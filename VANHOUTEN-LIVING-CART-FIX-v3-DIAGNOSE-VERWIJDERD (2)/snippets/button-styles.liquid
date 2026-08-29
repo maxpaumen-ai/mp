@@ -1,0 +1,175 @@
+{% comment %}
+  Simplified Button Styles Snippet
+
+  Logic:
+  - If global button styling is enabled: use global theme settings
+  - If global button styling is disabled: use section custom settings or theme defaults
+
+  Usage: {% render 'button-styles' %}
+{% endcomment %}
+
+{% if settings.enable_global_button_styling and section == blank or section.settings.use_global_button_styling == true %}
+  {% comment %} Global styling is enabled - use global settings {% endcomment %}
+  {% assign button_bg_color = settings.global_button_background_color | default: '#EF4A65' %}
+  {% assign button_text_color = settings.global_button_text_color_primary | default: '#FFFFFF' %}
+  {% assign button_hover_bg_color = settings.global_button_hover_bg_color | default: '#D63953' %}
+  {% assign button_hover_text_color = settings.global_button_hover_text_color | default: '#FFFFFF' %}
+  {% assign button_border_radius = settings.global_button_radius | default: 40 %}
+  {% assign button_font_size = settings.global_button_font_size | default: 14 %}
+  {% assign button_font_weight = settings.global_button_font_weight | default: 700 %}
+  {% assign button_padding_y = settings.global_button_padding_y | default: 12 %}
+  {% assign button_letter_spacing = settings.global_button_letter_spacing | default: 1 %}
+  {% assign button_text_transform = settings.global_button_text_transform | default: 'none' %}
+  {% assign button_font_family = settings.global_button_font_family | default: 'var(--font-body-family, sans-serif)' %}
+
+  {% comment %} Global section colors {% endcomment %}
+  {% assign global_section_text_color = settings.global_section_text_color | default: settings.text %}
+  {% assign global_section_background_color = settings.global_section_background_color | default: settings.background %}
+  {% assign global_section_accent_1_color = settings.global_section_accent_1_color | default: settings.accent_1 %}
+
+  <style>
+    :root {
+      /* Global button variables */
+      --global-button-bg-color: {{ button_bg_color }};
+      --global-button-text-color: {{ button_text_color }};
+      --global-button-hover-bg-color: {{ button_hover_bg_color }};
+      --global-button-hover-text-color: {{ button_hover_text_color }};
+      --global-button-radius: {{ button_border_radius }}px;
+      --global-button-font-size: {{ button_font_size }}px;
+      --global-button-font-weight: {{ button_font_weight }};
+      --global-button-padding-y: {{ button_padding_y }}px;
+      --global-button-letter-spacing: {{ button_letter_spacing }}px;
+      --global-button-text-transform: {{ button_text_transform }};
+      --global-button-font-family: {{ button_font_family }};
+
+      /* Global section colors */
+      --global-section-text-color: {{ global_section_text_color }};
+      --global-section-background-color: {{ global_section_background_color }};
+      --global-section-accent-1-color: {{ global_section_accent_1_color }};
+    }
+
+    /* Apply global button styles to all buttons except those with disable-global-button-styling */
+    /* Exclude base .button class when it only has gradient classes */
+    /* Exclude third-party apps (Klaviyo, Privy, JustUno, OptiMonk, Omnisend, etc.) */
+    .btn:not(.disable-global-button-styling):not([class*="klaviyo"]):not([class*="privy"]):not([class*="justuno"]):not([class*="optimonk"]):not([class*="omnisend"]),
+    button[type="submit"]:not(.disable-global-button-styling):not(.button):not([class*="klaviyo"]):not([class*="privy"]):not([class*="justuno"]):not([class*="optimonk"]):not([class*="omnisend"]),
+    input[type="submit"]:not(.disable-global-button-styling):not([class*="klaviyo"]):not([class*="privy"]):not([class*="justuno"]):not([class*="optimonk"]):not([class*="omnisend"]):not([style="display: none;"]),
+    .product-form__submit:not(.disable-global-button-styling),
+    .cart__checkout-button:not(.disable-global-button-styling),
+    .button--primary:not(.disable-global-button-styling),
+    .newsletter-form__button:not(.disable-global-button-styling):not([class*="klaviyo"]),
+    .field__button:not(.disable-global-button-styling),
+    .theme-button:not(.disable-global-button-styling),
+    .rich-text-button:not(.disable-global-button-styling) {
+      /* Typography */
+      font-size: var(--global-button-font-size) !important;
+      font-weight: var(--global-button-font-weight) !important;
+      letter-spacing: var(--global-button-letter-spacing) !important;
+      text-transform: var(--global-button-text-transform) !important;
+      font-family: var(--global-button-font-family) !important;
+
+      /* Layout */
+      padding: var(--global-button-padding-y) 20px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+
+      /* Colors & Appearance */
+      background-color: var(--global-button-bg-color) !important;
+      color: var(--global-button-text-color) !important;
+      border-left: var(--global-button-border-width, 2px) solid var(--global-button-border-color, #EF4A65) !important;
+      border-right: var(--global-button-border-width, 2px) solid var(--global-button-border-color, #EF4A65) !important;
+      border-top: var(--global-button-border-width, 2px) solid var(--global-button-border-color, #EF4A65) !important;
+      border-bottom: var(--global-button-bottom-border-width, 4px) solid var(--global-button-bottom-border-color, #000000) !important;
+      border-bottom-style: solid !important;
+      border-radius: var(--global-button-radius) !important;
+
+      /* Effects */
+      cursor: pointer !important;
+      transition: all 0.3s ease !important;
+      text-decoration: none !important;
+      outline: none !important;
+      position: relative !important;
+      overflow: hidden !important;
+    }
+
+    /* Hover states */
+    .btn:not(.disable-global-button-styling):not([class*="klaviyo"]):not([class*="privy"]):not([class*="justuno"]):not([class*="optimonk"]):not([class*="omnisend"]):hover,
+    button[type="submit"]:not(.disable-global-button-styling):not(.button):not([class*="klaviyo"]):not([class*="privy"]):not([class*="justuno"]):not([class*="optimonk"]):not([class*="omnisend"]):hover,
+    input[type="submit"]:not(.disable-global-button-styling):not([class*="klaviyo"]):not([class*="privy"]):not([class*="justuno"]):not([class*="optimonk"]):not([class*="omnisend"]):hover,
+    .product-form__submit:not(.disable-global-button-styling):hover,
+    .cart__checkout-button:not(.disable-global-button-styling):hover,
+    .button--primary:not(.disable-global-button-styling):hover,
+    .newsletter-form__button:not(.disable-global-button-styling):not([class*="klaviyo"]):hover,
+    .field__button:not(.disable-global-button-styling):hover,
+    .theme-button:not(.disable-global-button-styling):hover,
+    .rich-text-button:not(.disable-global-button-styling):hover {
+      background-color: var(--global-button-hover-bg-color) !important;
+      color: var(--global-button-hover-text-color) !important;
+      border-left: var(--global-button-border-width, 2px) solid var(--global-button-border-color, #EF4A65) !important;
+      border-right: var(--global-button-border-width, 2px) solid var(--global-button-border-color, #EF4A65) !important;
+      border-top: var(--global-button-border-width, 2px) solid var(--global-button-border-color, #EF4A65) !important;
+      border-bottom: var(--global-button-bottom-border-width, 4px) solid var(--global-button-bottom-border-color, #000000) !important;
+      border-bottom-style: solid !important;
+    }
+
+    /* === THIRD-PARTY APP EXCLUSIONS === */
+    /* Reset ALL styling for buttons inside third-party app containers */
+    /* This ensures apps like Klaviyo, Privy, JustUno, OptiMonk, Omnisend, etc. retain their own styling */
+    {% comment %} [class*="klaviyo"] button,
+    [class*="klaviyo"] .btn,
+    [class*="klaviyo"] input[type="submit"],
+    [id*="klaviyo"] button,
+    [id*="klaviyo"] .btn,
+    [id*="klaviyo"] input[type="submit"],
+    [class*="privy"] button,
+    [class*="privy"] .btn,
+    [class*="privy"] input[type="submit"],
+    [class*="justuno"] button,
+    [class*="justuno"] .btn,
+    [class*="justuno"] input[type="submit"],
+    [class*="optimonk"] button,
+    [class*="optimonk"] .btn,
+    [class*="optimonk"] input[type="submit"],
+    [class*="omnisend"] button,
+    [class*="omnisend"] .btn,
+    [class*="omnisend"] input[type="submit"],
+    [class*="popup"] button:not(.product-form__submit):not(.cart__checkout-button),
+    [class*="modal"] button:not(.product-form__submit):not(.cart__checkout-button):not(.drawer__close),
+    .klaviyo-form button,
+    .klaviyo-form .btn,
+    .klaviyo-form input[type="submit"],
+    .kl-private-reset-css-Xuajs1 button,
+    .kl-private-reset-css-Xuajs1 .btn,
+    .kl-private-reset-css-Xuajs1 input[type="submit"] {
+      all: revert !important;
+      font-size: revert !important;
+      font-weight: revert !important;
+      letter-spacing: revert !important;
+      text-transform: revert !important;
+      font-family: revert !important;
+      padding: revert !important;
+      background-color: revert !important;
+      color: revert !important;
+      border: revert !important;
+      border-radius: revert !important;
+      display: revert !important;
+    } {% endcomment %}
+  </style>
+
+{% else %}
+  {% comment %} Global styling is disabled - use theme defaults {% endcomment %}
+  {% assign global_section_text_color = settings.text %}
+  {% assign global_section_background_color = settings.background %}
+  {% assign global_section_accent_1_color = settings.accent_1 %}
+
+  <style>
+    :root {
+      /* Theme default colors only */
+      --global-section-text-color: {{ global_section_text_color }};
+      --global-section-background-color: {{ global_section_background_color }};
+      --global-section-accent-1-color: {{ global_section_accent_1_color }};
+    }
+  </style>
+{% endif %}

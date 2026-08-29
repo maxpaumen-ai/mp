@@ -1,0 +1,419 @@
+{% comment %}
+  VANHOUTEN LIVING
+  VHL Announcement Bar
+  Joseph-inspired premium announcement bar
+{% endcomment %}
+
+{%- liquid
+  assign text_1 = section.settings.text_1
+  assign text_2 = section.settings.text_2
+  assign text_3 = section.settings.text_3
+
+  assign link_1 = section.settings.link_1
+  assign link_2 = section.settings.link_2
+  assign link_3 = section.settings.link_3
+
+  assign autoplay = section.settings.autoplay
+  assign duration = section.settings.duration | times: 1000
+  assign fade_duration = section.settings.fade_duration
+-%}
+
+<div
+  id="VHLAnnouncement-{{ section.id }}"
+  class="vhl-announcement"
+  data-vhl-announcement
+  data-autoplay="{{ autoplay }}"
+  data-duration="{{ duration }}"
+  data-fade="{{ fade_duration }}"
+  style="
+    --vhl-announcement-bg: {{ section.settings.background_color }};
+    --vhl-announcement-text: {{ section.settings.text_color }};
+    --vhl-announcement-desktop-size: {{ section.settings.desktop_font_size }}px;
+    --vhl-announcement-mobile-size: {{ section.settings.mobile_font_size }}px;
+  "
+>
+  <div class="vhl-announcement__inner">
+
+    {% if text_1 != blank %}
+      <div
+        class="vhl-announcement__item is-active"
+        data-announcement-item
+        aria-hidden="false"
+      >
+        {% if link_1 != blank %}
+          <a href="{{ link_1 }}" class="vhl-announcement__link">
+            {{ text_1 | escape }}
+          </a>
+        {% else %}
+          <span class="vhl-announcement__text">
+            {{ text_1 | escape }}
+          </span>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if text_2 != blank %}
+      <div
+        class="vhl-announcement__item"
+        data-announcement-item
+        aria-hidden="true"
+      >
+        {% if link_2 != blank %}
+          <a href="{{ link_2 }}" class="vhl-announcement__link">
+            {{ text_2 | escape }}
+          </a>
+        {% else %}
+          <span class="vhl-announcement__text">
+            {{ text_2 | escape }}
+          </span>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if text_3 != blank %}
+      <div
+        class="vhl-announcement__item"
+        data-announcement-item
+        aria-hidden="true"
+      >
+        {% if link_3 != blank %}
+          <a href="{{ link_3 }}" class="vhl-announcement__link">
+            {{ text_3 | escape }}
+          </a>
+        {% else %}
+          <span class="vhl-announcement__text">
+            {{ text_3 | escape }}
+          </span>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<style>
+  /* =========================================================
+     VHL ANNOUNCEMENT BAR
+     ========================================================= */
+
+  #shopify-section-{{ section.id }} {
+    position: relative;
+    z-index: 50;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #VHLAnnouncement-{{ section.id }} {
+    width: 100%;
+    height: 34px;
+    min-height: 34px;
+
+    margin: 0;
+    padding: 0;
+
+    position: relative;
+    overflow: hidden;
+
+    background: var(--vhl-announcement-bg, #4a4a48);
+    color: var(--vhl-announcement-text, #ffffff);
+
+    border: 0;
+    box-shadow: none;
+  }
+
+  #VHLAnnouncement-{{ section.id }} .vhl-announcement__inner {
+    width: 100%;
+    height: 100%;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 24px;
+    box-sizing: border-box;
+  }
+
+  #VHLAnnouncement-{{ section.id }} .vhl-announcement__item {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 24px;
+
+    opacity: 0;
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+      opacity 400ms ease,
+      visibility 400ms ease;
+
+    box-sizing: border-box;
+  }
+
+  #VHLAnnouncement-{{ section.id }} .vhl-announcement__item.is-active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  #VHLAnnouncement-{{ section.id }} .vhl-announcement__text,
+  #VHLAnnouncement-{{ section.id }} .vhl-announcement__link {
+    display: block;
+
+    margin: 0;
+    padding: 0;
+
+    color: inherit;
+
+    font-family: inherit;
+    font-size: var(--vhl-announcement-desktop-size, 12px);
+    font-weight: 400;
+    line-height: 1;
+
+    letter-spacing: 0.035em;
+
+    text-align: center;
+    text-decoration: none;
+
+    white-space: nowrap;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  #VHLAnnouncement-{{ section.id }} .vhl-announcement__link:hover {
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.82;
+  }
+
+
+  /* =========================================================
+     MOBILE
+     ========================================================= */
+
+  @media screen and (max-width: 749px) {
+
+    #VHLAnnouncement-{{ section.id }} {
+      height: 32px;
+      min-height: 32px;
+    }
+
+    #VHLAnnouncement-{{ section.id }} .vhl-announcement__inner {
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+
+    #VHLAnnouncement-{{ section.id }} .vhl-announcement__item {
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+
+    #VHLAnnouncement-{{ section.id }} .vhl-announcement__text,
+    #VHLAnnouncement-{{ section.id }} .vhl-announcement__link {
+      font-size: var(--vhl-announcement-mobile-size, 11px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+  }
+
+
+  /* =========================================================
+     REDUCED MOTION
+     ========================================================= */
+
+  @media (prefers-reduced-motion: reduce) {
+    #VHLAnnouncement-{{ section.id }} .vhl-announcement__item {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const section = document.getElementById('VHLAnnouncement-{{ section.id }}');
+
+    if (!section || section.dataset.initialized === 'true') return;
+
+    section.dataset.initialized = 'true';
+
+    const items = Array.from(
+      section.querySelectorAll('[data-announcement-item]')
+    );
+
+    if (items.length <= 1) return;
+
+    const autoplay = section.dataset.autoplay === 'true';
+
+    if (!autoplay) return;
+
+    const duration =
+      parseInt(section.dataset.duration, 10) || 4000;
+
+    let currentIndex = 0;
+    let interval = null;
+
+    const showItem = (index) => {
+      items.forEach((item, itemIndex) => {
+        const active = itemIndex === index;
+
+        item.classList.toggle('is-active', active);
+
+        item.setAttribute(
+          'aria-hidden',
+          active ? 'false' : 'true'
+        );
+      });
+    };
+
+    const nextItem = () => {
+      currentIndex = (currentIndex + 1) % items.length;
+      showItem(currentIndex);
+    };
+
+    const startRotation = () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+
+      interval = setInterval(nextItem, duration);
+    };
+
+    showItem(currentIndex);
+    startRotation();
+
+    document.addEventListener('shopify:section:unload', (event) => {
+      if (event.detail.sectionId === '{{ section.id }}') {
+        if (interval) {
+          clearInterval(interval);
+        }
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "VHL Announcement Bar",
+  "tag": "section",
+  "class": "vhl-announcement-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Meldingen"
+    },
+    {
+      "type": "text",
+      "id": "text_1",
+      "label": "Tekst 1",
+      "default": "Gratis verzending vanaf €50"
+    },
+    {
+      "type": "url",
+      "id": "link_1",
+      "label": "Link voor tekst 1"
+    },
+    {
+      "type": "text",
+      "id": "text_2",
+      "label": "Tekst 2",
+      "default": "Premium kwaliteit, zorgvuldig geselecteerd"
+    },
+    {
+      "type": "url",
+      "id": "link_2",
+      "label": "Link voor tekst 2"
+    },
+    {
+      "type": "text",
+      "id": "text_3",
+      "label": "Tekst 3",
+      "default": "Veilig betalen met iDEAL"
+    },
+    {
+      "type": "url",
+      "id": "link_3",
+      "label": "Link voor tekst 3"
+    },
+    {
+      "type": "header",
+      "content": "Rotatie"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Teksten automatisch wisselen",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "duration",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Tijd per tekst",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "fade_duration",
+      "min": 100,
+      "max": 1000,
+      "step": 50,
+      "unit": "ms",
+      "label": "Duur fade-overgang",
+      "default": 400
+    },
+    {
+      "type": "header",
+      "content": "Kleuren en typografie"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Achtergrondkleur",
+      "default": "#4A4A48"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Tekstkleur",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "desktop_font_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Lettergrootte desktop",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "mobile_font_size",
+      "min": 9,
+      "max": 15,
+      "step": 1,
+      "unit": "px",
+      "label": "Lettergrootte mobiel",
+      "default": 11
+    }
+  ],
+  "presets": [
+    {
+      "name": "VHL Announcement Bar"
+    }
+  ]
+}
+{% endschema %}

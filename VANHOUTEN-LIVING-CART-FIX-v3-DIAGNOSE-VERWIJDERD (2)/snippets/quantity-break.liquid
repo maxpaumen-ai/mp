@@ -1,0 +1,2588 @@
+{%- liquid
+  assign title_text = title_text | default: 'BUNDLE & SAVE'
+  assign show_title = show_title | default: false
+  assign hide_images = hide_images | default: false
+  assign hide_quantity_break_variant_images = hide_quantity_break_variant_images | default: false
+  assign stack_variant_layout = stack_variant_layout | default: false
+
+  # Variant option inclusion settings
+  if include_variant_option_1 == false or include_variant_option_1 == 'false'
+    assign include_variant_option_1 = false
+  else
+    assign include_variant_option_1 = include_variant_option_1 | default: true
+  endif
+
+  if include_variant_option_2 == false or include_variant_option_2 == 'false'
+    assign include_variant_option_2 = false
+  else
+    assign include_variant_option_2 = include_variant_option_2 | default: true
+  endif
+
+  if include_variant_option_3 == false or include_variant_option_3 == 'false'
+    assign include_variant_option_3 = false
+  else
+    assign include_variant_option_3 = include_variant_option_3 | default: true
+  endif
+
+  # Product title display setting
+  if hide_product_title_in_variants == false or hide_product_title_in_variants == 'false'
+    assign hide_product_title_in_variants = false
+  else
+    assign hide_product_title_in_variants = hide_product_title_in_variants | default: false
+  endif
+
+  # Variant images instead of swatches setting (global fallback)
+  if show_variant_images_instead_of_swatches == false or show_variant_images_instead_of_swatches == 'false'
+    assign show_variant_images_instead_of_swatches = false
+  else
+    assign show_variant_images_instead_of_swatches = show_variant_images_instead_of_swatches | default: false
+  endif
+
+  # Per-option display type settings
+  assign variant_option_1_display_type = variant_option_1_display_type | default: 'dropdown'
+  assign variant_option_2_display_type = variant_option_2_display_type | default: 'dropdown'
+  assign variant_option_3_display_type = variant_option_3_display_type | default: 'dropdown'
+
+  # Color swatch settings (global fallback)
+  if enable_color_swatches == false or enable_color_swatches == 'false'
+    assign enable_color_swatches = false
+  else
+    assign enable_color_swatches = enable_color_swatches | default: false
+  endif
+
+  assign swatch_size = swatch_size | default: 24
+  assign variant_select_height = variant_select_height | default: 34
+  assign swatch_border_radius = swatch_border_radius | default: 50
+  assign swatch_container_border_radius = swatch_container_border_radius | default: 8
+  assign variant_select_border_radius = variant_select_border_radius | default: 8
+  assign swatch_selected_border_color = swatch_selected_border_color | default: '#000000'
+  assign show_swatch_container_border = show_swatch_container_border | default: true
+  assign swatch_container_border_color = swatch_container_border_color | default: '#ccc'
+  assign max_swatches_per_row = max_swatches_per_row | default: 4
+
+  # Size button settings
+  assign size_button_background_color = size_button_background_color | default: '#ffffff'
+  assign size_button_text_color = size_button_text_color | default: '#374151'
+  assign size_button_border_color = size_button_border_color | default: '#e5e5e5'
+  assign size_button_selected_border_color = size_button_selected_border_color | default: '#000000'
+  assign size_button_border_width = size_button_border_width | default: 1
+  assign size_button_selected_border_width = size_button_selected_border_width | default: 2
+  assign size_button_font_size = size_button_font_size | default: 11
+
+  # Variant image and label sizing
+  assign variant_image_size = variant_image_size | default: 30
+  assign variant_label_font_size = variant_label_font_size | default: 11
+  assign variant_label_font_size_mobile = variant_label_font_size_mobile | default: 10
+
+  # Quantity circle customization
+  assign quantity_circle_size = quantity_circle_size | default: 24
+  assign quantity_circle_size_mobile = quantity_circle_size_mobile | default: 20
+  assign quantity_circle_bg_color = quantity_circle_bg_color | default: variant_selector_background_color
+  assign quantity_circle_text_color = quantity_circle_text_color | default: variant_label_color
+  assign quantity_circle_font_size = quantity_circle_font_size | default: variant_label_font_size
+  assign quantity_circle_font_size_mobile = quantity_circle_font_size_mobile | default: variant_label_font_size_mobile
+
+  # Badge positions - which option displays which badge (legacy system for backward compatibility)
+  assign badge_1_position = badge_1_position | default: 'none'
+  assign badge_2_position = badge_2_position | default: 'none'
+
+  # New settings for radio buttons
+  if show_radio_buttons == 'true'
+    assign show_radio_buttons = true
+  elsif show_radio_buttons == true
+    assign show_radio_buttons = true
+  else
+    assign show_radio_buttons = false
+  endif
+
+  # New settings for variant selection - convert string 'true' to boolean true
+  if enable_variant_selection == 'true'
+    assign enable_variant_selection = true
+  elsif enable_variant_selection == true
+    assign enable_variant_selection = true
+  else
+    assign enable_variant_selection = false
+  endif
+
+  # New setting for dashed border on non-selected options
+  if use_dashed_border_unselected == 'true'
+    assign use_dashed_border_unselected = true
+  elsif use_dashed_border_unselected == true
+    assign use_dashed_border_unselected = true
+  else
+    assign use_dashed_border_unselected = false
+  endif
+
+  # Option display settings - convert strings to boolean explicitly
+  # For Shopify boolean settings, we need to explicitly check if they're set to false
+  if show_option_1 == false or show_option_1 == 'false'
+    assign show_option_1 = false
+  else
+    assign show_option_1 = true
+  endif
+
+  if show_option_2 == false or show_option_2 == 'false'
+    assign show_option_2 = false
+  else
+    assign show_option_2 = true
+  endif
+
+  if show_option_3 == false or show_option_3 == 'false'
+    assign show_option_3 = false
+  else
+    assign show_option_3 = true
+  endif
+
+  if show_option_4 == false or show_option_4 == 'false'
+    assign show_option_4 = false
+  else
+    assign show_option_4 = true
+  endif
+
+  assign final_save_text = save_badge_text
+  if final_save_text == blank
+    assign final_save_text = 'general.sale_badge.save' | t
+  endif
+
+  # Enhanced spacing and sizing settings
+  assign margin_top = margin_top | default: 0
+  assign margin_bottom = margin_bottom | default: 20
+
+  # Validate margin ranges (-20px to 20px)
+  if margin_top < -20
+    assign margin_top = -20
+  elsif margin_top > 20
+    assign margin_top = 20
+  endif
+
+  if margin_bottom < -20
+    assign margin_bottom = -20
+  elsif margin_bottom > 20
+    assign margin_bottom = 20
+  endif
+
+  assign gap_between_options = gap_between_options | default: 15
+  assign option_padding_vertical = option_padding_vertical | default: 16
+  assign option_padding_horizontal = option_padding_horizontal | default: 16
+  assign main_content_gap = main_content_gap | default: 12
+  assign image_size = image_size | default: 40
+  assign image_height = image_height | default: image_size
+  assign variant_image_size = variant_image_size | default: 18
+
+  # Enhanced border radius settings
+  assign border_radius = border_radius | default: 8
+  assign image_border_radius = image_border_radius | default: 4
+  assign badge_border_radius = badge_border_radius | default: 4
+  assign radio_border_radius = radio_border_radius | default: 50
+  assign variant_selector_border_radius = variant_selector_border_radius | default: 3
+  assign option_container_border_radius = option_container_border_radius | default: 8
+
+  # Badge border settings
+  if enable_badge_border == true or enable_badge_border == 'true'
+    assign enable_badge_border = true
+  else
+    assign enable_badge_border = false
+  endif
+  assign badge_border_color = badge_border_color | default: '#000000'
+  assign badge_border_width = badge_border_width | default: 1
+  assign badge_border_style = badge_border_style | default: 'solid'
+
+  # Enhanced color settings
+  assign border_color = border_color | default: '#e5e5e5'
+  assign unselected_border_width = unselected_border_width | default: 1
+  assign unselected_border_style = unselected_border_style | default: 'solid'
+  assign background_color = background_color | default: '#ffffff'
+  assign unselected_border_color = unselected_border_color | default: border_color
+  assign unselected_background_color = unselected_background_color | default: background_color
+  assign best_deal_border_color = best_deal_border_color | default: '#00C7FF'
+  assign selected_border_width = selected_border_width | default: 2
+  assign selected_border_style = selected_border_style | default: 'solid'
+  assign best_deal_background_color = best_deal_background_color | default: '#F7FCFF'
+
+  # Selected option gradient settings
+  assign enable_selected_gradient = enable_selected_gradient | default: false
+  assign selected_gradient_start = selected_gradient_start | default: '#F7FCFF'
+  assign selected_gradient_end = selected_gradient_end | default: '#E0F7FF'
+  assign selected_gradient_direction = selected_gradient_direction | default: 'to right'
+
+  # Header and line colors
+  assign header_color = header_color | default: '#000000'
+  assign header_background_color = header_background_color | default: 'transparent'
+  assign header_line_color = header_line_color | default: '#cccccc'
+
+  # New header customization settings
+  assign enable_header_border = enable_header_border | default: false
+  assign header_border_color = header_border_color | default: '#e5e5e5'
+  assign header_border_width = header_border_width | default: 1
+  assign header_border_radius = header_border_radius | default: 0
+  assign header_padding = header_padding | default: 0
+
+  # Header gradient settings
+  assign enable_header_gradient = enable_header_gradient | default: false
+  assign header_gradient_start = header_gradient_start | default: '#ff6b6b'
+  assign header_gradient_end = header_gradient_end | default: '#4ecdc4'
+  assign header_gradient_direction = header_gradient_direction | default: 'to right'
+
+  # Header icon settings
+  assign show_header_icon = show_header_icon | default: true
+  assign header_icon_color = header_icon_color | default: '#000000'
+  assign header_icon_size = header_icon_size | default: 18
+
+  # Text colors
+  assign text_color = text_color | default: '#333333'
+  assign price_color = price_color | default: best_deal_border_color
+  assign compare_price_color = compare_price_color | default: '#999999'
+
+  # Radio button colors
+  assign radio_border_color = radio_border_color | default: '#bbbbbb'
+  assign radio_active_border_color = radio_active_border_color | default: best_deal_border_color
+  assign radio_dot_color = radio_dot_color | default: best_deal_border_color
+
+  # Image styling
+  assign image_background_color = image_background_color | default: '#f8f8f8'
+  assign variant_image_background_color = variant_image_background_color | default: '#f8f8f8'
+
+  # Variant selector colors
+  assign variant_selector_border_color = variant_selector_border_color | default: '#e5e5e5'
+  assign variant_selector_background_color = variant_selector_background_color | default: '#ffffff'
+  assign variant_selector_text_color = variant_selector_text_color | default: '#374151'
+  assign variant_container_background_color = variant_container_background_color | default: 'transparent'
+  assign variant_label_color = variant_label_color | default: text_color
+
+  # Variant divider controls
+  assign show_variant_option_divider = show_variant_option_divider | default: true
+  assign variant_option_divider_color = variant_option_divider_color | default: '#e5e7eb'
+  assign show_variant_row_divider = show_variant_row_divider | default: true
+  assign variant_row_divider_color = variant_row_divider_color | default: '#e5e7eb'
+
+  # Variant selection border control
+  if show_variant_selection_border_top == true or show_variant_selection_border_top == 'true'
+    assign show_variant_selection_border_top = true
+  else
+    assign show_variant_selection_border_top = false
+  endif
+  assign variant_selection_border_top_color = variant_selection_border_top_color | default: '#e0e0e0'
+
+  # Hover and interaction colors (customizable)
+  assign option_hover_border_color = option_hover_border_color | default: best_deal_border_color
+  assign option_hover_background_color = option_hover_background_color | default: '#f8f9fa'
+
+  # Box shadow settings
+  assign option_box_shadow = option_box_shadow | default: 'none'
+  assign selected_option_box_shadow = selected_option_box_shadow | default: 'none'
+  assign badge_box_shadow = badge_box_shadow | default: 'none'
+
+  # Badge shine effect setting
+  if enable_badge_shine == false or enable_badge_shine == 'false'
+    assign enable_badge_shine = false
+  else
+    assign enable_badge_shine = true
+  endif
+
+  # Enhanced typography settings
+  assign title_font_weight = title_font_weight | default: '700'
+  assign title_font_size = title_font_size | default: '16'
+  assign price_font_size = price_font_size | default: '16'
+  assign compare_price_font_size = compare_price_font_size | default: '14'
+  assign header_font_size = header_font_size | default: '18'
+  assign variant_label_font_size = variant_label_font_size | default: '10'
+
+  # Savings text settings
+  if show_savings_text == false or show_savings_text == 'false'
+    assign show_savings_text = false
+  else
+    assign show_savings_text = show_savings_text | default: true
+  endif
+  assign custom_savings_font_size = custom_savings_font_size | default: 12
+  assign custom_savings_text_color = custom_savings_text_color | default: '#666666'
+
+  # Custom savings text format settings
+  assign savings_text_format = savings_text_format | default: 'You save {savings}'
+
+  # Enable individual savings text (allows custom text per option)
+  if enable_individual_savings_text == true or enable_individual_savings_text == 'true'
+    assign enable_individual_savings_text = true
+  else
+    assign enable_individual_savings_text = false
+  endif
+
+  # Show individual savings text (controls visibility)
+  if show_individual_savings_text == true or show_individual_savings_text == 'true'
+    assign show_individual_savings_text = true
+  else
+    assign show_individual_savings_text = false
+  endif
+
+  assign option_1_savings_text = option_1_savings_text
+  assign option_2_savings_text = option_2_savings_text
+  assign option_3_savings_text = option_3_savings_text
+  assign option_4_savings_text = option_4_savings_text
+
+  # Free gift badge settings
+  assign option_1_show_free_gift = option_1_show_free_gift | default: false
+  assign option_1_free_gift_count = option_1_free_gift_count | default: 1
+  assign option_1_free_gift_text = option_1_free_gift_text | default: '🎁 <b>FREE</b> Gift Included!'
+  assign option_1_free_gift_icon = option_1_free_gift_icon
+  assign option_1_free_gift_icon_size = option_1_free_gift_icon_size | default: 16
+  assign option_1_free_gift_font_size = option_1_free_gift_font_size | default: 10
+  assign option_1_free_gift_border_radius = option_1_free_gift_border_radius | default: 6
+  assign option_1_free_gift_bg_color = option_1_free_gift_bg_color | default: '#f0fdf4'
+  assign option_1_free_gift_use_gradient = option_1_free_gift_use_gradient | default: false
+  assign option_1_free_gift_gradient_start = option_1_free_gift_gradient_start | default: '#22c55e'
+  assign option_1_free_gift_gradient_end = option_1_free_gift_gradient_end | default: '#16a34a'
+  assign option_1_free_gift_text_color = option_1_free_gift_text_color | default: '#166534'
+  assign option_1_free_gift_border_color = option_1_free_gift_border_color | default: '#bbf7d0'
+
+  assign option_2_show_free_gift = option_2_show_free_gift | default: false
+  assign option_2_free_gift_count = option_2_free_gift_count | default: 1
+  assign option_2_free_gift_text = option_2_free_gift_text | default: '🎁 <b>FREE</b> Gift Included!'
+  assign option_2_free_gift_icon = option_2_free_gift_icon
+  assign option_2_free_gift_icon_size = option_2_free_gift_icon_size | default: 16
+  assign option_2_free_gift_font_size = option_2_free_gift_font_size | default: 10
+  assign option_2_free_gift_border_radius = option_2_free_gift_border_radius | default: 6
+  assign option_2_free_gift_bg_color = option_2_free_gift_bg_color | default: '#f0fdf4'
+  assign option_2_free_gift_use_gradient = option_2_free_gift_use_gradient | default: false
+  assign option_2_free_gift_gradient_start = option_2_free_gift_gradient_start | default: '#22c55e'
+  assign option_2_free_gift_gradient_end = option_2_free_gift_gradient_end | default: '#16a34a'
+  assign option_2_free_gift_text_color = option_2_free_gift_text_color | default: '#166534'
+  assign option_2_free_gift_border_color = option_2_free_gift_border_color | default: '#bbf7d0'
+
+  assign option_3_show_free_gift = option_3_show_free_gift | default: false
+  assign option_3_free_gift_count = option_3_free_gift_count | default: 1
+  assign option_3_free_gift_text = option_3_free_gift_text | default: '🎁 <b>FREE</b> Gift Included!'
+  assign option_3_free_gift_icon = option_3_free_gift_icon
+  assign option_3_free_gift_icon_size = option_3_free_gift_icon_size | default: 16
+  assign option_3_free_gift_font_size = option_3_free_gift_font_size | default: 10
+  assign option_3_free_gift_border_radius = option_3_free_gift_border_radius | default: 6
+  assign option_3_free_gift_bg_color = option_3_free_gift_bg_color | default: '#f0fdf4'
+  assign option_3_free_gift_use_gradient = option_3_free_gift_use_gradient | default: false
+  assign option_3_free_gift_gradient_start = option_3_free_gift_gradient_start | default: '#22c55e'
+  assign option_3_free_gift_gradient_end = option_3_free_gift_gradient_end | default: '#16a34a'
+  assign option_3_free_gift_text_color = option_3_free_gift_text_color | default: '#166534'
+  assign option_3_free_gift_border_color = option_3_free_gift_border_color | default: '#bbf7d0'
+
+  assign option_4_show_free_gift = option_4_show_free_gift | default: false
+  assign option_4_free_gift_count = option_4_free_gift_count | default: 1
+  assign option_4_free_gift_text = option_4_free_gift_text | default: '🎁 <b>FREE</b> Gift Included!'
+  assign option_4_free_gift_icon = option_4_free_gift_icon
+  assign option_4_free_gift_icon_size = option_4_free_gift_icon_size | default: 16
+  assign option_4_free_gift_font_size = option_4_free_gift_font_size | default: 10
+  assign option_4_free_gift_border_radius = option_4_free_gift_border_radius | default: 6
+  assign option_4_free_gift_bg_color = option_4_free_gift_bg_color | default: '#f0fdf4'
+  assign option_4_free_gift_use_gradient = option_4_free_gift_use_gradient | default: false
+  assign option_4_free_gift_gradient_start = option_4_free_gift_gradient_start | default: '#22c55e'
+  assign option_4_free_gift_gradient_end = option_4_free_gift_gradient_end | default: '#16a34a'
+  assign option_4_free_gift_text_color = option_4_free_gift_text_color | default: '#166534'
+  assign option_4_free_gift_border_color = option_4_free_gift_border_color | default: '#bbf7d0'
+
+  # Hide badges setting
+  if hide_badges == true or hide_badges == 'true'
+    assign hide_badges = true
+  else
+    assign hide_badges = false
+  endif
+
+  assign variant = product.selected_or_first_available_variant
+
+  # Create save badge display text based on format preference
+  assign save_badge_format = save_badge_format | default: 'dollar'
+
+  # First, determine which option should be selected based on settings
+  assign first_visible_option = 0
+
+  # Use preselected_option setting if provided and not the default
+  if preselected_option and preselected_option != 'first_visible'
+    case preselected_option
+      when 'option_1'
+        if show_option_1
+          assign first_visible_option = 1
+        endif
+      when 'option_2'
+        if show_option_2
+          assign first_visible_option = 2
+        endif
+      when 'option_3'
+        if show_option_3
+          assign first_visible_option = 3
+        endif
+      when 'option_4'
+        if show_option_4
+          assign first_visible_option = 4
+        endif
+    endcase
+  endif
+
+  # Fall back to first visible option if preselected option is not visible or not set
+  if first_visible_option == 0
+    if show_option_1
+      assign first_visible_option = 1
+    elsif show_option_2
+      assign first_visible_option = 2
+    elsif show_option_3
+      assign first_visible_option = 3
+    elsif show_option_4
+      assign first_visible_option = 4
+    endif
+  endif
+
+  # LEGACY SYSTEM: Fall back to position-based badges if new system isn't used
+  # Only apply legacy system if no new optional badges are enabled
+  # Normaliser enable_single_variant_selection (comme tu l'as fait pour enable_variant_selection)
+  if enable_single_variant_selection == 'true' or enable_single_variant_selection == true
+    assign enable_single_variant_selection = true
+  else
+    assign enable_single_variant_selection = false
+  endif
+
+  # Utiliser le custom pour le single uniquement si LES DEUX sont vrais
+  assign use_custom_single = false
+  if enable_variant_selection and enable_single_variant_selection
+    assign use_custom_single = true
+  endif
+
+  # Custom Pricing Settings
+  if enable_custom_pricing == false or enable_custom_pricing == 'false'
+    assign enable_custom_pricing = false
+  else
+    assign enable_custom_pricing = enable_custom_pricing | default: false
+  endif
+  assign selected_custom_price_format = selected_custom_price_format | default: 'amount'
+%}
+
+{% render 'quantity-break_style',
+  margin_top: margin_top,
+  margin_bottom: margin_bottom,
+  enable_header_gradient: enable_header_gradient,
+  header_gradient_direction: header_gradient_direction,
+  header_gradient_start: header_gradient_start,
+  header_gradient_end: header_gradient_end,
+  header_background_color: header_background_color,
+  enable_header_border: enable_header_border,
+  header_border_width: header_border_width,
+  header_border_color: header_border_color,
+  header_border_radius: header_border_radius,
+  header_padding: header_padding,
+  header_line_color: header_line_color,
+  header_font_size: header_font_size,
+  header_color: header_color,
+  header_icon_color: header_icon_color,
+  header_icon_size: header_icon_size,
+  show_header_icon: show_header_icon,
+  unselected_border_color: unselected_border_color,
+  unselected_border_width: unselected_border_width,
+  unselected_border_style: unselected_border_style,
+  option_container_border_radius: option_container_border_radius,
+  option_padding_vertical: option_padding_vertical,
+  option_padding_horizontal: option_padding_horizontal,
+  main_content_gap: main_content_gap,
+  image_height: image_height,
+  gap_between_options: gap_between_options,
+  unselected_background_color: unselected_background_color,
+  option_box_shadow: option_box_shadow,
+  option_hover_border_color: option_hover_border_color,
+  option_hover_background_color: option_hover_background_color,
+  best_deal_border_color: best_deal_border_color,
+  selected_border_width: selected_border_width,
+  selected_border_style: selected_border_style,
+  enable_selected_gradient: enable_selected_gradient,
+  selected_gradient_direction: selected_gradient_direction,
+  selected_gradient_start: selected_gradient_start,
+  selected_gradient_end: selected_gradient_end,
+  best_deal_background_color: best_deal_background_color,
+  selected_option_box_shadow: selected_option_box_shadow,
+  show_radio_buttons: show_radio_buttons,
+  radio_border_radius: radio_border_radius,
+  radio_active_border_color: radio_active_border_color,
+  radio_dot_color: radio_dot_color,
+  image_border_radius: image_border_radius,
+  center_titles_when_no_savings: center_titles_when_no_savings,
+  show_savings_text: show_savings_text,
+  title_font_weight: title_font_weight,
+  title_font_size: title_font_size,
+  title_color: title_color,
+  title_alignment: title_alignment,
+  title_line_height: title_line_height,
+  save_badge_background_color: save_badge_background_color,
+  save_badge_text_color: save_badge_text_color,
+  save_badge_border_radius: save_badge_border_radius,
+  custom_savings_font_size: custom_savings_font_size,
+  custom_savings_text_color: custom_savings_text_color,
+  price_color: price_color,
+  price_font_size: price_font_size,
+  compare_price_font_size: compare_price_font_size,
+  compare_price_color: compare_price_color,
+  border_radius: border_radius,
+  image_size: image_size,
+  variant_label_font_size: variant_label_font_size,
+  variant_label_color: variant_label_color,
+  quantity_circle_size: quantity_circle_size,
+  quantity_circle_bg_color: quantity_circle_bg_color,
+  quantity_circle_font_size: quantity_circle_font_size,
+  quantity_circle_text_color: quantity_circle_text_color,
+  swatch_size: swatch_size,
+  variant_select_height: variant_select_height,
+  variant_selector_border_color: variant_selector_border_color,
+  variant_select_border_radius: variant_select_border_radius,
+  variant_selector_background_color: variant_selector_background_color,
+  variant_selector_text_color: variant_selector_text_color,
+  show_swatch_container_border: show_swatch_container_border,
+  swatch_container_border_color: swatch_container_border_color,
+  swatch_container_border_radius: swatch_container_border_radius,
+  swatch_border_radius: swatch_border_radius,
+  swatch_selected_border_color: swatch_selected_border_color,
+  size_button_background_color: size_button_background_color,
+  size_button_text_color: size_button_text_color,
+  size_button_border_color: size_button_border_color,
+  size_button_selected_border_color: size_button_selected_border_color,
+  size_button_border_width: size_button_border_width,
+  size_button_selected_border_width: size_button_selected_border_width,
+  size_button_font_size: size_button_font_size,
+  variant_image_size: variant_image_size,
+  variant_image_background_color: variant_image_background_color,
+  badge_border_radius: badge_border_radius,
+  badge_box_shadow: badge_box_shadow,
+  enable_badge_shine: enable_badge_shine,
+  stack_variant_layout: stack_variant_layout,
+  variant_container_background_color: variant_container_background_color,
+  show_variant_option_divider: show_variant_option_divider,
+  variant_option_divider_color: variant_option_divider_color,
+  show_variant_row_divider: show_variant_row_divider,
+  variant_row_divider_color: variant_row_divider_color,
+  show_variant_selection_border_top: show_variant_selection_border_top,
+  variant_selection_border_top_color: variant_selection_border_top_color,
+  variant_label_font_size_mobile: variant_label_font_size_mobile,
+  quantity_circle_size_mobile: quantity_circle_size_mobile,
+  quantity_circle_font_size_mobile: quantity_circle_font_size_mobile
+%}
+
+<div class="quantity-break-container" {{ block.shopify_attributes }} data-custom-price="{{ enable_custom_pricing }}">
+  {% if show_title %}
+    <div class="quantity-break-header">
+      <div class="quantity-break-header-line"></div>
+      <div class="quantity-break-header-text">{{ title_text }}</div>
+      <div class="quantity-break-header-line"></div>
+    </div>
+  {% endif %}
+
+  <div class="quantity-break-form">
+    {% for n in (1..4) %}
+      {%- comment -%} ==== Génération des clés dynamiques ==== {%- endcomment -%}
+      {% assign show_option_key = 'show_option_' | append: n %}
+      {% assign qty_key = 'option_' | append: n | append: '_quantity' %}
+      {% assign title_key = 'option_' | append: n | append: '_title' %}
+      {% assign enable_custom_price_key = 'enable_option_' | append: n | append: '_custom_price' %}
+      {% assign custom_price_percentage_key = 'option_' | append: n | append: '_custom_price_percentage' %}
+      {% assign custom_price_amount_key = 'option_' | append: n | append: '_custom_price_amount' %}
+      {% assign bogo_multiplier_key = 'option_' | append: n | append: '_bogo_multiplier' %}
+      {% assign custom_compare_key = 'option_' | append: n | append: '_compare_at_price' %}
+      {% assign badge_key = 'enable_option_' | append: n | append: '_badge' %}
+      {% assign badge_color_key = 'option_' | append: n | append: '_badge_color' %}
+      {% assign badge_txt_key = 'option_' | append: n | append: '_badge' %}
+      {% assign badge_txt_color_key = 'option_' | append: n | append: '_badge_text_color' %}
+      {% assign save_disp_key = 'option_' | append: n | append: '_save_display' %}
+      {% assign img_key = 'option_' | append: n | append: '_image' %}
+      {% assign img_url_key = 'option_' | append: n | append: '_image_url' %}
+      {% assign hide_compare_at_price_key = 'hide_compare_at_price_option_' | append: n %}
+
+      {%- comment -%} ==== Récupération des valeurs ==== {%- endcomment -%}
+      {% assign show_option = block.settings[show_option_key] %}
+      {% assign qty = block.settings[qty_key] %}
+      {% assign title = block.settings[title_key] %}
+      {% assign enable_option_custom_price = block.settings[enable_custom_price_key] %}
+      {% assign custom_price_percentage = block.settings[custom_price_percentage_key] %}
+      {% assign custom_price_amount = block.settings[custom_price_amount_key] %}
+      {% assign bogo_multiplier = block.settings[bogo_multiplier_key] %}
+      {% assign custom_compare = block.settings[custom_compare_key] %}
+      {% assign hide_compare = block.settings[hide_compare_at_price_key] %}
+
+      {% assign badge = block.settings[badge_key] %}
+      {% assign badge_txt = block.settings[badge_txt_key] %}
+      {% assign badge_color = block.settings[badge_color_key] %}
+      {% assign badge_txt_color = block.settings[badge_txt_color_key] %}
+      {% assign save_disp = block.settings[save_disp_key] %}
+
+      {%- comment -%} Badge border settings for this option (border style is global for all options) {%- endcomment -%}
+      {% assign enable_badge_border_option_key = 'enable_option_' | append: n | append: '_badge_border' %}
+      {% assign badge_border_color_option_key = 'option_' | append: n | append: '_badge_border_color' %}
+      {% assign badge_border_width_option_key = 'option_' | append: n | append: '_badge_border_width' %}
+
+      {% assign enable_badge_border_option = block.settings[enable_badge_border_option_key] %}
+      {% assign badge_border_color_option = block.settings[badge_border_color_option_key] %}
+      {% assign badge_border_width_option = block.settings[badge_border_width_option_key] %}
+
+      {%- comment -%} Use option-specific settings if available, otherwise use global settings {%- endcomment -%}
+      {% if enable_badge_border_option == true or enable_badge_border_option == 'true' %}
+        {% assign use_badge_border = true %}
+        {% assign final_badge_border_color = badge_border_color_option
+          | default: badge_border_color
+          | default: '#000000'
+        %}
+        {% assign final_badge_border_width = badge_border_width_option | default: badge_border_width | default: 1 %}
+        {% assign final_badge_border_style = badge_border_style | default: 'solid' %}
+      {% elsif enable_badge_border == true or enable_badge_border == 'true' %}
+        {% assign use_badge_border = true %}
+        {% assign final_badge_border_color = badge_border_color | default: '#000000' %}
+        {% assign final_badge_border_width = badge_border_width | default: 1 %}
+        {% assign final_badge_border_style = badge_border_style | default: 'solid' %}
+      {% else %}
+        {% assign use_badge_border = false %}
+      {% endif %}
+      {% assign img = block.settings[img_key] %}
+      {% assign img_url = block.settings[img_url_key] %}
+
+      {%- comment -%} ==== Base price: use selected/first variant so it matches "REAL PRICE" (not product.price which is min across variants) ==== {%- endcomment -%}
+      {% assign qb_variant = product.selected_or_first_available_variant | default: product.variants.first %}
+      {% assign qb_unit_price = qb_variant.price | default: product.price %}
+      {% assign qb_unit_compare = qb_variant.compare_at_price | default: product.compare_at_price | default: 0 %}
+      {% assign base_price = qb_unit_price | times: qty %}
+      {% assign base_compare = qb_unit_compare | times: qty %}
+
+      {%- comment -%} Initialize with base values {%- endcomment -%}
+      {% assign final_price = base_price %}
+      {% assign final_compare_at_price = base_compare %}
+
+      {%- comment -%} Custom Pricing Logic {%- endcomment -%}
+      {% if enable_custom_pricing and enable_option_custom_price %}
+        {% case selected_custom_price_format %}
+          {% when 'percentage' %}
+            {% if custom_price_percentage != blank and custom_price_percentage != '' %}
+              {% assign discount_percent = custom_price_percentage | plus: 0 %}
+              {% if discount_percent > 0 and discount_percent <= 100 %}
+                {% comment %} Calculate price: base_price × (1 - discount_percent / 100) {% endcomment %}
+                {% assign discount_amount = base_price | times: discount_percent | divided_by: 100 %}
+                {% assign final_price = base_price | minus: discount_amount %}
+              {% else %}
+                {% assign final_price = base_price %}
+              {% endif %}
+            {% else %}
+              {% assign final_price = base_price %}
+            {% endif %}
+          {% when 'amount' %}
+            {% if custom_price_amount != blank and custom_price_amount != '' %}
+              {% comment %} Fixed amount: final bundle price in dollars (not multiplied by quantity) {% endcomment %}
+              {% assign price_amount_num = custom_price_amount | plus: 0 %}
+              {% assign final_price = price_amount_num | times: 100 | round %}
+            {% else %}
+              {% assign final_price = base_price %}
+            {% endif %}
+          {% when 'bogo' %}
+            {% if bogo_multiplier != blank and bogo_multiplier != '' and bogo_multiplier > 0 %}
+              {% assign multiplier_num = bogo_multiplier | plus: 0 %}
+              {% assign variant_price = qb_unit_price %}
+              {% assign final_price = variant_price | times: multiplier_num %}
+            {% else %}
+              {% assign final_price = base_price %}
+            {% endif %}
+        {% endcase %}
+
+        {% if custom_compare != blank and custom_compare != '' %}
+          {% comment %} Custom compare-at: final bundle compare price in dollars (not multiplied by quantity) {% endcomment %}
+          {% assign compare_amount_num = custom_compare | plus: 0 %}
+          {% assign final_compare_at_price = compare_amount_num | times: 100 | round %}
+        {% else %}
+          {% assign final_compare_at_price = base_compare %}
+        {% endif %}
+      {% endif %}
+
+      {%- comment -%} ==== Calcul des économies ==== {%- endcomment -%}
+      {% assign savings = final_compare_at_price | plus: 0 | minus: final_price | plus: 0 %}
+      {% assign percent_savings = savings | times: 100.0 | divided_by: final_compare_at_price | round %}
+
+      {%- comment -%} ==== Generate savings text ==== {%- endcomment -%}
+      {% assign savings_txt = '' %}
+      {% assign savings_money = savings | money %}
+
+      {%- comment -%} Check for individual option savings text first {%- endcomment -%}
+      {% assign option_savings_text = '' %}
+      {% if enable_individual_savings_text %}
+        {% case n %}
+          {% when 1 %}
+            {% assign option_savings_text = option_1_savings_text %}
+          {% when 2 %}
+            {% assign option_savings_text = option_2_savings_text %}
+          {% when 3 %}
+            {% assign option_savings_text = option_3_savings_text %}
+          {% when 4 %}
+            {% assign option_savings_text = option_4_savings_text %}
+        {% endcase %}
+      {% endif %}
+
+      {%- comment -%} If custom text is provided for this option, show it regardless of savings {%- endcomment -%}
+      {% if show_individual_savings_text %}
+        {% if option_savings_text != blank %}
+          {%- comment -%} Custom text provided - show it even if no calculated savings {%- endcomment -%}
+          {% assign savings_txt = option_savings_text | replace: '{savings}', savings_money %}
+        {% elsif savings > 0 %}
+          {%- comment -%} No custom text but has savings - use global format {%- endcomment -%}
+          {% assign savings_txt = savings_text_format | replace: '{savings}', savings_money %}
+        {% endif %}
+      {% endif %}
+
+      {% if show_option %}
+        <div
+          class="quantity-break-option-container"
+          data-option-quantity="{{ qty }}"
+          data-compare-at-price="{{ final_compare_at_price }}"
+          data-save-badge-format="{{ save_badge_format }}"
+          data-save-badge-text="{{ final_save_text | escape }}"
+        >
+          <label
+            class="quantity-break-option{% if first_visible_option == n %} selected{% endif %}"
+            for="quantity-break-option{{ n }}-{{ product.id }}"
+          >
+            <div class="quantity-break-main-content">
+              {% if badge != blank and hide_badges != true %}
+                <div
+                  class="quantity-break-badge"
+                  style="background-color: {{ badge_color }}; color: {{ badge_txt_color }};{% if use_badge_border %}border: {{ final_badge_border_width }}px {{ final_badge_border_style }} {{ final_badge_border_color }} !important;{% else %}border: none !important;{% endif %}"
+                >
+                  {{ badge_txt }}
+                </div>
+              {% endif %}
+
+              <input
+                type="radio"
+                id="quantity-break-option{{ n }}-{{ product.id }}"
+                name="quantity-break-{{ product.id }}"
+                value="{{ qty }}"
+                class="quantity-break-input"
+                {% if first_visible_option == n %}
+                  checked
+                {% endif %}
+                data-price="{{ final_price }}"
+                data-base-price="{{ base_price }}"
+                data-enable-custom-pricing="{% if enable_custom_pricing and enable_option_custom_price %}true{% else %}false{% endif %}"
+                data-custom-price-format="{{ selected_custom_price_format }}"
+                data-custom-price-percentage="{{ custom_price_percentage }}"
+                data-custom-price-amount="{{ custom_price_amount }}"
+                data-bogo-multiplier="{{ bogo_multiplier }}"
+                data-custom-compare-at-price="{{ custom_compare }}"
+                data-option-quantity="{{ qty }}"
+              >
+
+              <div class="quantity-break-radio-container">
+                <div class="quantity-break-radio-circle"><div class="quantity-break-radio-dot"></div></div>
+              </div>
+
+              <div class="quantity-break-content-wrapper">
+                <div class="quantity-break-image-details-group">
+                  {% unless hide_images %}
+                    <div class="quantity-break-image">
+                      {% if img != blank %}
+                        <img
+                          src="{{ img | img_url: '200x200', crop: 'center' }}"
+                          alt="{{ product.title }}"
+                          height="200"
+                          width="200"
+                        >
+                      {% elsif img_url != blank %}
+                        <img src="{{ img_url }}" alt="{{ product.title }}" height="200" width="100">
+                      {% elsif product.featured_image %}
+                        <img
+                          src="{{ product.featured_image | img_url: '200x200', crop: 'center' }}"
+                          alt="{{ product.title }}"
+                          height="200"
+                          width="200"
+                        >
+                      {% endif %}
+                    </div>
+                  {% endunless %}
+
+                  <div class="quantity-break-details">
+                    <div class="quantity-break-title-container">
+                      <div class="quantity-break-title">{{ title }}</div>
+                      {% if savings > 0 and show_save_badge and hide_badges != true %}
+                        {% if save_badge_format == 'percentage' %}
+                          <div class="quantity-break-save-badge">
+                            {{ final_save_text }}
+                            {{ percent_savings }}%
+                          </div>
+                        {% else %}
+                          <div class="quantity-break-save-badge">
+                            {{ final_save_text }}
+                            {{ savings | money }}
+                          </div>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                    {% if show_individual_savings_text and savings_txt != blank %}
+                      <div
+                        class="quantity-break-savings"
+                        style="color: {{ custom_savings_text_color }}; font-size: {{ custom_savings_font_size }}px;"
+                      >
+                        {{ savings_txt }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="quantity-break-price-container">
+                  <div class="quantity-break-price">{{ final_price | money }}</div>
+                  {% liquid
+                    assign compare_price_num = final_compare_at_price | plus: 0
+                    assign final_price_num = final_price | plus: 0
+                  %}
+                  {% unless compare_price_num == final_price_num
+                    or compare_price_num <= 0
+                    or hide_compare
+                    or hide_all_compare_price
+                  %}
+                    <div class="quantity-break-original-price">{{ final_compare_at_price | money }}</div>
+                  {% endunless %}
+                </div>
+              </div>
+            </div>
+
+            {%- liquid
+              assign show_variants = false
+              if qty > 1 and enable_variant_selection
+                assign show_variants = true
+              elsif qty == 1 and use_custom_single
+                assign show_variants = true
+              endif
+
+              comment
+                Debug: option {{ n }}, qty={{ qty }}, enable_variant_selection={{ enable_variant_selection }}, use_custom_single={{ use_custom_single }}, show_variants={{ show_variants }}
+              endcomment
+            -%}
+
+            {% if show_variants %}
+              {% unless product.has_only_default_variant %}
+                <div class="quantity-break-variant-container" data-has-custom-selectors="{{ show_variants }}">
+                  <div class="quantity-break-variant-selection">
+                    {% for i in (1..qty) %}
+                      <div class="quantity-break-variant-selectors">
+                        <div class="quantity-break-variant-left">
+                          {% unless hide_quantity_break_variant_images %}
+                            <div class="quantity-break-variant-image">
+                              {% if product.featured_image %}
+                                <img
+                                  src="{{ product.featured_image | img_url: '100x100', crop: 'center' }}"
+                                  alt="{{ product.title }}"
+                                  data-quantity-option="{{ qty }}"
+                                  data-item-index="{{ i }}"
+                                  height="100"
+                                  ,
+                                  width="100"
+                                >
+                              {% endif %}
+                            </div>
+                          {% endunless %}
+                          <div class="quantity-break-variant-label">
+                            <span class="quantity-number">1x</span>
+                            {% unless hide_product_title_in_variants %}
+                              {{ product.title | truncate: 20 -}}
+                            {%- endunless %}
+                            <div class="selected-variant-name" data-variant-display=""></div>
+                          </div>
+                        </div>
+
+                        <div class="quantity-break-variant-right">
+                          {% for option in product.options_with_values %}
+                            {% liquid
+                              assign show_this_option = false
+                              case option.position
+                                when 1
+                                  if include_variant_option_1
+                                    assign show_this_option = true
+                                  endif
+                                when 2
+                                  if include_variant_option_2
+                                    assign show_this_option = true
+                                  endif
+                                when 3
+                                  if include_variant_option_3
+                                    assign show_this_option = true
+                                  endif
+                              endcase
+                            %}
+                            {% if show_this_option %}
+                              {%- comment -%} Determine display type for this option - per-option settings override global settings {%- endcomment -%}
+                              {% assign current_option_display_type = 'dropdown' %}
+                              {% case option.position %}
+                                {% when 1 %}
+                                  {% if variant_option_1_display_type != blank %}
+                                    {% assign current_option_display_type = variant_option_1_display_type %}
+                                  {% endif %}
+                                {% when 2 %}
+                                  {% if variant_option_2_display_type != blank %}
+                                    {% assign current_option_display_type = variant_option_2_display_type %}
+                                  {% endif %}
+                                {% when 3 %}
+                                  {% if variant_option_3_display_type != blank %}
+                                    {% assign current_option_display_type = variant_option_3_display_type %}
+                                  {% endif %}
+                              {% endcase %}
+
+                              <div class="quantity-break-variant-option">
+                                {% if current_option_display_type == 'variant_image' %}
+                                  {%- comment -%} Show variant images {%- endcomment -%}
+                                  <div class="quantity-break-variant-images">
+                                    {% for value in option.values %}
+                                      {%- comment -%} Find the variant image for this option value {%- endcomment -%}
+                                      {% assign variant_image_url = '' %}
+                                      {% for variant in product.variants %}
+                                        {% case option.position %}
+                                          {% when 1 %}
+                                            {% if variant.option1 == value and variant.featured_image %}
+                                              {% assign variant_image_url = variant.featured_image
+                                                | img_url: '100x100', crop: 'center'
+                                              %}
+                                              {% break %}
+                                            {% endif %}
+                                          {% when 2 %}
+                                            {% if variant.option2 == value and variant.featured_image %}
+                                              {% assign variant_image_url = variant.featured_image
+                                                | img_url: '100x100', crop: 'center'
+                                              %}
+                                              {% break %}
+                                            {% endif %}
+                                          {% when 3 %}
+                                            {% if variant.option3 == value and variant.featured_image %}
+                                              {% assign variant_image_url = variant.featured_image
+                                                | img_url: '100x100', crop: 'center'
+                                              %}
+                                              {% break %}
+                                            {% endif %}
+                                        {% endcase %}
+                                      {% endfor %}
+
+                                      <input
+                                        type="radio"
+                                        id="option-{{ n }}-{{ i }}-{{ option.name | handleize }}-{{ value | handleize }}"
+                                        name="option-{{ n }}-{{ i }}-{{ option.name | handleize }}"
+                                        value="{{ value }}"
+                                        class="quantity-break-variant-image-input"
+                                        data-option-value="{{ value }}"
+                                        data-option-selector="{{ option.position }}"
+                                        data-item-index="{{ i }}"
+                                        data-quantity-option="{{ qty }}"
+                                        {% if forloop.first %}
+                                          checked
+                                        {% endif %}
+                                      >
+                                      <label
+                                        for="option-{{ n }}-{{ i }}-{{ option.name | handleize }}-{{ value | handleize }}"
+                                        class="quantity-break-variant-image-label"
+                                        title="{{ value }}"
+                                        style="width: {{ variant_image_size }}px; height: {{ variant_image_size }}px;"
+                                      >
+                                        {% if variant_image_url != blank %}
+                                          <img
+                                            src="{{ variant_image_url }}"
+                                            alt="{{ value }}"
+                                            width="100"
+                                            height="100"
+                                            style="width: 100%; height: 100%; object-fit: cover; border-radius: {{ variant_selector_border_radius }}px;"
+                                          >
+                                        {% else %}
+                                          <span
+                                            class="quantity-break-variant-image-placeholder"
+                                            style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: {{ variant_image_background_color }}; border-radius: {{ variant_selector_border_radius }}px; font-size: 10px;"
+                                          >
+                                            {{- value | truncate: 3, '' -}}
+                                          </span>
+                                        {% endif %}
+                                      </label>
+                                    {% endfor %}
+                                  </div>
+                                {% elsif current_option_display_type == 'color_swatch' %}
+                                  {%- comment -%} Show color swatches {%- endcomment -%}
+                                  <div class="quantity-break-color-swatches">
+                                    {% for value in option.values %}
+                                      {% assign value_downcase = value | downcase %}
+                                      {% assign color_hex = '#CCCCCC' %}
+                                      {% liquid
+                                        assign custom_mapping_found = false
+                                        if color_swatch_mapping != blank
+                                          assign mapping_lines = color_swatch_mapping | split: ' '
+                                          for line in mapping_lines
+                                            assign line_trimmed = line | strip
+                                            if line_trimmed != blank and line_trimmed contains ':'
+                                              assign mapping_parts = line_trimmed | split: ':'
+                                              assign mapped_color_name = mapping_parts[0] | strip | downcase
+                                              assign mapped_color_hex = mapping_parts[1] | strip
+                                              if mapped_color_name == value_downcase
+                                                assign color_hex = mapped_color_hex
+                                                assign custom_mapping_found = true
+                                                break
+                                              endif
+                                            endif
+                                          endfor
+                                        endif
+
+                                        unless custom_mapping_found
+                                          case value_downcase
+                                            when 'red' assign color_hex = '#FF0000'
+
+                                            when 'blue' assign color_hex = '#0000FF'
+
+                                            when 'green' assign color_hex = '#008000'
+
+                                            when 'yellow' assign color_hex = '#FFFF00'
+
+                                            when 'orange' assign color_hex = '#FFA500'
+
+                                            when 'purple' assign color_hex = '#800080'
+
+                                            when 'pink' assign color_hex = '#FFC0CB'
+
+                                            when 'brown' assign color_hex = '#A52A2A'
+
+                                            when 'black' assign color_hex = '#000000'
+
+                                            when 'white' assign color_hex = '#FFFFFF'
+
+                                            when 'gray', 'grey' assign color_hex = '#808080'
+
+                                            when 'navy' assign color_hex = '#000080'
+
+                                            when 'beige' assign color_hex = '#F5F5DC'
+
+                                            else
+                                              assign color_hex = '#CCCCCC'
+                                          endcase
+                                        endunless
+                                      %}
+                                      <input
+                                        type="radio"
+                                        id="option-{{ n }}-{{ i }}-{{ option.name | handleize }}-{{ value | handleize }}"
+                                        name="option-{{ n }}-{{ i }}-{{ option.name | handleize }}"
+                                        value="{{ value }}"
+                                        class="quantity-break-color-swatch-input"
+                                        data-option-value="{{ value }}"
+                                        data-option-selector="{{ option.position }}"
+                                        data-item-index="{{ i }}"
+                                        data-quantity-option="{{ qty }}"
+                                        {% if forloop.first %}
+                                          checked
+                                        {% endif %}
+                                      >
+                                      <label
+                                        for="option-{{ n }}-{{ i }}-{{ option.name | handleize }}-{{ value | handleize }}"
+                                        class="quantity-break-color-swatch"
+                                        style="--swatch-color: {{ color_hex }};"
+                                        title="{{ value }}"
+                                      >
+                                        <span class="sr-only">{{ value }}</span>
+                                      </label>
+                                    {% endfor %}
+                                  </div>
+                                {% elsif current_option_display_type == 'size_buttons' %}
+                                  {%- comment -%} Show size buttons (S, M, L, etc.) {%- endcomment -%}
+                                  <div class="quantity-break-size-buttons">
+                                    {% for value in option.values %}
+                                      {%- comment -%} Convert size names to abbreviated form {%- endcomment -%}
+                                      {% assign value_downcase = value | downcase %}
+                                      {% assign display_value = value %}
+                                      {% case value_downcase %}
+                                        {% when 'extra small',
+                                          'extra-small',
+                                          'xsmall',
+                                          'x-small',
+                                          'xs',
+                                          'x small',
+                                          'extra small size'
+                                        %}
+                                          {% assign display_value = 'XS' %}
+                                        {% when 'small', 'small size' %}
+                                          {% assign display_value = 'S' %}
+                                        {% when 'medium', 'medium size' %}
+                                          {% assign display_value = 'M' %}
+                                        {% when 'large', 'large size' %}
+                                          {% assign display_value = 'L' %}
+                                        {% when 'extra large',
+                                          'extra-large',
+                                          'xlarge',
+                                          'x-large',
+                                          'xl',
+                                          'x large',
+                                          'extra large size'
+                                        %}
+                                          {% assign display_value = 'XL' %}
+                                        {% when 'extra extra large',
+                                          'extra-extra-large',
+                                          'xxlarge',
+                                          'xx-large',
+                                          'xxl',
+                                          'xx large',
+                                          '2xl',
+                                          '2x large',
+                                          'extra extra large size'
+                                        %}
+                                          {% assign display_value = '2XL' %}
+                                        {% when 'extra extra extra large',
+                                          'extra-extra-extra-large',
+                                          'xxxlarge',
+                                          'xxx-large',
+                                          'xxxl',
+                                          'xxx large',
+                                          '3xl',
+                                          '3x large',
+                                          'extra extra extra large size'
+                                        %}
+                                          {% assign display_value = '3XL' %}
+                                        {% when 'one size',
+                                          'one size fits all',
+                                          'one-size',
+                                          'one-size-fits-all',
+                                          'os'
+                                        %}
+                                          {% assign display_value = 'OS' %}
+                                        {% when 'petite' %}
+                                          {% assign display_value = 'P' %}
+                                      {% endcase %}
+
+                                      <input
+                                        type="radio"
+                                        id="option-{{ n }}-{{ i }}-{{ option.name | handleize }}-{{ value | handleize }}"
+                                        name="option-{{ n }}-{{ i }}-{{ option.name | handleize }}"
+                                        value="{{ value }}"
+                                        class="quantity-break-size-button-input"
+                                        data-option-value="{{ value }}"
+                                        data-option-selector="{{ option.position }}"
+                                        data-item-index="{{ i }}"
+                                        data-quantity-option="{{ qty }}"
+                                        {% if forloop.first %}
+                                          checked
+                                        {% endif %}
+                                      >
+                                      <label
+                                        for="option-{{ n }}-{{ i }}-{{ option.name | handleize }}-{{ value | handleize }}"
+                                        class="quantity-break-size-button"
+                                        title="{{ value }}"
+                                      >
+                                        {{ display_value }}
+                                      </label>
+                                    {% endfor %}
+                                  </div>
+                                {% else %}
+                                  {%- comment -%} Show dropdown select (default) {%- endcomment -%}
+                                  <select
+                                    id="option-{{ n }}-{{ i }}-{{ option.name | handleize }}"
+                                    class="quantity-break-variant-select"
+                                    data-option-selector="{{ option.position }}"
+                                    data-item-index="{{ i }}"
+                                    data-quantity-option="{{ qty }}"
+                                    data-option-name="{{ option.name }}"
+                                  >
+                                    {% for value in option.values %}
+                                      <option value="{{ value }}">{{ value }}</option>
+                                    {% endfor %}
+                                  </select>
+                                {% endif %}
+                              </div>
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+
+                        {%- comment -%} Free Gift Badge - show on the last X items based on free_gift_count {%- endcomment -%}
+                        {% assign show_free_gift = false %}
+                        {% assign free_gift_count = 1 %}
+                        {% assign free_gift_text = '' %}
+                        {% assign free_gift_icon = null %}
+                        {% assign free_gift_icon_size = 16 %}
+                        {% assign free_gift_font_size = 10 %}
+                        {% assign free_gift_border_radius = 6 %}
+                        {% assign free_gift_bg_color = '#f0fdf4' %}
+                        {% assign free_gift_use_gradient = false %}
+                        {% assign free_gift_gradient_start = '#22c55e' %}
+                        {% assign free_gift_gradient_end = '#16a34a' %}
+                        {% assign free_gift_text_color = '#166534' %}
+                        {% assign free_gift_border_color = '#bbf7d0' %}
+
+                        {% case n %}
+                          {% when 1 %}
+                            {% assign show_free_gift = option_1_show_free_gift %}
+                            {% assign free_gift_count = option_1_free_gift_count %}
+                            {% assign free_gift_text = option_1_free_gift_text %}
+                            {% assign free_gift_icon = option_1_free_gift_icon %}
+                            {% assign free_gift_icon_size = option_1_free_gift_icon_size %}
+                            {% assign free_gift_font_size = option_1_free_gift_font_size %}
+                            {% assign free_gift_border_radius = option_1_free_gift_border_radius %}
+                            {% assign free_gift_bg_color = option_1_free_gift_bg_color %}
+                            {% assign free_gift_use_gradient = option_1_free_gift_use_gradient %}
+                            {% assign free_gift_gradient_start = option_1_free_gift_gradient_start %}
+                            {% assign free_gift_gradient_end = option_1_free_gift_gradient_end %}
+                            {% assign free_gift_text_color = option_1_free_gift_text_color %}
+                            {% assign free_gift_border_color = option_1_free_gift_border_color %}
+                          {% when 2 %}
+                            {% assign show_free_gift = option_2_show_free_gift %}
+                            {% assign free_gift_count = option_2_free_gift_count %}
+                            {% assign free_gift_text = option_2_free_gift_text %}
+                            {% assign free_gift_icon = option_2_free_gift_icon %}
+                            {% assign free_gift_icon_size = option_2_free_gift_icon_size %}
+                            {% assign free_gift_font_size = option_2_free_gift_font_size %}
+                            {% assign free_gift_border_radius = option_2_free_gift_border_radius %}
+                            {% assign free_gift_bg_color = option_2_free_gift_bg_color %}
+                            {% assign free_gift_use_gradient = option_2_free_gift_use_gradient %}
+                            {% assign free_gift_gradient_start = option_2_free_gift_gradient_start %}
+                            {% assign free_gift_gradient_end = option_2_free_gift_gradient_end %}
+                            {% assign free_gift_text_color = option_2_free_gift_text_color %}
+                            {% assign free_gift_border_color = option_2_free_gift_border_color %}
+                          {% when 3 %}
+                            {% assign show_free_gift = option_3_show_free_gift %}
+                            {% assign free_gift_count = option_3_free_gift_count %}
+                            {% assign free_gift_text = option_3_free_gift_text %}
+                            {% assign free_gift_icon = option_3_free_gift_icon %}
+                            {% assign free_gift_icon_size = option_3_free_gift_icon_size %}
+                            {% assign free_gift_font_size = option_3_free_gift_font_size %}
+                            {% assign free_gift_border_radius = option_3_free_gift_border_radius %}
+                            {% assign free_gift_bg_color = option_3_free_gift_bg_color %}
+                            {% assign free_gift_use_gradient = option_3_free_gift_use_gradient %}
+                            {% assign free_gift_gradient_start = option_3_free_gift_gradient_start %}
+                            {% assign free_gift_gradient_end = option_3_free_gift_gradient_end %}
+                            {% assign free_gift_text_color = option_3_free_gift_text_color %}
+                            {% assign free_gift_border_color = option_3_free_gift_border_color %}
+                          {% when 4 %}
+                            {% assign show_free_gift = option_4_show_free_gift %}
+                            {% assign free_gift_count = option_4_free_gift_count %}
+                            {% assign free_gift_text = option_4_free_gift_text %}
+                            {% assign free_gift_icon = option_4_free_gift_icon %}
+                            {% assign free_gift_icon_size = option_4_free_gift_icon_size %}
+                            {% assign free_gift_font_size = option_4_free_gift_font_size %}
+                            {% assign free_gift_border_radius = option_4_free_gift_border_radius %}
+                            {% assign free_gift_bg_color = option_4_free_gift_bg_color %}
+                            {% assign free_gift_use_gradient = option_4_free_gift_use_gradient %}
+                            {% assign free_gift_gradient_start = option_4_free_gift_gradient_start %}
+                            {% assign free_gift_gradient_end = option_4_free_gift_gradient_end %}
+                            {% assign free_gift_text_color = option_4_free_gift_text_color %}
+                            {% assign free_gift_border_color = option_4_free_gift_border_color %}
+                        {% endcase %}
+
+                        {% assign free_gift_start_index = qty | minus: free_gift_count | plus: 1 %}
+                        {% if show_free_gift and free_gift_text != blank and i >= free_gift_start_index %}
+                          {% capture free_gift_bg_style %}
+                            {% if free_gift_use_gradient %}
+                              background: linear-gradient(135deg, {{ free_gift_gradient_start }}, {{ free_gift_gradient_end }});
+                            {% else %}
+                              background-color: {{ free_gift_bg_color }};
+                            {% endif %}
+                          {% endcapture %}
+                          <div
+                            class="quantity-break-free-gift-badge"
+                            style="{{ free_gift_bg_style }} color: {{ free_gift_text_color }}; border: 1px solid {{ free_gift_border_color }}; font-size: {{ free_gift_font_size }}px; border-radius: {{ free_gift_border_radius }}px;"
+                          >
+                            {% if free_gift_icon != blank %}
+                              <img
+                                src="{{ free_gift_icon | image_url: width: 80 }}"
+                                alt="Free gift"
+                                width="{{ free_gift_icon_size }}"
+                                height="{{ free_gift_icon_size }}"
+                                style="width: {{ free_gift_icon_size }}px; height: {{ free_gift_icon_size }}px;"
+                              >
+                            {% endif %}
+                            <span>{{ free_gift_text }}</span>
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endunless %}
+            {% endif %}
+          </label>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  console.log('[QB Init] enable_variant_selection from Liquid:', {{ enable_variant_selection | json }});
+  console.log('[QB Init] enable_single_variant_selection from Liquid:', {{ enable_single_variant_selection | json }});
+  console.log('[QB Init] use_custom_single from Liquid:', {{ use_custom_single | json }});
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Elixir_ProductFormExists !== 'function' || !Elixir_ProductFormExists()) return;
+    var quantitySelectors = document.querySelectorAll('.quantity-break-option');
+    var quantityInputs = document.querySelectorAll('.quantity-break-input');
+    var shouldUpdatePrice = {% if update_price == true %}true{% else %}false{% endif %};
+    var enableVariantSelection = {% if enable_variant_selection == true %}true{% else %}false{% endif %};
+    var showRadioButtons = {% if show_radio_buttons == true %}true{% else %}false{% endif %};
+    var productVariants = {{ product.variants | json }};
+    var hasVariants = {% unless product.has_only_default_variant %}true{% else %}false{% endunless %};
+    var enableCustomPricing = {% if enable_custom_pricing == true %}true{% else %}false{% endif %};
+    const simpleVariantPickerRadioInputs = document.querySelectorAll('.simple-variant-picker__radio');
+
+    // Debug logging
+    console.log('Quantity Break Debug:', {
+      enableVariantSelection: enableVariantSelection,
+      hasVariants: hasVariants,
+      quantitySelectors: quantitySelectors.length,
+      variantContainers: document.querySelectorAll('.quantity-break-variant-container').length,
+      variantSelections: document.querySelectorAll('.quantity-break-variant-selection').length,
+      selectedOptions: document.querySelectorAll('.quantity-break-option.selected').length
+    });
+
+    // Check if variant containers are properly set up
+    document.querySelectorAll('.quantity-break-variant-container').forEach((container, index) => {
+      const hasCustomSelectors = container.getAttribute('data-has-custom-selectors');
+      const variantSelection = container.querySelector('.quantity-break-variant-selection');
+      const selectors = container.querySelectorAll('.quantity-break-variant-select, .quantity-break-color-swatch-input');
+      console.log(`Variant container ${index}:`, {
+        hasCustomSelectors,
+        hasVariantSelection: !!variantSelection,
+        selectorsCount: selectors.length,
+        parentSelected: container.closest('.quantity-break-option')?.classList.contains('selected')
+      });
+    });
+    
+    // Find the product form
+    const form = document.querySelector('form[action*="/cart/add"]:not(.free-product-form):not(.shipping-protection-form)');
+    
+    // Helper function to add quantity element
+    function addQuantityElem(quantity) {
+      if (!form) return;
+      const existingQuantityInputs = form.querySelectorAll('input[name="quantity"]');
+      existingQuantityInputs.forEach(input => {
+        if (input.type === 'hidden') input.remove();
+      });
+      const quantityInput = document.createElement('input');
+      quantityInput.type = 'hidden';
+      quantityInput.name = 'quantity';
+      quantityInput.value = quantity;
+      form.appendChild(quantityInput);
+    }
+    
+    // Get button text and format money function from global scope or define defaults
+    var addToCartButtonText = (typeof window.addToCartButtonText !== 'undefined') ? window.addToCartButtonText : 'Add to Cart';
+    function formatMoneyWithoutSuffix(amount) {
+      if (typeof window.formatMoneyWithoutSuffix === 'function') {
+        return window.formatMoneyWithoutSuffix(amount);
+      }
+      return amount;
+    }
+
+    document.querySelectorAll('.quantity-break-option-container').forEach(container => {
+      const quantityOption = container.getAttribute('data-option-quantity');
+      const rows = container.querySelectorAll('.quantity-break-variant-selectors');
+      rows.forEach((row, idx) => {
+        row.setAttribute('data-quantity-option', quantityOption);
+        row.setAttribute('data-item-index', String(idx + 1));
+      });
+    });
+
+
+
+    function slugify(s){
+      return (s || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // strip accents
+        .replace(/[^a-z0-9]+/g,'-')
+        .replace(/^-+|-+$/g,'');
+    }
+
+    function usesCustomSelectorsForSelectedOption() {
+      const selected = document.querySelector('.quantity-break-option.selected');
+      if (!selected) return false;
+      
+      // Check for variant container within the same option container
+      const optionContainer = selected.closest('.quantity-break-option-container');
+      if (!optionContainer) return false;
+      
+      const variantContainer = optionContainer.querySelector('.quantity-break-variant-container');
+      if (variantContainer) {
+        const flag = variantContainer.getAttribute('data-has-custom-selectors');
+        if (flag === 'true' || flag === true) return true;
+      }
+      
+      // Also check directly for variant selectors as fallback
+      return !!optionContainer.querySelector('.quantity-break-variant-selectors');
+    }
+
+    const hasSimplePicker = !!document.querySelector('.simple-variant-picker__container');
+    function qbControlsOption(quantityOption, itemIndex, position) {
+      return !!document.querySelector(
+        // Selects QB
+        `.quantity-break-variant-select[data-quantity-option="${quantityOption}"][data-item-index="${itemIndex}"][data-option-selector="${position}"],` +
+        // Radios QB (swatches, images, and size buttons)
+        `input.quantity-break-color-swatch-input[data-quantity-option="${quantityOption}"][data-item-index="${itemIndex}"][data-option-selector="${position}"],` +
+        `input.quantity-break-variant-image-input[data-quantity-option="${quantityOption}"][data-item-index="${itemIndex}"][data-option-selector="${position}"],` +
+        `input.quantity-break-size-button-input[data-quantity-option="${quantityOption}"][data-item-index="${itemIndex}"][data-option-selector="${position}"]`
+      );
+    }
+      
+    
+
+    function getOptionValue(quantityOption, itemIndex, position, optionName) {
+    // 1) Priorité : QB s'il gère cette option
+    if (qbControlsOption(quantityOption, itemIndex, position)) {
+      // Radio QB cochée ?
+      const qbRadio = document.querySelector(
+        `input[data-quantity-option="${quantityOption}"][data-item-index="${itemIndex}"][data-option-selector="${position}"]:checked`
+      );
+
+      if (qbRadio) return (qbRadio.dataset.optionValue || qbRadio.value || '').trim();
+
+      // Select QB ?
+      const qbSelect = document.querySelector(
+        `.quantity-break-variant-select[data-quantity-option="${quantityOption}"][data-item-index="${itemIndex}"][data-option-selector="${position}"]`
+      );
+
+      if (qbSelect && qbSelect.value) return qbSelect.value.trim();
+
+      return ''; // QB contrôle mais rien sélectionné
+    }
+
+    // 2) Sinon, on lit dans le simple variant picker (s'il existe)
+    if (hasSimplePicker) {
+      // Radio simple picker par position
+      const spRadio = document.querySelector(
+        `.simple-variant-picker__radio[data-option-position="${position}"]:checked`
+      );
+      if (spRadio) return spRadio.value.trim();
+      // Select simple picker par position
+      const spSelect = document.querySelector(
+        `.simple-variant-picker__select[data-option-position="${position}"]`
+      );
+      if (spSelect && spSelect.value) return spSelect.value.trim();
+
+      // Fallback par name (au cas où)
+      if (optionName) {
+        const byNameRadio = document.querySelector(
+          `input[name="options[${CSS.escape(optionName)}]"]:checked`
+        );
+        if (byNameRadio) return byNameRadio.value.trim();
+
+        const byNameSelect = document.querySelector(
+          `select[name="options[${CSS.escape(optionName)}]"]`
+        );
+        if (byNameSelect && byNameSelect.value) return byNameSelect.value.trim();
+      }
+    }
+
+    // 3) Rien trouvé
+    return '';
+  }
+
+  
+
+
+
+
+    const firstVisibleOption = {{ first_visible_option | json }};
+    console.log('First visible option index:', firstVisibleOption);
+
+    if (quantitySelectors[firstVisibleOption - 1]) {
+      // Select the first option immediately without delay
+      setTimeout(function() {
+        console.log('Clicking first visible option...');
+        quantitySelectors[firstVisibleOption - 1].click();
+
+        // Double-check that it's selected
+        setTimeout(function() {
+          const selected = document.querySelector('.quantity-break-option.selected');
+          console.log('After click, selected option:', !!selected);
+          if (selected) {
+            const variantContainer = selected.closest('.quantity-break-option-container')?.querySelector('.quantity-break-variant-container');
+            console.log('Selected option has variant container:', !!variantContainer);
+            if (variantContainer) {
+              const variantSelection = variantContainer.querySelector('.quantity-break-variant-selection');
+              console.log('Variant selection element:', !!variantSelection);
+              if (variantSelection) {
+                const computedStyle = window.getComputedStyle(variantSelection);
+                console.log('Variant selection styles:', {
+                  opacity: computedStyle.opacity,
+                  maxHeight: computedStyle.maxHeight,
+                  display: computedStyle.display
+                });
+              }
+            }
+          }
+        }, 200);
+      }, 100); // Reduced delay from 500ms to 100ms
+    }
+
+    var variantOptions = [];
+    var variantImages = {};
+    
+    {% for option in product.options_with_values %}
+      variantOptions.push("{{ option.name }}");
+    {% endfor %}
+    
+    // Create a mapping of variant IDs to their images
+    {% for variant in product.variants %}
+      {% if variant.featured_image %}
+        variantImages[{{ variant.id }}] = {
+          id: {{ variant.id }},
+          src: {{ variant.featured_image | img_url: '200x200', crop: 'center' | json }},
+          alt: {{ variant.title | json }}
+        };
+      {% endif %}
+    {% endfor %}
+    
+    // Log initial state for debugging
+    
+    function formatPrice(originPrice, newPriceValue) {
+      let priceValue = (newPriceValue / 100).toFixed(2).toString();
+      if (originPrice.includes(",")) priceValue = priceValue.replace(".", ",");
+      const originPriceNumber = originPrice.replace(/[^0-9.,]/g, '');
+
+      return originPrice.replace(originPriceNumber.toString(), priceValue);
+    }
+
+    // Function to update variant images based on current selections
+    function updateVariantImages(quantityOption, itemIndex) {
+      const selectedByPos = {};
+      for (let pos = 1; pos <= variantOptions.length; pos++) {
+        const val = getOptionValue(quantityOption, itemIndex, pos, variantOptions[pos - 1]);
+        if (val) selectedByPos[pos] = val;
+      }
+
+      const matchedVariant = productVariants.find(v =>
+        Object.keys(selectedByPos).every(pos => v[`option${pos}`] === selectedByPos[pos])
+      );
+
+      const row = document.querySelector(
+        `.quantity-break-variant-selectors[data-quantity-option="${quantityOption}"][data-item-index="${itemIndex}"]`
+      );
+      const img = row ? row.querySelector('.quantity-break-variant-image img') : null;
+
+      if (matchedVariant && variantImages[matchedVariant.id] && img) {
+        img.src = variantImages[matchedVariant.id].src;
+        img.alt = variantImages[matchedVariant.id].alt;
+      }
+    }
+
+
+    // Function to update selected variant name display
+   function updateVariantNameDisplay(quantityOption, itemIndex) {
+    const parts = [];
+    for (let pos = 1; pos <= variantOptions.length; pos++) {
+      const val = getOptionValue(quantityOption, itemIndex, pos, variantOptions[pos - 1]);
+      if (val) parts.push(val);
+    }
+    const row = document.querySelector(
+      `.quantity-break-variant-selectors[data-quantity-option="${quantityOption}"][data-item-index="${itemIndex}"]`
+    );
+    const el = row ? row.querySelector('.selected-variant-name') : null;
+   
+    if (el) el.textContent = parts.length ? `(${parts.join(' / ')})` : '';
+     console.log(el.textContent)
+  }
+
+
+    function switchRowImage(quantityOption, itemIndex, src, altText) {
+  const row = document.querySelector(
+    `.quantity-break-variant-selectors[data-quantity-option="${quantityOption}"][data-item-index="${itemIndex}"]`
+  );
+  const img = row ? row.querySelector('.quantity-break-variant-image img') : null;
+  if (img && src) {
+    img.src = src;
+    img.alt = altText || '';
+  }
+  } 
+
+  function activateMediaById(mediaId) {
+    const thumb = document.querySelector(`.shop-thumbnail[data-media-id="${mediaId}"]`);
+    if (thumb) {
+      thumb.click(); // pilote la galerie si thumbs actifs
+      return true;
+    }
+    return false;
+    }
+
+        // Handle option selection
+        quantitySelectors.forEach(option => {
+          option.addEventListener('click', function(e) {
+
+            // If radio buttons are visible, only proceed if the click is on the radio button or label
+            if (showRadioButtons) {
+              var clickedRadio = e.target.closest('.quantity-break-radio-container');
+              if (!clickedRadio && e.target.tagName !== 'INPUT') {
+                return; // Only respond to clicks on radio buttons when they're shown
+              }
+            }
+
+            // Continue with normal selection logic
+            quantitySelectors.forEach(opt => {
+              opt.classList.remove('selected');
+            });
+            this.classList.add('selected');
+
+            // Debug logging
+            const variantContainer = this.closest('.quantity-break-option-container')?.querySelector('.quantity-break-variant-container');
+            console.log('Option clicked, variant container found:', !!variantContainer);
+            if (variantContainer) {
+              console.log('Variant selectors:', variantContainer.querySelectorAll('.quantity-break-variant-select, .quantity-break-color-swatch-input').length);
+            }
+
+            var input = this.querySelector('input');
+            if (!input) return;
+            input.checked = true;
+
+            const currentQuantity = input.value;
+
+            if (form) {
+              form.querySelectorAll('input[type="hidden"][name="quantity"]').forEach(el => el.remove());
+              addQuantityElem(currentQuantity);
+              form.setAttribute('data-quantity', currentQuantity);
+            }
+
+            var quantityInput = document.querySelector('input[name="quantity"]:not([type="hidden"])');
+            if (quantityInput) {
+              quantityInput.value = currentQuantity;
+              var event = new Event('change', { bubbles: true });
+              quantityInput.dispatchEvent(event);
+            }
+
+            updateVariantSelections();
+
+            // Only update display if custom selectors are enabled
+            if (enableVariantSelection && hasVariants && usesCustomSelectorsForSelectedOption()) {
+              setTimeout(updateSimpleVariantPickerDisplay, 100);
+            } else {
+              // Clean up stale variant forms and restore single-id mode when using PDP form controller
+              if (typeof Elixir_ProductFormSwitchToSingleIdMode === 'function') {
+                Elixir_ProductFormSwitchToSingleIdMode(undefined, '.quantity-break-variant-form');
+              } else {
+                const stale = document.querySelector('.quantity-break-variant-form');
+                if (stale) stale.remove();
+              }
+            }
+
+            // Dispatch custom event so Price block and Subscribe & Save can update via Elixir_GetDisplayPrice
+            document.dispatchEvent(new CustomEvent('quantity_break:changed', {
+              detail: {
+                quantity: parseInt(input.value),
+                price: parseInt(input.dataset.price)
+              }
+            }));
+            
+            // Recalculate custom prices if enabled
+            if (enableCustomPricing) {
+              updateCustomPrices();
+            }
+          });
+        });
+        
+        // Handle variant selection changes
+        
+        if (enableVariantSelection && hasVariants ) {
+          var variantSelects = document.querySelectorAll('.quantity-break-variant-select');
+          
+          
+          variantSelects.forEach(select => {
+            select.addEventListener('change', function() {
+              // Get the data attributes
+              var quantityOption = this.getAttribute('data-quantity-option');
+              var itemIndex = this.getAttribute('data-item-index');
+              
+              // Update the variant image for this specific item
+              updateVariantImages(quantityOption, itemIndex);
+              // Update the variant name display
+              updateVariantNameDisplay(quantityOption, itemIndex);
+               // Also update the overall variant selections
+            updateVariantSelections();
+            
+            // Update simple variant picker display
+            updateSimpleVariantPickerDisplay();
+            
+            // Recalculate custom prices if enabled
+            if (enableCustomPricing) {
+              updateCustomPrices();
+            }
+            });
+          });
+          
+          // Initialize images and variant names for all items
+          setTimeout(function() {
+            variantSelects.forEach(select => {
+              var quantityOption = select.getAttribute('data-quantity-option');
+              var itemIndex = select.getAttribute('data-item-index');
+              updateVariantImages(quantityOption, itemIndex);
+              updateVariantNameDisplay(quantityOption, itemIndex);
+            });
+          }, 100);
+        }
+        if (enableVariantSelection && hasVariants) {
+
+          // Event handlers for color swatches
+          var variantSwatches = document.querySelectorAll('.quantity-break-color-swatch-input');
+
+              variantSwatches.forEach(swatch => {
+                swatch.addEventListener('change', function () {
+                  var quantityOption = this.getAttribute('data-quantity-option');
+                  var itemIndex      = this.getAttribute('data-item-index');
+
+                  // Récupère les data du label associé
+                  const label = document.querySelector(`label[for="${this.id}"]`);
+                  const mediaId  = label?.dataset.mediaId;
+                  const mediaSrc = label?.dataset.mediaSrc;
+
+                  // 1) Affiche l'image près des sélecteurs de variantes (petite vignette de ligne)
+                  if (mediaSrc) {
+                    switchRowImage(quantityOption, itemIndex, mediaSrc, this.value);
+                  }
+
+                  // 2) (Optionnel) Synchronise la galerie principale
+                  if (mediaId) {
+                    activateMediaById(mediaId);
+                  }
+
+                  // Ta logique existante :
+                  updateVariantImages(quantityOption, itemIndex);
+                  updateVariantNameDisplay(quantityOption, itemIndex);
+                  updateVariantSelections();
+                  
+                  // Recalculate custom prices if enabled
+                  if (enableCustomPricing) {
+                    updateCustomPrices();
+                  }
+                });
+          });
+          
+          // Event handlers for variant images (instead of swatches)
+          var variantImageInputs = document.querySelectorAll('.quantity-break-variant-image-input');
+
+              variantImageInputs.forEach(imageInput => {
+                imageInput.addEventListener('change', function () {
+                  var quantityOption = this.getAttribute('data-quantity-option');
+                  var itemIndex      = this.getAttribute('data-item-index');
+
+                  // Récupère les data du label associé
+                  const label = document.querySelector(`label[for="${this.id}"]`);
+                  const mediaSrc = label?.querySelector('img')?.src;
+
+                  // 1) Affiche l'image près des sélecteurs de variantes (petite vignette de ligne)
+                  if (mediaSrc) {
+                    switchRowImage(quantityOption, itemIndex, mediaSrc, this.value);
+                  }
+
+                  // Update variant images and selections
+                  updateVariantImages(quantityOption, itemIndex);
+                  updateVariantNameDisplay(quantityOption, itemIndex);
+                  updateVariantSelections();
+                });
+          });
+          
+          // Event handlers for size buttons
+          var sizeButtonInputs = document.querySelectorAll('.quantity-break-size-button-input');
+
+              sizeButtonInputs.forEach(sizeInput => {
+                sizeInput.addEventListener('change', function () {
+                  var quantityOption = this.getAttribute('data-quantity-option');
+                  var itemIndex      = this.getAttribute('data-item-index');
+
+                  // Update variant images and selections
+                  updateVariantImages(quantityOption, itemIndex);
+                  updateVariantNameDisplay(quantityOption, itemIndex);
+                  updateVariantSelections();
+                });
+          });
+        }
+        updateVariantSelections()
+        
+        
+        // Initialize - update product quantity input with selected quantity
+        var selectedBundleInput = document.querySelector('.quantity-break-option.selected input.quantity-break-input');
+
+        if (selectedBundleInput) {
+          var quantityInput = document.querySelector('input[name="quantity"]');
+          if (quantityInput) {
+            quantityInput.value = selectedBundleInput.value;
+            quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
+        
+        // Function to get selected variants
+        function getSelectedVariants() {
+          const selectedBundleInput = document.querySelector('.quantity-break-option.selected input.quantity-break-input');
+          if (!selectedBundleInput) return [[], 0, 0];
+
+          const quantityOption = selectedBundleInput.value;
+          const optionQuantity = parseInt(quantityOption, 10);
+
+          // Helper: récupère la variante correspondant aux valeurs de l'item i
+          const pickVariantForItem = (i) => {
+            const sel = {};
+            let has = false;
+            for (let pos = 1; pos <= variantOptions.length; pos++) {
+              const v = getOptionValue(quantityOption, i, pos, variantOptions[pos - 1]);
+              if (v) { sel[`option${pos}`] = v; has = true; }
+            }
+            if (!has) return {{ product.selected_or_first_available_variant | json }};
+            const m = productVariants.find(v => Object.keys(sel).every(k => v[k] === sel[k]));
+            return m || {{ product.selected_or_first_available_variant | json }};
+          };
+
+          if (optionQuantity <= 1) {
+            const v = pickVariantForItem(1);
+            return [[v.id], v.price, v.compare_at_price || 0];
+          }
+
+          const ids = [];
+          let total = 0, totalCompare = 0;
+          for (let i = 1; i <= optionQuantity; i++) {
+            const v = pickVariantForItem(i);
+            ids.push(v.id);
+            total += v.price;
+            totalCompare += (v.compare_at_price || 0);
+          }
+          return [ids, total, totalCompare];
+    }
+
+      
+
+      // Function to update variant selections in the cart form
+      function updateVariantSelections() {
+        const [selectedVariants, totalPrice, totalComparePrice] = getSelectedVariants();
+
+        if (selectedVariants.length > 0) {
+          // Get the selected bundle input to check for custom pricing
+          const selectedBundleInput = document.querySelector('.quantity-break-option.selected input.quantity-break-input');
+          const hasCustomPricing = selectedBundleInput && selectedBundleInput.getAttribute('data-enable-custom-pricing') === 'true';
+          // final_price is already in cents, so we need to parse it as integer
+          const customPrice = selectedBundleInput ? parseInt(selectedBundleInput.getAttribute('data-custom-price'), 10) || 0 : 0;
+          const quantityOption = selectedBundleInput ? parseInt(selectedBundleInput.value, 10) : 0;
+          
+          var upsellCheckbox = document.querySelector('[data-upsell-checkbox]');
+          var isUpsellActive = upsellCheckbox ? upsellCheckbox.checked : false;
+          var upsellVariantId = upsellCheckbox ? upsellCheckbox.getAttribute('data-variant-id') : null;
+
+          if (isUpsellActive && upsellVariantId) {
+            selectedVariants.push(upsellVariantId);
+          }
+
+          // Add all items to cart (including free ones for "Buy X Get Y Free" promotions)
+          // The custom pricing will be handled by discount apps or backend logic
+          const quantityList = Object.values(
+            selectedVariants.reduce((acc, id) => {
+              if (!acc[id]) {
+                acc[id] = { id, quantity: 1 };
+              } else {
+                acc[id].quantity += 1;
+              }
+              return acc;
+            }, {})
+          );
+
+          const premiumKitItems = document.querySelectorAll('.product-variant-premium-kit');
+          const premiumKitLength = premiumKitItems.length;
+          const startIndex = premiumKitLength + 1;
+
+          // When Subscribe & Save is on, use window.subscriptionContext so items[] get selling_plan per item
+          const subscriptionContext = window.subscriptionContext;
+          const sellingPlanId = (subscriptionContext && subscriptionContext.sellingPlanId) ? String(subscriptionContext.sellingPlanId) : null;
+
+          const itemsForForm = quantityList.map(function(_item, i) {
+            var props = {};
+            if (hasCustomPricing && customPrice > 0 && i === 0) {
+              props._custom_total_price = (customPrice / 100).toFixed(2);
+              props._quantity_option = String(quantityOption);
+            }
+            var item = { id: _item.id, quantity: _item.quantity, properties: Object.keys(props).length ? props : undefined };
+            if (sellingPlanId) item.selling_plan = sellingPlanId;
+            return item;
+          });
+
+          const productForm = (typeof Elixir_GetProductForm === 'function' && Elixir_GetProductForm()) || document.querySelector('form[action*="/cart/add"]:not(.free-product-form):not(.shipping-protection-form)');
+          var container = null;
+
+          if (typeof Elixir_ProductFormSwitchToItemsMode === 'function' && productForm && Elixir_GetProductForm() === productForm) {
+            if (Elixir_ProductFormSwitchToItemsMode(itemsForForm, { containerClass: 'quantity-break-variant-form', startIndex: startIndex })) {
+              container = productForm.querySelector('.quantity-break-variant-form');
+            }
+          }
+
+          if (!container && productForm) {
+            // Fallback: build container manually when not on PDP or controller unavailable
+            var existingContainer = document.querySelector('.quantity-break-variant-form');
+            if (existingContainer) existingContainer.parentNode.removeChild(existingContainer);
+
+            container = document.createElement('div');
+            container.classList.add('quantity-break-variant-form');
+            var index = startIndex;
+            quantityList.forEach(function(_item) {
+              var inputId = document.createElement('input');
+              inputId.type = 'hidden';
+              inputId.name = 'items[' + index + '][id]';
+              inputId.value = _item.id;
+              inputId.classList.add('product-variant-id', 'product-variant-quantity-break');
+              var inputQuantity = document.createElement('input');
+              inputQuantity.type = 'hidden';
+              inputQuantity.name = 'items[' + index + '][quantity]';
+              inputQuantity.value = _item.quantity;
+              inputQuantity.classList.add('product-variant-id');
+              if (sellingPlanId) {
+                var inputSellingPlan = document.createElement('input');
+                inputSellingPlan.type = 'hidden';
+                inputSellingPlan.name = 'items[' + index + '][selling_plan]';
+                inputSellingPlan.value = sellingPlanId;
+                container.appendChild(inputSellingPlan);
+              }
+              if (hasCustomPricing && customPrice > 0 && index === startIndex) {
+                var inputProperties = document.createElement('input');
+                inputProperties.type = 'hidden';
+                inputProperties.name = 'items[' + index + '][properties][_custom_total_price]';
+                inputProperties.value = (customPrice / 100).toFixed(2);
+                container.appendChild(inputProperties);
+                var inputQuantityOption = document.createElement('input');
+                inputQuantityOption.type = 'hidden';
+                inputQuantityOption.name = 'items[' + index + '][properties][_quantity_option]';
+                inputQuantityOption.value = quantityOption;
+                container.appendChild(inputQuantityOption);
+              }
+              container.appendChild(inputId);
+              container.appendChild(inputQuantity);
+              index++;
+            });
+            productForm.appendChild(container);
+          }
+
+          if (productForm && container) {
+            var mainVariantInput = productForm.querySelector('input[name="product-id"]');
+            if (mainVariantInput) mainVariantInput.remove();
+
+            console.log('Variant form created with', container.children.length, 'inputs');
+            console.log('Items to add:', quantityList);
+            const selectedBundle = document.querySelector('.quantity-break-option.selected input.quantity-break-input');
+            if (!selectedBundle) return;
+
+            // quantité choisie (ex: "3", "6", "9")
+            const quantityOption = selectedBundle?.value;
+
+            document
+              .querySelectorAll(`.quantity-break-variant-selectors[data-quantity-option="${quantityOption}"]`)
+              .forEach(row => {
+                const idx = row.getAttribute('data-item-index');   // "1", "2", "3", ...
+                // facultatif : si tu veux aussi resynchroniser l’image de ligne
+                // updateVariantImages(quantityOption, idx);
+                updateVariantImages(quantityOption, idx);
+                updateVariantNameDisplay(quantityOption, idx);
+              });
+            
+          } else {
+            console.error("Could not find cart form to add variant IDs input");
+          }
+
+          const selectedOption = document.querySelector('.quantity-break-option.selected input')?.parentElement;
+          if (!selectedOption) return;
+
+          refreshQuantityBreakDisplay();
+        }
+      }
+
+ 
+
+      if (simpleVariantPickerRadioInputs) {
+        simpleVariantPickerRadioInputs.forEach(input => {
+  input.addEventListener('change', () => {
+    const selectedBundle = document.querySelector('.quantity-break-option.selected input.quantity-break-input');
+    const quantityOption = selectedBundle?.value;
+    if (!quantityOption) return;
+
+    // Récupérer la position et valeur qui a changé
+    const changedPosition = input.getAttribute('data-option-position');
+    const changedValue = input.value;
+    
+    // Mettre à jour tous les sélecteurs QB correspondants
+    updateQuantityBreakSelectors(quantityOption, changedPosition, changedValue);
+    
+    // Mettre à jour les affichages
+    updateAllQuantityBreakDisplays(quantityOption);
+    
+    // Recalculer les sélections
+    updateVariantSelections();
+  });
+});
+
+function updateQuantityBreakSelectors(quantityOption, position, value) {
+  // Mettre à jour tous les selects
+  document.querySelectorAll(
+    `.quantity-break-variant-select[data-quantity-option="${quantityOption}"][data-option-selector="${position}"]`
+  ).forEach(select => {
+    if (Array.from(select.options).some(opt => opt.value === value)) {
+      select.value = value;
+    }
+  });
+
+  // Mettre à jour tous les radio buttons (swatches)
+  document.querySelectorAll(
+    `.quantity-break-color-swatch-input[data-quantity-option="${quantityOption}"][data-option-selector="${position}"]`
+  ).forEach(swatch => {
+    const swatchValue = swatch.getAttribute('data-option-value') || swatch.value;
+    swatch.checked = (swatchValue === value);
+  });
+
+  // Mettre à jour les images de variants
+  document.querySelectorAll(
+    `.quantity-break-variant-image-input[data-quantity-option="${quantityOption}"][data-option-selector="${position}"]`
+  ).forEach(imageInput => {
+    const imageValue = imageInput.getAttribute('data-option-value') || imageInput.value;
+    imageInput.checked = (imageValue === value);
+  });
+  
+  // Mettre à jour les boutons de taille
+  document.querySelectorAll(
+    `.quantity-break-size-button-input[data-quantity-option="${quantityOption}"][data-option-selector="${position}"]`
+  ).forEach(sizeInput => {
+    const sizeValue = sizeInput.getAttribute('data-option-value') || sizeInput.value;
+    sizeInput.checked = (sizeValue === value);
+  });
+}
+
+function updateAllQuantityBreakDisplays(quantityOption) {
+  const rows = document.querySelectorAll(
+    `.quantity-break-variant-selectors[data-quantity-option="${quantityOption}"]`
+  );
+  
+  rows.forEach(row => {
+    const itemIndex = row.getAttribute('data-item-index');
+    updateVariantImages(quantityOption, itemIndex);
+    updateVariantNameDisplay(quantityOption, itemIndex);
+  });
+}
+      }
+      
+
+      // Listen for product variant changeßs
+      document.addEventListener('variant:changed', function(event) {
+      
+        
+        // Refresh the selected quantity on variant change to maintain user selection
+        var selectedQuantityBreak = document.querySelector('.quantity-break-option.selected input');
+        
+        if (selectedQuantityBreak) {
+          var quantityInput = document.querySelector('input[name="quantity"]');
+          if (quantityInput) {
+            quantityInput.value = selectedQuantityBreak.value;
+          }
+          
+          // Update default selection for first item in each variant selector
+          if (enableVariantSelection && hasVariants && event.detail && event.detail.variant) {
+            var variant = event.detail.variant;
+            variantOptions.forEach(function(option, index) {
+              if (variant['option' + (index + 1)]) {
+                var firstItemSelects = document.querySelectorAll('.quantity-break-variant-select[data-option-selector="' + (index + 1) + '"][data-item-index="1"]');
+                firstItemSelects.forEach(function(select) {
+                  for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value === variant['option' + (index + 1)]) {
+                      select.selectedIndex = i;
+                      break;
+                    }
+                  }
+                });
+              }
+            });
+            
+            // Also update all variant images and names
+            setTimeout(function() {
+              variantSelects.forEach(select => {
+                var quantityOption = select.getAttribute('data-quantity-option');
+                var itemIndex = select.getAttribute('data-item-index');
+                updateVariantImages(quantityOption, itemIndex);
+                updateVariantNameDisplay(quantityOption, itemIndex);
+              });
+            }, 100);
+            
+            updateVariantSelections();
+          }
+        }
+        
+        if (enableCustomPricing) {
+          updateCustomPrices();
+        }
+      });
+      
+      function calculateCustomPrice(variantPrice, quantity, priceFormat, pricePercentage, priceAmount, bogoMultiplier) {
+        if (!priceFormat || priceFormat === 'none') {
+          return variantPrice * quantity;
+        }
+        
+        switch(priceFormat) {
+          case 'percentage':
+            if (pricePercentage && pricePercentage !== '' && pricePercentage > 0 && pricePercentage <= 100) {
+              const discountMultiplier = (100 - pricePercentage) / 100;
+              return Math.round(variantPrice * quantity * discountMultiplier);
+            }
+            return variantPrice * quantity;
+          
+          case 'amount':
+            if (priceAmount && priceAmount !== '') {
+              const amount = parseFloat(priceAmount);
+              if (!isNaN(amount)) {
+                return Math.round(amount * 100);
+              }
+            }
+            return variantPrice * quantity;
+          
+          case 'bogo':
+            if (bogoMultiplier && bogoMultiplier !== '' && parseFloat(bogoMultiplier) > 0) {
+              const multiplier = parseFloat(bogoMultiplier);
+              if (!isNaN(multiplier)) {
+                return Math.round(variantPrice * multiplier);
+              }
+            }
+            return variantPrice * quantity;
+          
+          default:
+            return variantPrice * quantity;
+        }
+      }
+      
+      function getCurrentVariant() {
+        let selectedVariant = null;
+        
+        if (hasVariants && typeof variantOptions !== 'undefined') {
+          const selectedOptions = {};
+          for (let pos = 1; pos <= variantOptions.length; pos++) {
+            const radio = document.querySelector(`.simple-variant-picker__radio[data-option-position="${pos}"]:checked`);
+            const select = document.querySelector(`.simple-variant-picker__select[data-option-position="${pos}"]`);
+            const value = radio ? radio.value : (select ? select.value : null);
+            if (value) {
+              selectedOptions[`option${pos}`] = value;
+            }
+          }
+          
+          if (Object.keys(selectedOptions).length > 0) {
+            selectedVariant = productVariants.find(v => 
+              Object.keys(selectedOptions).every(k => v[k] === selectedOptions[k])
+            );
+          }
+        }
+        
+        if (!selectedVariant && typeof getSelectedVariants === 'function') {
+          const [selectedVariantIds] = getSelectedVariants();
+          const firstVariantId = selectedVariantIds && selectedVariantIds.length > 0 ? selectedVariantIds[0] : null;
+          selectedVariant = firstVariantId ? 
+            productVariants.find(v => v.id === firstVariantId) : 
+            productVariants[0];
+        }
+        
+        if (!selectedVariant) {
+          selectedVariant = {{ product.selected_or_first_available_variant | json }};
+        }
+        
+        return selectedVariant;
+      }
+      
+      function updateCustomPrices() {
+        const selectedVariant = getCurrentVariant();
+        if (!selectedVariant) return;
+        
+        const variantPrice = selectedVariant.price;
+        const variantComparePrice = selectedVariant.compare_at_price || 0;
+        
+        quantityInputs.forEach(input => {
+          const hasCustomPricing = input.getAttribute('data-enable-custom-pricing') === 'true';
+          if (!hasCustomPricing) return;
+          
+          const quantity = parseInt(input.getAttribute('data-option-quantity'), 10);
+          const priceFormat = input.getAttribute('data-custom-price-format') || 'none';
+          
+          // Only use fields that match the selected format to avoid conflicts
+          let pricePercentage = 0;
+          let priceAmount = '';
+          let bogoMultiplier = '';
+          
+          if (priceFormat === 'percentage') {
+            pricePercentage = parseFloat(input.getAttribute('data-custom-price-percentage'), 10) || 0;
+          } else if (priceFormat === 'amount') {
+            priceAmount = input.getAttribute('data-custom-price-amount') || '';
+          } else if (priceFormat === 'bogo') {
+            bogoMultiplier = input.getAttribute('data-bogo-multiplier') || '';
+          }
+          
+          const customCompareAtPrice = input.getAttribute('data-custom-compare-at-price') || '';
+          
+          const calculatedPrice = calculateCustomPrice(variantPrice, quantity, priceFormat, pricePercentage, priceAmount, bogoMultiplier);
+          
+          // Calculate compare price: use custom compare if provided, otherwise use variant compare × quantity
+          let calculatedComparePrice = variantComparePrice * quantity;
+          if (customCompareAtPrice && customCompareAtPrice !== '') {
+            const compareAmount = parseFloat(customCompareAtPrice);
+            if (!isNaN(compareAmount)) {
+              calculatedComparePrice = Math.round(compareAmount * 100);
+            }
+          }
+          
+          input.setAttribute('data-price', calculatedPrice);
+          
+          const optionContainer = input.closest('.quantity-break-option-container');
+          if (optionContainer) {
+            const priceElement = optionContainer.querySelector('.quantity-break-price');
+            const comparePriceElement = optionContainer.querySelector('.quantity-break-original-price');
+            
+            if (priceElement) {
+              if (!priceElement.dataset.originalPrice) {
+                priceElement.dataset.originalPrice = priceElement.textContent || '';
+              }
+              const formattedPrice = Elixir_FormatMoney(calculatedPrice);
+              priceElement.textContent = formattedPrice;
+            }
+            
+            if (comparePriceElement && calculatedComparePrice > calculatedPrice) {
+              const formattedComparePrice = Elixir_FormatMoney(calculatedComparePrice);
+              comparePriceElement.textContent = formattedComparePrice;
+              comparePriceElement.style.visibility = 'visible';
+            } else if (comparePriceElement) {
+              comparePriceElement.style.visibility = 'hidden';
+            }
+            
+            if (optionContainer.querySelector('.quantity-break-option.selected')) {
+              const addToCartButton = document.querySelector('.product-form__submit .button__text')
+                || document.querySelector('.shop-add-to-cart-button .button-text')
+                || document.querySelector('[data-add-to-cart-text]');
+              
+              if (addToCartButton && priceElement) {
+                const submitButton = addToCartButton.closest('button[type="submit"]') || addToCartButton.closest('.shop-add-to-cart-button');
+                const hasTextOverride = submitButton && submitButton.dataset.textOverride === 'true';
+                const persistentText = submitButton && submitButton.dataset.persistentText;
+                
+                const showPriceInButton = submitButton && submitButton.dataset.showPrice === 'true' 
+                  || (typeof window.showPriceButton !== 'undefined' && window.showPriceButton);
+                
+                let buttonText = '';
+                if (hasTextOverride && persistentText) {
+                  buttonText = persistentText;
+                } else {
+                  buttonText = addToCartButtonText || 'Add to Cart';
+                }
+                
+                let newButtonText = buttonText;
+                // Only add price if the setting is enabled
+                if (showPriceInButton && priceElement.textContent) {
+                  newButtonText += ' - ' + formatMoneyWithoutSuffix(priceElement.textContent.replace(/[^0-9.,]/g, ''));
+                  if (comparePriceElement && calculatedComparePrice > calculatedPrice) {
+                    newButtonText += ` <span class="compare-price">(${formatMoneyWithoutSuffix(comparePriceElement.textContent.replace(/[^0-9.,]/g, ''))})</span>`;
+                  }
+                }
+                
+                addToCartButton.innerHTML = newButtonText;
+              }
+            }
+          }
+        });
+      }
+
+      /**
+       * Single place for quantity break price display: uses Elixir_GetDisplayPrice so prices
+       * respect subscription and stay in sync with variant/quantity. Updates all option labels
+       * and the add-to-cart button for the selected option.
+       */
+      function refreshQuantityBreakDisplay() {
+        if (typeof Elixir_GetDisplayPrice !== 'function' || typeof Elixir_FormatMoney !== 'function') return;
+        var variant = getCurrentVariant();
+        if (!variant) return;
+        var variantPrice = variant.price;
+        var variantComparePrice = variant.compare_at_price || 0;
+        var selectedInput = document.querySelector('.quantity-break-option.selected input.quantity-break-input');
+        document.querySelectorAll('.quantity-break-option-container').forEach(function(container) {
+          var input = container.querySelector('input.quantity-break-input');
+          if (!input) return;
+          var qty = Math.max(1, parseInt(input.getAttribute('data-option-quantity') || input.value, 10) || 1);
+          var hasCustom = input.getAttribute('data-enable-custom-pricing') === 'true';
+          var priceCents, compareCents;
+          if (hasCustom) {
+            var priceFormat = input.getAttribute('data-custom-price-format') || 'none';
+            var pricePercentage = parseFloat(input.getAttribute('data-custom-price-percentage'), 10) || 0;
+            var priceAmount = input.getAttribute('data-custom-price-amount') || '';
+            var bogoMultiplier = input.getAttribute('data-bogo-multiplier') || '';
+            priceCents = calculateCustomPrice(variantPrice, qty, priceFormat, pricePercentage, priceAmount, bogoMultiplier);
+            var customCompare = input.getAttribute('data-custom-compare-at-price') || '';
+            compareCents = (customCompare && customCompare !== '') ? Math.round(parseFloat(customCompare) * 100) : (variantComparePrice * qty);
+          } else {
+            priceCents = parseInt(input.getAttribute('data-price'), 10) || parseInt(input.getAttribute('data-base-price'), 10) || 0;
+            compareCents = parseInt(container.getAttribute('data-compare-at-price'), 10) || 0;
+          }
+          // Pass per-unit price and option quantity; always multiply by quantity so subscription is applied per unit then × qty
+          var perUnitPrice = qty > 0 ? Math.round(priceCents / qty) : priceCents;
+          var perUnitCompare = qty > 0 ? Math.round(compareCents / qty) : compareCents;
+          var result = Elixir_GetDisplayPrice({
+            price: perUnitPrice,
+            compareAtPrice: perUnitCompare,
+            quantity: qty,
+            multiplyByQuantity: true,
+            applySubscriptionDiscount: true
+          });
+          var priceEl = container.querySelector('.quantity-break-price');
+          var compareEl = container.querySelector('.quantity-break-original-price');
+          if (priceEl) priceEl.textContent = Elixir_FormatMoney(result.price);
+          if (compareEl) {
+            if (result.compareAtPrice <= result.price || result.compareAtPrice <= 0) {
+              compareEl.style.visibility = 'hidden';
+            } else {
+              compareEl.textContent = Elixir_FormatMoney(result.compareAtPrice);
+              compareEl.style.visibility = 'visible';
+            }
+          }
+          var saveBadge = container.querySelector('.quantity-break-save-badge');
+          if (saveBadge) {
+            var savingsCents = Math.max(0, result.compareAtPrice - result.price);
+            var compareAtCents = result.compareAtPrice;
+            var badgeFormat = (container.getAttribute('data-save-badge-format') || 'dollar').toLowerCase();
+            var badgeText = container.getAttribute('data-save-badge-text') || 'Save';
+            if (savingsCents <= 0) {
+              saveBadge.style.display = 'none';
+            } else {
+              saveBadge.style.display = '';
+              if (badgeFormat === 'percentage' && compareAtCents > 0) {
+                saveBadge.textContent = badgeText + ' ' + Math.round(savingsCents * 100 / compareAtCents) + '%';
+              } else {
+                saveBadge.textContent = badgeText + ' ' + Elixir_FormatMoney(savingsCents);
+              }
+            }
+          }
+          var isSelected = container.querySelector('.quantity-break-option.selected');
+          if (isSelected) {
+            var addToCartButton = document.querySelector('.product-form__submit .button__text') || document.querySelector('.shop-add-to-cart-button .button-text') || document.querySelector('[data-add-to-cart-text]');
+            if (addToCartButton) {
+              var submitButton = addToCartButton.closest('button[type="submit"]') || addToCartButton.closest('.shop-add-to-cart-button');
+              var hasTextOverride = submitButton && submitButton.dataset.textOverride === 'true';
+              var persistentText = submitButton && submitButton.dataset.persistentText;
+              var showPriceInButton = submitButton && submitButton.dataset.showPrice === 'true' || (typeof window.showPriceButton !== 'undefined' && window.showPriceButton);
+              var buttonText = (hasTextOverride && persistentText) ? persistentText : (addToCartButtonText || 'Add to Cart');
+              if (showPriceInButton && priceEl) {
+                buttonText += ' - ' + (typeof formatMoneyWithoutSuffix === 'function' ? formatMoneyWithoutSuffix(priceEl.textContent.replace(/[^0-9.,]/g, '')) : priceEl.textContent);
+                if (compareEl && result.compareAtPrice > result.price) {
+                  buttonText += ' <span class="compare-price">(' + (typeof formatMoneyWithoutSuffix === 'function' ? formatMoneyWithoutSuffix(compareEl.textContent.replace(/[^0-9.,]/g, '')) : compareEl.textContent) + ')</span>';
+                }
+              }
+              addToCartButton.innerHTML = buttonText;
+            }
+          }
+        });
+      }
+      
+      // Function to update simple variant picker display
+      function updateSimpleVariantPickerDisplay() {
+          if (!enableVariantSelection || !hasVariants || !usesCustomSelectorsForSelectedOption()) return;
+        
+        // Get the selected quantity break option
+        var selectedOption = document.querySelector('.quantity-break-option.selected input');
+        if (!selectedOption) return;
+        
+        var quantityOption = selectedOption.getAttribute('value');
+        
+        // Get all variant selects for the selected quantity option
+        var variantSelects = document.querySelectorAll('.quantity-break-variant-select[data-quantity-option="' + quantityOption + '"]');
+        
+        variantSelects.forEach(function(select) {
+          var optionPosition = select.getAttribute('data-option-selector');
+          var selectedValue = select.value;
+          
+          if (selectedValue && optionPosition) {
+            // Update the simple variant picker's selected variant display
+            var selectedVariantLabel = document.querySelector('.simple-variant-picker__selected-variant[data-option-position="' + optionPosition + '"]');
+            if (selectedVariantLabel) {
+              // Check if this is a size option for abbreviation
+              var optionName = select.getAttribute('data-option-name') || '';
+              var displayValue = optionName.toLowerCase().includes('size') ? 
+                getAbbreviatedSize(selectedValue, optionName) : selectedValue;
+              selectedVariantLabel.textContent = displayValue;
+            }
+            
+            // Also update the radio button selection in simple variant picker
+            var radioButton = document.querySelector('input[name="options[' + optionName + ']"][value="' + selectedValue + '"]');
+            if (radioButton && !radioButton.checked) {
+              radioButton.checked = true;
+            }
+          }
+        });
+      }
+      
+      // Helper function for size abbreviation (copied from simple variant picker)
+      function getAbbreviatedSize(size, optionName) {
+        if (!optionName.toLowerCase().includes('size')) return size;
+        
+        const sizeMap = {
+          'Extra Small': 'XS',
+          'Small': 'S', 
+          'Medium': 'M',
+          'Large': 'L',
+          'Extra Large': 'XL',
+          'XX-Large': 'XXL',
+          'XXX-Large': 'XXXL'
+        };
+        
+        return sizeMap[size] || size;
+      }
+
+      // Initialize variant selections if enabled
+      if (enableVariantSelection && hasVariants && usesCustomSelectorsForSelectedOption()) {
+        updateVariantSelections();
+        setTimeout(updateSimpleVariantPickerDisplay, 200);
+      }
+      
+      // Initialize custom prices on load if enabled
+      if (enableCustomPricing) {
+        setTimeout(function() {
+          updateCustomPrices();
+        }, 300);
+      }
+      // One refresh after init so subscription and form state are reflected (works with items[] mode)
+      setTimeout(function() {
+        refreshQuantityBreakDisplay();
+      }, 350);
+
+      // Standard events: keep quantity break prices and add-to-cart button in sync with variant, quantity, subscription
+      function onStandardPriceEvent() {
+        updateVariantSelections();
+      }
+
+      document.addEventListener('simple-variant-picker:variantChange', onStandardPriceEvent);
+      document.addEventListener('quantity:changed', onStandardPriceEvent);
+      document.addEventListener('quantity_break:changed', onStandardPriceEvent);
+      document.addEventListener('subscriptionContext:updated', onStandardPriceEvent);
+      
+      // Function to detect when quantity break titles wrap to multiple lines
+      function checkTitleWrapping() {
+        const titleContainers = document.querySelectorAll('.quantity-break-title-container');
+        
+        titleContainers.forEach(function(container) {
+          const title = container.querySelector('.quantity-break-title');
+          const badge = container.querySelector('.quantity-break-save-badge');
+          
+          if (title && badge) {
+            // Create a temporary element to measure single-line height
+            const tempElement = title.cloneNode(true);
+            tempElement.style.position = 'absolute';
+            tempElement.style.visibility = 'hidden';
+            tempElement.style.height = 'auto';
+            tempElement.style.width = 'auto';
+            tempElement.style.whiteSpace = 'nowrap';
+            tempElement.style.maxWidth = 'none';
+            document.body.appendChild(tempElement);
+            
+            const singleLineHeight = tempElement.offsetHeight;
+            document.body.removeChild(tempElement);
+            
+            // Compare actual height with single-line height
+            const actualHeight = title.offsetHeight;
+            const isWrapped = actualHeight > singleLineHeight + 2; // +2px tolerance
+            
+            if (isWrapped) {
+              container.classList.add('title-wrapped');
+            } else {
+              container.classList.remove('title-wrapped');
+            }
+          }
+        });
+      }
+      
+      // Check title wrapping on load
+      checkTitleWrapping();
+      
+      // Check title wrapping on window resize
+      window.addEventListener('resize', function() {
+        clearTimeout(window.titleWrapTimeout);
+        window.titleWrapTimeout = setTimeout(checkTitleWrapping, 100);
+      });
+
+      // Function to check if variant options wrapped to separate lines
+      function checkVariantWrapping(fullWidthWrapper) {
+        if (!fullWidthWrapper) return;
+        
+        const swatchesContainer = fullWidthWrapper.querySelector('.quantity-break-color-swatches-wrapped');
+        const variantOptions = fullWidthWrapper.querySelector('.quantity-break-variant-options-inline');
+        
+        if (!swatchesContainer || !variantOptions) return;
+        
+        // Get the bottom position of the swatches container
+        const swatchesRect = swatchesContainer.getBoundingClientRect();
+        const variantRect = variantOptions.getBoundingClientRect();
+        
+        // If variant options are more than 5px below the swatches, they've wrapped
+        const hasWrapped = variantRect.top > swatchesRect.bottom + 5;
+        
+        if (hasWrapped) {
+          variantOptions.classList.add('wrapped');
+        } else {
+          variantOptions.classList.remove('wrapped');
+        }
+      }
+
+      // Ensure color swatches are full-width and variant selects appear beneath them
+      function layOutSwatchesAndSelects() {
+        const swatchContainers = document.querySelectorAll('.quantity-break-color-swatches');
+        swatchContainers.forEach(function(container) {
+          // Skip if already processed
+          const variantSelectors = container.closest('.quantity-break-variant-selectors');
+          if (!variantSelectors || variantSelectors.classList.contains('quantity-break-swatches-processed')) return;
+
+          // Get the parent variant-option div that contains the swatches
+          const swatchParentOption = container.closest('.quantity-break-variant-option');
+
+          // Create full-width wrapper and move swatches into it
+          const fullWidthWrapper = document.createElement('div');
+          fullWidthWrapper.className = 'quantity-break-color-swatches-full-width';
+          container.classList.add('quantity-break-color-swatches-wrapped');
+          fullWidthWrapper.appendChild(container);
+          variantSelectors.parentNode.insertBefore(fullWidthWrapper, variantSelectors.nextSibling);
+
+          // Remove the now-empty parent option div (the one that contained swatches)
+          if (swatchParentOption) {
+            swatchParentOption.remove();
+          }
+
+          // Move the variant selects inline with the swatches
+          const variantRight = variantSelectors.querySelector('.quantity-break-variant-right');
+          if (variantRight) {
+            const inlineOptions = document.createElement('div');
+            inlineOptions.className = 'quantity-break-variant-options-inline';
+            // Move all remaining variant options to the inline container
+            while (variantRight.firstChild) {
+              inlineOptions.appendChild(variantRight.firstChild);
+            }
+            // Only append if there are actual options to show
+            if (inlineOptions.children.length > 0) {
+              fullWidthWrapper.appendChild(inlineOptions);
+            }
+          }
+
+          // Mark as processed
+          variantSelectors.classList.add('quantity-break-swatches-processed');
+
+          // Check if variants wrapped to separate lines
+          checkVariantWrapping(fullWidthWrapper);
+        });
+      }
+
+      // Run on load and resize
+      layOutSwatchesAndSelects();
+      window.addEventListener('resize', function(){
+        clearTimeout(window.qbLayoutTimeout);
+        window.qbLayoutTimeout = setTimeout(function() {
+          layOutSwatchesAndSelects();
+          // Also check variant wrapping on resize
+          document.querySelectorAll('.quantity-break-color-swatches-full-width').forEach(checkVariantWrapping);
+          checkVariantRightWrapping();
+        }, 100);
+      });
+
+      // Function to check if variant-right content would wrap to multiple rows
+      // If so, move entire variant-right below variant-left
+      function checkVariantRightWrapping() {
+        const variantSelectors = document.querySelectorAll('.quantity-break-variant-selectors');
+        
+        variantSelectors.forEach(function(container) {
+          const variantRight = container.querySelector('.quantity-break-variant-right');
+          if (!variantRight) return;
+          
+          // Temporarily allow single row to measure
+          variantRight.style.flexWrap = 'nowrap';
+          const singleRowHeight = variantRight.offsetHeight;
+          const singleRowWidth = variantRight.scrollWidth;
+          
+          // Check if content overflows (would need to wrap)
+          const containerWidth = variantRight.offsetWidth;
+          const wouldWrap = singleRowWidth > containerWidth + 10; // +10px tolerance
+          
+          // Restore flex-wrap
+          variantRight.style.flexWrap = '';
+          
+          if (wouldWrap) {
+            container.classList.add('variant-right-stacked');
+          } else {
+            container.classList.remove('variant-right-stacked');
+          }
+        });
+      }
+      
+      // Check variant-right wrapping on load
+      setTimeout(checkVariantRightWrapping, 200);
+      
+    });
+</script>

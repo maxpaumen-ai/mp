@@ -1,0 +1,723 @@
+{% liquid
+  assign section_background = section.settings.background
+  assign section_text = section.settings.text_color
+  assign card_radius = section.settings.card_radius
+  assign desktop_height = section.settings.desktop_height
+  assign mobile_height = section.settings.mobile_height
+%}
+
+<section
+  id="VHLCategories-{{ section.id }}"
+  class="vhl-categories-2"
+  style="
+    --vhl-bg: {{ section_background }};
+    --vhl-text: {{ section_text }};
+    --vhl-radius: {{ card_radius }}px;
+    --vhl-card-height: {{ desktop_height }}px;
+    --vhl-card-height-mobile: {{ mobile_height }}px;
+  "
+>
+  <div class="vhl-categories-2__container">
+    {% if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.intro != blank %}
+      <header class="vhl-categories-2__header">
+        <div class="vhl-categories-2__heading-group">
+          {% if section.settings.eyebrow != blank %}
+            <p class="vhl-categories-2__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+          {% endif %}
+
+          {% if section.settings.heading != blank %}
+            <h2 class="vhl-categories-2__heading">{{ section.settings.heading | escape }}</h2>
+          {% endif %}
+        </div>
+
+        {% if section.settings.intro != blank %}
+          <div class="vhl-categories-2__intro rte">{{ section.settings.intro }}</div>
+        {% endif %}
+      </header>
+    {% endif %}
+
+    <div class="vhl-categories-2__grid">
+      {% for block in section.blocks %}
+        {% liquid
+          assign selected_collection = block.settings.collection
+          assign card_image = block.settings.image
+
+          if card_image == blank and selected_collection != blank
+            assign card_image = selected_collection.featured_image
+          endif
+
+          assign card_title = block.settings.title
+          if card_title == blank and selected_collection != blank
+            assign card_title = selected_collection.title
+          endif
+
+          assign card_link = block.settings.link
+          if card_link == blank and selected_collection != blank
+            assign card_link = selected_collection.url
+          endif
+
+          assign card_link = card_link | default: routes.all_products_collection_url
+          assign card_alt = card_title | default: shop.name
+        %}
+
+        <article
+          class="vhl-categories-2__item{% if block.settings.featured %} vhl-categories-2__item--featured{% endif %}"
+          {{ block.shopify_attributes }}
+        >
+          <a class="vhl-categories-2__card" href="{{ card_link }}">
+            <div class="vhl-categories-2__media">
+              {% if card_image != blank %}
+                {{
+                  card_image
+                  | image_url: width: 2200
+                  | image_tag:
+                    class: 'vhl-categories-2__image',
+                    loading: 'lazy',
+                    widths: '480, 750, 1000, 1400, 1800, 2200',
+                    sizes: '(min-width: 990px) 50vw, 100vw',
+                    alt: card_alt
+                }}
+              {% else %}
+                {{ 'collection-1' | placeholder_svg_tag: 'vhl-categories-2__placeholder' }}
+              {% endif %}
+            </div>
+
+            <div
+              class="vhl-categories-2__overlay"
+              style="--overlay-opacity: {{ block.settings.overlay_opacity | divided_by: 100.0 }};"
+            ></div>
+
+            {% if block.settings.label != blank %}
+              <span class="vhl-categories-2__label">{{ block.settings.label | escape }}</span>
+            {% endif %}
+
+            <div class="vhl-categories-2__content">
+              {% if card_title != blank %}
+                <h3 class="vhl-categories-2__title">{{ card_title | escape }}</h3>
+              {% endif %}
+
+              {% if block.settings.description != blank %}
+                <p class="vhl-categories-2__description">{{ block.settings.description | escape }}</p>
+              {% endif %}
+
+              {% if block.settings.link_text != blank %}
+                <span class="vhl-categories-2__link">
+                  {{ block.settings.link_text | escape }}
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h13M13 6l6 6-6 6"></path>
+                  </svg>
+                </span>
+              {% endif %}
+            </div>
+          </a>
+        </article>
+      {% else %}
+        {% for i in (1..4) %}
+          <article class="vhl-categories-2__item">
+            <div class="vhl-categories-2__card">
+              <div class="vhl-categories-2__media">
+                {{ 'collection-' | append: i | placeholder_svg_tag: 'vhl-categories-2__placeholder' }}
+              </div>
+              <div class="vhl-categories-2__overlay" style="--overlay-opacity: 0.45;"></div>
+              <div class="vhl-categories-2__content">
+                <h3 class="vhl-categories-2__title">Collectie</h3>
+                <span class="vhl-categories-2__link">Bekijk collectie</span>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    {% if section.settings.button_label != blank %}
+      <div class="vhl-categories-2__footer">
+        <a
+          class="vhl-categories-2__button"
+          href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
+        >
+          {{ section.settings.button_label | escape }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% style %}
+  #VHLCategories-{{ section.id }} {
+    background: var(--vhl-bg);
+    color: var(--vhl-text);
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+  }
+
+  #VHLCategories-{{ section.id }} * {
+    box-sizing: border-box;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__container {
+    width: min(100%, 1500px);
+    margin: 0 auto;
+    padding: 0 clamp(18px, 4vw, 58px);
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.65fr);
+    align-items: end;
+    gap: 48px;
+    margin-bottom: clamp(34px, 5vw, 64px);
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__eyebrow {
+    margin: 0 0 12px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    opacity: 0.62;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__heading {
+    max-width: 760px;
+    margin: 0;
+    color: inherit;
+    font-family: var(--font-heading-family);
+    font-size: clamp(36px, 4.4vw, 66px);
+    font-style: var(--font-heading-style);
+    font-weight: var(--font-heading-weight);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__intro {
+    max-width: 480px;
+    justify-self: end;
+    color: inherit;
+    font-size: 15px;
+    line-height: 1.7;
+    opacity: 0.68;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__intro p {
+    margin: 0;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(16px, 2.2vw, 34px);
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__item {
+    min-width: 0;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__card {
+    position: relative;
+    display: block;
+    min-height: var(--vhl-card-height);
+    overflow: hidden;
+    border-radius: var(--vhl-radius);
+    background: #ded8cf;
+    color: #ffffff;
+    text-decoration: none;
+    isolation: isolate;
+    box-shadow: 0 18px 55px rgba(32, 27, 22, 0.08);
+    transform: translateZ(0);
+   transition:
+transform 650ms cubic-bezier(.19,1,.22,1),
+box-shadow 650ms cubic-bezier(.19,1,.22,1);
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__media,
+  #VHLCategories-{{ section.id }} .vhl-categories-2__overlay {
+    position: absolute;
+    inset: 0;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__media {
+    z-index: -2;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__image,
+  #VHLCategories-{{ section.id }} .vhl-categories-2__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1200ms cubic-bezier(.19,1,.22,1);
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__placeholder {
+    background: #d8d0c5;
+    fill: rgba(0, 0, 0, 0.13);
+  }
+
+ #VHLCategories-{{ section.id }} .vhl-categories-2__overlay {
+    z-index: -1;
+
+ background:
+linear-gradient(
+180deg,
+rgba(0,0,0,0) 0%,
+rgba(0,0,0,.06) 20%,
+rgba(0,0,0,.24) 45%,
+rgba(0,0,0,.55) 70%,
+rgba(0,0,0,.90) 100%
+);
+
+    transition: opacity 450ms ease;
+}
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__label {
+    position: absolute;
+    top: 28px;
+    left: 28px;
+    display: inline-flex;
+    min-height: 34px;
+    padding: 9px 13px;
+    align-items: center;
+    border: 1px solid rgba(255,255,255,.38);
+    border-radius: 999px;
+    background: rgba(20, 18, 16, 0.20);
+    color: #fff;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+ #VHLCategories-{{ section.id }} .vhl-categories-2__content {
+    position: absolute;
+
+    left: 40px;
+    right: 40px;
+    bottom: 42px;
+
+    z-index: 2;
+
+    transition: transform 450ms cubic-bezier(0.2,0.75,0.3,1);
+}
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__title{
+
+    max-width:13ch;
+
+    color:#fff;
+
+    font-size:clamp(42px,3.6vw,62px);
+
+    font-weight:700;
+
+    line-height:1;
+
+    letter-spacing:-.05em;
+
+    text-shadow:
+
+0 6px 18px rgba(0,0,0,.45),
+
+0 20px 45px rgba(0,0,0,.75);
+
+}
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__title{
+
+    max-width:13ch;
+
+    margin:0;
+
+    color:#ffffff !important;
+
+    -webkit-text-fill-color:#ffffff !important;
+
+    opacity:1 !important;
+
+    font-size:clamp(42px,3.6vw,62px);
+
+    font-weight:700;
+
+    line-height:1;
+
+    letter-spacing:-.05em;
+
+    text-shadow:
+        0 6px 18px rgba(0,0,0,.45),
+        0 20px 45px rgba(0,0,0,.75);
+
+}
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__link {
+    display: inline-flex;
+    margin-top: 24px;
+    padding-bottom: 6px;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.62);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__link svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 350ms ease;
+  }
+
+ #VHLCategories-{{ section.id }} .vhl-categories-2__card:hover{
+    transform:translateY(-12px) scale(1.01);
+
+    box-shadow: 0 40px 90px rgba(0,0,0,.22);
+}
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__card:hover .vhl-categories-2__image {
+    transform:scale(1.08);
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__card:hover .vhl-categories-2__content {
+    transform: translateY(-10px);
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__card:hover .vhl-categories-2__link svg {
+    transform: translateX(8px);
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 46px;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__button {
+    display: inline-flex;
+    min-height: 52px;
+    padding: 15px 27px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid currentColor;
+    color: inherit;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: background 250ms ease, color 250ms ease;
+  }
+
+  #VHLCategories-{{ section.id }} .vhl-categories-2__button:hover {
+    background: var(--vhl-text);
+    color: var(--vhl-bg);
+  }
+
+  @media screen and (min-width: 990px) {
+    #VHLCategories-{{ section.id }} .vhl-categories-2__item--featured {
+      grid-column: span 2;
+    }
+
+    #VHLCategories-{{ section.id }} .vhl-categories-2__item--featured .vhl-categories-2__title {
+      max-width: 16ch;
+      font-size: clamp(42px, 4.4vw, 68px);
+    }
+  }
+
+  @media screen and (max-width: 989px) {
+    #VHLCategories-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top_mobile }}px;
+      padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+    }
+
+    #VHLCategories-{{ section.id }} .vhl-categories-2__header {
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    #VHLCategories-{{ section.id }} .vhl-categories-2__intro {
+      justify-self: start;
+    }
+
+    #VHLCategories-{{ section.id }} .vhl-categories-2__grid {
+      grid-template-columns: 1fr;
+    }
+
+    #VHLCategories-{{ section.id }} .vhl-categories-2__card {
+      min-height: var(--vhl-card-height-mobile);
+      border-radius: min(var(--vhl-radius), 22px);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    #VHLCategories-{{ section.id }} .vhl-categories-2__container {
+      padding-inline: 14px;
+    }
+
+    #VHLCategories-{{ section.id }} .vhl-categories-2__heading {
+      font-size: clamp(34px, 10vw, 48px);
+    }
+
+    #VHLCategories-{{ section.id }} .vhl-categories-2__label {
+      top: 18px;
+      left: 18px;
+    }
+
+    #VHLCategories-{{ section.id }} .vhl-categories-2__title {
+      font-size: clamp(30px, 8.5vw, 40px);
+    }
+
+    #VHLCategories-{{ section.id }} .vhl-categories-2__description {
+      display: none;
+    }
+
+    #VHLCategories-{{ section.id }} .vhl-categories-2__link {
+      margin-top: 18px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #VHLCategories-{{ section.id }} .vhl-categories-2__card,
+    #VHLCategories-{{ section.id }} .vhl-categories-2__image,
+    #VHLCategories-{{ section.id }} .vhl-categories-2__content,
+    #VHLCategories-{{ section.id }} .vhl-categories-2__link svg {
+      transition: none;
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "VHL Categories 2.0",
+  "tag": "section",
+  "class": "section-vhl-categories-2",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Boventitel",
+      "default": "SHOP OP SFEER"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titel",
+      "default": "Ontdek jouw badkamerwereld"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Introductietekst",
+      "default": "<p>Van rustgevende spa-momenten tot zorgvuldig gekozen accessoires: ontdek collecties die jouw badkamer compleet maken.</p>"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Achtergrondkleur",
+      "default": "#F7F4EF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Tekstkleur",
+      "default": "#24211E"
+    },
+    {
+      "type": "range",
+      "id": "desktop_height",
+      "label": "Kaarthoogte desktop",
+      "min": 420,
+      "max": 760,
+      "step": 10,
+      "unit": "px",
+      "default": 620
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "label": "Kaarthoogte mobiel",
+      "min": 360,
+      "max": 620,
+      "step": 10,
+      "unit": "px",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Afronding kaarten",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Onderste knoptekst"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Onderste knoplink"
+    },
+    {
+      "type": "header",
+      "content": "Ruimte desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Bovenruimte",
+      "min": 30,
+      "max": 160,
+      "step": 5,
+      "unit": "px",
+      "default": 95
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Onderruimte",
+      "min": 30,
+      "max": 160,
+      "step": 5,
+      "unit": "px",
+      "default": 95
+    },
+    {
+      "type": "header",
+      "content": "Ruimte mobiel"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Bovenruimte mobiel",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Onderruimte mobiel",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Collectiekaart",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collectie"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Eigen afbeelding",
+          "info": "Laat leeg om de collectieafbeelding te gebruiken."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Eigen titel",
+          "info": "Laat leeg om de collectienaam te gebruiken."
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Korte omschrijving"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Klein label",
+          "placeholder": "Bijvoorbeeld: Nieuw"
+        },
+        {
+          "type": "text",
+          "id": "link_text",
+          "label": "Linktekst",
+          "default": "Bekijk collectie"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Eigen link",
+          "info": "Laat leeg om automatisch naar de geselecteerde collectie te linken."
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Donkerte afbeelding",
+          "min": 15,
+          "max": 85,
+          "step": 5,
+          "unit": "%",
+          "default": 55
+        },
+        {
+          "type": "checkbox",
+          "id": "featured",
+          "label": "Volledige breedte op desktop",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "VHL Categories 2.0",
+      "blocks": [
+        {
+          "type": "category",
+          "settings": {
+            "title": "SPA Collection",
+            "description": "Creëer thuis de rust van een luxe wellnesshotel."
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Badkamersets & Accessoires",
+            "description": "Bijpassende details voor een harmonieus geheel."
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Opbergen",
+            "description": "Stijlvolle oplossingen die rust en overzicht brengen."
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Home Decor",
+            "description": "Natuursteen en objecten met een tijdloze uitstraling."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

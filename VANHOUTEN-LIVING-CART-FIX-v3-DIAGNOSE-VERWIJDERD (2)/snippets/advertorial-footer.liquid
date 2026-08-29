@@ -1,0 +1,156 @@
+{% comment %}
+  Snippet: Advertorial Footer Block
+  - Dark background with disclaimer text
+  - Copyright information and legal links
+  - Fully customizable content and styling
+  - Supports theme colors when enabled
+{% endcomment %}
+
+{%- liquid
+  if section.settings.use_theme_colors
+    assign background_color = settings.global_section_accent_1_color
+    assign text_color = settings.global_section_background_color
+    assign link_color = settings.global_section_background_color
+    assign link_hover_color = settings.global_section_background_color | color_modify: 'alpha', 0.8
+  else
+    assign background_color = block.settings.background_color
+    assign text_color = block.settings.text_color
+    assign link_color = block.settings.link_color
+    assign link_hover_color = block.settings.link_hover_color
+  endif
+-%}
+
+<div class="advertorial-footer-{{ block.id }}">
+  <div class="advertorial-footer-container-{{ block.id }}">
+    {% if block.settings.disclaimer_text != blank %}
+      <div class="advertorial-footer-disclaimer-{{ block.id }}">
+        {{ block.settings.disclaimer_text }}
+      </div>
+    {% endif %}
+
+    {% if block.settings.copyright_text != blank or block.settings.show_links %}
+      <div class="advertorial-footer-bottom-{{ block.id }}">
+        {% if block.settings.copyright_text != blank %}
+          <div class="advertorial-footer-copyright-{{ block.id }}">
+            {{ block.settings.copyright_text }}
+          </div>
+        {% endif %}
+
+        {% if block.settings.show_links %}
+          <div class="advertorial-footer-links-{{ block.id }}">
+            {% if block.settings.terms_text != blank and block.settings.terms_link != blank %}
+              <a href="{{ block.settings.terms_link }}" class="advertorial-footer-link-{{ block.id }}">
+                {{- block.settings.terms_text -}}
+              </a>
+            {% endif %}
+            {% if block.settings.privacy_text != blank and block.settings.privacy_link != blank %}
+              {% if block.settings.terms_text != blank and block.settings.terms_link != blank %}
+                <span class="advertorial-footer-separator-{{ block.id }}">|</span>
+              {% endif %}
+              <a href="{{ block.settings.privacy_link }}" class="advertorial-footer-link-{{ block.id }}">
+                {{- block.settings.privacy_text -}}
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .advertorial-footer-{{ block.id }} {
+    background: {{ background_color }};
+    color: {{ text_color }};
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    font-family: var(--font-body-family);
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .advertorial-footer-container-{{ block.id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.gap }}px;
+  }
+
+  .advertorial-footer-disclaimer-{{ block.id }} {
+    font-size: {{ block.settings.disclaimer_font_size }}px;
+    font-weight: var(--font-weight-regular) !important;
+    line-height: {{ block.settings.disclaimer_line_height }};
+    text-align: {{ block.settings.disclaimer_alignment }};
+    opacity: {{ block.settings.disclaimer_opacity }};
+  }
+
+  .advertorial-footer-bottom-{{ block.id }} {
+    display: flex;
+    flex-direction: {{ block.settings.bottom_layout }};
+    align-items: {{ block.settings.bottom_alignment }};
+    justify-content: {{ block.settings.bottom_justify }};
+    gap: {{ block.settings.bottom_gap }}px;
+    flex-wrap: wrap;
+  }
+
+  .advertorial-footer-copyright-{{ block.id }} {
+    font-size: {{ block.settings.copyright_font_size }}px;
+    font-weight: var(--font-weight-regular) !important;
+    opacity: {{ block.settings.copyright_opacity }};
+  }
+
+  .advertorial-footer-links-{{ block.id }} {
+    display: flex;
+    align-items: center;
+    gap: {{ block.settings.links_gap }}px;
+    flex-wrap: wrap;
+  }
+
+  .advertorial-footer-link-{{ block.id }} {
+    color: {{ link_color }};
+    text-decoration: {{ block.settings.link_decoration }};
+    font-size: {{ block.settings.link_font_size }}px;
+    font-weight: var(--font-weight-regular) !important;
+    transition: all 0.3s ease;
+  }
+
+  .advertorial-footer-link-{{ block.id }}:hover {
+    color: {{ link_hover_color }};
+    text-decoration: {{ block.settings.link_hover_decoration }};
+  }
+
+  .advertorial-footer-separator-{{ block.id }} {
+    color: {{ text_color }};
+    opacity: 0.6;
+    font-size: {{ block.settings.link_font_size }}px;
+  }
+
+  @media (max-width: 768px) {
+    .advertorial-footer-{{ block.id }} {
+      padding: {{ block.settings.mobile_padding_vertical }}px {{ block.settings.mobile_padding_horizontal }}px;
+    }
+
+    .advertorial-footer-disclaimer-{{ block.id }} {
+      font-size: {{ block.settings.mobile_disclaimer_font_size }}px;
+      text-align: {{ block.settings.mobile_disclaimer_alignment }};
+    }
+
+    .advertorial-footer-bottom-{{ block.id }} {
+      flex-direction: {{ block.settings.mobile_bottom_layout }};
+      align-items: {{ block.settings.mobile_bottom_alignment }};
+      justify-content: {{ block.settings.mobile_bottom_justify }};
+      gap: {{ block.settings.mobile_bottom_gap }}px;
+    }
+
+    .advertorial-footer-copyright-{{ block.id }} {
+      font-size: {{ block.settings.mobile_copyright_font_size }}px;
+    }
+
+    .advertorial-footer-link-{{ block.id }} {
+      font-size: {{ block.settings.mobile_link_font_size }}px;
+    }
+
+    .advertorial-footer-links-{{ block.id }} {
+      gap: {{ block.settings.mobile_links_gap }}px;
+    }
+  }
+</style>

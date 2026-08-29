@@ -1,0 +1,319 @@
+<style>
+  #block-{{ block.id }}.guarantee-badges-container {
+    display: flex;
+    justify-content: {% if align_center %}center{% else %}flex-start{% endif %};
+    align-items: center;
+    gap: {{ gap | default: 6 }}px;
+    margin-top: {{ container_margin_top | default: -5 }}px;
+    margin-bottom: {{ container_margin_bottom | default: 10 }}px;
+    margin-left: {{ container_margin_left | default: 0 }}px;
+    margin-right: {{ container_margin_right | default: 0 }}px;
+    font-size: {{ font_size | default: 11 }}px;
+    letter-spacing: var(--letter-spacing-body);
+    color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_color | default: "#000000" }}{% endif %} !important;
+    width: 100%;
+    flex-direction: {% if mobile_stack %}column{% else %}row{% endif %};
+    flex-wrap: wrap;
+  }
+
+  #block-{{ block.id }} .guarantee-blinking-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    flex-shrink: 0;
+    margin-bottom: 1px;
+  }
+
+  #block-{{ block.id }} .guarantee-blinking-dot-1 {
+    background-color: {{ badge_1_dot_color | default: "#4CAF50" }};
+    animation: guarantee-blink-1 1s infinite linear;
+  }
+
+  #block-{{ block.id }} .guarantee-blinking-dot-1::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background-color: {{ badge_1_dot_color | default: "#4CAF50" }};
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    animation: guarantee-pulse-1 1s infinite cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  #block-{{ block.id }} .guarantee-blinking-dot-2 {
+    background-color: {{ badge_2_dot_color | default: "#4CAF50" }};
+    animation: guarantee-blink-2 1s infinite linear;
+  }
+
+  #block-{{ block.id }} .guarantee-blinking-dot-2::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background-color: {{ badge_2_dot_color | default: "#4CAF50" }};
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    animation: guarantee-pulse-2 1s infinite cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  @keyframes guarantee-blink-1 {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes guarantee-pulse-1 {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  @keyframes guarantee-blink-2 {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes guarantee-pulse-2 {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  #block-{{ block.id }} .guarantee-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+
+  #block-{{ block.id }} .guarantee-icon {
+    width: {{ icon_size | default: 12 }}px;
+    height: {{ icon_size | default: 12 }}px;
+    display: block;
+    flex-shrink: 0;
+    stroke: {% if use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ icon_color | default: "#00C7FF" }}{% endif %} !important;
+    color: {% if use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ icon_color | default: "#00C7FF" }}{% endif %} !important;
+    margin-bottom: 1px;
+  }
+
+  #block-{{ block.id }} .guarantee-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  #block-{{ block.id }} .guarantee-custom-icon {
+    width: {{ icon_size | default: 12 }}px;
+    height: {{ icon_size | default: 12 }}px;
+    margin-bottom: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  #block-{{ block.id }} .guarantee-custom-icon svg {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: {{ icon_size | default: 12 }}px !important;
+    max-height: {{ icon_size | default: 12 }}px !important;
+    fill: {% if use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ icon_color | default: "#00C7FF" }}{% endif %} !important;
+    stroke: {% if use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ icon_color | default: "#00C7FF" }}{% endif %} !important;
+  }
+
+  #block-{{ block.id }} .guarantee-custom-icon img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: {{ icon_size | default: 12 }}px !important;
+    max-height: {{ icon_size | default: 12 }}px !important;
+    object-fit: contain !important;
+  }
+
+  #block-{{ block.id }} .guarantee-text {
+    font-weight: {{ text_weight | default: 500 }};
+    letter-spacing: var(--letter-spacing-body);
+    word-wrap: break-word;
+    hyphens: auto;
+    color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_color | default: "#000000" }}{% endif %} !important;
+  }
+
+  @media (max-width: 480px) {
+    #block-{{ block.id }}.guarantee-badges-container {
+      flex-direction: {% if mobile_stack %}column{% else %}row{% endif %};
+      {% if mobile_stack %}gap: 6px;{% endif %}
+      justify-content: {% if align_center %}center{% else %}flex-start{% endif %};
+      margin-top: {{ container_margin_top | default: -5 }}px;
+      flex-wrap: wrap;
+    }
+
+    #block-{{ block.id }} .guarantee-item {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="guarantee-badges-container" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+  {% if badge_1_show %}
+    <div class="guarantee-item">
+      {% if badge_1_icon == 'shield' or badge_1_icon == blank or badge_1_icon == null %}
+        <svg
+          class="guarantee-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      {% elsif badge_1_icon == 'checkmark' %}
+        <svg
+          class="guarantee-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      {% elsif badge_1_icon == 'clock' %}
+        <svg
+          class="guarantee-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      {% elsif badge_1_icon == 'truck' %}
+        <svg
+          class="guarantee-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="1" y="3" width="15" height="13"></rect>
+          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+          <circle cx="5.5" cy="18.5" r="2.5"></circle>
+          <circle cx="18.5" cy="18.5" r="2.5"></circle>
+        </svg>
+      {% elsif badge_1_icon == 'blinking_dot' %}
+        <span class="guarantee-blinking-dot guarantee-blinking-dot-1"></span>
+      {% elsif badge_1_icon == 'custom_svg' and badge_1_custom_icon != blank %}
+        <div class="guarantee-custom-icon">{{ badge_1_custom_icon }}</div>
+      {% elsif badge_1_icon == 'custom_image' and badge_1_custom_image != blank %}
+        <div class="guarantee-custom-icon">
+          <img src="{{ badge_1_custom_image | image_url: width: 100 }}" alt="{{ badge_1_text }}" width="{{ icon_size | default: 12 }}" height="{{ icon_size | default: 12 }}" loading="lazy">
+        </div>
+      {% else %}
+        <svg
+          class="guarantee-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      {% endif %}
+      <span class="guarantee-text" style="color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_color | default: '#000000' }}{% endif %} !important;">{{ badge_1_text | default: '30-Day Money-Back Guarantee' }}</span>
+    </div>
+  {% endif %}
+
+  {% if badge_2_show %}
+    <div class="guarantee-item">
+      {% if badge_2_icon == 'checkmark' or badge_2_icon == blank or badge_2_icon == null %}
+        <svg
+          class="guarantee-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      {% elsif badge_2_icon == 'shield' %}
+        <svg
+          class="guarantee-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      {% elsif badge_2_icon == 'clock' %}
+        <svg
+          class="guarantee-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      {% elsif badge_2_icon == 'truck' %}
+        <svg
+          class="guarantee-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="1" y="3" width="15" height="13"></rect>
+          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+          <circle cx="5.5" cy="18.5" r="2.5"></circle>
+          <circle cx="18.5" cy="18.5" r="2.5"></circle>
+        </svg>
+      {% elsif badge_2_icon == 'blinking_dot' %}
+        <span class="guarantee-blinking-dot guarantee-blinking-dot-2"></span>
+      {% elsif badge_2_icon == 'custom_svg' and badge_2_custom_icon != blank %}
+        <div class="guarantee-custom-icon">{{ badge_2_custom_icon }}</div>
+      {% elsif badge_2_icon == 'custom_image' and badge_2_custom_image != blank %}
+        <div class="guarantee-custom-icon">
+          <img src="{{ badge_2_custom_image | image_url: width: 100 }}" alt="{{ badge_2_text }}" width="{{ icon_size | default: 12 }}" height="{{ icon_size | default: 12 }}" loading="lazy">
+        </div>
+      {% else %}
+        <svg
+          class="guarantee-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      {% endif %}
+      <span class="guarantee-text" style="color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_color | default: '#000000' }}{% endif %} !important;">{{ badge_2_text | default: 'Free Shipping Included' }}</span>
+    </div>
+  {% endif %}
+</div>

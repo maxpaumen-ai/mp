@@ -1,0 +1,841 @@
+{{ 'customer-reviews.css' | asset_url | stylesheet_tag }}
+
+{% assign reviews_anchor = section.settings.anchor_id | default: 'reviews' %}
+<div class="reviews-section-outer {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}" id="{{ reviews_anchor }}" style="
+    border-radius: {{ section.settings.section_border_radius | default: 0 }}px;
+    {% if section.settings.use_theme_colors %}
+      background-color: {{ settings.global_section_background_color }};
+      color: {{ settings.global_section_text_color }};
+    {% else %}
+      background-color: {{ section.settings.background_color }};
+      color: {{ section.settings.text_color | default: '#000000' }};
+    {% endif %}
+    {% if section.settings.use_gradient and section.settings.use_theme_colors != true %}
+      background: linear-gradient({{ section.settings.gradient_angle }}deg, {{ section.settings.gradient_start_color }} 0%, {{ section.settings.gradient_end_color }} 100%);
+    {% endif %}
+  ">
+  <div class="new-section" style="
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+      padding-left: {{ section.settings.padding_horizontal }}px;
+      padding-right: {{ section.settings.padding_horizontal }}px;
+    ">
+    <div class="swiper reviewSwiper reviewSwiper--pending" data-speed="{{ section.settings.slider_speed }}">
+      <div class="swiper-wrapper">
+        {% for block in section.blocks %}
+          {% if block.type == 'review_image' %}
+            <div class="swiper-slide" {{ block.shopify_attributes }}>
+              <img
+                src="{{ block.settings.review_image | image_url: width: 600 }}"
+                alt="{{ block.settings.review_image.alt | escape }}"
+                width="{{ block.settings.review_image.width }}"
+                height="{{ block.settings.review_image.height }}"
+                class="review-image"
+                loading="lazy"
+              >
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="content-wrapper" style="
+        --content-padding-top-mobile: {{ section.settings.content_padding_top_mobile }}px;
+        --content-padding-bottom-mobile: {{ section.settings.content_padding_bottom_mobile }}px;
+        --content-padding-left-mobile: {{ section.settings.content_padding_horizontal_mobile }}px;
+        --content-padding-right-mobile: {{ section.settings.content_padding_horizontal_mobile }}px;
+        --content-padding-top-desktop: {{ section.settings.content_padding_top_desktop }}px;
+        --content-padding-bottom-desktop: {{ section.settings.content_padding_bottom_desktop }}px;
+        --content-padding-left-desktop: {{ section.settings.content_padding_horizontal_desktop }}px;
+        --content-padding-right-desktop: {{ section.settings.content_padding_horizontal_desktop }}px;
+      ">
+      <h2 class="main-title h2" style="
+          color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_color }}{% endif %};
+          padding-top: {{ section.settings.title_padding_top }}px;
+          padding-bottom: {{ section.settings.title_padding_bottom }}px;
+          padding-left: {{ section.settings.title_padding_horizontal }}px;
+          padding-right: {{ section.settings.title_padding_horizontal }}px;
+        ">{{ section.settings.heading }}</h2>
+
+      <p class="subtitle body-large" style="
+          color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subtitle_color }}{% endif %};
+          padding-top: {{ section.settings.subtitle_padding_top }}px;
+          padding-bottom: {{ section.settings.subtitle_padding_bottom }}px;
+        ">{{ section.settings.subheading }}</p>
+
+      {% if section.settings.show_button %}
+        {%- liquid
+          if section.settings.button_redirect_type == 'product'
+            assign button_href = section.settings.redirect_product.url | default: '#'
+            assign button_extra_attrs = ''
+          elsif section.settings.button_redirect_type == 'collection'
+            assign button_href = section.settings.redirect_collection.url | default: '#'
+            assign button_extra_attrs = ''
+          elsif section.settings.button_redirect_type == 'page'
+            assign button_href = section.settings.redirect_page.url | default: '#'
+            assign button_extra_attrs = ''
+          elsif section.settings.button_redirect_type == 'custom_url'
+            assign button_href = section.settings.custom_url | default: '#'
+            assign button_extra_attrs = ''
+          elsif section.settings.button_redirect_type == 'scroll_to_first_section'
+            assign button_href = '#'
+            assign button_extra_attrs = 'data-scroll-to-first-section="true"'
+          else
+            assign button_href = '#'
+            assign button_extra_attrs = 'onclick="scrollToTop(event)"'
+          endif
+        -%}
+        <a href="{{ button_href }}" class="theme-button claim-button button-text" {{ button_extra_attrs }} style="
+            margin-top: {{ section.settings.button_padding_top }}px;
+            margin-bottom: {{ section.settings.button_padding_bottom }}px;
+            {% if settings.enable_global_button_styling and section.settings.use_global_button_styling %}
+              /* Apply global button styling */
+              --button-text-font-size: var(--global-button-font-size, 14px);
+              padding: var(--global-button-padding-y, 12px) 20px !important;
+              font-size: var(--global-button-font-size, 14px) !important;
+              font-weight: var(--global-button-font-weight, 700) !important;
+              letter-spacing: var(--global-button-letter-spacing, 1px) !important;
+              text-transform: var(--global-button-text-transform, none) !important;
+              border-radius: var(--global-button-radius, 8px) !important;
+              background-color: var(--global-button-bg-color, #EF4A65) !important;
+              color: var(--global-button-text-color, #FFFFFF) !important;
+              border: var(--global-button-border-width, 0px) solid var(--global-button-border-color, #EF4A65) !important;
+            {% else %}
+              /* Apply custom button styling */
+              --button-text-font-size: {{ section.settings.custom_button_font_size | default: 14 }}px;
+              padding: {{ section.settings.custom_button_padding_y | default: 12 }}px {{ section.settings.button_horizontal_padding | default: 30 }}px;
+              font-size: {{ section.settings.custom_button_font_size | default: 14 }}px;
+              letter-spacing: var(--global-button-letter-spacing, 1px);
+              font-weight: var(--global-button-font-weight, 700);
+              border-radius: var(--global-button-radius, 8px);
+            {% if section.settings.use_theme_colors %}
+              {% if settings.use_dedicated_button_colors %}
+                background-color: {% if settings.global_section_button_color != blank %}
+                                  {{ settings.global_section_button_color }}
+                                {% else %}
+                                  {{ settings.global_section_accent_1_color }}
+                                {% endif %};
+                color: {% if settings.global_section_button_text_color != blank %}
+                        {{ settings.global_section_button_text_color }}
+                      {% else %}
+                        white
+                      {% endif %};
+              {% else %}
+                background-color: {{ settings.global_section_accent_1_color }};
+                color: {{ settings.global_section_background_color }};
+              {% endif %}
+            {% else %}
+              background-color: {{ section.settings.button_color }};
+              color: white;
+              {% endif %}
+            {% endif %}
+          ">
+          {{ section.settings.button_text }}
+        </a>
+      {% endif %}
+
+      <div class="rating-section" style="padding-top: {{ section.settings.rating_padding_top }}px;">
+        <div class="star-icons">
+          {% for i in (1..5) %}
+            <svg
+              width="15px"
+              height="15px"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z" fill="{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.star_color }}{% endif %}"/>
+            </svg>
+          {% endfor %}
+        </div>
+        <div class="rating-text" style="{% if section.settings.use_theme_colors %}color: {{ settings.global_section_text_color }};{% else %}color: {{ section.settings.rating_text_color }};{% endif %}">
+          {{ section.settings.rating_text | escape }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Dynamic styles only */
+.reviews-section-outer .main-title {
+  font-size: {{ section.settings.mobile_title_size }}px;
+}
+
+.reviews-section-outer .subtitle {
+  font-size: {{ section.settings.mobile_subtitle_size }}px;
+}
+
+@media screen and (min-width: 768px) {
+  .reviews-section-outer .main-title {
+    font-size: {{ section.settings.desktop_title_size }}px;
+  }
+
+  .reviews-section-outer .subtitle {
+    font-size: {{ section.settings.desktop_subtitle_size }}px;
+  }
+}
+
+{% unless section.settings.use_theme_colors %}
+/* Button color override when theme colors are disabled */
+/* Conditional button styling based on global settings */
+{% if settings.enable_global_button_styling and section.settings.use_global_button_styling %}
+  /* Global button styling active - hover handled by global CSS */
+  .reviews-section-outer .new-section .claim-button.theme-button:hover {
+    background-color: var(--global-button-hover-bg-color, #D63953) !important;
+    color: var(--global-button-hover-text-color, #FFFFFF) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+{% else %}
+  /* Custom button styling active */
+.reviews-section-outer .new-section .claim-button.theme-button {
+  background-color: {{ section.settings.button_color }} !important;
+  color: white !important;
+}
+
+.reviews-section-outer .new-section .claim-button.theme-button:hover {
+  background-color: {{ section.settings.button_color }} !important;
+  opacity: 0.9 !important;
+  }
+{% endif %}
+
+/* Handle button-text elements inside claim button */
+.reviews-section-outer .new-section .claim-button .button-text {
+  {% if settings.enable_global_button_styling and section.settings.use_global_button_styling %}
+    /* Use Global Button Text Styling */
+    font-size: var(--global-button-font-size, 14px) !important;
+    font-weight: var(--global-button-font-weight, 700) !important;
+    letter-spacing: var(--global-button-letter-spacing, 1px) !important;
+    text-transform: var(--global-button-text-transform, none) !important;
+  {% else %}
+    /* Use Custom Button Text Sizing */
+    font-size: {{ section.settings.custom_button_font_size | default: 14 }}px !important;
+    font-weight: var(--global-button-font-weight, 700) !important;
+    letter-spacing: var(--global-button-letter-spacing, 1px) !important;
+    text-transform: var(--global-button-text-transform, none) !important;
+  {% endif %}
+}
+
+/* Title and subtitle color overrides when theme colors are disabled */
+.reviews-section-outer .new-section .content-wrapper .main-title.h2 {
+  color: {{ section.settings.title_color }} !important;
+}
+
+.reviews-section-outer .new-section .content-wrapper .subtitle.body-large {
+  color: {{ section.settings.subtitle_color }} !important;
+}
+{% endunless %}
+
+.reviews-section-outer .reviewSwiper.swiper {
+  overflow: hidden;
+  transition: opacity 0.15s ease-out;
+}
+.reviews-section-outer .reviewSwiper--pending {
+  opacity: 0;
+  pointer-events: none;
+}
+</style>
+
+{% schema %}
+{
+  "name": "Image Reviews",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Section anchor ID",
+      "default": "reviews",
+      "info": "Used for in-page links (e.g., enter \"reviews\" to link to #reviews)."
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Horizontal Padding",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Look At How Others Are Loving Their Product!"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Real Reviews From Real People"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "CLAIM OFFER"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_button",
+      "label": "Show Claim Offer Button",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Button Redirect Options"
+    },
+    {
+      "type": "select",
+      "id": "button_redirect_type",
+      "label": "Button Action",
+      "options": [
+        {
+          "value": "scroll_to_top",
+          "label": "Scroll to Top"
+        },
+        {
+          "value": "scroll_to_first_section",
+          "label": "Scroll to First Section"
+        },
+        {
+          "value": "product",
+          "label": "Redirect to Product"
+        },
+        {
+          "value": "collection",
+          "label": "Redirect to Collection"
+        },
+        {
+          "value": "page",
+          "label": "Redirect to Page"
+        },
+        {
+          "value": "custom_url",
+          "label": "Custom URL"
+        }
+      ],
+      "default": "scroll_to_top",
+      "info": "Choose what happens when the button is clicked"
+    },
+    {
+      "type": "product",
+      "id": "redirect_product",
+      "label": "Select Product",
+      "info": "Choose a product to redirect to (only used when 'Redirect to Product' is selected)"
+    },
+    {
+      "type": "collection",
+      "id": "redirect_collection",
+      "label": "Select Collection",
+      "info": "Choose a collection to redirect to (only used when 'Redirect to Collection' is selected)"
+    },
+    {
+      "type": "page",
+      "id": "redirect_page",
+      "label": "Select Page",
+      "info": "Choose a page to redirect to (only used when 'Redirect to Page' is selected)"
+    },
+    {
+      "type": "url",
+      "id": "custom_url",
+      "label": "Custom URL",
+      "info": "Enter any URL (only used when 'Custom URL' is selected)"
+    },
+    {
+      "type": "range",
+      "id": "button_horizontal_padding",
+      "min": 10,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Horizontal Padding",
+      "default": 30
+    },
+    {
+      "type": "text",
+      "id": "rating_text",
+      "label": "Rating Text",
+      "default": "Rated 4.8/5 by 1,319+ Happy Customers"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "mobile_title_size",
+      "min": 16,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile Title Size",
+      "default": 29
+    },
+    {
+      "type": "range",
+      "id": "desktop_title_size",
+      "min": 28,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Desktop Title Size",
+      "default": 42
+    },
+    {
+      "type": "range",
+      "id": "mobile_subtitle_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile Subtitle Size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "desktop_subtitle_size",
+      "min": 14,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop Subtitle Size",
+      "default": 18
+    },
+    {
+      "type": "header",
+      "content": "Element Spacing"
+    },
+    {
+      "type": "range",
+      "id": "title_padding_top",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Title Top Padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "title_padding_bottom",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Title Bottom Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "title_padding_horizontal",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Title Horizontal Padding",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "subtitle_padding_top",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Subtitle Top Padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "subtitle_padding_bottom",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Subtitle Bottom Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "button_padding_top",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Top Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_padding_bottom",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Bottom Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "rating_padding_top",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Rating Top Padding",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Content Wrapper Spacing"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_top_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Content Top Padding (Mobile)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "content_padding_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Content Bottom Padding (Mobile)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "content_padding_horizontal_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Content Horizontal Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "content_padding_top_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Content Top Padding (Desktop)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "content_padding_bottom_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Content Bottom Padding (Desktop)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "content_padding_horizontal_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Content Horizontal Padding (Desktop)",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Styling"
+    },
+     {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "use_global_button_styling",
+      "label": "Use Global Button Styling",
+      "default": true,
+      "info": "When enabled, uses theme's global button styling. Only works if 'Enable Global Button Styling for Sections' is turned on in Theme Settings > Button Styling."
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_padding_y",
+      "min": 5,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Custom Button Vertical Padding",
+      "default": 12,
+      "info": "Vertical padding for the button when global styling is off"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_font_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Custom Button Font Size",
+      "default": 14,
+      "info": "Font size for the button when global styling is off"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Border Radius (Deprecated)",
+      "default": 8,
+      "info": "This setting is no longer used. Please use the global Button Styling settings in the theme customizer instead."
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star Color",
+      "default": "#FFC107"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "rating_text_color",
+      "label": "Rating Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Slider Settings"
+    },
+    {
+      "type": "range",
+      "id": "slider_speed",
+      "min": 2000,
+      "max": 9000,
+      "step": 1000,
+      "unit": "ms",
+      "label": "Slider Speed",
+      "default": 5000,
+      "info": "Speed of the scrolling images (higher = slower)"
+    },
+    {
+      "type": "header",
+      "content": "Gradient Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient",
+      "label": "Use Gradient Background",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "gradient_start_color",
+      "label": "Gradient Start Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "gradient_end_color",
+      "label": "Gradient End Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "gradient_angle",
+      "min": 0,
+      "max": 360,
+      "step": 5,
+      "unit": "deg",
+      "label": "Gradient Angle",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#FFFFFF"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review_image",
+      "name": "Review Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "review_image",
+          "label": "Review Screenshot"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Reviews",
+      "blocks": [
+        {
+          "type": "review_image"
+        },
+        {
+          "type": "review_image"
+        },
+        {
+          "type": "review_image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Handle scroll-to-first-section functionality for image reviews section
+  const reviewButtons = document.querySelectorAll('.claim-button[data-scroll-to-first-section]');
+  
+  reviewButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      console.log('🎯 Image Reviews: Scrolling to first section...');
+      
+      // Find the first section on the page (excluding header/navigation)
+      const selectors = [
+        // Most common first section patterns
+        'main section:first-of-type',
+        '.main-content section:first-of-type',
+        '.page-content section:first-of-type',
+        
+        // Shopify section patterns
+        '.shopify-section:not([data-section-type="header"]):not([data-section-type="announcement-bar"])',
+        'section.shopify-section:not([data-section-type="header"])',
+        
+        // General section patterns
+        'main > *:first-child',
+        '.content section:first-of-type',
+        'section:not(header):not([role="banner"])',
+        
+        // Fallback to any section
+        'section:first-of-type',
+        '[data-section-type]:not([data-section-type="header"])',
+        
+        // Last resort - any content element
+        'main > div:first-child',
+        '.main > *:first-child'
+      ];
+      
+      let targetElement = null;
+      let usedSelector = '';
+      
+      for (const selector of selectors) {
+        try {
+          const elements = document.querySelectorAll(selector);
+          if (elements.length > 0) {
+            targetElement = elements[0];
+            usedSelector = selector;
+            console.log(`✅ Found target using selector: ${usedSelector}`, targetElement);
+            break;
+          }
+        } catch (error) {
+          console.warn(`❌ Invalid selector: ${selector}`, error);
+        }
+      }
+      
+      if (targetElement) {
+        // Calculate offset for fixed headers
+        const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+        const stickyHeader = document.querySelector('.sticky-header, .header-sticky, [style*="position: fixed"]')?.offsetHeight || 0;
+        const adminBarHeight = document.querySelector('#admin_bar_iframe, .admin-bar')?.offsetHeight || 0;
+        const announcementBar = document.querySelector('.announcement-bar, .promo-bar')?.offsetHeight || 0;
+        
+        const offset = Math.max(headerHeight, stickyHeader) + adminBarHeight + announcementBar + 20;
+        
+        const elementPosition = targetElement.offsetTop;
+        const offsetPosition = elementPosition - offset;
+        
+        window.scrollTo({
+          top: Math.max(0, offsetPosition),
+          behavior: 'smooth'
+        });
+        
+        console.log(`✅ Image Reviews: Scrolled to first section using selector: ${usedSelector}`);
+        
+        // Optional: Add visual highlight to show successful targeting
+        targetElement.style.transition = 'all 0.3s ease';
+        targetElement.style.transform = 'scale(1.01)';
+        setTimeout(() => {
+          targetElement.style.transform = 'scale(1)';
+        }, 300);
+        
+      } else {
+        console.warn('⚠️ Image Reviews: No first section found, falling back to scroll to top');
+        // Fallback: scroll to top if no target found
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+});
+</script>
+
+<script src="{{ 'customer-reviews-slider.js' | asset_url }}" defer></script>

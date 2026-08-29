@@ -1,0 +1,1443 @@
+{%- liquid
+  assign section_id = section.id
+  assign use_theme_colors = section.settings.use_theme_colors
+  assign heading_accent = section.settings.heading_accent
+  assign heading_regular = section.settings.heading_regular
+  assign subtitle = section.settings.subtitle
+-%}
+
+{% comment %} Google Fonts for accent text customization {% endcomment %}
+{% render 'accent-font-loader' %}
+
+{{ 'video-testimonials.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'video-testimonials.js' | asset_url }}" defer></script>
+
+<style>
+  /* Dynamic styles that require Liquid variables */
+    .video-testimonials-wrapper-{{ section_id }} {
+      {% if use_theme_colors %}
+        background: {{ settings.global_section_gradient_background }} !important;
+      {% elsif section.settings.use_gradient %}
+        background: linear-gradient({{ section.settings.gradient_angle }}deg, {{ section.settings.gradient_start_color }}, {{ section.settings.gradient_end_color }}) !important;
+      {% else %}
+        background-color: {{ section.settings.background_color }} !important;
+      {% endif %}
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+      padding-left: {{ section.settings.padding_left }}px;
+      padding-right: {{ section.settings.padding_right }}px;
+      --video-card-width-mobile: {{ section.settings.card_width_mobile | default: 220 }}px;
+      --video-card-width-desktop: {{ section.settings.card_width_desktop | default: 280 }}px;
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .section-heading {
+      font-size: {{ section.settings.heading_size_mobile }}px !important;
+      color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.heading_color }}{% endif %} !important;
+  }
+
+  .video-testimonials-wrapper-{{ section_id }} .global-accent-text,
+  .video-testimonials-wrapper-{{ section_id }} .custom-accent-text {
+    margin-left: {{ section.settings.accent_text_margin_left | default: 0 }}px !important;
+
+    {% if section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }} !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+    {% else %}
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.accent_color | default: settings.global_section_accent_1_color }}{% endif %} !important;
+    {% endif %}
+
+    {% if section.settings.override_global_accent %}
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %}
+            font-family: serif !important;
+          {% when 'Georgia Pro' %}
+            font-family: 'Georgia Pro', Georgia, serif !important;
+          {% when 'Bodoni Moda' %}
+            font-family: 'Bodoni Moda', Georgia, serif !important;
+          {% when 'Instrument Serif' %}
+            font-family: 'Instrument Serif', Georgia, serif !important;
+          {% when 'DM Serif Text' %}
+            font-family: 'DM Serif Text', Georgia, serif !important;
+          {% when 'Nothing You Could Do' %}
+            font-family: 'Nothing You Could Do', cursive !important;
+        {% endcase %}
+      {% endif %}
+      font-style: {% if section.settings.accent_font_style != 'normal' %}{{ section.settings.accent_font_style }}{% else %}var(--font-accent-style, normal){% endif %} !important;
+      font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+      letter-spacing: {% if section.settings.accent_letter_spacing != 'inherit' %}{{ section.settings.accent_letter_spacing }}{% else %}var(--font-accent-letter-spacing, inherit){% endif %} !important;
+      text-transform: {% if section.settings.accent_text_transform != 'none' %}{{ section.settings.accent_text_transform }}{% else %}var(--font-accent-text-transform, none){% endif %} !important;
+      {% endif %}
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .section-subtitle {
+      font-size: {{ section.settings.subtitle_size_mobile }}px !important;
+      color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subtitle_color }}{% endif %} !important;
+  }
+
+    .video-testimonials-wrapper-{{ section_id }} .video-card {
+      background: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.card_background }}{% endif %};
+      border-radius: {{ section.settings.card_border_radius | default: 8 }}px;
+      {% if section.settings.enable_card_border %}
+        border: {{ section.settings.card_border_width | default: 1 }}px {{ section.settings.card_border_style | default: 'solid' }} {{ section.settings.card_border_color | default: '#e2e8f0' }} !important;
+      {% else %}
+        border: none !important;
+      {% endif %}
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .video-wrapper {
+    border-radius: {{ section.settings.video_border_radius | default: 12 }}px {{ section.settings.video_border_radius | default: 12 }}px 0 0;
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .testimonial-video,
+    .video-testimonials-wrapper-{{ section_id }} .video-thumbnail,
+    .video-testimonials-wrapper-{{ section_id }} .video-placeholder {
+    border-radius: {{ section.settings.video_border_radius | default: 12 }}px {{ section.settings.video_border_radius | default: 12 }}px 0 0;
+  }
+
+    .video-testimonials-wrapper-{{ section_id }} .product-overlay {
+    border-radius: {{ section.settings.product_card_border_radius | default: 8 }}px;
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .product-image-overlay {
+    border-radius: {{ section.settings.product_image_border_radius | default: 6 }}px;
+          }
+
+    .video-testimonials-wrapper-{{ section_id }} .product-info-overlay {
+      color: {% if use_theme_colors %}#ffffff{% else %}#000{% endif %};
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .product-title-overlay {
+      color: {% if use_theme_colors %}#ffffff{% else %}{{ section.settings.product_title_color }}{% endif %} !important;
+      font-size: {{ section.settings.product_title_font_size }}px;
+      font-weight: {{section.settings.product_title_font_weight }} !important;
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .product-price-overlay .current-price {
+      color: {% if use_theme_colors %}#ffffff{% else %}{{ section.settings.product_price_color }}{% endif %} !important;
+      font-size: {{ section.settings.product_price_font_size }}px;
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .product-price-overlay .original-price {
+      color: {% if use_theme_colors %}rgba(255, 255, 255, 0.7){% else %}{{ section.settings.product_original_price_color }}{% endif %};
+      font-size: {{ section.settings.product_price_font_size }}px;
+      text-decoration: line-through;
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .review-content {
+      background: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.review_content_background }}{% endif %};
+    border-radius: 0 0 {{ section.settings.card_border_radius | default: 12 }}px {{ section.settings.card_border_radius | default: 12 }}px;
+      border-width: {{ section.settings.review_border_width }}px;
+      border-style: {{ section.settings.review_border_style }};
+      border-color: {% if use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.2 }}{% else %}{{ section.settings.review_border_color }}{% endif %};
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .star-rating {
+      color: {% if use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.star_color }}{% endif %};
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .star-rating .star,
+    .video-testimonials-wrapper-{{ section_id }} .star-rating svg {
+      width: {{ section.settings.star_size | default: 16 }}px !important;
+      height: {{ section.settings.star_size | default: 16 }}px !important;
+      margin-right: {{ section.settings.star_margin_right | default: 0 }}px !important;
+      opacity: 1 !important;
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .review-quote {
+      font-size: {{ section.settings.review_quote_size_mobile }}px;
+      color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.review_quote_color }}{% endif %};
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .review-author {
+      font-size: {{ section.settings.review_author_size_mobile }}px;
+    border-radius: {{ section.settings.review_author_border_radius | default: 50 }}px;
+    background-color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.review_author_background_color }}{% endif %};
+      color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.review_author_text_color }}{% endif %};
+    border: {{ section.settings.review_author_border_width }}px {{ section.settings.review_author_border_style }} {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.review_author_border_color }}{% endif %};
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .verified-badge {
+    font-size: {{ section.settings.review_author_size_mobile }}px;
+    }
+
+    .video-testimonials-wrapper-{{ section_id }} .verified-icon {
+    width: {{ section.settings.review_author_size_mobile | times: 0.9 | round: 1 }}px;
+    height: {{ section.settings.review_author_size_mobile | times: 0.9 | round: 1 }}px;
+  }
+
+  /* Navigation buttons now use global-nav-button snippet */
+  
+  /* Base navigation display */
+  .video-testimonials-wrapper-{{ section_id }} .carousel-nav {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+  }
+  
+  /* Hide/show navigation based on settings */
+  .video-testimonials-wrapper-{{ section_id }} .carousel-nav.hide-desktop {
+    display: none !important;
+  }
+  
+  .video-testimonials-wrapper-{{ section_id }} .carousel-nav.hide-mobile {
+    display: flex !important;
+  }
+  
+  @media screen and (max-width: 767px) {
+    .video-testimonials-wrapper-{{ section_id }} .carousel-nav.hide-desktop {
+      display: flex !important;
+    }
+    
+    .video-testimonials-wrapper-{{ section_id }} .carousel-nav.hide-mobile {
+      display: none !important;
+    }
+  }
+
+    /* Rating Summary Styles */
+    .video-testimonials-wrapper-{{ section_id }} .rating-summary-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: {{ section.settings.rating_summary_margin_bottom | default: 16 }}px;
+    }
+    
+    .video-testimonials-wrapper-{{ section_id }} .video-rating-summary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      {% if section.settings.enable_rating_summary_gradient %}
+        background: linear-gradient({{ section.settings.rating_summary_gradient_direction }}, {{ section.settings.rating_summary_gradient_start }}, {{ section.settings.rating_summary_gradient_end }});
+      {% else %}
+        background-color: {{ section.settings.rating_summary_bg_color | default: '#FEF3C7' }};
+      {% endif %}
+      {% if section.settings.enable_rating_summary_border %}
+        border: {{ section.settings.rating_summary_border_width }}px {{ section.settings.rating_summary_border_style }} {{ section.settings.rating_summary_border_color }};
+      {% endif %}
+      border-radius: {{ section.settings.rating_summary_border_radius | default: 50 }}px;
+    }
+    
+    .video-testimonials-wrapper-{{ section_id }} .rating-summary-stars {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    
+    .video-testimonials-wrapper-{{ section_id }} .rating-summary-stars svg {
+      width: {{ section.settings.rating_summary_star_size | default: 16 }}px;
+      height: {{ section.settings.rating_summary_star_size | default: 16 }}px;
+      color: {{ section.settings.rating_summary_star_color | default: '#F59E0B' }};
+    }
+    
+    .video-testimonials-wrapper-{{ section_id }} .rating-summary-text {
+      font-size: {{ section.settings.rating_summary_font_size | default: 13 }}px;
+      color: {{ section.settings.rating_summary_text_color | default: '#92400E' }};
+      line-height: 1.4;
+    }
+    
+    .video-testimonials-wrapper-{{ section_id }} .rating-summary-text p {
+      margin: 0;
+    }
+    
+    .video-testimonials-wrapper-{{ section_id }} .rating-summary-text strong {
+      font-weight: 700;
+    }
+
+    @media screen and (min-width: 768px) {
+      .video-testimonials-wrapper-{{ section_id }} .section-heading {
+        font-size: {{ section.settings.heading_size_desktop }}px !important;
+      }
+      .video-testimonials-wrapper-{{ section_id }} .section-subtitle {
+        font-size: {{ section.settings.subtitle_size_desktop }}px !important;
+      }
+      .video-testimonials-wrapper-{{ section_id }} .review-quote {
+        font-size: {{ section.settings.review_quote_size_desktop }}px;
+      }
+      .video-testimonials-wrapper-{{ section_id }} .review-author {
+        font-size: {{ section.settings.review_author_size_desktop }}px;
+      }
+      .video-testimonials-wrapper-{{ section_id }} .verified-badge {
+      font-size: {{ section.settings.review_author_size_desktop }}px;
+      }
+      .video-testimonials-wrapper-{{ section_id }} .verified-icon {
+      width: {{ section.settings.review_author_size_desktop | times: 0.9 | round: 1 }}px;
+      height: {{ section.settings.review_author_size_desktop | times: 0.9 | round: 1 }}px;
+      }
+    }
+</style>
+
+<div
+  class="video-testimonials-wrapper video-testimonials-wrapper-{{ section_id }}{% if section.settings.mobile_compact_cards %} mobile-compact{% endif %}"
+  id="video-testimonials-{{ section_id }}"
+>
+  <div class="video-testimonials-section">
+    {% if section.settings.show_rating_summary or heading_accent != blank or heading_regular != blank or subtitle != blank %}
+      <div class="section-header">
+        {% if section.settings.show_rating_summary %}
+          <div class="rating-summary-wrapper">
+            <div class="video-rating-summary">
+              <span class="rating-summary-stars">
+                {% for i in (1..5) %}
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                    <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z"/>
+                  </svg>
+                {% endfor %}
+              </span>
+              <div class="rating-summary-text">
+                {{ section.settings.rating_summary_text }}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        
+        {% if heading_accent != blank or heading_regular != blank %}
+          <h2 class="section-heading">
+            {% if heading_regular != blank %}
+              {{ heading_regular }}
+            {% endif %}
+            {% if heading_accent != blank %}
+              <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+                {{- heading_accent -}}
+              </span>
+            {% endif %}
+          </h2>
+        {% endif %}
+
+        {% if subtitle != blank %}
+          <p class="section-subtitle">{{ subtitle }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="carousel-container">
+      <div class="videos-grid" id="videosGrid-{{ section_id }}">
+        {% for block in section.blocks %}
+          {% if block.type == 'video_testimonial' %}
+            <div class="video-card" {{ block.shopify_attributes }}>
+              <div class="video-wrapper">
+                {% if block.settings.video_file != blank %}
+                  <video
+                    class="testimonial-video"
+                    poster="{% if block.settings.video_thumbnail != blank %}{{ block.settings.video_thumbnail | image_url: width: 400, height: 500 }}{% endif %}"
+                    preload="metadata"
+                    playsinline
+                    muted
+                    controls
+                    webkit-playsinline
+                    x-webkit-airplay="deny"
+                  >
+                    {% for source in block.settings.video_file.sources %}
+                      <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                    {% endfor %}
+                  </video>
+
+                  <div class="video-play-overlay">
+                    <button class="video-testimonial-play-btn disable-global-button-styling" aria-label="Play video">
+                      <svg viewBox="0 0 24 24" fill="white">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </button>
+                  </div>
+                {% elsif block.settings.video_thumbnail != blank %}
+                  <img
+                    src="{{ block.settings.video_thumbnail | image_url: width: 400, height: 500 }}"
+                    alt="{{ block.settings.video_alt | escape }}"
+                    class="video-thumbnail"
+                    width=""
+                    height=""
+                  >
+                {% else %}
+                  <div class="video-placeholder"></div>
+                {% endif %}
+
+                {% if block.settings.show_product_card and block.settings.product != blank %}
+                  {% assign product = block.settings.product %}
+                  <div class="product-overlay">
+                    {% if product.featured_image != blank %}
+                      <img
+                        src="{{ product.featured_image | image_url: width: 80, height: 80 }}"
+                        alt="{{ product.title | escape }}"
+                        class="product-image-overlay"
+                        width=""
+                        height=""
+                      >
+                    {% else %}
+                      <div class="product-image-placeholder-overlay">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M21,19V5c0,-1.1 -0.9,-2 -2,-2H5c-1.1,0 -2,0.9 -2,2v14c0,1.1 0.9,2 2,2h14c1.1,0 2,-0.9 2,-2zM8.5,13.5l2.5,3.01L14.5,12l4.5,6H5l3.5,-4.5z"/>
+                        </svg>
+                      </div>
+                    {% endif %}
+                    <div class="product-info-overlay">
+                      <p class="product-title-overlay">{{ product.title }}</p>
+                      <div class="product-price-overlay">
+                        {% if product.compare_at_price > product.price %}
+                          <span class="current-price">{{ product.price | money_without_trailing_zeros }}</span>
+                          <span class="original-price">
+                            {{- product.compare_at_price | money_without_trailing_zeros -}}
+                          </span>
+                        {% else %}
+                          <span class="current-price">{{ product.price | money_without_trailing_zeros }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="review-content">
+                <div class="review-header">
+                  {% if block.settings.rating > 0 %}
+                    <div class="star-rating">
+                      {% for i in (1..block.settings.rating) %}
+                        <svg class="star" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z" fill="currentColor"/>
+                        </svg>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+
+                  {% if block.settings.review_author != blank %}
+                    <p class="review-author">
+                      {{ block.settings.review_author }}
+                      {% if section.settings.show_verified_badge %}
+                        <span
+                          class="verified-badge"
+                          style="color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.verified_badge_color }}{% endif %};"
+                        >
+                          <svg
+                            class="verified-icon"
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.5924 3.20027C9.34888 3.4078 9.22711 3.51158 9.09706 3.59874C8.79896 3.79854 8.46417 3.93721 8.1121 4.00672C7.95851 4.03705 7.79903 4.04977 7.48008 4.07522C6.6787 4.13918 6.278 4.17115 5.94371 4.28923C5.17051 4.56233 4.56233 5.17051 4.28923 5.94371C4.17115 6.278 4.13918 6.6787 4.07522 7.48008C4.04977 7.79903 4.03705 7.95851 4.00672 8.1121C3.93721 8.46417 3.79854 8.79896 3.59874 9.09706C3.51158 9.22711 3.40781 9.34887 3.20027 9.5924C2.67883 10.2043 2.4181 10.5102 2.26522 10.8301C1.91159 11.57 1.91159 12.43 2.26522 13.1699C2.41811 13.4898 2.67883 13.7957 3.20027 14.4076C3.40778 14.6511 3.51158 14.7729 3.59874 14.9029C3.79854 15.201 3.93721 15.5358 4.00672 15.8879C4.03705 16.0415 4.04977 16.201 4.07522 16.5199C4.13918 17.3213 4.17115 17.722 4.28923 18.0563C4.56233 18.8295 5.17051 19.4377 5.94371 19.7108C6.278 19.8288 6.6787 19.8608 7.48008 19.9248C7.79903 19.9502 7.95851 19.963 8.1121 19.9933C8.46417 20.0628 8.79896 20.2015 9.09706 20.4013C9.22711 20.4884 9.34887 20.5922 9.5924 20.7997C10.2043 21.3212 10.5102 21.5819 10.8301 21.7348C11.57 22.0884 12.43 22.0884 13.1699 21.7348C13.4898 21.5819 13.7957 21.3212 14.4076 20.7997C14.6511 20.5922 14.7729 20.4884 14.9029 20.4013C15.201 20.2015 15.5358 20.0628 15.8879 19.9933C16.0415 19.963 16.201 19.9502 16.5199 19.9248C17.3213 19.8608 17.722 19.8288 18.0563 19.7108C18.8295 19.4377 19.4377 18.8295 19.7108 18.0563C19.8288 17.722 19.8608 17.3213 19.9248 16.5199C19.9502 16.201 19.963 16.0415 19.9933 15.8879C20.0628 15.5358 20.2015 15.201 20.4013 14.9029C20.4884 14.7729 20.5922 14.6511 20.7997 14.4076C21.3212 13.7957 21.5819 13.4898 21.7348 13.1699C22.0884 12.43 22.0884 11.57 21.7348 10.8301C21.5819 10.5102 21.3212 10.2043 20.7997 9.5924C20.5922 9.34887 20.4884 9.22711 20.4013 9.09706C20.2015 8.79896 20.0628 8.46417 19.9933 8.1121C19.963 7.95851 19.9502 7.79903 19.9248 7.48008C19.8608 6.6787 19.8288 6.278 19.7108 5.94371C19.4377 5.17051 18.8295 4.56233 18.0563 4.28923C17.722 4.17115 17.3213 4.13918 16.5199 4.07522C16.201 4.04977 16.0415 4.03705 15.8879 4.00672C15.5358 3.93721 15.201 3.79854 14.9029 3.59874C14.7729 3.51158 14.6511 3.40781 14.4076 3.20027C13.7957 2.67883 13.4898 2.41811 13.1699 2.26522C12.43 1.91159 11.57 1.91159 10.8301 2.26522C10.5102 2.4181 10.2043 2.67883 9.5924 3.20027ZM16.3735 9.86314C16.6913 9.5453 16.6913 9.03 16.3735 8.71216C16.0557 8.39433 15.5403 8.39433 15.2225 8.71216L10.3723 13.5624L8.77746 11.9676C8.45963 11.6498 7.94432 11.6498 7.62649 11.9676C7.30866 12.2854 7.30866 12.8007 7.62649 13.1186L9.79678 15.2889C10.1146 15.6067 10.6299 15.6067 10.9478 15.2889L16.3735 9.86314Z" fill="{% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.verified_icon_color }}{% endif %}"/>
+                          </svg>
+                          {{ section.settings.verified_badge_text | escape }}
+                        </span>
+                      {% endif %}
+                    </p>
+                  {% endif %}
+                </div>
+
+                {% if block.settings.review_quote != blank %}
+                  <p class="review-quote">"{{ block.settings.review_quote | escape }}"</p>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if section.settings.show_navigation_desktop or section.settings.show_navigation_mobile %}
+      <div class="carousel-nav {% unless section.settings.show_navigation_desktop %}hide-desktop{% endunless %} {% unless section.settings.show_navigation_mobile %}hide-mobile{% endunless %}">
+        {% render 'global-nav-button', 
+          direction: 'prev', 
+          aria_label: 'Previous testimonials',
+          use_global: section.settings.use_global_nav_buttons,
+          section_settings: section.settings
+        %}
+        {% render 'global-nav-button', 
+          direction: 'next', 
+          aria_label: 'Next testimonials',
+          use_global: section.settings.use_global_nav_buttons,
+          section_settings: section.settings
+        %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  // Initialize the video testimonials carousel when DOM is ready
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof window.initVideoTestimonials === 'function') {
+      window.initVideoTestimonials('{{ section.id }}');
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Video Testimonials",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Left Padding",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Right Padding",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_compact_cards",
+      "label": "Compact Cards on Mobile",
+      "default": false,
+      "info": "Make video cards smaller on mobile devices"
+    },
+    {
+      "type": "range",
+      "id": "card_width_desktop",
+      "min": 200,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "label": "Card Width (Desktop)",
+      "default": 280,
+      "info": "Width of each video card on desktop"
+    },
+    {
+      "type": "range",
+      "id": "card_width_mobile",
+      "min": 160,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "Card Width (Mobile)",
+      "default": 220,
+      "info": "Width of each video card on mobile"
+    },
+    {
+      "type": "header",
+      "content": "Card Styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_card_border",
+      "label": "Enable Card Border",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "card_border_style",
+      "label": "Card Border Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card Border Color",
+      "default": "#e2e8f0"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 20,
+      "max": 55,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading Size (Mobile)",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "min": 24,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading Size (Desktop)",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size_mobile",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Subtitle Size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size_desktop",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Subtitle Size (Desktop)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "review_quote_size_mobile",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Text Size (Mobile)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "review_quote_size_desktop",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Text Size (Desktop)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "review_author_size_mobile",
+      "min": 8,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "label": "Author Name Size (Mobile)",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "review_author_size_desktop",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Author Name Size (Desktop)",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Rating Summary"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating_summary",
+      "label": "Show Rating Summary",
+      "default": true,
+      "info": "Display a rating summary with stars and text above the heading"
+    },
+    {
+      "type": "richtext",
+      "id": "rating_summary_text",
+      "label": "Rating Summary Text",
+      "default": "<p>Rated <strong>4.8/5</strong> based on +10,839 Total Ratings</p>",
+      "info": "Enter the complete rating summary text. You can use bold, italic, and other formatting."
+    },
+    {
+      "type": "range",
+      "id": "rating_summary_font_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Rating Summary Font Size",
+      "default": 13
+    },
+    {
+      "type": "color",
+      "id": "rating_summary_bg_color",
+      "label": "Rating Summary Background",
+      "default": "#FEF3C7"
+    },
+    {
+      "type": "color",
+      "id": "rating_summary_text_color",
+      "label": "Rating Summary Text Color",
+      "default": "#92400E"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_rating_summary_gradient",
+      "label": "Use Gradient Background",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "rating_summary_gradient_direction",
+      "label": "Gradient Direction",
+      "options": [
+        { "value": "to right", "label": "Left to Right" },
+        { "value": "to left", "label": "Right to Left" },
+        { "value": "to bottom", "label": "Top to Bottom" },
+        { "value": "to top", "label": "Bottom to Top" },
+        { "value": "to bottom right", "label": "Diagonal (Top-Left to Bottom-Right)" },
+        { "value": "to bottom left", "label": "Diagonal (Top-Right to Bottom-Left)" }
+      ],
+      "default": "to right"
+    },
+    {
+      "type": "color",
+      "id": "rating_summary_gradient_start",
+      "label": "Gradient Start Color",
+      "default": "#FEF3C7"
+    },
+    {
+      "type": "color",
+      "id": "rating_summary_gradient_end",
+      "label": "Gradient End Color",
+      "default": "#FDE68A"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_rating_summary_border",
+      "label": "Enable Rating Summary Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "rating_summary_border_width",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Rating Summary Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "rating_summary_border_style",
+      "label": "Rating Summary Border Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "rating_summary_border_color",
+      "label": "Rating Summary Border Color",
+      "default": "#F59E0B"
+    },
+    {
+      "type": "range",
+      "id": "rating_summary_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Rating Summary Border Radius",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "rating_summary_star_color",
+      "label": "Rating Summary Star Color",
+      "default": "#F59E0B"
+    },
+    {
+      "type": "range",
+      "id": "rating_summary_star_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Rating Summary Star Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "rating_summary_margin_bottom",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Rating Summary Bottom Margin",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heading Accent Text"
+    },
+    {
+      "type": "text",
+      "id": "heading_regular",
+      "label": "Heading Regular Text",
+      "default": "Real People, Real Results"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation_desktop",
+      "label": "Show Navigation Arrows on Desktop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation_mobile",
+      "label": "Show Navigation Arrows on Mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Apply Theme Colors",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Colors & Background"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section Background Color",
+      "default": "#f8fafc"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient",
+      "label": "Use Gradient Background",
+      "default": false
+    },
+    { "type": "color", "id": "gradient_start_color", "label": "Gradient Start", "default": "#f8fafc" },
+    { "type": "color", "id": "gradient_end_color", "label": "Gradient End", "default": "#e2e8f0" },
+    {
+      "type": "range",
+      "id": "gradient_angle",
+      "min": 0,
+      "max": 360,
+      "step": 5,
+      "unit": "deg",
+      "label": "Gradient Angle",
+      "default": 180
+    },
+    { "type": "color", "id": "heading_color", "label": "Heading Color", "default": "#1e293b" },
+    { "type": "color", "id": "subtitle_color", "label": "Subtitle Color", "default": "#64748b" },
+
+    {
+      "type": "header",
+      "content": "Accent Text Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "header",
+      "content": "Section-Specific Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Section Accent Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_letter_spacing",
+      "label": "Accent Text Letter Spacing",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "-0.05em",
+          "label": "Tight (-0.05em)"
+        },
+        {
+          "value": "-0.025em",
+          "label": "Slightly Tight (-0.025em)"
+        },
+        {
+          "value": "0",
+          "label": "Normal (0)"
+        },
+        {
+          "value": "0.025em",
+          "label": "Slightly Wide (0.025em)"
+        },
+        {
+          "value": "0.05em",
+          "label": "Wide (0.05em)"
+        },
+        {
+          "value": "0.1em",
+          "label": "Very Wide (0.1em)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Control the spacing between letters in the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_text_transform",
+      "label": "Accent Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "Default (None)"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        },
+        {
+          "value": "lowercase",
+          "label": "lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize Each Word"
+        }
+      ],
+      "default": "none",
+      "info": "Choose how to transform the case of the accent text"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Text Color",
+      "default": "#EF4A65",
+      "info": "Color for the accent text (used when gradient is disabled)"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin_left",
+      "min": -10,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 0
+    },
+
+    {
+      "type": "header",
+      "content": "Card Styling"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "review_content_background",
+      "label": "Review Box Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "review_border_width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Box Border Width",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "review_border_style",
+      "label": "Review Box Border Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "review_border_color",
+      "label": "Review Box Border Color",
+      "default": "#e2e8f0"
+    },
+
+    {
+      "type": "header",
+      "content": "Navigation Styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_global_nav_buttons",
+      "label": "Use Global Navigation Button Styling",
+      "default": true,
+      "info": "Use global navigation button settings from theme settings. When disabled, use section-specific settings below."
+    },
+    {
+      "type": "paragraph",
+      "content": "Custom Navigation Button Styling (only applies when 'Use Global Navigation Button Styling' is disabled)"
+    },
+    {
+      "type": "color",
+      "id": "prev_button_bg",
+      "label": "Previous Button Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "prev_button_color",
+      "label": "Previous Button Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "prev_button_border",
+      "label": "Previous Button Border",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "color",
+      "id": "next_button_bg",
+      "label": "Next Button Background",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "color",
+      "id": "next_button_color",
+      "label": "Next Button Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "next_button_border",
+      "label": "Next Button Border",
+      "default": "#EF4A65"
+    },
+
+    {
+      "type": "header",
+      "content": "Border Radius Settings"
+    },
+    {
+      "type": "range",
+      "id": "video_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Video Area Border Radius",
+      "default": 12,
+      "info": "Border radius for the video/image area (top corners)"
+    },
+    {
+      "type": "range",
+      "id": "product_card_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Product Card Border Radius",
+      "default": 8,
+      "info": "Border radius for the product overlay card"
+    },
+    {
+      "type": "range",
+      "id": "product_image_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Product Image Border Radius",
+      "default": 6,
+      "info": "Border radius for the product image within the overlay"
+    },
+
+    { "type": "header", "content": "Product Overlay Styling" },
+    { "type": "color", "id": "product_title_color", "label": "Product Title Color", "default": "#ffffff" },
+    {
+      "type": "range",
+      "id": "product_title_font_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Product Title Font Size",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "product_title_font_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "label": "Product Title Font Weight",
+      "default": 600
+    },
+
+    { "type": "color", "id": "product_price_color", "label": "Product Price Color", "default": "#ffffff" },
+    {
+      "type": "range",
+      "id": "product_price_font_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Product Price Font Size",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "product_price_font_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "label": "Product Price Font Weight",
+      "default": 500
+    },
+    { "type": "color", "id": "product_original_price_color", "label": "Original Price Color", "default": "#ffffff" },
+    {
+      "type": "checkbox",
+      "id": "show_verified_badge",
+      "label": "Show Verified Badge",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "verified_badge_color",
+      "label": "Verified Badge Color",
+      "default": "#3b82f6"
+    },
+    {
+      "type": "text",
+      "id": "verified_badge_text",
+      "label": "Verified Badge Text",
+      "default": "Verified"
+    },
+    {
+      "type": "color",
+      "id": "verified_icon_color",
+      "label": "Verified Icon Color",
+      "default": "#3b82f6"
+    },
+    {
+      "type": "color",
+      "id": "review_author_background_color",
+      "label": "Review Author Background Color",
+      "default": "#3b82f6"
+    },
+    {
+      "type": "color",
+      "id": "review_author_text_color",
+      "label": "Review Author Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "review_author_border_width",
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Author Border Width",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "review_author_border_style",
+      "label": "Review Author Border Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "review_author_border_color",
+      "label": "Review Author Border Color",
+      "default": "#3b82f6"
+    },
+    {
+      "type": "range",
+      "id": "review_author_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Author Border Radius",
+      "default": 50,
+      "info": "Control the roundness of the review author badge (0 = square, 50 = fully rounded)"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star Color",
+      "default": "#fbbf24"
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Star Size",
+      "default": 16,
+      "info": "Size of the rating stars (applies to all devices)"
+    },
+    {
+      "type": "range",
+      "id": "star_margin_right",
+      "min": -5,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Star Margin Right",
+      "default": 0,
+      "info": "Space between star icons"
+    },
+    {
+      "type": "color",
+      "id": "review_quote_color",
+      "label": "Review Quote Color",
+      "default": "#374151"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "video_testimonial",
+      "name": "Video Testimonial",
+      "settings": [
+        { "type": "header", "content": "Video Content" },
+        { "type": "video", "id": "video_file", "label": "Shopify Hosted Video" },
+        { "type": "image_picker", "id": "video_thumbnail", "label": "Video Thumbnail/Poster (4:5 Ratio)" },
+        { "type": "text", "id": "video_alt", "label": "Video Alt Text", "default": "Customer testimonial video" },
+        { "type": "text", "id": "video_text", "label": "Text on Video", "info": "Text overlay shown on the video." },
+
+        { "type": "header", "content": "Review Content" },
+        { "type": "range", "id": "rating", "min": 1, "max": 5, "step": 1, "label": "Star Rating", "default": 5 },
+        { "type": "textarea", "id": "review_quote", "label": "Review Quote" },
+        { "type": "text", "id": "review_author", "label": "Review Author" },
+
+        { "type": "header", "content": "Product Card" },
+        { "type": "checkbox", "id": "show_product_card", "label": "Show Product Card", "default": true },
+        { "type": "product", "id": "product", "label": "Select Product" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video Testimonials",
+      "settings": {},
+      "blocks": [
+        {
+          "type": "video_testimonial",
+          "settings": {
+            "rating": 5,
+            "review_quote": "Oh wouah, c'était très intense! Tu pars direct dans une autre dimension... J'ai envie d'y retourner, j'ai adoré, c'était vraiment cool!",
+            "review_author": "Haidar"
+          }
+        },
+        {
+          "type": "video_testimonial",
+          "settings": {
+            "rating": 5,
+            "review_quote": "Complètement wow! Un peu la même sensation qu'un saut en chute libre ou quand on prend une décharge d'adrénaline.",
+            "review_author": "Julie"
+          }
+        },
+        {
+          "type": "video_testimonial",
+          "settings": {
+            "video_text": "Quand ça ralentissait, ça ralentissait.",
+            "rating": 5,
+            "review_quote": "Beaucoup de couleurs alors que la lumière est blanche, c'est ça qui est assez surprenant... La musique rythmait le visuel!",
+            "review_author": "Nathalie"
+          }
+        },
+        {
+          "type": "video_testimonial",
+          "settings": {
+            "video_text": "J'avais comme une sensation",
+            "rating": 5,
+            "review_quote": "Oh pardon, wouah. J'avais jamais vécu ce genre de moment. J'étais comme un oiseau qui volait. C'était hyper agréable de ressentir ça!",
+            "review_author": "Aurélie"
+          }
+        },
+        {
+          "type": "video_testimonial",
+          "settings": {
+            "video_text": "J'ai pu me sentir soit plus créative.",
+            "rating": 5,
+            "review_quote": "C'est fou à quel point c'est différent d'u programme à l'autre... Magique, pour moi l'expérience était magique.",
+            "review_author": "Priscilla"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

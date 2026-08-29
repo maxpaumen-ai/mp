@@ -1,0 +1,786 @@
+{% comment %}
+  VANHOUTEN LIVING — Categories 3.0
+  Premium asymmetrische categorie-sectie
+  Vervang hiermee de volledige inhoud van je huidige VHL categorie-sectie.
+{% endcomment %}
+
+<section
+  id="VHLCategories3-{{ section.id }}"
+  class="vhl-categories-3"
+  style="
+    --vhl-bg: {{ section.settings.background_color }};
+    --vhl-text: {{ section.settings.text_color }};
+    --vhl-muted: {{ section.settings.muted_text_color }};
+    --vhl-card-text: {{ section.settings.card_text_color }};
+    --vhl-gap: {{ section.settings.grid_gap }}px;
+    --vhl-radius: {{ section.settings.border_radius }}px;
+    --vhl-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+    --vhl-zoom: {{ section.settings.hover_zoom | divided_by: 100.0 | plus: 1 }};
+    --vhl-large-height: {{ section.settings.large_card_height }}px;
+    --vhl-small-height: {{ section.settings.small_card_height }}px;
+  "
+>
+  <div class="vhl-categories-3__inner">
+    <header class="vhl-categories-3__header vhl-header-{{ section.settings.heading_alignment }}">
+      {% if section.settings.eyebrow != blank %}
+        <p class="vhl-categories-3__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {% endif %}
+
+      {% if section.settings.heading != blank %}
+        <h2 class="vhl-categories-3__heading">{{ section.settings.heading | escape }}</h2>
+      {% endif %}
+
+      {% if section.settings.intro != blank %}
+        <p class="vhl-categories-3__intro">{{ section.settings.intro | escape }}</p>
+      {% endif %}
+    </header>
+
+    <div class="vhl-categories-3__grid">
+      {% for block in section.blocks %}
+        {% assign card_url = block.settings.link | default: routes.all_products_collection_url %}
+        {% assign card_class = 'vhl-categories-3__card' %}
+
+        {% if forloop.index == 1 %}
+          {% assign card_class = card_class | append: ' vhl-card-featured' %}
+        {% elsif forloop.index == 4 %}
+          {% assign card_class = card_class | append: ' vhl-card-wide' %}
+        {% else %}
+          {% assign card_class = card_class | append: ' vhl-card-standard' %}
+        {% endif %}
+
+        <a
+          href="{{ card_url }}"
+          class="{{ card_class }}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="vhl-categories-3__media">
+            {% if block.settings.image != blank %}
+              {{
+                block.settings.image
+                | image_url: width: 2200
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '480, 720, 960, 1200, 1600, 2000, 2200',
+                  sizes: '(max-width: 749px) 88vw, (max-width: 1100px) 50vw, 50vw',
+                  alt: block.settings.heading
+              }}
+            {% else %}
+              {{ 'collection-1' | placeholder_svg_tag: 'vhl-categories-3__placeholder' }}
+            {% endif %}
+
+            <span class="vhl-categories-3__shade"></span>
+          </div>
+
+          <div class="vhl-categories-3__content">
+            {% if section.settings.show_kicker and block.settings.kicker != blank %}
+              <span class="vhl-categories-3__kicker">{{ block.settings.kicker | escape }}</span>
+            {% endif %}
+
+            <h3 class="vhl-categories-3__title">{{ block.settings.heading | escape }}</h3>
+
+            {% if section.settings.show_link %}
+              <span class="vhl-categories-3__link">
+                {{ block.settings.link_label | escape }}
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 12h13M13 7l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            {% endif %}
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+  #VHLCategories3-{{ section.id }} {
+    width: 100%;
+    background: var(--vhl-bg);
+    color: var(--vhl-text);
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__inner {
+    width: min(100%, {{ section.settings.max_width }}px);
+    margin: 0 auto;
+    padding:
+      {{ section.settings.padding_top }}px
+      {{ section.settings.horizontal_padding }}px
+      {{ section.settings.padding_bottom }}px;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__header {
+    max-width: 980px;
+    margin-bottom: {{ section.settings.header_spacing }}px;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-header-center {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__eyebrow,
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__heading,
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__intro {
+    margin: 0;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__eyebrow {
+    margin-bottom: 14px;
+    color: var(--vhl-muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .17em;
+    text-transform: uppercase;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__heading {
+    font-size: clamp(38px, 5.4vw, {{ section.settings.heading_size }}px);
+    font-weight: {{ section.settings.heading_weight }};
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__intro {
+    max-width: 680px;
+    margin-top: 22px;
+    color: var(--vhl-muted);
+    font-size: {{ section.settings.intro_size }}px;
+    line-height: 1.7;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-header-center .vhl-categories-3__intro {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--vhl-gap);
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: var(--vhl-radius);
+    background: #ddd;
+    color: var(--vhl-card-text);
+    text-decoration: none;
+    isolation: isolate;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-card-featured {
+    grid-column: span 7;
+    height: var(--vhl-large-height);
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-card-standard {
+    grid-column: span 5;
+    height: calc((var(--vhl-large-height) - var(--vhl-gap)) / 2);
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-card-wide {
+    grid-column: span 12;
+    height: var(--vhl-small-height);
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__media img,
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 900ms cubic-bezier(.2,.7,.2,1);
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__shade {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        to top,
+        rgba(0,0,0,.78) 0%,
+        rgba(0,0,0,.22) 46%,
+        rgba(0,0,0,0) 76%
+      );
+    opacity: var(--vhl-overlay);
+    transition: opacity 300ms ease;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__content {
+    position: absolute;
+    z-index: 2;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: {{ section.settings.content_padding }}px;
+    transition: transform 300ms ease;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__kicker {
+    display: inline-block;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    opacity: .86;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__title {
+    max-width: 14ch;
+    margin: 0;
+    font-size: clamp(28px, 3vw, {{ section.settings.card_heading_size }}px);
+    font-weight: {{ section.settings.card_heading_weight }};
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-card-standard .vhl-categories-3__title {
+    font-size: clamp(24px, 2.3vw, {{ section.settings.small_card_heading_size }}px);
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-card-wide .vhl-categories-3__title {
+    max-width: none;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid currentColor;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__link svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 250ms ease;
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__card:hover .vhl-categories-3__media img {
+    transform: scale(var(--vhl-zoom));
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__card:hover .vhl-categories-3__content {
+    transform: translateY(-6px);
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__card:hover .vhl-categories-3__link svg {
+    transform: translateX(5px);
+  }
+
+  #VHLCategories3-{{ section.id }} .vhl-categories-3__card:hover .vhl-categories-3__shade {
+    opacity: calc(var(--vhl-overlay) + .08);
+  }
+
+  @media screen and (max-width: 1100px) {
+    #VHLCategories3-{{ section.id }} .vhl-card-featured,
+    #VHLCategories3-{{ section.id }} .vhl-card-standard,
+    #VHLCategories3-{{ section.id }} .vhl-card-wide {
+      grid-column: span 6;
+      height: {{ section.settings.tablet_card_height }}px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__inner {
+      padding:
+        {{ section.settings.mobile_padding_top }}px
+        16px
+        {{ section.settings.mobile_padding_bottom }}px;
+    }
+
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__header {
+      margin-bottom: {{ section.settings.mobile_header_spacing }}px;
+    }
+
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__intro {
+      margin-top: 16px;
+      font-size: 14px;
+    }
+
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__grid {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__card,
+    #VHLCategories3-{{ section.id }} .vhl-card-featured,
+    #VHLCategories3-{{ section.id }} .vhl-card-standard,
+    #VHLCategories3-{{ section.id }} .vhl-card-wide {
+      flex: 0 0 {{ section.settings.mobile_card_width }}%;
+      height: {{ section.settings.mobile_card_height }}px;
+      scroll-snap-align: start;
+    }
+
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__content {
+      padding: {{ section.settings.mobile_content_padding }}px;
+    }
+
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__title,
+    #VHLCategories3-{{ section.id }} .vhl-card-standard .vhl-categories-3__title {
+      max-width: 12ch;
+      font-size: {{ section.settings.mobile_card_heading_size }}px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__media img,
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__content,
+    #VHLCategories3-{{ section.id }} .vhl-categories-3__link svg {
+      transition: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "VHL Categories 3.0",
+  "tag": "section",
+  "class": "vhl-categories-3-section",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Inhoud"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Boventitel",
+      "default": "Ontdek onze collectie"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titel",
+      "default": "Rust begint bij de juiste details"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Introductie",
+      "default": "Ontdek zorgvuldig geselecteerde badkameraccessoires die vorm, functie en rust samenbrengen."
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Uitlijning kop",
+      "default": "center",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Gecentreerd" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_kicker",
+      "label": "Kleine tekst tonen",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_link",
+      "label": "Link tonen",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Kaarten"
+    },
+    {
+      "type": "range",
+      "id": "large_card_height",
+      "label": "Hoogte grote kaart",
+      "min": 560,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "default": 760
+    },
+    {
+      "type": "range",
+      "id": "small_card_height",
+      "label": "Hoogte brede kaart",
+      "min": 320,
+      "max": 620,
+      "step": 20,
+      "unit": "px",
+      "default": 420
+    },
+    {
+      "type": "range",
+      "id": "tablet_card_height",
+      "label": "Hoogte kaarten tablet",
+      "min": 380,
+      "max": 650,
+      "step": 10,
+      "unit": "px",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_height",
+      "label": "Hoogte kaarten mobiel",
+      "min": 420,
+      "max": 680,
+      "step": 20,
+      "unit": "px",
+      "default": 540
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_width",
+      "label": "Kaartbreedte mobiel",
+      "min": 78,
+      "max": 94,
+      "step": 1,
+      "unit": "%",
+      "default": 88
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "label": "Tekstruimte desktop",
+      "min": 22,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "default": 38
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding",
+      "label": "Tekstruimte mobiel",
+      "min": 18,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "label": "Ruimte tussen kaarten",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Afronding kaarten",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "hover_zoom",
+      "label": "Hover zoom",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "%",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Donkere overlay",
+      "min": 35,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 75
+    },
+    {
+      "type": "header",
+      "content": "Kleuren"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Achtergrondkleur",
+      "default": "#F7F4EF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Tekstkleur",
+      "default": "#242321"
+    },
+    {
+      "type": "color",
+      "id": "muted_text_color",
+      "label": "Secundaire tekstkleur",
+      "default": "#6E6962"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Tekstkleur kaarten",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Typografie"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Titelformaat desktop",
+      "min": 42,
+      "max": 92,
+      "step": 2,
+      "unit": "px",
+      "default": 68
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Titeldikte",
+      "default": "400",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "intro_size",
+      "label": "Introductiegrootte",
+      "min": 13,
+      "max": 21,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "card_heading_size",
+      "label": "Titel grote kaart",
+      "min": 28,
+      "max": 52,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "small_card_heading_size",
+      "label": "Titel kleine kaarten",
+      "min": 22,
+      "max": 42,
+      "step": 1,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_heading_size",
+      "label": "Categorietitel mobiel",
+      "min": 24,
+      "max": 38,
+      "step": 1,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "select",
+      "id": "card_heading_weight",
+      "label": "Categorietitel dikte",
+      "default": "500",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Afstanden"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximale breedte",
+      "min": 1100,
+      "max": 1800,
+      "step": 100,
+      "unit": "px",
+      "default": 1600
+    },
+    {
+      "type": "range",
+      "id": "horizontal_padding",
+      "label": "Ruimte links en rechts",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "label": "Ruimte onder kop",
+      "min": 30,
+      "max": 110,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "mobile_header_spacing",
+      "label": "Ruimte onder kop mobiel",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Ruimte boven desktop",
+      "min": 60,
+      "max": 180,
+      "step": 10,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Ruimte onder desktop",
+      "min": 60,
+      "max": 180,
+      "step": 10,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_top",
+      "label": "Ruimte boven mobiel",
+      "min": 30,
+      "max": 110,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_bottom",
+      "label": "Ruimte onder mobiel",
+      "min": 30,
+      "max": 110,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Categorie",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Afbeelding"
+        },
+        {
+          "type": "text",
+          "id": "kicker",
+          "label": "Kleine tekst",
+          "default": "Collectie"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Categorienaam",
+          "default": "Badkamersets"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Linktekst",
+          "default": "Bekijk collectie"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "VHL Categories 3.0",
+      "blocks": [
+        {
+          "type": "category",
+          "settings": {
+            "heading": "Badkamersets",
+            "link_label": "Bekijk badkamersets"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "heading": "Zeepdispensers",
+            "link_label": "Bekijk zeepdispensers"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "heading": "Zuignaphaken",
+            "link_label": "Bekijk zuignaphaken"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "heading": "Badkameropbergers",
+            "link_label": "Bekijk opbergers"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

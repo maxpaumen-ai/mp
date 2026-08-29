@@ -1,0 +1,136 @@
+{% comment %}
+  Global Border Helper Snippet
+
+  Usage:
+  {% render 'global-border-helper', element: 'card', custom_class: 'my-custom-card' %}
+  {% render 'global-border-helper', element: 'input' %}
+  {% render 'global-border-helper', element: 'container', section: section %}
+
+  Parameters:
+  - element: 'card', 'input', 'container', 'custom'
+  - custom_class: additional CSS class to apply
+  - section: section object for section-specific overrides
+  - use_global: force global styling (overrides section settings)
+  - no_global: force custom styling (ignores global settings)
+{% endcomment %}
+
+{% liquid
+  # Set default values
+  assign element_type = element | default: 'card'
+  assign use_global_borders = false
+  assign custom_classes = custom_class | default: ''
+
+  # First check if global border styling system is enabled
+  if settings.enable_global_border_styling
+    assign use_global_borders = true
+
+    # Then check for section-specific overrides
+    if section and section.settings.use_global_border_styling != blank
+      if section.settings.use_global_border_styling == false
+        assign use_global_borders = false
+      endif
+    endif
+  endif
+
+  # Force global or custom styling if specified
+  if use_global == true
+    assign use_global_borders = true
+  elsif no_global == true
+    assign use_global_borders = false
+  endif
+
+  # Build CSS classes based on element type and settings
+  assign border_classes = ''
+
+  if use_global_borders
+    case element_type
+      when 'card'
+        assign border_classes = border_classes | append: 'global-card-border '
+      when 'input'
+        assign border_classes = border_classes | append: 'global-input-border '
+      when 'container'
+        assign border_classes = border_classes | append: 'global-container-border '
+      when 'custom'
+        assign border_classes = border_classes | append: 'global-border '
+    endcase
+  else
+    # Global border system is disabled - use custom border classes
+    assign border_classes = border_classes | append: 'custom-borders '
+  endif
+
+  # Add any custom classes
+  if custom_classes != blank
+    assign border_classes = border_classes | append: custom_classes | append: ' '
+  endif
+
+  # Output the classes (remove trailing space)
+  assign border_classes = border_classes | strip
+%}
+
+{% comment %} Output the classes for use in templates {% endcomment %}
+class="{{ border_classes }}"
+
+{% comment %}
+  Also provide inline styles for more specific control when needed
+  Usage: {% render 'global-border-helper', output: 'styles', element: 'card' %}
+{% endcomment %}
+
+{% if output == 'styles' %}
+  {% if use_global_borders %}
+    style=" border-radius: var(--global-border-radius);
+    {% case element_type %}
+      {% when 'card' %}
+        border: var(--global-card-border);
+      {% when 'input' %}
+        border: var(--global-input-border);
+      {% when 'container' %}
+        border: var(--global-container-border);
+      {% else %}
+        border: var(--global-border-width) var(--global-border-style) var(--global-border-color);
+    {% endcase %}
+    "
+  {% endif %}
+{% endif %}
+
+{% comment %}
+  Provide CSS custom properties for dynamic styling
+  Usage: {% render 'global-border-helper', output: 'css-vars', element: 'card' %}
+{% endcomment %}
+
+{% if output == 'css-vars' %}
+  {% if use_global_borders %}
+    <style>
+      .{{ element_type }}-border-{{ section.id | default: 'global' }} {
+        --element-border-radius: var(--global-border-radius);
+        --element-border-width: var(--global-border-width);
+        --element-border-style: var(--global-border-style);
+        {% case element_type %}
+          {% when 'card' %}
+            --element-border-color: var(--global-card-border-color);
+          {% when 'input' %}
+            --element-border-color: var(--global-input-border-color);
+          {% when 'container' %}
+            --element-border-color: var(--global-container-border-color);
+          {% else %}
+            --element-border-color: var(--global-border-color);
+        {% endcase %}
+      }
+    </style>
+  {% endif %}
+{% endif %}
+
+{% comment %}
+  Helper for section schema (outputs JSON for border settings)
+  Usage: {% render 'global-border-helper', output: 'schema' %}
+{% endcomment %}
+
+{% if output == 'schema' %}
+  { "type": "header", "content": "Border Styling" }, { "type": "checkbox", "id": "use_global_border_styling", "label":
+  "Use Global Border Styling", "default": true, "info": "When enabled, elements will use theme's global border styling.
+  When disabled, use section-specific border settings." }, { "type": "range", "id": "custom_border_radius", "min": 0,
+  "max": 40, "step": 2, "unit": "px", "label": "Custom Border Radius", "default": 8, "info": "Only applies when 'Use
+  Global Border Styling' is disabled" }, { "type": "range", "id": "custom_border_width", "min": 0, "max": 10, "step": 1,
+  "unit": "px", "label": "Custom Border Width", "default": 1, "info": "Only applies when 'Use Global Border Styling' is
+  disabled" }, { "type": "color", "id": "custom_border_color", "label": "Custom Border Color", "default": "#e0e0e0",
+  "info": "Only applies when 'Use Global Border Styling' is disabled" }
+{% endif %}

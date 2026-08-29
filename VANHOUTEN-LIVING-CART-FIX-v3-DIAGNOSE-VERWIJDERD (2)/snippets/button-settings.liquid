@@ -1,0 +1,41 @@
+{% comment %}
+  Button Settings Snippet
+
+  Usage in section schema:
+  {% render 'button-settings', prefix: 'section_name' %}
+
+  This will generate:
+  - section_name_use_global_button_styling
+  - section_name_button_background_color
+  - section_name_button_text_color
+  - etc.
+{% endcomment %}
+
+{% assign prefix = prefix | default: 'button' %}
+
+{ "type": "header", "content": "Button Styling" }, { "type": "checkbox", "id": "{{ prefix }}_use_global_button_styling",
+"label": "Use Global Button Styling", "default": true, "info": "When enabled, buttons will use the global theme button
+settings. When disabled, you can customize button styling for this section." }, { "type": "header", "content": "Custom
+Button Settings" }, { "type": "paragraph", "content": "These settings only apply when 'Use Global Button Styling' is
+disabled. Note: Vertical padding and letter spacing always use global settings for consistency." }, { "type": "color",
+"id": "{{ prefix }}_background_color", "label": "Button Background Color", "default": "#EF4A65", "info": "Custom
+background color for buttons in this section" }, { "type": "color", "id": "{{ prefix }}_text_color", "label": "Button
+Text Color", "default": "#FFFFFF", "info": "Custom text color for buttons in this section" }, { "type": "color", "id": "
+{{- prefix -}}
+_hover_background_color", "label": "Button Hover Background Color", "default": "#D63953", "info": "Custom background
+color when hovering over buttons" }, { "type": "color", "id": "{{ prefix }}_hover_text_color", "label": "Button Hover
+Text Color", "default": "#FFFFFF", "info": "Custom text color when hovering over buttons" }, { "type": "range", "id": "
+{{- prefix -}}
+_border_radius", "min": 0, "max": 40, "step": 2, "unit": "px", "label": "Button Border Radius", "default": 8, "info":
+"Custom border radius for buttons in this section" },
+
+{ "type": "range", "id": "{{ prefix }}_font_size", "min": 10, "max": 24, "step": 1, "unit": "px", "label": "Button Font
+Size", "default": 14, "info": "Custom font size for button text" }, { "type": "select", "id": "
+{{- prefix -}}
+_font_weight", "label": "Button Font Weight", "options": [ {"value": "400", "label": "Regular"}, {"value": "500",
+"label": "Medium"}, {"value": "600", "label": "Semi-bold"}, {"value": "700", "label": "Bold"}, {"value": "800", "label":
+"Extra-bold"} ], "default": "700", "info": "Custom font weight for button text" }, { "type": "select", "id": "
+{{- prefix -}}
+_text_transform", "label": "Button Text Transform", "options": [ {"value": "none", "label": "None"}, {"value":
+"uppercase", "label": "UPPERCASE"}, {"value": "lowercase", "label": "lowercase"}, {"value": "capitalize", "label":
+"Capitalize"} ], "default": "none", "info": "Custom text transformation for button text" },

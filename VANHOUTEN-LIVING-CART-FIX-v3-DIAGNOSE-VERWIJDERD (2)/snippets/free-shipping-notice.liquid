@@ -1,0 +1,202 @@
+{% comment %}
+  Free Shipping Notice Snippet
+
+  Customization parameters:
+  - notice_text: Text before the date (default: "Get FREE shipping when you order by:")
+  - days_ahead: Number of days ahead to show as cutoff (default: 2)
+  - dot_color: Color of the animated dot (default: #4CAF50)
+  - highlight_color: Color of the FREE text (default: #4CAF50)
+  - text_color: Color of the regular text (default: #000000)
+  - date_color: Color specifically for the shipping date (default: #000000)
+  - font_size: Font size in pixels (default: 12)
+  - margin_top: Top margin in pixels (default: 0)
+  - margin_bottom: Bottom margin in pixels (default: 0)
+  - container_margin_top: Container top margin in pixels (default: 0)
+  - container_margin_bottom: Container bottom margin in pixels (default: 0)
+  - enable_animation: Enable the blinking dot animation (default: true)
+  - show_suffix: Show date suffix (st, nd, rd, th) (default: true)
+  - alignment: Alignment of content (left, center, right) (default: left)
+  - bg_color: Background color (default: #f5f5f5)
+  - border_radius: Border radius in pixels (default: 50)
+  - use_theme_colors: Whether the parent section is using theme colors (passed from section settings)
+{% endcomment %}
+
+{% assign final_margin_top = container_margin_top | default: margin_top | default: 0 %}
+{% assign final_margin_bottom = container_margin_bottom | default: margin_bottom | default: 0 %}
+
+<style>
+  .free-shipping-notice-container {
+    display: block !important;
+    width: 100% !important;
+    margin-top: {{ final_margin_top }}px !important;
+    margin-bottom: {{ final_margin_bottom }}px !important;
+    text-align: {% if alignment == 'center' %}center{% elsif alignment == 'right' %}right{% else %}left{% endif %} !important;
+  }
+
+  .free-shipping-notice-inner {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: {% if alignment == 'center' %}center{% elsif alignment == 'right' %}flex-end{% else %}flex-start{% endif %} !important;
+    width: auto !important;
+    {% if enable_background == false %}
+      padding: 0 !important;
+      background-color: transparent !important;
+    {% else %}
+      padding: 0px 11px !important;
+      background-color: {{ bg_color | default: "#f5f5f5" }} !important;
+    {% endif %}
+    border-radius: {{ border_radius | default: 50 }}px !important;
+    {% if block.settings.enable_border %}
+    border: {{ block.settings.border_width | default: 1 }}px {{ block.settings.border_style | default: 'solid' }} {{ block.settings.border_color | default: '#e5e5e5' }} !important;
+    {% endif %}
+  }
+
+  .free-shipping-banner {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: {% if alignment == 'center' %}center{% elsif alignment == 'right' %}flex-end{% else %}flex-start{% endif %} !important;
+    font-size: {{ font_size | default: 12 }}px !important;
+    letter-spacing: var(--letter-spacing-body);
+    line-height: 2 !important;
+    color: {{ text_color | default: "#000000" }} !important;
+  }
+
+  .free-shipping-banner,
+  .free-shipping-banner *,
+  .free-shipping-text,
+  .free-shipping-text * {
+    color: {{ text_color | default: "#000000" }} !important;
+  }
+
+  .free-shipping-dot {
+    width: 8px !important;
+    height: 8px !important;
+    background-color: {{ dot_color | default: "#4CAF50" }} !important;
+    border-radius: 50% !important;
+    margin: 0 6px 0 0 !important;
+    display: {% if enable_animation == false %}none{% else %}inline-block{% endif %} !important;
+    vertical-align: middle !important;
+    position: relative !important;
+    animation: free-shipping-blink 1s infinite linear !important;
+  }
+
+  .free-shipping-dot::after {
+    content: "" !important;
+    width: 8px !important;
+    height: 8px !important;
+    background-color: {{ dot_color | default: "#4CAF50" }} !important;
+    border-radius: 50% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: -1 !important;
+    animation: free-shipping-pulse 1s infinite cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+  }
+
+  .free-shipping-text {
+    display: inline-flex !important;
+    align-items: center !important;
+    vertical-align: middle !important;
+    flex-wrap: wrap !important;
+    justify-content: {% if alignment == 'center' %}center{% elsif alignment == 'right' %}flex-end{% else %}flex-start{% endif %} !important;
+  }
+
+  .free-shipping-highlight {
+    color: {{ highlight_color | default: "#4CAF50" }} !important;
+    font-weight: bold !important;
+    padding: 3px !important;
+    text-transform: uppercase !important;
+  }
+
+  .free-shipping-date {
+    font-weight: bold !important;
+    padding: 3px !important;
+    color: {{ date_color | default: text_color | default: "#000000" }} !important;
+  }
+
+  @keyframes free-shipping-blink {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes free-shipping-pulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  @media (max-width: 480px) {
+    .free-shipping-banner {
+      font-size: {{ font_size | minus: 1 | default: 11 }}px !important;
+    }
+
+    .free-shipping-text {
+      flex-wrap: wrap !important;
+    }
+  }
+</style>
+
+<div class="free-shipping-notice-container" {{ block.shopify_attributes }}>
+  <!-- Debug: text_color={{ text_color | default: "NOT_SET" }}, date_color={{ date_color | default: "NOT_SET" }} -->
+  <!-- Theme Debug: use_theme_colors={{ use_theme_colors | default: "NOT_SET" }} -->
+  <!-- Margin Debug: final_margin_top={{ final_margin_top }}, final_margin_bottom={{ final_margin_bottom }} -->
+  <div class="free-shipping-notice-inner">
+    <div class="free-shipping-banner">
+      {% if enable_animation != false %}<span class="free-shipping-dot"></span>{% endif %}
+      <span class="free-shipping-text">
+        {% if notice_text_before -%}
+          {{- notice_text_before -}}
+        {%- else -%}
+          Get <span class="free-shipping-highlight">FREE</span> shipping when you order by:
+        {%- endif %}
+
+        {% unless hide_delivery_date %}
+          {% assign custom_date_format = settings.free_shipping_notice_date_format | default: '' %}
+          {% assign today_timestamp = 'now' | date: '%s' | plus: 0 %}
+          {% assign offset_days = days_ahead | default: 2 %}
+          {% assign offset_seconds = offset_days | times: 86400 %}
+          {% assign delivery_timestamp = today_timestamp | plus: offset_seconds %}
+
+          <span
+            class="free-shipping-date"
+            {% if custom_date_format == '' %}
+              data-timestamp="{{ delivery_timestamp }}"
+              data-locale="{{ request.locale.iso_code }}"
+            {% endif %}
+          >
+            {%- if custom_date_format != '' -%}
+              {{- delivery_timestamp | date: custom_date_format -}}
+            {%- else -%}
+              {% comment %} Placeholder - JS will format this based on locale {% endcomment %}
+            {%- endif -%}
+          </span>
+        {% endunless %}
+
+        {% if notice_text_after %}
+          {{ notice_text_after }}
+        {% endif %}
+      </span>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const dateElement = document.querySelector('.free-shipping-date[data-timestamp]'); // Target only elements needing JS formatting
+    if (dateElement) {
+      try {
+        const timestamp = parseInt(dateElement.dataset.timestamp, 10) * 1000; // Convert Liquid seconds to JS milliseconds
+        const locale = dateElement.dataset.locale || 'en'; // Default to English if locale somehow missing
+        const jsDate = new Date(timestamp);
+
+        // Define formatting options (you could make these settings too, but starting simple)
+        const options = { month: 'long', day: 'numeric' };
+
+        const formatter = new Intl.DateTimeFormat(locale, options);
+        dateElement.textContent = formatter.format(jsDate);
+      } catch (error) {
+        console.error('Error formatting free shipping notice date:', error);
+        // Optionally display a fallback or leave the placeholder
+      }
+    }
+  });
+</script>

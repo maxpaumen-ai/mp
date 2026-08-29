@@ -1,0 +1,1914 @@
+{{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
+{% assign free_product_price = settings.product_free_amount | times: 100 %}
+{% assign free_shipping_price = settings.product_free_shipping | times: 100 %}
+<style>
+    #CartDrawer {
+      {% if settings.use_theme_colors_cart_drawer %}
+      --cart-drawer-primary-background-color: {{ settings.global_section_background_color | default: '#FFFFFF' }};
+      --cart-drawer-background-gradient: {{ settings.cart_drawer_bg_gradient | default: 'linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 100%)' }};
+      --cart-drawer-primary-text-color: {{ settings.global_section_text_color | default: '#121212' }};
+      --cart-drawer-header-background: {{ settings.global_section_background_color | default: '#f5f5f5' }}; /* Consider a subtle variation if needed */
+      --cart-drawer-item-saving-color: {{ settings.global_section_accent_1_color | default: '#EF4A65' }};
+      --cart-drawer-item-saving-background: {{ settings.global_section_accent_2_color | color_modify: 'alpha', 0.1 | default: 'rgba(0,0,0,0)' }}; /* Example: Accent 2 with low alpha */
+      --cart-drawer-checkout-button-background: {{ settings.global_section_accent_1_color | default: '#EF4A65' }};
+      --cart-drawer-checkout-button-text-color: {{ settings.global_section_button_text_color | default: '#FFFFFF' }};
+      --cart-drawer-fs-icon-default-color: {{ settings.global_section_accent_1_color | default: '#EF4A65' }}; /* Accent color 1 for default state */
+      --cart-drawer-fs-icon-active-color: {{ settings.global_section_background_color | default: '#FFFFFF' }}; /* Section background color for active state */
+      --cart-drawer-progress-active-color: {{ settings.global_section_accent_1_color | default: '#000000' }};
+      --cart-drawer-progress-inactive-color: #F2F2F2; /* Light gray at full opacity */
+      --cart-drawer-progress-active-icon-fill-color: {{ settings.global_section_button_text_color | default: '#FFFFFF' }}; /* Contrasting color for active icon */
+      --cart-drawer-shipping-protection-background: transparent; /* No background when theme colors are on */
+      --cart-drawer-shipping-protection-border-color: {{ settings.global_section_text_color | color_modify: 'alpha', 0.3 | default: '#A3A3A3' }};
+      --cart-drawer-shipping-protection-text-color: {{ settings.global_section_text_color | default: '#121212' }};
+      --cart-drawer-freq-bought-background: {{ settings.global_section_background_color | color_darken: 2 | default: '#EDEDED' }};
+      --cart-drawer-product-bg: {{ settings.global_section_background_color | default: '#FFFFFF' }};
+      --cart-drawer-footer-bg: {{ settings.global_section_background_color | default: '#FFFFFF' }}; /* Using exact global background color */
+      --cart-drawer-secondary-text: {{ settings.global_section_text_color | color_modify: 'alpha', 0.7 | default: '#707070' }};
+      --cart-drawer-accent-color: {{ settings.global_section_accent_1_color | default: '#EF4A65' }};
+      --cart-drawer-divider-color: {{ settings.global_section_text_color | color_modify: 'alpha', 0.1 | default: '#E5E5E5' }};
+      --cart-drawer-active-icon-color: {{ settings.global_section_accent_1_color | default: '#EF4A65' }};
+      {% else %}
+      --cart-drawer-primary-background-color: {{ settings.cart_drawer_primary_background_color | default: '#FFFFFF' }};
+      --cart-drawer-background-gradient: {{ settings.cart_drawer_bg_gradient | default: 'linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 100%)' }};
+      --cart-drawer-primary-text-color: {{ settings.cart_drawer_primary_text_color | default: '#121212' }};
+      --cart-drawer-header-background: {{ settings.cart_drawer_header_bg | default: '#f5f5f5' }};
+      --cart-drawer-item-saving-color: {{ settings.cart_drawer_item_saving_text | default: '#EF4A65' }};
+      --cart-drawer-item-saving-background: {{ settings.cart_drawer_item_saving_bg | default: 'rgba(0,0,0,0)' }};
+      --cart-drawer-checkout-button-background: {{ settings.cart_drawer_checkout_button_bg | default: '#121212' }};
+      --cart-drawer-checkout-button-text-color: {{ settings.cart_drawer_checkout_button_text | default: '#FFFFFF' }};
+      --cart-drawer-fs-icon-default-color: {{ settings.cart_drawer_fs_icon_default_color | default: '#808080' }};
+      --cart-drawer-fs-icon-active-color: {{ settings.cart_drawer_fs_icon_active_color | default: '#000000' }};
+      --cart-drawer-icons-active-bg: {{ settings.cart_drawer_icons_active_bg | default: '#000000' }};
+      --cart-drawer-progress-active-color: {{ settings.cart_drawer_progress_active_color | default: '#000000' }};
+      --cart-drawer-progress-inactive-color: {{ settings.cart_drawer_progress_inactive_color | default: '#ECECEC' }};
+      --cart-drawer-progress-active-icon-fill-color: {{ settings.cart_drawer_progress_active_icon_fill_color | default: '#FFFFFF' }};
+      --cart-drawer-shipping-protection-background: {{ settings.cart_drawer_shipping_protection_bg | default: '#F1F1F1' }};
+      --cart-drawer-shipping-protection-border-color: {{ settings.cart_drawer_shipping_protection_border | default: '#A3A3A3' }};
+      --cart-drawer-shipping-protection-text-color: {{ settings.cart_drawer_shipping_protection_text | default: '#121212' }};
+      --cart-drawer-freq-bought-background: {{ settings.cart_drawer_freq_bought_bg | default: '#EDEDED' }};
+      --cart-drawer-product-bg: {{ settings.cart_drawer_product_bg | default: '#FFFFFF' }};
+      --cart-drawer-footer-bg: {{ settings.cart_drawer_footer_bg | default: '#F8F8F8' }};
+      --cart-drawer-secondary-text: {{ settings.cart_drawer_secondary_text | default: '#707070' }};
+      --cart-drawer-accent-color: {{ settings.cart_drawer_accent_color | default: '#EF4A65' }};
+      --cart-drawer-divider-color: {{ settings.cart_drawer_divider_color | default: '#E5E5E5' }};
+      --cart-drawer-active-icon-color: {{ settings.cart_drawer_active_icon_color | default: '#EF4A65' }};
+      {% endif %}
+    }
+
+    /* Free Shipping Icon Colors */
+    .free-shipping-main svg path,
+    .free-shipping-main svg circle {
+      fill: var(--cart-drawer-fs-icon-default-color);
+    }
+
+    .free-shipping-main.free-shipping-main-color svg path,
+    .free-shipping-main.free-shipping-main-color svg circle {
+      fill: var(--cart-drawer-progress-active-icon-fill-color);
+    }
+
+    .drawer {
+      visibility: hidden;
+    }
+
+    /* Apply default color to inactive gift icon */
+    .free-gift-main svg path,
+    .free-gift-main svg circle { /* Assuming gift icon also might have circles */
+      fill: var(--cart-drawer-fs-icon-default-color);
+    }
+    .discounts {
+      font-size: 1rem;
+      display: flex
+      letter-spacing: var(--letter-spacing-body);
+      text-transform: uppercase;
+  ;
+      align-items: center;
+  }
+
+    /* Override global accent color for cart buttons */
+    .cart-drawer .quantity__button,
+    .cart-drawer .cart-remove-button {
+      background-color: transparent !important;
+      border-color: #E2E2E2 !important;
+      color: currentColor !important;
+    }
+
+    .cart-drawer .quantity__button:focus,
+    .cart-drawer .quantity__button:active,
+    .cart-drawer .cart-remove-button:focus,
+    .cart-drawer .cart-remove-button:active {
+      outline: none !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .cart-drawer quantity-input.quantity.cart-quantity .quantity__button:active,
+    .cart-drawer quantity-input.quantity.cart-quantity .quantity__button:focus {
+      background-color: #f5f5f5 !important;
+    }
+
+    .cart-drawer .cart-remove-button:hover,
+    .cart-drawer .cart-remove-button:active,
+    .cart-drawer .cart-remove-button:focus {
+      opacity: 0.8;
+      background-color: transparent !important;
+    }
+
+    /* IMPORTANT: Ensure the .gb-price-drawer-saving class always uses fixed colors regardless of theme settings */
+    /*
+    .gb-price-drawer-saving {
+      background:rgb(255, 237, 237) !important;
+      color: #FF1717 !important;
+    }
+    */
+
+    /* Apply custom cart drawer colors to specific elements */
+    .cart-drawer .drawer__header {
+      background-color: var(--cart-drawer-header-background);
+    }
+
+    .cart-drawer .cart-item {
+      background-color: var(--cart-drawer-product-bg);
+    }
+
+    .cart-drawer .drawer__footer {
+      background-color: var(--cart-drawer-footer-bg);
+      border-top-color: var(--cart-drawer-divider-color);
+    }
+
+    .cart-drawer .drawer__cart-items-wrapper .cart-items {
+      border-color: var(--cart-drawer-divider-color);
+    }
+
+    .cart-drawer .cart__checkout-button {
+      background-color: var(--cart-drawer-checkout-button-background) !important;
+      color: var(--cart-drawer-checkout-button-text-color) !important;
+      border-radius: {{ settings.cart_drawer_border_radius }}px !important;
+    }
+
+    /* Additional checkout button text color overrides */
+    .cart-drawer .cart__checkout-button,
+    .cart-drawer .cart__checkout-button *,
+    .cart-drawer .cart__checkout-button:hover,
+    .cart-drawer .cart__checkout-button:focus,
+    .cart-drawer .cart__checkout-button:active,
+    .cart-drawer .cart__checkout-button:visited,
+    .cart-drawer button[name="add"],
+    .cart-drawer input[type="submit"][name="add"] {
+      color: var(--cart-drawer-checkout-button-text-color) !important;
+    }
+
+    /* Ensure checkout button text elements don't inherit other colors */
+    .cart-drawer .cart__checkout-button span,
+    .cart-drawer .cart__checkout-button .loading__spinner,
+    .cart-drawer .cart__checkout-button .icon {
+      color: var(--cart-drawer-checkout-button-text-color) !important;
+    }
+
+    .cart-drawer .cart-item__price-wrapper,
+    .cart-drawer .totals__subtotal-value,
+    .cart-drawer .price--end {
+      color: var(--cart-drawer-secondary-text);
+    }
+
+    /* Apply accent color to final price */
+    .cart-drawer .cart-item__final-price.product-option,
+    .cart-drawer strong.cart-item__final-price {
+      color: var(--cart-drawer-accent-color) !important;
+    }
+
+    /* Apply accent color to toggle switch */
+    .cart-drawer .gb-shipping-protection-button input:checked + .slider {
+      background-color: var(--cart-drawer-accent-color) !important;
+    }
+
+    /* Apply accent color to toggle switch on focus */
+    .cart-drawer .gb-shipping-protection-button input:focus + .slider {
+      box-shadow: 0 0 1px var(--cart-drawer-accent-color) !important;
+    }
+
+    .cart-drawer .free-product-progress-bar {
+      border-color: var(--cart-drawer-divider-color);
+    }
+
+    .cart-drawer .free-product-progress-bar progress::-webkit-progress-value {
+      background-color: var(--cart-drawer-progress-active-color);
+    }
+
+    .cart-drawer .free-product-progress-bar progress::-webkit-progress-bar {
+      background-color: var(--cart-drawer-progress-inactive-color);
+    }
+
+    .cart-drawer .free-product-progress-bar progress {
+      color: var(--cart-drawer-progress-active-color);
+      background-color: var(--cart-drawer-progress-inactive-color);
+    }
+
+    .cart-drawer .gb-shipping-protection {
+      background-color: var(--cart-drawer-shipping-protection-background);
+      border-color: var(--cart-drawer-shipping-protection-border-color);
+    }
+
+    .cart-drawer .gb-shipping-protection-icontext h2,
+    .cart-drawer .gb-shipping-protection-icontext p {
+      color: var(--cart-drawer-shipping-protection-text-color) !important;
+    }
+
+    /* Removed frequently bought background color per user request */
+    /*
+    .cart-drawer product-info.gb-main-freq-bg-color {
+      background-color: var(--cart-drawer-freq-bought-background);
+    }
+    */
+
+    /* Cart item image border radius customization */
+    .cart-drawer .cart-item__image,
+    .cart-drawer .cart-item__image-container {
+      border-radius: {{ settings.cart_drawer_image_border_radius }}px !important;
+    }
+
+    {% comment %} Cart Customization Mode - Developer Mode {% endcomment %}
+    {% if settings.cart_customization_mode %}
+    /* Cart Customization Mode: Keep drawer always visible for easier theme development */
+    cart-drawer.drawer {
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    cart-drawer .cart-drawer__overlay {
+      background-color: rgba(0, 0, 0, 0.1) !important;
+      pointer-events: none !important;
+    }
+
+    cart-drawer .drawer__inner {
+      transform: translateX(0) !important;
+      transition: none !important;
+    }
+    {% endif %}
+
+    .cart-drawer .cart-item__discounted-prices s,
+    .cart-drawer s.cart-item__old-price {
+      color: var(--cart-drawer-secondary-text);
+    }
+
+    .cart-drawer h2.gb-30day-back {
+      color: {{ settings.money_back_guarantee_color | default: 'var(--cart-drawer-primary-text-color)' }};
+    }
+
+    /* Cart Drawer Payment Icons */
+    .cart-drawer-payment-icons {
+      margin-top: 4px;
+      padding: 0px 0;
+      border-top: 1px solid rgba(var(--color-foreground), 0.1);
+    }
+
+    /* Override desktop flex layout for cart drawer to stack payment icons below button */
+    .cart-drawer .cart__ctas {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0 !important;
+    }
+
+    .cart-drawer-payment-icons .payment-icons {
+      margin: 0;
+    }
+
+    .cart-drawer-payment-icons .payment-icons__wrapper {
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .cart-drawer-payment-icons .payment-icon svg {
+      height: {{ settings.payment_icon_height | default: 24 }}px;
+      width: auto;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    @media screen and (max-width: 749px) {
+      .cart-drawer-payment-icons {
+        margin-top: 4px;
+        padding: 0px 0;
+      }
+
+      .cart-drawer-payment-icons .payment-icons__wrapper {
+        gap: 6px;
+      }
+
+      .cart-drawer-payment-icons .payment-icon svg {
+        height: {{ settings.payment_icon_height | default: 24 | times: 0.8 }}px;
+      }
+    }
+
+    /* Fix quantity popover to use cart drawer colors instead of global theme colors */
+    .cart-drawer quantity-popover .quantity {
+      background: var(--cart-drawer-primary-background-color) !important;
+      color: var(--cart-drawer-primary-text-color) !important;
+    }
+
+    /* Ensure quantity popover text elements inherit the cart drawer text color */
+    .cart-drawer quantity-popover .quantity__button,
+    .cart-drawer quantity-popover .quantity__input,
+    .cart-drawer quantity-popover .quantity__rules {
+      color: var(--cart-drawer-primary-text-color);
+    }
+
+    /* Override quantity popover button backgrounds to match cart drawer styling */
+    .cart-drawer quantity-popover .quantity__button {
+      background-color: transparent;
+      border-color: var(--cart-drawer-divider-color);
+    }
+
+    .cart-drawer quantity-popover .quantity__button:hover,
+    .cart-drawer quantity-popover .quantity__button:focus {
+      background-color: transparent;
+    }
+
+    /* Ensure all text elements in cart drawer use cart drawer text color */
+    .cart-drawer,
+    .cart-drawer *:not(.gb-price-drawer-saving):not(.cart-item__final-price):not(strong.cart-item__final-price):not(span.gb-cart-total-item):not(.cart__checkout-button):not(.cart__checkout-button *):not(.gb-shipping-protection):not(.gb-shipping-protection *):not(.free-shipping-main):not(.free-shipping-main *):not(.free-gift-main):not(.free-gift-main *):not(.social-proof-bar):not(.social-proof-bar *):not(.discount-banner):not(.discount-banner *) {
+      color: var(--cart-drawer-primary-text-color) !important;
+    }
+
+    /* Specific overrides for common text elements */
+    .cart-drawer .cart-item__name,
+    .cart-drawer .cart-item__details,
+    .cart-drawer .cart-item__totals,
+    .cart-drawer .cart-item .product-option,
+    .cart-drawer .drawer__heading,
+    .cart-drawer .totals,
+    .cart-drawer .tax-note,
+    .cart-drawer p,
+    .cart-drawer span,
+    .cart-drawer div {
+      color: var(--cart-drawer-primary-text-color);
+    }
+
+    /* Additional specific override for drawer heading */
+    .cart-drawer .drawer__heading {
+      color: var(--cart-drawer-primary-text-color) !important;
+    }
+
+    /* Make sure links respect cart drawer text color */
+    .cart-drawer a:not(.cart__checkout-button) {
+      color: var(--cart-drawer-primary-text-color);
+    }
+
+    /* Specific override for cart item name link */
+    .cart-drawer .gb-cart-drawer-lb td.cart-item__details a.cart-item__name,
+    .cart-drawer .cart-item__details a.cart-item__name,
+    .cart-drawer a.cart-item__name {
+      color: var(--cart-drawer-primary-text-color) !important;
+    }
+
+    /* Secondary text elements */
+    .cart-drawer .cart-item__price-wrapper *,
+    .cart-drawer .totals__subtotal-value *,
+    .cart-drawer .price--end * {
+      color: var(--cart-drawer-secondary-text);
+    }
+
+    /* Cart total item badge - inverted colors for contrast */
+    .cart-drawer span.gb-cart-total-item {
+      background-color: var(--cart-drawer-primary-text-color) !important;
+      color: var(--cart-drawer-primary-background-color) !important;
+    }
+
+    /* Checkout button text color override */
+    .cart-drawer .cart__checkout-button,
+    .cart-drawer .cart__checkout-button * {
+      color: var(--cart-drawer-checkout-button-text-color) !important;
+    }
+
+    /* Shipping protection text color override */
+    .cart-drawer .gb-shipping-protection,
+    .cart-drawer .gb-shipping-protection * {
+      color: var(--cart-drawer-shipping-protection-text-color) !important;
+    }
+
+    /* Free shipping icon color overrides - Default state */
+    .cart-drawer .free-shipping-main svg,
+    .cart-drawer .free-shipping-main svg path,
+    .cart-drawer .free-shipping-main svg circle,
+    .cart-drawer .free-shipping-main svg rect,
+    .cart-drawer .free-shipping-main svg polygon,
+    .cart-drawer .free-shipping-main svg g,
+    .cart-drawer .free-shipping-main i {
+      fill: var(--cart-drawer-fs-icon-default-color) !important;
+      color: var(--cart-drawer-fs-icon-default-color) !important;
+    }
+
+    /* Free shipping icon color overrides - Active state */
+    .cart-drawer .free-shipping-main.free-shipping-main-color svg,
+    .cart-drawer .free-shipping-main.free-shipping-main-color svg path,
+    .cart-drawer .free-shipping-main.free-shipping-main-color svg circle,
+    .cart-drawer .free-shipping-main.free-shipping-main-color svg rect,
+    .cart-drawer .free-shipping-main.free-shipping-main-color svg polygon,
+    .cart-drawer .free-shipping-main.free-shipping-main-color svg g,
+    .cart-drawer .free-shipping-main.free-shipping-main-color i {
+      fill: var(--cart-drawer-fs-icon-active-color) !important;
+      color: var(--cart-drawer-fs-icon-active-color) !important;
+    }
+
+    /* Free gift icon color override - Default state */
+    .cart-drawer .free-gift-main svg,
+    .cart-drawer .free-gift-main svg path,
+    .cart-drawer .free-gift-main svg circle,
+    .cart-drawer .free-gift-main svg rect,
+    .cart-drawer .free-gift-main svg polygon,
+    .cart-drawer .free-gift-main svg g,
+    .cart-drawer .free-gift-main i {
+      fill: var(--cart-drawer-fs-icon-default-color) !important;
+      color: var(--cart-drawer-fs-icon-default-color) !important;
+    }
+
+    /* Free gift icon color override - Active state */
+    .cart-drawer .free-gift-main.free-gift-main-color svg,
+    .cart-drawer .free-gift-main.free-gift-main-color svg path,
+    .cart-drawer .free-gift-main.free-gift-main-color svg circle,
+    .cart-drawer .free-gift-main.free-gift-main-color svg rect,
+    .cart-drawer .free-gift-main.free-gift-main-color svg polygon,
+    .cart-drawer .free-gift-main.free-gift-main-color svg g,
+    .cart-drawer .free-gift-main.free-gift-main-color i {
+      fill: var(--cart-drawer-fs-icon-active-color) !important;
+      color: var(--cart-drawer-fs-icon-active-color) !important;
+    }
+
+    /* Social proof bar color overrides */
+    .cart-drawer .social-proof-bar {
+      {% if settings.use_theme_colors_cart_drawer %}
+        background-color: {{ settings.global_section_accent_1_color }} !important;
+      {% else %}
+        background-color: {{ settings.social_proof_bg_color }} !important;
+      {% endif %}
+    }
+
+    .cart-drawer .social-proof-bar__icon {
+      {% if settings.use_theme_colors_cart_drawer %}
+        color: {{ settings.global_section_background_color }} !important;
+      {% else %}
+        color: {{ settings.social_proof_icon_color }} !important;
+      {% endif %}
+    }
+
+    .cart-drawer .social-proof-bar__icon svg,
+    .cart-drawer .social-proof-bar__icon svg path,
+    .cart-drawer .social-proof-bar__icon svg circle,
+    .cart-drawer .social-proof-bar__icon svg rect,
+    .cart-drawer .social-proof-bar__icon svg polygon,
+    .cart-drawer .social-proof-bar__icon i {
+      {% if settings.use_theme_colors_cart_drawer %}
+        fill: {{ settings.global_section_background_color }} !important;
+        color: {{ settings.global_section_background_color }} !important;
+      {% else %}
+        fill: {{ settings.social_proof_icon_color }} !important;
+        color: {{ settings.social_proof_icon_color }} !important;
+      {% endif %}
+    }
+
+    .cart-drawer .social-proof-bar__text {
+      {% if settings.use_theme_colors_cart_drawer %}
+        color: {{ settings.global_section_background_color }} !important;
+      {% else %}
+        color: {{ settings.social_proof_text_color }} !important;
+      {% endif %}
+    }
+
+    /* Discount banner color overrides */
+    .cart-drawer .discount-banner {
+      {% if settings.use_theme_colors_cart_drawer %}
+        background-color: {{ settings.global_section_accent_2_color }} !important;
+        color: {{ settings.global_section_text_color }} !important;
+      {% else %}
+        background-color: {{ settings.discount_banner_bg_color }} !important;
+        color: {{ settings.discount_banner_text_color }} !important;
+      {% endif %}
+    }
+
+    .cart-drawer .discount-banner .discount-banner-text,
+    .cart-drawer .discount-banner .discount-banner-bold,
+    .cart-drawer .discount-banner .celebration-icon {
+      {% if settings.use_theme_colors_cart_drawer %}
+        color: {{ settings.global_section_text_color }} !important;
+      {% else %}
+        color: {{ settings.discount_banner_text_color }} !important;
+      {% endif %}
+      letter-spacing: var(--letter-spacing-body);
+    }
+
+    /* Item saving badge colors - customizable when theme colors are off */
+    .gb-price-drawer-saving {
+      {% if settings.use_theme_colors_cart_drawer %}
+        background:rgb(255, 238, 238) !important;
+        color: #FF1717 !important;
+      {% else %}
+        background-color: var(--cart-drawer-item-saving-background) !important;
+        color: var(--cart-drawer-item-saving-color) !important;
+      {% endif %}
+    }
+
+    /* NOTE: .gb-price-drawer-saving colors are now handled conditionally near the end of the style block */
+
+    /* Apply custom cart drawer colors to specific elements */
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .spin-animation {
+    display: none;
+    position: absolute;
+    height: 15px;
+    width: 15px;
+    border: solid;
+    border-radius: calc(infinity * 1px);
+    border-width: 2px;
+    border-color: rgba(0, 0, 0, 0.3);
+    border-top-color: #fff;
+    animation: var(--animate-spin);
+  }
+
+  .gb-shipping-protection-button .spin-animation {
+    top: 6px;
+    left: 5px;
+    height: 15px;
+    width: 15px;
+  }
+
+  .cart-drawer .gb-shipping-protection .complete-check {
+    display: none;
+    color: white !important;
+    position: absolute;
+    top: 4px;
+    left: 5px;
+    height: 15px;
+    width: 15px;
+  }
+
+  button.quantity__button, button.cart-remove-button, .gb-shipping-protection-button {
+    position: relative;
+  }
+
+  button.cart-remove-button {
+    width: 60px;
+  }
+
+  .quantity__button .spin-animation {
+    top: 7px;
+    left: 4px;
+  }
+
+  .cart-item__quantity .spin-animation {
+    display: none;
+  }
+</style>
+
+{% if settings.cart_customization_mode %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const cartDrawer = document.querySelector('cart-drawer');
+
+      if (cartDrawer && cartDrawer.classList.contains('customization-mode')) {
+        // Force open the cart drawer
+        if (typeof cartDrawer.open === 'function') {
+          cartDrawer.open();
+        }
+
+        // Override the close method to prevent closing in customization mode
+        if (typeof cartDrawer.close === 'function') {
+          const originalClose = cartDrawer.close;
+          cartDrawer.close = function () {
+            // Prevent closing when customization mode is active
+            return false;
+          };
+        }
+
+        // Disable overlay clicks
+        const overlay = cartDrawer.querySelector('.cart-drawer__overlay');
+        if (overlay) {
+          overlay.style.pointerEvents = 'none';
+        }
+
+        // Add click handlers to close buttons to show a message instead
+        const closeButtons = cartDrawer.querySelectorAll('.drawer__close');
+        closeButtons.forEach((button) => {
+          button.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            alert('Cart Customization Mode is active. Disable it in Theme Settings > Cart Drawer to allow closing.');
+          });
+        });
+
+        // Keep the drawer visible even if cart becomes empty
+        const observer = new MutationObserver(function (mutations) {
+          if (cartDrawer.classList.contains('is-empty')) {
+            setTimeout(() => {
+              if (typeof cartDrawer.open === 'function') {
+                cartDrawer.open();
+              }
+            }, 100);
+          }
+        });
+
+        observer.observe(cartDrawer, {
+          attributes: true,
+          attributeFilter: ['class'],
+        });
+      }
+    });
+  </script>
+{% endif %}
+
+<cart-drawer class="drawer{% if cart == empty %} is-empty{% endif %}{% if settings.cart_customization_mode %} customization-mode{% endif %}">
+  <div id="CartDrawer" class="gb-cart-drawer-lb cart-drawer">
+    <div id="CartDrawer-Overlay" class="cart-drawer__overlay"></div>
+    <div
+      class="drawer__inner gradient"
+      {{ block.shopify_attributes }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="{{ 'sections.cart.title' | t }}"
+      tabindex="-1"
+      style="background: var(--cart-drawer-background-gradient); background-color: var(--cart-drawer-primary-background-color); color: var(--cart-drawer-primary-text-color);"
+    >
+      {%- if cart == empty -%}
+        <style>
+          .free-product-progress-bar-main {
+            display: none !important;
+          }
+          .gb-shipping-protection {
+            display: none;
+          }
+          h2.gb-30day-back {
+            display: none;
+          }
+          .cart__ctas {
+            display: none;
+          }
+          .drawer__footer {
+            display: none;
+          }
+        </style>
+        <div class="drawer__inner-empty">
+          <div class="cart-drawer__warnings center{% if settings.cart_drawer_collection != blank %} cart-drawer__warnings--has-collection{% endif %}">
+            <div class="cart-drawer__empty-content">
+              <h2 class="cart__empty-text">{{ 'sections.cart.empty' | t }}</h2>
+              <button
+                class="drawer__close"
+                type="button"
+                onclick="this.closest('cart-drawer').close()"
+                aria-label="{{ 'accessibility.close' | t }}"
+              >
+                <span class="svg-wrapper">
+                  {{- 'icon-close.svg' | inline_asset_content -}}
+                </span>
+              </button>
+              <a href="{{ routes.all_products_collection_url }}" class="button">
+                {{ 'general.continue_shopping' | t }}
+              </a>
+
+              {%- if shop.customer_accounts_enabled and customer == null -%}
+                <p class="cart__login-title h3">{{ 'sections.cart.login.title' | t }}</p>
+                <p class="cart__login-paragraph">
+                  {{ 'sections.cart.login.paragraph_html' | t: link: routes.account_login_url }}
+                </p>
+              {%- endif -%}
+            </div>
+          </div>
+          {%- if settings.cart_drawer_collection != blank -%}
+            <div class="cart-drawer__collection">
+              {% render 'card-collection', card_collection: settings.cart_drawer_collection, columns: 1 %}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+      <div class="drawer__header">
+        <h2 class="drawer__heading">
+          {{ 'sections.cart.title' | t -}}
+          <span class="gb-cart-total-item">{{ cart.item_count }}</span>
+        </h2>
+        <button
+          class="drawer__close"
+          type="button"
+          onclick="this.closest('cart-drawer').close()"
+          aria-label="{{ 'accessibility.close' | t }}"
+        >
+          <span class="svg-wrapper">
+            {{- 'icon-close.svg' | inline_asset_content -}}
+          </span>
+        </button>
+      </div>
+
+      {% comment %} Discount Banner - Start {% endcomment %}
+      {% if settings.show_discount_banner and cart != empty %}
+        {% liquid
+          assign total_compare_at_price = 0
+          assign discount_amount = 0
+
+          for item in cart.items
+            if item.variant.compare_at_price > item.variant.price
+              assign compare_at_line_price = item.variant.compare_at_price | times: item.quantity
+              assign total_compare_at_price = total_compare_at_price | plus: compare_at_line_price
+            else
+              assign total_compare_at_price = total_compare_at_price | plus: item.final_line_price
+            endif
+          endfor
+
+          if total_compare_at_price > cart.total_price
+            assign discount_amount = total_compare_at_price | minus: cart.total_price
+          endif
+
+          if settings.use_theme_colors_cart_drawer
+            assign banner_bg_color = settings.global_section_accent_2_color
+            assign banner_text_color = settings.global_section_accent_1_color
+          else
+            assign banner_bg_color = settings.discount_banner_bg_color
+            assign banner_text_color = settings.discount_banner_text_color
+          endif
+        %}
+
+        {% comment %} Always show the banner regardless of discount amount {% endcomment %}
+        <div class="discount-banner" style="background-color: {{ banner_bg_color }}; color: {{ banner_text_color }};">
+          {% if settings.discount_banner_icon != 'none' %}
+            <span class="celebration-icon">
+              {% case settings.discount_banner_icon %}
+                {% when 'celebration' %}
+                  🎉
+                {% when 'star' %}
+                  ⭐
+                {% when 'gift' %}
+                  🎁
+                {% when 'discount' %}
+                  💰
+              {% endcase %}
+            </span>
+          {% endif %}
+          <span class="discount-banner-text">
+            <span class="discount-banner-bold">{{ settings.discount_banner_prefix }}</span>
+            {{ settings.discount_banner_middle }}
+            <span class="discount-banner-bold">
+              {%- if discount_amount > 0 -%}
+                {{- discount_amount | money -}}
+              {%- else -%}
+                {{- settings.discount_banner_default_text | default: 'today' -}}
+              {%- endif -%}
+            </span>
+            {{ settings.discount_banner_suffix }}
+          </span>
+        </div>
+
+        <style>
+          .discount-banner {
+            padding: 10px 15px;
+            text-align: center;
+            font-family: var(--font-body-family);
+            font-size: 14px;
+            font-weight: 400;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 0px;
+          }
+
+          .celebration-icon {
+            display: inline-block;
+            margin-right: 5px;
+          }
+
+          .discount-banner-bold {
+            font-weight: var(--font-weight-bold, 700);
+          }
+
+          @media (max-width: 749px) {
+            .discount-banner {
+              padding: 8px 10px;
+              font-size: 13px;
+            }
+          }
+        </style>
+      {% endif %}
+      {% comment %} Discount Banner - End {% endcomment %}
+
+      {% if settings.show_social_proof_bar and cart != empty %}
+        <div class="social-proof-bar">
+          <div class="social-proof-bar__content">
+            {% if settings.social_proof_icon == 'stars' %}
+              <div class="social-proof-bar__icon social-proof-bar__icon--stars">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 16 16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  class="bi bi-stars"
+                >
+                  <path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.734 1.734 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.734 1.734 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.734 1.734 0 0 0 3.407 2.31l.387-1.162zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L10.863.1z"/>
+                </svg>
+              </div>
+            {% elsif settings.social_proof_icon == 'star' %}
+              <div class="social-proof-bar__icon social-proof-bar__icon--star">
+                <svg width="18" height="17" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 0L11.0206 6.21885H17.5595L12.2694 10.0623L14.2901 16.2812L9 12.4377L3.70993 16.2812L5.73056 10.0623L0.440492 6.21885H6.97937L9 0Z" fill="currentColor"/>
+                </svg>
+              </div>
+            {% elsif settings.social_proof_icon == 'checkmark' %}
+              <div class="social-proof-bar__icon social-proof-bar__icon--checkmark">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6.75012 12.1275L3.62262 9L2.55762 10.0575L6.75012 14.25L15.7501 5.25L14.6926 4.1925L6.75012 12.1275Z" fill="currentColor"/>
+                </svg>
+              </div>
+            {% elsif settings.social_proof_icon == 'lock' %}
+              <div class="social-proof-bar__icon social-proof-bar__icon--lock">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 12.75C9.45 12.75 9.83125 12.5938 10.1438 12.2812C10.4563 11.9688 10.6125 11.5875 10.6125 11.1375C10.6125 10.6875 10.4563 10.3062 10.1438 9.99375C9.83125 9.68125 9.45 9.525 9 9.525C8.55 9.525 8.16875 9.68125 7.85625 9.99375C7.54375 10.3062 7.3875 10.6875 7.3875 11.1375C7.3875 11.5875 7.54375 11.9688 7.85625 12.2812C8.16875 12.5938 8.55 12.75 9 12.75ZM13.5 6H12.375V4.5C12.375 3.675 12.0688 2.9685 11.4562 2.3865C10.8437 1.8055 10.1025 1.515 9.22505 1.515C8.34755 1.515 7.6063 1.8055 7.00005 2.3865C6.3938 2.9685 6.09005 3.675 6.09005 4.5V6H4.5C4.0875 6 3.7345 6.147 3.441 6.441C3.147 6.7345 3 7.0875 3 7.5V15C3 15.4125 3.147 15.7655 3.441 16.059C3.7345 16.353 4.0875 16.5 4.5 16.5H13.5C13.9125 16.5 14.2655 16.353 14.559 16.059C14.853 15.7655 15 15.4125 15 15V7.5C15 7.0875 14.853 6.7345 14.559 6.441C14.2655 6.147 13.9125 6 13.5 6ZM7.5 4.5C7.5 4.0875 7.647 3.7345 7.941 3.441C8.2345 3.147 8.5875 3 9 3C9.4125 3 9.7655 3.147 10.059 3.441C10.353 3.7345 10.5 4.0875 10.5 4.5V6H7.5V4.5Z" fill="currentColor"/>
+                </svg>
+              </div>
+            {% elsif settings.social_proof_icon == 'truck' %}
+              <div class="social-proof-bar__icon social-proof-bar__icon--truck">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19.5 8.25H16.5V4.5C16.5 3.675 16.2365 2.9745 15.7095 2.3985C15.1835 1.824 14.55 1.5 13.8 1.5H4.2C3.45 1.5 2.8155 1.824 2.2905 2.3985C1.7645 2.9745 1.5 3.675 1.5 4.5V15.75C1.5 16.125 1.6245 16.4375 1.8735 16.6875C2.1245 16.9365 2.437 17.061 2.8125 17.061H3.75C3.75 17.836 4.0315 18.4865 4.5945 19.0125C5.1585 19.5375 5.85 19.8 6.6735 19.8C7.499 19.8 8.1905 19.5375 8.7525 19.0125C9.3155 18.4865 9.597 17.836 9.597 17.061H14.439C14.439 17.836 14.7205 18.4865 15.2835 19.0125C15.8455 19.5375 16.537 19.8 17.358 19.8C18.1815 19.8 18.8735 19.5375 19.4355 19.0125C19.9985 18.4865 20.28 17.836 20.28 17.061H21.187C21.562 17.061 21.875 16.9365 22.125 16.6875C22.375 16.4375 22.5 16.125 22.5 15.75V11.25C22.5 11.125 22.475 10.986 22.425 10.836C22.375 10.686 22.3125 10.5625 22.2375 10.4625L19.9875 8.2125C19.8875 8.1125 19.7635 8.0365 19.6155 7.9845C19.4685 7.9335 19.33 7.908 19.1925 7.908L19.5 8.25ZM6.75 18C6.3375 18 5.9845 17.853 5.691 17.559C5.397 17.2655 5.25 16.9125 5.25 16.5C5.25 16.0875 5.397 15.7345 5.691 15.441C5.9845 15.147 6.3375 15 6.75 15C7.1625 15 7.5155 15.147 7.809 15.441C8.103 15.7345 8.25 16.0875 8.25 16.5C8.25 16.9125 8.103 17.2655 7.809 17.559C7.5155 17.853 7.1625 18 6.75 18ZM18.75 12H22.5L19.5 9V12H18.75ZM17.25 18C16.8375 18 16.4845 17.853 16.191 17.559C15.897 17.2655 15.75 16.9125 15.75 16.5C15.75 16.0875 15.897 15.7345 16.191 15.441C16.4845 15.147 16.8375 15 17.25 15C17.6625 15 18.0155 15.147 18.309 15.441C18.603 15.7345 18.75 16.0875 18.75 16.5C18.75 16.9125 18.603 17.2655 18.309 17.559C18.0155 17.853 17.6625 18 17.25 18Z" fill="currentColor"/>
+                </svg>
+              </div>
+            {% elsif settings.social_proof_icon == 'users' %}
+              <div class="social-proof-bar__icon social-proof-bar__icon--users">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14.6875 9.0625C15.75 9.0625 16.625 8.1875 16.625 7.125C16.625 6.0625 15.75 5.1875 14.6875 5.1875C13.625 5.1875 12.75 6.0625 12.75 7.125C12.75 8.1875 13.625 9.0625 14.6875 9.0625ZM7 8.5C8.375 8.5 9.4375 7.4375 9.4375 6.0625C9.4375 4.6875 8.375 3.625 7 3.625C5.625 3.625 4.5625 4.6875 4.5625 6.0625C4.5625 7.4375 5.625 8.5 7 8.5ZM14.6875 10.625C13.3125 10.625 10.5625 11.3125 10.5625 12.6875V14.25H18.8125V12.6875C18.8125 11.3125 16.0625 10.625 14.6875 10.625ZM7 10.0625C5.25 10.0625 1.75 10.9375 1.75 12.6875V14.25H7V12.6875C7 12.125 7.1875 10.875 8.8125 9.9375C8.1875 9.375 7.4375 9.0625 7 9.0625V10.0625Z" fill="currentColor"/>
+                </svg>
+              </div>
+            {% endif %}
+            <div class="social-proof-bar__text">
+              {{ settings.social_proof_text }}
+            </div>
+          </div>
+        </div>
+
+        <style>
+          .social-proof-bar {
+            background-color: {{ settings.social_proof_bg_color }};
+            padding: 8px 15px;
+            text-align: center;
+          }
+
+          .social-proof-bar__content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+          }
+
+          .social-proof-bar__icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: {{ settings.social_proof_icon_color }};
+          }
+
+          .social-proof-bar__text {
+            color: {{ settings.social_proof_text_color }};
+            font-size: 14px;
+            font-weight: 500;
+          }
+
+          @media (max-width: 749px) {
+            .social-proof-bar {
+              padding: 8px 10px;
+            }
+
+            .social-proof-bar__text {
+              font-size: 13px;
+            }
+          }
+        </style>
+      {% endif %}
+
+      <cart-drawer-items
+        {% if cart == empty %}
+          class=" is-empty"
+        {% endif %}
+      >
+        {% if settings.product_free_show == true %}
+          <div class="free-product-progress-bar-main">
+            <div class="free-product-progress-bar-successfull">
+              {% assign total_pending_value = free_shipping_price | minus: cart.total_price %}
+              {% assign freeproduct = free_product_price | minus: cart.total_price %}
+
+              {% if freeproduct > total_pending_value %}
+                {% if cart.total_price >= free_shipping_price and cart.total_price >= free_product_price %}
+                  {% comment %}🎉 Hooray!{% endcomment %}
+                  {%- if free_shipping_price > 0 %}
+                    You've earned <strong>Free Shipping</strong>
+                  {%- else %}
+                    You've earned <strong>{{ settings.product_free_id.title }}</strong>
+                  {%- endif %}
+                {% elsif freeproduct
+                  and cart.total_price <= free_product_price
+                  and cart.total_price >= free_shipping_price
+                %}
+                  You're {{ freeproduct | money_without_trailing_zeros }} away
+                  <strong>{{ settings.product_free_id.title }}</strong>
+                {% elsif free_shipping_price > 0 %}
+                  You're {{ total_pending_value | money_without_trailing_zeros }} away <strong>Free Shipping</strong>
+                {% endif %}
+              {% else %}
+                {% if cart.total_price >= free_product_price and cart.total_price >= free_shipping_price %}
+                  {% comment %}🎉 Hooray!{% endcomment %}
+                  {% if free_shipping_price > 0 %}
+                    You've earned <strong>Free Shipping</strong>
+                  {%- else %}
+                    You've earned <strong>{{ settings.product_free_id.title }}</strong>
+                  {%- endif %}
+                {% elsif cart.total_price <= free_shipping_price
+                  and cart.total_price >= free_product_price
+                  and free_shipping_price > 0
+                %}
+                  Your {{ total_pending_value | money_without_trailing_zeros }} away <strong>Free Shipping</strong>
+                {% else %}
+                  Your {{ freeproduct | money_without_trailing_zeros }} away
+                  <strong>{{ settings.product_free_id.title }}</strong>
+                {% endif %}
+              {% endif %}
+            </div>
+            <div class="free-product-progress-bar">
+              {% comment %}<span>{{ 000 | money_without_trailing_zeros}}</span> {% endcomment %}
+              {% assign products_divider = free_product_price | minus: free_shipping_price | divided_by: 2 %}
+              {% assign products_minus = free_product_price | minus: free_shipping_price %}
+              {% if freeproduct > free_shipping_price and free_shipping_price > 0 %}
+                {% if cart.total_price <= free_shipping_price %}
+                  <progress
+                    id="file"
+                    value="{{ cart.total_price }}"
+                    max="{{ free_shipping_price | times: 2 }}"
+                  ></progress>
+                {% elsif free_product_price > 0 %}
+                  <progress id="file" value="{{ cart.total_price }}" max="{{free_product_price}}"></progress>
+                {% endif %}
+              {% else %}
+                {% if cart.total_price <= free_shipping_price and free_product_price > 0 %}
+                  <progress
+                    id="file"
+                    value="{{ cart.total_price }}"
+                    max="{{ free_product_price | times: 2 }}"
+                  ></progress>
+                {% else %}
+                  <progress id="file" value="{{ cart.total_price }}" max="{{free_shipping_price}}"></progress>
+                {% endif %}
+              {% endif %}
+              {% comment %}{{settings.product_free_amount | money_without_trailing_zeros}}{% endcomment %}
+              {% if free_shipping_price > 0 %}
+                <div class="free-shipping-main {% if cart.total_price  >=  free_shipping_price %} free-shipping-main-color {% endif %} {% if free_product_price > free_shipping_price %}first-gift{% else %}second-gift{% endif %}">
+                  {% case block.settings.free_shipping_icon_type %}
+                    {% when 'circle' %}
+                      {% render 'circle-icon' %}
+                    {% when 'custom' %}
+                      {% if block.settings.free_shipping_custom_icon %}
+                        <img src="{{ block.settings.free_shipping_custom_icon | image_url: width: 100 }}" alt="Free Shipping" width="30" height="30" loading="lazy">
+                      {% else %}
+                        {% render 'free-shipping-icon' %}
+                      {% endif %}
+                    {% else %}
+                      {% render 'free-shipping-icon' %}
+                  {% endcase %}
+                  <span class="reward-name">Free Shipping</span>
+                </div>
+              {% endif %}
+              {% if free_product_price > 0 %}
+                <div class="free-gift-main {% if cart.total_price  >=  free_product_price %} free-gift-main-color {% endif %} {% if free_product_price > free_shipping_price %}second-gift{% else %}first-gift{% endif %}">
+                  {% case block.settings.free_gift_icon_type %}
+                    {% when 'circle' %}
+                      {% render 'circle-icon' %}
+                    {% when 'custom' %}
+                      {% if block.settings.free_gift_custom_icon %}
+                        <img src="{{ block.settings.free_gift_custom_icon | image_url: width: 100 }}" alt="Free Gift" width="30" height="30" loading="lazy">
+                      {% else %}
+                        {% render 'free-gift-icon' %}
+                      {% endif %}
+                    {% else %}
+                      {% render 'free-gift-icon' %}
+                  {% endcase %}
+                  {% if settings.product_free_id != blank %}
+                    <span class="reward-name">{{ settings.product_free_id.title | escape }}</span>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+        <form
+          action="{{ routes.cart_url }}"
+          id="CartDrawer-Form"
+          class="cart__contents cart-drawer__form"
+          method="post"
+        >
+          <div id="CartDrawer-CartItems" class="drawer__contents js-contents">
+            {%- if cart != empty -%}
+              <div class="drawer__cart-items-wrapper">
+                <table class="cart-items" role="table">
+                  <tbody role="rowgroup">
+                    {%- for item in cart.items -%}
+                      <tr
+                        {% if item.id == settings.product_shipping_protection.selected_or_first_available_variant.id %}
+                          style="display:none;"
+                        {% endif %}
+                        id="CartDrawer-Item-{{ item.index | plus: 1 }}"
+                        class="cart-item {% if item.id == settings.product_free_id.selected_or_first_available_variant.id %} gb-find-remove-product{% endif %}"
+                        role="row"
+                      >
+                        <td class="cart-item__media" role="cell" headers="CartDrawer-ColumnProductImage">
+                          {% if item.image %}
+                            {% comment %} Leave empty space due to a:empty CSS display: none rule {% endcomment %}
+                            <a href="{{ item.url }}" class="cart-item__link" tabindex="-1" aria-hidden="true"> </a>
+                            <img
+                              class="cart-item__image"
+                              src="{{ item.image | image_url: width: 300 }}"
+                              alt="{{ item.image.alt | escape }}"
+                              loading="lazy"
+                              width="150"
+                              height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                            >
+                          {% endif %}
+                        </td>
+
+                        {% if item.variant.compare_at_price > item.variant.price %}
+                          {% assign saving = item.variant.compare_at_price
+                            | minus: item.variant.price
+                            | times: item.quantity
+                          %}
+                          {% assign total_saving = saving | plus: total_saving %}
+                        {% endif %}
+
+                        <td class="cart-item__details" role="cell" headers="CartDrawer-ColumnProduct">
+                          {%- if settings.show_vendor -%}
+                            <p class="caption-with-letter-spacing light">{{ item.product.vendor }}</p>
+                          {%- endif -%}
+                          <div class="cart-details-wrapper">
+                            <div class="cart-items-wrapper">
+                              <a href="{{ item.url }}" class="cart-item__name h4 break">
+                                {{- item.product.title | escape -}}
+                              </a>
+
+                              {% comment %}
+                                {%- if item.original_price != item.final_price -%}
+                                  <div class="cart-item__discounted-prices">
+                                    <span class="visually-hidden">
+                                      {{ 'products.product.price.regular_price' | t }}
+                                    </span>
+                                    <s class="cart-item__old-price product-option">
+                                      {{- item.original_price | money -}}
+                                    </s>
+                                    <span class="visually-hidden">
+                                      {{ 'products.product.price.sale_price' | t }}
+                                    </span>
+                                    <strong class="cart-item__final-price product-option">
+                                      {{ item.final_price | money }}
+                                    </strong>
+                                  </div>
+                                {%- else -%}
+                                  <div class="product-option">
+
+                                    {% if item.variant.compare_at_price > item.variant.price %}
+                                       <s class="cart-item__old-price product-option">
+                                         {{- item.variant.compare_at_price | money -}}
+                                        </s>
+                                        <strong class="cart-item__final-price product-option">
+                                        {{ item.final_price | money }}
+                                      </strong>
+                                     {% else %}
+                                       {{ item.original_price | money }}
+                                    {% endif %}
+                                    {% if item.variant.compare_at_price > item.variant.price %}
+                                    	{% assign saving_2 = item.variant.compare_at_price | minus: item.variant.price  %}
+                                    	{% assign total_saving_2 = saving | plus: total_saving %}
+                                      {{ saving_2 | money }}
+                                    {% endif %}
+                                  </div>
+                                {%- endif -%}
+                              {% endcomment %}
+                              {%- if item.product.has_only_default_variant == false
+                                or item.properties.size != 0
+                                or item.selling_plan_allocation != null
+                              -%}
+                                <dl>
+                                  {%- if item.product.has_only_default_variant == false -%}
+                                    {%- for option in item.options_with_values -%}
+                                      <div class="product-option">
+                                        <dt>{{ option.name }}:</dt>
+                                        <dd>
+                                          {{ option.value -}}
+                                          {%- unless forloop.last %}, {% endunless %}
+                                        </dd>
+                                      </div>
+                                    {%- endfor -%}
+                                  {%- endif -%}
+
+                                  {%- for property in item.properties -%}
+                                    {%- assign property_first_char = property.first | slice: 0 -%}
+                                    {%- if property.last != blank and property_first_char != '_' -%}
+                                      <div class="product-option">
+                                        <dt>{{ property.first }}:</dt>
+                                        <dd>
+                                          {%- if property.last contains '/uploads/' -%}
+                                            <a
+                                              href="{{ property.last }}"
+                                              class="link"
+                                              target="_blank"
+                                              aria-describedby="a11y-new-window-message"
+                                            >
+                                              {{ property.last | split: '/' | last }}
+                                            </a>
+                                          {%- else -%}
+                                            {{ property.last }}
+                                          {%- endif -%}
+                                        </dd>
+                                      </div>
+                                    {%- endif -%}
+                                  {%- endfor -%}
+                                </dl>
+
+                                <p class="product-option">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                              {%- endif -%}
+                            </div>
+                            <div class="product-option">
+                              {% comment %}{{ item.original_price | money }}{% endcomment %}
+                              {% if item.variant.compare_at_price > item.variant.price %}
+                                <div class="gb-price-drawer">
+                                  <s class="cart-item__old-price product-option">
+                                    {{- item.variant.compare_at_price | times: item.quantity | money -}}
+                                  </s>
+                                  <strong class="cart-item__final-price product-option">
+                                    {{ item.final_line_price | money }}
+                                  </strong>
+                                </div>
+                              {% else %}
+                                <div class="gb-price-drawer">
+                                  {{ item.original_price | money }}
+                                </div>
+                              {% endif %}
+                              {% if item.variant.compare_at_price > item.variant.price %}
+                                {% assign saving_per_item = item.variant.compare_at_price | minus: item.variant.price %}
+                                {% assign total_saving = saving_per_item | times: item.quantity %}
+                                <div class="gb-price-drawer-saving">
+                                  {{ settings.save_text | default: 'SAVE' }}
+                                  {{ total_saving | money_without_trailing_zeros }}
+                                </div>
+                              {% endif %}
+                            </div>
+                          </div>
+                          {% comment %}
+                            {%- render 'loading-spinner' -%}
+                            <div class="cart-item__price-wrapper">
+                              {%- if item.original_line_price != item.final_line_price -%}
+                                <div class="cart-item__discounted-prices">
+                                  <span class="visually-hidden">
+                                    {{ 'products.product.price.regular_price' | t }}
+                                  </span>
+                                  <s class="cart-item__old-price price price--end">
+                                    {{ item.original_line_price | money }}
+                                  </s>
+                                  <span class="visually-hidden">
+                                    {{ 'products.product.price.sale_price' | t }}
+                                  </span>
+                                  <span class="price price--end">
+                                    {{ item.final_line_price | money }}
+                                  </span>
+                                </div>
+                              {%- else -%}
+                                <span class="price price--end">
+                                  {{ item.original_line_price | money }}
+                                </span>
+                              {%- endif -%}
+
+                              {%- if item.variant.available and item.unit_price_measurement -%}
+                                <div class="unit-price caption">
+                                  <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
+                                  {{ item.unit_price | money }}
+                                  <span aria-hidden="true">/</span>
+                                  <span class="visually-hidden"
+                                    >&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span
+                                  >
+                                  {%- if item.unit_price_measurement.reference_value != 1 -%}
+                                    {{- item.unit_price_measurement.reference_value -}}
+                                  {%- endif -%}
+                                  {{ item.unit_price_measurement.reference_unit }}
+                                </div>
+                              {%- endif -%}
+                            </div>
+                          {% endcomment %}
+
+                          {%- liquid
+                            assign has_qty_rules = false
+                            if item.variant.quantity_rule.increment > 1 or item.variant.quantity_rule.min > 1 or item.variant.quantity_rule.max != null
+                              assign has_qty_rules = true
+                            endif
+
+                            assign has_vol_pricing = false
+                            if item.variant.quantity_price_breaks.size > 0
+                              assign has_vol_pricing = true
+                            endif
+                          -%}
+                          <div
+                            class="cart-item__quantity {% if has_qty_rules or has_vol_pricing %} cart-item__quantity--info{% endif %}"
+                            role="cell"
+                            headers="CartDrawer-ColumnQuantity"
+                          >
+                            <quantity-popover>
+                              <div class="cart-item__quantity-wrapper quantity-popover-wrapper">
+                                <div
+                                  {% if item.id == settings.product_free_id.selected_or_first_available_variant.id %}
+                                    style="display:none;"
+                                  {% endif %}
+                                  class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}"
+                                >
+                                  <quantity-input class="quantity cart-quantity">
+                                    <button class="quantity__button" name="minus" type="button">
+                                      <span class="visually-hidden">
+                                        {{-
+                                          'products.product.quantity.decrease'
+                                          | t: product: item.product.title
+                                          | escape
+                                        -}}
+                                      </span>
+                                      <span class="svg-wrapper content">
+                                        {{- 'icon-minus.svg' | inline_asset_content -}}
+                                      </span>
+										                  <div class="spin-animation">
+                                        <span></span>
+                                      </div>
+                                    </button>
+                                    <input
+                                      class="quantity__input"
+                                      type="number"
+                                      data-quantity-variant-id="{{ item.variant.id }}"
+                                      name="updates[]"
+                                      value="{{ item.quantity }}"
+                                      {% # theme-check-disable %}
+                                      data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
+                                      min="1"
+                                      data-min="{{ item.variant.quantity_rule.min }}"
+                                      {% if item.variant.quantity_rule.max != null %}
+                                        max="{{ item.variant.quantity_rule.max }}"
+                                      {% endif %}
+                                      step="{{ item.variant.quantity_rule.increment }}"
+                                      {% # theme-check-enable %}
+                                      aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+                                      id="Drawer-quantity-{{ item.index | plus: 1 }}"
+                                      data-index="{{ item.index | plus: 1 }}"
+                                    >
+                                    <button class="quantity__button" name="plus" type="button">
+                                      <span class="visually-hidden">
+                                        {{-
+                                          'products.product.quantity.increase'
+                                          | t: product: item.product.title
+                                          | escape
+                                        -}}
+                                      </span>
+                                      <span class="svg-wrapper content">
+                                        {{- 'icon-plus.svg' | inline_asset_content -}}
+                                      </span>
+										<div class="spin-animation">
+                                        <span></span>
+                                      </div>
+                                    </button>
+                                  </quantity-input>
+                                  <cart-remove-button
+                                    id="CartDrawer-Remove-{{ item.index | plus: 1 }}"
+                                    data-index="{{ item.index | plus: 1 }}"
+                                  >
+                                    <button
+                                      type="button"
+                                      class="button button--tertiary cart-remove-button {% if item.id == settings.product_free_id.selected_or_first_available_variant.id %} gb-remove-product{% endif %}  {% if item.id == settings.product_shipping_protection.selected_or_first_available_variant.id %}  gb-remove-product-shipping-protection {% endif %}"
+                                      aria-label="{{ 'sections.cart.remove_title' | t: title: item.title | escape }}"
+                                      data-variant-id="{{ item.variant.id }}"
+                                    >
+                                      <span class="svg-wrapper gb-cart-del-img content">
+                                        {% comment %} {{- 'delete-icon.png' | inline_asset_content -}}{% endcomment %}
+                                        <svg
+                                          width="20"
+                                          height="20"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path d="M8 1.5V2.5H3C2.44772 2.5 2 2.94772 2 3.5V4.5C2 5.05228 2.44772 5.5 3 5.5H21C21.5523 5.5 22 5.05228 22 4.5V3.5C22 2.94772 21.5523 2.5 21 2.5H16V1.5C16 0.947715 15.5523 0.5 15 0.5H9C8.44772 0.5 8 0.947715 8 1.5Z" fill="currentColor"/>
+                                          <path d="M3.9231 7.5H20.0767L19.1344 20.2216C19.0183 21.7882 17.7135 23 16.1426 23H7.85724C6.28636 23 4.98148 21.7882 4.86544 20.2216L3.9231 7.5Z" fill="currentColor"/>
+                                        </svg>
+                                      </span>
+										<div class="spin-animation">
+                                        <span></span>
+                                      </div>
+                                    </button>
+                                  </cart-remove-button>
+                                </div>
+                                <ul
+                                  class="discounts list-unstyled"
+                                  role="list"
+                                  aria-label="{{ 'customer.order.discount' | t }}"
+                                >
+                                  {%- for discount in item.line_level_discount_allocations -%}
+                                    <li class="discounts__discount">
+                                      {{- 'icon-discount.svg' | inline_asset_content -}}
+                                      {{ discount.discount_application.title }}
+                                    </li>
+                                  {%- endfor -%}
+                                </ul>
+
+                                {% comment %}
+                                  {%- if item.original_price != item.final_price -%}
+                                    <div class="cart-item__discounted-prices">
+                                      <span class="visually-hidden">
+                                        {{ 'products.product.price.regular_price' | t }}
+                                      </span>
+                                      <s class="cart-item__old-price product-option">
+                                        {{- item.original_price | money -}}
+                                      </s>
+                                      <span class="visually-hidden">
+                                        {{ 'products.product.price.sale_price' | t }}
+                                      </span>
+                                      <strong class="cart-item__final-price product-option">
+                                        {{ item.final_line_price | money }}
+                                      </strong>
+                                    </div>
+                                  {%- else -%}
+
+                                  {%- endif -%}
+                                {% endcomment %}
+
+                                {% comment %}
+                                  <cart-remove-button
+                                    id="CartDrawer-Remove-{{ item.index | plus: 1 }}"
+                                    data-index="{{ item.index | plus: 1 }}"
+                                  >
+                                    <button
+                                      type="button"
+                                      class="button button--tertiary cart-remove-button {% if item.id == settings.product_free_id.selected_or_first_available_variant.id %} gb-remove-product{% endif %}"
+                                      aria-label="{{ 'sections.cart.remove_title' | t: title: item.title | escape }}"
+                                      data-variant-id="{{ item.variant.id }}"
+                                    >
+                                      <span class="svg-wrapper">
+                                        {{- 'icon-remove.svg' | inline_asset_content -}}
+                                      </span>
+                                    </button>
+                                  </cart-remove-button>
+                                {% endcomment %}
+                              </div>
+                              {%- if has_qty_rules or has_vol_pricing -%}
+                                <button
+                                  type="button"
+                                  class="quantity-popover__info-button quantity-popover__info-button--icon-with-label button button--tertiary"
+                                  aria-expanded="false"
+                                >
+                                  <span class="svg-wrapper">
+                                    {{- 'icon-info.svg' | inline_asset_content -}}
+                                  </span>
+                                  <span>
+                                    {%- if has_vol_pricing -%}
+                                      {{ 'products.product.volume_pricing.note' | t }}
+                                    {%- elsif has_qty_rules -%}
+                                      {{ 'products.product.quantity.note' | t }}
+                                    {%- endif -%}
+                                  </span>
+                                </button>
+                              {%- endif -%}
+                              {%- if has_vol_pricing or has_qty_rules -%}
+                                <div
+                                  class="cart-items__info global-settings-popup quantity-popover__info"
+                                  tabindex="-1"
+                                  hidden
+                                >
+                                  {%- if has_qty_rules == false -%}
+                                    <span class="volume-pricing-label caption">
+                                      {{- 'products.product.volume_pricing.title' | t -}}
+                                    </span>
+                                  {%- endif -%}
+                                  <div class="quantity__rules caption">
+                                    {%- if item.variant.quantity_rule.increment > 1 -%}
+                                      <span class="divider">
+                                        {{-
+                                          'products.product.quantity.multiples_of'
+                                          | t: quantity: item.variant.quantity_rule.increment
+                                        -}}
+                                      </span>
+                                    {%- endif -%}
+                                    {%- if item.variant.quantity_rule.min > 1 -%}
+                                      <span class="divider">
+                                        {{-
+                                          'products.product.quantity.min_of'
+                                          | t: quantity: item.variant.quantity_rule.min
+                                        -}}
+                                      </span>
+                                    {%- endif -%}
+                                    {%- if item.variant.quantity_rule.max != null -%}
+                                      <span class="divider">
+                                        {{-
+                                          'products.product.quantity.max_of'
+                                          | t: quantity: item.variant.quantity_rule.max
+                                        -}}
+                                      </span>
+                                    {%- endif -%}
+                                  </div>
+                                  <button
+                                    class="button-close button button--tertiary"
+                                    type="button"
+                                    aria-label="{{ 'accessibility.close' | t }}"
+                                  >
+                                    <span class="svg-wrapper">
+                                      {{- 'icon-close.svg' | inline_asset_content -}}
+                                    </span>
+                                  </button>
+                                  {%- if item.variant.quantity_price_breaks.size > 0 -%}
+                                    <volume-pricing class="parent-display">
+                                      <ul class="list-unstyled">
+                                        <li>
+                                          <span>{{ item.variant.quantity_rule.min }}+</span>
+                                          <span>{{ item.variant.price | money_with_currency }}/ea</span>
+                                        </li>
+                                        {%- for price_break in item.variant.quantity_price_breaks -%}
+                                          <li>
+                                            <span>
+                                              {{- price_break.minimum_quantity -}}
+                                              <span aria-hidden="true">+</span></span
+                                            >
+                                            <span>{{ price_break.price | money_with_currency }}/ea</span>
+                                          </li>
+                                        {%- endfor -%}
+                                      </ul>
+                                    </volume-pricing>
+                                  {%- endif -%}
+                                </div>
+                              {%- endif -%}
+
+                              <div
+                                id="CartDrawer-LineItemError-{{ item.index | plus: 1 }}"
+                                class="cart-item__error"
+                                role="alert"
+                                {% unless item.line_level_error %}
+                                  style="display: none;"
+                                {% endunless %}
+                              >
+                                <small class="cart-item__error-text">
+                                  {{ item.line_level_error }}
+                                </small>
+                                <span class="svg-wrapper">
+                                  {{- 'icon-error.svg' | inline_asset_content -}}
+                                </span>
+                              </div>
+                            </quantity-popover>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {% unless forloop.last %}
+                      {% endunless %}
+                    {%- endfor -%}
+                  </tbody>
+                </table>
+              </div>
+            {%- endif -%}
+
+            <p id="CartDrawer-LiveRegionText" class="visually-hidden" role="status"></p>
+            <p id="CartDrawer-LineItemStatus" class="visually-hidden" aria-hidden="true" role="status">
+              {{ 'accessibility.loading' | t }}
+            </p>
+          </div>
+
+          <div id="CartDrawer-CartErrors" role="alert"></div>
+        </form>
+      </cart-drawer-items>
+
+      <div class="drawer__footer">
+        {%- if settings.show_cart_note -%}
+          <details id="Details-CartDrawer">
+            <summary>
+              <span class="summary__title">
+                {{ 'sections.cart.note' | t }}
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </span>
+            </summary>
+            <cart-note class="cart__note field">
+              <label class="visually-hidden" for="CartDrawer-Note">{{ 'sections.cart.note' | t }}</label>
+              <textarea
+                id="CartDrawer-Note"
+                class="text-area text-area--resize-vertical field__input"
+                name="note"
+                placeholder="{{ 'sections.cart.note' | t }}"
+              >{{ cart.note }}</textarea>
+            </cart-note>
+          </details>
+        {%- endif -%}
+
+        <!-- Start blocks -->
+        <!-- Subtotals -->
+
+        <div class="cart-drawer__footer" style="display:none;" {{ block.shopify_attributes }}>
+          <div>
+            {%- if cart.cart_level_discount_applications.size > 0 -%}
+              <ul class="discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
+                {%- for discount in cart.cart_level_discount_applications -%}
+                  <li class="discounts__discount discounts__discount--end">
+                    {{- 'icon-discount.svg' | inline_asset_content -}}
+                    {{ discount.title | escape }}
+                    (-{{ discount.total_allocated_amount | money }})
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </div>
+
+          <div class="totals" role="status">
+            <h2 class="totals__total">
+              <p class="gb-totals-total-value" style="display:none;">{{ cart.total_price }}</p>
+              {{ 'sections.cart.estimated_total' | t }}
+            </h2>
+
+            <p class="totals__total-value">{{ cart.total_price | money_with_currency }}</p>
+          </div>
+
+          <small class="tax-note caption-large rte">
+            {%- if cart.duties_included and cart.taxes_included -%}
+              {%- if shop.shipping_policy.body == blank -%}
+                {{ 'sections.cart.duties_and_taxes_included_shipping_at_checkout_without_policy' | t }}
+              {%- else -%}
+                {{
+                  'sections.cart.duties_and_taxes_included_shipping_at_checkout_with_policy_html'
+                  | t: link: shop.shipping_policy.url
+                }}
+              {%- endif -%}
+            {%- elsif cart.duties_included == false and cart.taxes_included -%}
+              {%- if shop.shipping_policy.body == blank -%}
+                {{ 'sections.cart.taxes_included_shipping_at_checkout_without_policy' | t }}
+              {%- else -%}
+                {{
+                  'sections.cart.taxes_included_shipping_at_checkout_with_policy_html'
+                  | t: link: shop.shipping_policy.url
+                }}
+              {%- endif -%}
+            {%- elsif cart.duties_included and cart.taxes_included == false -%}
+              {%- if shop.shipping_policy.body == blank -%}
+                {{ 'sections.cart.duties_included_taxes_at_checkout_shipping_at_checkout_without_policy' | t }}
+              {%- else -%}
+                {{
+                  'sections.cart.duties_included_taxes_at_checkout_shipping_at_checkout_with_policy_html'
+                  | t: link: shop.shipping_policy.url
+                }}
+              {%- endif -%}
+            {%- elsif cart.duties_included == false and cart.taxes_included == false -%}
+              {%- if shop.shipping_policy.body == blank -%}
+                {{ 'sections.cart.taxes_at_checkout_shipping_at_checkout_without_policy' | t }}
+              {%- else -%}
+                {{
+                  'sections.cart.taxes_at_checkout_shipping_at_checkout_with_policy_html'
+                  | t: link: shop.shipping_policy.url
+                }}
+              {%- endif -%}
+            {%- endif -%}
+          </small>
+        </div>
+
+        {% capture get_shipping_pro_id %}
+  {% assign found = false %}
+  {%- for item in cart.items -%}
+    {% if item.id == settings.product_shipping_protection.selected_or_first_available_variant.id %}
+      {% assign found = true %}
+      checked
+      {% break %}
+    {% endif %}
+  {%- endfor -%}
+  {% if found == false %}
+    unchecked
+  {% endif %}
+{% endcapture %}
+        {% comment %}
+          {%- for item in cart.items -%}
+             {% if item.id == settings.product_shipping_protection.selected_or_first_available_variant.id %}
+                {% assign checked == true %}
+             {% endif %}
+           {% endfor %}
+           {% if checked %}
+               checked
+             {% else %}
+             unchecked
+           {% endif %}
+        {% endcomment %}
+        {% if settings.show_shipping_protection %}
+          <div class="gb-shipping-protection">
+            <div class="gb-shipping-protection-icon">
+              {% if settings.cart_drawer_sp_icon != blank %}
+                <img
+                  src="{{ settings.cart_drawer_sp_icon | image_url: width: 184 }}"
+                  alt="{{ settings.cart_drawer_sp_heading | default: 'Shipping Protection' | escape }}"
+                  width="46"
+                  height="46"
+                  loading="lazy"
+                  style="object-fit: contain;"
+                >
+              {% else %}
+                <svg
+                  width="46"
+                  height="46"
+                  viewBox="0 0 46 46"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                >
+                  <rect width="46" height="46" fill="url(#pattern0_1_81)"/>
+                  <defs>
+                  <pattern id="pattern0_1_81" patternContentUnits="objectBoundingBox" width="1" height="1">
+                  <use xlink:href="#image0_1_81" transform="scale(0.00195312)"/>
+                  </pattern>
+                  <image id="image0_1_81" width="512" height="512" preserveAspectRatio="none" xlink:href="data:image/png;base64,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"/>
+                  </defs>
+                </svg>
+              {% endif %}
+            </div>
+            <div class="gb-shipping-protection-icontext">
+              <h2>
+                {{ settings.cart_drawer_sp_heading | default: 'Shipping Protection' | escape }}
+                <span>
+                  {{- settings.product_shipping_protection.selected_or_first_available_variant.price | money -}}
+                </span>
+              </h2>
+              <p>
+                {{
+                  settings.cart_drawer_sp_text
+                  | default: 'Protect your order from damage, loss, or theft during shipping'
+                  | escape
+                }}
+              </p>
+            </div>
+            <div class="gb-shipping-protection-button">
+              <label class="switch {{ get_shipping_pro_id }}">
+                <input type="checkbox" {{ get_shipping_pro_id }}>
+                <span class="slider round"></span>
+				<div class="spin-animation">
+                  <span></span>
+                </div>
+                <div class="complete-check">
+                  <svg fill="#fff" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1743.858 267.012 710.747 1300.124 176.005 765.382 0 941.387l710.747 710.871 1209.24-1209.116z" fill-rule="evenodd"/>
+                  </svg>
+                </div>
+              </label>
+            </div>
+          </div>
+        {% endif %}
+        <!-- CTAs -->
+        {% if true %}
+          <div
+            class="totals gb-discounts-cart-values"
+            role="status"
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;"
+          >
+            <div class="totals__total">
+              {{ 'sections.cart.items_total' | t: item_count: cart.item_count }}
+            </div>
+            <div style="display: flex; align-items: baseline;">
+              {%- liquid
+                assign cart_total_compare_at_price = 0
+                for item_loop_var in cart.items
+                  assign item_price_for_calc = item_loop_var.variant.price
+                  assign item_display_price_before_any_discount = item_price_for_calc
+                  if item_loop_var.variant.compare_at_price and item_loop_var.variant.compare_at_price > item_price_for_calc
+                    assign item_display_price_before_any_discount = item_loop_var.variant.compare_at_price
+                  endif
+                  assign line_total_compare_price = item_display_price_before_any_discount | times: item_loop_var.quantity
+                  assign cart_total_compare_at_price = cart_total_compare_at_price | plus: line_total_compare_price
+                endfor
+              -%}
+
+              {% if cart_total_compare_at_price > cart.total_price %}
+                <s
+                  class="cart-item__old-price product-option"
+                  style="margin-right: 3px; font-size: 14px; color: currentColor; opacity: 0.7;"
+                >
+                  {{ cart_total_compare_at_price | money }}
+                </s>
+              {% endif %}
+
+              <div class="totals__total-value">
+                {{ cart.total_price | money }}
+              </div>
+            </div>
+            <p class="gb-totals-total-value" style="display:none;">{{ cart.total_price }}</p>
+          </div>
+        {% endif %}
+        <div class="cart__ctas" {{ block.shopify_attributes }}>
+          <button
+            type="submit"
+            id="CartDrawer-Checkout"
+            class="cart__checkout-button button"
+            name="checkout"
+            form="CartDrawer-Form"
+            {% if cart == empty %}
+              disabled
+            {% endif %}
+          >
+            <svg
+              class="icon icon-lock"
+              aria-hidden="true"
+              focusable="false"
+              role="presentation"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span class="button-text">
+              {{- settings.cart_drawer_checkout_button_label | default: 'SECURE CHECKOUT' | escape -}}
+            </span>
+          </button>
+
+          {%- if settings.show_cart_drawer_payment_icons -%}
+            <div class="cart-drawer-payment-icons">
+              {% render 'payment-icons' %}
+            </div>
+          {%- endif -%}
+        </div>
+        {% if settings.show_money_back_guarantee != false %}
+          <h2
+            class="gb-30day-back"
+            {% if settings.money_back_guarantee_color != blank %}
+              style="color: {{ settings.money_back_guarantee_color }};"
+            {% endif %}
+          >
+            {% case settings.money_back_guarantee_icon %}
+              {% when 'seal-check' %}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 256 256"
+                  fill="currentColor"
+                  width="18"
+                  height="18"
+                >
+                  <path d="M216,56v56c0,96-88,120-88,120S40,208,40,112V56a8,8,0,0,1,8-8H208A8,8,0,0,1,216,56Z" opacity="0.2"/><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34Z"/>
+                </svg>
+              {% when 'checkmark' %}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 256 256"
+                  fill="currentColor"
+                  width="18"
+                  height="18"
+                >
+                  <path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm-34.32,69.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/>
+                </svg>
+              {% when 'shield' %}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 256 256"
+                  fill="currentColor"
+                  width="18"
+                  height="18"
+                >
+                  <rect width="256" height="256" fill="none"/><path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-52.2,6.84-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/>
+                </svg>
+              {% else %}
+                <!-- No icon -->
+            {% endcase %}
+            {% if settings.money_back_guarantee_text contains '[days]' %}
+              {{
+                settings.money_back_guarantee_text
+                | replace: '[days]', settings.money_back_guarantee_days
+                | default: '30'
+              }}
+            {% else %}
+              {{ settings.money_back_guarantee_text | default: '30 Day Money Back Guarantee' }}
+            {% endif %}
+          </h2>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</cart-drawer>
+
+<script>
+  // Countdown timer is temporarily disabled
+  /*
+// Put the timer code in the global scope so it persists through cart refreshes
+(function() {
+  // Create a global timer tracker
+  window.cartTimerInterval = window.cartTimerInterval || null;
+  
+  // Initialize timer functionality
+  function setupCartTimer() {
+    // Only run if countdown banner is enabled
+    if (!{{ settings.enable_countdown_banner | json }}) return;
+
+    clearInterval(window.cartTimerInterval); // Clear any existing interval
+    
+    // Get timer element (may be new after a cart refresh)
+    let timerElement = document.getElementById("cart-timer");
+    const reservationTime = document.querySelector('.drawer-cart-reservation');
+    
+    // Exit if elements don't exist or cart is empty
+    if (!timerElement || !reservationTime) return;
+    
+    // Get or initialize duration from localStorage (in seconds)
+    let countdownDuration = parseInt(localStorage.getItem("countdownDuration"), 10);
+    let startTime = parseInt(localStorage.getItem("startTime"), 10);
+    
+    // If no duration in storage, set to default from settings
+    if (!countdownDuration) {
+      countdownDuration = {{ settings.countdown_duration_minutes | times: 60 | default: 300 }};
+    }
+    
+    // If we have a start time, calculate elapsed time
+    if (startTime) {
+      let elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+      countdownDuration = Math.max(0, countdownDuration - elapsedTime);
+    } else {
+      // Set new start time if none exists
+      localStorage.setItem("startTime", Date.now());
+    }
+    
+    // Exit if timer has expired
+    if (countdownDuration <= 0) {
+      localStorage.removeItem("countdownDuration");
+      localStorage.removeItem("startTime");
+      reservationTime.remove();
+      return;
+    }
+    
+    // Save the current duration to localStorage (for persistence)
+    localStorage.setItem("countdownDuration", countdownDuration);
+    
+    // Update the timer display
+    function updateTimerDisplay() {
+      // Get latest timer element (might have changed)
+      timerElement = document.getElementById("cart-timer");
+      
+      if (countdownDuration > 0) {
+        let minutes = Math.floor(countdownDuration / 60);
+        let seconds = countdownDuration % 60;
+        
+        if (timerElement) {
+          timerElement.textContent = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+        }
+        
+        countdownDuration--;
+        localStorage.setItem("countdownDuration", countdownDuration);
+      } else {
+        clearInterval(window.cartTimerInterval);
+        window.cartTimerInterval = null;
+        localStorage.removeItem("countdownDuration");
+        localStorage.removeItem("startTime");
+        
+        // Try to remove the banner if it exists
+        const banner = document.querySelector('.drawer-cart-reservation');
+        if (banner) banner.remove();
+      }
+    }
+    
+    // Run initially and start interval
+    updateTimerDisplay();
+    window.cartTimerInterval = setInterval(updateTimerDisplay, 1000);
+  }
+  
+  // Set up listeners for various events
+  document.addEventListener('DOMContentLoaded', setupCartTimer);
+  
+  // Handle cart updates - use setTimeout to let the DOM update first
+  const handleCartUpdate = () => setTimeout(setupCartTimer, 100);
+  
+  // Listen for standard cart events
+  document.addEventListener('cart:update', handleCartUpdate);
+  document.addEventListener('cart:change', handleCartUpdate);
+  document.addEventListener('cart-drawer:open', handleCartUpdate);
+  
+  // Additional listeners for AJAX/fetch requests that might update the cart
+  const originalFetch = window.fetch;
+  window.fetch = function(...args) {
+    return originalFetch.apply(this, args).then(response => {
+      // Check if this is a cart-related request
+      if (args[0] && (
+          args[0].includes('/cart/add') || 
+          args[0].includes('/cart/update') || 
+          args[0].includes('/cart/change')
+      )) {
+        console.log("this handle cart update being called")
+        handleCartUpdate();
+      }
+      return response;
+    });
+  };
+  
+  // Also attach to specific cart drawer elements for good measure
+  document.addEventListener('click', function(e) {
+    // Check if click is on quantity buttons or remove buttons
+    if (e.target.closest('.quantity__button') || 
+        e.target.closest('.cart-remove-button')) {
+      handleCartUpdate();
+    }
+  });
+})();
+*/
+</script>

@@ -1,0 +1,1749 @@
+{%- comment -%}
+  Removed duplicate Google Fonts loading - Should be handled globally in theme.liquid
+  Removed unused CSS asset reference - Deleted the incorrect section-statistics.css reference
+  Simplified color logic - Used simpler default filters instead of complex conditionals
+  Added accessibility features:
+  Added role="slider", aria-valuenow/min/max, and tabindex to slider button
+  Added keyboard navigation with arrow keys, Home, and End
+  Added focus styles for keyboard users
+  Added proper aria-label and role="region"
+  Fixed initialization guard - Added dataset.inited to prevent duplicate event listeners
+  Added proper image dimensions - Used actual image aspect ratios for width/height attributes
+  Removed !important flags - Improved CSS specificity
+  Added CSS variable fallbacks - For theme variables that might not be defined
+  Simplified class names - Removed section ID from most classes, used parent scoping instead
+  Added disabled_on restrictions - Prevented section from appearing in header/footer
+  Removed unused variables - Deleted the unused section_id variable
+{%- endcomment -%}
+
+{%- liquid
+  # Color customization logic with theme toggle
+  # Handle checkbox boolean properly (Shopify checkboxes: checked = 'true', unchecked = blank/false)
+  assign use_theme_colors = section.settings.use_theme_colors
+
+  # Core section colors with theme toggle logic
+  # Section-specific colors ALWAYS override when set, regardless of theme toggle
+  if section.settings.title_color != blank
+    assign title_color = section.settings.title_color
+  elsif use_theme_colors and settings.global_section_text_color != blank
+    assign title_color = settings.global_section_text_color
+  else
+    assign title_color = '#1f2937'
+  endif
+
+  if section.settings.description_color != blank
+    assign description_color = section.settings.description_color
+  elsif use_theme_colors and settings.global_section_text_color != blank
+    assign description_color = settings.global_section_text_color
+  else
+    assign description_color = '#374151'
+  endif
+
+  if section.settings.instructions_color != blank
+    assign instructions_color = section.settings.instructions_color
+  elsif use_theme_colors and settings.global_section_text_color != blank
+    assign instructions_color = settings.global_section_text_color
+  else
+    assign instructions_color = '#6b7280'
+  endif
+
+  if section.settings.section_background_color != blank
+    assign section_bg_color = section.settings.section_background_color
+  elsif use_theme_colors and settings.global_section_background_color != blank
+    assign section_bg_color = settings.global_section_background_color
+  else
+    assign section_bg_color = 'transparent'
+  endif
+
+  # Interactive element colors (always use custom settings first)
+  assign divider_line_color = section.settings.divider_line_color | default: '#ffffff'
+  assign slider_button_bg = section.settings.slider_button_bg | default: '#ffffff'
+  assign slider_button_border = section.settings.slider_button_border | default: '#f3f4f6'
+  assign slider_button_icon = section.settings.slider_button_icon | default: '#374151'
+  assign image_label_bg = section.settings.image_label_bg | default: 'rgba(255, 255, 255, 0.9)'
+  assign image_label_text = section.settings.image_label_text | default: '#1f2937'
+
+  assign before_image = section.settings.before_image
+  assign after_image = section.settings.after_image
+  assign section_title = section.settings.title | default: 'Image Comparison'
+  assign section_description = section.settings.description | default: 'See the stunning transformations our products deliver — real results from real customers.'
+  assign before_label = section.settings.before_label | default: 'Before'
+  assign after_label = section.settings.after_label | default: 'After'
+  assign instructions_text = section.settings.instructions_text | default: 'Drag the slider to see the difference'
+
+  assign container_max_width = section.settings.container_max_width | default: 600
+  assign border_radius = section.settings.border_radius | default: 8
+  assign initial_position = section.settings.initial_position | default: 50
+
+  # Font size customization - Desktop
+  assign title_font_size = section.settings.title_font_size | default: 32
+  assign description_font_size = section.settings.description_font_size | default: 16
+  assign instructions_font_size = section.settings.instructions_font_size | default: 14
+  assign label_font_size = section.settings.label_font_size | default: 12
+
+  # Font size customization - Mobile
+  assign title_font_size_mobile = section.settings.title_font_size_mobile | default: 24
+  assign description_font_size_mobile = section.settings.description_font_size_mobile | default: 14
+  assign instructions_font_size_mobile = section.settings.instructions_font_size_mobile | default: 12
+  assign label_font_size_mobile = section.settings.label_font_size_mobile | default: 11
+
+  # Image size customization
+  assign image_aspect_ratio = section.settings.image_aspect_ratio | default: '4/3'
+  assign image_min_height = section.settings.image_min_height | default: 250
+  assign image_max_height = section.settings.image_max_height | default: 500
+
+  # Mobile-specific image sizing
+  assign mobile_aspect_ratio = section.settings.mobile_aspect_ratio | default: '4/3'
+  assign mobile_min_height = section.settings.mobile_min_height | default: 200
+  assign mobile_max_height = section.settings.mobile_max_height | default: 400
+  assign mobile_container_width = section.settings.mobile_container_width | default: 320
+-%}
+
+<div
+  class="before-after-section before-after-{{ section.id }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}"
+  style="background-color: {{ section_bg_color }};"
+>
+  <div class="page-width">
+    <div
+      class="before-after-container {% if section.settings.contain_section %}contained{% endif %}"
+      style="
+        {% if section.settings.contain_section %}
+          padding: {{ section.settings.container_padding_top }}px {{ section.settings.container_padding_right }}px {{ section.settings.container_padding_bottom }}px {{ section.settings.container_padding_left }}px;
+          border-radius: {{ section.settings.container_border_radius }}px;
+          background: {{ section.settings.container_background | default: '#FFFFFF' }};
+          {% if section.settings.enable_border %}
+            border: {{ section.settings.border_width }}px {{ section.settings.border_style }} {{ section.settings.border_color }};
+          {% endif %}
+        {% endif %}
+      "
+    >
+      <div class="image-comparison-container{% if section.settings.enable_two_column_layout %} two-column-layout{% endif %}">
+        {% if section.settings.enable_two_column_layout %}
+          <!-- Two Column Layout -->
+          <div class="text-content">
+            {% if section_title != blank or section.settings.title_accent != blank %}
+              <h2 class="comparison-title">
+                {% if section_title != blank %}{{ section_title }}{% endif %}
+                {% if section.settings.title_accent != blank %}
+                  <span class="accent-text {% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+                    {{- section.settings.title_accent -}}
+                  </span>
+                {% endif %}
+              </h2>
+            {% endif %}
+
+            {% if section_description != blank %}
+              <p class="comparison-description">{{ section_description }}</p>
+            {% endif %}
+
+            {% if section.settings.additional_description != blank %}
+              <p class="comparison-additional-description">{{ section.settings.additional_description }}</p>
+            {% endif %}
+          </div>
+
+          <div class="image-content">
+            <div
+              class="slider-container"
+              id="sliderContainer{{ section.id }}"
+              role="region"
+              aria-label="Image comparison slider"
+            >
+        {% else %}
+          <!-- Single Column Layout (Original) -->
+          {% if section_title != blank or section.settings.title_accent != blank %}
+            <h2 class="comparison-title">
+              {% if section_title != blank %}{{ section_title }}{% endif %}
+              {% if section.settings.title_accent != blank %}
+                <span class="accent-text {% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+                  {{- section.settings.title_accent -}}
+                </span>
+              {% endif %}
+            </h2>
+          {% endif %}
+
+          {% if section_description != blank %}
+            <p class="comparison-description">{{ section_description }}</p>
+          {% endif %}
+
+          <div
+            class="slider-container"
+            id="sliderContainer{{ section.id }}"
+            role="region"
+            aria-label="Image comparison slider"
+          >
+        {% endif %}
+        <!-- After Image (Background) -->
+        <div class="after-image">
+          {% if after_image != blank %}
+            <img
+              src="{{ after_image | image_url: width: 1200 }}"
+              alt="{{ after_label }}"
+              loading="lazy"
+              width="1200"
+              height="{{ 1200 | divided_by: after_image.aspect_ratio | round }}"
+            >
+          {% else %}
+            <div class="placeholder-image">{{ 'image' | placeholder_svg_tag }}</div>
+          {% endif %}
+          <div class="image-label label-after">{{ after_label }}</div>
+        </div>
+
+        <!-- Before Image (Clipped) -->
+        <div class="before-image" id="beforeImage{{ section.id }}">
+          {% if before_image != blank %}
+            <img
+              src="{{ before_image | image_url: width: 1200 }}"
+              alt="{{ before_label }}"
+              loading="lazy"
+              width="1200"
+              height="{{ 1200 | divided_by: before_image.aspect_ratio | round }}"
+            >
+          {% else %}
+            <div class="placeholder-image">{{ 'image' | placeholder_svg_tag }}</div>
+          {% endif %}
+          <div class="image-label label-before">{{ before_label }}</div>
+        </div>
+
+        <!-- Vertical divider line -->
+        <div class="comparison-divider-line" id="sliderLine{{ section.id }}"></div>
+
+        <!-- Slider button -->
+        <div
+          class="slider-button"
+          id="sliderButton{{ section.id }}"
+          role="slider"
+          tabindex="0"
+          aria-valuenow="{{ initial_position }}"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-label="Image comparison slider control"
+        >
+          <svg class="slider-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 5L5 8M5 8L8 11M5 8H13M16 13L19 16M19 16L16 19M19 16H11" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      {% if instructions_text != blank %}
+        <div class="slider-instructions">
+          {{ instructions_text }}
+        </div>
+      {% endif %}
+
+      {% if section.settings.enable_two_column_layout %}
+        </div>
+        <!-- Close image-content -->
+      {% endif %}
+    </div>
+    <!-- Close slider-container or image-comparison-container -->
+
+    {% if section.settings.enable_two_column_layout %}
+      </div>
+      <!-- Close two-column layout container -->
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    (function() {
+      // Initialize slider functionality for section {{ section.id }}
+      const container = document.getElementById('sliderContainer{{ section.id }}');
+      if (!container || container.dataset.inited) return;
+      container.dataset.inited = 'true';
+      
+      let sliderPosition = {{ initial_position }}; // Start position from settings
+      let isDragging = false;
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchStartTime = 0;
+      let hasMovedHorizontally = false;
+      let isScrolling = null;
+      
+      // Get DOM elements
+      const beforeImage = document.getElementById('beforeImage{{ section.id }}');
+      const sliderLine = document.getElementById('sliderLine{{ section.id }}');
+      const sliderButton = document.getElementById('sliderButton{{ section.id }}');
+      
+      if (!beforeImage || !sliderLine || !sliderButton) return;
+      
+      // Update slider position
+      function updateSliderPosition(percentage) {
+        // Clamp percentage between 0 and 100
+        percentage = Math.max(0, Math.min(100, percentage));
+        sliderPosition = percentage;
+        
+        // Update elements
+        beforeImage.style.clipPath = `inset(0 ${100 - percentage}% 0 0)`;
+        sliderLine.style.left = percentage + '%';
+        sliderButton.style.left = percentage + '%';
+        sliderButton.setAttribute('aria-valuenow', percentage);
+        
+        // Force reflow to ensure immediate update
+        sliderButton.offsetLeft;
+        sliderLine.offsetLeft;
+      }
+      
+      // Get mouse/touch position relative to container
+      function getPositionFromEvent(e, container) {
+        const rect = container.getBoundingClientRect();
+        const clientX = e.type && e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const offsetX = clientX - rect.left;
+        return Math.max(0, Math.min(100, (offsetX / rect.width) * 100));
+      }
+      
+      // Reset touch state
+      function resetTouchState() {
+        isDragging = false;
+        touchStartX = 0;
+        touchStartY = 0;
+        touchStartTime = 0;
+        hasMovedHorizontally = false;
+        isScrolling = null;
+        sliderButton.classList.remove('dragging');
+        sliderButton.style.transition = '';
+      }
+      
+      // Keyboard accessibility
+      function handleKeyDown(e) {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+        
+        e.preventDefault();
+        let newPosition = sliderPosition;
+        
+        switch(e.key) {
+          case 'ArrowLeft':
+            newPosition = Math.max(0, sliderPosition - 5);
+            break;
+          case 'ArrowRight':
+            newPosition = Math.min(100, sliderPosition + 5);
+            break;
+          case 'Home':
+            newPosition = 0;
+            break;
+          case 'End':
+            newPosition = 100;
+            break;
+        }
+        
+        updateSliderPosition(newPosition);
+      }
+      
+      // Mouse events
+      function handleMouseDown(e) {
+        e.preventDefault();
+        isDragging = true;
+        sliderButton.classList.add('dragging');
+        sliderButton.style.transition = 'none';
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+      }
+      
+      function handleMouseMove(e) {
+        if (!isDragging) return;
+        const percentage = getPositionFromEvent(e, container);
+        updateSliderPosition(percentage);
+      }
+      
+      function handleMouseUp() {
+        isDragging = false;
+        sliderButton.classList.remove('dragging');
+        sliderButton.style.transition = '';
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      }
+      
+      // Touch events
+      function handleTouchStart(e) {
+        const touch = e.touches[0];
+        const rect = container.getBoundingClientRect();
+        const touchX = touch.clientX - rect.left;
+        const touchY = touch.clientY - rect.top;
+        
+        // Check if touch is within container bounds
+        if (touchX < 0 || touchX > rect.width || touchY < 0 || touchY > rect.height) {
+          return;
+        }
+        
+        // Reset state
+        resetTouchState();
+        
+        // Set initial touch values
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        touchStartTime = Date.now();
+        isDragging = true;
+        isScrolling = null;
+        hasMovedHorizontally = false;
+        
+        sliderButton.classList.add('dragging');
+        sliderButton.style.transition = 'none';
+        
+        // Add touch event listeners
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd, { passive: true });
+        document.addEventListener('touchcancel', handleTouchCancel, { passive: true });
+      }
+      
+      function handleTouchMove(e) {
+        if (!isDragging) return;
+        
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        const absDeltaX = Math.abs(deltaX);
+        const absDeltaY = Math.abs(deltaY);
+        
+        // Determine scroll direction on first significant movement
+        if (isScrolling === null && (absDeltaX > 5 || absDeltaY > 5)) {
+          isScrolling = absDeltaY > absDeltaX;
+        }
+        
+        // If user is scrolling vertically, cancel slider interaction
+        if (isScrolling) {
+          resetTouchState();
+          document.removeEventListener('touchmove', handleTouchMove);
+          document.removeEventListener('touchend', handleTouchEnd);
+          document.removeEventListener('touchcancel', handleTouchCancel);
+          return;
+        }
+        
+        // If moving horizontally, prevent default scrolling and update slider
+        if (absDeltaX > 5) {
+          e.preventDefault();
+          hasMovedHorizontally = true;
+          const percentage = getPositionFromEvent(e, container);
+          updateSliderPosition(percentage);
+        }
+      }
+      
+      function handleTouchEnd(e) {
+        if (!isDragging) return;
+        
+        // Clean up event listeners
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
+        document.removeEventListener('touchcancel', handleTouchCancel);
+        
+        // If it was a quick tap without horizontal movement, treat as click
+        const touchDuration = Date.now() - touchStartTime;
+        if (touchDuration < 200 && !hasMovedHorizontally && !isScrolling) {
+          const percentage = getPositionFromEvent(e.changedTouches[0], container);
+          updateSliderPosition(percentage);
+        }
+        
+        resetTouchState();
+      }
+      
+      function handleTouchCancel() {
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
+        document.removeEventListener('touchcancel', handleTouchCancel);
+        resetTouchState();
+      }
+      
+      // Container click/tap events
+      function handleContainerClick(e) {
+        // Don't handle if clicking on slider button
+        if (e.target === sliderButton || sliderButton.contains(e.target)) return;
+        
+        // Don't handle if this was part of a drag gesture
+        if (hasMovedHorizontally) return;
+        
+        const percentage = getPositionFromEvent(e, container);
+        updateSliderPosition(percentage);
+      }
+      
+      // Attach event listeners
+      sliderButton.addEventListener('mousedown', handleMouseDown);
+      sliderButton.addEventListener('touchstart', handleTouchStart, { passive: true });
+      sliderButton.addEventListener('keydown', handleKeyDown);
+      
+      container.addEventListener('mousedown', function(e) {
+        if (e.target === sliderButton || sliderButton.contains(e.target)) return;
+        handleMouseDown(e);
+      });
+      
+      container.addEventListener('touchstart', function(e) {
+        if (e.target === sliderButton || sliderButton.contains(e.target)) return;
+        handleTouchStart(e);
+      }, { passive: true });
+      
+      container.addEventListener('click', handleContainerClick);
+      
+      // Initialize position
+      updateSliderPosition({{ initial_position }});
+    })();
+  });
+</script>
+
+<style>
+  /* Before & After Comparison Styles */
+  .before-after-section {
+    padding: 40px 0;
+  }
+
+  .before-after-section .page-width {
+    max-width: {{ section.settings.page_width | default: 1200 }}px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  [dir="rtl"] .before-after-section h2, [dir="rtl"] .before-after-section p {
+    text-align: center;
+  }
+
+  .image-comparison-container {
+    width: 100%;
+    max-width: {{ mobile_container_width }}px;
+    margin: 16px auto;
+    padding: {{ section.settings.comparison_container_padding_top | default: 0 }}px {{ section.settings.comparison_container_padding_right | default: 16 }}px {{ section.settings.comparison_container_padding_bottom | default: 0 }}px {{ section.settings.comparison_container_padding_left | default: 16 }}px;
+  }
+
+  .comparison-title {
+    font-size: {{ title_font_size_mobile }}px;
+    font-weight: 700; /* Fallback for --font-weight-bold */
+    font-weight: var(--font-weight-bold, 700);
+    text-align: {{ section.settings.mobile_text_alignment | default: 'center' }};
+    margin-bottom: 8px;
+    color: {{ title_color }};
+    letter-spacing: 0.02em; /* Fallback for --letter-spacing-heading */
+    letter-spacing: var(--letter-spacing-heading, 0.02em);
+  }
+
+  /* Enhanced accent text styling with global and local customization options */
+  .before-after-section .accent-text {
+    padding: 2px 4px;
+    margin: -2px -4px;
+    display: inline-block;
+
+    {% if section.settings.use_theme_colors %}
+      background: {{ settings.global_accent_text_gradient_dark | default: 'linear-gradient(45deg, #EF4A65, #FF6B9D)' }};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.3;
+    {% elsif section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient | default: 'linear-gradient(45deg, #EF4A65, #FF6B9D)' }};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    {% else %}
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color | default: '#EF4A65' }}{% else %}{{ section.settings.accent_color | default: '#EF4A65' }}{% endif %};
+    {% endif %}
+
+    {% if section.settings.override_global_accent %}
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %} font-family: serif;
+          {% when 'Georgia Pro' %} font-family: 'Georgia Pro', Georgia, serif;
+          {% when 'Bodoni Moda' %} font-family: 'Bodoni Moda', Georgia, serif;
+          {% when 'Instrument Serif' %} font-family: 'Instrument Serif', Georgia, serif;
+          {% when 'DM Serif Text' %} font-family: 'DM Serif Text', Georgia, serif;
+          {% when 'Nothing You Could Do' %} font-family: 'Nothing You Could Do', cursive;
+        {% endcase %}
+      {% endif %}
+
+      {% if section.settings.accent_font_style != 'normal' %}
+        font-style: {{ section.settings.accent_font_style }};
+      {% endif %}
+
+      {% if section.settings.accent_font_weight != 'inherit' %}
+        font-weight: {{ section.settings.accent_font_weight }};
+      {% endif %}
+
+      {% if section.settings.accent_letter_spacing %}
+        letter-spacing: {{ section.settings.accent_letter_spacing }}em;
+      {% endif %}
+
+      {% if section.settings.accent_text_transform != 'none' %}
+        text-transform: {{ section.settings.accent_text_transform }};
+      {% endif %}
+    {% else %}
+      font-family: var(--font-accent-family, inherit);
+      font-style: var(--font-accent-style, normal);
+      font-weight: var(--font-accent-weight, inherit);
+      letter-spacing: var(--font-accent-letter-spacing, inherit);
+      text-transform: var(--font-accent-text-transform, none);
+    {% endif %}
+  }
+
+  .comparison-description,
+  .comparison-additional-description {
+    font-size: {{ description_font_size_mobile }}px;
+    text-align: {{ section.settings.mobile_text_alignment | default: 'center' }};
+    margin-bottom: 16px;
+    padding: 0 0px;
+    color: {{ description_color }};
+    line-height: 1.5;
+    letter-spacing: 0.01em; /* Fallback for --letter-spacing-body */
+    letter-spacing: var(--letter-spacing-body, 0.01em);
+  }
+
+  /* Main slider container - Mobile settings */
+  .slider-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: {{ border_radius }}px;
+    {% if section.settings.enable_shadow %}
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    {% else %}
+      box-shadow: none;
+    {% endif %}
+    {% if mobile_aspect_ratio == 'auto' %}
+      aspect-ratio: auto;
+    {% else %}
+      aspect-ratio: {{ mobile_aspect_ratio }};
+    {% endif %}
+    min-height: {{ mobile_min_height }}px;
+    max-height: {{ mobile_max_height }}px;
+    touch-action: manipulation;
+    user-select: none;
+    cursor: ew-resize;
+  }
+
+  /* After image (background) */
+  .after-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .after-image img,
+  .before-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .placeholder-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f3f4f6;
+  }
+
+  .placeholder-image svg {
+    width: 50%;
+    height: 50%;
+    opacity: 0.3;
+  }
+
+  /* Before image (overlaid and clipped) */
+  .before-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    clip-path: inset(0 {{ 100 | minus: initial_position }}% 0 0);
+  }
+
+  /* Image labels */
+  .image-label {
+    position: absolute;
+    background: {{ image_label_bg }};
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: {{ label_font_size_mobile }}px;
+    font-weight: 700; /* Fallback for --font-weight-bold */
+    font-weight: var(--font-weight-bold, 700);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    color: {{ image_label_text }};
+    letter-spacing: 0.01em; /* Fallback for --letter-spacing-body */
+    letter-spacing: var(--letter-spacing-body, 0.01em);
+    z-index: 1;
+  }
+
+  .label-before {
+    bottom: 8px;
+    left: 8px;
+  }
+
+  .label-after {
+    bottom: 8px;
+    right: 8px;
+  }
+
+  /* Comparison divider line */
+  .comparison-divider-line {
+    position: absolute;
+    top: 0;
+    width: 3px;
+    background: {{ divider_line_color }};
+    height: 100%;
+    left: {{ initial_position }}%;
+    transform: translateX(-50%);
+    z-index: 2;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Slider button */
+  .slider-button {
+    position: absolute;
+    top: 50%;
+    left: {{ initial_position }}%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: {{ slider_button_bg }};
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    border: 2px solid {{ slider_button_border }};
+    transition: all 0.2s ease;
+    touch-action: none;
+  }
+
+  .slider-button:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .slider-button:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+
+  .slider-button:active,
+  .slider-button.dragging {
+    cursor: grabbing;
+    transform: translate(-50%, -50%) scale(0.95);
+    transition: none !important;
+  }
+
+  /* Arrow icon */
+  .slider-icon {
+    width: 20px;
+    height: 20px;
+    stroke: {{ slider_button_icon }};
+    stroke-width: 2;
+    fill: none;
+  }
+
+  /* Instructions */
+  .slider-instructions {
+    text-align: {{ section.settings.mobile_text_alignment | default: 'center' }};
+    margin-top: 12px;
+    font-size: {{ instructions_font_size_mobile }}px;
+    color: {{ instructions_color }};
+    padding: 0 8px;
+    letter-spacing: 0.01em; /* Fallback for --letter-spacing-body */
+    letter-spacing: var(--letter-spacing-body, 0.01em);
+  }
+
+  /* Responsive design - Small screens (640px+) - Transition to desktop sizing */
+  @media (min-width: 640px) {
+    .image-comparison-container {
+      max-width: 448px;
+      margin: 24px auto;
+      padding: {{ section.settings.comparison_container_padding_top | default: 0 }}px {{ section.settings.comparison_container_padding_right | default: 24 }}px {{ section.settings.comparison_container_padding_bottom | default: 0 }}px {{ section.settings.comparison_container_padding_left | default: 24 }}px;
+    }
+
+    /* Switch to desktop image sizing */
+    .slider-container {
+      {% if image_aspect_ratio == 'auto' %}
+        aspect-ratio: auto;
+      {% else %}
+        aspect-ratio: {{ image_aspect_ratio }};
+      {% endif %}
+      min-height: {{ image_min_height }}px;
+      max-height: {{ image_max_height }}px;
+    }
+
+    .comparison-title {
+      font-size: {{ title_font_size }}px;
+      margin-bottom: 12px;
+    }
+
+    .comparison-description,
+    .comparison-additional-description {
+      font-size: {{ description_font_size }}px;
+      margin-bottom: 20px;
+    }
+
+    .slider-button {
+      width: 44px;
+      height: 44px;
+    }
+
+    .slider-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .image-label {
+      padding: 6px 12px;
+      font-size: {{ label_font_size }}px;
+    }
+
+    .label-before {
+      bottom: 12px;
+      left: 12px;
+    }
+
+    .label-after {
+      bottom: 12px;
+      right: 12px;
+    }
+
+    .slider-instructions {
+      margin-top: 16px;
+      font-size: {{ instructions_font_size }}px;
+    }
+  }
+
+  /* Medium screens (768px+) */
+  @media (min-width: 768px) {
+    .image-comparison-container {
+      max-width: 512px;
+      margin: 32px auto;
+    }
+
+    /* Two Column Layout */
+    .image-comparison-container.two-column-layout {
+      max-width: 100%;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      {% assign gap_value = section.settings.column_gap | default: 50 %}
+      {% if gap_value == 'small' %}
+        gap: 30px;
+      {% elsif gap_value == 'medium' %}
+        gap: 50px;
+      {% elsif gap_value == 'large' %}
+        gap: 80px;
+      {% else %}
+        gap: {{ gap_value }}px;
+      {% endif %}
+    }
+
+    .image-comparison-container.two-column-layout .text-content {
+      flex: 0 0 {{ section.settings.text_column_width }}%;
+      {% if section.settings.text_alignment == 'center' %}
+        text-align: center;
+      {% else %}
+        text-align: left;
+      {% endif %}
+    }
+
+    .image-comparison-container.two-column-layout .image-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .image-comparison-container.two-column-layout .slider-container {
+      margin: 0;
+    }
+
+    .image-comparison-container.two-column-layout .comparison-title {
+      margin-bottom: 16px;
+      {% if section.settings.text_alignment == 'center' %}
+        text-align: center;
+      {% else %}
+        text-align: left;
+      {% endif %}
+    }
+
+    .image-comparison-container.two-column-layout .comparison-description,
+    .image-comparison-container.two-column-layout .comparison-additional-description {
+      margin-bottom: 16px;
+      {% if section.settings.text_alignment == 'center' %}
+        text-align: center;
+      {% else %}
+        text-align: left;
+      {% endif %}
+    }
+
+    .image-comparison-container.two-column-layout .slider-instructions {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .comparison-title {
+      font-size: {{ title_font_size }}px;
+      margin-bottom: 16px;
+    }
+
+    .comparison-description,
+    .comparison-additional-description {
+      font-size: {{ description_font_size }}px;
+      margin-bottom: 24px;
+    }
+
+    .slider-button {
+      width: 48px;
+      height: 48px;
+    }
+
+    .slider-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    .image-label {
+      bottom: 16px;
+    }
+
+    .label-before {
+      left: 16px;
+    }
+
+    .label-after {
+      right: 16px;
+    }
+  }
+
+  /* Large screens (1024px+) */
+  @media (min-width: 1024px) {
+    .image-comparison-container {
+      max-width: 512px;
+    }
+  }
+
+  /* Extra large screens (1280px+) */
+  @media (min-width: 1280px) {
+    .image-comparison-container {
+      max-width: {{ container_max_width }}px;
+    }
+  }
+
+  .before-after-container.contained {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  @media screen and (max-width: 768px) {
+    .before-after-container.contained {
+      padding: {{ section.settings.container_padding_top_mobile }}px {{ section.settings.container_padding_right_mobile }}px {{ section.settings.container_padding_bottom_mobile }}px {{ section.settings.container_padding_left_mobile }}px !important;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Before & After Comparison",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "aside"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Theme Integration"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use theme colors",
+      "info": "When enabled, section will inherit global theme colors as defaults. When disabled, only custom colors below will be used.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_two_column_layout",
+      "label": "Enable Two Column Layout",
+      "default": false,
+      "info": "On desktop, display content in two columns: text on left, image on right"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text Alignment (Two Column)",
+      "default": "left",
+      "info": "Text alignment when two column layout is enabled",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "mobile_text_alignment",
+      "label": "Mobile Text Alignment",
+      "default": "center",
+      "info": "Text alignment on mobile devices",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Column Gap",
+      "default": 50,
+      "info": "Space between text and image columns"
+    },
+    {
+      "type": "range",
+      "id": "text_column_width",
+      "min": 30,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "label": "Text Column Width",
+      "default": 40,
+      "info": "Width of the text column (image column will take remaining space)"
+    },
+    {
+      "type": "range",
+      "id": "mobile_container_padding",
+      "min": 10,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile Container Padding",
+      "default": 16,
+      "info": "Left and right padding for the container on mobile devices"
+    },
+    {
+      "type": "range",
+      "id": "tablet_container_padding",
+      "min": 10,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Tablet Container Padding",
+      "default": 24,
+      "info": "Left and right padding for the container on tablet devices (640px+)"
+    },
+    {
+      "type": "header",
+      "content": "Image Comparison Container Padding"
+    },
+    {
+      "type": "range",
+      "id": "comparison_container_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 0,
+      "info": "Top padding for the image comparison container"
+    },
+    {
+      "type": "range",
+      "id": "comparison_container_padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Right Padding",
+      "default": 16,
+      "info": "Right padding for the image comparison container"
+    },
+    {
+      "type": "range",
+      "id": "comparison_container_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 0,
+      "info": "Bottom padding for the image comparison container"
+    },
+    {
+      "type": "range",
+      "id": "comparison_container_padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Left Padding",
+      "default": 16,
+      "info": "Left padding for the image comparison container"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Image Comparison"
+    },
+    {
+      "type": "text",
+      "id": "title_accent",
+      "label": "Title Accent Text",
+      "info": "Optional accent text to highlight part of the title"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Text Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "header",
+      "content": "Section-Specific Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Section Accent Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        { "value": "normal", "label": "Normal" },
+        { "value": "italic", "label": "Italic" }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text"
+    },
+    {
+      "type": "range",
+      "id": "accent_letter_spacing",
+      "min": -0.1,
+      "max": 0.3,
+      "step": 0.1,
+      "label": "Accent Letter Spacing",
+      "default": 0.0,
+      "unit": "em"
+    },
+    {
+      "type": "select",
+      "id": "accent_text_transform",
+      "label": "Accent Text Transform",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "uppercase", "label": "Uppercase" },
+        { "value": "lowercase", "label": "Lowercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin_left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "See the stunning transformations our products deliver — real results from real customers."
+    },
+    {
+      "type": "textarea",
+      "id": "additional_description",
+      "label": "Additional Description",
+      "info": "Optional additional text that appears below the main description (useful for two-column layout)"
+    },
+    {
+      "type": "text",
+      "id": "instructions_text",
+      "label": "Instructions text",
+      "default": "Drag the slider to see the difference"
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "before_image",
+      "label": "Before image"
+    },
+    {
+      "type": "image_picker",
+      "id": "after_image",
+      "label": "After image"
+    },
+    {
+      "type": "text",
+      "id": "before_label",
+      "label": "Before label",
+      "default": "Before"
+    },
+    {
+      "type": "text",
+      "id": "after_label",
+      "label": "After label",
+      "default": "After"
+    },
+    {
+      "type": "header",
+      "content": "Settings"
+    },
+    {
+      "type": "range",
+      "id": "initial_position",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Initial slider position",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "container_max_width",
+      "min": 320,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "label": "Maximum container width",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "page_width",
+      "min": 1000,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "label": "Page Width",
+      "default": 1200,
+      "info": "Maximum width of the entire section content"
+    },
+    {
+      "type": "range",
+      "id": "container_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Container Border Radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Font Size - Desktop"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 16,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Title font size (Desktop)",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Description font size (Desktop)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "instructions_font_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Instructions font size (Desktop)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "label_font_size",
+      "min": 8,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Image label font size (Desktop)",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Font Size - Mobile"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size_mobile",
+      "min": 14,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "Title font size (Mobile)",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "description_font_size_mobile",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description font size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "instructions_font_size_mobile",
+      "min": 8,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Instructions font size (Mobile)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "label_font_size_mobile",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Image label font size (Mobile)",
+      "default": 11
+    },
+    {
+      "type": "header",
+      "content": "Image Size Customization"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Image aspect ratio",
+      "options": [
+        { "value": "16/9", "label": "16:9 (Widescreen)" },
+        { "value": "4/3", "label": "4:3 (Standard)" },
+        { "value": "3/2", "label": "3:2 (Photo)" },
+        { "value": "1/1", "label": "1:1 (Square)" },
+        { "value": "auto", "label": "Auto (Natural)" }
+      ],
+      "default": "4/3"
+    },
+    {
+      "type": "range",
+      "id": "image_min_height",
+      "min": 200,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "Minimum image height",
+      "default": 250
+    },
+    {
+      "type": "range",
+      "id": "image_max_height",
+      "min": 300,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "label": "Maximum image height",
+      "default": 500
+    },
+    {
+      "type": "header",
+      "content": "Mobile-specific Image Sizing"
+    },
+    {
+      "type": "select",
+      "id": "mobile_aspect_ratio",
+      "label": "Mobile image aspect ratio",
+      "options": [
+        { "value": "16/9", "label": "16:9 (Widescreen)" },
+        { "value": "4/3", "label": "4:3 (Standard)" },
+        { "value": "3/2", "label": "3:2 (Photo)" },
+        { "value": "1/1", "label": "1:1 (Square)" },
+        { "value": "auto", "label": "Auto (Natural)" }
+      ],
+      "default": "4/3"
+    },
+    {
+      "type": "range",
+      "id": "mobile_min_height",
+      "min": 200,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "Minimum mobile image height",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "mobile_max_height",
+      "min": 300,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "label": "Maximum mobile image height",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "mobile_container_width",
+      "min": 320,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "label": "Maximum mobile container width",
+      "default": 320
+    },
+    {
+      "type": "header",
+      "content": "Color Customization"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section background color"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color"
+    },
+    {
+      "type": "color",
+      "id": "instructions_color",
+      "label": "Instructions color"
+    },
+    {
+      "type": "color",
+      "id": "slider_button_bg",
+      "label": "Slider button background color"
+    },
+    {
+      "type": "color",
+      "id": "slider_button_border",
+      "label": "Slider button border color"
+    },
+    {
+      "type": "color",
+      "id": "slider_button_icon",
+      "label": "Slider button icon color"
+    },
+    {
+      "type": "color",
+      "id": "image_label_bg",
+      "label": "Image label background color"
+    },
+    {
+      "type": "color",
+      "id": "image_label_text",
+      "label": "Image label text color"
+    },
+    {
+      "type": "header",
+      "content": "Container Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "contain_section",
+      "label": "Contain Section",
+      "default": false,
+      "info": "Add padding and border around the section content"
+    },
+    {
+      "type": "header",
+      "content": "Container Padding - Desktop"
+    },
+    {
+      "type": "range",
+      "id": "container_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Top Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "container_padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Right Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "container_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Bottom Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "container_padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Left Padding",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Container Padding - Mobile"
+    },
+    {
+      "type": "range",
+      "id": "container_padding_top_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Top Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "container_padding_right_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Right Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "container_padding_bottom_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Bottom Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "container_padding_left_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Left Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "color_background",
+      "id": "container_background",
+      "label": "Container Background",
+      "default": "linear-gradient(to bottom, #FFFFFF, #F8F8F8)"
+    },
+    {
+      "type": "header",
+      "content": "Border Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_border",
+      "label": "Enable Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "border_style",
+      "label": "Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#E5E7EB"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_shadow",
+      "label": "Enable Shadow",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Before & After Comparison"
+    }
+  ]
+}
+{% endschema %}

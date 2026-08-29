@@ -1,0 +1,1554 @@
+{%- style -%}
+  /* 1. Load fonts with font_face filter at the top */
+  {{ section.settings.body_font | font_face: font_display: 'swap' }}
+  {{ section.settings.heading_font | font_face: font_display: 'swap' }}
+  {{ section.settings.accent_font | font_face: font_display: 'swap' }}
+
+  /* 2. Body font - applied to EVERYTHING first using wildcard */
+  .section-id-{{ section.id }},
+  .section-id-{{ section.id }} *,
+  .section-id-{{ section.id }} p,
+  .section-id-{{ section.id }} span,
+  .section-id-{{ section.id }} div,
+  .section-id-{{ section.id }} li,
+  .section-id-{{ section.id }} a,
+  .section-id-{{ section.id }} strong,
+  .section-id-{{ section.id }} em,
+  .section-id-{{ section.id }} small,
+  .section-id-{{ section.id }} h2,
+  .section-id-{{ section.id }} h3,
+  .section-id-{{ section.id }} h4,
+  .section-id-{{ section.id }} h5,
+  .section-id-{{ section.id }} h6,
+  .section-id-{{ section.id }} button {
+    font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }} !important;
+  }
+
+  /* 3. Body font - extra specificity for elements that might be overridden */
+  #si-slider-{{ section.id }} h3.si-card-title-{{ section.id }},
+  .section-id-{{ section.id }} .si-card-title-{{ section.id }},
+  .section-id-{{ section.id }} h3.si-card-title-{{ section.id }},
+  h3.si-card-title-{{ section.id }},
+  .section-id-{{ section.id }} .si-card-desc-{{ section.id }},
+  .section-id-{{ section.id }} div.si-card-desc-{{ section.id }},
+  div.si-card-desc-{{ section.id }} {
+    font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }} !important;
+  }
+
+  /* 4. Heading font - override body font for main heading */
+  .section-id-{{ section.id }} h2.si-heading-{{ section.id }},
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} {
+    font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }} !important;
+    color: {{ section.settings.heading_color }} !important;
+    font-size: {{ section.settings.heading_size }}px !important;
+    font-weight: {{ section.settings.heading_weight }} !important;
+    font-style: {{ section.settings.heading_font.style }} !important;
+    letter-spacing: {{ section.settings.heading_letter_spacing }}px !important;
+    line-height: {{ section.settings.heading_line_height }} !important;
+  }
+
+  /* Section root */
+  .section-id-{{ section.id }} {
+    background-color: {{ section.settings.section_bg_color }} !important;
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    overflow-x: clip;
+    overflow-y: visible;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  .si-container-{{ section.id }} {
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+    {% if section.settings.container_width == 'custom' %}
+      max-width: {{ section.settings.custom_width_value }}px;
+    {% elsif section.settings.container_width == 'full' %}
+      max-width: 100%;
+    {% else %}
+      max-width: 1200px;
+    {% endif %}
+    width: 100%;
+  }
+
+  /* Reset all default margins/padding inside the header area */
+  .section-id-{{ section.id }} .si-text-content-{{ section.id }} h1,
+  .section-id-{{ section.id }} .si-text-content-{{ section.id }} h2,
+  .section-id-{{ section.id }} .si-text-content-{{ section.id }} h3,
+  .section-id-{{ section.id }} .si-text-content-{{ section.id }} p:not(.si-subheading-{{ section.id }}),
+  .section-id-{{ section.id }} .si-text-content-{{ section.id }} span,
+  .section-id-{{ section.id }} .si-text-content-{{ section.id }} strong,
+  .section-id-{{ section.id }} .si-text-content-{{ section.id }} em,
+  .section-id-{{ section.id }} .si-text-content-{{ section.id }} ul,
+  .section-id-{{ section.id }} .si-text-content-{{ section.id }} ol {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Header Layout */
+  .si-header-{{ section.id }} {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 0 !important;
+    margin-bottom: {{ section.settings.gap_header_to_slider }}px !important;
+    padding: 0 !important;
+    flex-wrap: wrap;
+    column-gap: 20px;
+    row-gap: 20px;
+  }
+
+  .si-text-content-{{ section.id }} {
+    max-width: 800px;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Subheading — below heading + accent */
+  .section-id-{{ section.id }} .si-subheading-{{ section.id }} {
+    font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }} !important;
+    color: {{ section.settings.subheading_color | default: '#666666' }} !important;
+    font-size: {{ section.settings.subheading_size | default: 16 }}px !important;
+    font-weight: {{ section.settings.subheading_weight | default: 400 }} !important;
+    letter-spacing: {{ section.settings.subheading_letter_spacing | default: 0 }}px !important;
+    line-height: {{ section.settings.subheading_line_height | default: 1.5 }} !important;
+    margin: {{ section.settings.gap_heading_to_subheading | default: 8 }}px 0 0 0 !important;
+    padding: 0 !important;
+    display: block;
+  }
+
+  /* Heading — all typography with !important. Text sits directly in <h2> (p tags stripped in Liquid) */
+  .section-id-{{ section.id }} h2.si-heading-{{ section.id }},
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} {
+    font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }} !important;
+    color: {{ section.settings.heading_color }} !important;
+    font-size: {{ section.settings.heading_size }}px !important;
+    font-weight: {{ section.settings.heading_weight }} !important;
+    font-style: {{ section.settings.heading_font.style }} !important;
+    letter-spacing: {{ section.settings.heading_letter_spacing }}px !important;
+    line-height: {{ section.settings.heading_line_height }} !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  /* Heading bold/italic — <strong>/<em> sit directly in <h2>, inherit everything except their own trait */
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} > strong,
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} > b {
+    font-weight: bold !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    letter-spacing: inherit !important;
+    line-height: inherit !important;
+    color: inherit !important;
+  }
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} > em,
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} > i {
+    font-style: italic !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    letter-spacing: inherit !important;
+    line-height: inherit !important;
+    color: inherit !important;
+  }
+
+  /* 5. Accent text — inline with heading, own font/size/weight/spacing/color */
+  .si-accent-{{ section.id }},
+  .si-accent-{{ section.id }} p,
+  .si-accent-{{ section.id }} span,
+  .si-accent-{{ section.id }} strong,
+  .si-accent-{{ section.id }} em {
+    font-family: {{ section.settings.accent_font.family }}, {{ section.settings.accent_font.fallback_families }} !important;
+    font-size: {{ section.settings.heading_size }}px !important;
+    letter-spacing: {{ section.settings.accent_letter_spacing }}px !important;
+    line-height: inherit !important;
+    display: inline !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    {% if section.settings.accent_use_gradient and section.settings.accent_gradient != blank %}
+      background: {{ section.settings.accent_gradient }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+    {% else %}
+      color: {{ section.settings.accent_color }} !important;
+      -webkit-text-fill-color: {{ section.settings.accent_color }} !important;
+    {% endif %}
+  }
+  /* Accent weight/style on parent + p/span only — not on strong/em so bold/italic work */
+  .si-accent-{{ section.id }},
+  .si-accent-{{ section.id }} p,
+  .si-accent-{{ section.id }} span {
+    font-weight: {{ section.settings.accent_weight }} !important;
+    font-style: {{ section.settings.accent_font.style }} !important;
+  }
+  .si-accent-{{ section.id }} strong {
+    font-weight: bold !important;
+  }
+  .si-accent-{{ section.id }} em {
+    font-style: italic !important;
+  }
+
+
+  /* Navigation Arrows */
+  .si-nav-{{ section.id }} {
+    display: flex;
+    gap: 12px;
+  }
+
+  .si-nav-btn-{{ section.id }} {
+    width: {{ section.settings.nav_size }}px;
+    height: {{ section.settings.nav_size }}px;
+    background-color: {{ section.settings.nav_bg }};
+    color: {{ section.settings.nav_icon_color }};
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, color 0.2s, transform 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+
+  .si-nav-btn-{{ section.id }}:focus {
+    outline: none;
+  }
+
+  /* Nav Shape Classes */
+  .si-nav-shape-circle {
+    border-radius: 50% !important;
+  }
+
+  .si-nav-shape-square {
+    border-radius: 4px !important;
+  }
+
+  .si-nav-btn-{{ section.id }}:hover:not(.si-nav-disabled) {
+    background-color: {{ section.settings.nav_hover_bg }} !important;
+    color: {{ section.settings.nav_hover_icon_color }} !important;
+    {% if section.settings.nav_hover_grow %}
+      transform: scale({{ section.settings.nav_hover_grow_amount | divided_by: 100.0 | plus: 1.0 }});
+    {% endif %}
+  }
+
+  .si-nav-btn-{{ section.id }}.si-nav-disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .si-nav-btn-{{ section.id }} svg {
+    width: 40%;
+    height: 40%;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+  }
+
+  /* Slider Track */
+  .si-slider-wrapper-{{ section.id }} {
+    position: relative;
+  }
+
+  .si-slider-{{ section.id }} {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: {{ section.settings.slides_gap }}px;
+    padding-bottom: 20px;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    -ms-overflow-style: none;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: grab;
+  }
+
+  .si-slider-{{ section.id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Remove highlight from cards */
+  .si-card-{{ section.id }},
+  .si-card-{{ section.id }} * {
+    -webkit-tap-highlight-color: transparent !important;
+    outline: none !important;
+  }
+  .si-card-{{ section.id }}:hover,
+  .si-card-{{ section.id }}:focus,
+  .si-card-{{ section.id }}:active {
+    background-color: {{ section.settings.card_bg_color }} !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Cards */
+  {%- assign gap = section.settings.slides_gap -%}
+  .si-card-{{ section.id }} {
+    flex: 0 0 calc((100% - ({{ section.settings.slides_desktop | minus: 1 }} * {{ gap }}px)) / {{ section.settings.slides_desktop }});
+    scroll-snap-align: start;
+    background-color: {{ section.settings.card_bg_color }};
+    padding: {{ section.settings.card_padding_tb }}px {{ section.settings.card_padding_lr }}px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  .si-media-wrapper-{{ section.id }} {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    position: relative;
+    margin-bottom: {{ section.settings.gap_image_to_title }}px;
+    background-color: #F8F5EE;
+    overflow: hidden;
+  }
+
+  /* Shape classes for Ingredients */
+  .si-shape-circle,
+  .si-shape-circle img,
+  .si-shape-circle svg {
+    border-radius: 50% !important;
+  }
+
+  .si-shape-square,
+  .si-shape-square img,
+  .si-shape-square svg {
+    border-radius: 0 !important;
+  }
+
+  /* Image Tag Styling */
+  .si-img-{{ section.id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  /* Placeholder specific adjustments */
+  .si-img-{{ section.id }} svg {
+    width: 100%;
+    height: 100%;
+    transform: scale(0.5);
+    fill: #C0C0C0;
+  }
+
+  /* Card Title */
+  #si-slider-{{ section.id }} h3.si-card-title-{{ section.id }},
+  .si-card-title-{{ section.id }} {
+    font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }} !important;
+    color: {{ section.settings.card_title_color }} !important;
+    font-size: {{ section.settings.card_title_size }}px !important;
+    font-weight: {{ section.settings.card_title_weight }} !important;
+    letter-spacing: {{ section.settings.card_title_letter_spacing }}px !important;
+    line-height: {{ section.settings.card_title_line_height }} !important;
+    margin: 0 0 {{ section.settings.gap_title_to_desc }}px 0;
+  }
+
+  /* Card Description */
+  .si-card-desc-{{ section.id }} {
+    font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }} !important;
+    color: {{ section.settings.card_desc_color }} !important;
+    font-size: {{ section.settings.card_desc_size }}px !important;
+    font-weight: {{ section.settings.card_desc_weight }} !important;
+    letter-spacing: {{ section.settings.card_desc_letter_spacing }}px !important;
+    line-height: {{ section.settings.card_desc_line_height }} !important;
+    margin: 0;
+  }
+  .si-card-desc-{{ section.id }} p {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    letter-spacing: inherit !important;
+    line-height: inherit !important;
+    color: inherit !important;
+  }
+  .si-card-desc-{{ section.id }} strong,
+  .si-card-desc-{{ section.id }} b {
+    font-weight: bold !important;
+  }
+  .si-card-desc-{{ section.id }} em,
+  .si-card-desc-{{ section.id }} i {
+    font-style: italic !important;
+  }
+
+  @media (max-width: 768px) {
+    .si-container-{{ section.id }} {
+      padding-left: {{ section.settings.section_padding_left_mobile }}px !important;
+      padding-right: {{ section.settings.section_padding_right_mobile }}px !important;
+    }
+    .si-header-{{ section.id }} {
+      flex-direction: column;
+      align-items: flex-start;
+      column-gap: 10px !important;
+      row-gap: 10px !important;
+      margin-bottom: {{ section.settings.gap_header_to_slider_mobile }}px !important;
+    }
+    .si-nav-{{ section.id }} {
+      display: none;
+    }
+    .section-id-{{ section.id }} .si-subheading-{{ section.id }} {
+      font-size: {{ section.settings.subheading_size_mobile | default: 14 }}px !important;
+      margin: {{ section.settings.gap_heading_to_subheading_mobile | default: 6 }}px 0 0 0 !important;
+    }
+    .section-id-{{ section.id }} h2.si-heading-{{ section.id }},
+    .section-id-{{ section.id }} .si-heading-{{ section.id }} {
+      font-size: {{ section.settings.heading_size_mobile }}px !important;
+      margin: 0 !important;
+    }
+    .section-id-{{ section.id }} .si-heading-{{ section.id }} > strong,
+    .section-id-{{ section.id }} .si-heading-{{ section.id }} > b,
+    .section-id-{{ section.id }} .si-heading-{{ section.id }} > em,
+    .section-id-{{ section.id }} .si-heading-{{ section.id }} > i {
+      font-size: inherit !important;
+    }
+    .si-accent-{{ section.id }},
+    .si-accent-{{ section.id }} p,
+    .si-accent-{{ section.id }} span,
+    .si-accent-{{ section.id }} strong,
+    .si-accent-{{ section.id }} em {
+      font-size: {{ section.settings.heading_size_mobile }}px !important;
+    }
+    .si-card-{{ section.id }} {
+      flex: 0 0 calc((100% - ({{ section.settings.slides_mobile | minus: 1 }} * {{ section.settings.slides_gap_mobile }}px)) / {{ section.settings.slides_mobile }});
+      padding: {{ section.settings.card_padding_tb_mobile }}px {{ section.settings.card_padding_lr_mobile }}px;
+    }
+    .si-media-wrapper-{{ section.id }} {
+      margin-bottom: {{ section.settings.gap_image_to_title_mobile }}px !important;
+    }
+    .si-card-title-{{ section.id }} {
+      font-size: {{ section.settings.card_title_size_mobile }}px !important;
+      margin-bottom: {{ section.settings.gap_title_to_desc_mobile }}px !important;
+    }
+    .si-card-desc-{{ section.id }} {
+      font-size: {{ section.settings.card_desc_size_mobile }}px !important;
+    }
+    .si-slider-{{ section.id }} {
+      gap: {{ section.settings.slides_gap_mobile }}px;
+      scroll-snap-type: x proximity;
+      touch-action: pan-x;
+      cursor: grab;
+    }
+    .si-slider-{{ section.id }}:active {
+      cursor: grabbing;
+    }
+  }
+
+  /* 6. Stubborn overrides - placed at the END of the style block for highest priority */
+
+  /* Stubborn heading override */
+  .section-id-{{ section.id }} h2.si-heading-{{ section.id }},
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} {
+    font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }} !important;
+    font-weight: {{ section.settings.heading_weight }} !important;
+    font-size: {{ section.settings.heading_size }}px !important;
+    letter-spacing: {{ section.settings.heading_letter_spacing }}px !important;
+    line-height: {{ section.settings.heading_line_height }} !important;
+    color: {{ section.settings.heading_color }} !important;
+  }
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} > strong,
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} > b {
+    font-weight: bold !important;
+  }
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} > em,
+  .section-id-{{ section.id }} .si-heading-{{ section.id }} > i {
+    font-style: italic !important;
+  }
+
+  #si-slider-{{ section.id }} h3.si-card-title-{{ section.id }},
+  .section-id-{{ section.id }} .si-card-{{ section.id }} h3.si-card-title-{{ section.id }},
+  .section-id-{{ section.id }} h3.si-card-title-{{ section.id }},
+  h3.si-card-title-{{ section.id }} {
+    font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }} !important;
+    font-weight: {{ section.settings.card_title_weight }} !important;
+    font-size: {{ section.settings.card_title_size }}px !important;
+    letter-spacing: {{ section.settings.card_title_letter_spacing }}px !important;
+    line-height: {{ section.settings.card_title_line_height }} !important;
+    color: {{ section.settings.card_title_color }} !important;
+  }
+
+  .section-id-{{ section.id }} .si-card-{{ section.id }} .si-card-desc-{{ section.id }},
+  .section-id-{{ section.id }} .si-card-desc-{{ section.id }},
+  .si-card-desc-{{ section.id }} {
+    font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }} !important;
+    font-weight: {{ section.settings.card_desc_weight }} !important;
+    font-size: {{ section.settings.card_desc_size }}px !important;
+    letter-spacing: {{ section.settings.card_desc_letter_spacing }}px !important;
+    line-height: {{ section.settings.card_desc_line_height }} !important;
+    color: {{ section.settings.card_desc_color }} !important;
+  }
+  .section-id-{{ section.id }} .si-card-desc-{{ section.id }} strong,
+  .section-id-{{ section.id }} .si-card-desc-{{ section.id }} b {
+    font-weight: bold !important;
+  }
+  .section-id-{{ section.id }} .si-card-desc-{{ section.id }} em,
+  .section-id-{{ section.id }} .si-card-desc-{{ section.id }} i {
+    font-style: italic !important;
+  }
+  .section-id-{{ section.id }} .si-card-desc-{{ section.id }} p {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    letter-spacing: inherit !important;
+    line-height: inherit !important;
+    color: inherit !important;
+  }
+
+  /* Mobile overrides for card title/desc — must appear after stubborn rules to win */
+  @media (max-width: 768px) {
+    #si-slider-{{ section.id }} h3.si-card-title-{{ section.id }},
+    .section-id-{{ section.id }} .si-card-{{ section.id }} h3.si-card-title-{{ section.id }},
+    .section-id-{{ section.id }} h3.si-card-title-{{ section.id }},
+    h3.si-card-title-{{ section.id }} {
+      font-size: {{ section.settings.card_title_size_mobile }}px !important;
+    }
+    .section-id-{{ section.id }} .si-card-{{ section.id }} .si-card-desc-{{ section.id }},
+    .section-id-{{ section.id }} .si-card-desc-{{ section.id }},
+    .si-card-desc-{{ section.id }} {
+      font-size: {{ section.settings.card_desc_size_mobile }}px !important;
+    }
+  }
+
+  /* Stubborn accent override — last rule in stylesheet, wins at equal specificity */
+  .si-accent-{{ section.id }},
+  .si-accent-{{ section.id }} p,
+  .si-accent-{{ section.id }} span,
+  .si-accent-{{ section.id }} strong,
+  .si-accent-{{ section.id }} em {
+    font-family: {{ section.settings.accent_font.family }}, {{ section.settings.accent_font.fallback_families }} !important;
+    font-size: {{ section.settings.heading_size }}px !important;
+    letter-spacing: {{ section.settings.accent_letter_spacing }}px !important;
+    line-height: inherit !important;
+    display: inline !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    {% if section.settings.accent_use_gradient and section.settings.accent_gradient != blank %}
+      background: {{ section.settings.accent_gradient }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+    {% else %}
+      color: {{ section.settings.accent_color }} !important;
+      -webkit-text-fill-color: {{ section.settings.accent_color }} !important;
+    {% endif %}
+  }
+  .si-accent-{{ section.id }},
+  .si-accent-{{ section.id }} p,
+  .si-accent-{{ section.id }} span {
+    font-weight: {{ section.settings.accent_weight }} !important;
+    font-style: {{ section.settings.accent_font.style }} !important;
+  }
+  .si-accent-{{ section.id }} strong {
+    font-weight: bold !important;
+  }
+  .si-accent-{{ section.id }} em {
+    font-style: italic !important;
+  }
+
+  /* Mobile accent override — MUST be last to beat the desktop stubborn rule above */
+  @media (max-width: 768px) {
+    .si-accent-{{ section.id }},
+    .si-accent-{{ section.id }} p,
+    .si-accent-{{ section.id }} span,
+    .si-accent-{{ section.id }} strong,
+    .si-accent-{{ section.id }} em {
+      font-size: {{ section.settings.heading_size_mobile }}px !important;
+    }
+  }
+
+{%- endstyle -%}
+
+<style>
+  #shopify-section-{{ section.id }},
+  #shopify-section-{{ section.id }} .section-id-{{ section.id }} {
+    background-color: {{ section.settings.section_bg_color }} !important;
+  }
+</style>
+
+<div class="section-id-{{ section.id }} si-container-{{ section.id }}">
+  <div class="si-header-{{ section.id }}">
+    <div class="si-text-content-{{ section.id }}">
+      {% if section.settings.show_heading and section.settings.heading != blank or section.settings.accent_text != blank %}
+        {%- capture heading_stripped -%}{{ section.settings.heading | replace: '<p>', '' | replace: '</p>', '' }}{%- endcapture -%}
+        {%- capture accent_stripped -%}{{ section.settings.accent_text | replace: '<p>', '' | replace: '</p>', '' }}{%- endcapture -%}
+        <style>
+          #si-heading-{{ section.id }} {
+            font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }} !important;
+            color: {{ section.settings.heading_color }} !important;
+            font-size: {{ section.settings.heading_size }}px !important;
+            font-weight: {{ section.settings.heading_weight }} !important;
+            font-style: {{ section.settings.heading_font.style }} !important;
+            letter-spacing: {{ section.settings.heading_letter_spacing }}px !important;
+            line-height: {{ section.settings.heading_line_height }} !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          #si-heading-{{ section.id }} strong,
+          #si-heading-{{ section.id }} b {
+            font-weight: bold !important;
+          }
+          #si-heading-{{ section.id }} em,
+          #si-heading-{{ section.id }} i {
+            font-style: italic !important;
+          }
+          @media (max-width: 768px) {
+            #si-heading-{{ section.id }} {
+              font-size: {{ section.settings.heading_size_mobile }}px !important;
+            }
+          }
+        </style>
+        <h2 id="si-heading-{{ section.id }}" class="si-heading-{{ section.id }}">{%- if section.settings.show_heading and section.settings.heading != blank -%}{{ heading_stripped }}{%- endif -%}{%- if section.settings.accent_text != blank %} <span class="si-accent-{{ section.id }}">{{ accent_stripped }}</span>{%- endif -%}</h2>
+      {% endif %}
+      {% if section.settings.subheading != blank %}
+        <p class="si-subheading-{{ section.id }}">{{ section.settings.subheading }}</p>
+      {% endif %}
+    </div>
+
+    <div class="si-nav-{{ section.id }}">
+      <button class="si-nav-btn-{{ section.id }} si-nav-shape-{{ section.settings.nav_shape }}" id="si-prev-{{ section.id }}" aria-label="Previous slide">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="si-nav-btn-{{ section.id }} si-nav-shape-{{ section.settings.nav_shape }}" id="si-next-{{ section.id }}" aria-label="Next slide">
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="si-slider-wrapper-{{ section.id }}">
+    <div class="si-slider-{{ section.id }}" id="si-slider-{{ section.id }}">
+      {% for block in section.blocks %}
+        <div class="si-card-{{ section.id }}" {{ block.shopify_attributes }}>
+          {%- assign border_radius = '0' -%}
+          {%- if block.settings.image_shape == 'circle' -%}
+            {%- assign border_radius = '50%' -%}
+          {%- endif -%}
+
+          <div class="si-media-wrapper-{{ section.id }}" style="border-radius: {{ border_radius }} !important; overflow: hidden;">
+            {% capture img_classes %}si-img-{{ section.id }}{% endcapture %}
+
+            {% if block.settings.image != blank %}
+              {{ block.settings.image | image_url: width: 600 | image_tag: class: img_classes, loading: 'lazy' }}
+            {% else %}
+              {{ 'image' | placeholder_svg_tag: img_classes }}
+            {% endif %}
+          </div>
+          <h3 class="si-card-title-{{ section.id }}">{{ block.settings.title }}</h3>
+          <div class="si-card-desc-{{ section.id }}">{{ block.settings.description }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    function initSlider() {
+      const slider = document.getElementById('si-slider-{{ section.id }}');
+      const prevBtn = document.getElementById('si-prev-{{ section.id }}');
+      const nextBtn = document.getElementById('si-next-{{ section.id }}');
+
+      if (!slider || !prevBtn || !nextBtn) return;
+
+      /* --- Scroll amount helper --- */
+      function getScrollAmount() {
+        const firstCard = slider.querySelector('[class*="si-card-"]');
+        if (firstCard) {
+          const style = window.getComputedStyle(slider);
+          const gap = parseInt(style.gap) || {{ section.settings.slides_gap }};
+          return firstCard.offsetWidth + gap;
+        }
+        return 300;
+      }
+
+      /* --- Nav button state --- */
+      function updateButtonStates() {
+        const scrollLeft = slider.scrollLeft;
+        const maxScroll = slider.scrollWidth - slider.clientWidth;
+
+        if (scrollLeft <= 0) {
+          prevBtn.classList.add('si-nav-disabled');
+        } else {
+          prevBtn.classList.remove('si-nav-disabled');
+        }
+
+        if (scrollLeft >= maxScroll - 1) {
+          nextBtn.classList.add('si-nav-disabled');
+        } else {
+          nextBtn.classList.remove('si-nav-disabled');
+        }
+      }
+
+      prevBtn.onclick = function() {
+        if (!prevBtn.classList.contains('si-nav-disabled')) {
+          slider.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+        }
+      };
+
+      nextBtn.onclick = function() {
+        if (!nextBtn.classList.contains('si-nav-disabled')) {
+          slider.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+        }
+      };
+
+      slider.addEventListener('scroll', updateButtonStates);
+      updateButtonStates();
+
+      /* --- Smooth drag / swipe engine --- */
+      var isActive = false;
+      var isMouse = false;
+      var pointerStartX = 0;
+      var scrollStart = 0;
+      var animRaf = null;
+
+      function cancelAnim() {
+        if (animRaf) { cancelAnimationFrame(animRaf); animRaf = null; }
+      }
+
+      function disableSnap() {
+        cancelAnim();
+        slider.style.scrollBehavior = 'auto';
+        slider.style.scrollSnapType = 'none';
+      }
+
+      function enableSnap() {
+        slider.style.scrollBehavior = '';
+        slider.style.scrollSnapType = '';
+      }
+
+      function smoothScrollTo(target, duration, cb) {
+        cancelAnim();
+        var start = slider.scrollLeft;
+        var diff = target - start;
+        if (Math.abs(diff) < 1) { slider.scrollLeft = target; if (cb) cb(); return; }
+        var startTime = null;
+        function step(ts) {
+          if (!startTime) startTime = ts;
+          var elapsed = ts - startTime;
+          var progress = Math.min(elapsed / duration, 1);
+          var ease = 1 - Math.pow(1 - progress, 3);
+          slider.scrollLeft = start + diff * ease;
+          if (progress < 1) {
+            animRaf = requestAnimationFrame(step);
+          } else {
+            slider.scrollLeft = target;
+            animRaf = null;
+            if (cb) cb();
+          }
+        }
+        animRaf = requestAnimationFrame(step);
+      }
+
+      function snapAfterDrag() {
+        var scrollAmount = getScrollAmount();
+        var maxScroll = slider.scrollWidth - slider.clientWidth;
+        if (scrollAmount <= 0) { enableSnap(); updateButtonStates(); return; }
+
+        /* How far did the user drag (positive = swiped toward next) */
+        var totalDrag = slider.scrollLeft - scrollStart;
+        /* 30px threshold — a small intentional swipe triggers navigation */
+        var threshold = 30;
+
+        var startIdx = Math.round(scrollStart / scrollAmount);
+        var targetIdx = startIdx;
+
+        if (totalDrag > threshold) {
+          targetIdx = startIdx + 1;
+        } else if (totalDrag < -threshold) {
+          targetIdx = startIdx - 1;
+        }
+
+        /* Clamp index to valid range */
+        var totalCards = slider.querySelectorAll('[class*="si-card-"]').length;
+        var maxIdx = Math.max(totalCards - Math.round(slider.clientWidth / scrollAmount), 0);
+        targetIdx = Math.min(Math.max(targetIdx, 0), maxIdx);
+
+        var target = Math.min(targetIdx * scrollAmount, maxScroll);
+        smoothScrollTo(target, 280, function() {
+          enableSnap();
+          updateButtonStates();
+        });
+      }
+
+      function onPointerStart(x, mouse) {
+        isActive = true;
+        isMouse = mouse;
+        pointerStartX = x;
+        scrollStart = slider.scrollLeft;
+        disableSnap();
+        if (mouse) slider.style.cursor = 'grabbing';
+      }
+
+      function onPointerMove(x) {
+        if (!isActive) return;
+        var walk = x - pointerStartX;
+        slider.scrollLeft = scrollStart - walk;
+      }
+
+      function onPointerEnd() {
+        if (!isActive) return;
+        isActive = false;
+        if (isMouse) slider.style.cursor = '';
+        snapAfterDrag();
+      }
+
+      /* --- Mouse events (desktop & theme editor) --- */
+      slider.addEventListener('mousedown', function(e) {
+        onPointerStart(e.pageX, true);
+        e.preventDefault();
+      });
+
+      slider.addEventListener('mousemove', function(e) {
+        if (!isActive || !isMouse) return;
+        e.preventDefault();
+        onPointerMove(e.pageX);
+      });
+
+      slider.addEventListener('mouseup', function() { if (isMouse) onPointerEnd(); });
+      slider.addEventListener('mouseleave', function() { if (isMouse) onPointerEnd(); });
+
+      /* --- Touch events (mobile + theme editor) --- */
+      slider.addEventListener('touchstart', function(e) {
+        onPointerStart(e.touches[0].pageX, false);
+      }, { passive: true });
+
+      slider.addEventListener('touchmove', function(e) {
+        if (!isActive || isMouse) return;
+        onPointerMove(e.touches[0].pageX);
+      }, { passive: true });
+
+      slider.addEventListener('touchend', function() { if (!isMouse) onPointerEnd(); }, { passive: true });
+      slider.addEventListener('touchcancel', function() { if (!isMouse) onPointerEnd(); }, { passive: true });
+
+      /* Prevent native image/link drag from interfering */
+      slider.addEventListener('dragstart', function(e) { e.preventDefault(); });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSlider);
+    } else {
+      initSlider();
+    }
+
+    if (typeof Shopify !== 'undefined' && Shopify.designMode) {
+      document.addEventListener('shopify:section:load', function(event) {
+        if (event.detail.sectionId === '{{ section.id }}') {
+          initSlider();
+        }
+      });
+      document.addEventListener('shopify:section:select', function(event) {
+        if (event.detail.sectionId === '{{ section.id }}') {
+          initSlider();
+        }
+      });
+      document.addEventListener('shopify:block:select', function(event) {
+        if (event.detail.sectionId === '{{ section.id }}') {
+          initSlider();
+        }
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Scrollable Ingredients",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background Color",
+      "default": "#F2F2F2"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_left_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Left Padding (Mobile)",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "section_padding_right_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Right Padding (Mobile)",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "container_width",
+      "label": "Container Width",
+      "options": [
+        { "value": "full", "label": "Full Width" },
+        { "value": "container", "label": "Standard Container" },
+        { "value": "custom", "label": "Custom Width" }
+      ],
+      "default": "container"
+    },
+    {
+      "type": "range",
+      "id": "custom_width_value",
+      "min": 800,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "label": "Custom Max Width",
+      "default": 1200,
+      "info": "Only applies if 'Custom Width' is selected."
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "body_font",
+      "label": "Body Font",
+      "default": "dm_sans_n4"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Heading Font",
+      "default": "dm_sans_n4"
+    },
+    {
+      "type": "font_picker",
+      "id": "accent_font",
+      "label": "Accent Font",
+      "default": "dm_sans_n4"
+    },
+    {
+      "type": "header",
+      "content": "Heading Typography"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading",
+      "label": "Show Heading",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "<p>Key Ingredients</p>"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#181818"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 16,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading & Accent Font Size (Desktop)",
+      "default": 42
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 16,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading & Accent Font Size (Mobile)",
+      "default": 27
+    },
+    {
+      "type": "range",
+      "id": "heading_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "label": "Heading Weight",
+      "default": 700
+    },
+    {
+      "type": "range",
+      "id": "heading_letter_spacing",
+      "min": -2,
+      "max": 2,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Heading Letter Spacing",
+      "default": -0.5
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "label": "Heading Line Height",
+      "default": 1.2
+    },
+    {
+      "type": "header",
+      "content": "Accent Text"
+    },
+    {
+      "type": "richtext",
+      "id": "accent_text",
+      "label": "Accent Text",
+      "default": "<p>Inside</p>"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#19bdff"
+    },
+    {
+      "type": "checkbox",
+      "id": "accent_use_gradient",
+      "label": "Use Gradient",
+      "default": false,
+      "info": "Apply a gradient effect to the accent text instead of a solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_gradient",
+      "label": "Accent Gradient",
+      "default": "linear-gradient(45deg, #19bdff, #6EE4FF)",
+      "info": "Only used when 'Use Gradient' is enabled above."
+    },
+    {
+      "type": "range",
+      "id": "accent_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "label": "Accent Font Weight",
+      "default": 700
+    },
+    {
+      "type": "range",
+      "id": "accent_letter_spacing",
+      "min": -2,
+      "max": 5,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Accent Letter Spacing",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading Text"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading Color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "subheading_size",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Subheading Font Size (Desktop)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "subheading_size_mobile",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Subheading Font Size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "subheading_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "label": "Subheading Weight",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "subheading_letter_spacing",
+      "min": -2,
+      "max": 2,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Subheading Letter Spacing",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "subheading_line_height",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "label": "Subheading Line Height",
+      "default": 1.5
+    },
+    {
+      "type": "header",
+      "content": "Gaps (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "gap_heading_to_subheading",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap: Heading → Subheading",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "gap_header_to_slider",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap: Header → Slider",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "gap_image_to_title",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap: Image → Title",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "gap_title_to_desc",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap: Title → Description",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Gaps (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "gap_heading_to_subheading_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap: Heading → Subheading (Mobile)",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "gap_header_to_slider_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap: Header → Slider (Mobile)",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "gap_image_to_title_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap: Image → Title (Mobile)",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "gap_title_to_desc_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap: Title → Description (Mobile)",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "select",
+      "id": "nav_shape",
+      "label": "Arrow Shape",
+      "options": [
+        { "value": "circle", "label": "Circle" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "circle"
+    },
+    {
+      "type": "range",
+      "id": "nav_size",
+      "min": 30,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Arrow Size",
+      "default": 44
+    },
+    {
+      "type": "color",
+      "id": "nav_bg",
+      "label": "Arrow Background",
+      "default": "#DFDFDF"
+    },
+    {
+      "type": "color",
+      "id": "nav_icon_color",
+      "label": "Arrow Icon Color",
+      "default": "#181818"
+    },
+    {
+      "type": "color",
+      "id": "nav_hover_bg",
+      "label": "Arrow Hover Background",
+      "default": "#C0C0C0"
+    },
+    {
+      "type": "color",
+      "id": "nav_hover_icon_color",
+      "label": "Arrow Hover Icon Color",
+      "default": "#181818"
+    },
+    {
+      "type": "checkbox",
+      "id": "nav_hover_grow",
+      "label": "Enable Hover Scale Effect",
+      "default": true,
+      "info": "When enabled, the hovered navigation arrow grows in size."
+    },
+    {
+      "type": "range",
+      "id": "nav_hover_grow_amount",
+      "min": 5,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "label": "Hover Scale Increase",
+      "default": 15,
+      "info": "How much bigger the arrow gets on hover (e.g. 15% = 1.15x scale)."
+    },
+    {
+      "type": "header",
+      "content": "Slider Settings"
+    },
+    {
+      "type": "range",
+      "id": "slides_desktop",
+      "min": 1,
+      "max": 6,
+      "step": 0.1,
+      "label": "Slides per view (Desktop)",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "slides_mobile",
+      "min": 1,
+      "max": 3,
+      "step": 0.1,
+      "label": "Slides per view (Mobile)",
+      "default": 1.2
+    },
+    {
+      "type": "range",
+      "id": "slides_gap",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap between slides",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "slides_gap_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap between slides (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Card Styling"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_padding_tb",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Padding Top/Bottom",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_padding_lr",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Padding Left/Right",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_padding_tb_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Padding Top/Bottom (Mobile)",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_padding_lr_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Padding Left/Right (Mobile)",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Card Title Typography"
+    },
+    {
+      "type": "color",
+      "id": "card_title_color",
+      "label": "Title Color",
+      "default": "#181818"
+    },
+    {
+      "type": "range",
+      "id": "card_title_size",
+      "min": 14,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Title Font Size (Desktop)",
+      "default": 19
+    },
+    {
+      "type": "range",
+      "id": "card_title_size_mobile",
+      "min": 10,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Title Font Size (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_title_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "label": "Title Font Weight",
+      "default": 700
+    },
+    {
+      "type": "range",
+      "id": "card_title_letter_spacing",
+      "min": -2,
+      "max": 2,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Title Letter Spacing",
+      "default": -0.3
+    },
+    {
+      "type": "range",
+      "id": "card_title_line_height",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "label": "Title Line Height",
+      "default": 1.2
+    },
+    {
+      "type": "header",
+      "content": "Card Description Typography"
+    },
+    {
+      "type": "color",
+      "id": "card_desc_color",
+      "label": "Description Color",
+      "default": "#181818"
+    },
+    {
+      "type": "range",
+      "id": "card_desc_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Font Size (Desktop)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "card_desc_size_mobile",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Font Size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "card_desc_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "label": "Description Font Weight",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "card_desc_letter_spacing",
+      "min": -2,
+      "max": 2,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Description Letter Spacing",
+      "default": -0.3
+    },
+    {
+      "type": "range",
+      "id": "card_desc_line_height",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "label": "Description Line Height",
+      "default": 1.5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "ingredient",
+      "name": "Ingredient",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "select",
+          "id": "image_shape",
+          "label": "Image Shape",
+          "options": [
+            { "value": "circle", "label": "Circle" },
+            { "value": "square", "label": "Square" }
+          ],
+          "default": "circle"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Ingredient Name"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Brief description of the ingredient and its benefits.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrollable Ingredients",
+      "blocks": [
+        { "type": "ingredient" },
+        { "type": "ingredient" },
+        { "type": "ingredient" },
+        { "type": "ingredient" },
+        { "type": "ingredient" }
+      ]
+    }
+  ]
+}
+{% endschema %}

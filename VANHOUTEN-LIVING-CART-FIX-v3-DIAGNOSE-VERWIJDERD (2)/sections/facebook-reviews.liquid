@@ -1,0 +1,2835 @@
+{% comment %}
+  Facebook Comment Thread
+  Based on the authentic Facebook comment block from product details section.
+  Displays comments in a vertical thread with replies support.
+{% endcomment %}
+
+{% if section.settings.use_facebook_font %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% endif %}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.outer_background_color | default: '#ffffff' }}{% endif %} !important;
+  }
+</style>
+
+<div
+  class="fb-thread-section {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}"
+  id="fb-thread-{{ section.id }}"
+  style="
+    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.section_background_color | default: '#ffffff' }}{% endif %};
+    padding: {{ section.settings.desktop_vertical_padding | default: 20 }}px 0;
+  "
+>
+  {% if section.settings.show_container %}
+    <div
+      class="fb-thread-container-wrapper"
+      style="
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      "
+    >
+      <div
+        class="fb-thread-content-wrapper"
+        style="
+          max-width: {{ section.settings.page_width | default: 1200 }}px;
+          background-color: {{ section.settings.container_background_color | default: '#f8f9fa' }};
+          padding: {{ section.settings.container_padding_vertical | default: 24 }}px {{ section.settings.container_padding_horizontal | default: 24 }}px;
+          border-radius: {{ section.settings.container_border_radius | default: 8 }}px;
+          box-sizing: border-box;
+          width: 100%;
+        "
+      >
+  {% else %}
+    <div
+      class="fb-thread-content-wrapper"
+      style="
+        max-width: {{ section.settings.page_width | default: 1200 }}px;
+        margin: 0 auto;
+        padding: 0 {{ section.settings.section_horizontal_padding | default: 20 }}px;
+        box-sizing: border-box;
+      "
+    >
+  {% endif %}
+  {% if section.settings.title != blank %}
+    <div
+      class="fb-thread-header"
+      style="
+        text-align: {{ section.settings.header_alignment | default: 'left' }};
+        margin-bottom: {{ section.settings.header_margin_bottom | default: 20 }}px;
+      "
+    >
+      <h2
+        class="fb-thread-title"
+        style="
+          font-size: {{ section.settings.title_size | default: 24 }}px;
+          font-weight: {{ section.settings.title_weight | default: '600' }};
+          color: {{ section.settings.title_color | default: '#1c1e21' }};
+          margin: 0 0 {{ section.settings.title_margin_bottom | default: 8 }}px 0;
+          line-height: 1.2;
+          {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+        "
+      >
+        {{ section.settings.title }}
+      </h2>
+    </div>
+  {% endif %}
+
+  <!-- Top Divider -->
+  <div
+    class="fb-thread-top-divider"
+    style="
+      width: 100%;
+      height: 1px;
+      background-color: {{ section.settings.divider_color | default: '#dadde1' }};
+      margin-bottom: {{ section.settings.filter_section_spacing | default: 16 }}px;
+    "
+  ></div>
+
+  <!-- Filter Section -->
+  <div
+    class="fb-thread-filter-section"
+    style="
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: {{ section.settings.filter_section_spacing | default: 16 }}px;
+      padding: 0;
+    "
+  >
+    <div
+      class="fb-thread-filter-left"
+      style="
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      "
+    >
+      <span
+        class="fb-thread-filter-label"
+        style="
+          font-size: {{ section.settings.filter_label_size | default: 15 }}px;
+          font-weight: {{ section.settings.filter_label_weight | default: '600' }};
+          color: {{ section.settings.filter_label_color | default: '#1c1e21' }};
+          {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+        "
+      >
+        {{- section.settings.filter_label_text | default: 'Most relevant' -}}
+      </span>
+
+      {% if section.settings.show_filter_dropdown %}
+        <svg
+          class="fb-thread-filter-arrow"
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          style="          color: {{ section.settings.filter_arrow_color | default: '#65676b' }};"
+        >
+          <path d="M6 8L2 4h8l-4 4z" fill="currentColor"/>
+        </svg>
+      {% endif %}
+    </div>
+
+    {% if section.settings.show_comment_count %}
+      <div
+        class="fb-thread-comment-count"
+        style="
+          font-size: {{ section.settings.comment_count_size | default: 14 }}px;
+          letter-spacing: var(--letter-spacing-body);
+          font-weight: {{ section.settings.comment_count_weight | default: '400' }};
+          color: {{ section.settings.comment_count_color | default: '#65676b' }};
+          {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+        "
+      >
+        {% liquid
+          assign comment_count = 0
+          for block in section.blocks
+            if block.type == 'fb_thread_comment' or block.type == 'fb_thread_reply_comment'
+              assign comment_count = comment_count | plus: 1
+              if block.type == 'fb_thread_reply_comment'
+                assign comment_count = comment_count | plus: 1
+              endif
+            endif
+          endfor
+        %}
+        {{ comment_count }} comment{% if comment_count != 1 %}s{% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Add Comment Input Section -->
+  {% if section.settings.show_add_comment %}
+    <div
+      class="fb-thread-add-comment"
+      style="
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: {{ section.settings.add_comment_padding | default: 12 }}px 0;
+        margin-bottom: {{ section.settings.add_comment_margin_bottom | default: 16 }}px;
+        border-bottom: 1px solid {{ section.settings.add_comment_border_color | default: '#e4e6ea' }};
+      "
+    >
+      <!-- Default Profile Picture -->
+      <div
+        class="fb-thread-add-comment-avatar"
+        style="
+          width: {{ section.settings.add_comment_avatar_size | default: 32 }}px;
+          height: {{ section.settings.add_comment_avatar_size | default: 32 }}px;
+          border-radius: 50%;
+          background: {{ section.settings.add_comment_avatar_bg | default: '#e4e6ea' }};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        "
+      >
+        <svg
+          width="{{ section.settings.add_comment_avatar_size | default: 32 | times: 0.6 | floor }}"
+          height="{{ section.settings.add_comment_avatar_size | default: 32 | times: 0.6 | floor }}"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                fill="{{ section.settings.add_comment_icon_color | default: '#65676b' }}"/>
+        </svg>
+      </div>
+
+      <!-- Comment Input Container -->
+      <div
+        class="fb-thread-add-comment-input-container"
+        style="
+          flex: 1;
+          position: relative;
+        "
+      >
+        <!-- Input Field -->
+        <div
+          class="fb-thread-add-comment-input"
+          style="
+            background: {{ section.settings.add_comment_input_bg | default: '#f0f2f5' }};
+            border-radius: {{ section.settings.add_comment_input_radius | default: 20 }}px;
+            padding: {{ section.settings.add_comment_input_padding | default: 8 }}px {{ section.settings.add_comment_input_padding | default: 8 | plus: 4 }}px;
+            min-height: {{ section.settings.add_comment_input_height | default: 36 }}px;
+            display: flex;
+            align-items: center;
+            cursor: text;
+            border: 1px solid transparent;
+            transition: border-color 0.2s ease;
+            position: relative;
+          "
+        >
+          <input
+            type="text"
+            class="fb-thread-add-comment-real-input"
+            placeholder="{{ section.settings.add_comment_placeholder | default: 'Add a comment' }}"
+            style="
+              background: transparent;
+              border: none;
+              outline: none;
+              flex: 1;
+              color: {{ section.settings.add_comment_text_color | default: '#1c1e21' }};
+              font-size: {{ section.settings.add_comment_font_size | default: 14 }}px;
+              {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+            "
+            maxlength="{{ section.settings.add_comment_max_length | default: 500 }}"
+          >
+
+          <!-- Send Button -->
+          <svg
+            class="fb-thread-send-button"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style="color: #65676b; cursor: pointer; opacity: 0.6; transition: color 0.2s ease, opacity 0.2s ease; margin-left: 8px;"
+          >
+            <path d="M15.854 7.646l-7-7a.5.5 0 0 0-.708.708L14.293 7.5H.5a.5.5 0 0 0 0 1h13.793l-6.147 6.146a.5.5 0 0 0 .708.708l7-7a.5.5 0 0 0 0-.708z" fill="currentColor"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <div
+    class="fb-thread-container"
+    style="
+      display: flex;
+      flex-direction: column;
+      gap: {{ section.settings.comment_spacing | default: 12 }}px;
+    "
+  >
+    {% for block in section.blocks %}
+      {% case block.type %}
+        {% when 'fb_thread_comment' %}
+          <div
+            class="fb-thread-comment-block"
+            id="thread-block-{{ block.id }}"
+            {{ block.shopify_attributes }}
+            style="
+              margin-top: {{ block.settings.margin_top | default: 0 }}px;
+              margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;
+              padding: {{ section.settings.universal_block_vertical_padding | default: 8 }}px {{ section.settings.universal_block_horizontal_padding | default: 0 }}px;
+            "
+          >
+            <div
+              class="fb-thread-comment-container"
+              style="
+                border-radius: 0px;
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                padding: {{ section.settings.comment_container_vertical_padding | default: 8 }}px 0;
+                overflow: hidden;
+                font-family: {% if section.settings.use_facebook_font %}Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important{% else %}-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif{% endif %};
+                line-height: 1.34;
+              "
+            >
+              <div
+                class="fb-thread-comment-inner"
+                style="
+                  display: flex;
+                  gap: 8px;
+                  align-items: flex-start;
+                "
+              >
+                {% if block.settings.profile_image != blank %}
+                  <div
+                    class="fb-thread-comment-profile"
+                    style="
+                      width: 32px;
+                      height: 32px;
+                      border-radius: 50%;
+                      position: relative;
+                      overflow: hidden;
+                      flex-shrink: 0;
+                    "
+                  >
+                    <img
+                      src="{{ block.settings.profile_image | image_url }}"
+                      alt="Profile picture"
+                      style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"
+                      width=""
+                      height=""
+                    >
+                  </div>
+                {% else %}
+                  <div
+                    class="fb-thread-comment-profile"
+                    style="
+                      width: 32px;
+                      height: 32px;
+                      border-radius: 50%;
+                      background: {{ block.settings.profile_center_color | default: '#e4e6ea' }};
+                      position: relative;
+                      overflow: hidden;
+                      flex-shrink: 0;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 14px;
+                      font-weight: 600;
+                      color: #65676b;
+                    "
+                  >
+                    {{ block.settings.author_name | slice: 0 | upcase }}
+                  </div>
+                {% endif %}
+
+                <div class="fb-thread-comment-content" style="flex: 1;">
+                  <div
+                    class="fb-thread-comment-bubble"
+                    style="
+                      background: #f0f2f5;
+                      border-radius: 18px;
+                      padding: {{ section.settings.comment_bubble_vertical_padding | default: 8 }}px {{ section.settings.comment_bubble_horizontal_padding | default: 12 }}px;
+                      margin-bottom: 4px;
+                      position: relative;
+                      display: inline-block;
+                      max-width: 100%;
+                    "
+                  >
+                    <div
+                      class="fb-thread-comment-author"
+                      style="
+                        font-weight: 700 !important;
+                        font-size: {{ block.settings.author_name_font_size | default: 13 }}px;
+                        letter-spacing: var(--letter-spacing-body);
+                        color: {{ block.settings.author_name_color | default: '#050505' }};
+                        margin-bottom: 2px;
+                        {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                      "
+                    >
+                      {{ block.settings.author_name }}
+                    </div>
+
+                    <div
+                      class="fb-thread-comment-text"
+                      style="
+                        color: {{ block.settings.comment_text_color | default: '#050505' }};
+                        letters-spacing: var(--letter-spacing-body);
+                        font-size: {{ block.settings.comment_text_font_size | default: 14 }}px;
+                        line-height: 1.3;
+                        {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                      "
+                    >
+                      {{ block.settings.comment_text }}
+                    </div>
+
+                    {% liquid
+                      assign has_reaction_count = false
+                      if block.settings.reaction_count != blank and block.settings.reaction_count != '0'
+                        assign has_reaction_count = true
+                      endif
+                      assign has_reaction_icons = false
+                      if block.settings.show_like_icon or block.settings.show_love_icon or block.settings.show_care_icon
+                        assign has_reaction_icons = true
+                      endif
+                    %}
+                    {% if has_reaction_count or has_reaction_icons %}
+                      <!-- Connecting Line -->
+                      <div
+                        class="fb-thread-reaction-line"
+                        style="
+                          position: absolute;
+                          bottom: -7px;
+                          right: 24px;
+                          width: 16px;
+                          height: 2px;
+                          background-color: #dadde1;
+                          z-index: 1;
+                          border-radius: 1px;
+                        "
+                      ></div>
+
+                      <div
+                        class="fb-thread-comment-reactions"
+                        style="
+                          position: absolute;
+                          bottom: -10px;
+                          right: 12px;
+                          display: flex;
+                          align-items: center;
+                          gap: 4px;
+                          background: #ffffff;
+                          border-radius: 12px;
+                          padding: 1px 4px;
+                          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                          border: 1px solid #e4e6ea;
+                          z-index: 2;
+                        "
+                      >
+                        {% if block.settings.reaction_count != blank and block.settings.reaction_count != '0' %}
+                          <span
+                            class="fb-thread-comment-reaction-count"
+                            style="
+                              color: #65676b;
+                              font-size: 12px;
+                              font-weight: 400;
+                              margin-right: 2px;
+                              {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                            "
+                          >
+                            {{- block.settings.reaction_count -}}
+                          </span>
+                        {% endif %}
+
+                        <div class="fb-thread-comment-reaction-icons" style="display: flex; margin-right: 0px;">
+                          {% if block.settings.show_like_icon %}
+                            <!-- Like Icon -->
+                            <div
+                              class="fb-thread-comment-reaction-icon"
+                              style="
+                                width: 16px;
+                                height: 16px;
+                                border-radius: 50%;
+                                border: 1px solid white;
+                                overflow: hidden;
+                                flex-shrink: 0;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                              "
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                fill="none"
+                                viewBox="0 0 16 16"
+                                style="display: block;"
+                              >
+                                <path fill="url(#fb-thread-like-gradient-{{ block.id }})" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Z"></path>
+                                <path fill="#fff" d="M12.162 7.338c.176.123.338.245.338.674 0 .43-.229.604-.474.725.1.163.132.36.089.546-.077.344-.392.611-.672.69.121.194.159.385.015.62-.185.295-.346.407-1.058.407H7.5c-.988 0-1.5-.546-1.5-1V7.665c0-1.23 1.467-2.275 1.467-3.13L7.361 3.47c-.005-.065.008-.224.058-.27.08-.079.301-.2.635-.2.218 0 .363.041.534.123.581.277.732.978.732 1.542 0 .271-.414 1.083-.47 1.364 0 0 .867-.192 1.879-.199 1.061-.006 1.749.19 1.749.842 0 .261-.219.523-.316.666ZM3.6 7h.8a.6.6 0 0 1 .6.6v3.8a.6.6 0 0 1-.6.6h-.8a.6.6 0 0 1-.6-.6V7.6a.6.6 0 0 1 .6-.6Z"></path>
+                                <defs>
+                                  <linearGradient id="fb-thread-like-gradient-{{ block.id }}" x1="8" x2="8" y2="16" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#18AFFF"></stop>
+                                    <stop offset="1" stop-color="#0062DF"></stop>
+                                  </linearGradient>
+                                </defs>
+                              </svg>
+                            </div>
+                          {% endif %}
+
+                          {% if block.settings.show_love_icon %}
+                            <!-- Love Icon -->
+                            <div
+                              class="fb-thread-comment-reaction-icon"
+                              style="
+                                width: 16px;
+                                height: 16px;
+                                border-radius: 50%;
+                                border: 1px solid white;
+                                overflow: hidden;
+                                flex-shrink: 0;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                              "
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                fill="none"
+                                viewBox="0 0 16 16"
+                                style="display: block;"
+                              >
+                                <path fill="url(#fb-thread-love-gradient-{{ block.id }})" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Z"></path>
+                                <path fill="#fff" d="M10.473 4C8.275 4 8 5.824 8 5.824S7.726 4 5.528 4c-2.114 0-2.73 2.222-2.472 3.41C3.736 10.55 8 12.75 8 12.75s4.265-2.2 4.945-5.34c.257-1.188-.36-3.41-2.472-3.41Z"></path>
+                                <defs>
+                                  <linearGradient id="fb-thread-love-gradient-{{ block.id }}" x1="8" x2="8" y2="16" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#FF6680"></stop>
+                                    <stop offset="1" stop-color="#E61739"></stop>
+                                  </linearGradient>
+                                </defs>
+                              </svg>
+                            </div>
+                          {% endif %}
+
+                          {% if block.settings.show_care_icon %}
+                            <!-- Care Icon -->
+                            <div
+                              class="fb-thread-comment-reaction-icon"
+                              style="
+                                width: 16px;
+                                height: 16px;
+                                border-radius: 50%;
+                                border: 1px solid white;
+                                overflow: hidden;
+                                flex-shrink: 0;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                              "
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                style="display: block;"
+                              >
+                                <defs>
+                                  <linearGradient id="fb-thread-care-bg-{{ block.id }}" x1="-2.313" x2="-2.313" y1="19.862" y2="20.738" gradientTransform="matrix(16 0 0 -16 45 333)" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0" stop-color="#f28a2d"></stop>
+                                    <stop offset="1" stop-color="#fde86f"></stop>
+                                  </linearGradient>
+                                  <linearGradient id="fb-thread-care-mouth-{{ block.id }}" x1="-1.619" x2="-1.619" y1="18.2" y2="16.681" gradientTransform="matrix(3.4035 0 0 -.9374 13.51 22.37)" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0" stop-color="#482314"></stop>
+                                    <stop offset="1" stop-color="#9a4111"></stop>
+                                  </linearGradient>
+                                  <radialGradient id="fb-thread-care-eye1-{{ block.id }}" cx="-3.9" cy="18.924" r=".872" gradientTransform="matrix(0 -2.1326 -2.1327 0 45.352 -4.046)" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0" stop-color="#3b446b"></stop>
+                                    <stop offset=".688" stop-color="#202340"></stop>
+                                  </radialGradient>
+                                  <radialGradient id="fb-thread-care-eye2-{{ block.id }}" cx="-3.914" cy="18.924" r=".872" gradientTransform="matrix(0 -2.1326 -2.1327 0 51.366 -4.077)" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0" stop-color="#3b446b"></stop>
+                                    <stop offset=".688" stop-color="#202340"></stop>
+                                  </radialGradient>
+                                  <linearGradient id="fb-thread-care-heart-{{ block.id }}" x1="-2.17" x2="-2.407" y1="20.358" y2="19.647" gradientTransform="matrix(9.7496 0 0 -9.079 27.91 194.578)" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0" stop-color="#f34462"></stop>
+                                    <stop offset="1" stop-color="#cc0820"></stop>
+                                  </linearGradient>
+                                </defs>
+                                <path fill="url(#fb-thread-care-bg-{{ block.id }})" fill-rule="evenodd" d="M16 8c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8 8 3.6 8 8z" clip-rule="evenodd"></path>
+                                <path fill="url(#fb-thread-care-mouth-{{ block.id }})" fill-rule="evenodd" d="M9.7 5.9c-.1-.3-3.3-.3-3.4 0-.1.3.6.7 1.7.7s1.8-.4 1.7-.7z" clip-rule="evenodd"></path>
+                                <path fill="url(#fb-thread-care-eye1-{{ block.id }})" fill-rule="evenodd" d="M6 4.1c0 .7-.4.9-1 1-.6.1-1.1-.2-1.1-1 0-.6.3-1.4 1.1-1.4.7 0 1 .8 1 1.4z" clip-rule="evenodd"></path>
+                                <path fill="url(#fb-thread-care-eye2-{{ block.id }})" fill-rule="evenodd" d="M10 4.1c0 .7.4.9 1.1 1 .6.1 1.1-.2 1.1-1 0-.6-.3-1.4-1.1-1.4S10 3.5 10 4.1z" clip-rule="evenodd"></path>
+                                <path fill="url(#fb-thread-care-heart-{{ block.id }})" fill-rule="evenodd" d="M9.7 8.5c-2.1-.6-2.8.8-2.8.8S7.1 7.7 5 7c-2-.6-3.2 1.3-3.3 2.4-.2 2.5 2 5.3 2.8 6.3.1.3.4.3.7.3 1.2-.3 4.6-1.4 5.9-3.6.5-1.1.6-3.3-1.4-3.9z" clip-rule="evenodd"></path>
+                              </svg>
+                            </div>
+                          {% endif %}
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  {% if block.settings.comment_image != blank %}
+                    <div
+                      class="fb-thread-comment-image"
+                      style="
+                        margin-top: 8px;
+                        margin-left: 12px;
+                        border-radius: 18px;
+                        overflow: hidden;
+                        max-width: 300px;
+                        position: relative;
+                      "
+                    >
+                      <img
+                        src="{{ block.settings.comment_image | image_url: width: 400 }}"
+                        alt="Comment image"
+                        style="
+                          width: 100%;
+                          height: auto;
+                          display: block;
+                          border-radius: 18px;
+                        "
+                        loading="lazy"
+                      >
+
+                      {% if block.settings.show_reactions %}
+                        <div
+                          class="fb-thread-comment-reactions"
+                          style="
+                            position: absolute;
+                            bottom: 8px;
+                            right: 8px;
+                            display: flex;
+                            align-items: center;
+                            gap: 2px;
+                            background: rgba(255, 255, 255, 0.9);
+                            border-radius: 12px;
+                            padding: 2px 6px;
+                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                          "
+                        >
+                          {% if block.settings.reaction_count != blank and block.settings.reaction_count != '0' %}
+                            <span
+                              class="fb-thread-reaction-count"
+                              style="
+                                font-size: {{ section.settings.reaction_number_font_size | default: 12 }}px;
+                                color: {{ block.settings.reaction_count_color | default: '#65676b' }};
+                                margin-right: 2px;
+                              "
+                            >
+                              {{- block.settings.reaction_count -}}
+                            </span>
+                          {% endif %}
+
+                          {% if block.settings.show_like_emoji %}
+                            <span
+                              class="fb-thread-reaction-icon"
+                              style="font-size: {{ block.settings.reaction_emoji_size | default: 16 }}px;"
+                              >👍</span
+                            >
+                          {% endif %}
+                          {% if block.settings.show_love_emoji %}
+                            <span
+                              class="fb-thread-reaction-icon"
+                              style="font-size: {{ block.settings.reaction_emoji_size | default: 16 }}px;"
+                              >❤️</span
+                            >
+                          {% endif %}
+                          {% if block.settings.show_laugh_emoji %}
+                            <span
+                              class="fb-thread-reaction-icon"
+                              style="font-size: {{ block.settings.reaction_emoji_size | default: 16 }}px;"
+                              >😂</span
+                            >
+                          {% endif %}
+                          {% if block.settings.show_wow_emoji %}
+                            <span
+                              class="fb-thread-reaction-icon"
+                              style="font-size: {{ block.settings.reaction_emoji_size | default: 16 }}px;"
+                              >😮</span
+                            >
+                          {% endif %}
+                          {% if block.settings.show_sad_emoji %}
+                            <span
+                              class="fb-thread-reaction-icon"
+                              style="font-size: {{ block.settings.reaction_emoji_size | default: 16 }}px;"
+                              >😢</span
+                            >
+                          {% endif %}
+                          {% if block.settings.show_angry_emoji %}
+                            <span
+                              class="fb-thread-reaction-icon"
+                              style="font-size: {{ block.settings.reaction_emoji_size | default: 16 }}px;"
+                              >😡</span
+                            >
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+
+                  <div
+                    class="fb-thread-comment-meta"
+                    style="
+                      display: flex;
+                      letter-spacing: var(--letter-spacing-body) !important;
+                      align-items: center;
+                      gap: 12px;
+                      margin-left: 12px;
+                      margin-bottom: 12px;
+                      {% if block.settings.comment_image != blank %}margin-top: 8px;{% endif %}
+                      font-size: {{ block.settings.meta_font_size | default: 12 }}px;
+                      color: #65676b;
+                      {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                    "
+                  >
+                    <span
+                      class="fb-thread-comment-meta-item"
+                      style="
+                        cursor: pointer;
+                        letter-spacing: var(--letter-spacing-body);
+                        font-weight: 600;
+                        {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                      "
+                      >Like</span
+                    >
+                    <span
+                      class="fb-thread-comment-meta-item"
+                      style="
+                        cursor: pointer;
+                        letter-spacing: var(--letter-spacing-body);
+                        font-weight: 600;
+                        {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                      "
+                      >Reply</span
+                    >
+                    <span
+                      class="fb-thread-comment-timestamp"
+                      style="
+                                              {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                      "
+                    >
+                      {{- block.settings.time_stamp -}}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        {% when 'fb_thread_reply_comment' %}
+          <div
+            class="fb-thread-reply-comment-block"
+            id="thread-reply-block-{{ block.id }}"
+            {{ block.shopify_attributes }}
+            style="
+              margin-top: {{ block.settings.margin_top | default: 0 }}px;
+              margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;
+              padding: {{ section.settings.universal_block_vertical_padding | default: 8 }}px {{ section.settings.universal_block_horizontal_padding | default: 0 }}px;
+            "
+          >
+            <!-- Main Comment -->
+            <div
+              class="fb-thread-comment-container"
+              style="
+                border-radius: 0px;
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                padding: {{ section.settings.comment_container_vertical_padding | default: 8 }}px 0;
+                overflow: hidden;
+                font-family: {% if section.settings.use_facebook_font %}Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important{% else %}-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif{% endif %};
+                line-height: 1.34;
+              "
+            >
+              <div
+                class="fb-thread-comment-inner"
+                style="
+                  display: flex;
+                  gap: 8px;
+                  align-items: flex-start;
+                "
+              >
+                {% if block.settings.profile_image != blank %}
+                  <div
+                    class="fb-thread-comment-profile"
+                    style="
+                      width: 32px;
+                      height: 32px;
+                      border-radius: 50%;
+                      position: relative;
+                      overflow: hidden;
+                      flex-shrink: 0;
+                    "
+                  >
+                    <img
+                      src="{{ block.settings.profile_image | image_url }}"
+                      alt="Profile picture"
+                      style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"
+                      width=""
+                      height=""
+                    >
+                  </div>
+                {% else %}
+                  <div
+                    class="fb-thread-comment-profile"
+                    style="
+                      width: 32px;
+                      height: 32px;
+                      border-radius: 50%;
+                      background: {{ block.settings.profile_center_color | default: '#e4e6ea' }};
+                      position: relative;
+                      overflow: hidden;
+                      flex-shrink: 0;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 14px;
+                      font-weight: 600;
+                      color: #65676b;
+                    "
+                  >
+                    {{ block.settings.author_name | slice: 0 | upcase }}
+                  </div>
+                {% endif %}
+
+                <div class="fb-thread-comment-content" style="flex: 1;">
+                  <div
+                    class="fb-thread-comment-bubble"
+                    style="
+                      background: #f0f2f5;
+                      border-radius: 18px;
+                      padding: {{ section.settings.comment_bubble_vertical_padding | default: 8 }}px {{ section.settings.comment_bubble_horizontal_padding | default: 12 }}px;
+                      margin-bottom: 4px;
+                      position: relative;
+                      display: inline-block;
+                      max-width: 100%;
+                    "
+                  >
+                    <div
+                      class="fb-thread-comment-author"
+                      style="
+                        font-weight: 700 !important;
+                        font-size: {{ block.settings.author_name_font_size | default: 13 }}px;
+                        letter-spacing: var(--letter-spacing-body);
+                        color: {{ block.settings.author_name_color | default: '#050505' }};
+                        margin-bottom: 2px;
+                        {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                      "
+                    >
+                      {{ block.settings.author_name }}
+                    </div>
+
+                    <div
+                      class="fb-thread-comment-text"
+                      style="
+                        color: {{ block.settings.comment_text_color | default: '#050505' }};
+                        letters-spacing: var(--letter-spacing-body);
+                        font-size: {{ block.settings.comment_text_font_size | default: 14 }}px;
+                        line-height: 1.3;
+                        {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                      "
+                    >
+                      {{ block.settings.comment_text }}
+                    </div>
+
+                    {% liquid
+                      assign has_reaction_count = false
+                      if block.settings.reaction_count != blank and block.settings.reaction_count != '0'
+                        assign has_reaction_count = true
+                      endif
+                      assign has_reaction_icons = false
+                      if block.settings.show_like_icon or block.settings.show_love_icon or block.settings.show_care_icon
+                        assign has_reaction_icons = true
+                      endif
+                    %}
+                    {% if has_reaction_count or has_reaction_icons %}
+                      <!-- Connecting Line -->
+                      <div
+                        class="fb-thread-reaction-line"
+                        style="
+                          position: absolute;
+                          bottom: -7px;
+                          right: 24px;
+                          width: 16px;
+                          height: 2px;
+                          background-color: #dadde1;
+                          z-index: 1;
+                          border-radius: 1px;
+                        "
+                      ></div>
+
+                      <div
+                        class="fb-thread-comment-reactions"
+                        style="
+                          position: absolute;
+                          bottom: -10px;
+                          right: 12px;
+                          display: flex;
+                          align-items: center;
+                          gap: 4px;
+                          background: #ffffff;
+                          border-radius: 12px;
+                          padding: 1px 4px;
+                          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                          border: 1px solid #e4e6ea;
+                          z-index: 2;
+                        "
+                      >
+                        {% if block.settings.reaction_count != blank and block.settings.reaction_count != '0' %}
+                          <span
+                            class="fb-thread-comment-reaction-count"
+                            style="
+                              color: #65676b;
+                              font-size: 12px;
+                              font-weight: 400;
+                              margin-right: 2px;
+                              {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                            "
+                          >
+                            {{- block.settings.reaction_count -}}
+                          </span>
+                        {% endif %}
+                        {% if block.settings.show_like_icon %}
+                          <!-- Like Icon -->
+                          <div
+                            class="fb-thread-comment-reaction-icon"
+                            style="
+                              width: 16px;
+                              height: 16px;
+                              border-radius: 50%;
+                              border: 1px solid white;
+                              overflow: hidden;
+                              flex-shrink: 0;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                            "
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              fill="none"
+                              viewBox="0 0 16 16"
+                              style="display: block;"
+                            >
+                              <path fill="url(#fb-thread-like-gradient-main-{{ block.id }})" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Z"></path>
+                              <path fill="#fff" d="M12.162 7.338c.176.123.338.245.338.674 0 .43-.229.604-.474.725.1.163.132.36.089.546-.077.344-.392.611-.672.69.121.194.159.385.015.62-.185.295-.346.407-1.058.407H7.5c-.988 0-1.5-.546-1.5-1V7.665c0-1.23 1.467-2.275 1.467-3.13L7.361 3.47c-.005-.065.008-.224.058-.27.08-.079.301-.2.635-.2.218 0 .363.041.534.123.581.277.732.978.732 1.542 0 .271-.414 1.083-.47 1.364 0 0 .867-.192 1.879-.199 1.061-.006 1.749.19 1.749.842 0 .261-.219.523-.316.666ZM3.6 7h.8a.6.6 0 0 1 .6.6v3.8a.6.6 0 0 1-.6.6h-.8a.6.6 0 0 1-.6-.6V7.6a.6.6 0 0 1 .6-.6Z"></path>
+                              <defs>
+                                <linearGradient id="fb-thread-like-gradient-main-{{ block.id }}" x1="8" x2="8" y2="16" gradientUnits="userSpaceOnUse">
+                                  <stop stop-color="#18AFFF"></stop>
+                                  <stop offset="1" stop-color="#0062DF"></stop>
+                                </linearGradient>
+                              </defs>
+                            </svg>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.show_love_icon %}
+                          <!-- Love Icon -->
+                          <div
+                            class="fb-thread-comment-reaction-icon"
+                            style="
+                              width: 16px;
+                              height: 16px;
+                              border-radius: 50%;
+                              border: 1px solid white;
+                              overflow: hidden;
+                              flex-shrink: 0;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                            "
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              fill="none"
+                              viewBox="0 0 16 16"
+                              style="display: block;"
+                            >
+                              <path fill="url(#fb-thread-love-gradient-main-{{ block.id }})" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Z"></path>
+                              <path fill="#fff" d="M10.473 4C8.275 4 8 5.824 8 5.824S7.726 4 5.528 4c-2.114 0-2.73 2.222-2.472 3.41C3.736 10.55 8 12.75 8 12.75s4.265-2.2 4.945-5.34c.257-1.188-.36-3.41-2.472-3.41Z"></path>
+                              <defs>
+                                <linearGradient id="fb-thread-love-gradient-main-{{ block.id }}" x1="8" x2="8" y2="16" gradientUnits="userSpaceOnUse">
+                                  <stop stop-color="#FF6680"></stop>
+                                  <stop offset="1" stop-color="#E61739"></stop>
+                                </linearGradient>
+                              </defs>
+                            </svg>
+                          </div>
+                        {% endif %}
+
+                        {% if block.settings.show_care_icon %}
+                          <!-- Care Icon -->
+                          <div
+                            class="fb-thread-comment-reaction-icon"
+                            style="
+                              width: 16px;
+                              height: 16px;
+                              border-radius: 50%;
+                              border: 1px solid white;
+                              overflow: hidden;
+                              flex-shrink: 0;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                            "
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 16 16"
+                              style="display: block;"
+                            >
+                              <defs>
+                                <linearGradient id="fb-thread-care-bg-main-{{ block.id }}" x1="-2.313" x2="-2.313" y1="19.862" y2="20.738" gradientTransform="matrix(16 0 0 -16 45 333)" gradientUnits="userSpaceOnUse">
+                                  <stop offset="0" stop-color="#f28a2d"></stop>
+                                  <stop offset="1" stop-color="#fde86f"></stop>
+                                </linearGradient>
+                                <linearGradient id="fb-thread-care-mouth-main-{{ block.id }}" x1="-1.619" x2="-1.619" y1="18.2" y2="16.681" gradientTransform="matrix(3.4035 0 0 -.9374 13.51 22.37)" gradientUnits="userSpaceOnUse">
+                                  <stop offset="0" stop-color="#482314"></stop>
+                                  <stop offset="1" stop-color="#9a4111"></stop>
+                                </linearGradient>
+                                <radialGradient id="fb-thread-care-eye1-main-{{ block.id }}" cx="-3.9" cy="18.924" r=".872" gradientTransform="matrix(0 -2.1326 -2.1327 0 45.352 -4.046)" gradientUnits="userSpaceOnUse">
+                                  <stop offset="0" stop-color="#3b446b"></stop>
+                                  <stop offset=".688" stop-color="#202340"></stop>
+                                </radialGradient>
+                                <radialGradient id="fb-thread-care-eye2-main-{{ block.id }}" cx="-3.914" cy="18.924" r=".872" gradientTransform="matrix(0 -2.1326 -2.1327 0 51.366 -4.077)" gradientUnits="userSpaceOnUse">
+                                  <stop offset="0" stop-color="#3b446b"></stop>
+                                  <stop offset=".688" stop-color="#202340"></stop>
+                                </radialGradient>
+                                <linearGradient id="fb-thread-care-heart-main-{{ block.id }}" x1="-2.17" x2="-2.407" y1="20.358" y2="19.647" gradientTransform="matrix(9.7496 0 0 -9.079 27.91 194.578)" gradientUnits="userSpaceOnUse">
+                                  <stop offset="0" stop-color="#f34462"></stop>
+                                  <stop offset="1" stop-color="#cc0820"></stop>
+                                </linearGradient>
+                              </defs>
+                              <path fill="url(#fb-thread-care-bg-main-{{ block.id }})" fill-rule="evenodd" d="M16 8c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8 8 3.6 8 8z" clip-rule="evenodd"></path>
+                              <path fill="url(#fb-thread-care-mouth-main-{{ block.id }})" fill-rule="evenodd" d="M9.7 5.9c-.1-.3-3.3-.3-3.4 0-.1.3.6.7 1.7.7s1.8-.4 1.7-.7z" clip-rule="evenodd"></path>
+                              <path fill="url(#fb-thread-care-eye1-main-{{ block.id }})" fill-rule="evenodd" d="M6 4.1c0 .7-.4.9-1 1-.6.1-1.1-.2-1.1-1 0-.6.3-1.4 1.1-1.4.7 0 1 .8 1 1.4z" clip-rule="evenodd"></path>
+                              <path fill="url(#fb-thread-care-eye2-main-{{ block.id }})" fill-rule="evenodd" d="M10 4.1c0 .7.4.9 1.1 1 .6.1 1.1-.2 1.1-1 0-.6-.3-1.4-1.1-1.4S10 3.5 10 4.1z" clip-rule="evenodd"></path>
+                              <path fill="url(#fb-thread-care-heart-main-{{ block.id }})" fill-rule="evenodd" d="M9.7 8.5c-2.1-.6-2.8.8-2.8.8S7.1 7.7 5 7c-2-.6-3.2 1.3-3.3 2.4-.2 2.5 2 5.3 2.8 6.3.1.3.4.3.7.3 1.2-.3 4.6-1.4 5.9-3.6.5-1.1.6-3.3-1.4-3.9z" clip-rule="evenodd"></path>
+                            </svg>
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <div
+                    class="fb-thread-comment-meta"
+                    style="
+                      display: flex;
+                      gap: 12px;
+                      margin-left: 12px;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    <span
+                      class="fb-thread-comment-meta-item"
+                      style="
+                        font-size: 12px;
+                        color: #65676b;
+                        cursor: pointer;
+                        font-weight: var(--font-weight-bold);
+                        {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                      "
+                      >Like</span
+                    >
+                    <span
+                      class="fb-thread-comment-meta-item"
+                      style="
+                        font-size: 12px;
+                        color: #65676b;
+                        cursor: pointer;
+                        font-weight: var(--font-weight-bold);
+                        {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                      "
+                      >Reply</span
+                    >
+                    <span
+                      class="fb-thread-comment-meta-item"
+                      style="
+                        font-size: 12px;
+                        color: #65676b;
+                        {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                      "
+                    >
+                      {{- block.settings.time_stamp -}}
+                    </span>
+                  </div>
+
+                  {% if block.settings.comment_image != blank %}
+                    <div
+                      class="fb-thread-comment-image"
+                      style="
+                        margin-top: 8px;
+                        margin-left: 12px;
+                        border-radius: 18px;
+                        overflow: hidden;
+                        max-width: 300px;
+                      "
+                    >
+                      <img
+                        src="{{ block.settings.comment_image | image_url: width: 400 }}"
+                        alt="Comment image"
+                        style="
+                          width: 100%;
+                          height: auto;
+                          display: block;
+                          border-radius: 18px;
+                        "
+                        loading="lazy"
+                      >
+                    </div>
+                  {% endif %}
+
+                  <!-- Reply Comment -->
+                  <div
+                    class="fb-thread-replies fb-thread-replies-{{ block.id }}"
+                    style="
+                      margin-left: 40px;
+                      margin-top: 8px;
+                      position: relative;
+                    "
+                  >
+                    <div
+                      class="fb-thread-reply"
+                      style="
+                        display: flex;
+                        gap: 6px;
+                        align-items: flex-start;
+                        margin-bottom: 8px;
+                      "
+                    >
+                      {% if block.settings.reply_profile_image != blank %}
+                        <div
+                          class="fb-thread-reply-avatar"
+                          style="
+                            width: 28px;
+                            height: 28px;
+                            border-radius: 50%;
+                            position: relative;
+                            overflow: hidden;
+                            flex-shrink: 0;
+                          "
+                        >
+                          <img
+                            src="{{ block.settings.reply_profile_image | image_url }}"
+                            alt="Reply profile picture"
+                            style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"
+                            width=""
+                            height=""
+                          >
+                        </div>
+                      {% else %}
+                        <div
+                          class="fb-thread-reply-avatar"
+                          style="
+                            width: 28px;
+                            height: 28px;
+                            border-radius: 50%;
+                            background: {{ block.settings.reply_profile_center_color | default: '#e4e6ea' }};
+                            position: relative;
+                            overflow: hidden;
+                            flex-shrink: 0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #65676b;
+                          "
+                        >
+                          {{ block.settings.reply_author_name | slice: 0 | upcase }}
+                        </div>
+                      {% endif %}
+
+                      <div class="fb-thread-reply-content" style="flex: 1;">
+                        <div
+                          class="fb-thread-reply-bubble"
+                          style="
+                            background: #f0f2f5;
+                            border-radius: 14px;
+                            padding: {{ section.settings.reply_bubble_vertical_padding | default: 6 }}px {{ section.settings.reply_bubble_horizontal_padding | default: 10 }}px;
+                            margin-bottom: 2px;
+                            position: relative;
+                            display: inline-block;
+                            max-width: 100%;
+                          "
+                        >
+                          <div
+                            class="fb-thread-reply-author"
+                            style="
+                              font-weight: 700 !important;
+                              font-size: {{ block.settings.reply_author_name_font_size | default: 13 }}px;
+                              letter-spacing: var(--letter-spacing-body);
+                              color: {{ block.settings.author_name_color | default: '#050505' }};
+                              margin-bottom: 1px;
+                              {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                            "
+                          >
+                            {{ block.settings.reply_author_name }}
+                          </div>
+
+                          <div
+                            class="fb-thread-reply-text"
+                            style="
+                              color: {{ block.settings.reply_comment_text_color | default: '#050505' }};
+                              letters-spacing: var(--letter-spacing-body);
+                              font-size: {{ block.settings.reply_comment_text_font_size | default: 14 }}px;
+                              line-height: 1.3;
+                              {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                            "
+                          >
+                            {{ block.settings.reply_comment_text }}
+                          </div>
+
+                          {% liquid
+                            assign reply_has_reaction_count = false
+                            if block.settings.reply_reaction_count != blank and block.settings.reply_reaction_count != '0'
+                              assign reply_has_reaction_count = true
+                            endif
+                            assign reply_has_reaction_icons = false
+                            if block.settings.reply_show_like_icon or block.settings.reply_show_love_icon or block.settings.reply_show_care_icon
+                              assign reply_has_reaction_icons = true
+                            endif
+                          %}
+                          {% if reply_has_reaction_count or reply_has_reaction_icons %}
+                            <!-- Reply Connecting Line -->
+                            <div
+                              class="fb-thread-reply-reaction-line"
+                              style="
+                                position: absolute;
+                                bottom: -5px;
+                                right: 18px;
+                                width: 12px;
+                                height: 2px;
+                                background-color: #dadde1;
+                                z-index: 1;
+                                border-radius: 1px;
+                              "
+                            ></div>
+
+                            <div
+                              class="fb-thread-reply-reactions"
+                              style="
+                                position: absolute;
+                                bottom: -12px;
+                                right: 10px;
+                                display: flex;
+                                align-items: center;
+                                gap: 3px;
+                                background: #ffffff;
+                                border-radius: 10px;
+                                padding: 1px 4px;
+                                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                                border: 1px solid #e4e6ea;
+                                z-index: 2;
+                              "
+                            >
+                              {% if block.settings.reply_reaction_count != blank
+                                and block.settings.reply_reaction_count != '0'
+                              %}
+                                <span
+                                  class="fb-thread-reply-reaction-count"
+                                  style="
+                                    font-size: 12px;
+                                    color: #65676b;
+                                    font-weight: 400;
+                                    margin-right: 2px;
+                                    {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                                  "
+                                >
+                                  {{- block.settings.reply_reaction_count -}}
+                                </span>
+                              {% endif %}
+                              {% if block.settings.reply_show_like_icon %}
+                                <!-- Reply Like Icon -->
+                                <div
+                                  class="fb-thread-reply-reaction-icon"
+                                  style="
+                                    width: 16px;
+                                    height: 16px;
+                                    border-radius: 50%;
+                                    border: 1px solid white;
+                                    overflow: hidden;
+                                    flex-shrink: 0;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                  "
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    fill="none"
+                                    viewBox="0 0 16 16"
+                                    style="display: block;"
+                                  >
+                                    <path fill="url(#fb-thread-reply-like-gradient-main-{{ block.id }})" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Z"></path>
+                                    <path fill="#fff" d="M12.162 7.338c.176.123.338.245.338.674 0 .43-.229.604-.474.725.1.163.132.36.089.546-.077.344-.392.611-.672.69.121.194.159.385.015.62-.185.295-.346.407-1.058.407H7.5c-.988 0-1.5-.546-1.5-1V7.665c0-1.23 1.467-2.275 1.467-3.13L7.361 3.47c-.005-.065.008-.224.058-.27.08-.079.301-.2.635-.2.218 0 .363.041.534.123.581.277.732.978.732 1.542 0 .271-.414 1.083-.47 1.364 0 0 .867-.192 1.879-.199 1.061-.006 1.749.19 1.749.842 0 .261-.219.523-.316.666ZM3.6 7h.8a.6.6 0 0 1 .6.6v3.8a.6.6 0 0 1-.6.6h-.8a.6.6 0 0 1-.6-.6V7.6a.6.6 0 0 1 .6-.6Z"></path>
+                                    <defs>
+                                      <linearGradient id="fb-thread-reply-like-gradient-main-{{ block.id }}" x1="8" x2="8" y2="16" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#18AFFF"></stop>
+                                        <stop offset="1" stop-color="#0062DF"></stop>
+                                      </linearGradient>
+                                    </defs>
+                                  </svg>
+                                </div>
+                              {% endif %}
+
+                              {% if block.settings.reply_show_love_icon %}
+                                <!-- Reply Love Icon -->
+                                <div
+                                  class="fb-thread-reply-reaction-icon"
+                                  style="
+                                    width: 16px;
+                                    height: 16px;
+                                    border-radius: 50%;
+                                    border: 1px solid white;
+                                    overflow: hidden;
+                                    flex-shrink: 0;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                  "
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    fill="none"
+                                    viewBox="0 0 16 16"
+                                    style="display: block;"
+                                  >
+                                    <path fill="url(#fb-thread-reply-love-gradient-main-{{ block.id }})" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Z"></path>
+                                    <path fill="#fff" d="M10.473 4C8.275 4 8 5.824 8 5.824S7.726 4 5.528 4c-2.114 0-2.73 2.222-2.472 3.41C3.736 10.55 8 12.75 8 12.75s4.265-2.2 4.945-5.34c.257-1.188-.36-3.41-2.472-3.41Z"></path>
+                                    <defs>
+                                      <linearGradient id="fb-thread-reply-love-gradient-main-{{ block.id }}" x1="8" x2="8" y2="16" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#FF6680"></stop>
+                                        <stop offset="1" stop-color="#E61739"></stop>
+                                      </linearGradient>
+                                    </defs>
+                                  </svg>
+                                </div>
+                              {% endif %}
+
+                              {% if block.settings.reply_show_care_icon %}
+                                <!-- Reply Care Icon -->
+                                <div
+                                  class="fb-thread-reply-reaction-icon"
+                                  style="
+                                    width: 16px;
+                                    height: 16px;
+                                    border-radius: 50%;
+                                    border: 1px solid white;
+                                    overflow: hidden;
+                                    flex-shrink: 0;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                  "
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 16 16"
+                                    style="display: block;"
+                                  >
+                                    <defs>
+                                      <linearGradient id="fb-thread-reply-care-bg-main-{{ block.id }}" x1="-2.313" x2="-2.313" y1="19.862" y2="20.738" gradientTransform="matrix(16 0 0 -16 45 333)" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0" stop-color="#f28a2d"></stop>
+                                        <stop offset="1" stop-color="#fde86f"></stop>
+                                      </linearGradient>
+                                      <linearGradient id="fb-thread-reply-care-mouth-main-{{ block.id }}" x1="-1.619" x2="-1.619" y1="18.2" y2="16.681" gradientTransform="matrix(3.4035 0 0 -.9374 13.51 22.37)" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0" stop-color="#482314"></stop>
+                                        <stop offset="1" stop-color="#9a4111"></stop>
+                                      </linearGradient>
+                                      <radialGradient id="fb-thread-reply-care-eye1-main-{{ block.id }}" cx="-3.9" cy="18.924" r=".872" gradientTransform="matrix(0 -2.1326 -2.1327 0 45.352 -4.046)" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0" stop-color="#3b446b"></stop>
+                                        <stop offset=".688" stop-color="#202340"></stop>
+                                      </radialGradient>
+                                      <radialGradient id="fb-thread-reply-care-eye2-main-{{ block.id }}" cx="-3.914" cy="18.924" r=".872" gradientTransform="matrix(0 -2.1326 -2.1327 0 51.366 -4.077)" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0" stop-color="#3b446b"></stop>
+                                        <stop offset=".688" stop-color="#202340"></stop>
+                                      </radialGradient>
+                                      <linearGradient id="fb-thread-reply-care-heart-main-{{ block.id }}" x1="-2.17" x2="-2.407" y1="20.358" y2="19.647" gradientTransform="matrix(9.7496 0 0 -9.079 27.91 194.578)" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0" stop-color="#f34462"></stop>
+                                        <stop offset="1" stop-color="#cc0820"></stop>
+                                      </linearGradient>
+                                    </defs>
+                                    <path fill="url(#fb-thread-reply-care-bg-main-{{ block.id }})" fill-rule="evenodd" d="M16 8c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8 8 3.6 8 8z" clip-rule="evenodd"></path>
+                                    <path fill="url(#fb-thread-reply-care-mouth-main-{{ block.id }})" fill-rule="evenodd" d="M9.7 5.9c-.1-.3-3.3-.3-3.4 0-.1.3.6.7 1.7.7s1.8-.4 1.7-.7z" clip-rule="evenodd"></path>
+                                    <path fill="url(#fb-thread-reply-care-eye1-main-{{ block.id }})" fill-rule="evenodd" d="M6 4.1c0 .7-.4.9-1 1-.6.1-1.1-.2-1.1-1 0-.6.3-1.4 1.1-1.4.7 0 1 .8 1 1.4z" clip-rule="evenodd"></path>
+                                    <path fill="url(#fb-thread-reply-care-eye2-main-{{ block.id }})" fill-rule="evenodd" d="M10 4.1c0 .7.4.9 1.1 1 .6.1 1.1-.2 1.1-1 0-.6-.3-1.4-1.1-1.4S10 3.5 10 4.1z" clip-rule="evenodd"></path>
+                                    <path fill="url(#fb-thread-reply-care-heart-main-{{ block.id }})" fill-rule="evenodd" d="M9.7 8.5c-2.1-.6-2.8.8-2.8.8S7.1 7.7 5 7c-2-.6-3.2 1.3-3.3 2.4-.2 2.5 2 5.3 2.8 6.3.1.3.4.3.7.3 1.2-.3 4.6-1.4 5.9-3.6.5-1.1.6-3.3-1.4-3.9z" clip-rule="evenodd"></path>
+                                  </svg>
+                                </div>
+                              {% endif %}
+                            </div>
+                          {% endif %}
+                        </div>
+
+                        {% if block.settings.reply_comment_image != blank %}
+                          <div
+                            class="fb-thread-reply-image"
+                            style="
+                              margin-top: 8px;
+                              margin-left: 10px;
+                              border-radius: 14px;
+                              overflow: hidden;
+                              max-width: 250px;
+                              position: relative;
+                            "
+                          >
+                            <img
+                              src="{{ block.settings.reply_comment_image | image_url: width: 300 }}"
+                              alt="Reply image"
+                              style="
+                                width: 100%;
+                                height: auto;
+                                display: block;
+                                border-radius: 14px;
+                              "
+                              loading="lazy"
+                            >
+
+                            {% if block.settings.show_reply_reactions %}
+                              <div
+                                class="fb-thread-reply-reactions"
+                                style="
+                                  position: absolute;
+                                  bottom: 6px;
+                                  right: 6px;
+                                  display: flex;
+                                  align-items: center;
+                                  gap: 2px;
+                                  background: rgba(255, 255, 255, 0.9);
+                                  border-radius: 10px;
+                                  padding: 2px 5px;
+                                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                                "
+                              >
+                                {% if block.settings.reply_reaction_count != blank
+                                  and block.settings.reply_reaction_count != '0'
+                                %}
+                                  <span
+                                    class="fb-thread-reply-reaction-count"
+                                    style="
+                                      font-size: {{ section.settings.reaction_number_font_size | default: 12 }}px;
+                                      color: {{ block.settings.reaction_count_color | default: '#65676b' }};
+                                      margin-right: 2px;
+                                    "
+                                  >
+                                    {{- block.settings.reply_reaction_count -}}
+                                  </span>
+                                {% endif %}
+
+                                {% if block.settings.show_reply_like_emoji %}
+                                  <span
+                                    class="fb-thread-reply-reaction-icon"
+                                    style="font-size: {{ block.settings.reply_reaction_emoji_size | default: 14 }}px;"
+                                    >👍</span
+                                  >
+                                {% endif %}
+                                {% if block.settings.show_reply_love_emoji %}
+                                  <span
+                                    class="fb-thread-reply-reaction-icon"
+                                    style="font-size: {{ block.settings.reply_reaction_emoji_size | default: 14 }}px;"
+                                    >❤️</span
+                                  >
+                                {% endif %}
+                                {% if block.settings.show_reply_laugh_emoji %}
+                                  <span
+                                    class="fb-thread-reply-reaction-icon"
+                                    style="font-size: {{ block.settings.reply_reaction_emoji_size | default: 14 }}px;"
+                                    >😂</span
+                                  >
+                                {% endif %}
+                                {% if block.settings.show_reply_wow_emoji %}
+                                  <span
+                                    class="fb-thread-reply-reaction-icon"
+                                    style="font-size: {{ block.settings.reply_reaction_emoji_size | default: 14 }}px;"
+                                    >😮</span
+                                  >
+                                {% endif %}
+                                {% if block.settings.show_reply_sad_emoji %}
+                                  <span
+                                    class="fb-thread-reply-reaction-icon"
+                                    style="font-size: {{ block.settings.reply_reaction_emoji_size | default: 14 }}px;"
+                                    >😢</span
+                                  >
+                                {% endif %}
+                                {% if block.settings.show_reply_angry_emoji %}
+                                  <span
+                                    class="fb-thread-reply-reaction-icon"
+                                    style="font-size: {{ block.settings.reply_reaction_emoji_size | default: 14 }}px;"
+                                    >😡</span
+                                  >
+                                {% endif %}
+                              </div>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+
+                        <div
+                          class="fb-thread-reply-meta"
+                          style="
+                            display: flex;
+                            gap: 10px;
+                            margin-left: 10px;
+                            {% if block.settings.reply_comment_image != blank %}margin-top: 6px;{% endif %}
+                          "
+                        >
+                          <span
+                            class="fb-thread-reply-meta-item"
+                            style="
+                              font-size: 11px;
+                              color: #65676b;
+                              cursor: pointer;
+                              font-weight: var(--font-weight-bold);
+                              {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                            "
+                            >Like</span
+                          >
+                          <span
+                            class="fb-thread-reply-meta-item"
+                            style="
+                              font-size: 11px;
+                              color: #65676b;
+                              cursor: pointer;
+                              font-weight: var(--font-weight-bold);
+                              {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                            "
+                            >Reply</span
+                          >
+                          <span
+                            class="fb-thread-reply-meta-item"
+                            style="
+                              font-size: 11px;
+                              color: #65676b;
+                              {% if section.settings.use_facebook_font %}font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;{% endif %}
+                            "
+                          >
+                            {{- block.settings.reply_time_stamp -}}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      {% endcase %}
+    {% endfor %}
+  </div>
+  {% if section.settings.show_container %}
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  .fb-thread-comment-meta-item:hover,
+  .fb-thread-reply-meta-item:hover {
+    text-decoration: underline;
+  }
+
+  /* Reply connecting lines using pseudo-elements - curved like Facebook */
+  .fb-thread-replies::before {
+    content: '';
+    position: absolute;
+    left: -65px;
+    top: -49px;
+    width: 57px;
+    height: 64px;
+    border-left: 2px solid #dadde1;
+    border-bottom: 2px solid #dadde1;
+    border-bottom-left-radius: 12px;
+    background: transparent;
+  }
+
+  /* Remove the original dynamic CSS - will be handled by JavaScript */
+
+    .fb-thread-comment-container,
+    .fb-thread-reply-container {
+      margin: 0;
+      border-radius: 0;
+      box-shadow: none;
+      width: 100%;
+      max-width: none;
+    }
+    .fb-thread-comment-meta,
+    .fb-thread-reply-meta {
+      gap: 8px;
+    }
+    .fb-thread-comment-meta-item,
+    .fb-thread-reply-meta-item {
+      font-size: 11px;
+    }
+    .fb-thread-reply-block {
+      margin-left: 24px !important;
+    }
+
+    .fb-thread-section {
+      padding: {{ section.settings.mobile_vertical_padding | default: 16 }}px 0 !important;
+    }
+
+    {% if section.settings.show_container %}
+      .fb-thread-container-wrapper {
+        padding: 0 !important;
+      }
+      .fb-thread-content-wrapper {
+        padding: {{ section.settings.container_padding_vertical | divided_by: 1.2 | floor }}px {{ section.settings.container_padding_horizontal | divided_by: 1.2 | floor }}px !important;
+        box-sizing: border-box !important;
+      }
+    {% else %}
+      .fb-thread-content-wrapper {
+        padding: 0 {{ section.settings.section_horizontal_padding_mobile | default: 16 }}px !important;
+        box-sizing: border-box !important;
+      }
+    {% endif %}
+
+    .fb-thread-filter-section {
+      margin-bottom: {{ section.settings.filter_section_spacing | divided_by: 1.5 | floor }}px !important;
+    }
+
+    .fb-thread-filter-left {
+      flex-shrink: 0;
+    }
+
+    .fb-thread-filter-label {
+      font-size: {{ section.settings.filter_label_size | minus: 1 }}px !important;
+      letter-spacing: var(--letter-spacing-body);
+    }
+
+    .fb-thread-comment-count {
+      flex-shrink: 0;
+      font-size: {{ section.settings.comment_count_size | minus: 1 }}px !important;
+    }
+  }
+
+  /* Filter Section Styling */
+  .fb-thread-filter-left {
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .fb-thread-filter-left:hover {
+    opacity: 0.8;
+  }
+
+  .fb-thread-filter-arrow {
+    transition: transform 0.2s ease;
+  }
+
+  .fb-thread-filter-left:hover .fb-thread-filter-arrow {
+    transform: translateY(1px);
+  }
+
+  /* Add Comment Section Styling */
+  .fb-thread-add-comment-input:hover {
+    border-color: #dadde1 !important;
+  }
+
+  .fb-thread-add-comment-input:focus-within {
+    border-color: #1877f2 !important;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2) !important;
+  }
+
+  .fb-thread-add-comment-actions svg:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+
+  .fb-thread-add-comment-actions svg {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  @media (max-width: 520px) {
+    .fb-thread-add-comment {
+      gap: 6px !important;
+    }
+
+    .fb-thread-add-comment-avatar {
+      width: 28px !important;
+      height: 28px !important;
+      font-size: 14px !important;
+    }
+
+    .fb-thread-add-comment-input {
+      min-height: 32px !important;
+      padding: 6px 10px !important;
+    }
+
+    .fb-thread-add-comment-placeholder {
+      font-size: 13px !important;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const addCommentInputs = document.querySelectorAll('.fb-thread-add-comment-real-input');
+
+    addCommentInputs.forEach(function (input) {
+      const container = input.closest('.fb-thread-add-comment-input');
+      const sendButton = container.querySelector('.fb-thread-send-button');
+
+      // Handle input focus/blur for styling
+      input.addEventListener('focus', function () {
+        container.style.borderColor = '#1877f2';
+        container.style.boxShadow = '0 0 0 2px rgba(24, 119, 242, 0.2)';
+      });
+
+      input.addEventListener('blur', function () {
+        container.style.borderColor = 'transparent';
+        container.style.boxShadow = 'none';
+      });
+
+      // Handle input changes for send button state
+      input.addEventListener('input', function () {
+        if (input.value.trim().length > 0) {
+          sendButton.style.color = '#1877f2';
+          sendButton.style.opacity = '1';
+        } else {
+          sendButton.style.color = '#65676b';
+          sendButton.style.opacity = '0.6';
+        }
+      });
+
+      // Handle send button click
+      if (sendButton) {
+        sendButton.addEventListener('click', function () {
+          if (input.value.trim().length > 0) {
+            // Show a simple notification (you can customize this)
+            const notification = document.createElement('div');
+            notification.textContent = 'Comment posted!';
+            notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #42b883;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          `;
+
+            document.body.appendChild(notification);
+
+            // Clear the input
+            input.value = '';
+            sendButton.style.color = '#65676b';
+            sendButton.style.opacity = '0.6';
+
+            // Remove notification after 3 seconds
+            setTimeout(function () {
+              if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+              }
+            }, 3000);
+          }
+        });
+      }
+
+      // Handle Enter key
+      input.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && input.value.trim().length > 0) {
+          sendButton.click();
+        }
+      });
+    });
+
+    // Dynamic height adjustment for reply connecting lines
+    function adjustReplyLines() {
+      const replyBlocks = document.querySelectorAll('.fb-thread-reply-comment-block');
+      console.log('Found reply blocks:', replyBlocks.length);
+
+      replyBlocks.forEach(function (block, index) {
+        const commentBubble = block.querySelector('.fb-thread-comment-bubble');
+        const repliesContainer = block.querySelector('.fb-thread-replies');
+
+        if (commentBubble && repliesContainer) {
+          const bubbleHeight = commentBubble.offsetHeight;
+          console.log(`Block ${index + 1}: Bubble height = ${bubbleHeight}px`);
+
+          // Create a unique ID for this block
+          const blockId = block.id || 'fb-reply-block-' + index;
+          if (!block.id) block.id = blockId;
+
+          // Remove existing styles
+          const existingStyles = document.querySelectorAll(`[id^="style-${blockId}"], [id^="override-${blockId}"]`);
+          existingStyles.forEach((style) => style.remove());
+
+          // Calculate values for both mobile and desktop
+          const mobileTopOffset = bubbleHeight - 10;
+          const mobileHeightValue = bubbleHeight + 7;
+          const desktopTopOffset = bubbleHeight - 8;
+          const desktopHeightValue = bubbleHeight + 7;
+
+          // Create completely new CSS rules that replace the original
+          const style = document.createElement('style');
+          style.id = 'style-' + blockId;
+          style.textContent = `
+          /* Completely override the original pseudo-element */
+          #${blockId} .fb-thread-replies::before {
+            content: '';
+            position: absolute;
+            border-left: 2px solid #dadde1;
+            border-bottom: 2px solid #dadde1;
+            border-bottom-left-radius: 12px;
+            background: transparent;
+            z-index: 1;
+            /* Desktop values */
+            left: -65px;
+            width: 57px;
+            top: -${desktopTopOffset}px;
+            height: ${desktopHeightValue}px;
+          }
+          
+          /* Ensure profile pictures are above the connecting line */
+          #${blockId} .fb-thread-reply-avatar,
+          #${blockId} .fb-thread-comment-profile {
+            position: relative;
+            z-index: 2;
+          }
+          
+          @media screen and (max-width: 520px) {
+            #${blockId} .fb-thread-replies::before {
+              left: -65px;
+              width: 57px;
+              top: -${mobileTopOffset}px;
+              height: ${mobileHeightValue}px;
+            }
+          }
+        `;
+
+          document.head.appendChild(style);
+
+          // Also set CSS variables as backup
+          repliesContainer.style.setProperty('--bubble-height', bubbleHeight + 'px');
+
+          // Force a style recalculation
+          repliesContainer.style.display = 'none';
+          repliesContainer.offsetHeight; // Trigger reflow
+          repliesContainer.style.display = '';
+
+          console.log(`Applied styles for block ${blockId}:`, {
+            bubbleHeight,
+            mobileTop: -mobileTopOffset,
+            mobileHeight: mobileHeightValue,
+            desktopTop: -desktopTopOffset,
+            desktopHeight: desktopHeightValue,
+          });
+        } else {
+          console.log(
+            `Block ${index + 1}: Missing elements - bubble:`,
+            !!commentBubble,
+            'replies:',
+            !!repliesContainer,
+          );
+        }
+      });
+    }
+
+    // Run on load and resize with a small delay to ensure elements are rendered
+    setTimeout(adjustReplyLines, 100);
+    window.addEventListener('resize', function () {
+      setTimeout(adjustReplyLines, 50);
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Facebook Comment Thread",  
+  "tag": "section",
+  "class": "fb-thread-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Header"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title Size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "title_weight",
+      "label": "Title Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#1c1e21"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Header Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom",
+      "label": "Title Bottom Margin",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "header_margin_bottom",
+      "label": "Header Bottom Margin",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+
+    {
+      "type": "header",
+      "content": "Filter Section"
+    },
+    {
+      "type": "text",
+      "id": "filter_label_text",
+      "label": "Filter Label Text",
+      "default": "Most relevant",
+      "info": "Text shown in the filter (e.g., 'Most relevant', 'Top comments', 'Newest first')"
+    },
+    {
+      "type": "range",
+      "id": "filter_label_size",
+      "label": "Filter Label Font Size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "select",
+      "id": "filter_label_weight",
+      "label": "Filter Label Font Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "color",
+      "id": "filter_label_color",
+      "label": "Filter Label Color",
+      "default": "#1c1e21"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filter_dropdown",
+      "label": "Show Filter Dropdown Arrow",
+      "default": true,
+      "info": "Shows a dropdown arrow next to the filter text"
+    },
+    {
+      "type": "color",
+      "id": "filter_arrow_color",
+      "label": "Filter Arrow Color",
+      "default": "#65676b"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_comment_count",
+      "label": "Show Comment Count",
+      "default": true,
+      "info": "Displays the total number of comments on the right side"
+    },
+    {
+      "type": "range",
+      "id": "comment_count_size",
+      "label": "Comment Count Font Size",
+      "min": 11,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "comment_count_weight",
+      "label": "Comment Count Font Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "color",
+      "id": "comment_count_color",
+      "label": "Comment Count Color",
+      "default": "#65676b"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Top Divider Color",
+      "default": "#dadde1"
+    },
+    {
+      "type": "range",
+      "id": "filter_section_spacing",
+      "label": "Filter Section Spacing",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "info": "Space above and below the filter section"
+    },
+
+    {
+      "type": "header",
+      "content": "Add Comment Section"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_add_comment",
+      "label": "Show Add Comment Input",
+      "default": true,
+      "info": "Shows the Facebook-style comment input above all comments"
+    },
+    {
+      "type": "text",
+      "id": "add_comment_placeholder",
+      "label": "Comment Placeholder Text",
+      "default": "Add a comment",
+      "info": "Text shown in the comment input field"
+    },
+    {
+      "type": "range",
+      "id": "add_comment_avatar_size",
+      "label": "Avatar Size",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "add_comment_avatar_bg",
+      "label": "Avatar Background Color",
+      "default": "#e4e6ea",
+      "info": "Background color when no avatar image is uploaded"
+    },
+    {
+      "type": "color",
+      "id": "add_comment_input_bg",
+      "label": "Input Background Color",
+      "default": "#f0f2f5"
+    },
+    {
+      "type": "range",
+      "id": "add_comment_input_radius",
+      "label": "Input Border Radius",
+      "min": 8,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "add_comment_input_height",
+      "label": "Input Height",
+      "min": 28,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "add_comment_input_padding",
+      "label": "Input Padding",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "add_comment_font_size",
+      "label": "Input Font Size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "add_comment_placeholder_color",
+      "label": "Placeholder Text Color",
+      "default": "#65676b"
+    },
+    {
+      "type": "color",
+      "id": "add_comment_text_color",
+      "label": "Input Text Color",
+      "default": "#1c1e21"
+    },
+    {
+      "type": "range",
+      "id": "add_comment_max_length",
+      "label": "Maximum Character Length",
+      "min": 100,
+      "max": 1000,
+      "step": 50,
+      "default": 500,
+      "info": "Maximum number of characters allowed in the comment input"
+    },
+    {
+      "type": "color",
+      "id": "add_comment_border_color",
+      "label": "Section Border Color",
+      "default": "#e4e6ea"
+    },
+    {
+      "type": "range",
+      "id": "add_comment_padding",
+      "label": "Section Padding",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12,
+      "info": "Top and bottom padding for the add comment section"
+    },
+    {
+      "type": "range",
+      "id": "add_comment_margin_bottom",
+      "label": "Section Bottom Margin",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "info": "Space between add comment section and first comment"
+    },
+
+    {
+      "type": "header",
+      "content": "Desktop Padding"
+    },
+    {
+      "type": "range",
+      "id": "desktop_vertical_padding",
+      "label": "Desktop Vertical Padding",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "info": "Top and bottom padding for the entire section on desktop"
+    },
+    {
+      "type": "range",
+      "id": "section_horizontal_padding",
+      "label": "Section Horizontal Padding (Desktop)",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "info": "Left and right padding for the section content on desktop (only when container is off)"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Padding"
+    },
+    {
+      "type": "range",
+      "id": "mobile_vertical_padding",
+      "label": "Mobile Vertical Padding",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "info": "Top and bottom padding for the entire section on mobile"
+    },
+    {
+      "type": "range",
+      "id": "section_horizontal_padding_mobile",
+      "label": "Section Horizontal Padding (Mobile)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "info": "Left and right padding for the section content on mobile (only when container is off)"
+    },
+
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "color",
+      "id": "section_background",
+      "label": "Section Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "comment_spacing",
+      "label": "Comment Spacing",
+      "min": -14,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "use_facebook_font",
+      "label": "Use Facebook Font (Roboto)",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Comment Bubble Padding"
+    },
+    {
+      "type": "range",
+      "id": "comment_bubble_vertical_padding",
+      "label": "Comment Bubble Vertical Padding",
+      "min": 0,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "info": "Top and bottom padding inside comment bubbles"
+    },
+    {
+      "type": "range",
+      "id": "comment_bubble_horizontal_padding",
+      "label": "Comment Bubble Horizontal Padding",
+      "min": 6,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "info": "Left and right padding inside comment bubbles"
+    },
+    {
+      "type": "range",
+      "id": "reply_bubble_vertical_padding",
+      "label": "Reply Bubble Vertical Padding",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "default": 6,
+      "info": "Top and bottom padding inside reply bubbles"
+    },
+    {
+      "type": "range",
+      "id": "reply_bubble_horizontal_padding",
+      "label": "Reply Bubble Horizontal Padding",
+      "min": 4,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 10,
+      "info": "Left and right padding inside reply bubbles"
+    },
+    {
+      "type": "header",
+      "content": "Universal Block Spacing"
+    },
+    {
+      "type": "range",
+      "id": "universal_block_vertical_padding",
+      "label": "Universal Vertical Padding",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "info": "Top and bottom padding around each comment block"
+    },
+    {
+      "type": "range",
+      "id": "universal_block_horizontal_padding",
+      "label": "Universal Horizontal Padding",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "info": "Left and right padding around each comment block"
+    },
+    {
+      "type": "header",
+      "content": "Comment Container Padding"
+    },
+    {
+      "type": "range",
+      "id": "comment_container_vertical_padding",
+      "label": "Comment Container Vertical Padding",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "info": "Top and bottom padding inside all comment containers"
+    },
+    {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "range",
+      "id": "page_width",
+      "label": "Page Width",
+      "min": 500,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "default": 1200,
+      "info": "Maximum width of the Facebook reviews section"
+    },
+    {
+      "type": "header",
+      "content": "Background & Container"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": false,
+      "info": "Use global theme background color or customize below"
+    },
+    {
+      "type": "color",
+      "id": "outer_background_color",
+      "label": "Outer Background Color",
+      "default": "#ffffff",
+      "info": "Background color behind the entire section (only applies when theme colors are off)"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section Background Color",
+      "default": "#ffffff",
+      "info": "Background color for the fb-thread-section (only applies when theme colors are off)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_container",
+      "label": "Show Container Behind Content",
+      "default": false,
+      "info": "Add a container background behind the content"
+    },
+    {
+      "type": "color",
+      "id": "container_background_color",
+      "label": "Container Background Color",
+      "default": "#f8f9fa",
+      "info": "Background color for the content container"
+    },
+    {
+      "type": "range",
+      "id": "container_padding_vertical",
+      "label": "Container Vertical Padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 24,
+      "info": "Top and bottom padding inside the container"
+    },
+    {
+      "type": "range",
+      "id": "container_padding_horizontal",
+      "label": "Container Horizontal Padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 24,
+      "info": "Left and right padding inside the container"
+    },
+    {
+      "type": "range",
+      "id": "container_border_radius",
+      "label": "Container Border Radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "info": "Border radius for the container"
+    }
+  ],
+
+  "blocks": [
+    {
+      "type": "fb_thread_comment",
+      "name": "Facebook Comment",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "profile_image",
+          "label": "Profile Image"
+        },
+        {
+          "type": "color",
+          "id": "profile_center_color",
+          "label": "Profile Placeholder Color",
+          "default": "#e4e6ea"
+        },
+        {
+          "type": "text",
+          "id": "author_name",
+          "label": "Author Name",
+          "default": "Simon Aref"
+        },
+        {
+          "type": "textarea",
+          "id": "comment_text",
+          "label": "Comment Text",
+          "default": "Interested"
+        },
+        {
+          "type": "image_picker",
+          "id": "comment_image",
+          "label": "Comment Image (Optional)"
+        },
+        {
+          "type": "text",
+          "id": "time_stamp",
+          "label": "Time Stamp",
+          "default": "3w"
+        },
+        {
+          "type": "text",
+          "id": "reaction_count",
+          "label": "Reaction Count",
+          "info": "Leave blank to hide reactions, or enter number (e.g., '12')"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_like_icon",
+          "label": "Show Like Icon",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_love_icon",
+          "label": "Show Love Icon",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_care_icon",
+          "label": "Show Care Icon",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "author_name_font_size",
+          "label": "Author Name Font Size",
+          "min": 11,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "default": 13
+        },
+        {
+          "type": "range",
+          "id": "comment_text_font_size",
+          "label": "Comment Text Font Size",
+          "min": 11,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "default": 13
+        },
+        {
+          "type": "range",
+          "id": "meta_font_size",
+          "label": "Meta Font Size",
+          "min": 10,
+          "max": 14,
+          "step": 1,
+          "unit": "px",
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "block_padding",
+          "label": "Block Padding",
+          "min": 0,
+          "max": 24,
+          "step": 2,
+          "unit": "px",
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Margin Top",
+          "min": 0,
+          "max": 30,
+          "step": 2,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Margin Bottom",
+          "min": 0,
+          "max": 30,
+          "step": 2,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+    {
+      "type": "fb_thread_reply_comment",
+      "name": "Comment with Reply",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Main Comment"
+        },
+        {
+          "type": "image_picker",
+          "id": "profile_image",
+          "label": "Profile Image"
+        },
+        {
+          "type": "color",
+          "id": "profile_center_color",
+          "label": "Profile Placeholder Color",
+          "default": "#e4e6ea"
+        },
+        {
+          "type": "text",
+          "id": "author_name",
+          "label": "Author Name",
+          "default": "Simon Aref"
+        },
+        {
+          "type": "textarea",
+          "id": "comment_text",
+          "label": "Comment Text",
+          "default": "This looks amazing!"
+        },
+        {
+          "type": "text",
+          "id": "time_stamp",
+          "label": "Time Stamp",
+          "default": "3w"
+        },
+        {
+          "type": "text",
+          "id": "reaction_count",
+          "label": "Reaction Count",
+          "info": "Leave blank to hide reactions, or enter number (e.g., '12')"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_like_icon",
+          "label": "Show Like Icon",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_love_icon",
+          "label": "Show Love Icon",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_care_icon",
+          "label": "Show Care Icon",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "author_name_font_size",
+          "label": "Author Name Font Size",
+          "min": 11,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "default": 13
+        },
+        {
+          "type": "range",
+          "id": "comment_text_font_size",
+          "label": "Comment Text Font Size",
+          "min": 11,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "default": 14
+        },
+        {
+          "type": "color",
+          "id": "author_name_color",
+          "label": "Author Name Color",
+          "default": "#365899"
+        },
+        {
+          "type": "color",
+          "id": "comment_text_color",
+          "label": "Comment Text Color",
+          "default": "#1c1e21"
+        },
+        {
+          "type": "header",
+          "content": "Reply Comment"
+        },
+        {
+          "type": "image_picker",
+          "id": "reply_profile_image",
+          "label": "Reply Profile Image"
+        },
+        {
+          "type": "color",
+          "id": "reply_profile_center_color",
+          "label": "Reply Profile Placeholder Color",
+          "default": "#e4e6ea"
+        },
+        {
+          "type": "text",
+          "id": "reply_author_name",
+          "label": "Reply Author Name",
+          "default": "Sarah Johnson"
+        },
+        {
+          "type": "textarea",
+          "id": "reply_comment_text",
+          "label": "Reply Comment Text",
+          "default": "I agree! Can't wait to try it."
+        },
+        {
+          "type": "image_picker",
+          "id": "reply_comment_image",
+          "label": "Reply Image (Optional)"
+        },
+        {
+          "type": "text",
+          "id": "reply_time_stamp",
+          "label": "Reply Time Stamp",
+          "default": "2w"
+        },
+        {
+          "type": "text",
+          "id": "reply_reaction_count",
+          "label": "Reply Reaction Count",
+          "info": "Leave blank to hide reactions, or enter number (e.g., '5')"
+        },
+        {
+          "type": "checkbox",
+          "id": "reply_show_like_icon",
+          "label": "Reply Show Like Icon",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "reply_show_love_icon",
+          "label": "Reply Show Love Icon",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "reply_show_care_icon",
+          "label": "Reply Show Care Icon",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "reply_author_name_font_size",
+          "label": "Reply Author Name Font Size",
+          "min": 11,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "reply_comment_text_font_size",
+          "label": "Reply Comment Text Font Size",
+          "min": 11,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "default": 13
+        },
+        {
+          "type": "color",
+          "id": "reply_comment_text_color",
+          "label": "Reply Comment Text Color",
+          "default": "#1c1e21"
+        }
+      ]
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "Facebook Comment Thread",
+      "blocks": [
+        {
+          "type": "fb_thread_comment",
+          "settings": {
+            "author_name": "Simon Aref",
+            "comment_text": "Interested",
+            "time_stamp": "3w"
+          }
+        },
+        {
+          "type": "fb_thread_comment",
+          "settings": {
+            "author_name": "Luis Arvayo",
+            "comment_text": "I'm sold tell me more",
+            "time_stamp": "3d"
+          }
+        },
+        {
+          "type": "fb_thread_comment",
+          "settings": {
+            "author_name": "Eric Conway",
+            "comment_text": "I didn't know Eminem was selling leads",
+            "time_stamp": "9w"
+          }
+        },
+        {
+          "type": "fb_thread_comment",
+          "settings": {
+            "author_name": "Mark Deaton",
+            "comment_text": "This ad made me stop lol",
+            "time_stamp": "19w",
+            "reaction_count": "2",
+            "show_like_icon": true,
+            "show_love_icon": true
+          }
+        },
+        {
+          "type": "fb_thread_comment",
+          "settings": {
+            "author_name": "Jeff Dagelo",
+            "comment_text": "Hmmmm 😏",
+            "time_stamp": "15w",
+            "show_care_icon": true
+          }
+        },
+        {
+          "type": "fb_thread_comment",
+          "settings": {
+            "author_name": "Tim Huddleston",
+            "comment_text": "What kind of leads? Just leaves in general or industry leaves like real estate, sellers or insurance agents?",
+            "time_stamp": "1w"
+          }
+        },
+        {
+          "type": "fb_thread_comment",
+          "settings": {
+            "author_name": "Steven Hoffman",
+            "comment_text": "What he is doing now is paying off !!!!",
+            "time_stamp": "11w"
+          }
+        },
+        {
+          "type": "fb_thread_comment",
+          "settings": {
+            "author_name": "Bryan Waser",
+            "comment_text": "I get 6-8 texts/calls/day wanting to sell me leads. Obnoxious.",
+            "time_stamp": "1w"
+          }
+        },
+        {
+          "type": "fb_thread_comment",
+          "settings": {
+            "author_name": "Ray Ortiz",
+            "comment_text": "Don't hype it so much is not that easy",
+            "time_stamp": "2d"
+          }
+        },
+        {
+          "type": "fb_thread_reply_comment",
+          "settings": {
+            "author_name": "Jennifer Martinez",
+            "comment_text": "Has anyone actually tried this? Looking for real reviews.",
+            "time_stamp": "1w",
+            "reaction_count": "3",
+            "show_like_icon": true,
+            "reply_author_name": "Mike Thompson",
+            "reply_comment_text": "Yes! I've been using it for 2 months and it's amazing. Definitely worth it.",
+            "reply_time_stamp": "6d",
+            "reply_show_love_icon": true,
+            "reply_reaction_count": "1"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,406 @@
+{% comment %}
+  VanHouten Living — roterende announcement bar
+{% endcomment %}
+
+{%- liquid
+  assign rotation_ms = section.settings.rotation_speed | times: 1000
+-%}
+
+<section
+  id="VHLAnnouncementBar-{{ section.id }}"
+  class="vhl-announcement-bar{% if section.settings.sticky_with_header %} vhl-announcement-bar--sticky{% endif %}"
+  style="
+    --vhl-bar-bg: {{ section.settings.background_color }};
+    --vhl-bar-text: {{ section.settings.text_color }};
+    --vhl-bar-height-desktop: {{ section.settings.desktop_height }}px;
+    --vhl-bar-height-mobile: {{ section.settings.mobile_height }}px;
+    --vhl-bar-font-desktop: {{ section.settings.desktop_font_size }}px;
+    --vhl-bar-font-mobile: {{ section.settings.mobile_font_size }}px;
+    --vhl-bar-transition: {{ section.settings.transition_duration }}ms;
+  "
+  data-vhl-announcement
+  data-autoplay="{{ section.settings.enable_rotation }}"
+  data-speed="{{ rotation_ms }}"
+  role="region"
+  aria-label="{{ section.settings.accessibility_label | escape }}"
+>
+  <div class="vhl-announcement-bar__inner">
+    <div class="vhl-announcement-bar__slides">
+      {%- for i in (1..3) -%}
+        {%- capture text_key -%}announcement_{{ i }}{%- endcapture -%}
+        {%- capture link_key -%}link_{{ i }}{%- endcapture -%}
+        {%- assign announcement_text = section.settings[text_key] -%}
+        {%- assign announcement_link = section.settings[link_key] -%}
+
+        {%- if announcement_text != blank -%}
+          <div
+            class="vhl-announcement-bar__slide{% if forloop.first %} is-active{% endif %}"
+            data-vhl-slide
+            aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+          >
+            {%- if announcement_link != blank -%}
+              <a class="vhl-announcement-bar__link" href="{{ announcement_link }}">
+                {{ announcement_text | escape }}
+              </a>
+            {%- else -%}
+              <span>{{ announcement_text | escape }}</span>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  #VHLAnnouncementBar-{{ section.id }} {
+    position: relative;
+    z-index: 30;
+    width: 100%;
+    min-height: var(--vhl-bar-height-desktop);
+    overflow: hidden;
+    background: var(--vhl-bar-bg);
+    color: var(--vhl-bar-text);
+  }
+
+  #VHLAnnouncementBar-{{ section.id }}.vhl-announcement-bar--sticky {
+    position: sticky;
+    top: 0;
+  }
+
+  #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__inner,
+  #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__slides {
+    position: relative;
+    width: 100%;
+    min-height: var(--vhl-bar-height-desktop);
+  }
+
+  #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__inner {
+    max-width: {{ section.settings.content_width }}px;
+    margin: 0 auto;
+    padding: 0 {{ section.settings.horizontal_padding }}px;
+  }
+
+  #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    pointer-events: none;
+    transition:
+      opacity var(--vhl-bar-transition) ease,
+      transform var(--vhl-bar-transition) ease,
+      visibility var(--vhl-bar-transition) ease;
+    color: var(--vhl-bar-text);
+    font-size: var(--vhl-bar-font-desktop);
+    font-weight: {{ section.settings.font_weight }};
+    line-height: 1.35;
+    letter-spacing: {{ section.settings.letter_spacing | divided_by: 100.0 }}em;
+    text-align: center;
+  }
+
+  #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__link:hover,
+  #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media screen and (max-width: 749px) {
+    #VHLAnnouncementBar-{{ section.id }},
+    #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__inner,
+    #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__slides {
+      min-height: var(--vhl-bar-height-mobile);
+    }
+
+    #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__inner {
+      padding-right: 16px;
+      padding-left: 16px;
+    }
+
+    #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__slide {
+      font-size: var(--vhl-bar-font-mobile);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #VHLAnnouncementBar-{{ section.id }} .vhl-announcement-bar__slide {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const sectionId = 'VHLAnnouncementBar-{{ section.id }}';
+
+    function initVHLAnnouncementBar() {
+      const bar = document.getElementById(sectionId);
+      if (!bar) return;
+
+      if (bar._vhlInterval) {
+        window.clearInterval(bar._vhlInterval);
+        bar._vhlInterval = null;
+      }
+
+      const slides = Array.from(bar.querySelectorAll('[data-vhl-slide]'));
+      if (!slides.length) return;
+
+      slides.forEach((slide, index) => {
+        const active = index === 0;
+        slide.classList.toggle('is-active', active);
+        slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+
+      if (
+        slides.length < 2 ||
+        bar.dataset.autoplay !== 'true' ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ) return;
+
+      const speed = Math.max(parseInt(bar.dataset.speed, 10) || 4000, 2000);
+      let activeIndex = 0;
+      let paused = false;
+
+      const showSlide = (index) => {
+        slides.forEach((slide, slideIndex) => {
+          const active = slideIndex === index;
+          slide.classList.toggle('is-active', active);
+          slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+        });
+        activeIndex = index;
+      };
+
+      bar.addEventListener('mouseenter', () => { paused = true; });
+      bar.addEventListener('mouseleave', () => { paused = false; });
+      bar.addEventListener('focusin', () => { paused = true; });
+      bar.addEventListener('focusout', () => { paused = false; });
+
+      bar._vhlInterval = window.setInterval(() => {
+        if (!paused && !document.hidden) {
+          showSlide((activeIndex + 1) % slides.length);
+        }
+      }, speed);
+    }
+
+    initVHLAnnouncementBar();
+
+    document.addEventListener('shopify:section:load', (event) => {
+      if (event.detail.sectionId === '{{ section.id }}') initVHLAnnouncementBar();
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "VHL announcement",
+  "tag": "section",
+  "class": "vhl-announcement-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Meldingen"
+    },
+    {
+      "type": "text",
+      "id": "announcement_1",
+      "label": "Tekst 1",
+      "default": "Gratis verzending vanaf €50"
+    },
+    {
+      "type": "url",
+      "id": "link_1",
+      "label": "Link voor tekst 1"
+    },
+    {
+      "type": "text",
+      "id": "announcement_2",
+      "label": "Tekst 2",
+      "default": "30 dagen zorgeloos retourneren"
+    },
+    {
+      "type": "url",
+      "id": "link_2",
+      "label": "Link voor tekst 2"
+    },
+    {
+      "type": "text",
+      "id": "announcement_3",
+      "label": "Tekst 3",
+      "default": "Veilig betalen met iDEAL"
+    },
+    {
+      "type": "url",
+      "id": "link_3",
+      "label": "Link voor tekst 3"
+    },
+    {
+      "type": "header",
+      "content": "Rotatie"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_rotation",
+      "label": "Teksten automatisch wisselen",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "rotation_speed",
+      "label": "Tijd per tekst",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "transition_duration",
+      "label": "Duur fade-overgang",
+      "min": 100,
+      "max": 1000,
+      "step": 50,
+      "unit": "ms",
+      "default": 400
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_with_header",
+      "label": "Meescrollen met de header",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Kleuren en typografie"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Achtergrondkleur",
+      "default": "#4A4A48"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Tekstkleur",
+      "default": "#F8F5F0"
+    },
+    {
+      "type": "range",
+      "id": "desktop_font_size",
+      "label": "Lettergrootte desktop",
+      "min": 11,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "mobile_font_size",
+      "label": "Lettergrootte mobiel",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Tekstdikte",
+      "default": "400",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi bold" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Letterafstand",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "%",
+      "default": 3
+    },
+    {
+      "type": "header",
+      "content": "Afmetingen"
+    },
+    {
+      "type": "range",
+      "id": "desktop_height",
+      "label": "Hoogte desktop",
+      "min": 28,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "label": "Hoogte mobiel",
+      "min": 28,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "default": 38
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Maximale contentbreedte",
+      "min": 800,
+      "max": 2000,
+      "step": 100,
+      "unit": "px",
+      "default": 1600
+    },
+    {
+      "type": "range",
+      "id": "horizontal_padding",
+      "label": "Horizontale ruimte",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "text",
+      "id": "accessibility_label",
+      "label": "Toegankelijkheidslabel",
+      "default": "Belangrijke winkelinformatie"
+    }
+  ],
+  "presets": [
+    {
+      "name": "VHL announcement",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}

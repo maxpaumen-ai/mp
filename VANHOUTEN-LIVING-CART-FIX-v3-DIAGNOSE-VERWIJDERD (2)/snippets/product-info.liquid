@@ -1,0 +1,4041 @@
+{% for block in section.blocks %}
+  {% case block.type %}
+    {% when '@app' %}
+      <div class="blocks-section">
+        {% render block %}
+      </div>
+    {% when 'product_description' %}
+      <div
+        class="product-description-block"
+        id="block-{{ block.id }}"
+        {{ block.shopify_attributes }}
+        style="
+          margin-top: {{ block.settings.margin_top }}px;
+          margin-bottom: {{ block.settings.margin_bottom }}px;
+          width: 100%;
+          max-width: 100%;
+          overflow: hidden;
+          box-sizing: border-box;
+        "
+      >
+        {% if block.settings.show_heading and block.settings.heading != blank %}
+          <h3
+            class="product-description-heading"
+            style="
+              color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ block.settings.heading_color }}{% endif %};
+              font-size: {{ block.settings.heading_font_size }}px;
+              text-align: {{ block.settings.text_alignment }};
+              margin-bottom: {{ block.settings.heading_spacing }}px;
+              font-weight: var(--font-weight-bold);
+              letter-spacing: var(--letter-spacing-heading);
+              max-width: 100%;
+              word-wrap: break-word;
+            "
+          >
+            {{ block.settings.heading }}
+          </h3>
+        {% endif %}
+
+        {% if product.description != blank %}
+          <div
+            class="product-description-content"
+            id="product-description-{{ block.id }}"
+            style="
+              color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ block.settings.text_color }}{% endif %};
+              font-size: {{ block.settings.text_font_size }}px;
+              line-height: {{ block.settings.line_height }};
+              text-align: {{ block.settings.text_alignment }};
+              max-width: min({{ block.settings.max_width }}px, 100%);
+              width: 100%;
+              box-sizing: border-box;
+              word-wrap: break-word;
+              overflow-wrap: break-word;
+              {% if block.settings.text_alignment == 'center' %}
+                margin-left: auto;
+                margin-right: auto;
+              {% elsif block.settings.text_alignment == 'right' %}
+                margin-left: auto;
+              {% endif %}
+            "
+          >
+            {{ product.description }}
+          </div>
+          <script>
+            (function () {
+              const descriptionContainer = document.getElementById('product-description-{{ block.id }}');
+              if (descriptionContainer) {
+                const images = descriptionContainer.querySelectorAll('img');
+                images.forEach(function (img) {
+                  img.classList.add('description-image');
+                  // Ensure images don't have inline width/height that could cause overflow
+                  img.removeAttribute('width');
+                  img.removeAttribute('height');
+                  // Wrap image in a container for better control
+                  if (!img.parentElement.classList.contains('description-image-wrapper')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'description-image-wrapper';
+                    img.parentNode.insertBefore(wrapper, img);
+                    wrapper.appendChild(img);
+                  }
+                });
+              }
+            })();
+          </script>
+        {% else %}
+          {% if block.settings.show_fallback %}
+            <div
+              class="product-description-fallback"
+              style="
+                color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.7 }}{% else %}{{ block.settings.text_color | color_modify: 'alpha', 0.7 }}{% endif %};
+                font-size: {{ block.settings.text_font_size }}px;
+                text-align: {{ block.settings.text_alignment }};
+                font-style: italic;
+                max-width: 100%;
+                word-wrap: break-word;
+              "
+            >
+              {{ block.settings.fallback_text }}
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+
+    {% when 'reviews' %}
+      {% if block.settings.rating_text_content != blank %}
+        {% assign rating_text_content = block.settings.rating_text_content %}
+      {% else %}
+        {% if product.metafields.custom.rating %}
+          {% assign rating_decimal = product.metafields.custom.rating.value | round: 1 %}
+        {% else %}
+          {% assign rating_decimal = 4.7 %}
+        {% endif %}
+
+        {% if product.metafields.custom.rating_count %}
+          {% assign rating_count = product.metafields.custom.rating_count.value %}
+        {% else %}
+          {% assign rating_count = 137 %}
+        {% endif %}
+
+        {% assign rating_text_content = '<p>Rated <strong>'
+          | append: rating_decimal
+          | append: '</strong> (<em>'
+          | append: rating_count
+          | append: '</em>)</p>'
+        %}
+      {% endif %}
+
+      <div
+        class="rating-component"
+        id="block-{{ block.id }}"
+        style="display: flex; align-items: center; gap: {{ block.settings.element_gap | default: 4 }}px; width: 100%; max-width: 517px; margin-top: {{ block.settings.margin_top | default: 0 }}px; margin-bottom: {{ block.settings.margin_bottom | default: 15 }}px; font-size: 11.5px; letter-spacing: -0.3px;"
+        {{ block.shopify_attributes }}
+      >
+        <div class="rating-stars" style="display: flex; align-items: center;">
+          <div class="stars" style="display: flex; align-items: center;">
+            {% for i in (1..4) %}
+              <span class="review-star-wrapper" style="display: inline-block; width: 20px; height: 20px;">
+                <svg
+                  class="review-star"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z" fill="{% if block.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ block.settings.star_color }}{% endif %}"/>
+                </svg>
+              </span>
+            {% endfor %}
+
+            <span
+              class="review-star-wrapper review-star-half"
+              style="display: inline-block; width: 20px; height: 20px; position: relative;"
+            >
+              <span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                <svg
+                  class="review-star-empty"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z" fill="{{ block.settings.empty_star_color }}"/>
+                </svg>
+              </span>
+              <span style="position: absolute; top: 0; left: 0; width: 50%; height: 100%; overflow: hidden;">
+                <svg
+                  class="review-star-filled"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z" fill="{% if block.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ block.settings.star_color }}{% endif %}"/>
+                </svg>
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div
+          class="rating-text-content"
+          style="font-size: {{ block.settings.rating_text_size | default: 12 }}px; font-weight: 500; color: {% if block.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ block.settings.rating_text_color }}{% endif %}; letter-spacing: -0.3px; line-height: 1.3;"
+        >
+          {{ rating_text_content }}
+        </div>
+
+        {% if block.settings.satisfaction_text != blank %}
+          <div
+            class="rating-satisfaction"
+            style="color: {% if block.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ block.settings.satisfaction_text_color }};{% endif %}; margin-bottom: 0px; font-weight: 600 !important; font-size: {{ block.settings.satisfaction_text_size | default: 11 }}px; background-color: {% if block.settings.use_theme_colors %}{{ settings.global_section_accent_2_color }}{% else %}{{ block.settings.satisfaction_bg_color }}{% endif %}; padding: 0.5px 4px; letter-spacing: var(--letter-spacing-body); border-radius: 2.3px;"
+          >
+            {{ block.settings.satisfaction_text }}
+          </div>
+        {% endif %}
+      </div>
+      {% style %}
+        #block-{{ block.id }} .review-star-wrapper {
+          flex-shrink: 0;
+          margin-right: {{ block.settings.star_spacing | default: 2 }}px;
+        }
+
+        #block-{{ block.id }} .review-star-wrapper:last-child {
+          margin-right: 0;
+        }
+
+        #block-{{ block.id }} .review-star,
+        #block-{{ block.id }} .review-star-filled,
+        #block-{{ block.id }} .review-star-empty {
+          width: 20px !important;
+          height: 20px !important;
+        }
+
+        /* Mobile responsive typography */
+        @media screen and (max-width: 768px) {
+          #block-{{ block.id }} .rating-text-content {
+            font-size: {{ block.settings.rating_text_size_mobile | default: 10 }}px !important;
+          }
+          #block-{{ block.id }} .rating-satisfaction {
+            font-size: {{ block.settings.satisfaction_text_size_mobile | default: 9 }}px !important;
+          }
+        }
+
+        /* Rich text content styling */
+        #block-{{ block.id }} .rating-text-content p {
+          margin: 0;
+          display: inline;
+          line-height: inherit;
+        }
+        #block-{{ block.id }} .rating-text-content strong {
+          font-weight: 600;
+        }
+        #block-{{ block.id }} .rating-text-content em {
+          font-style: normal;
+          color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.8 }}{% else %}{{ block.settings.rating_text_color | default: '#777777' | color_modify: 'alpha', 0.7 }}{% endif %};
+        }
+        #block-{{ block.id }} .rating-text-content * {
+          display: inline;
+          margin: 0;
+          padding: 0;
+        }
+      {% endstyle %}
+
+    {% when 'title' %}
+      {% assign mobile_font_size = block.settings.font_size | times: 0.85 | round %}
+      {% comment %} Debug font information {% endcomment %}
+      <!-- Font Debug: {{ block.settings.custom_font.family | default: 'No custom font' }} -->
+      <h1
+        style="
+          font-size: {{ block.settings.font_size }}px !important;
+          margin-top: {{ block.settings.margin_top }}px !important;
+          margin-bottom: {{ block.settings.margin_bottom }}px !important;
+          color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ block.settings.title_color }}{% endif %} !important;
+          line-height: {{ block.settings.line_height | default: 1.2 }} !important;
+          letter-spacing: var(--letter-spacing-{{ block.settings.letter_spacing | default: 'heading' }}) !important;
+          padding: 2px 0 !important;
+          width: 100% !important;
+          display: block !important;
+          {% if block.settings.custom_font != blank %}
+            {% if block.settings.override_global_font %}
+              font-family: '{{ block.settings.custom_font.family }}', {{ block.settings.custom_font.fallback_families }}, Arial, sans-serif !important;
+              font-weight: {{ block.settings.custom_font.weight | default: 400 }} !important;
+              font-style: {{ block.settings.custom_font.style | default: 'normal' }} !important;
+            {% else %}
+              font-family: '{{ block.settings.custom_font.family }}', {{ block.settings.custom_font.fallback_families }}, Arial, sans-serif;
+              font-weight: {{ block.settings.custom_font.weight | default: 400 }};
+              font-style: {{ block.settings.custom_font.style | default: 'normal' }};
+            {% endif %}
+          {% endif %}
+        "
+        class="shop-product-title product-title-{{ block.id }}{% if block.settings.override_global_font %} custom-font-override{% endif %}"
+        {{ block.shopify_attributes }}
+        data-font-size="{{ block.settings.font_size }}"
+        data-mobile-font-size="{{ mobile_font_size }}"
+        data-custom-font="{{ block.settings.custom_font.family | default: 'none' }}"
+        data-dynamic-variant-option="{{ block.settings.dynamic_variant_title_option | default: 'none' }}"
+        data-original-title="{{ product.title }}"
+      >
+        {% if block.settings.use_custom_title and block.settings.custom_title != blank %}
+          {{ block.settings.custom_title }}
+        {% else %}
+          {{ product.title }}
+        {% endif %}
+      </h1>
+      <!-- Responsive title sizing is handled by shop-product-details.js -->
+
+      {% if block.settings.dynamic_variant_title_option != 'none'
+        and block.settings.dynamic_variant_title_option != blank
+      %}
+        <script>
+          window.productVariants_{{ block.id }} = {{ product.variants | json }};
+          window.productOptions_{{ block.id }} = {{ product.options_with_values | json }};
+
+          (function() {
+            if (typeof Elixir_ProductFormExists !== 'function' || !Elixir_ProductFormExists()) return;
+            const titleElement = document.querySelector('.product-title-{{ block.id }}');
+            const productForm = (typeof Elixir_GetProductForm === 'function' && Elixir_GetProductForm()) || document.querySelector('form[action*="/cart/add"]');
+
+            if (!titleElement || !productForm) return;
+
+            const dynamicOption = titleElement.getAttribute('data-dynamic-variant-option');
+            const originalTitle = titleElement.getAttribute('data-original-title');
+            const productVariants = window.productVariants_{{ block.id }} || [];
+            const productOptions = window.productOptions_{{ block.id }} || [];
+
+            if (!dynamicOption || dynamicOption === 'none') return;
+
+            const optionIndex = parseInt(dynamicOption) - 1; // Convert to 0-based index
+
+            // Function to update title based on variant option
+            function updateTitle(variantId) {
+              if (!variantId) return;
+
+              const variant = productVariants.find(v => v.id == variantId);
+
+              if (variant) {
+                // Get the option value based on selected option index (option1, option2, option3)
+                let optionValue = null;
+                if (optionIndex === 0 && variant.option1) {
+                  optionValue = variant.option1;
+                } else if (optionIndex === 1 && variant.option2) {
+                  optionValue = variant.option2;
+                } else if (optionIndex === 2 && variant.option3) {
+                  optionValue = variant.option3;
+                }
+
+                if (optionValue && optionValue !== 'Default Title') {
+                  titleElement.textContent = optionValue;
+                } else {
+                  titleElement.textContent = originalTitle;
+                }
+              } else {
+                titleElement.textContent = originalTitle;
+              }
+            }
+
+            // Listen for variant changes
+            document.addEventListener('variant:change', function(event) {
+              if (event.detail && event.detail.variant) {
+                updateTitle(event.detail.variant.id);
+              }
+            });
+
+            // Also listen for form input changes
+            const variantInput = productForm.querySelector('[name="id"]');
+            if (variantInput) {
+              const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                  if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                    updateTitle(variantInput.value);
+                  }
+                });
+              });
+
+              observer.observe(variantInput, {
+                attributes: true,
+                attributeFilter: ['value']
+              });
+
+              // Also listen for direct value changes
+              variantInput.addEventListener('change', function() {
+                updateTitle(this.value);
+              });
+
+              // Set initial title if variant is pre-selected
+              if (variantInput.value) {
+                updateTitle(variantInput.value);
+              }
+            }
+          })();
+        </script>
+      {% endif %}
+
+    {% when 'price' %}
+      <div
+        class="shop-product-price-container"
+        id="block-{{ block.id }}"
+        {{ block.shopify_attributes }}
+        data-multiply-by-quantity="{{ block.settings.multiply_price_by_quantity }}"
+        data-apply-subscription-discount="{{ block.settings.apply_selected_subscription_discount }}"
+        data-save-badge-type="{{ block.settings.save_badge_display_type | default: 'percentage' }}"
+        style="margin-top: {{ block.settings.price_margin_top }}px !important; margin-bottom: {{ block.settings.price_margin_bottom }}px !important;"
+      >
+        {% assign current_variant = product.selected_or_first_available_variant %}
+        {% assign compare_at_price = current_variant.compare_at_price %}
+        {% assign price = current_variant.price %}
+
+        <span class="shop-product-price-block {% if compare_at_price and compare_at_price > price %}on-sale{% endif %}">
+          {{ price | money }}
+        </span>
+
+        {% if compare_at_price and compare_at_price > price %}
+          <span class="shop-compare-price">
+            {{ compare_at_price | money }}
+          </span>
+
+          {% assign discount_percentage = compare_at_price
+            | minus: price
+            | times: 100.0
+            | divided_by: compare_at_price
+            | round
+          %}
+          <span class="shop-save-price">
+            {% if block.settings.show_save_icon %}
+              {% style %}
+                #block-{{ block.id }} svg{
+                    width: calc({{ block.settings.save_badge_font_size }}px * {{ block.settings.save_icon_size_ratio }});
+                    height: calc({{ block.settings.save_badge_font_size }}px * {{ block.settings.save_icon_size_ratio }});
+                    {% if block.settings.save_icon_position_y != 0 %}
+                    position: relative;
+                    top: {{ block.settings.save_icon_position_y }}px;
+                    {% endif %}
+                }
+              {% endstyle %}
+              <svg
+                class="tag-icon"
+                id="block-{{ block.id }}"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 256 256"
+                fill="currentColor"
+              >
+                <path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/>
+              </svg>
+            {% endif %}
+            {% if block.settings.save_badge_display_type == 'custom_amount'
+              and block.settings.custom_save_amount != blank
+            %}
+              {{ block.settings.custom_save_amount }}
+            {% else %}
+              {{ block.settings.custom_save_text | default: settings.save_text | default: 'SAVE' }} 
+              {% if block.settings.save_badge_display_type == 'percentage'
+                or block.settings.save_badge_display_type == blank
+              %}
+                 <span data-save-percentage>{{ discount_percentage }}</span>%
+              {% elsif block.settings.save_badge_display_type == 'dollar_amount' %}
+                {% assign dollar_discount = compare_at_price | minus: price %}
+                <span data-save-dollar>{{ dollar_discount | money }}</span>
+              {% else %} 
+                 <span data-save-percentage>{{ discount_percentage }}</span>%
+              {% endif %}
+            {% endif %}
+          </span>
+        {% endif %}
+      </div>
+      <script>
+        (function() {
+          const blockId = 'block-{{ block.id }}';
+          const container = document.getElementById(blockId);
+          if (!container) return;
+
+          const multiplyByQuantity = container.dataset.multiplyByQuantity !== 'false';
+          const applySubscriptionDiscount = container.dataset.applySubscriptionDiscount !== 'false';
+          const saveBadgeType = container.dataset.saveBadgeType || 'percentage';
+          const variants = {{ product.variants | json }};
+
+          function getForm() {
+            return (typeof Elixir_GetProductForm === 'function' && Elixir_GetProductForm()) || document.querySelector('.shop-add-to-cart-wrapper form[action*="/cart/add"]');
+          }
+
+          function getQuantity() {
+            const form = getForm();
+            if (!form) return 1;
+            const input = form.querySelector('input[name="quantity"]');
+            const qty = input ? parseInt(input.value, 10) : 1;
+            return isNaN(qty) || qty < 1 ? 1 : qty;
+          }
+
+          function getVariantFromForm() {
+            const id = (typeof Elixir_GetProductFormVariantId === 'function' && Elixir_GetProductFormVariantId()) || null;
+            if (!id) return variants.length ? variants[0] : null;
+            return variants.find(function(v) { return v.id.toString() === String(id); }) || null;
+          }
+
+          function updatePriceDisplay(variant) {
+            if (!variant) return;
+            const qty = getQuantity();
+            const compareAt = variant.compare_at_price != null ? variant.compare_at_price : (variant.compareAtPrice != null ? variant.compareAtPrice : 0);
+            const result = Elixir_GetDisplayPrice({
+              price: variant.price,
+              quantity: qty,
+              multiplyByQuantity: multiplyByQuantity,
+              compareAtPrice: compareAt,
+              applySubscriptionDiscount: applySubscriptionDiscount
+            });
+            const priceTotal = result.price;
+            const compareTotal = result.compareAtPrice;
+            const isOnSale = compareTotal > 0 && compareTotal > priceTotal;
+
+            const priceEl = container.querySelector('.shop-product-price-block');
+            const comparePriceEl = container.querySelector('.shop-compare-price');
+            const saveBadge = container.querySelector('.shop-save-price');
+            const percentageEl = container.querySelector('[data-save-percentage]');
+            const dollarEl = container.querySelector('[data-save-dollar]');
+
+            if (priceEl) priceEl.textContent = Elixir_FormatMoney(priceTotal);
+            if (priceEl) priceEl.classList.toggle('on-sale', isOnSale);
+
+            if (comparePriceEl) {
+              if (isOnSale) {
+                comparePriceEl.textContent = Elixir_FormatMoney(compareTotal);
+                comparePriceEl.style.display = '';
+              } else {
+                comparePriceEl.style.display = 'none';
+              }
+            }
+
+            if (saveBadge) {
+              if (isOnSale) {
+                saveBadge.style.display = '';
+                if (saveBadgeType === 'percentage' && percentageEl) {
+                  const discount = Math.round(((compareTotal - priceTotal) / compareTotal) * 100);
+                  percentageEl.textContent = discount;
+                } else if (saveBadgeType === 'dollar_amount' && dollarEl) {
+                  dollarEl.textContent = Elixir_FormatMoney(compareTotal - priceTotal);
+                }
+              } else {
+                saveBadge.style.display = 'none';
+              }
+            }
+          }
+
+          function runUpdate() {
+            const variant = getVariantFromForm();
+            updatePriceDisplay(variant);
+          }
+
+          document.addEventListener('simple-variant-picker:variantChange', function(event) {
+            const variant = event.detail && event.detail.variant;
+            if (variant) updatePriceDisplay(variant);
+          });
+
+          document.addEventListener('quantity:changed', runUpdate);
+
+          document.addEventListener('quantity_break:changed', runUpdate);
+
+          document.addEventListener('subscriptionContext:updated', runUpdate);
+
+          document.addEventListener('DOMContentLoaded', function() {
+            runUpdate();
+          });
+
+          if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(runUpdate, 0);
+          }
+        })();
+      </script>
+
+      <!-- Inline styles to ensure price styling works correctly -->
+      <style>
+        #block-{{ block.id }} .shop-product-price-block {
+          font-size: {{ block.settings.price_font_size }}px !important;
+          font-weight: {{ block.settings.price_font_weight }} !important;
+          color: {% if block.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ block.settings.price_color }}{% endif %} !important;
+        }
+
+        #block-{{ block.id }} .shop-product-price-block.on-sale {
+          color: {% if block.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ block.settings.price_color }}{% endif %} !important;
+        }
+
+        #block-{{ block.id }} .shop-compare-price {
+          color: {% if block.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ block.settings.compare_price_color }}{% endif %} !important;
+          font-size: {{ block.settings.compare_price_font_size }}px !important;
+        }
+
+        #block-{{ block.id }} .shop-save-price {
+          background-color: {% if block.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ block.settings.sale_badge_bg_color }}{% endif %} !important;
+          color: {% if block.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ block.settings.sale_badge_text_color }}{% endif %} !important;
+          font-size: {{ block.settings.save_badge_font_size }}px !important;
+          padding: {{ block.settings.save_badge_padding_v | default: 3 }}px {{ block.settings.save_badge_padding_h | default: 6 }}px !important;
+          {% if block.settings.save_badge_enable_border %}
+          border: {{ block.settings.save_badge_border_width | default: 1 }}px {{ block.settings.save_badge_border_style | default: 'solid' }} {{ block.settings.save_badge_border_color | default: '#000000' }} !important;
+          {% endif %}
+          {% unless block.settings.show_save_badge %}
+          display: none !important;
+          {% endunless %}
+        }
+
+        #block-{{ block.id }} .shop-save-price span {
+          margin-left:5px;
+        }
+
+        @media (max-width: 767px) {
+          #block-{{ block.id }} .shop-product-price-block {
+            font-size: {{ block.settings.price_font_size | minus: 4 }}px !important;
+          }
+
+          #block-{{ block.id }} .shop-compare-price {
+            font-size: {{ block.settings.compare_price_font_size | minus: 2 }}px !important;
+          }
+        }
+      </style>
+
+    {% when 'award_badge' %}
+      <div class="shop-award-badge" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+        {%- if block.settings.award_badge_icon != blank -%}
+          <img 
+            class="award-badge-icon" 
+            src="{{ block.settings.award_badge_icon | image_url: width: 64 }}" 
+            alt="{{ block.settings.award_badge_icon.alt | escape }}" 
+            width="{{ block.settings.award_badge_icon_size }}" 
+            height="{{ block.settings.award_badge_icon_size }}"
+            loading="lazy"
+          >
+        {%- endif -%}
+        <span class="award-badge-text">{{ block.settings.award_badge_text }}</span>
+      </div>
+
+      <style>
+        #block-{{ block.id }} {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: {{ block.settings.award_badge_bg_gradient }};
+          color: {{ block.settings.award_badge_text_color }} !important;
+          border: 1px solid {{ block.settings.award_badge_border_color }};
+          border-radius: {{ block.settings.award_badge_border_radius }}px;
+          margin-top: {{ block.settings.award_badge_margin_top }}px;
+          margin-bottom: {{ block.settings.award_badge_margin_bottom }}px;
+          font-size: {{ block.settings.award_badge_font_size }}px;
+          padding: 6px 12px;
+        }
+
+        #block-{{ block.id }} .award-badge-icon {
+          width: {{ block.settings.award_badge_icon_size }}px;
+          height: {{ block.settings.award_badge_icon_size }}px;
+          object-fit: contain;
+          flex-shrink: 0;
+        }
+
+        @media (max-width: 767px) {
+           #block-{{ block.id }}  {
+            margin-top: {{ block.settings.award_badge_margin_top }}px;
+          }
+        }
+      </style>
+
+    {% when 'trustpilot_rating' %}
+      {% render 'trustpilot-rating-block', block: block %}
+
+    {% when 'number_one_award' %}
+      {% render 'award-badge',
+        badge_number: block.settings.badge_number,
+        title_text: block.settings.title_text,
+        subtitle_text: block.settings.subtitle_text,
+        gradient_start_color: block.settings.gradient_start_color,
+        gradient_end_color: block.settings.gradient_end_color,
+        background_color: block.settings.background_color,
+        text_color: block.settings.text_color,
+        badge_width: block.settings.badge_width,
+        badge_height: block.settings.badge_height,
+        border_radius: block.settings.border_radius,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        number_badge_text_color: block.settings.number_badge_text_color,
+        number_badge_font_size: block.settings.number_badge_font_size,
+        number_badge_font_weight: block.settings.number_badge_font_weight,
+        block: block
+      %}
+
+    {% when 'custom_money_back' %}
+      {% render 'custom-money-back',
+        use_theme_colors: block.settings.use_theme_colors,
+        title_text: block.settings.title_text,
+        description_text: block.settings.description_text,
+        badge_image: block.settings.badge_image,
+        badge_svg: block.settings.badge_svg,
+        use_svg_badge: block.settings.use_svg_badge,
+        badge_size: block.settings.badge_size,
+        gradient_start_color: block.settings.gradient_start_color,
+        gradient_end_color: block.settings.gradient_end_color,
+        title_color: block.settings.title_color,
+        text_color: block.settings.text_color,
+        title_font_size: block.settings.title_font_size,
+        description_font_size: block.settings.description_font_size,
+        border_style: block.settings.border_style,
+        border_color: block.settings.border_color,
+        border_radius: block.settings.border_radius,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        padding_top: block.settings.padding_top,
+        padding_right: block.settings.padding_right,
+        padding_bottom: block.settings.padding_bottom,
+        padding_left: block.settings.padding_left,
+        enable_shine: block.settings.enable_shine,
+        block: block
+      %}
+    {%- when 'custom_liquid' -%}
+      {{ block.settings.custom_liquid }}
+    {% when 'benefits_grid' %}
+      {% render 'benefits-grid',
+        icon_bg_color: block.settings.icon_bg_color,
+        hide_icon_background: block.settings.hide_icon_background,
+        enable_icon_circle_stroke: block.settings.enable_icon_circle_stroke,
+        icon_circle_stroke_color: block.settings.icon_circle_stroke_color,
+        icon_circle_stroke_width: block.settings.icon_circle_stroke_width,
+        icon_stroke_color: block.settings.icon_stroke_color,
+        text_color: block.settings.text_color,
+        font_size: block.settings.font_size,
+        font_weight: block.settings.font_weight,
+        grid_gap: block.settings.grid_gap,
+        icon_size: block.settings.icon_size,
+        icon_container_size: block.settings.icon_container_size,
+        benefit_1_text: block.settings.benefit_1_text,
+        benefit_2_text: block.settings.benefit_2_text,
+        benefit_3_text: block.settings.benefit_3_text,
+        benefit_4_text: block.settings.benefit_4_text,
+        container_margin_top: block.settings.container_margin_top,
+        container_margin_bottom: block.settings.container_margin_bottom,
+        benefit_1_use_image: block.settings.benefit_1_use_image,
+        benefit_1_image: block.settings.benefit_1_image,
+        benefit_1_use_custom_icon: block.settings.benefit_1_use_custom_icon,
+        benefit_1_custom_icon: block.settings.benefit_1_custom_icon,
+        benefit_2_use_image: block.settings.benefit_2_use_image,
+        benefit_2_image: block.settings.benefit_2_image,
+        benefit_2_use_custom_icon: block.settings.benefit_2_use_custom_icon,
+        benefit_2_custom_icon: block.settings.benefit_2_custom_icon,
+        benefit_3_use_image: block.settings.benefit_3_use_image,
+        benefit_3_image: block.settings.benefit_3_image,
+        benefit_3_use_custom_icon: block.settings.benefit_3_use_custom_icon,
+        benefit_3_custom_icon: block.settings.benefit_3_custom_icon,
+        benefit_4_use_image: block.settings.benefit_4_use_image,
+        benefit_4_image: block.settings.benefit_4_image,
+        benefit_4_use_custom_icon: block.settings.benefit_4_use_custom_icon,
+        benefit_4_custom_icon: block.settings.benefit_4_custom_icon,
+        block: block
+      %}
+
+    {% when 'emoji_benefits' %}
+      {% render 'emoji-benefits-list',
+        benefit_1: block.settings.benefit_1,
+        benefit_2: block.settings.benefit_2,
+        benefit_3: block.settings.benefit_3,
+        benefit_4: block.settings.benefit_4,
+        benefit_5: block.settings.benefit_5,
+        benefit_6: block.settings.benefit_6,
+        emoji_1: block.settings.emoji_1,
+        emoji_2: block.settings.emoji_2,
+        emoji_3: block.settings.emoji_3,
+        emoji_4: block.settings.emoji_4,
+        emoji_5: block.settings.emoji_5,
+        emoji_6: block.settings.emoji_6,
+        text_size: block.settings.text_size,
+        spacing: block.settings.spacing,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        text_color: block.settings.text_color,
+        text_bold: block.settings.text_bold,
+        font_weight: block.settings.font_weight,
+        bg_color: block.settings.bg_color,
+        border_radius: block.settings.border_radius,
+        block: block
+      %}
+
+    {% when 'add_to_cart' %}
+      {%- liquid
+        assign base_add_to_cart_text = 'products.product.add_to_cart' | t
+        assign current_button_text = ''
+        assign text_for_js_init = base_add_to_cart_text
+
+        if block.settings.button_text_override != blank
+          assign current_button_text = block.settings.button_text_override
+          assign text_for_js_init = current_button_text
+        else
+          assign current_button_text = base_add_to_cart_text
+        endif
+
+        assign button_text_for_initial_render = current_button_text
+
+        assign adding_text = 'products.product.add_to_cart' | t
+        assign added_text = 'products.product.add_to_cart' | t
+        assign sold_out_text = 'products.product.sold_out' | t
+
+        assign button_bg_color = block.settings.buy_box_button_bg_color | default: '#EF4A65'
+        assign button_text_color = block.settings.button_text_color | default: '#FFFFFF'
+        assign button_hover_color = block.settings.buy_box_button_hover_color | default: '#EF4A65'
+        assign button_icon = block.settings.button_icon | default: 'none'
+        assign icon_position = block.settings.icon_position | default: 'left'
+        assign icon_size = block.settings.icon_size | default: 20
+
+        assign has_quantity_selector = false
+        for blk in section.blocks
+          if blk.type == 'quantity_selector'
+            assign has_quantity_selector = true
+            break
+          endif
+        endfor
+      -%}
+
+      <script>
+        // Make translations available to JS
+        window.variantStrings = window.variantStrings || {};
+        window.variantStrings.addToCart = {{ text_for_js_init | json }};
+        window.variantStrings.soldOut = {{ sold_out_text | json }};
+        window.variantStrings.adding = {{ adding_text | json }};
+        window.variantStrings.added = {{ added_text | json }};
+
+        var addToCartButtonText = {{ button_text_for_initial_render | json }}
+        var showPriceButton = {{ block.settings.show_price_in_button  }}
+      </script>
+
+      <div class="shop-add-to-cart-wrapper">
+        <product-form class="product-form" data-section-id="{{ section.id }}">
+          {% assign product_form_id = 'product-form-' | append: section.id %}
+          {%- form 'product',
+            product,
+            id: product_form_id,
+            class: 'form product-buy-form-pdp product-buy-form--{{ section.id }}',
+            novalidate: 'novalidate',
+            data-type: 'add-to-cart-form'
+          -%}
+            <input
+              type="hidden"
+              name="id"
+              value="{{ product.selected_or_first_available_variant.id }}"
+              {% if product.selected_or_first_available_variant.available == false
+                or quantity_rule_soldout
+                or product.selected_or_first_available_variant == null
+              %}
+                disabled
+              {% endif %}
+              class="product-variant-id"
+            >
+            <input
+              type="hidden"
+              name="selling_plan"
+              value=""
+            >
+
+            <button
+              type="submit"
+              id="ProductSubmitButton-{{ section.id }}"
+              name="add"
+              data-persistent-text="{{ button_text_for_initial_render | escape }}"
+              data-show-price="{% if block.settings.show_price_in_button != false %}true{% else %}false{% endif %}"
+              {% if block.settings.button_behavior == 'skip_to_checkout' %}
+                onclick="skipToCheckout(event)"
+              {% endif %}
+              class="shop-add-to-cart-button {% if product.selected_or_first_available_variant.available == false %} sold-out{% endif %} product-form__submit {% unless settings.enable_global_button_styling and block.settings.use_global_button_styling %}disable-global-button-styling{% endunless %}"
+              style="
+                {%- liquid
+                  assign use_global_styling = false
+                  if settings.enable_global_button_styling and block.settings.use_global_button_styling
+                    assign use_global_styling = true
+                  endif
+                -%}
+                {% if use_global_styling %}
+                  /* Apply global button styling inline to ensure proper precedence */
+                  --button-text-font-size: var(--global-button-font-size, 14px);
+                  --button-text-color: var(--global-button-text-color, #FFFFFF) !important;
+                  --button-price-color: var(--global-button-text-color, #FFFFFF) !important;
+                  --button-hover-color: var(--global-button-hover-bg-color, #D63953);
+                  padding: var(--global-button-padding-y, 12px) 20px !important;
+                  font-size: var(--global-button-font-size, 14px) !important;
+                  font-weight: var(--global-button-font-weight, 700) !important;
+                  letter-spacing: var(--global-button-letter-spacing, 1px) !important;
+                  text-transform: var(--global-button-text-transform, none) !important;
+                  border-radius: var(--global-button-radius, 8px) !important;
+                  {% if settings.enable_button_gradient %}
+                  background: linear-gradient({{ settings.button_gradient_direction | default: 'to bottom' }}, {{ settings.button_gradient_start | default: '#EF4A65' }}, {{ settings.button_gradient_end | default: '#D63953' }}) !important;
+                  {% else %}
+                  background-color: var(--global-button-bg-color, #EF4A65) !important;
+                  {% endif %}
+                  color: var(--global-button-text-color, #FFFFFF) !important;
+                  border: var(--global-button-border-width, 0px) solid var(--global-button-border-color, #EF4A65) !important;
+				  border-bottom: var(--global-button-bottom-border-width, 0px) solid var(--global-button-bottom-border-color, #000000) !important;
+                {% else %}
+                  --button-text-font-size: {{ block.settings.custom_button_font_size | default: 14 }}px;
+                  {%- liquid
+                    comment
+                      Always prioritize block settings over theme colors when use_global_button_styling is false
+                    endcomment
+                    if block.settings.button_text_color != blank
+                      assign final_button_text_color = block.settings.button_text_color
+                    elsif section.settings.use_theme_colors
+                      if settings.global_section_button_text_color != blank
+                        assign final_button_text_color = settings.global_section_button_text_color
+                      else
+                        assign final_button_text_color = settings.global_section_background_color
+                      endif
+                    else
+                      assign final_button_text_color = button_text_color
+                    endif
+
+                    if block.settings.buy_box_button_bg_color != blank
+                      assign final_button_bg_color = block.settings.buy_box_button_bg_color
+                    elsif section.settings.use_theme_colors
+                      if settings.global_section_button_color != blank
+                        assign final_button_bg_color = settings.global_section_button_color
+                      else
+                        assign final_button_bg_color = settings.global_section_accent_1_color
+                      endif
+                    else
+                      assign final_button_bg_color = button_bg_color
+                    endif
+
+                    if block.settings.buy_box_button_hover_color != blank
+                      assign final_button_hover_color = block.settings.buy_box_button_hover_color
+                    elsif section.settings.use_theme_colors
+                      if settings.global_section_button_color != blank
+                        assign final_button_hover_color = settings.global_section_button_color | color_darken: 5
+                      else
+                        assign final_button_hover_color = settings.global_section_accent_1_color | color_darken: 5
+                      endif
+                    else
+                      assign final_button_hover_color = button_hover_color
+                    endif
+                  -%}
+                  --button-text-color: {{ final_button_text_color }} !important;
+                  --button-price-color: {{ final_button_text_color }} !important;
+                  --button-bg-color: {{ final_button_bg_color }};
+                  --button-hover-color: {{ final_button_hover_color }};
+                  padding: {{ block.settings.custom_button_padding_y | default: 12 }}px 20px;
+                  font-size: {{ block.settings.custom_button_font_size | default: 14 }}px;
+                  letter-spacing: var(--global-button-letter-spacing, 1px);
+                  font-weight: var(--global-button-font-weight, 700);
+                background-color: var(--button-bg-color);
+                border-radius: {{ block.settings.card_border_radius | default: 8 }}px;
+                color: {{ final_button_text_color }};
+                /* Global hover effects are handled by button-styling.css */
+                {% endif %}
+              "
+              {% if product.selected_or_first_available_variant.available == false %}
+                disabled
+              {% endif %}
+              data-original-text="{{ button_text_for_initial_render }}"
+              {% if block.settings.button_text_override != blank %}
+                data-text-override="true"
+                data-persistent-text="{{ button_text_for_initial_render }}"
+              {% endif %}
+              {% if block.settings.show_price_in_button != false %}
+                data-show-price="true"
+              {% endif %}
+            >
+              {% if button_icon != 'none' and icon_position == 'left' %}
+                <span
+                  class="button-icon"
+                  style="
+                                        color: {% if section.settings.use_theme_colors %}
+                    {% if settings.global_section_button_text_color != blank %}
+                      {{ settings.global_section_button_text_color }}
+                    {% else %}
+                      {{ settings.global_section_background_color }}
+                    {% endif %}
+                    {% else %}
+                      {{ button_text_color }}
+                    {% endif %};
+                  "
+                >
+                  {% case button_icon %}
+                    {% when 'cart' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                      </svg>
+                    {% when 'bag' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path>
+                      </svg>
+                    {% when 'arrow' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                    {% when 'custom' %}
+                      {% if block.settings.custom_icon != blank %}
+                        {{ block.settings.custom_icon }}
+                      {% endif %}
+                  {% endcase %}
+                </span>
+              {% endif %}
+              <span class="button-text" data-no-override="true">
+                {% if product.selected_or_first_available_variant.available %}
+                  {{ button_text_for_initial_render }}
+                  {%- if block.settings.show_price_in_button != false -%}
+                    - {{ product.selected_or_first_available_variant.price | money }}
+                    {% if product.selected_or_first_available_variant.compare_at_price
+                        > product.selected_or_first_available_variant.price
+                    %}
+                      <span class="compare-price"
+                        >({{ product.selected_or_first_available_variant.compare_at_price | money }})</span
+                      >
+                    {% endif %}
+                  {%- endif -%}
+                {% else %}
+                  {{ sold_out_text }}
+                {% endif %}
+              </span>
+
+              {% if button_icon != 'none' and icon_position == 'right' %}
+                <span
+                  class="button-icon"
+                  style="
+                                        color: {% if section.settings.use_theme_colors %}
+                    {% if settings.global_section_button_text_color != blank %}
+                      {{ settings.global_section_button_text_color }}
+                    {% else %}
+                      {{ settings.global_section_background_color }}
+                    {% endif %}
+                    {% else %}
+                      {{ button_text_color }}
+                    {% endif %};
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                  "
+                >
+                  {% case button_icon %}
+                    {% when 'cart' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                      </svg>
+                    {% when 'bag' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path>
+                      </svg>
+                    {% when 'arrow' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                    {% when 'custom' %}
+                      {% if block.settings.custom_icon != blank %}
+                        {{ block.settings.custom_icon }}
+                      {% endif %}
+                  {% endcase %}
+                </span>
+              {% endif %}
+
+              <div class="loading__spinner hidden">
+                <svg
+                  aria-hidden="true"
+                  focusable="false"
+                  class="spinner"
+                  viewBox="0 0 66 66"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                </svg>
+              </div>
+            </button>
+
+            {% if block.settings.show_fast_payment %}
+              {{ form | payment_button }}
+            {% endif %}
+          {% endform %}
+        </product-form>
+      </div>
+      <style>
+        .shop-add-to-cart-button  .button-text {
+          text-transform: none !important;
+        }
+        /* Ensure form takes full width */
+        #product-form-{{ section.id }},
+        .form {
+          width: 100% !important;
+          display: block;
+        }
+        .shop-add-to-cart-button .path {
+          stroke: {{ button_text_color }};
+        }
+      </style>
+
+      <script>
+        /* Add to cart and redirect to checkout */
+        function skipToCheckout(e) {
+          e.preventDefault();
+          if (!Elixir_ProductFormExists()) return;
+          var form = Elixir_GetProductForm();
+          fetch('/cart/add.js', {
+            method: 'POST',
+            body: new FormData(form)
+          }).then(function (r) {
+            if (r.ok) window.location.href = '/checkout';
+          });
+        }
+
+        // Add to Cart button: when "Show price in button" is on, keep price in sync via Elixir_GetDisplayPrice and standard events
+        document.addEventListener('DOMContentLoaded', function () {
+          if (typeof Elixir_ProductFormExists !== 'function' || !Elixir_ProductFormExists()) return;
+          if (!showPriceButton) return;
+
+          const mainAtcBtn = document.querySelector('.shop-add-to-cart-button');
+          const btnTextEl = mainAtcBtn && mainAtcBtn.querySelector('.button-text');
+          if (!mainAtcBtn || !btnTextEl) return;
+
+          const variants = {{ product.variants | json }};
+          function getForm() {
+            return (typeof Elixir_GetProductForm === 'function' && Elixir_GetProductForm()) || document.querySelector('.shop-add-to-cart-wrapper form[action*="/cart/add"]');
+          }
+          function getQuantity() {
+            const form = getForm();
+            if (!form) return 1;
+            const input = form.querySelector('input[name="quantity"]');
+            const qty = input ? parseInt(input.value, 10) : 1;
+            return isNaN(qty) || qty < 1 ? 1 : qty;
+          }
+          function getVariantFromForm() {
+            const id = typeof Elixir_GetProductFormVariantId === 'function' ? Elixir_GetProductFormVariantId() : null;
+            if (id == null) return variants.length ? variants[0] : null;
+            return variants.find(function (v) { return v.id.toString() === String(id); }) || variants[0] || null;
+          }
+          function updateAddToCartButtonPrice() {
+            const variant = getVariantFromForm();
+            if (!variant) return;
+            if (typeof Elixir_GetDisplayPrice !== 'function' || typeof Elixir_FormatMoney !== 'function') return;
+            const qty = getQuantity();
+            const compareAt = variant.compare_at_price != null ? variant.compare_at_price : (variant.compareAtPrice != null ? variant.compareAtPrice : 0);
+            const result = Elixir_GetDisplayPrice({
+              price: variant.price,
+              quantity: qty,
+              multiplyByQuantity: true,
+              compareAtPrice: compareAt,
+              applySubscriptionDiscount: true
+            });
+            const persistentText = mainAtcBtn.dataset.persistentText || addToCartButtonText || 'Add to cart';
+            let html = persistentText + ' - ' + Elixir_FormatMoney(result.price);
+            if (result.compareAtPrice > result.price && result.compareAtPrice > 0) {
+              html += ' <span class="compare-price">(' + Elixir_FormatMoney(result.compareAtPrice) + ')</span>';
+            }
+            btnTextEl.innerHTML = html;
+          }
+
+          document.addEventListener('simple-variant-picker:variantChange', updateAddToCartButtonPrice);
+          document.addEventListener('quantity:changed', updateAddToCartButtonPrice);
+          document.addEventListener('quantity_break:changed', updateAddToCartButtonPrice);
+          document.addEventListener('subscriptionContext:updated', updateAddToCartButtonPrice);
+          updateAddToCartButtonPrice();
+        });
+
+
+
+          {% comment %} if (!{{ block.settings.show_price_in_button }}) {
+            const target = document.querySelector('#ProductSubmitButton-{{ section.id }} .button-text');
+          const originalText = target?.innerText;
+
+          if (target) {
+            const observer = new MutationObserver(() => {
+              if (target.innerText !== originalText) {
+                target.innerText = originalText;
+              }
+            });
+
+            observer.observe(target, { childList: true, subtree: true, characterData: true });
+          }
+          }
+
+          // Watch for cart update events
+          document.addEventListener('cart:update', function () {
+            setTimeout(restorePersistentButtonText, 50);
+          });
+
+          // Watch for section renders in theme editor
+          document.addEventListener('shopify:section:load', restorePersistentButtonText);
+
+          // Watch for variant changes
+          document.addEventListener('variant:change', restorePersistentButtonText);
+
+          function restorePersistentButtonText() {
+            // First process buttons with text-override attribute
+          }
+
+          // Initial run
+          restorePersistentButtonText(); {% endcomment %}
+      </script>
+
+      {% render 'guarantee-badges',
+        badge_1_show: block.settings.badge_1_show,
+        badge_1_text: block.settings.badge_1_text,
+        badge_1_icon: block.settings.badge_1_icon,
+        badge_1_custom_icon: block.settings.badge_1_custom_icon,
+        badge_1_custom_image: block.settings.badge_1_custom_image,
+        badge_1_dot_color: block.settings.badge_1_dot_color,
+        badge_2_show: block.settings.badge_2_show,
+        badge_2_text: block.settings.badge_2_text,
+        badge_2_icon: block.settings.badge_2_icon,
+        badge_2_custom_icon: block.settings.badge_2_custom_icon,
+        badge_2_custom_image: block.settings.badge_2_custom_image,
+        badge_2_dot_color: block.settings.badge_2_dot_color,
+        icon_color: block.settings.icon_color,
+        text_color: block.settings.text_color,
+        container_margin_top: block.settings.container_margin_top,
+        container_margin_bottom: block.settings.container_margin_bottom,
+        container_margin_left: block.settings.container_margin_left,
+        container_margin_right: block.settings.container_margin_right,
+        font_size: block.settings.font_size,
+        icon_size: block.settings.icon_size,
+        gap: block.settings.gap,
+        text_weight: block.settings.text_weight,
+        align_center: block.settings.align_center,
+        mobile_stack: block.settings.mobile_stack,
+        block: block
+      %}
+
+    {% when 'buy_buttons' %}
+      {% render 'buy-buttons',
+        block: block,
+        product: product,
+        product_form_id: product_form_id,
+        section_id: section.id,
+        show_pickup_availability: block.settings.show_pickup_availability
+      %}
+
+    {% when 'shipping_notice' %}
+      {% if section.settings.use_theme_colors %}
+        {% assign shipping_highlight_color = block.settings.highlight_color %}
+        {% assign shipping_bg_color = block.settings.bg_color %}
+      {% else %}
+        {% assign shipping_highlight_color = block.settings.custom_highlight_color_off_theme %}
+        {% assign shipping_bg_color = block.settings.custom_bg_color_off_theme %}
+      {% endif %}
+
+      {% render 'free-shipping-notice',
+        notice_text_before: block.settings.notice_text_before,
+        notice_text_after: block.settings.notice_text_after,
+        days_ahead: block.settings.days_ahead,
+        show_suffix: block.settings.show_suffix,
+        hide_delivery_date: block.settings.hide_delivery_date,
+        text_color: block.settings.custom_shipping_text,
+        date_color: block.settings.custom_date_color,
+        highlight_color: custom_highlight_color,
+        dot_color: block.settings.dot_color,
+        bg_color: shipping_bg_color,
+        enable_background: block.settings.enable_background,
+        font_size: block.settings.font_size,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        container_margin_top: block.settings.container_margin_top,
+        container_margin_bottom: block.settings.container_margin_bottom,
+        enable_animation: block.settings.enable_animation,
+        alignment: block.settings.text_alignment,
+        use_theme_colors: section.settings.use_theme_colors,
+        block: block
+      %}
+
+    {% when 'stock_indicator' %}
+      <div class="shop-stock-indicator" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+        {% if block.settings.show_dot %}
+          <div class="shop-stock-dot-container">
+            <span class="shop-stock-dot static-dot"></span>
+            <span class="shop-stock-dot animated-dot"></span>
+          </div>
+        {% endif %}
+        <span class="shop-stock-text">
+          {% if block.settings.bold_first_word %}
+            {% assign words = block.settings.indicator_text | split: ' ' %}
+            <strong>{{ words.first }}</strong> {{ words | slice: 1, words.size | join: ' ' }}
+          {% else %}
+            {{ block.settings.indicator_text }}
+          {% endif %}
+        </span>
+      </div>
+
+      <style>
+        #block-{{ block.id }} {
+          padding: {{ block.settings.container_padding_y }}px {{ block.settings.container_padding_x }}px;
+          margin: {{ block.settings.container_margin_top }}px 0 {{ block.settings.container_margin_bottom }}px;
+        }
+
+        #block-{{ block.id }} .shop-stock-dot {
+          width: {{ block.settings.dot_size }}px;
+          height: {{ block.settings.dot_size }}px;
+          background-color: {{ block.settings.indicator_color }};
+        }
+        #block-{{ block.id }} .shop-stock-dot.animated-dot {
+          animation: stock-pulse {{ block.settings.animation_duration }}s ease-in-out infinite;
+        }
+
+        #block-{{ block.id }} .shop-stock-text {
+          font-family: var(--type-body-font);
+          font-size: {{ block.settings.font_size }}px;
+          letter-spacing: var(--letter-spacing-body);
+          color: {{ block.settings.indicator_color }};
+        }
+
+        @keyframes stock-pulse {
+          0% {
+            transform: scale(1);
+            opacity: 0.8;
+          }
+          50% {
+            transform: scale(2.5);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 0;
+          }
+        }
+      </style>
+
+    {% when 'limited_inventory' %}
+      {% render 'limited-inventory-alert',
+        dot_color: block.settings.dot_color,
+        text_color: block.settings.text_color,
+        show_dot: block.settings.show_dot,
+        inventory_text: block.settings.inventory_text,
+        bold_first_word: block.settings.bold_first_word,
+        font_size: block.settings.font_size,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        block: block
+      %}
+
+    {% when 'simple_variant_picker' %}
+      {% assign product_form_id = 'product-form-' | append: section.id %}
+      {%
+        render 'simple-variant-picker',
+        product: product,
+        block: block,
+        product_form_id: product_form_id,
+        margin_top: block.settings.margin_top | default: 0,
+        margin_bottom: block.settings.margin_bottom | default: 0,
+        use_dropdown: block.settings.use_dropdown
+        hide_option_1: block.settings.hide_option_1,
+        hide_option_2: block.settings.hide_option_2,
+        hide_option_3: block.settings.hide_option_3,
+      %}
+
+    {% when 'product_videos' %}
+      {% render 'video-carousel-standalone',
+        heading: block.settings.heading,
+        heading_size: block.settings.heading_size,
+        button_color: block.settings.button_color,
+        container_margin_top: block.settings.container_margin_top,
+        container_margin_bottom: block.settings.container_margin_bottom,
+        show_heading: block.settings.show_heading,
+        text_align: block.settings.text_align,
+        block: block
+      %}
+
+    {% when 'video_carousel_standalone' %}
+      {% render 'video-carousel-standalone',
+        heading: block.settings.heading,
+        heading_size: block.settings.heading_size,
+        heading_color: block.settings.heading_color,
+        heading_font_weight: block.settings.heading_font_weight,
+        heading_letter_spacing: block.settings.heading_letter_spacing,
+        button_color: block.settings.button_color,
+        scrollbar_color: block.settings.scrollbar_color,
+        scrollbar_width: block.settings.scrollbar_width,
+        video_size: block.settings.video_size,
+        enable_autoplay: block.settings.enable_autoplay,
+        show_sound_controls_autoplay: block.settings.show_sound_controls_autoplay,
+        hide_scrollbar: block.settings.hide_scrollbar,
+        play_button_size: block.settings.play_button_size,
+        sound_button_size: block.settings.sound_button_size,
+        play_button_bg_color: block.settings.play_button_bg_color,
+        play_button_bg_opacity: block.settings.play_button_bg_opacity,
+        sound_button_bg_color: block.settings.sound_button_bg_color,
+        sound_button_bg_opacity: block.settings.sound_button_bg_opacity,
+        show_social_badge: block.settings.show_social_badge,
+        social_platform: block.settings.social_platform,
+        view_count: block.settings.view_count,
+        badge_text: block.settings.badge_text,
+        badge_suffix: block.settings.badge_suffix,
+        use_gradient_text: block.settings.use_gradient_text,
+        badge_background_color: block.settings.badge_background_color,
+        badge_text_color: block.settings.badge_text_color,
+        remove_badge_background: block.settings.remove_badge_background,
+        show_divider_above_views: block.settings.show_divider_above_views,
+        divider_color: block.settings.divider_color,
+        divider_width: block.settings.divider_width,
+        divider_thickness: block.settings.divider_thickness,
+        divider_margin: block.settings.divider_margin,
+        custom_badge_text: block.settings.custom_badge_text,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        block: block
+      %}
+
+    {% when 'video_item_legacy' %}
+      <div class="shop-video-container" {{ block.shopify_attributes }}>
+        <video
+          class="shop-video"
+          src="{{ block.settings.video }}"
+          controls
+          {% if block.settings.enable_autoplay %}
+            autoplay muted
+          {% endif %}
+        ></video>
+      </div>
+
+    {% when 'product_faq' %}
+      {% render 'new-product-faq',
+        blocks: block.settings.faq_blocks,
+        items_limit: block.settings.items_limit,
+        image_size: block.settings.image_size,
+        image_border_radius: block.settings.image_border_radius,
+        image_fit: block.settings.image_fit,
+        text_size: block.settings.text_size,
+        answer_text_size: block.settings.answer_text_size,
+        item_padding: block.settings.item_padding,
+        question_padding: block.settings.question_padding,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        border_radius: block.settings.border_radius,
+        border_color: block.settings.border_color,
+        border_style: block.settings.border_style,
+        question_bg_color: block.settings.question_bg_color,
+        question_color: block.settings.question_color,
+        answer_color: block.settings.answer_color,
+        answer_bg_color: block.settings.answer_bg_color,
+        use_theme_colors: block.settings.use_theme_colors,
+        section_use_theme_colors: section.settings.use_theme_colors,
+        block: block,
+        product: product
+      %}
+
+    {% when 'unique_rating' %}
+      {% render 'unique-rating-component',
+        star_color: block.settings.star_color,
+        empty_star_color: block.settings.empty_star_color,
+        background_start_color: block.settings.background_start_color,
+        background_end_color: block.settings.background_end_color,
+        border_color: block.settings.border_color,
+        text_color: block.settings.text_color,
+        rating_value: block.settings.rating_value,
+        rating_count: block.settings.rating_count,
+        container_margin_top: block.settings.container_margin_top,
+        container_margin_bottom: block.settings.container_margin_bottom,
+        block: block,
+        star_size: block.settings.star_size,
+        star_size_mobile: block.settings.star_size_mobile,
+        text_size: block.settings.text_size,
+        text_size_mobile: block.settings.text_size_mobile,
+        container_padding_vertical: block.settings.container_padding_vertical,
+        container_padding_horizontal: block.settings.container_padding_horizontal,
+        container_padding_vertical_mobile: block.settings.container_padding_vertical_mobile,
+        container_padding_horizontal_mobile: block.settings.container_padding_horizontal_mobile,
+        border_radius: block.settings.border_radius,
+        star_spacing: block.settings.star_spacing,
+        mobile_responsive: block.settings.mobile_responsive
+      %}
+    {% when 'quantity_bundle' %}
+      {% render 'quantity-bundle-block', product: product, block: block %}
+    {% when 'limited_stock' %}
+      <div
+        class="limited-stock-component"
+        style="
+          margin-top: {{ block.settings.margin_top }}px;
+          margin-bottom: {{ block.settings.margin_bottom }}px;
+          font-size: {{ block.settings.font_size }}px;
+          {% if block.settings.show_background %}
+            background-color: {{ block.settings.background_color }};
+            padding: {{ block.settings.vertical_padding }}px {{ block.settings.horizontal_padding }}px;
+            border-radius: {{ block.settings.border_radius }}px;
+          {% endif %}
+          {% if block.settings.show_border %}
+            border: {{ block.settings.border_width }}px {{ block.settings.border_style }} {{ block.settings.border_color }};
+          {% endif %}
+        "
+        {{ block.shopify_attributes }}
+      >
+        <div class="stock-icon">
+          {% case block.settings.icon_type %}
+            {% when 'clock' %}
+              <!-- Clock icon -->
+              <svg
+                class="clock-face"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ block.settings.icon_color }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+              </svg>
+
+              <svg
+                class="hour-hand"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ block.settings.icon_color }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="12" y1="12" x2="12" y2="7"></line>
+              </svg>
+
+              <svg
+                class="minute-hand"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ block.settings.icon_color }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="12" y1="12" x2="16" y2="14"></line>
+              </svg>
+
+            {% when 'warning' %}
+              <!-- Warning icon -->
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ block.settings.icon_color }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+
+            {% when 'hourglass' %}
+              <!-- Hourglass icon -->
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ block.settings.icon_color }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="hourglass"
+              >
+                <path d="M22 8h-6.5l-1-7H9.5l-1 7H2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2z"></path>
+                <path d="M18 16H6a2 2 0 0 0-2 2h16a2 2 0 0 0-2-2z"></path>
+                <path d="M12 12v4"></path>
+                <path d="M6 8v8"></path>
+                <path d="M18 8v8"></path>
+              </svg>
+          {% endcase %}
+        </div>
+        <span class="limited-stock-text" style="color: {{ block.settings.primary_text_color }};">
+          {{- block.settings.primary_text -}}
+        </span>
+        <span class="stock-available" style="color: {{ block.settings.secondary_text_color }};">
+          {{- block.settings.secondary_text -}}
+        </span>
+      </div>
+
+    {% when 'divider' %}
+      {% render 'divider',
+        color: block.settings.color,
+        width: block.settings.width,
+        thickness: block.settings.thickness,
+        style: block.settings.style,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        alignment: block.settings.alignment,
+        max_width: block.settings.max_width,
+        block: block
+      %}
+
+    {% when 'quantity_selector' %}
+      {% assign product_form_id = 'product-form-' | append: section.id %}
+      {% render 'modern-quantity-selector',
+        product: product,
+        variant: product.selected_or_first_available_variant,
+        product_form_id: product_form_id,
+        background_color: block.settings.background_color,
+        button_color: block.settings.button_color,
+        text_color: block.settings.text_color,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        button_text: button_text,
+        block: block
+      %}
+
+    {% when 'replica_warning' %}
+      <div
+        class="replica-warning"
+        {{ block.shopify_attributes }}
+        style="
+          background-color: {{ block.settings.background_color }} !important;
+          color: {{ block.settings.text_color }} !important;
+          border: {{ block.settings.border_width }}px dashed {{ block.settings.border_color }} !important;
+          border-radius: {{ block.settings.border_radius }}px;
+          padding: {{ block.settings.padding }}px;
+          padding-left: {{ block.settings.padding | plus: 34 }}px;
+          margin-top: {{ block.settings.margin_top }}px;
+          margin-bottom: {{ block.settings.margin_bottom }}px;
+          width: 100%;
+          position: relative;
+        "
+      >
+        <div
+          class="warning-icon"
+          style="
+            background-color: {{ block.settings.icon_color }} !important;
+            color: {{ block.settings.icon_background_color }} !important;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-size: 10px;
+            position: absolute;
+            top: {{ block.settings.padding }}px;
+            left: 14px;
+          "
+        >
+          <svg
+            fill="{{ block.settings.icon_background_color }}"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            width="{{ block.settings.icon_size | default: 16 }}px"
+            height="{{ block.settings.icon_size | default: 16 }}px"
+            viewBox="0 0 416.979 416.979"
+          >
+            <g>
+              <path d="M356.004,61.156c-81.37-81.47-213.377-81.551-294.848-0.182c-81.47,81.371-81.552,213.379-0.181,294.85
+                c81.369,81.47,213.378,81.551,294.849,0.181C437.293,274.636,437.375,142.626,356.004,61.156z M237.6,340.786
+                c0,3.217-2.607,5.822-5.822,5.822h-46.576c-3.215,0-5.822-2.605-5.822-5.822V167.885c0-3.217,2.607-5.822,5.822-5.822h46.576
+                c3.215,0,5.822,2.604,5.822,5.822V340.786z M208.49,137.901c-18.618,0-33.766-15.146-33.766-33.765
+                c0-18.617,15.147-33.766,33.766-33.766c18.619,0,33.766,15.148,33.766,33.766C242.256,122.755,227.107,137.901,208.49,137.901z"/>
+            </g>
+          </svg>
+        </div>
+        <div class="warning-content">
+          <div
+            class="warning-title"
+            style="font-size: {{ block.settings.title_font_size | minus: 6 }}px; color: {{ block.settings.text_color }} !important;"
+          >
+            {{ block.settings.warning_title }}
+          </div>
+          <div
+            class="warning-text"
+            style="
+              font-size: {{ block.settings.text_font_size | minus: 2 }}px;
+              letter-spacing: var(--letter-spacing-body);
+              color: {{ block.settings.text_color }} !important;
+            "
+          >
+            {{ block.settings.warning_text }}
+          </div>
+        </div>
+      </div>
+
+    {% when 'custom_content' %}
+      {% if block.settings.custom_content != blank %}
+        <div class="custom-content-block" {{ block.shopify_attributes }}>
+          {{ block.settings.custom_content }}
+        </div>
+      {% endif %}
+
+    {% when 'viewer_notice' %}
+      {% render 'viewer-notice',
+        background_color: block.settings.background_color,
+        text_color: block.settings.text_color,
+        dot_color: block.settings.dot_color,
+        box_shadow: block.settings.box_shadow,
+        border_radius: block.settings.border_radius,
+        min_viewers: block.settings.min_viewers,
+        max_viewers: block.settings.max_viewers,
+        notice_text: block.settings.notice_text,
+        suffix_text: block.settings.suffix_text,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        show_border: block.settings.show_border,
+        border_style: block.settings.border_style,
+        border_color: block.settings.border_color,
+        border_width: block.settings.border_width,
+        use_icon: block.settings.use_icon,
+        custom_icon: block.settings.custom_icon,
+        icon_size: block.settings.icon_size,
+        font_size_desktop: block.settings.font_size_desktop,
+        font_size_mobile: block.settings.font_size_mobile,
+        alignment: block.settings.text_alignment,
+        block: block
+      %}
+
+    {% when 'product_upsell' %}
+      {% render 'product-upsell-block', block: block %}
+
+    {% when 'custom_text' %}
+      <div class="custom-text-block-container-{{ block.id }}">
+        <div class="custom-text-block-{{ block.id }}" {{ block.shopify_attributes }}>
+          <div class="custom-text-wrapper">
+            <div class="custom-text-content">
+              {% if block.settings.show_divider %}
+                <div class="custom-text-with-divider">
+                  {% if block.settings.text_align == 'right' %}
+                    <div class="divider-line"></div>
+                  {% elsif block.settings.text_align == 'center' %}
+                    <div class="divider-line"></div>
+                  {% endif %}
+
+                  <div class="custom-text-main">
+                    {% if block.settings.show_icon %}
+                      <div class="custom-text-icon">
+                        {% if block.settings.use_image_icon and block.settings.icon_image != blank %}
+                          <img
+                            src="{{ block.settings.icon_image | image_url: width: 72 }}"
+                            srcset="{{ block.settings.icon_image | image_url: width: 72 }} 1x, {{ block.settings.icon_image | image_url: width: 144 }} 2x"
+                            alt="Icon"
+                            loading="lazy"
+                            width="{{ block.settings.icon_size }}"
+                            height="{{ block.settings.icon_size }}"
+                            style="width: {{ block.settings.icon_size }}px; height: {{ block.settings.icon_size }}px; object-fit: contain;"
+                          >
+                        {% elsif block.settings.custom_icon != blank %}
+                          {{ block.settings.custom_icon }}
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                    <div class="custom-text-main-text-content">
+                      {% if block.settings.show_accent_text and block.settings.accent_text_position == 'before' %}
+                        <div class="custom-text-accent">{{ block.settings.accent_text }}</div>
+                      {% endif %}
+
+                      {% if block.settings.show_accent_text and block.settings.accent_text_position == 'inline' %}
+                        {% assign accent_placeholder = '[ACCENT]' %}
+                        {% if block.settings.text contains accent_placeholder %}
+                          {% assign text_parts = block.settings.text | split: accent_placeholder %}
+                          {{ text_parts[0] -}}
+                          <span class="custom-text-accent-inline">{{ block.settings.accent_text }}</span>
+                          {{- text_parts[1] }}
+                        {% else %}
+                          <span class="custom-text-accent-inline">{{ block.settings.accent_text }}</span>
+                          {{ block.settings.text }}
+                        {% endif %}
+                      {% else %}
+                        {{ block.settings.text }}
+                      {% endif %}
+
+                      {% if block.settings.show_accent_text and block.settings.accent_text_position == 'after' %}
+                        <div class="custom-text-accent">{{ block.settings.accent_text }}</div>
+                      {% endif %}
+                    </div>
+                    {% if block.settings.show_after_icon %}
+                      <div class="custom-text-after-icon">
+                        {% if block.settings.use_image_after_icon and block.settings.after_icon_image != blank %}
+                          <img
+                            src="{{ block.settings.after_icon_image | image_url: width: 72 }}"
+                            srcset="{{ block.settings.after_icon_image | image_url: width: 72 }} 1x, {{ block.settings.after_icon_image | image_url: width: 144 }} 2x"
+                            alt="After Icon"
+                            loading="lazy"
+                            width="{{ block.settings.after_icon_size }}"
+                            height="{{ block.settings.after_icon_size }}"
+                            style="width: {{ block.settings.after_icon_size }}px; height: {{ block.settings.after_icon_size }}px; object-fit: contain;"
+                          >
+                        {% elsif block.settings.after_custom_icon != blank %}
+                          {{ block.settings.after_custom_icon }}
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  {% if block.settings.text_align == 'left' %}
+                    <div class="divider-line"></div>
+                  {% elsif block.settings.text_align == 'center' %}
+                    <div class="divider-line"></div>
+                  {% endif %}
+                </div>
+              {% else %}
+                <div class="custom-text-main">
+                  {% if block.settings.show_icon %}
+                    <div class="custom-text-icon">
+                      {% if block.settings.use_image_icon and block.settings.icon_image != blank %}
+                        <img
+                          src="{{ block.settings.icon_image | image_url: width: 72 }}"
+                          srcset="{{ block.settings.icon_image | image_url: width: 72 }} 1x, {{ block.settings.icon_image | image_url: width: 144 }} 2x"
+                          alt="Icon"
+                          loading="lazy"
+                          width="{{ block.settings.icon_size }}"
+                          height="{{ block.settings.icon_size }}"
+                          style="width: {{ block.settings.icon_size }}px; height: {{ block.settings.icon_size }}px; object-fit: contain;"
+                        >
+                      {% elsif block.settings.custom_icon != blank %}
+                        {{ block.settings.custom_icon }}
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                  <div class="custom-text-main-text-content">
+                    {% if block.settings.show_accent_text and block.settings.accent_text_position == 'before' %}
+                      <div class="custom-text-accent">{{ block.settings.accent_text }}</div>
+                    {% endif %}
+
+                    {% if block.settings.show_accent_text and block.settings.accent_text_position == 'inline' %}
+                      {% assign accent_placeholder = '[ACCENT]' %}
+                      {% if block.settings.text contains accent_placeholder %}
+                        {% assign text_parts = block.settings.text | split: accent_placeholder %}
+                        {{ text_parts[0] -}}
+                        <span class="custom-text-accent-inline">{{ block.settings.accent_text }}</span>
+                        {{- text_parts[1] }}
+                      {% else %}
+                        <span class="custom-text-accent-inline">{{ block.settings.accent_text }}</span>
+                        {{ block.settings.text }}
+                      {% endif %}
+                    {% else %}
+                      {{ block.settings.text }}
+                    {% endif %}
+
+                    {% if block.settings.show_accent_text and block.settings.accent_text_position == 'after' %}
+                      <div class="custom-text-accent">{{ block.settings.accent_text }}</div>
+                    {% endif %}
+                  </div>
+                  {% if block.settings.show_after_icon %}
+                    <div class="custom-text-after-icon">
+                      {% if block.settings.use_image_after_icon and block.settings.after_icon_image != blank %}
+                        <img
+                          src="{{ block.settings.after_icon_image | image_url: width: 72 }}"
+                          srcset="{{ block.settings.after_icon_image | image_url: width: 72 }} 1x, {{ block.settings.after_icon_image | image_url: width: 144 }} 2x"
+                          alt="After Icon"
+                          loading="lazy"
+                          width="{{ block.settings.after_icon_size }}"
+                          height="{{ block.settings.after_icon_size }}"
+                          style="width: {{ block.settings.after_icon_size }}px; height: {{ block.settings.after_icon_size }}px; object-fit: contain;"
+                        >
+                      {% elsif block.settings.after_custom_icon != blank %}
+                        {{ block.settings.after_custom_icon }}
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              {% if block.settings.show_description and block.settings.description != blank %}
+                <div class="custom-text-description">
+                  {{ block.settings.description }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        .custom-text-block-container-{{ block.id }} {
+          width: 100%;
+          display: block;
+          {% if block.settings.use_container and block.settings.container_fit_content %}
+            text-align: {{ block.settings.text_align }};
+          {% endif %}
+        }
+
+        .custom-text-block-{{ block.id }} {
+          margin-top: {{ block.settings.margin_top }}px;
+          margin-bottom: {{ block.settings.margin_bottom }}px;
+          text-align: {{ block.settings.text_align }};
+          {% if block.settings.use_container and block.settings.container_fit_content %}
+            display: inline-block;
+            width: auto;
+            max-width: 100%;
+          {% else %}
+            width: 100%;
+          {% endif %}
+          {% if block.settings.use_container %}
+            {% if block.settings.container_bg_type == 'gradient' %}
+              background: {{ block.settings.container_bg_gradient }};
+            {% else %}
+            background-color: {{ block.settings.container_bg }};
+            {% endif %}
+            padding: {{ block.settings.container_padding_v | default: 10 }}px {{ block.settings.container_padding_h | default: 14 }}px;
+            border-radius: {{ block.settings.border_radius }}px;
+            {% if block.settings.show_border %}
+              border: {{ block.settings.border_width | default: 1 }}px solid {{ block.settings.border_color | default: '#E0E0E0' }};
+            {% endif %}
+          {% endif %}
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-wrapper {
+          {% if block.settings.use_container and block.settings.container_fit_content %}
+            width: auto;
+          {% else %}
+            width: 100%;
+          {% endif %}
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-with-divider {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          gap: {{ block.settings.divider_spacing | default: 12 }}px;
+        }
+
+        .custom-text-block-{{ block.id }} .divider-line {
+          flex: 1;
+          height: {{ block.settings.divider_height | default: 1 }}px;
+          min-height: {{ block.settings.divider_height | default: 1 }}px;
+          min-width: 20px;
+          background-color: {{ block.settings.divider_color | default: '#e0e0e0' }};
+          border: none;
+          margin: 0;
+          display: block;
+          {% if block.settings.divider_style == 'dashed' %}
+            background-image: repeating-linear-gradient(
+              to right,
+              {{ block.settings.divider_color | default: '#e0e0e0' }} 0px,
+              {{ block.settings.divider_color | default: '#e0e0e0' }} 8px,
+              transparent 8px,
+              transparent 16px
+            );
+            background-color: transparent;
+          {% elsif block.settings.divider_style == 'dotted' %}
+            background-image: repeating-linear-gradient(
+              to right,
+              {{ block.settings.divider_color | default: '#e0e0e0' }} 0px,
+              {{ block.settings.divider_color | default: '#e0e0e0' }} 4px,
+              transparent 4px,
+              transparent 8px
+            );
+            background-color: transparent;
+          {% endif %}
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-main {
+          display: flex;
+          align-items: {{ block.settings.icon_alignment | default: 'center' }};
+          gap: {{ block.settings.icon_spacing | default: 8 }}px;
+          font-size: {{ block.settings.font_size }}px;
+          font-weight: {% case block.settings.font_weight %}
+            {% when 'bold' %}var(--font-weight-bold)
+            {% when 'semibold' %}var(--font-weight-semibold)
+            {% when 'regular' %}var(--font-weight-regular)
+            {% else %}var(--font-weight-regular)
+          {% endcase %};
+          {% unless block.settings.show_divider %}
+            width: 100%;
+            {% if block.settings.text_align == 'center' %}
+              justify-content: center;
+            {% elsif block.settings.text_align == 'right' %}
+              justify-content: flex-end;
+            {% else %}
+              justify-content: flex-start;
+            {% endif %}
+          {% endunless %}
+          flex-shrink: 0;
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-icon {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: {{ block.settings.icon_color | default: block.settings.text_color }};
+          width: {{ block.settings.icon_size | default: 20 }}px;
+          height: {{ block.settings.icon_size | default: 20 }}px;
+          margin-left: {{ block.settings.icon_margin_left | default: 0 }}px;
+          margin-right: {{ block.settings.icon_margin_right | default: 8 }}px;
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-icon svg {
+          width: 100%;
+          height: 100%;
+          fill: currentColor;
+          stroke: currentColor;
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-after-icon {
+          flex-shrink: 0;
+          display: flex;
+          align-items: {{ block.settings.after_icon_alignment | default: 'center' }};
+          justify-content: center;
+          color: {{ block.settings.after_icon_color | default: block.settings.text_color }};
+          width: {{ block.settings.after_icon_size | default: 20 }}px;
+          height: {{ block.settings.after_icon_size | default: 20 }}px;
+          margin-left: {{ block.settings.after_icon_margin_left | default: 8 }}px;
+          margin-right: {{ block.settings.after_icon_margin_right | default: 0 }}px;
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-after-icon svg {
+          width: 100%;
+          height: 100%;
+          fill: currentColor;
+          stroke: currentColor;
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-content {
+          color: {{ block.settings.text_color }};
+          margin: 0;
+          width: 100%;
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-content a,
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content a {
+          color: {{ block.settings.link_color | default: '#0066CC' }};
+          text-decoration: underline;
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-content a:hover,
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content a:hover {
+          opacity: 0.8;
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-content strong,
+        .custom-text-block-{{ block.id }} .custom-text-content b,
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content strong,
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content b {
+          font-weight: 700 !important;
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content {
+          {% if block.settings.show_divider %}
+            text-align: {{ block.settings.text_align }};
+          {% else %}
+            text-align: {{ block.settings.text_align }};
+            {% unless block.settings.text_align == 'center' %}
+              width: auto;
+            {% endunless %}
+          {% endif %}
+          font-weight: {% case block.settings.font_weight %}
+            {% when 'bold' %}var(--font-weight-bold)
+            {% when 'semibold' %}var(--font-weight-semibold)
+            {% when 'regular' %}var(--font-weight-regular)
+            {% else %}var(--font-weight-regular)
+          {% endcase %};
+        }
+
+        /* Ensure paragraph tags inherit the text alignment and font weight */
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content p {
+          text-align: inherit;
+          font-weight: inherit;
+        }
+
+        /* Ensure strong tags within the custom text also respect the font weight setting */
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content strong,
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content b {
+          font-weight: {% case block.settings.font_weight %}
+            {% when 'bold' %}700 !important
+            {% when 'semibold' %}var(--font-weight-bold)
+            {% when 'regular' %}var(--font-weight-semibold)
+            {% else %}var(--font-weight-semibold)
+          {% endcase %};
+        }
+
+        {% if block.settings.reset_paragraph_margin %}
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content p {
+          margin: 0;
+          padding: 0;
+        }
+        {% else %}
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content p {
+          margin-top: 0;
+          margin-bottom: {{ block.settings.paragraph_spacing }}px;
+        }
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content p:last-child {
+          margin-bottom: 0;
+        }
+        {% endif %}
+
+        .custom-text-block-{{ block.id }} .custom-text-description {
+          font-size: {{ block.settings.description_font_size | default: block.settings.font_size | minus: 2 }}px;
+          margin-top: {{ block.settings.description_spacing | default: 4 }}px;
+          color: {{ block.settings.description_color | default: block.settings.text_color }};
+          opacity: {{ block.settings.description_opacity | default: 0.8 }};
+          font-weight: {% case block.settings.font_weight %}
+            {% when 'bold' %}var(--font-weight-regular)
+            {% when 'semibold' %}var(--font-weight-regular)
+            {% when 'regular' %}var(--font-weight-regular)
+            {% else %}var(--font-weight-regular)
+          {% endcase %};
+          text-align: {{ block.settings.text_align }};
+        }
+
+        /* Accent Text Styles */
+        {% if block.settings.show_accent_text %}
+        .custom-text-block-{{ block.id }} .custom-text-accent,
+        .custom-text-block-{{ block.id }} .custom-text-accent-inline {
+          font-size: {{ block.settings.accent_text_font_size }}px;
+          font-weight: {% case block.settings.accent_text_font_weight %}
+            {% when 'bold' %}var(--font-weight-bold)
+            {% when 'semibold' %}var(--font-weight-semibold)
+            {% when 'regular' %}var(--font-weight-regular)
+            {% else %}var(--font-weight-semibold)
+          {% endcase %};
+          {% if block.settings.use_accent_gradient %}
+            background: {{ block.settings.accent_text_gradient }};
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+          {% else %}
+            color: {{ block.settings.accent_text_color }};
+          {% endif %}
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-accent {
+          display: block;
+          {% if block.settings.accent_text_position == 'before' %}
+            margin-bottom: {{ block.settings.accent_text_spacing }}px;
+          {% elsif block.settings.accent_text_position == 'after' %}
+            margin-top: {{ block.settings.accent_text_spacing }}px;
+          {% endif %}
+        }
+
+        .custom-text-block-{{ block.id }} .custom-text-accent-inline {
+          display: inline;
+        }
+        {% endif %}
+
+        /* Ensure strong tags within the description also work properly */
+        .custom-text-block-{{ block.id }} .custom-text-description strong,
+        .custom-text-block-{{ block.id }} .custom-text-description b {
+          font-weight: {% case block.settings.font_weight %}
+            {% when 'bold' %}var(--font-weight-bold)
+            {% when 'semibold' %}var(--font-weight-semibold)
+            {% when 'regular' %}var(--font-weight-semibold)
+            {% else %}var(--font-weight-semibold)
+          {% endcase %};
+        }
+
+        {% if block.settings.reset_description_margin %}
+        .custom-text-block-{{ block.id }} .custom-text-description p {
+          margin: 0;
+          padding: 0;
+        }
+        {% else %}
+        .custom-text-block-{{ block.id }} .custom-text-description p {
+          margin-top: 0;
+          margin-bottom: {{ block.settings.description_paragraph_spacing }}px;
+        }
+        .custom-text-block-{{ block.id }} .custom-text-description p:last-child {
+          margin-bottom: 0;
+        }
+        {% endif %}
+
+        /* Special handling for center alignment with divider */
+        {% if block.settings.show_divider and block.settings.text_align == 'center' %}
+        .custom-text-block-{{ block.id }} .custom-text-with-divider .divider-line:first-child {
+          order: -1;
+        }
+        .custom-text-block-{{ block.id }} .custom-text-with-divider .custom-text-main {
+          order: 0;
+        }
+        .custom-text-block-{{ block.id }} .custom-text-with-divider .divider-line:last-child {
+          order: 1;
+        }
+        {% endif %}
+      </style>
+
+      <style>
+        /* Ensure strong and bold tags always display as bold */
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content strong,
+        .custom-text-block-{{ block.id }} .custom-text-main-text-content b,
+        .custom-text-block-{{ block.id }} .custom-text-description strong,
+        .custom-text-block-{{ block.id }} .custom-text-description b {
+          font-weight: 700 !important;
+        }
+
+        /* Override font weight inheritance for non-bold elements only */
+        .custom-text-block-{{ block.id }} *:not(strong):not(b) {
+          font-weight: inherit;
+        }
+
+        /* Ensure all text elements respect the custom font weight (except strong/b tags) */
+        .custom-text-block-{{ block.id }} span:not(strong):not(b),
+        .custom-text-block-{{ block.id }} div:not(.custom-text-icon):not(strong):not(b),
+        .custom-text-block-{{ block.id }} p:not(strong):not(b),
+        .custom-text-block-{{ block.id }} h1:not(strong):not(b),
+        .custom-text-block-{{ block.id }} h2:not(strong):not(b),
+        .custom-text-block-{{ block.id }} h3:not(strong):not(b),
+        .custom-text-block-{{ block.id }} h4:not(strong):not(b),
+        .custom-text-block-{{ block.id }} h5:not(strong):not(b),
+        .custom-text-block-{{ block.id }} h6:not(strong):not(b) {
+          font-weight: {% case block.settings.font_weight %}
+            {% when 'bold' %}var(--font-weight-bold)
+            {% when 'semibold' %}var(--font-weight-semibold)
+            {% when 'regular' %}var(--font-weight-regular)
+            {% else %}var(--font-weight-regular)
+          {% endcase %};
+        }
+      </style>
+
+    {% when 'payment_icons' %}
+      <div
+        class="payment-icons-wrapper"
+        style="width: 100%; text-align: center; margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;"
+        {{ block.shopify_attributes }}
+      >
+        {% render 'payment-icons', block: block %}
+      </div>
+
+    {% when 'custom_image' %}
+      <div
+        class="custom-image-container custom-image-{{ block.id }}"
+        style="
+          text-align: {{ block.settings.alignment }};
+          {% if block.settings.container_sizing == 'full_width' %}
+          width: 100%;
+          {% elsif block.settings.container_sizing == 'custom_width' %}
+            width: {{ block.settings.container_width }}px;
+            max-width: 100%;
+          {% elsif block.settings.container_sizing == 'custom_max_width' %}
+            max-width: {{ block.settings.container_max_width }}px;
+            width: 100%;
+          {% else %}
+            width: 100%;
+          {% endif %}
+        "
+        {{ block.shopify_attributes }}
+      >
+        {% if block.settings.image %}
+          {% if block.settings.link != blank %}
+            <a href="{{ block.settings.link }}">
+          {% endif %}
+
+          <img
+            {% if block.settings.high_quality_image %}
+              src="{{ block.settings.image | img_url: 'master' }}"
+              srcset="
+                {{ block.settings.image | img_url: '800x' }} 1x,
+                {{ block.settings.image | img_url: '1600x' }} 2x,
+                {{ block.settings.image | img_url: 'master' }} 3x
+              "
+            {% else %}
+              src="{{ block.settings.image | img_url: '200x' }}"
+              srcset="
+                {{ block.settings.image | img_url: '200x' }} 1x,
+                {{ block.settings.image | img_url: '400x' }} 2x
+              "
+            {% endif %}
+            alt="{{ block.settings.image.alt | escape }}"
+            style="
+              {% if block.settings.image_sizing == 'fixed_dimensions' %}
+              object-fit: {{ block.settings.image_fit }};
+              {% elsif block.settings.image_sizing == 'max_width' %}
+                max-width: {{ block.settings.image_max_width }}px;
+                height: auto;
+                width: 100%;
+              {% elsif block.settings.image_sizing == 'max_height' %}
+                max-height: {{ block.settings.image_height }}px;
+              width: auto;
+              {% else %}
+                height: {{ block.settings.image_height }}px;
+                width: auto;
+                object-fit: {{ block.settings.image_fit }};
+              {% endif %}
+              max-width: 100%;
+            "
+            width="{{ block.settings.image_width }}"
+            height="{{ block.settings.image_height }}"
+            loading="lazy"
+          >
+
+          {% if block.settings.link != blank %}
+            </a>
+          {% endif %}
+        {% else %}
+          <div style="height: {{ block.settings.image_height }}px; background-color: #f2f2f2; display: flex; align-items: center; justify-content: center; width: 100%; color: #888;">
+            <span>Please select an image</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <style>
+        /* Mobile margins for custom image block {{ block.id }} */
+        .custom-image-{{ block.id }} {
+          margin-top: {{ block.settings.margin_top_mobile | default: 8 }}px !important;
+          margin-bottom: {{ block.settings.margin_bottom_mobile | default: 8 }}px !important;
+        }
+
+        /* Desktop margins for custom image block {{ block.id }} */
+        @media screen and (min-width: 768px) {
+          .custom-image-{{ block.id }} {
+            margin-top: {{ block.settings.margin_top_desktop | default: 8 }}px !important;
+            margin-bottom: {{ block.settings.margin_bottom_desktop | default: 8 }}px !important;
+          }
+        }
+      </style>
+
+    {% when 'image_rating' %}
+      {% render 'image-rating',
+        avatar_1: block.settings.avatar_1,
+        avatar_2: block.settings.avatar_2,
+        avatar_3: block.settings.avatar_3,
+        avatar_4: block.settings.avatar_4,
+        avatar_5: block.settings.avatar_5,
+        star_color: block.settings.star_color,
+        empty_star_color: block.settings.empty_star_color,
+        rating_text: block.settings.rating_text,
+        rating_value: block.settings.rating_value,
+        text_color: block.settings.text_color,
+        value_color: block.settings.value_color,
+        rating_text_size: block.settings.rating_text_size,
+        rating_value_size: block.settings.rating_value_size,
+        star_size: block.settings.star_size,
+        avatar_size: block.settings.avatar_size,
+        layout_order: block.settings.layout_order,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        use_theme_colors: section.settings.use_theme_colors,
+        block: block
+      %}
+    {% when 'quantity_break' %}
+      {% render 'quantity-break',
+        product: product,
+        show_title: block.settings.show_title,
+        title_text: block.settings.title_text,
+        show_radio_buttons: block.settings.show_radio_buttons,
+        enable_variant_selection: block.settings.enable_variant_selection,
+        enable_single_variant_selection: block.settings.enable_single_variant_selection,
+                unselected_border_width: block.settings.unselected_border_width,
+        unselected_border_style: block.settings.unselected_border_style,
+        show_option_1: block.settings.show_option_1,
+        show_option_2: block.settings.show_option_2,
+        show_option_3: block.settings.show_option_3,
+        show_option_4: block.settings.show_option_4,
+        option_1_title: block.settings.option_1_title,
+        option_1_quantity: block.settings.option_1_quantity,
+        option_1_image: block.settings.option_1_image,
+        option_2_title: block.settings.option_2_title,
+        option_2_quantity: block.settings.option_2_quantity,
+        option_2_price: block.settings.option_2_price,
+        option_2_image: block.settings.option_2_image,
+        option_3_title: block.settings.option_3_title,
+        option_3_quantity: block.settings.option_3_quantity,
+        option_3_price: block.settings.option_3_price,
+        option_3_image: block.settings.option_3_image,
+        option_4_title: block.settings.option_4_title,
+        option_4_quantity: block.settings.option_4_quantity,
+        option_4_price: block.settings.option_4_price,
+        option_4_image: block.settings.option_4_image,
+        hide_badges: block.settings.hide_badges,
+        option_1_badge: block.settings.option_1_badge,
+        option_2_badge: block.settings.option_2_badge,
+        option_3_badge: block.settings.option_3_badge,
+        option_4_badge: block.settings.option_4_badge,
+        enable_option_1_badge: block.settings.enable_option_1_badge,
+        enable_option_2_badge: block.settings.enable_option_2_badge,
+        enable_option_3_badge: block.settings.enable_option_3_badge,
+        enable_option_4_badge: block.settings.enable_option_4_badge,
+        option_1_badge_color: block.settings.option_1_badge_color,
+        option_1_badge_text_color: block.settings.option_1_badge_text_color,
+        option_2_badge_color: block.settings.option_2_badge_color,
+        option_2_badge_text_color: block.settings.option_2_badge_text_color,
+        option_3_badge_color: block.settings.option_3_badge_color,
+        option_3_badge_text_color: block.settings.option_3_badge_text_color,
+        option_4_badge_color: block.settings.option_4_badge_color,
+        option_4_badge_text_color: block.settings.option_4_badge_text_color,
+        border_color: block.settings.border_color,
+        background_color: block.settings.background_color,
+        best_deal_border_color: block.settings.best_deal_border_color,
+        selected_border_width: block.settings.selected_border_width,
+        selected_border_style: block.settings.selected_border_style,
+        best_deal_background_color: block.settings.best_deal_background_color,
+        enable_selected_gradient: block.settings.enable_selected_gradient,
+        selected_gradient_start: block.settings.selected_gradient_start,
+        selected_gradient_end: block.settings.selected_gradient_end,
+        selected_gradient_direction: block.settings.selected_gradient_direction,
+        unselected_border_color: block.settings.unselected_border_color,
+        unselected_background_color: block.settings.unselected_background_color,
+        save_badge_background_color: block.settings.save_badge_background_color,
+        save_badge_text_color: block.settings.save_badge_text_color,
+        save_badge_text: block.settings.save_badge_text,
+        show_save_badge: block.settings.show_save_badge,
+        save_badge_format: block.settings.save_badge_format,
+        enable_badge_shine: block.settings.enable_badge_shine,
+        save_badge_border_radius: block.settings.save_badge_border_radius,
+        badge_border_radius: block.settings.badge_border_radius,
+        option_container_border_radius: block.settings.option_container_border_radius,
+        selected_custom_price_format: block.settings.selected_custom_price_format,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        gap_between_options: block.settings.gap_between_options,
+        option_padding_vertical: block.settings.option_padding_vertical,
+        option_padding_horizontal: block.settings.option_padding_horizontal,
+        main_content_gap: block.settings.main_content_gap,
+        option_min_height: block.settings.option_min_height,
+        image_height: block.settings.image_height,
+        savings_text_format: block.settings.savings_text_format,
+        enable_individual_savings_text: block.settings.enable_individual_savings_text,
+        option_1_savings_text: block.settings.option_1_savings_text,
+        option_2_savings_text: block.settings.option_2_savings_text,
+        option_3_savings_text: block.settings.option_3_savings_text,
+        option_4_savings_text: block.settings.option_4_savings_text,
+        show_savings_text: block.settings.show_savings_text,
+        show_individual_savings_text: block.settings.show_individual_savings_text,
+        center_titles_when_no_savings: block.settings.center_titles_when_no_savings,
+        custom_savings_text_color: block.settings.custom_savings_text_color,
+        custom_savings_font_size: block.settings.custom_savings_font_size,
+        enable_custom_pricing: block.settings.enable_custom_pricing,
+        option_1_custom_price: block.settings.option_1_custom_price,
+        option_1_compare_at_price: block.settings.option_1_compare_at_price,
+        option_2_custom_price: block.settings.option_2_custom_price,
+        option_2_compare_at_price: block.settings.option_2_compare_at_price,
+        option_3_custom_price: block.settings.option_3_custom_price,
+        option_3_compare_at_price: block.settings.option_3_compare_at_price,
+        option_4_custom_price: block.settings.option_4_custom_price,
+        option_4_compare_at_price: block.settings.option_4_compare_at_price,
+        option_1_show_free_gift: block.settings.option_1_show_free_gift,
+        option_1_free_gift_count: block.settings.option_1_free_gift_count,
+        option_1_free_gift_text: block.settings.option_1_free_gift_text,
+        option_1_free_gift_icon: block.settings.option_1_free_gift_icon,
+        option_1_free_gift_icon_size: block.settings.option_1_free_gift_icon_size,
+        option_1_free_gift_font_size: block.settings.option_1_free_gift_font_size,
+        option_1_free_gift_border_radius: block.settings.option_1_free_gift_border_radius,
+        option_1_free_gift_bg_color: block.settings.option_1_free_gift_bg_color,
+        option_1_free_gift_use_gradient: block.settings.option_1_free_gift_use_gradient,
+        option_1_free_gift_gradient_start: block.settings.option_1_free_gift_gradient_start,
+        option_1_free_gift_gradient_end: block.settings.option_1_free_gift_gradient_end,
+        option_1_free_gift_text_color: block.settings.option_1_free_gift_text_color,
+        option_1_free_gift_border_color: block.settings.option_1_free_gift_border_color,
+        option_2_show_free_gift: block.settings.option_2_show_free_gift,
+        option_2_free_gift_count: block.settings.option_2_free_gift_count,
+        option_2_free_gift_text: block.settings.option_2_free_gift_text,
+        option_2_free_gift_icon: block.settings.option_2_free_gift_icon,
+        option_2_free_gift_icon_size: block.settings.option_2_free_gift_icon_size,
+        option_2_free_gift_font_size: block.settings.option_2_free_gift_font_size,
+        option_2_free_gift_border_radius: block.settings.option_2_free_gift_border_radius,
+        option_2_free_gift_bg_color: block.settings.option_2_free_gift_bg_color,
+        option_2_free_gift_use_gradient: block.settings.option_2_free_gift_use_gradient,
+        option_2_free_gift_gradient_start: block.settings.option_2_free_gift_gradient_start,
+        option_2_free_gift_gradient_end: block.settings.option_2_free_gift_gradient_end,
+        option_2_free_gift_text_color: block.settings.option_2_free_gift_text_color,
+        option_2_free_gift_border_color: block.settings.option_2_free_gift_border_color,
+        option_3_show_free_gift: block.settings.option_3_show_free_gift,
+        option_3_free_gift_count: block.settings.option_3_free_gift_count,
+        option_3_free_gift_text: block.settings.option_3_free_gift_text,
+        option_3_free_gift_icon: block.settings.option_3_free_gift_icon,
+        option_3_free_gift_icon_size: block.settings.option_3_free_gift_icon_size,
+        option_3_free_gift_font_size: block.settings.option_3_free_gift_font_size,
+        option_3_free_gift_border_radius: block.settings.option_3_free_gift_border_radius,
+        option_3_free_gift_bg_color: block.settings.option_3_free_gift_bg_color,
+        option_3_free_gift_use_gradient: block.settings.option_3_free_gift_use_gradient,
+        option_3_free_gift_gradient_start: block.settings.option_3_free_gift_gradient_start,
+        option_3_free_gift_gradient_end: block.settings.option_3_free_gift_gradient_end,
+        option_3_free_gift_text_color: block.settings.option_3_free_gift_text_color,
+        option_3_free_gift_border_color: block.settings.option_3_free_gift_border_color,
+        option_4_show_free_gift: block.settings.option_4_show_free_gift,
+        option_4_free_gift_count: block.settings.option_4_free_gift_count,
+        option_4_free_gift_text: block.settings.option_4_free_gift_text,
+        option_4_free_gift_icon: block.settings.option_4_free_gift_icon,
+        option_4_free_gift_icon_size: block.settings.option_4_free_gift_icon_size,
+        option_4_free_gift_font_size: block.settings.option_4_free_gift_font_size,
+        option_4_free_gift_border_radius: block.settings.option_4_free_gift_border_radius,
+        option_4_free_gift_bg_color: block.settings.option_4_free_gift_bg_color,
+        option_4_free_gift_use_gradient: block.settings.option_4_free_gift_use_gradient,
+        option_4_free_gift_gradient_start: block.settings.option_4_free_gift_gradient_start,
+        option_4_free_gift_gradient_end: block.settings.option_4_free_gift_gradient_end,
+        option_4_free_gift_text_color: block.settings.option_4_free_gift_text_color,
+        option_4_free_gift_border_color: block.settings.option_4_free_gift_border_color,
+        variant_selector_border_color: block.settings.variant_selector_border_color,
+        variant_selector_background_color: block.settings.variant_selector_background_color,
+        variant_selector_text_color: block.settings.variant_selector_text_color,
+        variant_container_background_color: block.settings.variant_container_background_color,
+        variant_label_color: block.settings.variant_label_color,
+        show_variant_option_divider: block.settings.show_variant_option_divider,
+        variant_option_divider_color: block.settings.variant_option_divider_color,
+        show_variant_row_divider: block.settings.show_variant_row_divider,
+        variant_row_divider_color: block.settings.variant_row_divider_color,
+        preselected_option: block.settings.preselected_option,
+        enable_badge_border: block.settings.enable_badge_border,
+        badge_border_color: block.settings.badge_border_color,
+        badge_border_width: block.settings.badge_border_width,
+        badge_border_style: block.settings.badge_border_style,
+        enable_option_1_badge_border: block.settings.enable_option_1_badge_border,
+        option_1_badge_border_color: block.settings.option_1_badge_border_color,
+        option_1_badge_border_width: block.settings.option_1_badge_border_width,
+        enable_option_2_badge_border: block.settings.enable_option_2_badge_border,
+        option_2_badge_border_color: block.settings.option_2_badge_border_color,
+        option_2_badge_border_width: block.settings.option_2_badge_border_width,
+        enable_option_3_badge_border: block.settings.enable_option_3_badge_border,
+        option_3_badge_border_color: block.settings.option_3_badge_border_color,
+        option_3_badge_border_width: block.settings.option_3_badge_border_width,
+        enable_option_4_badge_border: block.settings.enable_option_4_badge_border,
+        option_4_badge_border_color: block.settings.option_4_badge_border_color,
+        option_4_badge_border_width: block.settings.option_4_badge_border_width,
+        hide_compare_at_price_option_1: block.settings.hide_compare_at_price_option_1,
+        hide_compare_at_price_option_2: block.settings.hide_compare_at_price_option_2,
+        hide_compare_at_price_option_3: block.settings.hide_compare_at_price_option_3,
+        hide_compare_at_price_option_4: block.settings.hide_compare_at_price_option_4,
+        title_font_size: block.settings.title_font_size,
+        price_font_size: block.settings.price_font_size,
+        compare_price_font_size: block.settings.compare_price_font_size,
+        variant_label_font_size: block.settings.variant_label_font_size,
+        title_color: block.settings.title_color,
+        title_font_weight: block.settings.title_font_weight,
+        title_alignment: block.settings.title_alignment,
+        title_line_height: block.settings.title_line_height,
+        price_color: block.settings.price_color,
+        compare_price_color: block.settings.compare_price_color,
+        hide_images: block.settings.hide_images,
+        hide_all_compare_price: block.settings.hide_compare_price,
+        option_hover_background_color: block.settings.option_hover_background_color,
+        block: block,
+        include_variant_option_1: block.settings.include_variant_option_1,
+        variant_option_1_display_type: block.settings.variant_option_1_display_type,
+        include_variant_option_2: block.settings.include_variant_option_2,
+        variant_option_2_display_type: block.settings.variant_option_2_display_type,
+        include_variant_option_3: block.settings.include_variant_option_3,
+        variant_option_3_display_type: block.settings.variant_option_3_display_type,
+        hide_product_title_in_variants: block.settings.hide_product_title_in_variants,
+        show_variant_images_instead_of_swatches: block.settings.show_variant_images_instead_of_swatches,
+        hide_quantity_break_variant_images: block.settings.hide_quantity_break_variant_images,
+        stack_variant_layout: block.settings.stack_variant_layout,
+        enable_color_swatches: block.settings.enable_color_swatches,
+        swatch_size: block.settings.swatch_size,
+        swatch_border_radius: block.settings.swatch_border_radius,
+        swatch_container_border_radius: block.settings.swatch_container_border_radius,
+        show_swatch_container_border: block.settings.show_swatch_container_border,
+        swatch_container_border_color: block.settings.swatch_container_border_color,
+        variant_select_border_radius: block.settings.variant_select_border_radius,
+        swatch_selected_border_color: block.settings.swatch_selected_border_color,
+        size_button_background_color: block.settings.size_button_background_color,
+        size_button_text_color: block.settings.size_button_text_color,
+        size_button_border_color: block.settings.size_button_border_color,
+        size_button_selected_border_color: block.settings.size_button_selected_border_color,
+        size_button_border_width: block.settings.size_button_border_width,
+        size_button_selected_border_width: block.settings.size_button_selected_border_width,
+        size_button_font_size: block.settings.size_button_font_size,
+        max_swatches_per_row: block.settings.max_swatches_per_row,
+        color_swatch_mapping: block.settings.color_swatch_mapping,
+        variant_image_size: block.settings.variant_image_size,
+        variant_label_font_size_mobile: block.settings.variant_label_font_size_mobile,
+        quantity_circle_size: block.settings.quantity_circle_size,
+        quantity_circle_size_mobile: block.settings.quantity_circle_size_mobile,
+        quantity_circle_bg_color: block.settings.quantity_circle_bg_color,
+        quantity_circle_text_color: block.settings.quantity_circle_text_color,
+        quantity_circle_font_size: block.settings.quantity_circle_font_size,
+        quantity_circle_font_size_mobile: block.settings.quantity_circle_font_size_mobile,
+        show_variant_selection_border_top: block.settings.show_variant_selection_border_top,
+        variant_selection_border_top_color: block.settings.variant_selection_border_top_color
+      %}
+
+    {% when 'premium_attachment_kit' %}
+      {%
+        render 'premium-attachment-kit',
+        block: block,
+        section: section,
+        apply_to_product: block.settings.apply_to_product,
+        use_theme_colors: block.settings.use_theme_colors,
+        title: block.settings.title,
+        show_item_count: block.settings.show_item_count,
+        original_price: block.settings.original_price,
+        free_badge_text: block.settings.free_badge_text,
+        show_badge_icon: block.settings.show_badge_icon,
+        badge_icon_type: block.settings.badge_icon_type,
+        custom_badge_svg: block.settings.custom_badge_svg,
+        custom_badge_image: block.settings.custom_badge_image,
+        badge_icon_size: block.settings.badge_icon_size,
+        background_color: block.settings.background_color,
+        border_color: block.settings.border_color,
+        text_color: block.settings.text_color,
+        header_color: block.settings.header_color,
+        free_badge_bg: block.settings.free_badge_bg,
+        free_badge_text_color: block.settings.free_badge_text_color,
+        item_background_color: block.settings.item_background_color,
+        item_count_color: block.settings.item_count_color,
+        item_border_radius: block.settings.item_border_radius,
+        container_border_radius: block.settings.container_border_radius,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        item_1_name: block.settings.item_1_name,
+        item_1_price: block.settings.item_1_price,
+        item_1_compare_price: block.settings.item_1_compare_price,
+        item_1_icon: block.settings.item_1_icon,
+        item_1_product: block.settings.item_1_product,
+        item_2_name: block.settings.item_2_name,
+        item_2_price: block.settings.item_2_price,
+        item_2_compare_price: block.settings.item_2_compare_price,
+        item_2_icon: block.settings.item_2_icon,
+        item_2_product: block.settings.item_2_product,
+        item_3_name: block.settings.item_3_name,
+        item_3_price: block.settings.item_3_price,
+        item_3_compare_price: block.settings.item_3_compare_price,
+        item_3_icon: block.settings.item_3_icon,
+        item_3_product: block.settings.item_3_product,
+        item_4_name: block.settings.item_4_name,
+        item_4_price: block.settings.item_4_price,
+        item_4_compare_price: block.settings.item_4_compare_price,
+        item_4_icon: block.settings.item_4_icon,
+        item_4_product: block.settings.item_4_product,
+        item_5_name: block.settings.item_5_name,
+        item_5_price: block.settings.item_5_price,
+        item_5_compare_price: block.settings.item_5_compare_price,
+        item_5_icon: block.settings.item_5_icon,
+        item_5_product: block.settings.item_5_product,
+        item_6_name: block.settings.item_6_name,
+        item_6_price: block.settings.item_6_price,
+        item_6_compare_price: block.settings.item_6_compare_price,
+        item_6_icon: block.settings.item_6_icon,
+        item_6_product: block.settings.item_6_product,
+        item_7_name: block.settings.item_7_name,
+        item_7_price: block.settings.item_7_price,
+        item_7_compare_price: block.settings.item_7_compare_price,
+        item_7_icon: block.settings.item_7_icon,
+        item_7_product: block.settings.item_7_product,
+        item_8_name: block.settings.item_8_name,
+        item_8_price: block.settings.item_8_price,
+        item_8_compare_price: block.settings.item_8_compare_price,
+        item_8_icon: block.settings.item_8_icon,
+        item_8_product: block.settings.item_8_product,
+        item_9_name: block.settings.item_9_name,
+        item_9_price: block.settings.item_9_price,
+        item_9_compare_price: block.settings.item_9_compare_price,
+        item_9_icon: block.settings.item_9_icon,
+        item_9_product: block.settings.item_9_product,
+        item_10_name: block.settings.item_10_name,
+        item_10_price: block.settings.item_10_price,
+        item_10_compare_price: block.settings.item_10_compare_price,
+        item_10_icon: block.settings.item_10_icon,
+        item_10_product: block.settings.item_10_product,
+        rely_on_product: block.settings.rely_on_product
+      %}
+    {% when 'product_tabs' %}
+      {% render 'product-tabs',
+        num_tabs: block.settings.num_tabs,
+        block_heading: block.settings.block_heading,
+        block_heading_color: block.settings.block_heading_color,
+        block_heading_size: block.settings.block_heading_size,
+        block_heading_weight: block.settings.block_heading_weight,
+        block_background: block.settings.block_background,
+        block_margin_top: block.settings.block_margin_top,
+        block_margin_bottom: block.settings.block_margin_bottom,
+        padding_top: block.settings.padding_top,
+        padding_bottom: block.settings.padding_bottom,
+        border_radius: block.settings.border_radius,
+        tab_background: block.settings.tab_background,
+        tab_text_color: block.settings.tab_text_color,
+        tab_font_size: block.settings.tab_font_size,
+        tab_active_background: block.settings.tab_active_background,
+        tab_active_color: block.settings.tab_active_color,
+        tab_border_color: block.settings.tab_border_color,
+        tab_divider_color: block.settings.tab_divider_color,
+        content_text_color: block.settings.content_text_color,
+        content_text_size: block.settings.content_text_size,
+        tab1_title: block.settings.tab1_title,
+        tab1_star_rating: block.settings.tab1_star_rating,
+        tab1_star_color: block.settings.tab1_star_color,
+        tab1_star_size: block.settings.tab1_star_size,
+        tab1_quote: block.settings.tab1_quote,
+        tab1_author_image: block.settings.tab1_author_image,
+        tab1_author_name: block.settings.tab1_author_name,
+        tab1_author_title: block.settings.tab1_author_title,
+        tab1_author_title_font_size: block.settings.tab1_author_title_font_size,
+        tab1_author_title_color: block.settings.tab1_author_title_color,
+        tab1_author_title_background: block.settings.tab1_author_title_background,
+        tab1_author_title_padding_v: block.settings.tab1_author_title_padding_v,
+        tab1_author_title_padding_h: block.settings.tab1_author_title_padding_h,
+        tab1_author_title_border_radius: block.settings.tab1_author_title_border_radius,
+        tab1_author_date: block.settings.tab1_author_date,
+        tab2_title: block.settings.tab2_title,
+        tab2_show_icons: block.settings.tab2_show_icons,
+        tab2_brand_background: block.settings.tab2_brand_background,
+        tab2_brand_logo: block.settings.tab2_brand_logo,
+        tab2_brand_name: block.settings.tab2_brand_name,
+        tab2_others_label: block.settings.tab2_others_label,
+        tab2_item_1_name: block.settings.tab2_item_1_name,
+        tab2_item_1_description: block.settings.tab2_item_1_description,
+        tab2_item_1_brand_has: block.settings.tab2_item_1_brand_has,
+        tab2_item_1_others_has: block.settings.tab2_item_1_others_has,
+        tab2_item_2_name: block.settings.tab2_item_2_name,
+        tab2_item_2_description: block.settings.tab2_item_2_description,
+        tab2_item_2_brand_has: block.settings.tab2_item_2_brand_has,
+        tab2_item_2_others_has: block.settings.tab2_item_2_others_has,
+        tab2_item_3_name: block.settings.tab2_item_3_name,
+        tab2_item_3_description: block.settings.tab2_item_3_description,
+        tab2_item_3_brand_has: block.settings.tab2_item_3_brand_has,
+        tab2_item_3_others_has: block.settings.tab2_item_3_others_has,
+        tab2_item_4_name: block.settings.tab2_item_4_name,
+        tab2_item_4_description: block.settings.tab2_item_4_description,
+        tab2_item_4_brand_has: block.settings.tab2_item_4_brand_has,
+        tab2_item_4_others_has: block.settings.tab2_item_4_others_has,
+        tab2_description_color: block.settings.tab2_description_color,
+        tab2_description_font_size: block.settings.tab2_description_font_size,
+        tab2_item_name_font_size: block.settings.tab2_item_name_font_size,
+        tab2_column_header_font_size: block.settings.tab2_column_header_font_size,
+        tab2_item_name_color: block.settings.tab2_item_name_color,
+        tab2_brand_header_color: block.settings.tab2_brand_header_color,
+        tab2_others_header_color: block.settings.tab2_others_header_color,
+        tab3_title: block.settings.tab3_title,
+        tab3_header_background: block.settings.tab3_header_background,
+        tab3_column1_header: block.settings.tab3_column1_header,
+        tab3_column2_header: block.settings.tab3_column2_header,
+        tab3_row_1_image: block.settings.tab3_row_1_image,
+        tab3_row_1_label: block.settings.tab3_row_1_label,
+        tab3_row_1_sublabel: block.settings.tab3_row_1_sublabel,
+        tab3_row_1_value: block.settings.tab3_row_1_value,
+        tab3_row_2_image: block.settings.tab3_row_2_image,
+        tab3_row_2_label: block.settings.tab3_row_2_label,
+        tab3_row_2_sublabel: block.settings.tab3_row_2_sublabel,
+        tab3_row_2_value: block.settings.tab3_row_2_value,
+        tab3_row_3_image: block.settings.tab3_row_3_image,
+        tab3_row_3_label: block.settings.tab3_row_3_label,
+        tab3_row_3_sublabel: block.settings.tab3_row_3_sublabel,
+        tab3_row_3_value: block.settings.tab3_row_3_value,
+        tab3_row_4_image: block.settings.tab3_row_4_image,
+        tab3_row_4_label: block.settings.tab3_row_4_label,
+        tab3_row_4_sublabel: block.settings.tab3_row_4_sublabel,
+        tab3_row_4_value: block.settings.tab3_row_4_value,
+        tab3_row_5_image: block.settings.tab3_row_5_image,
+        tab3_row_5_label: block.settings.tab3_row_5_label,
+        tab3_row_5_sublabel: block.settings.tab3_row_5_sublabel,
+        tab3_row_5_value: block.settings.tab3_row_5_value,
+        tab3_row_6_image: block.settings.tab3_row_6_image,
+        tab3_row_6_label: block.settings.tab3_row_6_label,
+        tab3_row_6_sublabel: block.settings.tab3_row_6_sublabel,
+        tab3_row_6_value: block.settings.tab3_row_6_value,
+        tab3_disclaimer_text: block.settings.tab3_disclaimer_text,
+        tab3_header_font_size: block.settings.tab3_header_font_size,
+        tab3_label_font_size: block.settings.tab3_label_font_size,
+        tab3_sublabel_font_size: block.settings.tab3_sublabel_font_size,
+        tab3_value_font_size: block.settings.tab3_value_font_size,
+        tab3_disclaimer_font_size: block.settings.tab3_disclaimer_font_size,
+        tab3_hide_table_borders: block.settings.tab3_hide_table_borders,
+        tab3_header_text_color: block.settings.tab3_header_text_color,
+        tab3_row_background_color: block.settings.tab3_row_background_color,
+        tab3_border_color: block.settings.tab3_border_color,
+        tab3_label_color: block.settings.tab3_label_color,
+        tab3_sublabel_color: block.settings.tab3_sublabel_color,
+        tab3_value_color: block.settings.tab3_value_color,
+        tab3_disclaimer_color: block.settings.tab3_disclaimer_color,
+        tab4_title: block.settings.tab4_title,
+        tab4_heading: block.settings.tab4_heading,
+        tab4_heading_font_size: block.settings.tab4_heading_font_size,
+        tab4_benefit_font_size: block.settings.tab4_benefit_font_size,
+        tab4_icon_size: block.settings.tab4_icon_size,
+        tab4_heading_color: block.settings.tab4_heading_color,
+        tab4_benefit_text_color: block.settings.tab4_benefit_text_color,
+        tab4_icon_bg_color: block.settings.tab4_icon_bg_color,
+        tab4_icon_check_color: block.settings.tab4_icon_check_color,
+        tab4_show_benefit_border: block.settings.tab4_show_benefit_border,
+        tab4_benefit_1: block.settings.tab4_benefit_1,
+        tab4_benefit_1_icon: block.settings.tab4_benefit_1_icon,
+        tab4_benefit_2: block.settings.tab4_benefit_2,
+        tab4_benefit_2_icon: block.settings.tab4_benefit_2_icon,
+        tab4_benefit_3: block.settings.tab4_benefit_3,
+        tab4_benefit_3_icon: block.settings.tab4_benefit_3_icon,
+        tab4_benefit_4: block.settings.tab4_benefit_4,
+        tab4_benefit_4_icon: block.settings.tab4_benefit_4_icon,
+        tab4_benefit_5: block.settings.tab4_benefit_5,
+        tab4_benefit_5_icon: block.settings.tab4_benefit_5_icon,
+        tab4_benefit_6: block.settings.tab4_benefit_6,
+        tab4_benefit_6_icon: block.settings.tab4_benefit_6_icon,
+        tab4_benefit_7: block.settings.tab4_benefit_7,
+        tab4_benefit_7_icon: block.settings.tab4_benefit_7_icon,
+        tab4_benefit_8: block.settings.tab4_benefit_8,
+        tab4_benefit_8_icon: block.settings.tab4_benefit_8_icon,
+        block: block
+      %}
+    {% when 'size_chart' %}
+      {% unless block.settings.inline_with_variant_picker %}
+        {% render 'size-chart-block',
+          block: block,
+          remove_background_container: block.settings.remove_background_container,
+          underline_text: block.settings.underline_text,
+          trigger_bg_color: block.settings.trigger_bg_color,
+          trigger_text_color: block.settings.trigger_text_color,
+          trigger_border_width: block.settings.trigger_border_width,
+          trigger_border_color: block.settings.trigger_border_color,
+          trigger_border_radius: block.settings.trigger_border_radius,
+          trigger_font_size: block.settings.trigger_font_size,
+          trigger_width: block.settings.trigger_width,
+          trigger_height: block.settings.trigger_height,
+          trigger_hover_bg_color: block.settings.trigger_hover_bg_color,
+          trigger_hover_text_color: block.settings.trigger_hover_text_color,
+          trigger_text: block.settings.trigger_text,
+          show_icon: block.settings.show_icon,
+          use_custom_icon: block.settings.use_custom_icon,
+          custom_icon: block.settings.custom_icon,
+          icon_size: block.settings.icon_size,
+          icon_margin: block.settings.icon_margin,
+          margin_top: block.settings.margin_top,
+          margin_bottom: block.settings.margin_bottom,
+          popup_bg_color: block.settings.popup_bg_color,
+          popup_border_radius: block.settings.popup_border_radius,
+          popup_max_width: block.settings.popup_max_width,
+          popup_backdrop_color: block.settings.popup_backdrop_color,
+          popup_header_bg_color: block.settings.popup_header_bg_color,
+          popup_header_text_color: block.settings.popup_header_text_color,
+          popup_header_font_size: block.settings.popup_header_font_size,
+          popup_header_padding: block.settings.popup_header_padding,
+          popup_border_color: block.settings.popup_border_color,
+          popup_title: block.settings.popup_title,
+          close_button_color: block.settings.close_button_color,
+          close_button_hover_color: block.settings.close_button_hover_color,
+          close_button_hover_bg: block.settings.close_button_hover_bg,
+          popup_body_padding: block.settings.popup_body_padding,
+          popup_body_text_color: block.settings.popup_body_text_color,
+          popup_body_font_size: block.settings.popup_body_font_size,
+          popup_content_type: block.settings.popup_content_type,
+          image_only_popup: block.settings.image_only_popup,
+          table_header_1: block.settings.table_header_1,
+          table_header_2: block.settings.table_header_2,
+          table_header_3: block.settings.table_header_3,
+          table_header_4: block.settings.table_header_4,
+          table_header_5: block.settings.table_header_5,
+          table_row_1_col_1: block.settings.table_row_1_col_1,
+          table_row_1_col_2: block.settings.table_row_1_col_2,
+          table_row_1_col_3: block.settings.table_row_1_col_3,
+          table_row_1_col_4: block.settings.table_row_1_col_4,
+          table_row_1_col_5: block.settings.table_row_1_col_5,
+          table_row_2_col_1: block.settings.table_row_2_col_1,
+          table_row_2_col_2: block.settings.table_row_2_col_2,
+          table_row_2_col_3: block.settings.table_row_2_col_3,
+          table_row_2_col_4: block.settings.table_row_2_col_4,
+          table_row_2_col_5: block.settings.table_row_2_col_5,
+          table_row_3_col_1: block.settings.table_row_3_col_1,
+          table_row_3_col_2: block.settings.table_row_3_col_2,
+          table_row_3_col_3: block.settings.table_row_3_col_3,
+          table_row_3_col_4: block.settings.table_row_3_col_4,
+          table_row_3_col_5: block.settings.table_row_3_col_5,
+          table_row_4_col_1: block.settings.table_row_4_col_1,
+          table_row_4_col_2: block.settings.table_row_4_col_2,
+          table_row_4_col_3: block.settings.table_row_4_col_3,
+          table_row_4_col_4: block.settings.table_row_4_col_4,
+          table_row_4_col_5: block.settings.table_row_4_col_5,
+          table_row_5_col_1: block.settings.table_row_5_col_1,
+          table_row_5_col_2: block.settings.table_row_5_col_2,
+          table_row_5_col_3: block.settings.table_row_5_col_3,
+          table_row_5_col_4: block.settings.table_row_5_col_4,
+          table_row_5_col_5: block.settings.table_row_5_col_5,
+          size_chart_image: block.settings.size_chart_image,
+          custom_content: block.settings.custom_content,
+          popup_note: block.settings.popup_note,
+          table_border_color: block.settings.table_border_color,
+          table_text_color: block.settings.table_text_color,
+          table_header_bg: block.settings.table_header_bg,
+          table_header_text_color: block.settings.table_header_text_color,
+          table_row_hover_bg: block.settings.table_row_hover_bg,
+          note_bg_color: block.settings.note_bg_color,
+          note_border_color: block.settings.note_border_color,
+          note_text_color: block.settings.note_text_color,
+          scrollbar_track_color: block.settings.scrollbar_track_color,
+          scrollbar_thumb_color: block.settings.scrollbar_thumb_color,
+          scrollbar_thumb_hover_color: block.settings.scrollbar_thumb_hover_color
+        %}
+      {% endunless %}
+    {% when 'customer_review' %}
+      {% if block.settings.enable_carousel %}
+        <!-- Customer Review Carousel -->
+        {% comment %} Collect all customer_review_item blocks from the section {% endcomment %}
+        {% assign review_items = section.blocks | where: 'type', 'customer_review_item' %}
+
+        {% if review_items.size > 0 %}
+          <div class="customer-review-carousel-container" id="customer-review-carousel-{{ block.id }}">
+            <div class="customer-review-carousel">
+              <div class="customer-review-slides">
+                {% for review_block in review_items %}
+                  {% if review_block.settings.reviewer_name != blank and review_block.settings.review_text != blank %}
+                    <div class="customer-review-slide">
+                      {% render 'customer-review-card',
+                        reviewer_name: review_block.settings.reviewer_name,
+                        review_text: review_block.settings.review_text,
+                        rating: review_block.settings.rating,
+                        avatar_url: review_block.settings.avatar_url,
+                        show_avatar: review_block.settings.show_avatar,
+                        use_theme_colors: block.settings.use_theme_colors,
+                        background_color_start: block.settings.background_color_start,
+                        background_color_end: block.settings.background_color_end,
+                        text_color: block.settings.text_color,
+                        border_color: block.settings.border_color,
+                        border_radius: block.settings.border_radius,
+                        border_style: block.settings.border_style,
+                        show_shadow: block.settings.show_shadow,
+                        star_color: block.settings.star_color,
+                        verified_icon_color: block.settings.verified_icon_color,
+                        review_text_color: block.settings.review_text_color,
+                        reviewer_name_size: block.settings.reviewer_name_size,
+                        review_text_size: block.settings.review_text_size,
+                        star_size: block.settings.star_size,
+                        avatar_size_desktop: block.settings.avatar_size_desktop,
+                        avatar_size_mobile: block.settings.avatar_size_mobile,
+                        margin_top: 0,
+                        margin_bottom: 0,
+                        block: block
+                      %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+
+              {% if block.settings.show_navigation %}
+                <div class="customer-review-pagination">
+                  {% for review_block in review_items %}
+                    {% if review_block.settings.reviewer_name != blank %}
+                      <button
+                        class="pagination-dot{% if forloop.first %} active{% endif %}"
+                        data-slide="{{ forloop.index0 }}"
+                      ></button>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
+        <style>
+          .customer-review-carousel-container {
+            margin: 15px 0;
+            width: 100%;
+            overflow: hidden;
+          }
+
+          .customer-review-carousel {
+            position: relative;
+            overflow: visible;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+
+          .customer-review-slides {
+            display: flex;
+            width: 80%;
+            gap: 12px;
+            transition: transform 0.4s ease-out;
+            will-change: transform;
+            align-items: center;
+            cursor: grab;
+            user-select: none;
+          }
+
+          .customer-review-slides:active {
+            cursor: grabbing;
+          }
+
+          .customer-review-slide {
+            min-width: 100%;
+            width: 100%;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+
+          .customer-review-slide .customer-review-card {
+            width: 100%;
+            max-width: 100%;
+            {% if block.settings.show_active_shadow %}
+            transition: box-shadow 0.3s ease;
+            {% endif %}
+          }
+
+          /* Center/active slide styling */
+          .customer-review-slide.active .customer-review-card {
+            z-index: 2;
+            {% if block.settings.show_active_shadow %}
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            {% endif %}
+          }
+
+          .customer-review-pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+            width: 100%;
+          }
+
+          .pagination-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50% !important;
+            border: none !important;
+            background-color: {{ block.settings.pagination_dot_color | default: '#dddddd' }} !important;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0 !important;
+            margin: 0 !important;
+            outline: none !important;
+            box-shadow: none !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            min-width: 8px !important;
+            min-height: 8px !important;
+            max-width: 8px !important;
+            max-height: 8px !important;
+            flex-shrink: 0 !important;
+          }
+
+          .pagination-dot:hover,
+          .pagination-dot.active {
+            background-color: {{ block.settings.pagination_dot_active_color | default: '#333333' }} !important;
+            transform: scale(1);
+          }
+
+          @media (max-width: 767px) {
+            .customer-review-slide .customer-review-card {
+              width: 100%;
+              max-width: 100%;
+            }
+
+            .customer-review-slide.active .customer-review-card {
+              {% if block.settings.show_active_shadow %}
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              {% endif %}
+            }
+          }
+        </style>
+
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const carousel = document.getElementById('customer-review-carousel-{{ block.id }}');
+            if (!carousel) return;
+
+            const slidesContainer = carousel.querySelector('.customer-review-slides');
+            const slides = carousel.querySelectorAll('.customer-review-slide');
+            const dots = carousel.querySelectorAll('.pagination-dot');
+
+            // Start with the middle card
+            const middleIndex = Math.floor(slides.length / 2);
+            let currentSlide = middleIndex;
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+            let startTransform = 0;
+
+            function goToSlide(index, instant = false) {
+              // Infinite scroll logic - normalize the index
+              if (index >= slides.length) {
+                currentSlide = 0;
+              } else if (index < 0) {
+                currentSlide = slides.length - 1;
+              } else {
+                currentSlide = index;
+              }
+
+              // Calculate the offset to center the active slide
+              // Container is 80% width and centered by parent
+              // Each slide is 100% of container width with 12px gap
+              // Add small offset to shift more to the left
+              const slideOffset = currentSlide * 100;
+              const leftOffset = -3; // Shift 5% more to the left
+
+              if (instant) {
+                slidesContainer.style.transition = 'none';
+              }
+
+              slidesContainer.style.transform = `translateX(calc(${leftOffset}% - ${slideOffset}%))`;
+
+              if (instant) {
+                // Force reflow
+                slidesContainer.offsetHeight;
+                slidesContainer.style.transition = 'transform 0.4s ease-out';
+              }
+
+              // Update active class on slides
+              slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === currentSlide);
+              });
+
+              // Update dots
+              dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+              });
+            }
+
+            function nextSlide() {
+              goToSlide(currentSlide + 1);
+            }
+
+            function prevSlide() {
+              goToSlide(currentSlide - 1);
+            }
+
+            // Dot navigation
+            dots.forEach((dot, index) => {
+              dot.addEventListener('click', () => {
+                goToSlide(index);
+              });
+            });
+
+            // Touch/Swipe functionality
+            function handleStart(e) {
+              isDragging = true;
+              startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+              const leftOffset = -5;
+              startTransform = leftOffset - currentSlide * 100;
+              slidesContainer.style.transition = 'none';
+            }
+
+            function handleMove(e) {
+              if (!isDragging) return;
+              e.preventDefault();
+
+              currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+              const diff = currentX - startX;
+              const containerWidth = slidesContainer.offsetWidth;
+              const percentMoved = (diff / containerWidth) * 100;
+
+              slidesContainer.style.transform = `translateX(${startTransform + percentMoved}%)`;
+            }
+
+            function handleEnd(e) {
+              if (!isDragging) return;
+              isDragging = false;
+
+              slidesContainer.style.transition = 'transform 0.4s ease-out';
+
+              const diff = currentX - startX;
+              const threshold = 50; // Minimum swipe distance
+
+              if (Math.abs(diff) > threshold) {
+                if (diff > 0) {
+                  // Swiped right - go to previous
+                  prevSlide();
+                } else {
+                  // Swiped left - go to next
+                  nextSlide();
+                }
+              } else {
+                // Didn't swipe far enough, return to current slide
+                goToSlide(currentSlide);
+              }
+            }
+
+            // Mouse events
+            slidesContainer.addEventListener('mousedown', handleStart);
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', handleEnd);
+
+            // Touch events
+            slidesContainer.addEventListener('touchstart', handleStart, { passive: false });
+            slidesContainer.addEventListener('touchmove', handleMove, { passive: false });
+            slidesContainer.addEventListener('touchend', handleEnd);
+
+            // Prevent text selection while dragging
+            slidesContainer.addEventListener('dragstart', (e) => e.preventDefault());
+
+            // Initialize with the middle card
+            goToSlide(middleIndex);
+          });
+        </script>
+      {% else %}
+        {% render 'customer-review-card',
+          reviewer_name: block.settings.reviewer_name,
+          review_text: block.settings.review_text,
+          rating: block.settings.rating,
+          avatar_url: block.settings.avatar_url,
+          show_avatar: block.settings.show_avatar,
+          use_theme_colors: block.settings.use_theme_colors,
+          background_color_start: block.settings.background_color_start,
+          background_color_end: block.settings.background_color_end,
+          text_color: block.settings.text_color,
+          border_color: block.settings.border_color,
+          border_radius: block.settings.border_radius,
+          border_style: block.settings.border_style,
+          show_shadow: block.settings.show_shadow,
+          star_color: block.settings.star_color,
+          verified_icon_color: block.settings.verified_icon_color,
+          review_text_color: block.settings.review_text_color,
+          reviewer_name_size: block.settings.reviewer_name_size,
+          review_text_size: block.settings.review_text_size,
+          star_size: block.settings.star_size,
+          avatar_size_desktop: block.settings.avatar_size_desktop,
+          avatar_size_mobile: block.settings.avatar_size_mobile,
+          margin_top: block.settings.margin_top,
+          margin_right: block.settings.margin_right,
+          margin_bottom: block.settings.margin_bottom,
+          margin_left: block.settings.margin_left,
+          block: block
+        %}
+      {% endif %}
+
+    {% when 'customer_review_item' %}
+      {% comment %}
+        Customer review items are rendered by the customer_review carousel block.
+        This block type exists only to hold data and should not render anything on its own.
+      {% endcomment %}
+
+    {% when 'facebook_review' %}
+      {% render 'facebook-review',
+        avatar: block.settings.avatar,
+        username: block.settings.username,
+        content: block.settings.review_content,
+        star_color: block.settings.star_color,
+        empty_star_color: block.settings.empty_star_color,
+        username_font_size: block.settings.username_font_size,
+        content_font_size: block.settings.content_font_size,
+        meta_font_size: block.settings.meta_font_size,
+        action_button_font_size: block.settings.action_button_font_size,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom
+      %}
+    {% when 'bullet_list' %}
+      {% render 'product-bullet-list',
+        bullet_1: block.settings.bullet_1,
+        bullet_2: block.settings.bullet_2,
+        bullet_3: block.settings.bullet_3,
+        bullet_4: block.settings.bullet_4,
+        bullet_5: block.settings.bullet_5,
+        bullet_6: block.settings.bullet_6,
+        use_custom_icon_1: block.settings.use_custom_icon_1,
+        use_custom_icon_2: block.settings.use_custom_icon_2,
+        use_custom_icon_3: block.settings.use_custom_icon_3,
+        use_custom_icon_4: block.settings.use_custom_icon_4,
+        use_custom_icon_5: block.settings.use_custom_icon_5,
+        use_custom_icon_6: block.settings.use_custom_icon_6,
+        custom_icon_1: block.settings.custom_icon_1,
+        custom_icon_2: block.settings.custom_icon_2,
+        custom_icon_3: block.settings.custom_icon_3,
+        custom_icon_4: block.settings.custom_icon_4,
+        custom_icon_5: block.settings.custom_icon_5,
+        custom_icon_6: block.settings.custom_icon_6,
+        custom_image_1: block.settings.custom_image_1,
+        custom_image_2: block.settings.custom_image_2,
+        custom_image_3: block.settings.custom_image_3,
+        custom_image_4: block.settings.custom_image_4,
+        custom_image_5: block.settings.custom_image_5,
+        custom_image_6: block.settings.custom_image_6,
+        layout_style: block.settings.layout_style,
+        row_gap: block.settings.row_gap,
+        icon_color: block.settings.icon_color,
+        text_color: block.settings.text_color,
+        show_bg: block.settings.show_bg,
+        bg_color: block.settings.bg_color,
+        border_radius: block.settings.border_radius,
+        icon_size: block.settings.icon_size,
+        text_size: block.settings.text_size,
+        spacing: block.settings.spacing,
+        icon_text_gap: block.settings.icon_text_gap,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        section: section,
+        block: block
+      %}
+
+    {% when 'guarantee_badges' %}
+      {% render 'guarantee-badges',
+        use_theme_colors: block.settings.use_theme_colors,
+        badge_1_show: block.settings.badge_1_show,
+        badge_1_text: block.settings.badge_1_text,
+        badge_1_icon: block.settings.badge_1_icon,
+        badge_1_custom_icon: block.settings.badge_1_custom_icon,
+        badge_1_custom_image: block.settings.badge_1_custom_image,
+        badge_1_dot_color: block.settings.badge_1_dot_color,
+        badge_2_show: block.settings.badge_2_show,
+        badge_2_text: block.settings.badge_2_text,
+        badge_2_icon: block.settings.badge_2_icon,
+        badge_2_custom_icon: block.settings.badge_2_custom_icon,
+        badge_2_custom_image: block.settings.badge_2_custom_image,
+        badge_2_dot_color: block.settings.badge_2_dot_color,
+        icon_color: block.settings.icon_color,
+        text_color: block.settings.text_color,
+        container_margin_top: block.settings.container_margin_top,
+        container_margin_bottom: block.settings.container_margin_bottom,
+        container_margin_left: block.settings.container_margin_left,
+        container_margin_right: block.settings.container_margin_right,
+        font_size: block.settings.font_size,
+        icon_size: block.settings.icon_size,
+        gap: block.settings.gap,
+        text_weight: block.settings.text_weight,
+        align_center: block.settings.align_center,
+        mobile_stack: block.settings.mobile_stack,
+        block: block
+      %}
+
+    {% when 'money_back_guarantee' %}
+      {% render 'money-back-guarantee-badge',
+        use_theme_colors: block.settings.use_theme_colors,
+        container_bg_color: block.settings.container_bg_color,
+        border_color: block.settings.border_color,
+        badge_icon: block.settings.badge_icon,
+        text_small: block.settings.text_small,
+        text_large: block.settings.text_large,
+        text_small_color: block.settings.text_small_color,
+        text_large_color: block.settings.text_large_color,
+        padding: block.settings.padding,
+        badge_size: block.settings.badge_size,
+        icon_size: block.settings.icon_size,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        enable_container_border: block.settings.enable_container_border,
+        container_border_width: block.settings.container_border_width,
+        container_border_style: block.settings.container_border_style,
+        container_border_color: block.settings.container_border_color,
+        container_border_radius: block.settings.container_border_radius,
+        badge_border_width: block.settings.badge_border_width,
+        badge_border_style: block.settings.badge_border_style,
+        badge_border_color: block.settings.badge_border_color,
+        badge_background_color: block.settings.badge_background_color,
+        text_small_size: block.settings.text_small_size,
+        text_large_size: block.settings.text_large_size,
+        block: block
+      %}
+
+  {% when 'product_labels' %}
+      {% render 'product-labels',
+        label_1_show: block.settings.label_1_show,
+        label_1_icon: block.settings.label_1_icon,
+        label_1_custom_icon: block.settings.label_1_custom_icon,
+        label_1_name: block.settings.label_1_name,
+        label_1_serving_count: block.settings.label_1_serving_count,
+        label_1_show_serving_count: block.settings.label_1_show_serving_count,
+        label_1_image: block.settings.label_1_image,
+        label_1_use_image: block.settings.label_1_use_image,
+        label_1_use_gradient: block.settings.label_1_use_gradient,
+        label_1_background_gradient: block.settings.label_1_background_gradient,
+        label_1_background_color: block.settings.label_1_background_color,
+        label_1_text_color: block.settings.label_1_text_color,
+        label_1_serving_text_color: block.settings.label_1_serving_text_color,
+        label_1_border_color: block.settings.label_1_border_color,
+        label_2_show: block.settings.label_2_show,
+        label_2_icon: block.settings.label_2_icon,
+        label_2_custom_icon: block.settings.label_2_custom_icon,
+        label_2_name: block.settings.label_2_name,
+        label_2_serving_count: block.settings.label_2_serving_count,
+        label_2_show_serving_count: block.settings.label_2_show_serving_count,
+        label_2_image: block.settings.label_2_image,
+        label_2_use_image: block.settings.label_2_use_image,
+        label_2_use_gradient: block.settings.label_2_use_gradient,
+        label_2_background_gradient: block.settings.label_2_background_gradient,
+        label_2_background_color: block.settings.label_2_background_color,
+        label_2_text_color: block.settings.label_2_text_color,
+        label_2_serving_text_color: block.settings.label_2_serving_text_color,
+        label_2_border_color: block.settings.label_2_border_color,
+        label_3_show: block.settings.label_3_show,
+        label_3_icon: block.settings.label_3_icon,
+        label_3_custom_icon: block.settings.label_3_custom_icon,
+        label_3_name: block.settings.label_3_name,
+        label_3_serving_count: block.settings.label_3_serving_count,
+        label_3_show_serving_count: block.settings.label_3_show_serving_count,
+        label_3_image: block.settings.label_3_image,
+        label_3_use_image: block.settings.label_3_use_image,
+        label_3_use_gradient: block.settings.label_3_use_gradient,
+        label_3_background_gradient: block.settings.label_3_background_gradient,
+        label_3_background_color: block.settings.label_3_background_color,
+        label_3_text_color: block.settings.label_3_text_color,
+        label_3_serving_text_color: block.settings.label_3_serving_text_color,
+        label_3_border_color: block.settings.label_3_border_color,
+        container_gap: block.settings.container_gap,
+        labels_justify_content: block.settings.labels_justify_content,
+        labels_wrapper_padding_top: block.settings.labels_wrapper_padding_top,
+        labels_wrapper_padding_bottom: block.settings.labels_wrapper_padding_bottom,
+        labels_wrapper_left_padding: block.settings.labels_wrapper_left_padding,
+        labels_wrapper_padding_right: block.settings.labels_wrapper_padding_right,
+        label_bg_color: block.settings.label_bg_color,
+        label_border_color: block.settings.label_border_color,
+        label_border_radius: block.settings.label_border_radius,
+        label_layout: block.settings.label_layout,
+        container_layout: block.settings.container_layout,
+        label_padding_v: block.settings.label_padding_v,
+        label_padding_h: block.settings.label_padding_h,
+        icon_bg_start: block.settings.icon_bg_start,
+        icon_bg_end: block.settings.icon_bg_end,
+        icon_size: block.settings.icon_size,
+        icon_border_radius: block.settings.icon_border_radius,
+        icon_show_background: block.settings.icon_show_background,
+        label_1_drop_shadow_enabled: block.settings.label_1_drop_shadow_enabled,
+        label_1_shadow_blur: block.settings.label_1_shadow_blur,
+        label_1_shadow_spread: block.settings.label_1_shadow_spread,
+        label_1_shadow_offset_x: block.settings.label_1_shadow_offset_x,
+        label_1_shadow_offset_y: block.settings.label_1_shadow_offset_y,
+        label_1_shadow_color: block.settings.label_1_shadow_color,
+        label_1_shadow_opacity: block.settings.label_1_shadow_opacity,
+        label_2_drop_shadow_enabled: block.settings.label_2_drop_shadow_enabled,
+        label_2_shadow_blur: block.settings.label_2_shadow_blur,
+        label_2_shadow_spread: block.settings.label_2_shadow_spread,
+        label_2_shadow_offset_x: block.settings.label_2_shadow_offset_x,
+        label_2_shadow_offset_y: block.settings.label_2_shadow_offset_y,
+        label_2_shadow_color: block.settings.label_2_shadow_color,
+        label_2_shadow_opacity: block.settings.label_2_shadow_opacity,
+        label_3_drop_shadow_enabled: block.settings.label_3_drop_shadow_enabled,
+        label_3_shadow_blur: block.settings.label_3_shadow_blur,
+        label_3_shadow_spread: block.settings.label_3_shadow_spread,
+        label_3_shadow_offset_x: block.settings.label_3_shadow_offset_x,
+        label_3_shadow_offset_y: block.settings.label_3_shadow_offset_y,
+        label_3_shadow_color: block.settings.label_3_shadow_color,
+        label_3_shadow_opacity: block.settings.label_3_shadow_opacity,
+        product_name_color: block.settings.product_name_color,
+        product_name_font_size: block.settings.product_name_font_size,
+        product_name_font_size_mobile: block.settings.product_name_font_size_mobile,
+        serving_info_color: block.settings.serving_info_color,
+        serving_info_font_size: block.settings.serving_info_font_size,
+        serving_info_font_size_mobile: block.settings.serving_info_font_size_mobile,
+        label_padding_v_mobile: block.settings.label_padding_v_mobile,
+        label_padding_h_mobile: block.settings.label_padding_h_mobile,
+        margin_top: block.settings.margin_top,
+        margin_bottom: block.settings.margin_bottom,
+        block: block
+      %}
+    {% when 'custom_product_field' %}
+      {% assign field_id = 'custom_field_' | append: block.id %}
+      {% assign property_name = block.settings.property_name | default: 'Personalization' %}
+
+      <div
+        class="custom-product-field-wrapper"
+        id="wrapper-{{ field_id }}"
+        {{ block.shopify_attributes }}
+        style="margin-top: {{ block.settings.margin_top | default: 16 }}px; margin-bottom: {{ block.settings.margin_bottom | default: 16 }}px; width: 100%; box-sizing: border-box;"
+      >
+        {% if block.settings.field_label != blank %}
+          <label
+            for="{{ field_id }}"
+            class="custom-field-label"
+            style="display: block; margin-bottom: 8px; color: {{ block.settings.label_color | default: '#000000' }}; font-size: {{ block.settings.label_font_size | default: 14 }}px; font-weight: var(--font-weight-bold); letter-spacing: var(--letter-spacing-body) !important;"
+          >
+            {{ block.settings.field_label }}
+            {% if block.settings.required_field %}
+              <span style="color: #dc2626;">*</span>
+            {% endif %}
+          </label>
+        {% endif %}
+
+        {% if block.settings.field_type == 'textarea' %}
+          <textarea
+            id="{{ field_id }}"
+            name="properties[{{ property_name }}]"
+            placeholder="{{ block.settings.field_placeholder | default: 'Enter your custom text here...' }}"
+            {% if block.settings.required_field %}
+              required
+            {% endif %}
+            {% if block.settings.max_length > 0 %}
+              maxlength="{{ block.settings.max_length }}"
+            {% endif %}
+            rows="4"
+            style="
+              width: 100%;
+              padding: 12px;
+              border: 1px solid {{ block.settings.input_border_color | default: '#d1d5db' }};
+              border-radius: {{ block.settings.border_radius | default: 4 }}px;
+              background-color: {{ block.settings.input_background_color | default: '#ffffff' }};
+              color: {{ block.settings.input_text_color | default: '#000000' }};
+              font-size: {{ block.settings.input_font_size | default: 14 }}px;
+              font-family: inherit;
+              resize: vertical;
+              transition: border-color 0.2s ease;
+            "
+            onfocus="this.style.borderColor='{{ block.settings.input_border_color | default: '#d1d5db' | color_darken: 20 }}'"
+            onblur="this.style.borderColor='{{ block.settings.input_border_color | default: '#d1d5db' }}'"
+          ></textarea>
+        {% else %}
+          <input
+            type="text"
+            id="{{ field_id }}"
+            name="properties[{{ property_name }}]"
+            placeholder="{{ block.settings.field_placeholder | default: 'Enter your custom text here...' }}"
+            {% if block.settings.required_field %}
+              required
+            {% endif %}
+            {% if block.settings.max_length > 0 %}
+              maxlength="{{ block.settings.max_length }}"
+            {% endif %}
+            style="
+              width: 100%;
+              padding: 12px;
+              border: 1px solid {{ block.settings.input_border_color | default: '#d1d5db' }};
+              border-radius: {{ block.settings.border_radius | default: 4 }}px;
+              background-color: {{ block.settings.input_background_color | default: '#ffffff' }};
+              color: {{ block.settings.input_text_color | default: '#000000' }};
+              font-size: {{ block.settings.input_font_size | default: 14 }}px;
+              font-family: inherit;
+              transition: border-color 0.2s ease;
+            "
+            onfocus="this.style.borderColor='{{ block.settings.input_border_color | default: '#d1d5db' | color_darken: 20 }}'"
+            onblur="this.style.borderColor='{{ block.settings.input_border_color | default: '#d1d5db' }}'"
+          >
+        {% endif %}
+
+        {% if block.settings.help_text != blank %}
+          <div
+            class="field-help-text"
+            style="margin-top: 4px; font-size: 12px; color: #6b7280; line-height: 1.4;"
+          >
+            {{ block.settings.help_text }}
+          </div>
+        {% endif %}
+
+        {% if block.settings.max_length > 0 %}
+          <div
+            class="character-counter"
+            id="counter-{{ field_id }}"
+            style="text-align: right; margin-top: 4px; font-size: 12px; color: #6b7280;"
+          >
+            <span id="current-{{ field_id }}">0</span>/{{ block.settings.max_length }}
+          </div>
+        {% endif %}
+      </div>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          if (typeof Elixir_ProductFormExists !== 'function' || !Elixir_ProductFormExists()) return;
+          const field = document.getElementById('{{ field_id }}');
+          const wrapper = document.getElementById('wrapper-{{ field_id }}');
+          {% if block.settings.max_length > 0 %}
+          const currentCounter = document.getElementById('current-{{ field_id }}');
+          const maxLength = {{ block.settings.max_length }};
+          {% endif %}
+
+          if (field) {
+            {% if block.settings.max_length > 0 %}
+            // Character counter functionality
+            function updateCounter() {
+              const currentLength = field.value.length;
+              if (currentCounter) {
+                currentCounter.textContent = currentLength;
+
+                // Change color as approaching limit
+                if (currentLength > maxLength * 0.9) {
+                  currentCounter.style.color = '#dc2626'; // Red
+                } else if (currentLength > maxLength * 0.7) {
+                  currentCounter.style.color = '#f59e0b'; // Amber
+                } else {
+                  currentCounter.style.color = '#6b7280'; // Gray
+                }
+              }
+            }
+
+            field.addEventListener('input', updateCounter);
+            field.addEventListener('paste', function() {
+              setTimeout(updateCounter, 10);
+            });
+            {% endif %}
+
+            {% if block.settings.required_field %}
+            // Required field validation
+            function validateField() {
+              const value = field.value.trim();
+              if (value === '') {
+                field.style.borderColor = '#dc2626';
+                return false;
+              } else {
+                field.style.borderColor = '{{ block.settings.input_border_color | default: "#d1d5db" }}';
+                return true;
+              }
+            }
+
+            // Validate on form submission
+            const productForm = field.closest('form');
+            if (productForm) {
+              productForm.addEventListener('submit', function(e) {
+                if (!validateField()) {
+                  e.preventDefault();
+                  field.focus();
+
+                  // Show error message
+                  let errorMsg = wrapper.querySelector('.field-error');
+                  if (!errorMsg) {
+                    errorMsg = document.createElement('div');
+                    errorMsg.className = 'field-error';
+                    errorMsg.style.cssText = 'color: #dc2626; font-size: 12px; margin-top: 4px;';
+                    errorMsg.textContent = 'This field is required.';
+                    wrapper.appendChild(errorMsg);
+                  }
+
+                  // Remove error on input
+                  field.addEventListener('input', function() {
+                    if (errorMsg && field.value.trim() !== '') {
+                      errorMsg.remove();
+                    }
+                  }, { once: true });
+                }
+              });
+            }
+            {% endif %}
+
+            // Store original cart form submission for line item properties
+            const cartForm = (typeof Elixir_GetProductForm === 'function' && Elixir_GetProductForm()) || document.querySelector('form[action*="/cart/add"]');
+            if (cartForm && field.name.includes('properties')) {
+              field.addEventListener('input', function() {
+                // Auto-save to session storage for persistence
+                sessionStorage.setItem('custom_field_{{ field_id }}', field.value);
+              });
+
+              // Restore from session storage
+              const savedValue = sessionStorage.getItem('custom_field_{{ field_id }}');
+              if (savedValue) {
+                field.value = savedValue;
+                {% if block.settings.max_length > 0 %}
+                updateCounter();
+                {% endif %}
+              }
+            }
+          }
+        });
+      </script>
+    {% when 'facebook_comment' %}
+      {% render 'facebook-comment-block', block: block %}
+    {% when 'instagram_comment' %}
+      {% render 'instagram-comment-block', block: block %}
+    {% when 'tiktok_comment' %}
+      {% render 'tiktok-comment-block', block: block %}
+    {% when 'variant_selector' %}
+      {% render 'variant-selector-clean', block: block, product: product %}
+
+    {% when 'selling_out_fast' %}
+      {% render 'selling-out-fast', block: block, product: product %}
+
+    {% when 'subscribe_save' %}
+      {% render 'subscribe-and-save', block: block %}
+
+    {% when 'deal_timer' %}
+      {% render 'deal-timer', block: block %}
+
+    {% when 'bundle_and_save' %}
+      {% render 'bundle-and-save', block: block %}
+  {% endcase %}
+{% endfor %}
+
+<!-- =========================================================
+     VANHOUTEN LIVING — PRODUCT BUY BOX
+     Joseph Joseph-inspired layout, custom implementation
+========================================================= -->
+
+<style>
+  /* ---------- Base ---------- */
+  .shop-product-info {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .shop-product-info > * {
+    flex-grow: 0 !important;
+  }
+
+  /* ---------- Title ---------- */
+  .shop-product-info .shop-product-title {
+    width: calc(100% - 88px) !important;
+    max-width: calc(100% - 88px) !important;
+    min-height: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 28px !important;
+    padding: 0 !important;
+    font-size: clamp(30px, 2vw, 38px) !important;
+    line-height: 1.1 !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.03em !important;
+    color: #4d4d4a !important;
+    overflow: visible !important;
+  }
+
+  /* ---------- Wishlist ---------- */
+  .vhl-product-wishlist {
+    position: absolute !important;
+    top: -6px !important;
+    right: 0 !important;
+    width: 68px !important;
+    height: 68px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: #f7f7f5 !important;
+    color: #4d4d4a !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    box-shadow: none !important;
+  }
+
+  .vhl-product-wishlist:hover {
+    background: #efefec !important;
+  }
+
+  .vhl-product-wishlist svg {
+    width: 34px !important;
+    height: 34px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.45 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+
+  .vhl-product-wishlist.is-active svg {
+    fill: currentColor !important;
+  }
+
+  /* ---------- Price + rating row ---------- */
+  .shop-product-info .shop-product-price-container {
+    width: 100% !important;
+    min-height: 48px !important;
+    margin-top: 0 !important;
+    margin-bottom: 32px !important;
+    padding: 0 0 24px !important;
+    border-bottom: 1px solid #dededb !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 18px !important;
+  }
+
+  .shop-product-info .shop-product-price-block {
+    font-size: 28px !important;
+    line-height: 1.15 !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.02em !important;
+    color: #4d4d4a !important;
+    white-space: nowrap !important;
+  }
+
+  .vhl-jj-rating {
+    margin-left: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    color: #555552 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .vhl-jj-rating__count {
+    font-size: 14px !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+  }
+
+  .vhl-jj-rating__stars {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+  }
+
+  .vhl-jj-rating__stars svg {
+    width: 23px !important;
+    height: 23px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.2 !important;
+    stroke-linejoin: round !important;
+  }
+
+  /* Hide the old standalone review block when present */
+  .shop-product-info .rating-component {
+    display: none !important;
+  }
+
+  /* ---------- Variant / colour ---------- */
+  .shop-product-info [class*="variant"] {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .shop-product-info label,
+  .shop-product-info .variant-label,
+  .shop-product-info [class*="option-label"] {
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+  }
+
+  /* ---------- Real buy row ---------- */
+  .vhl-buy-row {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 185px minmax(0, 1fr) !important;
+    gap: 20px !important;
+    align-items: stretch !important;
+    margin-top: 28px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .vhl-buy-row > * {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .vhl-buy-row .shop-add-to-cart-wrapper {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .vhl-buy-row .shop-add-to-cart-wrapper product-form,
+  .vhl-buy-row .shop-add-to-cart-wrapper form {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .vhl-buy-row .shop-add-to-cart-button {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: 62px !important;
+    min-height: 62px !important;
+    margin: 0 !important;
+    padding: 0 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 999px !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+  }
+
+  .vhl-buy-row .shop-add-to-cart-button .button-text {
+    display: block !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1 !important;
+  }
+
+  .vhl-buy-row input[name="quantity"] {
+    margin: 0 !important;
+  }
+
+  .vhl-buy-row [class*="quantity"] {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Keep any guarantee/benefit area comfortably below the buy row */
+  .shop-product-info .guarantee-badges,
+  .shop-product-info [class*="guarantee"] {
+    margin-top: 0 !important;
+  }
+
+  @media screen and (min-width: 990px) {
+    .shop-product-info {
+      width: 100% !important;
+      max-width: 650px !important;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .shop-product-info .shop-product-title {
+      width: calc(100% - 60px) !important;
+      max-width: calc(100% - 60px) !important;
+      margin-bottom: 22px !important;
+      font-size: 27px !important;
+      line-height: 1.1 !important;
+    }
+
+    .vhl-product-wishlist {
+      top: -3px !important;
+      width: 50px !important;
+      height: 50px !important;
+    }
+
+    .vhl-product-wishlist svg {
+      width: 25px !important;
+      height: 25px !important;
+    }
+
+    .shop-product-info .shop-product-price-container {
+      margin-bottom: 26px !important;
+      padding-bottom: 20px !important;
+      gap: 10px !important;
+    }
+
+    .shop-product-info .shop-product-price-block {
+      font-size: 23px !important;
+    }
+
+    .vhl-jj-rating {
+      gap: 5px !important;
+    }
+
+    .vhl-jj-rating__count {
+      font-size: 11px !important;
+    }
+
+    .vhl-jj-rating__stars {
+      gap: 0 !important;
+    }
+
+    .vhl-jj-rating__stars svg {
+      width: 17px !important;
+      height: 17px !important;
+    }
+
+    .vhl-buy-row {
+      grid-template-columns: 1fr !important;
+      gap: 12px !important;
+      margin-top: 22px !important;
+    }
+
+    .vhl-buy-row .shop-add-to-cart-button {
+      height: 56px !important;
+      min-height: 56px !important;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    function directChildOfInfo(node, info) {
+      if (!node || !info) return null;
+      let current = node;
+      while (current && current.parentElement && current.parentElement !== info) {
+        current = current.parentElement;
+      }
+      return current && current.parentElement === info ? current : null;
+    }
+
+    const vhlRatingValue = Number({{ product.metafields.custom.rating.value | default: 0 | json }});
+    const vhlReviewCount = Number({{ product.metafields.custom.review_count.value | default: 0 | json }});
+
+    function makeStar(index) {
+      const rawFill = Math.max(0, Math.min(1, vhlRatingValue - index));
+      const fillPercent = Math.round(rawFill * 100);
+      const uid = 'vhl-star-' + index + '-' + Math.random().toString(36).slice(2, 8);
+
+      return '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+        '<defs><linearGradient id="' + uid + '" x1="0" x2="1" y1="0" y2="0">' +
+          '<stop offset="0%" stop-color="currentColor"></stop>' +
+          '<stop offset="' + fillPercent + '%" stop-color="currentColor"></stop>' +
+          '<stop offset="' + fillPercent + '%" stop-color="transparent"></stop>' +
+          '<stop offset="100%" stop-color="transparent"></stop>' +
+        '</linearGradient></defs>' +
+        '<path style="fill:url(#' + uid + ') !important;" d="M12 2.8l2.75 5.57 6.15.89-4.45 4.34 1.05 6.12L12 16.83l-5.5 2.89 1.05-6.12L3.1 9.26l6.15-.89L12 2.8z"></path>' +
+      '</svg>';
+    }
+
+    function initVHLProductBuyBox() {
+      const info = document.querySelector('.shop-product-info');
+      if (!info) return;
+
+      /* Wishlist */
+      if (!info.querySelector('.vhl-product-wishlist')) {
+        const wishlist = document.createElement('button');
+        wishlist.type = 'button';
+        wishlist.className = 'vhl-product-wishlist';
+        wishlist.setAttribute('aria-label', 'Toevoegen aan favorieten');
+        wishlist.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
+
+        const storageKey = 'vhl-favorite-{{ product.handle }}';
+        try {
+          if (localStorage.getItem(storageKey) === 'true') wishlist.classList.add('is-active');
+        } catch (e) {}
+
+        wishlist.addEventListener('click', function () {
+          wishlist.classList.toggle('is-active');
+          try {
+            localStorage.setItem(storageKey, wishlist.classList.contains('is-active') ? 'true' : 'false');
+          } catch (e) {}
+        });
+
+        info.appendChild(wishlist);
+      }
+
+      /* Rating inside the existing price row */
+      const price = info.querySelector('.shop-product-price-container');
+      if (price && !price.querySelector('.vhl-jj-rating')) {
+        const rating = document.createElement('div');
+        rating.className = 'vhl-jj-rating';
+        rating.innerHTML = '<span class="vhl-jj-rating__count">(' + vhlReviewCount + ')</span>' +
+          '<span class="vhl-jj-rating__stars" aria-label="' + vhlRatingValue.toFixed(1) + ' van 5 sterren">' +
+          makeStar(0) + makeStar(1) + makeStar(2) + makeStar(3) + makeStar(4) +
+          '</span>';
+        price.appendChild(rating);
+      }
+
+      /* Real quantity + add-to-cart row */
+      if (!info.querySelector('.vhl-buy-row')) {
+        const cart = info.querySelector('.shop-add-to-cart-wrapper');
+        const quantityInput = info.querySelector('input[name="quantity"]');
+        const quantityBlock = directChildOfInfo(quantityInput, info);
+        const cartBlock = directChildOfInfo(cart, info) || cart;
+
+        if (quantityBlock && cartBlock && quantityBlock !== cartBlock) {
+          const row = document.createElement('div');
+          row.className = 'vhl-buy-row';
+          quantityBlock.parentNode.insertBefore(row, quantityBlock);
+          row.appendChild(quantityBlock);
+          row.appendChild(cartBlock);
+        }
+      }
+    }
+
+    function run() {
+      initVHLProductBuyBox();
+      setTimeout(initVHLProductBuyBox, 50);
+      setTimeout(initVHLProductBuyBox, 250);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', run);
+    } else {
+      run();
+    }
+
+    document.addEventListener('shopify:section:load', run);
+  })();
+</script>

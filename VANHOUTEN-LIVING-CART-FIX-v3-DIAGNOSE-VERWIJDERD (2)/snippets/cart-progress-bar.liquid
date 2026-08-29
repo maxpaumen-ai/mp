@@ -1,0 +1,213 @@
+{% comment %}
+  💡 Cart Progress Bar Component
+
+  This snippet renders the free shipping and free product progress bar
+  with dynamic messaging and icon display.
+
+  Dependencies:
+  - cart-drawer_pgb_style.liquid (for styles)
+  - circle-icon.liquid (optional icon)
+  - free-shipping-icon.liquid (optional icon)
+  - free-gift-icon.liquid (optional icon)
+
+  Parameters:
+  - block: The progress bar block settings
+{% endcomment %}
+
+<div class="free-product-progress-bar-main">
+  <div
+    class="free-product-progress-bar-successfull"
+    data-treshold-product="{{ block.settings.product_free_amount |  times: 100 }}"
+  >
+    {% assign free_product_price = block.settings.product_free_amount | default: 0 | times: 100 %}
+    {% assign free_shipping_price = block.settings.product_free_shipping | default: 0 | times: 100 %}
+
+    {% comment %} Check if only one goal is configured {% endcomment %}
+    {% assign has_single_goal = false %}
+    {% if free_shipping_price > 0 and free_product_price == 0 %}
+      {% assign has_single_goal = true %}
+    {% elsif free_product_price > 0 and free_shipping_price == 0 %}
+      {% assign has_single_goal = true %}
+    {% endif %}
+
+    {% assign hide_icons_on_single_goal = block.settings.hide_icons_single_goal | default: false %}
+    {% assign has_equal_goals = false %}
+    {% if free_shipping_price > 0 and free_product_price > 0 and free_shipping_price == free_product_price %}
+      {% assign has_equal_goals = true %}
+    {% endif %}
+    {% assign should_hide_icons = false %}
+    {% if hide_icons_on_single_goal and has_single_goal %}
+      {% assign should_hide_icons = true %}
+    {% endif %}
+
+    {%- comment -%}
+      Determine icon position classes:
+      - When both goals are configured:
+          • The lower threshold is "first-gift" (left stop on the bar)
+          • The higher threshold is "second-gift" (right stop on the bar)
+      - When only one goal is configured:
+          • That single icon is always treated as "first-gift"
+    {%- endcomment -%}
+    {% assign shipping_icon_position = '' %}
+    {% assign gift_icon_position = '' %}
+
+    {% if has_single_goal %}
+      {% comment %} Single goal: icon is fixed at 100% (end of progress bar) {% endcomment %}
+      {% if free_shipping_price > 0 %}
+        {% assign shipping_icon_position = 'second-gift' %}
+      {% endif %}
+      {% if free_product_price > 0 %}
+        {% assign gift_icon_position = 'second-gift' %}
+      {% endif %}
+    {% else %}
+      {% if free_product_price > free_shipping_price %}
+        {% assign shipping_icon_position = 'first-gift' %}
+        {% assign gift_icon_position = 'second-gift' %}
+      {% else %}
+        {% assign shipping_icon_position = 'second-gift' %}
+        {% assign gift_icon_position = 'first-gift' %}
+      {% endif %}
+    {% endif %}
+
+    {%- comment -%}
+      Note: shipping_protection_percent and shipping_protection_pixel
+      are calculated globally in sections/cart-drawer.liquid
+      and used here for icon positioning in cart-drawer_style.liquid
+    {%- endcomment -%}
+    {% assign total_pending_value = free_shipping_price
+      | minus: cart.total_price
+      | money_without_trailing_zeros
+    %}
+    {% assign freeproduct = free_product_price
+      | minus: cart.total_price
+      | money_without_trailing_zeros
+    %}
+    {% assign custom_free_product_title = block.settings.product_free_custom_id_title
+      | default: block.settings.progress_bar_free_product.title
+    %}
+    {% comment %} Custom progress bar text {% endcomment %}
+    {% assign shipping_away_text = block.settings.shipping_away_text
+      | replace: '[missingAmount]', total_pending_value
+    %}
+    {% assign free_product_away_text = block.settings.free_product_away_text
+      | replace: '[freeProduct]', custom_free_product_title
+      | replace: '[missingAmount]', freeproduct
+      | escape
+    %}
+    {% assign shipping_earn_text = block.settings.shipping_earn_text %}
+    {% assign free_product_earn_text = block.settings.free_product_earn_text
+      | replace: '[freeProduct]', custom_free_product_title
+      | escape
+    %}
+
+    {% if freeproduct > total_pending_value %}
+      {% if cart.total_price >= free_shipping_price and cart.total_price >= free_product_price %}
+        {% comment %}🎉 Hooray!{% endcomment %}
+        {%- if free_shipping_price > 0 %}
+          {{ shipping_earn_text }}
+        {%- else %}
+          {{ free_product_earn_text }}
+        {%- endif %}
+      {% elsif freeproduct
+        and cart.total_price <= free_product_price
+        and cart.total_price >= free_shipping_price
+      %}
+        {{ free_product_away_text }}
+      {% elsif free_shipping_price > 0 %}
+        {{ shipping_away_text }}
+      {% endif %}
+    {% else %}
+      {% if cart.total_price >= free_product_price and cart.total_price >= free_shipping_price %}
+        {% comment %}🎉 Hooray!{% endcomment %}
+        {% if free_shipping_price > 0 %}
+          {{ shipping_earn_text }}
+        {%- else %}
+          {{ free_product_earn_text }}
+        {%- endif %}
+      {% elsif cart.total_price <= free_shipping_price
+        and cart.total_price >= free_product_price
+        and free_shipping_price > 0
+      %}
+        {{ shipping_away_text }}
+      {% else %}
+        {{ free_product_away_text }}
+      {% endif %}
+    {% endif %}
+  </div>
+  <input
+    value="{{ block.settings.progress_bar_free_product.selected_or_first_available_variant.id }}"
+    class="free_product_progress_bar_variant"
+    style="display: none !important;"
+  >
+  <div class="free-product-progress-bar {% if should_hide_icons %}hide-icons-mode{% endif %}{% if has_equal_goals %} has-equal-goals{% endif %}" 
+       data-free-shipping-price="{{ free_shipping_price }}" 
+       data-free-product-price="{{ free_product_price }}"
+       data-has-single-goal="{{ has_single_goal }}">
+    {% if free_product_price > free_shipping_price and free_shipping_price > 0 %}
+      <progress id="file" value="{{ cart.total_price }}" max="{{ free_product_price }}"></progress>
+    {% else %}
+      {% if free_shipping_price > 0 %}
+        <progress
+          id="file"
+          value="{{ cart.total_price }}"
+          max="{{ free_shipping_price }}"
+        ></progress>
+      {% else %}
+        <progress id="file" value="{{ cart.total_price }}" max="{{free_product_price}}"></progress>
+      {% endif %}
+    {% endif %}
+    {% comment %}{{settings.product_free_amount | money_without_trailing_zeros}}{% endcomment %}
+    {% if free_shipping_price > 0 %}
+      {% unless should_hide_icons %}
+        <div class="free-shipping-main {% if cart.total_price  >=  free_shipping_price %} free-shipping-main-color {% endif %} {{ shipping_icon_position }}">
+          {% case block.settings.free_shipping_icon_type %}
+            {% when 'circle' %}
+              {% render 'circle-icon' %}
+            {% when 'custom' %}
+              {% if block.settings.free_shipping_custom_icon %}
+                <img
+                  src="{{ block.settings.free_shipping_custom_icon | image_url: width: 100 }}"
+                  alt="Gratis verzending"
+                  width="30"
+                  height="30"
+                  loading="lazy"
+                >
+              {% else %}
+                {% render 'free-shipping-icon' %}
+              {% endif %}
+            {% else %}
+              {% render 'free-shipping-icon' %}
+          {% endcase %}
+          <span class="reward-name">Gratis verzending</span>
+        </div>
+      {% endunless %}
+    {% endif %}
+    {% if free_product_price > 0 %}
+      {% unless should_hide_icons %}
+        <div class="free-gift-main {% if cart.total_price  >=  free_product_price %} free-gift-main-color {% endif %} {{ gift_icon_position }}">
+          {% case block.settings.free_gift_icon_type %}
+            {% when 'circle' %}
+              {% render 'circle-icon' %}
+            {% when 'custom' %}
+              {% if block.settings.free_gift_custom_icon %}
+                <img
+                  src="{{ block.settings.free_gift_custom_icon | image_url: width: 100 }}"
+                  alt="Gratis product"
+                  width="30"
+                  height="30"
+                  loading="lazy"
+                >
+              {% else %}
+                {% render 'free-gift-icon' %}
+              {% endif %}
+            {% else %}
+              {% render 'free-gift-icon' %}
+          {% endcase %}
+          {% if settings.product_free_id != blank %}
+            <span class="reward-name">{{ custom_free_product_title | escape }}</span>
+          {% endif %}
+        </div>
+      {% endunless %}
+    {% endif %}
+  </div>
+</div>

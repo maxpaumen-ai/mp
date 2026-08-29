@@ -1,0 +1,452 @@
+{{ 'scrolling-features-bar.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'scrolling-features-bar.js' | asset_url }}" defer></script>
+
+<style>
+  @keyframes marquee-horizontal-left {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-25%);
+    }
+  }
+
+  @keyframes marquee-horizontal-right {
+    0% {
+      transform: translateX(-25%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  .section-{{ section.id }} {
+    --vertical-padding: {{ section.settings.vertical_padding }}px;
+    --item-gap: {{ section.settings.item_gap }}px;
+    --mobile-item-gap: {{ section.settings.mobile_item_gap }}px;
+    --font-size: {{ section.settings.font_size }}px;
+    --mobile-font-size: {{ section.settings.mobile_font_size }}px;
+    --letter-spacing: {{ section.settings.letter_spacing }}px !important;
+    --text-transform: {% if section.settings.uppercase_text %}uppercase{% else %}none{% endif %};
+    --icon-size: {{ section.settings.icon_size }}px;
+    --mobile-icon-size: {{ section.settings.mobile_icon_size }}px;
+    --icon-spacing: {{ section.settings.icon_spacing }}px;
+    
+    {% case section.settings.theme_color_mode %}
+      {% when 'theme_default' %}
+        --background-color: {{ settings.global_section_accent_1_color }};
+        --text-color: {{ settings.global_section_background_color }};
+        --icon-color: {{ settings.global_section_background_color }};
+      {% when 'light_gradient' %}
+        background: {{ settings.global_accent_text_gradient_light }};
+        --text-color: {{ settings.global_section_text_color }};
+        --icon-color: {{ settings.global_section_text_color }};
+      {% when 'dark_gradient' %}
+        background: {{ settings.global_accent_text_gradient_dark }};
+        --text-color: {{ settings.global_section_background_color }};
+        --icon-color: {{ settings.global_section_background_color }};
+      {% else %}
+        --text-color: {{ section.settings.text_color }};
+        --icon-color: {{ section.settings.icon_color }};
+        {% unless section.settings.use_gradient_background and section.settings.background_gradient != blank %}
+          --background-color: {{ section.settings.background_color }};
+        {% endunless %}
+    {% endcase %}
+    
+    {% if section.settings.use_gradient_background and section.settings.background_gradient != blank and section.settings.theme_color_mode == 'custom' %}
+      background: {{ section.settings.background_gradient }};
+    {% endif %}
+    
+    {% if section.settings.enable_top_border %}
+      border-top: {{ section.settings.top_border_width | default: 1 }}px {{ section.settings.top_border_style | default: 'solid' }} {{ section.settings.top_border_color | default: '#E5E5E5' }};
+    {% endif %}
+    
+    {% if section.settings.enable_bottom_border %}
+      border-bottom: {{ section.settings.bottom_border_width | default: 1 }}px {{ section.settings.bottom_border_style | default: 'solid' }} {{ section.settings.bottom_border_color | default: '#E5E5E5' }};
+    {% endif %}
+  }
+
+  .section-{{ section.id }} .features-track {
+    animation: marquee-horizontal-{{ section.settings.slider_direction }} {{ section.settings.scrolling_velocity | times: 1000 | round: 0 }}ms linear infinite;
+  }
+  
+  {% if section.settings.override_bold %}
+  .section-{{ section.id }}.scrolling-features-bar .feature-item {
+    font-weight: 700 !important;
+  }
+  {% endif %}
+</style>
+
+<div class="scrolling-features-bar section-{{ section.id }} {% if section.settings.pause_on_hover %}pause-on-hover{% endif %}">
+  <div class="features-track-container">
+    <div class="features-track">
+      {% for i in (1..4) %}
+        <div class="feature-items">
+          {% for block in section.blocks %}
+            <div class="feature-item">
+              {% if block.settings.icon_type == 'image' and block.settings.icon_image != blank %}
+                <div class="feature-icon">
+                  {{ block.settings.icon_image | image_url: width: 100 | image_tag: class: 'icon-image', loading: 'lazy', alt: block.settings.text }}
+                </div>
+              {% elsif block.settings.icon != blank %}
+                <div class="feature-icon">
+                  {{ block.settings.icon }}
+                </div>
+              {% endif %}
+              <span>{{ block.settings.text }}</span>
+            </div>
+            {% unless forloop.last %}
+              <div class="feature-item-separator"></div>
+            {% endunless %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Scrolling Features Bar",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "theme_color_mode",
+      "label": "Theme Color Mode",
+      "options": [
+        {"value": "theme_default", "label": "Theme Default"},
+        {"value": "light_gradient", "label": "Light Gradient"},
+        {"value": "dark_gradient", "label": "Dark Gradient"},
+        {"value": "custom", "label": "Custom Colors"}
+      ],
+      "default": "theme_default",
+      "info": "Choose how to apply theme colors or use custom colors"
+    },
+    {
+      "type": "header",
+      "content": "General Settings"
+    },
+    {
+      "type": "range",
+      "id": "vertical_padding",
+      "min": 5,
+      "max": 30,
+      "step": 1,
+      "default": 15,
+      "label": "Vertical Padding"
+    },
+    {
+      "type": "range",
+      "id": "item_gap",
+      "min": 20,
+      "max": 120,
+      "step": 10,
+      "default": 60,
+      "label": "Space Between Items (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "mobile_item_gap",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "default": 30,
+      "label": "Space Between Items (Mobile)"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 10,
+      "max": 70,
+      "step": 1,
+      "default": 14,
+      "label": "Font Size (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "mobile_font_size",
+      "min": 10,
+      "max": 70,
+      "step": 1,
+      "default": 12,
+      "label": "Font Size (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "label": "Letter Spacing"
+    },
+    {
+      "type": "checkbox",
+      "id": "uppercase_text",
+      "label": "Uppercase Text",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "override_bold",
+      "label": "Override Bold",
+      "default": false,
+      "info": "Override font weight to 700 (bold) for feature items"
+    },
+    {
+      "type": "header",
+      "content": "Icons"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "min": 12,
+      "max": 36,
+      "step": 2,
+      "default": 20,
+      "label": "Icon Size (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "mobile_icon_size",
+      "min": 10,
+      "max": 30,
+      "step": 2,
+      "default": 16,
+      "label": "Icon Size (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "icon_spacing",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "default": 10,
+      "label": "Space After Icon"
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "select",
+      "id": "slider_direction",
+      "label": "Scroll Direction",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "scrolling_velocity",
+      "min": 5,
+      "max": 60,
+      "step": 1,
+      "default": 15,
+      "label": "Scrolling Velocity (seconds)",
+      "info": "Lower values = faster scrolling"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on Hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ef4a65"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#FFFFFF",
+      "info": "Color for the feature text when using custom colors"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon Color",
+      "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_background",
+      "label": "Use Gradient Background",
+      "default": false
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background Gradient",
+      "info": "Choose a gradient for the background using Shopify's gradient editor."
+    },
+    {
+      "type": "header",
+      "content": "Border Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_top_border",
+      "label": "Enable Top Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "top_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "top_border_style",
+      "label": "Top Border Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "top_border_color",
+      "label": "Top Border Color",
+      "default": "#E5E5E5"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bottom_border",
+      "label": "Enable Bottom Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "bottom_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "bottom_border_style",
+      "label": "Bottom Border Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "bottom_border_color",
+      "label": "Bottom Border Color",
+      "default": "#E5E5E5"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature_item",
+      "name": "Feature",
+      "limit": 10,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Feature Text",
+          "default": "Feature Text"
+        },
+        {
+          "type": "select",
+          "id": "icon_type",
+          "label": "Icon Type",
+          "options": [
+            {
+              "value": "svg",
+              "label": "SVG Code"
+            },
+            {
+              "value": "image",
+              "label": "Uploaded Image"
+            }
+          ],
+          "default": "svg",
+          "info": "Choose which type of icon to display"
+        },
+        {
+          "type": "html",
+          "id": "icon",
+          "label": "Icon (SVG)",
+          "info": "Paste SVG code here. SVG icons are vector graphics that scale perfectly at any size and can be customized with CSS. You can find free SVG icons at websites like Feather Icons, Heroicons, or Font Awesome."
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Icon Image",
+          "info": "Use this option if you prefer to upload an image instead of using SVG code. If both SVG and image are provided, SVG will be used."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolling Features Bar",
+      "blocks": [
+        {
+          "type": "feature_item",
+          "settings": {
+            "text": "PREMIUM QUALITY",
+            "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z\"/></svg>",
+            "icon_image": ""
+          }
+        },
+        {
+          "type": "feature_item",
+          "settings": {
+            "text": "FAST SHIPPING",
+            "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zm-6 0H5V6h9v2zm-9 11.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm12 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z\"/></svg>",
+            "icon_image": ""
+          }
+        },
+        {
+          "type": "feature_item",
+          "settings": {
+            "text": "SATISFACTION GUARANTEED",
+            "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z\"/></svg>",
+            "icon_image": ""
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

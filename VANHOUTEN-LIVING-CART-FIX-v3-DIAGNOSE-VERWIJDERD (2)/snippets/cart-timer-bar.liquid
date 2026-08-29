@@ -1,0 +1,280 @@
+{% comment %}
+	Cart Timer Bar - Customizable countdown timer for cart drawer
+	
+	Accepts:
+	- block: {Object} Block settings object
+{% endcomment %}
+
+{% liquid
+	assign timer_minutes = block.settings.timer_minutes | default: 10
+	assign timer_text = block.settings.timer_text | default: 'Your order is reserved for {timer} mins!'
+	assign bg_color = block.settings.timer_bg_color | default: '#000000'
+	assign text_color = block.settings.timer_text_color | default: '#ffffff'
+	assign padding = block.settings.timer_padding | default: 8
+	assign text_size = block.settings.timer_text_size | default: 15
+	assign border_width = block.settings.timer_border_width | default: 0
+	assign border_color = block.settings.timer_border_color | default: '#ffffff'
+	assign border_style = block.settings.timer_border_style | default: 'solid'
+	assign block_id = block.id
+%}
+
+<style>
+	.cart-timer-bar-{{ block_id }} {
+		background-color: {{ bg_color }};
+		padding: {{ padding }}px;
+		text-align: center;
+		width: 100%;
+		box-sizing: border-box;
+		margin: 0 !important;
+		display: block !important;
+		position: relative;
+		z-index: 10;
+		flex-shrink: 0;
+		min-height: calc({{ text_size }}px + {{ padding }}px * 2);
+		{% if border_width > 0 %}
+			border-top: {{ border_width }}px {{ border_style }} {{ border_color }};
+			border-bottom: {{ border_width }}px {{ border_style }} {{ border_color }};
+		{% endif %}
+	}
+	
+	.cart-timer-bar-{{ block_id }}:not(.timer-expired) {
+		display: block !important;
+		visibility: visible !important;
+		opacity: 1 !important;
+	}
+
+	.cart-timer-bar-{{ block_id }}.timer-expired {
+		display: none !important;
+	}
+
+	.is-empty .cart-timer-bar-{{ block_id }} {
+		display: none !important;
+	}
+
+	.cart-timer-text span {
+		color: {{ text_color }} !important;
+		font-size: {{ text_size }}px;
+        letter-spacing: var(--letter-spacing-body);
+	}
+	
+	.cart-timer-bar-{{ block_id }}.timer-expired {
+		display: none;
+	}
+</style>
+
+{%- assign timer_placeholder = '{timer}' -%}
+{%- assign initial_display = timer_text | replace: timer_placeholder, '0:00' -%}
+<div class="cart-timer-bar-{{ block_id }}" id="cart-timer-bar-{{ block_id }}" data-block-id="{{ block_id }}" data-timer-minutes="{{ timer_minutes }}" data-timer-text="{{ timer_text | escape }}">
+	<span class="cart-timer-text">
+		{% liquid
+			assign timer_text_parts = timer_text | split: '{timer}'
+			assign timer_text_pre = timer_text_parts[0]
+		%}
+		<span class="cart-timer-text-pre">{{ timer_text_pre }}</span>
+		<span class="cart-timer-countdown"></span>
+		<span class="cart-timer-text-pos">
+			{% if timer_text_parts.size > 1 %}
+				{{ timer_text_parts[1] }}
+			{% endif %}
+		</span>
+	</span>
+</div>
+
+<script>
+	const timerIntervals = window.cartTimerIntervals || {};
+	window.cartTimerIntervals = timerIntervals;
+	const blockId = '{{ block_id }}';
+	const { storageKey, cartKeyKey } = getCartTimerStorage(blockId);
+
+	function cartTimerBar(cartData = null) {
+		if (timerIntervals[blockId]) {
+			clearInterval(timerIntervals[blockId]);
+			timerIntervals[blockId] = null;
+		}
+
+		const timerBar = document.getElementById('cart-timer-bar-{{ block_id }}');
+		if (!timerBar) return;
+
+		// Use fetched cart data if provided, or use Liquid template values
+		let items_count, cartTotalPrice;
+		if (cartData) {
+			items_count = cartData.item_count || 0;
+			cartTotalPrice = cartData.total_price || 0;
+		} else {
+			items_count = parseInt('{{ cart.item_count }}');
+			cartTotalPrice = parseInt('{{ cart.total_price }}');
+		}
+
+		if (items_count > 0) {
+			timerBar.style.display = 'block';
+		} else {
+			timerBar.style.display = 'none';
+			removeTimerFromDOM();
+			return;
+		}
+
+		const timerMinutes = parseInt(timerBar.getAttribute('data-timer-minutes'), 10) || 10;
+
+		const now = Date.now();
+		let endTime = parseInt(localStorage.getItem(storageKey), 10);
+
+		if (!endTime || isNaN(endTime) || now >= endTime) {
+			if (items_count > 0) {
+				endTime = now + timerMinutes * 60 * 1000;
+				localStorage.setItem(storageKey, endTime.toString());
+				localStorage.setItem(cartKeyKey, `${items_count}-${cartTotalPrice}`);
+			}
+		}
+
+		function formatTime(ms) {
+			const totalSeconds = Math.floor(ms / 1000);
+			const minutes = Math.floor(totalSeconds / 60);
+			const seconds = totalSeconds % 60;
+			return `${minutes}:${String(seconds).padStart(2, '0')}`;
+		}
+
+		function updateTimer() {
+			const timerBar = document.getElementById('cart-timer-bar-{{ block_id }}');
+			if (!timerBar) {
+				if (timerIntervals[blockId]) {
+					clearInterval(timerIntervals[blockId]);
+					timerIntervals[blockId] = null;
+				}
+				return;
+			}
+
+			const timerCountdownEl = timerBar.querySelector('.cart-timer-countdown');
+			if (!timerCountdownEl) {
+				if (timerIntervals[blockId]) {
+					clearInterval(timerIntervals[blockId]);
+					timerIntervals[blockId] = null;
+				}
+				return;
+			}
+
+			const now = Date.now();
+			const endTime = parseInt(localStorage.getItem(storageKey), 10);
+			const remaining = endTime - now;
+			
+			if (remaining <= 0) {
+				// Timer expired - remove from DOM and localStorage
+				removeTimerFromDOM();
+			}
+			
+			const formattedTime = formatTime(remaining);
+			timerCountdownEl.textContent = formattedTime;
+		}
+
+		function removeTimerFromDOM() {
+			if (timerIntervals[blockId]) {
+				clearInterval(timerIntervals[blockId]);
+				timerIntervals[blockId] = null;
+			}
+			timerBar.style.display = 'none';
+			timerBar.classList.add('timer-expired');
+			localStorage.removeItem(storageKey);
+			localStorage.removeItem(cartKeyKey);
+		}
+
+		// Update immediately
+		updateTimer();
+		
+		// Update every second - store interval globally
+		timerIntervals[blockId] = setInterval(updateTimer, 1000);
+	}
+
+	function getCartTimerStorage(blockId) {
+		const storageKey = `cart_timer_${blockId}`;
+		const cartKeyKey = `cart_timer_cart_${blockId}`;
+		return { storageKey, cartKeyKey };
+	}
+	
+	window.onload = function() {
+		cartTimerBar();
+	}
+
+	// Form submissions listening (add to cart)
+	document.addEventListener('submit', function(e) {
+		const form = e.target;
+		if (form && form.action && form.action.includes('/cart/add')) {
+			setTimeout(async function() {
+				try {
+					const response = await fetch('/cart.js');
+					if (response.ok) {
+						const cartData = await response.json();
+						cartTimerBar(cartData);
+					}
+				} catch (error) {
+					// Fallback to regular initialization
+					cartTimerBar();
+				}
+			}, 1000);
+		}
+	});
+
+	// Listen for upsell button clicks
+	document.addEventListener('click', function(e) {
+		const target = e.target;
+		const upsellButton = target.closest('button[name="upsell-add"], .upsell-add-button, [class*="upsell-add-button"], .upsell-button');
+		
+		if (upsellButton) {
+			setTimeout(async function() {
+				try {
+					const response = await fetch('/cart.js');
+					if (response.ok) {
+						const cartData = await response.json();
+						cartTimerBar(cartData);
+					} else {
+						cartTimerBar();
+					}
+				} catch (error) {
+					cartTimerBar();
+				}
+			}, 1500);
+		}
+	}, true);
+
+	// Listen for remove button clicks
+	document.addEventListener('click', function(e) {
+		const target = e.target;
+		const removeButton = target.closest('[data-cart-remove], [name="remove"], .cart-remove, [aria-label*="remove" i], [aria-label*="delete" i]');
+		
+		if (removeButton) {
+			setTimeout(async function() {
+				try {
+					const response = await fetch('/cart.js');
+					if (response.ok) {
+						const cartData = await response.json();
+						cartTimerBar(cartData);
+					} else {
+						cartTimerBar();
+					}
+				} catch (error) {
+					cartTimerBar();
+				}
+			}, 500);
+		}
+	}, true);
+
+	// Listen for quantity button clicks (plus/minus)
+	document.addEventListener('click', function(e) {
+		const target = e.target;
+		const quantityButton = target.closest('.quantity__button, button[name="plus"], button[name="minus"], [class*="quantity-button"]');
+		
+		if (quantityButton) {
+			setTimeout(async function() {
+				try {
+					const response = await fetch('/cart.js');
+					if (response.ok) {
+						const cartData = await response.json();
+						cartTimerBar(cartData);
+					} else {
+						cartTimerBar();
+					}
+				} catch (error) {
+					cartTimerBar();
+				}
+			}, 500);
+		}
+	}, true);
+</script>

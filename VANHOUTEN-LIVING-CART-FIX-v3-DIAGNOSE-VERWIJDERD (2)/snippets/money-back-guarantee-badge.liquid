@@ -1,0 +1,204 @@
+{%- comment -%}
+  Money Back Guarantee Badge Snippet
+
+  Accepts:
+  - container_bg_color: Background color for the main container (default: #CDF4FF)
+  - border_color: Dashed border color for the badge circle (default: #555555) - DEPRECATED, use badge_border_color
+  - badge_icon: Image object for the badge icon
+  - text_small: Bold part of the text (default: "Less than 1%")
+  - text_large: Regular part of the text (default: "of customers claim our Money Back Guarantee")
+  - text_small_color: Color for the bold text (default: #333333)
+  - text_large_color: Color for the regular text (default: #555555)
+  - padding: Padding inside the container (default: 15px)
+  - badge_size: Size of the badge circle (default: 45px)
+  - icon_size: Size of the icon inside the badge (default: 30px)
+  - margin_top: Top margin (default: 10px)
+  - margin_bottom: Bottom margin (default: 10px)
+  - text_small_size: Font size for bold text (default: 13px)
+  - text_large_size: Font size for regular text (default: 13px)
+  - enable_container_border: Enable border around the container (default: false)
+  - container_border_width: Width of the container border in pixels (default: 1)
+  - container_border_style: Style of the container border (default: 'solid')
+  - container_border_color: Color of the container border (default: '#cccccc')
+  - container_border_radius: Border radius of the container in pixels (default: 10)
+  - badge_border_width: Width of the badge circle border in pixels (default: 1.5)
+  - badge_border_style: Style of the badge circle border (default: 'dashed')
+  - badge_border_color: Color of the badge circle border (default: #555555)
+  - badge_background_color: Background color of the badge circle (default: #ffffff)
+  - block: The block object for shopify_attributes
+{%- endcomment -%}
+
+{% liquid
+  # Check if use_theme_colors is explicitly true, otherwise default to false
+  if use_theme_colors == true
+    assign use_theme_colors = true
+  else
+    assign use_theme_colors = false
+  endif
+  
+  assign container_bg_color = container_bg_color | default: '#CDF4FF'
+  assign border_color = border_color | default: '#555555'
+  assign text_small = text_small | default: 'Less than 1%'
+  assign text_large = text_large | default: 'of customers claim our Money Back Guarantee'
+  assign text_small_color = text_small_color | default: '#333333'
+  assign text_large_color = text_large_color | default: '#555555'
+  assign padding = padding | default: 15
+  assign badge_size = badge_size | default: 45
+  assign icon_size = icon_size | default: 30
+  assign margin_top = margin_top | default: 10
+  assign margin_bottom = margin_bottom | default: 10
+  assign text_small_size = text_small_size | default: 13
+  assign text_large_size = text_large_size | default: 13
+  assign default_icon_url = 'https://i.ibb.co/V0jMqZTR/badge-1.png'
+
+  # Container border settings
+  assign enable_container_border = enable_container_border | default: false
+  assign container_border_width = container_border_width | default: 1
+  assign container_border_style = container_border_style | default: 'solid'
+  assign container_border_color = container_border_color | default: '#cccccc'
+  assign container_border_radius = container_border_radius | default: 10
+
+  # Badge circle border settings
+  assign badge_border_width = badge_border_width | default: 1.5
+  assign badge_border_style = badge_border_style | default: 'dashed'
+  assign badge_border_color = badge_border_color | default: border_color
+  assign badge_background_color = badge_background_color | default: '#ffffff'
+
+  assign badge_size_mobile = badge_size | times: 0.84 | round
+  assign icon_size_mobile = icon_size | times: 0.83 | round
+  assign padding_mobile = padding | times: 0.8 | round
+  assign text_small_size_mobile = text_small_size | times: 0.92 | round
+  assign text_large_size_mobile = text_large_size | times: 0.92 | round
+%}
+
+<div
+  class="guarantee-container guarantee-container-{{ block.id }}"
+  style="
+    background-color: {% if use_theme_colors %}{{ settings.global_section_accent_2_color }}{% else %}{{ container_bg_color }}{% endif %};
+    padding: {{ padding }}px;
+    margin-top: {{ margin_top }}px;
+    margin-bottom: {{ margin_bottom }}px;
+    {% if enable_container_border %}
+    border: {{ container_border_width }}px {{ container_border_style }} {{ container_border_color }};
+    border-radius: {{ container_border_radius }}px;
+    {% else %}
+    border-radius: 10px;
+    {% endif %}
+  "
+  {{ block.shopify_attributes }}
+>
+  <div class="badge-container" style="min-width: {{ badge_size | plus: 5 }}px;">
+    <div class="badge-circle" style="border: {{ badge_border_width }}px {{ badge_border_style }} {{ badge_border_color }}; background-color: {{ badge_background_color }}; width: {{ badge_size }}px; height: {{ badge_size }}px;">
+      {% if badge_icon != blank %}
+        {{
+          badge_icon
+          | image_url: width: icon_size
+          | image_tag: class: 'badge-icon', width: icon_size, height: icon_size, alt: 'Guarantee Badge'
+        }}
+      {% else %}
+        <img
+          class="badge-icon"
+          src="{{ default_icon_url }}"
+          alt="Badge icon"
+          width="{{ icon_size }}"
+          height="{{ icon_size }}"
+        >
+      {% endif %}
+    </div>
+  </div>
+  <div class="guarantee-text">
+    <p>
+      <span
+        class="guarantee-text-small"
+        style="color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_small_color }}{% endif %};"
+      >
+        {{- text_small }}
+      </span>
+      <span
+        class="guarantee-text-large"
+        style="color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_large_color }}{% endif %};"
+      >
+        {{- text_large -}}
+      </span>
+    </p>
+  </div>
+</div>
+
+<style>
+  .guarantee-container-{{ block.id }} {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    font-family: sans-serif;
+  }
+
+  .guarantee-container-{{ block.id }} .badge-container {
+    position: relative;
+    margin-right: 12px;
+  }
+
+  .guarantee-container-{{ block.id }} .badge-circle {
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .guarantee-container-{{ block.id }} .badge-icon {
+    object-fit: contain;
+  }
+
+  .guarantee-container-{{ block.id }} .guarantee-text {
+    font-size: 0; /* Base for inline spans */
+  }
+
+  .guarantee-container-{{ block.id }} .guarantee-text p {
+      margin: 0;
+  }
+
+  .guarantee-container-{{ block.id }} .guarantee-text-small {
+    font-size: {{ text_small_size }}px !important;
+    letter-spacing: var(--letter-spacing-body);
+    line-height: 1.3;
+    font-weight: var(--font-weight-bold);
+    display: inline;
+  }
+
+  .guarantee-container-{{ block.id }} .guarantee-text-large {
+    font-size: {{ text_large_size }}px !important;
+    letter-spacing: var(--letter-spacing-body);
+    line-height: 1.3;
+    display: inline;
+  }
+
+  @media (max-width: 480px) {
+    .guarantee-container-{{ block.id }} {
+      padding: {{ padding_mobile }}px;
+    }
+
+    .guarantee-container-{{ block.id }} .badge-container {
+      margin-right: 10px;
+      min-width: {{ badge_size_mobile | plus: 2 }}px;
+    }
+
+    .guarantee-container-{{ block.id }} .badge-circle {
+      width: {{ badge_size_mobile }}px;
+      height: {{ badge_size_mobile }}px;
+    }
+
+    .guarantee-container-{{ block.id }} .badge-icon {
+      width: {{ icon_size_mobile }}px !important; /* Use important to override width attribute */
+      height: {{ icon_size_mobile }}px !important;
+    }
+
+    .guarantee-container-{{ block.id }} .guarantee-text-small {
+      font-size: {{ text_small_size_mobile }}px; /* Slightly smaller on mobile */
+      line-height: 1.3;
+    }
+
+    .guarantee-container-{{ block.id }} .guarantee-text-large {
+      font-size: {{ text_large_size_mobile }}px; /* Slightly smaller on mobile */
+      line-height: 1.3;
+    }
+  }
+</style>

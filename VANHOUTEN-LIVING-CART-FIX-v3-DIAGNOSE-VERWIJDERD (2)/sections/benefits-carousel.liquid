@@ -1,0 +1,606 @@
+{% comment %}
+  Component: Benefits Carousel
+  
+  Description: Horizontal scrolling carousel displaying benefit items with pause/play functionality
+  
+  Features:
+  - Responsive animation with accessibility support
+  - Keyboard navigation and reduced motion support
+  - Customizable colors and typography
+  - Theme color integration
+  - Mobile-optimized design
+  
+  Settings:
+  - use_theme_colors: boolean - Use global theme colors
+  - Custom styling options for container, items, and typography
+  - Animation and spacing controls
+{% endcomment %}
+
+{{ 'benefits-carousel.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  # Color customization logic with theme toggle
+  assign use_theme_colors = section.settings.use_theme_colors
+  
+  # Content
+  assign heading_text = section.settings.heading
+  assign empty_text = section.settings.empty_text | default: 'No benefits currently listed.'
+  assign benefits = section.blocks
+  
+  # Configuration variables (used in CSS below)
+  assign use_gradient = section.settings.use_gradient | default: false
+-%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    margin-top: {{ section.settings.margin_top }}px;
+    margin-bottom: {{ section.settings.margin_bottom }}px;
+  }
+  
+  .section-{{ section.id }}.helps-with-carousel__container {
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;
+    font-family: var(--font-body-family-override, inherit);
+    letter-spacing: var(--letter-spacing-heading, normal);
+    border-radius: 0;
+    border-top: 2px solid;
+    border-bottom: 2px solid;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    
+    {% if section.settings.use_theme_colors %}
+      background-color: {{ settings.global_section_background_color }} !important;
+      color: {{ settings.global_section_text_color }} !important;
+      border-image: linear-gradient(to right, {{ settings.global_section_accent_1_color }}, {{ settings.global_section_accent_1_color }}) 1;
+    {% else %}
+      background-color: {{ section.settings.background_color }} !important;
+      border-image: linear-gradient(to right, {{ section.settings.border_start_color }}, {{ section.settings.border_end_color }}) 1;
+    {% endif %}
+  }
+
+ .section-{{ section.id }} .helps-with-carousel__heading {
+    font-weight: var(--font-weight-bold, 700);
+    margin-bottom: 14px;
+    letter-spacing: var(--letter-spacing-heading, normal);
+
+    {% if section.settings.use_theme_colors %}
+      /* Apply global theme text color */
+      color: {{ settings.global_section_text_color }} !important;
+    {% else %}
+      /* Apply custom section text color */
+      color: {{ section.settings.heading_color }} !important;
+    {% endif %}
+
+    {% if section.settings.use_gradient %}
+      background: linear-gradient(to right, {{ section.settings.heading_gradient_start }}, {{ section.settings.heading_gradient_end | default: '#FFFFFF' }});
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    {% endif %}
+
+    font-size: {{ section.settings.heading_size }}px;
+  }
+
+  .helps-with-carousel__benefits {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding: 8px 0;
+    margin: 0 auto;
+  }
+
+  .helps-with-carousel__track-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .helps-with-carousel__track {
+    display: inline-flex;
+    white-space: nowrap;
+    position: relative;
+    will-change: transform;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .section-{{ section.id }} .helps-with-carousel__track {
+    animation: carouselScroll-{{ section.id }} {{ section.settings.scroll_speed }}s linear infinite;
+  }
+
+  .section-{{ section.id }}.paused .helps-with-carousel__track {
+    animation-play-state: paused;
+  }
+
+  @keyframes carouselScroll-{{ section.id }} {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(calc(-100% / 5), 0, 0);
+    }
+  }
+
+  .section-{{ section.id }} .helps-with-carousel__item {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    margin: 0 10px;
+    letter-spacing: var(--letter-spacing-body, normal);
+    white-space: nowrap;
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    position: relative;
+    gap: {{ section.settings.icon_text_spacing }}px;
+
+    {% if section.settings.use_theme_colors %}
+      /* Apply global theme colors to item (inverse) */
+      background-color: {{ settings.global_section_background_color }};
+      color: {{ settings.global_section_accent_1_color }} !important;
+    {% else %}
+      /* Apply custom section item colors */
+      background-color: {{ section.settings.item_background }} !important;
+      color: {{ section.settings.item_text_color }} !important;
+    {% endif %}
+  }
+
+  .section-{{ section.id }} .helps-with-carousel__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: {{ section.settings.icon_size }}px;
+    height: {{ section.settings.icon_size }}px;
+    flex-shrink: 0;
+  }
+
+  .section-{{ section.id }} .helps-with-carousel__icon svg {
+    width: 100%;
+    height: 100%;
+    {% if section.settings.use_theme_colors %}
+      fill: {{ settings.global_section_accent_1_color }} !important;
+    {% else %}
+      fill: {{ section.settings.icon_color }} !important;
+    {% endif %}
+  }
+
+  .helps-with-carousel__text {
+    display: inline-block;
+  }
+
+  .section-{{ section.id }} .helps-with-carousel__item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    {% if section.settings.use_theme_colors %}
+      background: {{ settings.global_section_accent_1_color }} border-box;
+    {% else %}
+      background: linear-gradient(to right, {{ section.settings.item_border_start }}, {{ section.settings.item_border_end }}) border-box;
+    {% endif %}
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .section-{{ section.id }} .helps-with-carousel__no-benefits {
+    color: {{ section.settings.empty_text_color }};
+    font-style: italic;
+    padding: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .section-{{ section.id }} .helps-with-carousel__heading {
+      font-size: {{ section.settings.heading_size_mobile }}px;
+    }
+
+    .section-{{ section.id }} .helps-with-carousel__item {
+      padding: 8px 15px;
+      margin: 0 5px;
+      font-size: {{ section.settings.item_font_size_mobile }}px;
+      gap: {{ section.settings.icon_text_spacing_mobile }}px;
+    }
+
+    .section-{{ section.id }} .helps-with-carousel__icon {
+      width: {{ section.settings.icon_size_mobile }}px;
+      height: {{ section.settings.icon_size_mobile }}px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-{{ section.id }} .helps-with-carousel__track {
+      animation: none;
+    }
+  }
+
+  @media (hover: hover) {
+    .section-{{ section.id }} .helps-with-carousel__benefits:hover .helps-with-carousel__track {
+      animation-play-state: paused;
+    }
+  }
+</style>
+
+<div 
+  id="section-{{ section.id }}" 
+  class="helps-with-carousel__container section-{{ section.id }}{% unless use_theme_colors %}{% if section.settings.border_start_color != blank %} has-gradient-border{% endif %}{% endunless %} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}" 
+  data-component="helps-with-carousel"
+  data-section-id="{{ section.id }}"
+  data-scroll-speed="{{ section.settings.scroll_speed | default: 20 }}"
+>
+  {% if heading_text != blank %}
+    <h2 class="helps-with-carousel__heading{% if use_gradient %} has-gradient{% endif %}">
+      {{ heading_text }}
+    </h2>
+  {% endif %}
+  
+  {% if benefits.size > 0 %}
+  <div class="helps-with-carousel__benefits">
+    <div class="helps-with-carousel__track-container" aria-live="off">
+      <ul class="helps-with-carousel__track" role="list">
+        {% comment %} First set - authoritative with shopify attributes {% endcomment %}
+        {% for block in benefits %}
+          <li class="helps-with-carousel__item" role="listitem" {{ block.shopify_attributes }}>
+            {% if block.settings.show_icon and block.settings.custom_icon != blank %}
+              <span class="helps-with-carousel__icon">{{ block.settings.custom_icon }}</span>
+            {% endif %}
+            <span class="helps-with-carousel__text">{{ block.settings.benefit_text }}</span>
+          </li>
+        {% endfor %}
+        
+        {% comment %} Second and third sets - clones without shopify attributes {% endcomment %}
+        {% for i in (1..4) %}
+          {% for block in benefits %}
+            <li class="helps-with-carousel__item" role="listitem" aria-hidden="true">
+              {% if block.settings.show_icon and block.settings.custom_icon != blank %}
+                <span class="helps-with-carousel__icon">{{ block.settings.custom_icon }}</span>
+              {% endif %}
+              <span class="helps-with-carousel__text">{{ block.settings.benefit_text }}</span>
+            </li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% else %}
+  <div class="helps-with-carousel__no-benefits">{{ empty_text }}</div>
+  {% endif %}
+</div>
+
+<script src="{{ 'benefits-carousel.js' | asset_url }}" defer></script>
+
+{% schema %} 
+{
+  "name": "Benefits Carousel",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "Apply the global theme colors to this section"
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "HELPS WITH"
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Empty state text",
+      "default": "No benefits currently listed."
+    },
+    {
+      "type": "header",
+      "content": "Icon Settings"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Icon size (desktop)",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "icon_size_mobile",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Icon size (mobile)",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon color",
+      "default": "#ef4a65"
+    },
+    {
+      "type": "range",
+      "id": "icon_text_spacing",
+      "min": 2,
+      "max": 15,
+      "step": 1,
+      "unit": "px",
+      "label": "Icon to text spacing (desktop)",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "icon_text_spacing_mobile",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "label": "Icon to text spacing (mobile)",
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": -20,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "label": "Top margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": -20,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "s",
+      "label": "Scroll speed",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Heading Style"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 16,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size (desktop)",
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 14,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size (mobile)",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1383A0"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient",
+      "label": "Use gradient for heading",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "heading_gradient_start",
+      "label": "Heading gradient start",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "heading_gradient_end",
+      "label": "Heading gradient end",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Container Style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ef4a65"
+    },
+    {
+      "type": "color",
+      "id": "border_start_color",
+      "label": "Border gradient start",
+      "default": "#ef4a65"
+    },
+    {
+      "type": "color",
+      "id": "border_end_color",
+      "label": "Border gradient end",
+      "default": "#ffb1be"
+    },
+    {
+      "type": "header",
+      "content": "Item Style"
+    },
+    {
+      "type": "color",
+      "id": "item_background",
+      "label": "Item background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "item_text_color",
+      "label": "Item text color",
+      "default": "#ef4a65"
+    },
+    {
+      "type": "color",
+      "id": "item_border_start",
+      "label": "Item border gradient start",
+      "default": "#ffb1be"
+    },
+    {
+      "type": "color",
+      "id": "item_border_end",
+      "label": "Item border gradient end",
+      "default": "#ef4a65"
+    },
+    {
+      "type": "range",
+      "id": "item_font_size_mobile",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Item font size (mobile)",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "empty_text_color",
+      "label": "Empty state text color",
+      "default": "#888888"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit Item",
+      "limit": 12,
+      "settings": [
+        {
+          "type": "text",
+          "id": "benefit_text",
+          "label": "Benefit text",
+          "default": "Better Mood"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_icon",
+          "label": "Show custom icon",
+          "default": false,
+          "info": "Enable to display a custom SVG icon before the text"
+        },
+        {
+          "type": "textarea",
+          "id": "custom_icon",
+          "label": "Custom SVG Icon",
+          "default": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z\"/></svg>",
+          "info": "Paste your custom SVG code here. For best results, use an SVG with viewBox attribute and currentColor fill."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Benefits Carousel",
+      "blocks": [
+        {
+          "type": "benefit",
+          "settings": {
+            "benefit_text": "Improved Sleep",
+            "show_icon": true,
+            "custom_icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M6 6.9L3.87 4.78l1.41-1.41L7.4 5.5L6 6.9zM13 1v3h-2V1h2zm7.13 3.78L18 6.9l-1.4-1.4l2.12-2.13 1.41 1.41zM4.5 10.5v2h-3v-2h3zm15 0h3v2h-3v-2zM6 20h2v-2H6v2zm6 2v-3h2v3h-2zm6-4h2v2h-2v-2z\"/></svg>"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "benefit_text": "Reduced Stress",
+            "show_icon": true,
+            "custom_icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z\"/></svg>"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "benefit_text": "Enhanced Focus",
+            "show_icon": true,
+            "custom_icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z\"/></svg>"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "benefit_text": "Better Mood",
+            "show_icon": true,
+            "custom_icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z\"/></svg>"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "benefit_text": "Increased Energy",
+            "show_icon": true,
+            "custom_icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M7 2v11h3v9l7-12h-4l4-8z\"/></svg>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

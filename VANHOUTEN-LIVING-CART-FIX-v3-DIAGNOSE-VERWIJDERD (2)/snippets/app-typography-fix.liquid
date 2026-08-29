@@ -1,0 +1,50 @@
+{% comment %}
+  App Typography Fix
+  Ensures proper letter spacing for third-party apps
+  Uses the app_letter_spacing setting or falls back to body_letter_spacing
+{% endcomment %}
+
+<style>
+  :root {
+    --app-letter-spacing: {{ settings.app_letter_spacing | default: settings.body_letter_spacing }}px;
+  }
+
+  /* Apply letter-spacing to common app elements */
+  .shopify-app-block,
+  .shopify-buy-frame,
+  div[data-shopify-app],
+  div[data-app-id],
+  div[class*="app-"],
+  div[class*="App"],
+  #bundle-container,
+  #bundle-app,
+  [data-bundle-app],
+  .bundle-builder,
+  #ReCharge,
+  [data-rebuy-id],
+  [data-rebuy-container],
+  [data-bold-bundle],
+  [data-loyalty-container] {
+    letter-spacing: var(--app-letter-spacing) !important;
+  }
+
+  /* Exclude shop-product-details blocks from app letter-spacing rules */
+  .shop-product-section,
+  .shop-product-info,
+  .shop-product-info *:not(.shop-product-title):not([class*="product-title"]),
+  .shop-product-section *:not(.shop-product-title):not([class*="product-title"]),
+  .blocks-section:not(.shopify-app-block):not([data-shopify-app]):not([data-app-id]):not([class*="app-"]):not([class*="App"]),
+  .limited-inventory-alert,
+  .limited-inventory-alert *,
+  .product-description-block,
+  .product-description-block * {
+    letter-spacing: var(--letter-spacing-body) !important;
+  }
+
+  /* Product title should use heading letter-spacing */
+  .shop-product-title,
+  .shop-product-section .shop-product-title,
+  [class*="product-title-title"] {
+    letter-spacing: var(--letter-spacing-heading) !important;
+  }
+</style>

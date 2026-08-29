@@ -1,0 +1,282 @@
+{%- if cart != empty -%}
+  {%- for item in cart.items -%}
+    <div id="cart-notification-product-{{ item.key }}" class="cart-item">
+      {%- if item.image -%}
+        <div class="cart-notification-product__image global-media-settings">
+          <img
+            src="{{ item.image | image_url: width: 140 }}"
+            alt="{{ item.image.alt | escape }}"
+            width="70"
+            height="{{ 70 | divided_by: item.image.aspect_ratio | ceil }}"
+            loading="lazy"
+          >
+        </div>
+      {%- endif -%}
+      <div>
+        {%- if settings.show_vendor -%}
+          <p class="caption-with-letter-spacing light">{{ item.product.vendor }}</p>
+        {%- endif -%}
+        <h3 class="cart-notification-product__name h4">{{ item.product.title | escape }}</h3>
+        <dl>
+          {%- unless item.product.has_only_default_variant -%}
+            {%- for option in item.options_with_values -%}
+              <div class="product-option">
+                <dt>{{ option.name }}:</dt>
+                <dd>{{ option.value }}</dd>
+              </div>
+            {%- endfor -%}
+          {%- endunless -%}
+          {%- for property in item.properties -%}
+            {%- assign property_first_char = property.first | slice: 0 -%}
+            {%- if property.last != blank and property_first_char != '_' -%}
+              <div class="product-option">
+                <dt>{{ property.first }}:</dt>
+                <dd>
+                  {%- if property.last contains '/uploads/' -%}
+                    <a href="{{ property.last }}" class="link" target="_blank">
+                      {{ property.last | split: '/' | last }}
+                    </a>
+                  {%- else -%}
+                    {{ property.last }}
+                  {%- endif -%}
+                </dd>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </dl>
+        {%- if item.selling_plan_allocation != null -%}
+          <p class="product-option">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+        {%- endif -%}
+      </div>
+
+      {% comment %} Render upsells from cart-drawer blocks {% endcomment %}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'cart_upsell' -%}
+          {%- assign upsell_handle = block.settings.upsell_product_1 -%}
+          {%- if upsell_handle != blank -%}
+            {%- assign upsell_product = all_products[upsell_handle] -%}
+            {%- if upsell_product and upsell_product.available -%}
+              {%-
+                render 'cart-drawer-upsell',
+                block: block,
+                block_id: block.id,
+                product_form_id: 'cart-notification-upsell-' | append: block.id,
+                upsell_product: upsell_product,
+                show_description: block.settings.show_upsell_description,
+                description_text: block.settings.upsell_description_text,
+                upsell_button_text: block.settings.upsell_button_text,
+                button_text_color: block.settings.upsell_button_text_color,
+                upsell_custom_bestseller_svg: block.settings.upsell_custom_bestseller_svg,
+                title_color: block.settings.upsell_title_color,
+                description_color: block.settings.upsell_description_color,
+                show_best_seller_tag: block.settings.show_upsell_best_seller_tag,
+                best_seller_text: block.settings.upsell_best_seller_text,
+                best_seller_tag_color: block.settings.upsell_best_seller_tag_color,
+                best_seller_tag_text_color: block.settings.upsell_best_seller_tag_text_color,
+                show_price: block.settings.upsell_show_price,
+                card_bg_color: block.settings.upsell_card_background_color,
+                card_border_radius: block.settings.upsell_card_border_radius,
+                border_width: block.settings.upsell_border_width,
+                border_style: block.settings.upsell_border_style,
+                border_color: block.settings.upsell_border_color,
+                variant_border_color: block.settings.upsell_variant_border_color,
+                variant_bg_color: block.settings.upsell_variant_background_color,
+                variant_text_color: block.settings.upsell_variant_text_color,
+                button_bg_color: block.settings.upsell_button_bg_color,
+                button_border_radius: block.settings.upsell_button_border_radius,
+                button_text_color: block.settings.upsell_button_text_color,
+                upsell_show_price: block.settings.upsell_show_price,
+                product_image_bg_color: block.settings.upsell_product_image_background_color,
+                image_border_radius: block.settings.upsell_image_border_radius,
+                top_margin: 10,
+                bottom_margin: 10
+              -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endfor -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Cart Notification Product",
+  "tag": "section",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "cart_upsell",
+      "name": "Upsell Product",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "product",
+          "id": "upsell_product_1",
+          "label": "Select Upsell Product"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_upsell_description",
+          "label": "Show Description",
+          "default": false
+        },
+        {
+          "type": "textarea",
+          "id": "upsell_description_text",
+          "label": "Description Text",
+          "default": "Short product description here"
+        },
+        {
+          "type": "color",
+          "id": "upsell_description_color",
+          "label": "Description Text Color",
+          "default": "#333333"
+        },
+        {
+          "type": "checkbox",
+          "id": "upsell_show_price",
+          "label": "Show the price inside the button",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "upsell_button_text",
+          "label": "Button Text",
+          "default": "Add +"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_upsell_best_seller_tag",
+          "label": "Show 'Best Seller' Tag",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "upsell_best_seller_text",
+          "label": "Tag Text",
+          "default": "BEST SELLER"
+        },
+        {
+          "type": "color",
+          "id": "upsell_best_seller_tag_color",
+          "label": "Tag Background Color",
+          "default": "#e18942"
+        },
+        {
+          "type": "color",
+          "id": "upsell_best_seller_tag_text_color",
+          "label": "Tag Text Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "textarea",
+          "id": "upsell_custom_bestseller_svg",
+          "label": "Custom SVG Icon (Optional)"
+        },
+        {
+          "type": "color",
+          "id": "upsell_card_background_color",
+          "label": "Card Background Color",
+          "default": "#fcf9e6"
+        },
+        {
+          "type": "color",
+          "id": "upsell_product_image_background_color",
+          "label": "Product Image Background Color",
+          "default": "#fcf9e6"
+        },
+        {
+          "type": "color",
+          "id": "upsell_title_color",
+          "label": "Title Color",
+          "default": "#111111"
+        },
+        {
+          "type": "color",
+          "id": "upsell_variant_text_color",
+          "label": "Variant Text Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "color",
+          "id": "upsell_variant_background_color",
+          "label": "Variant Background Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "upsell_variant_border_color",
+          "label": "Variant Border Color",
+          "default": "#e0e0e0"
+        },
+        {
+          "type": "color",
+          "id": "upsell_button_bg_color",
+          "label": "Button Background Color",
+          "default": "#181818"
+        },
+        {
+          "type": "color",
+          "id": "upsell_button_text_color",
+          "label": "Button Text Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "range",
+          "id": "upsell_button_border_radius",
+          "label": "Button Border Radius",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "default": 2
+        },
+        {
+          "type": "range",
+          "id": "upsell_card_border_radius",
+          "label": "Card Border Radius",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "default": 10
+        },
+        {
+          "type": "select",
+          "id": "upsell_border_style",
+          "label": "Border Style",
+          "options": [
+            {"value": "none", "label": "None"},
+            {"value": "solid", "label": "Solid"},
+            {"value": "dashed", "label": "Dashed"}
+          ],
+          "default": "none"
+        },
+        {
+          "type": "range",
+          "id": "upsell_border_width",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "label": "Border Width",
+          "default": 0
+        },
+        {
+          "type": "color",
+          "id": "upsell_border_color",
+          "label": "Border Color",
+          "default": "#000000"
+        },
+        {
+          "type": "range",
+          "id": "upsell_image_border_radius",
+          "label": "Image Border Radius",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "default": 4
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

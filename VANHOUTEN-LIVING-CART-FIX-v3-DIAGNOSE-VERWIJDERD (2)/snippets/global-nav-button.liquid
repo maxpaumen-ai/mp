@@ -1,0 +1,264 @@
+{%- comment -%}
+  Global Navigation Button Snippet
+  
+  Parameters:
+  - direction: 'prev' or 'next'
+  - aria_label: Accessibility label
+  - aria_controls: ID of the element being controlled (optional)
+  - use_global: true/false - whether to use global settings (default: checks settings.enable_global_nav_buttons)
+  - section_settings: section.settings object for fallback colors
+  
+  Usage:
+  {% render 'global-nav-button', 
+    direction: 'prev', 
+    aria_label: 'Previous', 
+    use_global: true 
+  %}
+{%- endcomment -%}
+
+{%- liquid
+  assign use_global = use_global | default: settings.enable_global_nav_buttons
+  assign direction = direction | default: 'next'
+  
+  if use_global
+    assign button_bg = settings.nav_button_background
+    assign button_bg_hover = settings.nav_button_background_hover
+    assign icon_color = settings.nav_button_icon_color
+    assign icon_color_hover = settings.nav_button_icon_color_hover
+    assign border_color = settings.nav_button_border_color
+    assign border_color_hover = settings.nav_button_border_color_hover
+    assign border_width = settings.nav_button_border_width
+    assign border_radius = settings.nav_button_border_radius
+    assign button_size = settings.nav_button_size
+    assign icon_size = settings.nav_button_icon_size
+    assign stroke_width = settings.nav_button_icon_stroke_width
+    assign arrow_style = settings.nav_button_arrow_style
+    assign enable_border = settings.nav_button_enable_border
+    assign enable_shadow = settings.nav_button_enable_shadow
+    assign enable_hover_transform = settings.nav_button_enable_hover_transform
+  else
+    comment
+      ORDER OF PRIORITY FOR NON-GLOBAL BUTTONS:
+      1) arrow_* settings (used by Instagram / photo-feed) when section has arrow_background OR arrow_color settings
+      2) section-level "use_theme_colors"
+      3) other per-section nav button styles
+    endcomment
+    comment
+      Check if section has Instagram-style arrow settings (arrow_background, arrow_color, etc.)
+      We check if EITHER arrow_background or arrow_color is defined (not nil)
+      This allows the section to work even if user hasn't set colors yet
+    endcomment
+    assign section_id_check = section.id | default: section_settings.id | default: ''
+    assign has_instagram_arrows = false
+    # Photo feed and similar sections will have arrow_size setting
+    if section_settings.arrow_size
+      assign has_instagram_arrows = true
+    endif
+    
+    if has_instagram_arrows
+      comment
+        Instagram feed / local arrow settings:
+        arrow_background, arrow_hover_background, arrow_color, arrow_hover_color,
+        arrow_size, arrow_icon_size, arrow_border_radius, arrow_opacity, button_hover_transparency
+      endcomment
+      assign button_bg = section_settings.arrow_background | default: 'rgba(255,255,255,0.9)'
+      assign button_bg_hover = section_settings.arrow_hover_background | default: button_bg
+      assign icon_color = section_settings.arrow_color | default: '#333333'
+      assign icon_color_hover = section_settings.arrow_hover_color | default: icon_color
+      assign border_color = section_settings.arrow_background | default: button_bg
+      assign border_color_hover = section_settings.arrow_hover_background | default: border_color
+      assign button_size = section_settings.arrow_size | default: 50
+      assign icon_size = section_settings.arrow_icon_size | default: 20
+      assign stroke_width = 2
+      if section_settings.use_global_button_style
+        assign border_radius = settings.nav_button_border_radius | default: 24
+      else
+        assign border_radius = section_settings.arrow_border_radius | default: 24
+      endif
+      assign arrow_opacity = section_settings.arrow_opacity | default: 1.0
+      assign arrow_hover_opacity = section_settings.button_hover_transparency | default: arrow_opacity
+      assign enable_border = true
+      assign enable_shadow = false
+      assign enable_hover_transform = true
+    elsif section_settings.use_theme_colors
+      if direction == 'prev'
+        assign button_bg = settings.global_section_background_color
+        assign icon_color = settings.global_section_text_color
+        assign border_color = settings.global_section_text_color | color_lighten: 70
+      else
+        assign button_bg = settings.global_section_accent_1_color
+        assign icon_color = settings.global_section_background_color
+        assign border_color = settings.global_section_accent_1_color
+      endif
+    else
+      comment
+        Check for unified nav button settings (video slider & before-after styles)
+      endcomment
+      if section_settings.nav_button_bg_color
+        comment
+          Before-after style: nav_button_bg_color, nav_button_text_color
+        endcomment
+        assign button_bg = section_settings.nav_button_bg_color
+        assign button_bg_hover = section_settings.nav_button_hover_bg_color | default: button_bg
+        assign icon_color = section_settings.nav_button_text_color | default: '#ffffff'
+        assign icon_color_hover = section_settings.nav_button_hover_text_color | default: icon_color
+        assign border_color = section_settings.nav_button_border_color | default: button_bg
+        assign border_radius = section_settings.nav_button_radius | default: 8
+      elsif section_settings.pagination_color
+        comment
+          Board of advisors style: pagination_color for both border and icon
+        endcomment
+        assign button_bg = 'transparent'
+        assign icon_color = section_settings.pagination_color | default: '#2c2c2c'
+        assign border_color = section_settings.pagination_color | default: '#2c2c2c'
+        assign button_bg_hover = section_settings.pagination_color | default: '#2c2c2c'
+        assign icon_color_hover = section_settings.section_background | default: '#ffffff'
+        assign border_radius = 8
+      elsif section_settings.nav_button_bg
+        comment
+          Collection grid & video slider style: nav_button_bg, nav_button_color, nav_button_active_bg
+        endcomment
+        if direction == 'prev'
+          assign button_bg = section_settings.nav_button_bg | default: '#ffffff'
+          assign icon_color = section_settings.nav_button_color | default: '#000000'
+          assign border_color = section_settings.nav_button_border | default: '#cccccc'
+        else
+          comment Check for active button settings (collection grid)
+          if section_settings.nav_button_active_bg
+            assign button_bg = section_settings.nav_button_active_bg
+            assign icon_color = section_settings.nav_button_active_color | default: '#ffffff'
+            assign border_color = section_settings.nav_button_active_border | default: button_bg
+          else
+            assign button_bg = section_settings.nav_button_bg | default: '#000000'
+            assign icon_color = section_settings.nav_button_color | default: '#ffffff'
+            assign border_color = section_settings.nav_button_border | default: '#cccccc'
+          endif
+        endcomment
+        endif
+        assign border_radius = section_settings.nav_button_radius | default: 8
+      else
+        comment
+          Fall back to direction-specific settings (steps/testimonials style)
+        endcomment
+        if direction == 'prev'
+          assign button_bg = section_settings.prev_button_bg | default: '#ffffff'
+          assign icon_color = section_settings.prev_button_color | default: '#000000'
+          assign border_color = section_settings.prev_button_border | default: '#e0e0e0'
+        else
+          assign button_bg = section_settings.next_button_bg | default: '#EF4A65'
+          assign icon_color = section_settings.next_button_color | default: '#ffffff'
+          assign border_color = section_settings.next_button_border | default: '#EF4A65'
+        endif
+        assign border_radius = 50
+      endif
+    endif
+    unless button_bg_hover
+      assign button_bg_hover = button_bg
+    endunless
+    unless icon_color_hover
+      assign icon_color_hover = icon_color
+    endunless
+    unless border_color_hover
+      assign border_color_hover = border_color
+    endunless
+    unless arrow_opacity
+      assign arrow_opacity = 1.0
+    endunless
+    unless arrow_hover_opacity
+      assign arrow_hover_opacity = arrow_opacity
+    endunless
+    assign border_width = 1
+    assign button_size = 40
+    assign icon_size = 24
+    assign stroke_width = 2
+    assign arrow_style = 'chevron'
+    assign enable_border = true
+    assign enable_shadow = false
+    assign enable_hover_transform = true
+  endif
+-%}
+
+<button 
+  class="nav-button global-nav-button {{ direction }}" 
+  type="button" 
+  aria-label="{{ aria_label | escape }}"
+  {% if aria_controls %}aria-controls="{{ aria_controls }}"{% endif %}
+  style="
+    --nav-btn-bg: {{ button_bg }};
+    --nav-btn-bg-hover: {{ button_bg_hover }};
+    --nav-btn-color: {{ icon_color }};
+    --nav-btn-color-hover: {{ icon_color_hover }};
+    --nav-btn-border-color: {{ border_color }};
+    --nav-btn-border-color-hover: {{ border_color_hover }};
+    --nav-btn-border-width: {{ border_width }}px;
+    --nav-btn-border-radius: {{ border_radius }}px;
+    --nav-btn-size: {{ button_size }}px;
+    --nav-btn-icon-size: {{ icon_size }}px;
+    --nav-btn-stroke-width: {{ stroke_width }};
+    --nav-btn-opacity: {{ arrow_opacity }};
+    --nav-btn-opacity-hover: {{ arrow_hover_opacity }};
+    background: var(--nav-btn-bg);
+    color: var(--nav-btn-color);
+    {% if enable_border %}border: var(--nav-btn-border-width) solid var(--nav-btn-border-color);{% else %}border: none;{% endif %}
+    border-radius: var(--nav-btn-border-radius);
+    width: var(--nav-btn-size);
+    height: var(--nav-btn-size);
+    min-width: var(--nav-btn-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: var(--nav-btn-opacity);
+    {% if enable_shadow %}box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);{% endif %}
+  "
+  data-enable-hover-transform="{{ enable_hover_transform }}"
+>
+  {%- case arrow_style -%}
+    {%- when 'chevron' -%}
+      <svg xmlns="http://www.w3.org/2000/svg" width="{{ icon_size }}" height="{{ icon_size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ stroke_width }}" stroke-linecap="round" stroke-linejoin="round">
+        {%- if direction == 'prev' -%}
+          <polyline points="15 18 9 12 15 6"></polyline>
+        {%- else -%}
+          <polyline points="9 18 15 12 9 6"></polyline>
+        {%- endif -%}
+      </svg>
+    {%- when 'arrow' -%}
+      <svg xmlns="http://www.w3.org/2000/svg" width="{{ icon_size }}" height="{{ icon_size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ stroke_width }}" stroke-linecap="round" stroke-linejoin="round">
+        {%- if direction == 'prev' -%}
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        {%- else -%}
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        {%- endif -%}
+      </svg>
+    {%- when 'caret' -%}
+      <svg xmlns="http://www.w3.org/2000/svg" width="{{ icon_size }}" height="{{ icon_size }}" viewBox="0 0 24 24" fill="currentColor">
+        {%- if direction == 'prev' -%}
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+        {%- else -%}
+          <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+        {%- endif -%}
+      </svg>
+  {%- endcase -%}
+</button>
+
+<style>
+  .global-nav-button:hover {
+    background: var(--nav-btn-bg-hover) !important;
+    color: var(--nav-btn-color-hover) !important;
+    {% if enable_border %}border-color: var(--nav-btn-border-color-hover) !important;{% endif %}
+    opacity: var(--nav-btn-opacity-hover) !important;
+  }
+  
+  .global-nav-button[data-enable-hover-transform="true"]:hover {
+    transform: translateY(-2px);
+  }
+  
+  .global-nav-button svg {
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+</style>

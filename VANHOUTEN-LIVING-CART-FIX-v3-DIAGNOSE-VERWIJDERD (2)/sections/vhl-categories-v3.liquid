@@ -1,0 +1,144 @@
+<section
+  id="VHLCategoriesV3-{{ section.id }}"
+  class="vhl-categories-v3"
+  style="--vhl-bg: {{ section.settings.background }}; --vhl-text: {{ section.settings.text_color }}; --vhl-radius: {{ section.settings.radius }}px; --vhl-height: {{ section.settings.desktop_height }}px; --vhl-mobile-height: {{ section.settings.mobile_height }}px;"
+>
+  <div class="vhl-categories-v3__inner">
+    {% if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.intro != blank %}
+      <header class="vhl-categories-v3__header">
+        <div>
+          {% if section.settings.eyebrow != blank %}<p class="vhl-categories-v3__eyebrow">{{ section.settings.eyebrow | escape }}</p>{% endif %}
+          {% if section.settings.heading != blank %}<h2 class="vhl-categories-v3__heading">{{ section.settings.heading | escape }}</h2>{% endif %}
+        </div>
+        {% if section.settings.intro != blank %}<div class="vhl-categories-v3__intro rte">{{ section.settings.intro }}</div>{% endif %}
+      </header>
+    {% endif %}
+
+    <div class="vhl-categories-v3__grid">
+      {% for block in section.blocks %}
+        {% liquid
+          assign chosen_collection = block.settings.collection
+          assign card_image = block.settings.image | default: chosen_collection.featured_image
+          assign card_title = block.settings.title | default: chosen_collection.title
+          assign card_url = block.settings.link | default: chosen_collection.url | default: routes.all_products_collection_url
+          assign card_alt = card_image.alt | default: card_title | default: shop.name
+          assign card_sizes = '(min-width: 990px) 50vw, 100vw'
+          if block.settings.full_width
+            assign card_sizes = '100vw'
+          endif
+        %}
+        <article
+          class="vhl-categories-v3__item{% if block.settings.full_width %} vhl-categories-v3__item--wide{% endif %}"
+          style="--vhl-position: {{ block.settings.image_position }}; --vhl-overlay: {{ block.settings.overlay | divided_by: 100.0 }};"
+          {{ block.shopify_attributes }}
+        >
+          <a class="vhl-categories-v3__card" href="{{ card_url }}">
+            {% if card_image != blank %}
+              {{ card_image | image_url: width: 2400 | image_tag: class: 'vhl-categories-v3__image', loading: 'lazy', widths: '480, 750, 1000, 1400, 1800, 2400', sizes: card_sizes, alt: card_alt }}
+            {% else %}
+              {{ 'collection-1' | placeholder_svg_tag: 'vhl-categories-v3__image vhl-categories-v3__placeholder' }}
+            {% endif %}
+            <span class="vhl-categories-v3__shade" aria-hidden="true"></span>
+            {% if block.settings.label != blank %}<span class="vhl-categories-v3__label">{{ block.settings.label | escape }}</span>{% endif %}
+            <div class="vhl-categories-v3__content">
+              {% if card_title != blank %}<h3 class="vhl-categories-v3__title">{{ card_title | escape }}</h3>{% endif %}
+              {% if block.settings.description != blank %}<p class="vhl-categories-v3__description">{{ block.settings.description | escape }}</p>{% endif %}
+              {% if block.settings.link_text != blank %}
+                <span class="vhl-categories-v3__link">{{ block.settings.link_text | escape }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
+              {% endif %}
+            </div>
+          </a>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% style %}
+  #VHLCategoriesV3-{{ section.id }} { overflow: hidden; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px; background: var(--vhl-bg); color: var(--vhl-text); }
+  #VHLCategoriesV3-{{ section.id }} * { box-sizing: border-box; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__inner { width: min(100%, 1500px); margin: 0 auto; padding: 0 clamp(18px, 4vw, 58px); }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__header { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .65fr); align-items: end; gap: clamp(28px, 5vw, 72px); margin-bottom: clamp(34px, 5vw, 64px); }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__eyebrow { margin: 0 0 12px; color: inherit; font-size: 11px; font-weight: 700; line-height: 1.4; letter-spacing: .24em; text-transform: uppercase; opacity: .65; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__heading { max-width: 760px; margin: 0; color: var(--vhl-text) !important; font-family: var(--font-heading-family); font-size: clamp(36px, 4.4vw, 66px); font-weight: var(--font-heading-weight); line-height: 1; letter-spacing: -.04em; overflow-wrap: anywhere; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__intro { max-width: 480px; justify-self: end; color: inherit; font-size: 15px; line-height: 1.7; opacity: .72; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__intro p { margin: 0; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 2.2vw, 34px); }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__item { min-width: 0; height: var(--vhl-height); }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__item--wide { grid-column: 1 / -1; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__card { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; border-radius: var(--vhl-radius); background: #80776d; color: #fff; isolation: isolate; text-decoration: none; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__image { position: absolute; inset: 0; z-index: -2; display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--vhl-position); transform: scale(1.001); transition: transform 700ms cubic-bezier(.2,.7,.3,1); }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__placeholder { background: #d8d1c7; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(15,15,13,.05), rgba(15,15,13,.12) 35%, rgba(15,15,13,var(--vhl-overlay)) 100%); }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__label { position: absolute; top: clamp(18px,2.4vw,30px); left: clamp(18px,2.8vw,38px); padding: 8px 12px; border: 1px solid rgba(255,255,255,.42); border-radius: 999px; background: rgba(24,23,20,.25); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__content { position: absolute; right: clamp(22px,3.2vw,48px); bottom: clamp(24px,3.5vw,52px); left: clamp(22px,3.2vw,48px); max-width: 760px; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__title { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; max-width: 18ch; margin: 0; color: #fff !important; -webkit-text-fill-color: #fff; font-family: var(--font-heading-family); font-size: clamp(34px,4.1vw,64px); font-weight: var(--font-heading-weight); line-height: 1; letter-spacing: -.045em; overflow-wrap: anywhere; text-shadow: 0 3px 16px rgba(0,0,0,.42); }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__description { max-width: 54ch; margin: 14px 0 0; color: #fff !important; font-size: clamp(13px,1.2vw,16px); line-height: 1.55; text-shadow: 0 2px 12px rgba(0,0,0,.48); }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__link { display: inline-flex; align-items: center; gap: 11px; margin-top: 22px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,.7); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+  #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__link svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; transition: transform 240ms ease; }
+  @media (hover:hover) and (pointer:fine) { #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__card:hover .vhl-categories-v3__image { transform: scale(1.045); } #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__card:hover svg { transform: translateX(4px); } }
+  @media screen and (max-width: 749px) {
+    #VHLCategoriesV3-{{ section.id }} { padding: {{ section.settings.padding_top_mobile }}px 0 {{ section.settings.padding_bottom_mobile }}px; }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__inner { padding-inline: 16px; }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__header, #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__grid { grid-template-columns: minmax(0,1fr); }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__header { gap: 18px; margin-bottom: 32px; }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__heading { font-size: clamp(32px,10vw,46px); }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__intro { justify-self: start; font-size: 14px; }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__grid { gap: 16px; }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__item, #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__item--wide { grid-column: 1; width: 100%; height: var(--vhl-mobile-height); }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__title { max-width: 100%; font-size: clamp(30px,9.5vw,44px); }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__description { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) { #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__image, #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__link svg { transition: none; } }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "VHL Categories 3.0",
+  "tag": "section",
+  "class": "section-vhl-categories-v3",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Boventitel", "default": "Shop op sfeer" },
+    { "type": "text", "id": "heading", "label": "Hoofdtitel", "default": "Ontdek jouw badkamerwereld" },
+    { "type": "richtext", "id": "intro", "label": "Introductietekst", "default": "<p>Van rustgevende spa-momenten tot tijdloze details: ontdek collecties die jouw badkamer compleet maken.</p>" },
+    { "type": "color", "id": "background", "label": "Achtergrondkleur", "default": "#F7F4EF" },
+    { "type": "color", "id": "text_color", "label": "Tekstkleur", "default": "#24211E" },
+    { "type": "range", "id": "desktop_height", "label": "Kaarthoogte desktop", "min": 420, "max": 760, "step": 10, "unit": "px", "default": 620 },
+    { "type": "range", "id": "mobile_height", "label": "Kaarthoogte mobiel", "min": 380, "max": 620, "step": 10, "unit": "px", "default": 500 },
+    { "type": "range", "id": "radius", "label": "Afronding", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding_top", "label": "Bovenruimte desktop", "min": 30, "max": 160, "step": 5, "unit": "px", "default": 95 },
+    { "type": "range", "id": "padding_bottom", "label": "Onderruimte desktop", "min": 30, "max": 160, "step": 5, "unit": "px", "default": 95 },
+    { "type": "range", "id": "padding_top_mobile", "label": "Bovenruimte mobiel", "min": 20, "max": 100, "step": 5, "unit": "px", "default": 60 },
+    { "type": "range", "id": "padding_bottom_mobile", "label": "Onderruimte mobiel", "min": 20, "max": 100, "step": 5, "unit": "px", "default": 60 }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Collectiekaart",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collectie" },
+        { "type": "image_picker", "id": "image", "label": "Eigen afbeelding", "info": "Laat leeg voor de collectieafbeelding." },
+        { "type": "text", "id": "title", "label": "Eigen titel", "info": "Laat leeg voor de collectienaam." },
+        { "type": "textarea", "id": "description", "label": "Korte omschrijving" },
+        { "type": "text", "id": "label", "label": "Klein label" },
+        { "type": "text", "id": "link_text", "label": "Linktekst", "default": "Bekijk de collectie" },
+        { "type": "url", "id": "link", "label": "Eigen link" },
+        { "type": "range", "id": "overlay", "label": "Overlaysterkte", "min": 25, "max": 85, "step": 5, "unit": "%", "default": 55 },
+        { "type": "select", "id": "image_position", "label": "Afbeeldingspositie", "default": "center center", "options": [
+          { "value": "left top", "label": "Linksboven" }, { "value": "center top", "label": "Midden boven" }, { "value": "right top", "label": "Rechtsboven" },
+          { "value": "left center", "label": "Links midden" }, { "value": "center center", "label": "Midden" }, { "value": "right center", "label": "Rechts midden" },
+          { "value": "left bottom", "label": "Linksonder" }, { "value": "center bottom", "label": "Midden onder" }, { "value": "right bottom", "label": "Rechtsonder" }
+        ] },
+        { "type": "checkbox", "id": "full_width", "label": "Volledige breedte op desktop", "default": false }
+      ]
+    }
+  ],
+  "presets": [{ "name": "VHL Categories 3.0", "blocks": [
+    { "type": "category", "settings": { "title": "SPA Collection", "description": "Creëer thuis de rust van een luxe wellnesshotel.", "full_width": true } },
+    { "type": "category", "settings": { "title": "Badkamersets & Accessoires", "description": "Bijpassende details voor een harmonieus geheel." } },
+    { "type": "category", "settings": { "title": "Opbergen", "description": "Stijlvolle oplossingen die rust en overzicht brengen." } },
+    { "type": "category", "settings": { "title": "Home Decor", "description": "Natuursteen en objecten met een tijdloze uitstraling.", "full_width": true } }
+  ] }]
+}
+{% endschema %}

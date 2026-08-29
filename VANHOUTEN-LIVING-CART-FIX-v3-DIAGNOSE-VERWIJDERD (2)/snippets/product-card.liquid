@@ -1,0 +1,286 @@
+{% comment %}
+  Component: Product Card
+  
+  Required parameters:
+  - product: product object
+  - settings: section settings object
+  
+  Optional parameters:
+  - section_id: section ID for unique styling (default: 'default')
+  - show_view_product: boolean (default: settings.show_view_product)
+  - full_card_clickable: boolean (default: settings.full_card_clickable)
+{% endcomment %}
+
+{% assign section_id = section_id | default: 'default' %}
+{% assign show_view_product = show_view_product | default: settings.show_view_product %}
+{% assign full_card_clickable = full_card_clickable | default: settings.full_card_clickable %}
+{% assign show_product_rating =  show_product_rating |default: false %}
+
+<div class="product-card{% if full_card_clickable %} full-card-clickable{% endif %}"{% if full_card_clickable %} data-product-url="{{ product.url }}"{% endif %}>
+  {% unless show_view_product %}
+    <a href="{{ product.url }}" class="product-card-link">
+  {% endunless %}
+  
+  <div class="product-image-container">
+    {% assign current_variant = product.selected_or_first_available_variant %}
+    {% assign compare_at_price = current_variant.compare_at_price %}
+    {% assign price = current_variant.price %}
+    
+    {% comment %} Custom badges for metafields and tags {% endcomment %}
+    {% if settings.show_custom_badges %}
+      {% assign custom_badge_text = null %}
+      {% assign badge_priority = 0 %}
+      
+      {% comment %} Check for metafield badge first (highest priority) {% endcomment %}
+      {% if settings.metafield_badge_key != blank %}
+        {% comment %} Handle both formats: 'badge' and 'custom.badge' {% endcomment %}
+        {% if settings.metafield_badge_key contains '.' %}
+          {% assign metafield_parts = settings.metafield_badge_key | split: '.' %}
+          {% assign metafield_namespace = metafield_parts[0] %}
+          {% assign metafield_key = metafield_parts[1] %}
+          {% assign metafield_value = product.metafields[metafield_namespace][metafield_key].value %}
+        {% else %}
+          {% comment %} Default to custom namespace if no dot notation {% endcomment %}
+          {% assign metafield_value = product.metafields.custom[settings.metafield_badge_key].value %}
+        {% endif %}
+        
+        {% if metafield_value and metafield_value != blank %}
+          {% assign custom_badge_text = metafield_value %}
+          {% assign badge_priority = 3 %}
+        {% endif %}
+      {% endif %}
+      
+      {% comment %} Check for specific tags (medium priority) {% endcomment %}
+      {% if custom_badge_text == null and settings.badge_tags != blank %}
+        {% assign badge_tags = settings.badge_tags | split: ',' %}
+        {% for badge_tag in badge_tags %}
+          {% assign clean_tag = badge_tag | strip | downcase %}
+          {% for product_tag in product.tags %}
+            {% assign clean_product_tag = product_tag | strip | downcase %}
+            {% if clean_product_tag == clean_tag %}
+              {% assign custom_badge_text = product_tag | strip %}
+              {% assign badge_priority = 2 %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {% if custom_badge_text %}{% break %}{% endif %}
+        {% endfor %}
+      {% endif %}
+      
+      {% comment %} Display custom badge if found {% endcomment %}
+      {% if custom_badge_text %}
+        <div class="custom-badge" data-priority="{{ badge_priority }}">
+          {{ custom_badge_text }}
+        </div>
+      {% endif %}
+    {% endif %}
+    
+    {% if compare_at_price and compare_at_price > price and settings.show_sale_badge %}
+      <div class="sale-badge {{ settings.sale_badge_placement_with_custom }} {% if settings.badge_gradient %}badge-gradient{% endif %}">
+        <span class="sale-badge-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
+        </span>
+        {% if settings.sale_badge_text != blank %}
+          {{ settings.sale_badge_text }}
+        {% else %}
+          {% assign savings = compare_at_price | minus: price %}
+          {% if settings.show_percentage_off %}
+            {% assign savings_percentage = savings | times: 100 | divided_by: compare_at_price %}
+            {{ savings_percentage }}% {{ settings.sale_badge_off_text | default: 'off' }}
+          {% else %}
+            {{ settings.sale_badge_save_text | default: 'Save' }} {{ savings | money }}
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+    
+    <div class="product-slider swiper-no-swiping" data-slider-guard="true">
+      {% assign max_slides = settings.max_image_dots | default: 8 %}
+      {% assign slides_to_show = product.images.size %}
+      {% if slides_to_show > max_slides %}
+        {% assign slides_to_show = max_slides %}
+      {% endif %}
+      <div class="product-slider-wrapper" data-slide-count="{{ slides_to_show }}">
+        {% for image in product.images limit: slides_to_show %}
+          <div class="product-slide">
+            <img src="{{ image | img_url: '318x' }}" srcset="{{ image | img_url: '318x' }} 1x, {{ image | img_url: '636x' }} 2x" alt="{{ product.title | escape }}" class="product-image" width="" height="">
+          </div>
+        {% else %}
+          <div class="product-slide">
+            <img src="{{ product.featured_image | img_url: '318x' }}" srcset="{{ product.featured_image | img_url: '318x' }} 1x, {{ product.featured_image | img_url: '636x' }} 2x" alt="{{ product.title | escape }}" class="product-image" width="" height="">
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    
+    {% comment %} Hover image overlay - shows second image on hover {% endcomment %}
+    {% if product.images.size > 1 %}
+      <div class="product-hover-image-overlay">
+        <img src="{{ product.images[1] | img_url: '318x' }}" srcset="{{ product.images[1] | img_url: '318x' }} 1x, {{ product.images[1] | img_url: '636x' }} 2x" alt="{{ product.title | escape }}" class="product-hover-image" width="" height="">
+      </div>
+    {% endif %}
+  </div>
+  
+  <div class="collection-product-info">
+    {% if product.images.size > 1 %}
+      <div class="product-dots">
+        {% assign max_dots = settings.max_image_dots | default: 8 %}
+        {% assign dots_to_show = product.images.size %}
+        {% if dots_to_show > max_dots %}
+          {% assign dots_to_show = max_dots %}
+        {% endif %}
+        {% for i in (1..dots_to_show) %}
+          <span class="dot {% if forloop.first %}active{% endif %}"></span>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    {% if settings.show_rating or show_product_rating %}
+      <div class="product-rating">
+        <div class="stars">
+          {% if product.metafields.custom.rating != blank and settings.use_product_rating %}
+            {% assign rating_decimal = product.metafields.custom.rating.value | times: 1 %}
+          {% else %}
+            {% assign rating_decimal = settings.rating_value | times: 1 %}
+          {% endif %}
+          {% assign rating_whole = rating_decimal | floor %}
+          {% assign rating_fraction = rating_decimal | minus: rating_whole %}
+          {% assign next_star = rating_whole | plus: 1 %}
+          
+          {% for i in (1..5) %}
+            {% if i <= rating_whole %}
+              <span class="star star-filled">
+                <svg fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/></svg>
+              </span>
+            {% elsif i == next_star and rating_fraction >= 0.3 %}
+              <span class="star star-half">
+                <svg fill="currentColor" class="star-bg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/></svg>
+                <svg fill="currentColor" class="star-fill" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16,4.588 L16,22.023 L8.583,27.412 L11.416,18.693 L4,13.306 L13.167,13.306 L16,4.588 Z"/></svg>
+              </span>
+            {% else %}
+              <span class="star star-empty">
+                <svg fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/></svg>
+              </span>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% if settings.show_rating_text %}
+          {% if product.metafields.custom.rating != blank and settings.use_product_rating %}
+            <span class="rating-number">({{ product.metafields.custom.rating.value }})</span>
+          {% else %}
+            <span class="rating-number">({{ settings.rating_number | default: '4.7' }})</span>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+    
+    <h3 class="product-title">{{ product.title }}</h3>
+    
+    {% if settings.show_product_description %}
+      <div class="product-description">
+        {{ product.description | strip_html | truncatewords: settings.description_words | escape }}
+      </div>
+    {% endif %}
+    
+    <div class="collection-product-price">
+      <span class="collection-current-price">{{ price | money }}</span>
+      {% if compare_at_price and compare_at_price > price %}
+        <span class="collection-regular-price">{{ compare_at_price | money }}</span>
+      {% endif %}
+    </div>
+    
+    {% if show_view_product %}
+      <div class="collection-view-product">
+        <a href="{{ product.url }}" class="collection-view-product-btn icon-right">
+          <span class="view-product-text">
+            {% if settings.view_product_text != blank %}
+              {{ settings.view_product_text }}
+            {% else %}
+              View Product
+            {% endif %}
+          </span>
+          {% if settings.show_view_product_icon %}
+            <span class="view-product-icon" style="width: {{ settings.view_product_icon_size | default: 16 }}px; height: {{ settings.view_product_icon_size | default: 16 }}px;">
+              {% case settings.view_product_icon_type %}
+                {% when 'arrow' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"/>
+                    <path d="M12 5l7 7-7 7"/>
+                  </svg>
+                {% when 'eye' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                {% when 'plus' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14"/>
+                    <path d="M5 12h14"/>
+                  </svg>
+                {% when 'cart' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"/>
+                    <circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                  </svg>
+                {% when 'custom' %}
+                  {% if settings.view_product_custom_svg != blank %}
+                    {{ settings.view_product_custom_svg }}
+                  {% else %}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                      <line x1="3" y1="6" x2="21" y2="6"/>
+                      <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                  {% endif %}
+                {% else %}
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                  </svg>
+              {% endcase %}
+            </span>
+          {% endif %}
+        </a>
+      </div>
+    {% endif %}
+    
+    {% if settings.show_product_metadata %}
+      <div class="product-metadata">
+        {% if settings.metadata_field_1 != blank and product.metafields.custom[settings.metadata_field_1] != blank %}
+          <div class="metadata-item">
+            <span class="metadata-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M5.25 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM2.25 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM18.75 7.5a.75.75 0 00-1.5 0v2.25H15a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H21a.75.75 0 000-1.5h-2.25V7.5z"/>
+              </svg>
+            </span>
+            {% if settings.show_metadata_labels %}
+              <span class="metadata-label">{{ settings.metadata_label_1 | default: settings.metadata_field_1 }}:</span>
+            {% endif %}
+            <span class="metadata-value">{{ product.metafields.custom[settings.metadata_field_1] }}</span>
+          </div>
+        {% endif %}
+        
+        {% if settings.metadata_field_2 != blank and product.metafields.custom[settings.metadata_field_2] != blank %}
+          <div class="metadata-item">
+            <span class="metadata-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/>
+                <path d="M6.75 6.75h.008v.008H6.75V6.75z"/>
+              </svg>
+            </span>
+            {% if settings.show_metadata_labels %}
+              <span class="metadata-label">{{ settings.metadata_label_2 | default: settings.metadata_field_2 }}:</span>
+            {% endif %}
+            <span class="metadata-value">{{ product.metafields.custom[settings.metadata_field_2] }}</span>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+  
+  {% unless show_view_product %}
+    </a>
+  {% endunless %}
+</div>

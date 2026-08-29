@@ -1,0 +1,310 @@
+{% comment %}
+  Customer Review Card Snippet
+
+  Accepts:
+  - reviewer_name: Name of the reviewer
+  - review_text: The review content
+  - rating: Rating out of 5
+  - avatar_url: URL to the reviewer's avatar image
+  - background_color_start: Starting color for the gradient background
+  - background_color_end: Ending color for the gradient background
+  - text_color: Color for the review text
+  - border_color: Color for the border
+  - border_radius: Border radius in pixels (default: 8px)
+  - border_style: Border style (default: dashed)
+  - show_shadow: Whether to show drop shadow (default: true)
+  - star_color: Color for filled stars
+  - review_text_color: Color for the review text content
+  - verified_icon_color: Color for the verified badge icon
+  - reviewer_name_size: Font size for reviewer name in pixels (default: 16px)
+  - review_text_size: Font size for review text in pixels (default: 14px)
+  - star_size: Size for star rating icons in pixels (default: 16px)
+  - avatar_size_desktop: Avatar image size on desktop in pixels (default: 75px)
+  - avatar_size_mobile: Avatar image size on mobile in pixels (default: 65px)
+  - margin_top: Top margin in pixels (default: 15px)
+  - margin_right: Right margin in pixels (default: 0)
+  - margin_bottom: Bottom margin in pixels (default: 15px)
+  - margin_left: Left margin in pixels (default: 0)
+  - block: Block object for Shopify attributes
+{% endcomment %}
+
+{%- assign reviewer_name = reviewer_name | default: 'Lauren J.' -%}
+{%- assign review_text = review_text
+  | default: "This is my favorite purchase ever! It came so fast!! Anyone who's like me needs this!"
+-%}
+{%- assign rating = rating | default: 5 -%}
+{%- assign avatar_url = avatar_url -%}
+{%- if show_avatar == false -%}
+  {%- assign show_avatar = false -%}
+{%- else -%}
+  {%- assign show_avatar = true -%}
+{%- endif -%}
+{%- assign background_color_start = background_color_start | default: '#f8f8f8' -%}
+{%- assign background_color_end = background_color_end | default: '#f2f2f2' -%}
+{%- assign text_color = text_color | default: '#333' -%}
+{%- assign review_text_color = review_text_color | default: '#4a4a4a' -%}
+{%- assign verified_icon_color = verified_icon_color | default: '#1C274C' -%}
+{%- assign border_color = border_color | default: '#dcdcdc' -%}
+{%- assign border_radius = border_radius | default: 8 -%}
+{%- assign border_style = border_style | default: 'dashed' -%}
+{%- assign show_shadow = show_shadow | default: true -%}
+{%- assign star_color = star_color | default: '#FFB800' -%}
+{%- assign reviewer_name_size = reviewer_name_size | default: 16 -%}
+{%- assign review_text_size = review_text_size | default: 14 -%}
+{%- assign star_size = star_size | default: 16 -%}
+{%- assign avatar_size_desktop = avatar_size_desktop | default: 75 -%}
+{%- assign avatar_size_mobile = avatar_size_mobile | default: 65 -%}
+{%- assign margin_top = margin_top | default: 15 | append: 'px' -%}
+{%- assign margin_right = margin_right | default: 0 | append: 'px' -%}
+{%- assign margin_bottom = margin_bottom | default: 15 | append: 'px' -%}
+{%- assign margin_left = margin_left | default: 0 | append: 'px' -%}
+
+{%- comment -%} Use card_id if provided, otherwise fall back to block.id {%- endcomment -%}
+{%- assign unique_id = card_id | default: block.id | default: 'default' -%}
+
+<div
+  class="customer-review-card customer-review-{{ unique_id }}"
+  {{ block.shopify_attributes }}
+  style="margin: {{ margin_top }} {{ margin_right }} {{ margin_bottom }} {{ margin_left }};"
+>
+  {%- if show_avatar -%}
+    <div class="customer-review-avatar-container">
+      <div class="customer-review-avatar">
+        {% if avatar_url != blank %}
+          {%- comment -%} 
+            avatar_url is a Shopify image object from image_picker
+            We use image_url filter to get the URL
+          {%- endcomment -%}
+          {%- assign avatar_src_60 = avatar_url | image_url: width: 60 -%}
+          {%- assign avatar_src_120 = avatar_url | image_url: width: 120 -%}
+          {%- assign avatar_src_180 = avatar_url | image_url: width: 180 -%}
+          <img 
+            src="{{ avatar_src_120 }}" 
+            srcset="{{ avatar_src_60 }} 1x, {{ avatar_src_120 }} 2x, {{ avatar_src_180 }} 3x" 
+            alt="{{ reviewer_name }}" 
+            loading="lazy" 
+            width="{{ avatar_size_desktop | default: 60 }}" 
+            height="{{ avatar_size_desktop | default: 60 }}" 
+            style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; object-fit: cover;">
+        {% endif %}
+      </div>
+    </div>
+  {%- endif -%}
+  <div class="customer-review-content">
+    <div class="customer-review-header">
+      <div class="customer-review-name">
+        {{ reviewer_name }}
+        <svg
+          class="customer-review-verified"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.5924 3.20027C9.34888 3.4078 9.22711 3.51158 9.09706 3.59874C8.79896 3.79854 8.46417 3.93721 8.1121 4.00672C7.95851 4.03705 7.79903 4.04977 7.48008 4.07522C6.6787 4.13918 6.278 4.17115 5.94371 4.28923C5.17051 4.56233 4.56233 5.17051 4.28923 5.94371C4.17115 6.278 4.13918 6.6787 4.07522 7.48008C4.04977 7.79903 4.03705 7.95851 4.00672 8.1121C3.93721 8.46417 3.79854 8.79896 3.59874 9.09706C3.51158 9.22711 3.40781 9.34887 3.20027 9.5924C2.67883 10.2043 2.4181 10.5102 2.26522 10.8301C1.91159 11.57 1.91159 12.43 2.26522 13.1699C2.41811 13.4898 2.67883 13.7957 3.20027 14.4076C3.40778 14.6511 3.51158 14.7729 3.59874 14.9029C3.79854 15.201 3.93721 15.5358 4.00672 15.8879C4.03705 16.0415 4.04977 16.201 4.07522 16.5199C4.13918 17.3213 4.17115 17.722 4.28923 18.0563C4.56233 18.8295 5.17051 19.4377 5.94371 19.7108C6.278 19.8288 6.6787 19.8608 7.48008 19.9248C7.79903 19.9502 7.95851 19.963 8.1121 19.9933C8.46417 20.0628 8.79896 20.2015 9.09706 20.4013C9.22711 20.4884 9.34887 20.5922 9.5924 20.7997C10.2043 21.3212 10.5102 21.5819 10.8301 21.7348C11.57 22.0884 12.43 22.0884 13.1699 21.7348C13.4898 21.5819 13.7957 21.3212 14.4076 20.7997C14.6511 20.5922 14.7729 20.4884 14.9029 20.4013C15.201 20.2015 15.5358 20.0628 15.8879 19.9933C16.0415 19.963 16.201 19.9502 16.5199 19.9248C17.3213 19.8608 17.722 19.8288 18.0563 19.7108C18.8295 19.4377 19.4377 18.8295 19.7108 18.0563C19.8288 17.722 19.8608 17.3213 19.9248 16.5199C19.9502 16.201 19.963 16.0415 19.9933 15.8879C20.0628 15.5358 20.2015 15.201 20.4013 14.9029C20.4884 14.7729 20.5922 14.6511 20.7997 14.4076C21.3212 13.7957 21.5819 13.4898 21.7348 13.1699C22.0884 12.43 22.0884 11.57 21.7348 10.8301C21.5819 10.5102 21.3212 10.2043 20.7997 9.5924C20.5922 9.34887 20.4884 9.22711 20.4013 9.09706C20.2015 8.79896 20.0628 8.46417 19.9933 8.1121C19.963 7.95851 19.9502 7.79903 19.9248 7.48008C19.8608 6.6787 19.8288 6.278 19.7108 5.94371C19.4377 5.17051 18.8295 4.56233 18.0563 4.28923C17.722 4.17115 17.3213 4.13918 16.5199 4.07522C16.201 4.04977 16.0415 4.03705 15.8879 4.00672C15.5358 3.93721 15.201 3.79854 14.9029 3.59874C14.7729 3.51158 14.6511 3.40781 14.4076 3.20027C13.7957 2.67883 13.4898 2.41811 13.1699 2.26522C12.43 1.91159 11.57 1.91159 10.8301 2.26522C10.5102 2.4181 10.2043 2.67883 9.5924 3.20027ZM16.3735 9.86314C16.6913 9.5453 16.6913 9.03 16.3735 8.71216C16.0557 8.39433 15.5403 8.39433 15.2225 8.71216L10.3723 13.5624L8.77746 11.9676C8.45963 11.6498 7.94432 11.6498 7.62649 11.9676C7.30866 12.2854 7.30866 12.8007 7.62649 13.1186L9.79678 15.2889C10.1146 15.6067 10.6299 15.6067 10.9478 15.2889L16.3735 9.86314Z" fill="{{ verified_icon_color }}"/>
+        </svg>
+      </div>
+      <div class="customer-review-stars">
+        {% for i in (1..5) %}
+          {% if i <= rating %}
+            <svg
+              class="customer-review-star customer-review-star--filled"
+              width="{{ star_size }}"
+              height="{{ star_size }}"
+              viewBox="0 0 32 32"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+            </svg>
+          {% else %}
+            <svg
+              class="customer-review-star"
+              width="{{ star_size }}"
+              height="{{ star_size }}"
+              viewBox="0 0 32 32"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+            </svg>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    <p class="customer-review-text">{{ review_text }}</p>
+  </div>
+</div>
+
+<style>
+  .customer-review-{{ unique_id }} {
+    display: flex;
+    padding: clamp(12px, 1%, 24px);
+    background: linear-gradient(to bottom, {{ background_color_start }}, {{ background_color_end }});
+    border: 1px {{ border_style }} {{ border_color }};
+    border-radius: {{ border_radius }}px;
+    font-family: var(--font-body-family-override);
+    {% if show_shadow %}box-shadow: 0 2px 4px rgba(0,0,0,0.05);{% else %}box-shadow: none;{% endif %}
+    letter-spacing: var(--letter-spacing-heading);
+    box-sizing: border-box;
+    align-items: flex-start;
+    gap: clamp(10px, 3%, 20px);
+    width: 100%;
+    height: 100%;
+  }
+
+  {%- if show_avatar -%}
+  .customer-review-{{ unique_id }} .customer-review-avatar-container {
+    position: relative;
+    width: {{ avatar_size_desktop }}px;
+    flex: 0 0 auto;
+    align-self: flex-start;
+  }
+
+  /* This pseudo-element ensures the container remains square */
+  .customer-review-{{ unique_id }} .customer-review-avatar-container::before {
+    content: "";
+    display: block;
+    padding-top: 100%; /* Creates a 1:1 aspect ratio */
+  }
+
+  .customer-review-{{ unique_id }} .customer-review-avatar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .customer-review-{{ unique_id }} .customer-review-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    border-radius: 50px;
+    background-color: #f5f5f5;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -o-crisp-edges;
+    image-rendering: crisp-edges;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  {%- endif -%}
+
+  .customer-review-{{ unique_id }} .customer-review-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* Allows content to shrink below its minimum content size */
+  }
+
+  .customer-review-{{ unique_id }} .customer-review-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: clamp(4px, 1.5%, 8px);
+    gap: 0px;
+    width: 100%;
+  }
+
+  .customer-review-{{ unique_id }} .customer-review-name {
+    font-weight: var(--font-weight-bold) !important;
+    font-size: {{ reviewer_name_size }}px;
+    color: {{ text_color }};
+    display: flex;
+    align-items: center;
+    letter-spacing: var(--letter-spacing-body);
+    flex-shrink: 1;
+    margin-right: 0;
+    min-width: 0;
+    width: auto;
+  }
+
+  .customer-review-{{ unique_id }} .customer-review-verified {
+    margin-left: 5px;
+    margin-right: 6px;
+    position: relative;
+    top: -1px;
+    flex-shrink: 0;
+    width: {{ reviewer_name_size }}px;
+    height: {{ reviewer_name_size }}px;
+  }
+
+  .customer-review-{{ unique_id }} .customer-review-stars {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+
+  .customer-review-{{ unique_id }} .customer-review-star {
+    margin-right: -3px;
+    fill: #D8D8D8 !important;
+    height: {{ star_size }}px;
+    width: {{ star_size }}px;
+    flex-shrink: 0;
+  }
+
+  .customer-review-{{ unique_id }} .customer-review-star--filled {
+    fill: {{ star_color }} !important;
+  }
+
+  .customer-review-{{ unique_id }} .customer-review-text {
+    margin: 0 !important;
+    font-size: {{ review_text_size }}px !important;
+    color: {{ review_text_color }} !important;
+    letter-spacing: var(--letter-spacing-body) !important;
+    line-height: 1.4 !important;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    max-height: none; /* Allow content to expand based on text amount */
+  }
+
+  /* Add responsive sizing for shorter reviews */
+  .customer-review-{{ unique_id }} .customer-review-text:empty {
+    display: none;
+  }
+
+  .customer-review-{{ unique_id }} .customer-review-text:only-child {
+    margin-top: 0;
+  }
+
+  @media (max-width: 480px) {
+    .customer-review-{{ unique_id }} {
+      padding: 10px;
+      gap: 8px;
+    }
+
+    {%- if show_avatar -%}
+    .customer-review-{{ unique_id }} .customer-review-avatar-container {
+      width: {{ avatar_size_mobile }}px;
+      /* The padding-top percentage in the ::before element
+      ensures it remains square at all widths */
+    }
+    {%- endif -%}
+
+    .customer-review-{{ unique_id }} .customer-review-header {
+      margin-bottom: 3px;
+      align-items: center !important;
+      gap: 0px !important;
+    }
+
+    .customer-review-{{ unique_id }} .customer-review-verified {
+      /* Use customizable sizing that scales with name size */
+    }
+
+    .customer-review-{{ unique_id }} .customer-review-star {
+      /* Use customizable sizing instead of fixed mobile size */
+    }
+
+    .customer-review-{{ unique_id }} .customer-review-text {
+      /* Use customizable sizing instead of fixed mobile size */
+      line-height: 1.3;
+    }
+  }
+</style>

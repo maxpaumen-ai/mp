@@ -1,0 +1,161 @@
+{% comment %}
+  Listicle Sticky Add to Cart Component
+  - Simple button-only version for listicle section
+  - Always visible at bottom of screen
+  - No delivery text or shipping info
+{% endcomment %}
+
+{% liquid
+  assign button_text = block.settings.button_text | default: 'YES, GET 60% OFF'
+  assign button_link = block.settings.button_link | default: '#'
+  assign verification_text = block.settings.verification_text | default: 'VERIFIED LOWEST PRICE EVER'
+  assign use_gradient = block.settings.use_gradient | default: false
+  assign button_bg_color = block.settings.button_bg_color | default: '#25282A'
+  assign button_gradient = block.settings.button_gradient | default: 'linear-gradient(180deg, #25282A 0%, #1a1c1e 100%)'
+  assign button_text_color = block.settings.button_text_color | default: '#FFFFFF'
+  assign button_icon_color = block.settings.button_icon_color | default: '#FFFFFF'
+  assign button_border_radius = block.settings.button_border_radius | default: 8
+  assign button_padding_vertical = block.settings.button_padding_vertical | default: 16
+  assign button_padding_horizontal = block.settings.button_padding_horizontal | default: 24
+  assign button_font_size = block.settings.button_font_size | default: 16
+  assign arrow_size = block.settings.arrow_size | default: 18
+  assign verification_color = block.settings.verification_color | default: '#25282A'
+  assign verification_font_size = block.settings.verification_font_size | default: 12
+%}
+
+<style>
+  @keyframes listicle-button-bounce-{{ block.id }} {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+      animation-timing-function: ease-out;
+    }
+    10% {
+      transform: translateY(-10px);
+      animation-timing-function: ease-in;
+    }
+    30% {
+      transform: translateY(-5px);
+      animation-timing-function: ease-in;
+    }
+    40% {
+      transform: translateY(0);
+      animation-timing-function: ease-out;
+    }
+  }
+
+  .listicle-sticky-bar-{{ block.id }} {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9900;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    background: #FFFFFF;
+    padding: 12px 15px;
+    box-sizing: border-box;
+  }
+
+  .listicle-sticky-bar-{{ block.id }} .listicle-sticky-container {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .listicle-sticky-bar-{{ block.id }} .listicle-verification-text {
+    font-size: {{ verification_font_size }}px;
+    color: {{ verification_color }};
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  .listicle-sticky-bar-{{ block.id }} .listicle-button {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: {{ button_padding_vertical }}px {{ button_padding_horizontal }}px;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-body);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    {% if use_gradient %}
+      background: {{ button_gradient }} !important;
+    {% else %}
+      background: {{ button_bg_color }} !important;
+    {% endif %}
+    color: {{ button_text_color }} !important;
+    border-radius: {{ button_border_radius }}px !important;
+    font-size: {{ button_font_size }}px;
+    text-transform: uppercase;
+    animation: listicle-button-bounce-{{ block.id }} 2s linear infinite;
+  }
+
+  .listicle-sticky-bar-{{ block.id }} .listicle-button:hover {
+    opacity: 0.9;
+    animation-play-state: paused;
+  }
+
+  .listicle-sticky-bar-{{ block.id }} .listicle-button-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: {{ arrow_size }}px;
+    height: {{ arrow_size }}px;
+    color: {{ button_icon_color }} !important;
+  }
+
+  .listicle-sticky-bar-{{ block.id }} .listicle-button-arrow svg {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .listicle-sticky-bar-{{ block.id }} .listicle-button-arrow svg path {
+    stroke: {{ button_icon_color }} !important;
+  }
+
+  @media (max-width: 767px) {
+    .listicle-sticky-bar-{{ block.id }} .listicle-button {
+      max-width: 100%;
+    }
+  }
+</style>
+
+<div class="listicle-sticky-bar-{{ block.id }}">
+  <div class="listicle-sticky-container">
+    
+    
+    {% if button_link != blank and button_link != '#' %}
+      <a href="{{ button_link }}" class="listicle-button">
+        {{ button_text }}
+        <span class="listicle-button-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.5 4.5L21 12M21 12L13.5 19.5M21 12H3" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </a>
+    {% else %}
+      <button type="button" class="listicle-button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+        {{ button_text }}
+        <span class="listicle-button-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.5 4.5L21 12M21 12L13.5 19.5M21 12H3" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </button>
+    {% endif %}
+  </div>
+</div>
+

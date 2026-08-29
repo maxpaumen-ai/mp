@@ -1,0 +1,478 @@
+{% comment %}
+  Component: Contact Form
+  
+  Required parameters:
+  - section: section object
+  
+  Optional parameters:
+  - validate_on_submit: boolean (default: true)
+  - show_success_message: boolean (default: true)
+  - auto_focus_errors: boolean (default: true)
+  - debounce_delay: number (default: 300)
+{% endcomment %}
+
+{{ 'contact-form.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .contact-form-{{ section.id }} {
+    --theme-primary: {% if section.settings.use_theme_colors %}{{ settings.colors_accent_1 }}{% else %}{{ section.settings.button_background_color }}{% endif %};
+    --theme-primary-hover: {% if section.settings.use_theme_colors %}{{ settings.colors_accent_1 | color_darken: 10 }}{% else %}{{ section.settings.button_hover_background_color }}{% endif %};
+    --theme-background: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.background_color }}{% endif %};
+    --theme-text: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.text_color }}{% endif %};
+    --theme-border: {% if section.settings.use_theme_colors %}{{ settings.colors_outline_button_labels }}{% else %}{{ section.settings.field_border_color }}{% endif %};
+    --theme-error: {% if section.settings.use_theme_colors %}{{ settings.colors_accent_2 }}{% else %}{{ section.settings.error_color }}{% endif %};
+    --theme-success: {% if section.settings.use_theme_colors %}{{ settings.colors_accent_3 }}{% else %}{{ section.settings.success_color }}{% endif %};
+    --theme-placeholder: {% if section.settings.use_theme_colors %}{{ settings.colors_text | color_modify: 'alpha', 0.6 }}{% else %}{{ section.settings.placeholder_color }}{% endif %};
+    --theme-field-bg: {% if section.settings.use_theme_colors %}{{ settings.colors_background_1 }}{% else %}{{ section.settings.field_background_color }}{% endif %};
+    --theme-field-text: {% if section.settings.use_theme_colors %}{{ settings.colors_text }}{% else %}{{ section.settings.field_text_color }}{% endif %};
+    --theme-button-text: {% if section.settings.use_theme_colors %}{{ settings.colors_solid_button_labels }}{% else %}{{ section.settings.button_text_color }}{% endif %};
+    
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+    padding-left: {{ section.settings.padding_left | times: 0.75 | round: 0 }}px;
+    padding-right: {{ section.settings.padding_right | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .contact-form-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+      padding-left: {{ section.settings.padding_left }}px;
+      padding-right: {{ section.settings.padding_right }}px;
+    }
+  }
+
+  /* Apply border color to input fields */
+  .contact-form-{{ section.id }} .contact-form__input {
+    border-color: var(--theme-border) !important;
+  }
+
+  .contact-form-{{ section.id }} .contact-form__input:focus {
+    border-color: var(--theme-primary) !important;
+  }
+
+  .contact-form-{{ section.id }} .contact-form__field--with-error .contact-form__input {
+    border-color: var(--theme-error) !important;
+  }
+{%- endstyle -%}
+
+<div 
+  class="contact-form contact-form-{{ section.id }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}" 
+  data-component="contact-form"
+  data-validate-on-submit="{{ section.settings.validate_on_submit | default: true }}"
+  data-show-success-message="{{ section.settings.show_success_message | default: true }}"
+  data-auto-focus-errors="{{ section.settings.auto_focus_errors | default: true }}"
+  data-debounce-delay="{{ section.settings.debounce_delay | default: 300 }}"
+  style="background-color: var(--theme-background);"
+>
+  <div class="page-width page-width--narrow contact-form__padding">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="contact-form__heading {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} contact-form__animate-slide-in{% endif %}">
+        {{ section.settings.heading }}
+      </h2>
+    {%- else -%}
+      <h2 class="contact-form__heading visually-hidden">{{ 'templates.contact.form.title' | t }}</h2>
+    {%- endif -%}
+    
+    {%- liquid
+      assign contact_form_class = 'contact-form__form'
+      if settings.animations_reveal_on_scroll
+        assign contact_form_class = 'contact-form__form contact-form__animate-slide-in'
+      endif
+    -%}
+    
+    {%- form 'contact', id: 'ContactForm', class: contact_form_class -%}
+      <div class="contact-form__status">
+        {%- if form.posted_successfully? -%}
+          <div class="contact-form__status--success" tabindex="-1" autofocus>
+            <span class="contact-form__status-icon">
+              {{- 'icon-success.svg' | inline_asset_content -}}
+            </span>
+            <span>{{ 'templates.contact.form.post_success' | t }}</span>
+          </div>
+        {%- elsif form.errors -%}
+          <div class="contact-form__status--error">
+            <h2 class="contact-form__status--error" role="alert" tabindex="-1" autofocus>
+              <span class="contact-form__status-icon">
+                {{- 'icon-error.svg' | inline_asset_content -}}
+              </span>
+              <span>{{ 'templates.contact.form.error_heading' | t }}</span>
+            </h2>
+            <ul class="contact-form__status-list" role="list">
+              <li>
+                <a href="#ContactForm-email" class="link">
+                  {{ form.errors.translated_fields.email | capitalize }}
+                  {{ form.errors.messages.email }}
+                </a>
+              </li>
+            </ul>
+          </div>
+        {%- endif -%}
+      </div>
+      
+      <div class="contact-form__fields">
+        <div class="contact-form__field" data-field="name">
+          <input
+            class="contact-form__input"
+            autocomplete="name"
+            type="text"
+            id="ContactForm-name"
+            name="contact[{{ 'templates.contact.form.name' | t }}]"
+            value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
+            placeholder="{{ 'templates.contact.form.name' | t }}"
+          >
+          <label class="contact-form__label" for="ContactForm-name">{{ 'templates.contact.form.name' | t }}</label>
+          <small class="contact-form__field-error" id="ContactForm-name-error" style="display: none;">
+            <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
+            <span class="contact-form__message">
+              <span class="svg-wrapper">
+                {{- 'icon-error.svg' | inline_asset_content -}}
+              </span>
+              <span class="error-text"></span>
+            </span>
+          </small>
+        </div>
+        
+        <div class="contact-form__field{% if form.errors contains 'email' %} contact-form__field--with-error{% endif %}" data-field="email">
+          <input
+            autocomplete="email"
+            type="email"
+            id="ContactForm-email"
+            class="contact-form__input"
+            name="contact[email]"
+            spellcheck="false"
+            autocapitalize="off"
+            value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+            aria-required="true"
+            required
+            {% if form.errors contains 'email' %}
+              aria-invalid="true"
+              aria-describedby="ContactForm-email-error"
+            {% endif %}
+            placeholder="{{ 'templates.contact.form.email' | t }}"
+          >
+          <label class="contact-form__label" for="ContactForm-email">
+            {{- 'templates.contact.form.email' | t }}
+            <span aria-hidden="true">*</span>
+          </label>
+          {%- if form.errors contains 'email' -%}
+            <small class="contact-form__field-error" id="ContactForm-email-error">
+              <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
+              <span class="contact-form__message">
+                <span class="svg-wrapper">
+                  {{- 'icon-error.svg' | inline_asset_content -}}
+                </span>
+                {{- form.errors.translated_fields.email | capitalize }}
+                {{ form.errors.messages.email -}}
+              </span>
+            </small>
+          {%- else -%}
+            <small class="contact-form__field-error" id="ContactForm-email-error" style="display: none;">
+              <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
+              <span class="contact-form__message">
+                <span class="svg-wrapper">
+                  {{- 'icon-error.svg' | inline_asset_content -}}
+                </span>
+                <span class="error-text"></span>
+              </span>
+            </small>
+          {%- endif -%}
+        </div>
+      </div>
+      
+      <div class="contact-form__field" data-field="phone">
+        <input
+          type="tel"
+          id="ContactForm-phone"
+          class="contact-form__input"
+          autocomplete="tel"
+          name="contact[{{ 'templates.contact.form.phone' | t }}]"
+          pattern="[0-9\-\(\)\+\s]*"
+          value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}"
+          placeholder="{{ 'templates.contact.form.phone' | t }}"
+        >
+        <label class="contact-form__label" for="ContactForm-phone">{{ 'templates.contact.form.phone' | t }}</label>
+        <small class="contact-form__field-error" id="ContactForm-phone-error" style="display: none;">
+          <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
+          <span class="contact-form__message">
+            <span class="svg-wrapper">
+              {{- 'icon-error.svg' | inline_asset_content -}}
+            </span>
+            <span class="error-text"></span>
+          </span>
+        </small>
+      </div>
+      
+      <div class="contact-form__field" data-field="body">
+        <textarea
+          rows="10"
+          id="ContactForm-body"
+          class="contact-form__textarea contact-form__input"
+          name="contact[{{ 'templates.contact.form.comment' | t }}]"
+          placeholder="{{ 'templates.contact.form.comment' | t }}"
+        >
+          {{- form.body -}}
+        </textarea>
+        <label class="contact-form__label" for="ContactForm-body">
+          {{- 'templates.contact.form.comment' | t -}}
+        </label>
+        <small class="contact-form__field-error" id="ContactForm-body-error" style="display: none;">
+          <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
+          <span class="contact-form__message">
+            <span class="svg-wrapper">
+              {{- 'icon-error.svg' | inline_asset_content -}}
+            </span>
+            <span class="error-text"></span>
+          </span>
+        </small>
+      </div>
+      
+      <div class="contact-form__button-wrapper">
+        <button type="submit" class="contact-form__button">
+          {{ 'templates.contact.form.send' | t }}
+        </button>
+      </div>
+    {%- endform -%}
+  </div>
+</div>
+
+<script src="{{ 'contact-form.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "t:sections.contact-form.name",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "When disabled, you can customize all colors below"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "default": "t:sections.contact-form.settings.title.default",
+      "label": "t:sections.contact-form.settings.title.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        },
+        {
+          "value": "hxl",
+          "label": "t:sections.all.heading_size.options__4.label"
+        },
+        {
+          "value": "hxxl",
+          "label": "t:sections.all.heading_size.options__5.label"
+        }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "header",
+      "content": "Form Behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "validate_on_submit",
+      "label": "Validate on Submit",
+      "default": true,
+      "info": "Enable client-side validation before form submission"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_success_message",
+      "label": "Show Success Message",
+      "default": true,
+      "info": "Display success message after form submission"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_focus_errors",
+      "label": "Auto Focus Errors",
+      "default": true,
+      "info": "Automatically focus first field with validation error"
+    },
+    {
+      "type": "range",
+      "id": "debounce_delay",
+      "min": 100,
+      "max": 1000,
+      "step": 50,
+      "unit": "ms",
+      "label": "Validation Debounce Delay",
+      "default": 300,
+      "info": "Delay before validating field input (lower = more responsive)"
+    },
+    {
+      "type": "header",
+      "content": "Custom Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section Background Color",
+      "default": "#FFFFFF",
+      "info": "Used when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#000000",
+      "info": "Used when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000",
+      "info": "Used for labels and general text when theme colors are disabled"
+    },
+    {
+      "type": "header",
+      "content": "Form Field Colors"
+    },
+    {
+      "type": "color",
+      "id": "field_background_color",
+      "label": "Field Background Color",
+      "default": "#FFFFFF",
+      "info": "Background color for input fields when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "field_border_color",
+      "label": "Field Border Color",
+      "default": "#E5E5E5",
+      "info": "Border color for input fields when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "field_text_color",
+      "label": "Field Text Color",
+      "default": "#000000",
+      "info": "Text color inside input fields when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "placeholder_color",
+      "label": "Placeholder Text Color",
+      "default": "#999999",
+      "info": "Color for placeholder text when theme colors are disabled"
+    },
+    {
+      "type": "header",
+      "content": "Button Colors"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Button Background Color",
+      "default": "#000000",
+      "info": "Submit button background color when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#FFFFFF",
+      "info": "Submit button text color when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background_color",
+      "label": "Button Hover Background Color",
+      "default": "#333333",
+      "info": "Submit button background color on hover when theme colors are disabled"
+    },
+    {
+      "type": "header",
+      "content": "Message Colors"
+    },
+    {
+      "type": "color",
+      "id": "success_color",
+      "label": "Success Message Color",
+      "default": "#28A745",
+      "info": "Color for success messages when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "error_color",
+      "label": "Error Message Color",
+      "default": "#DC3545",
+      "info": "Color for error messages when theme colors are disabled"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Left",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Right",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.contact-form.presets.name"
+    }
+  ]
+}
+{% endschema %}

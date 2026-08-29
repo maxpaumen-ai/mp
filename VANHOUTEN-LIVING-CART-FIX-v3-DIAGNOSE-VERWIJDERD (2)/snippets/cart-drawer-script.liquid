@@ -1,0 +1,21 @@
+<script>
+  function detectDiscountWrap() {
+    const container = document.querySelector('.cart-drawer .discount_price-container');
+    const discount = container?.querySelector('.discount_discount-value');
+    const price = container?.querySelector('.totals__total-value');
+
+    if (!container || !discount || !price) return;
+    const discountTop = discount.getBoundingClientRect().top;
+    const priceTop = price.getBoundingClientRect().top;
+    console.log(discountTop, priceTop);
+    if (discountTop + 5 < priceTop) {
+      container.classList.add('wrap');
+    } else {
+      container.classList.remove('wrap');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    detectDiscountWrap();
+  });
+</script>

@@ -1,0 +1,183 @@
+{% comment %}
+  Viewer Notice Component
+  Shows how many people are currently viewing the product
+
+  Parameters:
+  - background_color: Background color of the notice
+  - text_color: Text color
+  - dot_color: Color of the pulsing dot
+  - box_shadow: Enable/disable box shadow
+  - border_radius: Border radius in px
+  - min_viewers: Minimum number of viewers
+  - max_viewers: Maximum number of viewers
+  - margin_top: Top margin in px
+  - margin_bottom: Bottom margin in px
+  - show_border: Enable/disable border
+  - border_style: Border style (solid, dashed, dotted)
+  - border_color: Border color
+  - border_width: Border width in px
+  - use_icon: Whether to use custom icon instead of dot
+  - custom_icon: Custom SVG icon
+  - icon_size: Size of icon in px
+  - alignment: Text alignment (left, center, right)
+  - font_size_desktop: Font size on desktop (px)
+  - font_size_mobile: Font size on mobile (px)
+  - block: Block object for Shopify attributes
+{% endcomment %}
+
+{% assign bg_color = background_color | default: '#EAF4FB' %}
+{% assign txt_color = text_color | default: '#1a1a1a' %}
+{% assign pulse_color = dot_color | default: '#B7D9EB' %}
+{% assign radius = border_radius | default: 16 %}
+{% assign min_count = min_viewers | default: 30 %}
+{% assign max_count = max_viewers | default: 60 %}
+{% assign top_margin = margin_top | default: 10 %}
+{% assign bottom_margin = margin_bottom | default: 0 %}
+{% assign notice_text = notice_text | default: 'Selling Fast!' %}
+{% assign suffix_text = suffix_text | default: 'people are looking at this' %}
+{% assign show_border = show_border | default: false %}
+{% assign border_style = border_style | default: 'solid' %}
+{% assign border_color = border_color | default: '#cccccc' %}
+{% assign border_width = border_width | default: 1 %}
+{% assign use_icon = use_icon | default: false %}
+{% assign icon_size = icon_size | default: 16 %}
+{% assign text_align = alignment | default: 'left' %}
+{% assign fs_desktop = font_size_desktop | default: 12 %}
+{% assign fs_mobile = font_size_mobile | default: 11 %}
+
+<div
+  class="viewer-notice-container"
+  {{ block.shopify_attributes }}
+  style="
+    text-align: {{ text_align }};
+    margin-top: {{ top_margin }}px;
+    margin-bottom: {{ bottom_margin }}px;
+  "
+>
+  <div
+    class="viewer-notice"
+    id="viewer-notice-{{ block.id }}"
+    style="
+      background: {{ bg_color }};
+      color: {{ txt_color }};
+      border-radius: {{ radius }}px;
+      {% if box_shadow == false %}box-shadow: none;{% endif %}
+      {% if show_border %}border: {{ border_width }}px {{ border_style }} {{ border_color }};{% endif %}
+    "
+  >
+    {% if use_icon %}
+      <span class="viewer-icon">
+        {{ custom_icon }}
+      </span>
+    {% else %}
+      <span class="viewer-dot"></span>
+    {% endif %}
+    <strong>{{ notice_text }}</strong>
+    <span id="viewer-count-{{ block.id }}">{{ min_count }}</span> {{ suffix_text }}
+  </div>
+</div>
+
+<style>
+  .viewer-notice-container {
+    display: block;
+    width: 100%;
+  }
+
+  .viewer-notice {
+    font-size: {{ fs_desktop }}px;
+    padding: 4px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  }
+
+  .viewer-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 3px;
+    position: relative;
+    background: {{ pulse_color }};
+    animation: blink-{{ block.id }} 1s infinite linear;
+  }
+
+  .viewer-dot::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background: {{ pulse_color }};
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    animation: pulse-{{ block.id }} 1s infinite cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  .viewer-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 3px;
+  }
+
+  .viewer-icon svg {
+    width: {{ icon_size }}px;
+    height: {{ icon_size }}px;
+  }
+
+  @keyframes blink-{{ block.id }} {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes pulse-{{ block.id }} {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  @media (max-width: 768px) {
+    .viewer-notice {
+      font-size: {{ fs_mobile }}px;
+    }
+
+    .viewer-dot {
+      width: 7px;
+      height: 7px;
+    }
+
+    .viewer-icon svg {
+      width: {{ icon_size | times: 0.875 }}px;
+      height: {{ icon_size | times: 0.875 }}px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const blockId = '{{ block.id }}';
+    let viewerCount = Math.floor(Math.random() * ({{ max_count }} - {{ min_count }} + 1)) + {{ min_count }};
+    const countEl = document.getElementById("viewer-count-" + blockId);
+
+    if (countEl) {
+      countEl.textContent = viewerCount;
+
+      function updateViewerCount() {
+        // Randomly increase or decrease by 1–3, stay within min–max
+        const change = Math.floor(Math.random() * 3) + 1;
+        const direction = Math.random() > 0.5 ? 1 : -1;
+        viewerCount += change * direction;
+
+        if (viewerCount < {{ min_count }}) viewerCount = {{ min_count }};
+        if (viewerCount > {{ max_count }}) viewerCount = {{ max_count }};
+
+        countEl.textContent = viewerCount;
+      }
+
+      // Update every 5–8 seconds
+      setInterval(updateViewerCount, Math.floor(Math.random() * 3000) + 5000);
+    }
+  });
+</script>

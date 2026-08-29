@@ -1,0 +1,336 @@
+{% comment %}
+  Added “Use theme colors” toggle (maps to global tokens).
+  Scoped line-height:0 to .divider-svg-wrap only.
+  Made SVG transform composable via --svg-transform.
+  Added “Keep proportions” toggle (controls preserveAspectRatio).
+  Set background_color default to transparent.
+  Applied consistent strokes with stroke-linecap and stroke-linejoin: round.
+  Marked SVGs as decorative with role="presentation" aria-hidden.
+  Updated labels/helptext to guide merchants on contrast.
+  Slimmed DOM; wrappers only where needed.
+  Restricted section placement (disabled in header/footer).
+  Improved labels/help for flip, stretch, and gradient options.
+  Kept seam-hiding path coordinates but documented in code.
+{% endcomment %}
+
+{%- liquid
+  if section.settings.use_theme_colors
+    assign divider_color = settings.global_section_accent_1_color
+    assign bg_color = settings.global_section_background_color
+  else
+    assign divider_color = section.settings.color
+    assign bg_color = section.settings.background_color
+  endif
+-%}
+
+{%- style -%}
+  .divider-section-{{ section.id }} {
+    --divider-color: {{ divider_color }};
+    --divider-height: {{ section.settings.height }}px;
+    --padding-top: {{ section.settings.padding_top }}px;
+    --padding-bottom: {{ section.settings.padding_bottom }}px;
+    --svg-transform: {% if section.settings.flip_direction %}scaleY(-1){% else %}none{% endif %};
+    background-color: {{ bg_color }};
+    padding: var(--padding-top) 0 var(--padding-bottom) 0;
+  }
+
+  .divider-section-{{ section.id }} .divider-svg-wrap {
+    line-height: 0;
+    transform: var(--svg-transform); /* ALWAYS on wrapper */
+  }
+
+  .divider-section-{{ section.id }} svg {
+    width: 100%;
+    height: var(--divider-height);
+    /* REMOVE transform from here entirely */
+    display: block;
+    {% if section.settings.keep_proportion %}
+      preserveAspectRatio: xMidYMid meet;
+    {% endif %}
+  }
+
+  /* Apply gradient to wrapper, SVG becomes the mask */
+  {% if section.settings.use_gradient %}
+  .divider-section-{{ section.id }} .divider-svg-wrap {
+    background: {{ section.settings.gradient_background }};
+    
+    {% case section.settings.divider_style %}
+      {% when 'cloud' %}
+        -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M-5,90 Q 100,20 250,90 Q 400,50 550,90 Q 750,-20 950,70 Q 1100,40 1205,90 L 1205,120 L -5,120 Z" fill="black"/></svg>');
+                mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M-5,90 Q 100,20 250,90 Q 400,50 550,90 Q 750,-20 950,70 Q 1100,40 1205,90 L 1205,120 L -5,120 Z" fill="black"/></svg>');
+      {% when 'wavy' %}
+        -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,60 Q300,120 600,60 T1200,60 V120 H0 Z" fill="black"/></svg>');
+                mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,60 Q300,120 600,60 T1200,60 V120 H0 Z" fill="black"/></svg>');
+      {% when 'diagonal' %}
+        -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,120 L1200,90 V120 H0 Z" fill="black"/></svg>');
+                mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,120 L1200,90 V120 H0 Z" fill="black"/></svg>');
+      {% when 'gradient' %}
+        -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect x="0" y="0" width="1200" height="120" fill="black"/></svg>');
+                mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><rect x="0" y="0" width="1200" height="120" fill="black"/></svg>');
+    {% endcase %}
+    
+    -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+            mask-position: center;
+  }
+  
+  /* Hide the actual SVG when using gradient mask */
+  .divider-section-{{ section.id }} .divider-svg-wrap svg {
+    opacity: 0;
+    pointer-events: none;
+  }
+  {% endif %}
+
+  .divider-section-{{ section.id }} svg path {
+    {% if section.settings.use_gradient %}
+      /* mask mode draws black to reveal the gradient background */
+      fill: black;
+    {% else %}
+      fill: var(--divider-color);
+    {% endif %}
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .divider-section-{{ section.id }} svg rect {
+    {% if section.settings.use_gradient %}
+      /* mask mode draws black to reveal the gradient background */
+      fill: black;
+    {% else %}
+      fill: var(--divider-color);
+    {% endif %}
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  {% if section.settings.show_border %}
+  .divider-section-{{ section.id }} [data-divider-stroke] {
+    stroke: {{ section.settings.border_color }};
+    stroke-width: {{ section.settings.border_width }};
+    vector-effect: non-scaling-stroke;
+    {% case section.settings.border_style %}
+      {% when 'dashed' %} stroke-dasharray: 10 5;
+      {% when 'dotted' %} stroke-dasharray: 2 3;
+    {% endcase %}
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+  {% endif %}
+{%- endstyle -%}
+
+<div class="divider-section-{{ section.id }}">
+  <div class="divider-svg-wrap">
+    {%- case section.settings.divider_style -%}
+      {%- when 'cloud' -%}
+        <svg
+          viewBox="0 0 1200 120"
+          {% unless section.settings.keep_proportion %}
+            preserveAspectRatio="none"
+          {% endunless %}
+          role="presentation"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M-5,90 Q 100,20 250,90 Q 400,50 550,90 Q 750,-20 950,70 Q 1100,40 1205,90 L 1205,120 L -5,120 Z"></path>
+          {%- if section.settings.show_border -%}
+            <path data-divider-stroke d="M-5,90 Q 100,20 250,90 Q 400,50 550,90 Q 750,-20 950,70 Q 1100,40 1205,90"></path>
+          {%- endif -%}
+        </svg>
+
+      {%- when 'wavy' -%}
+        <svg
+          viewBox="0 0 1200 120"
+          {% unless section.settings.keep_proportion %}
+            preserveAspectRatio="none"
+          {% endunless %}
+          role="presentation"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M0,60 Q300,120 600,60 T1200,60 V120 H0 Z"></path>
+          {%- if section.settings.show_border -%}
+            <path data-divider-stroke d="M0,60 Q300,120 600,60 T1200,60"></path>
+          {%- endif -%}
+        </svg>
+
+      {%- when 'diagonal' -%}
+        <svg
+          viewBox="0 0 1200 120"
+          {% unless section.settings.keep_proportion %}
+            preserveAspectRatio="none"
+          {% endunless %}
+          role="presentation"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M0,120 L1200,90 V120 H0 Z"></path>
+          {%- if section.settings.show_border -%}
+            <path data-divider-stroke d="M0,120 L1200,90"></path>
+          {%- endif -%}
+        </svg>
+
+      {%- when 'gradient' -%}
+        <svg
+          viewBox="0 0 1200 120"
+          {% unless section.settings.keep_proportion %}
+            preserveAspectRatio="none"
+          {% endunless %}
+          role="presentation"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <rect x="0" y="0" width="1200" height="120"></rect>
+          {%- if section.settings.show_border -%}
+            <rect data-divider-stroke x="0" y="0" width="1200" height="120"></rect>
+          {%- endif -%}
+        </svg>
+    {%- endcase -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Divider",
+  "tag": "section",
+  "class": "section section-divider",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use theme colors",
+      "default": true,
+      "info": "When enabled, divider color uses your theme accent and background uses your section background."
+    },
+    {
+      "type": "select",
+      "id": "divider_style",
+      "label": "Divider style",
+      "options": [
+        { "value": "cloud", "label": "Cloud" },
+        { "value": "wavy", "label": "Wavy" },
+        { "value": "diagonal", "label": "Diagonal" },
+        { "value": "gradient", "label": "Gradient rectangle" }
+      ],
+      "default": "wavy"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "transparent",
+      "info": "Used when “Use theme colors” is off."
+    },
+    {
+      "type": "checkbox",
+      "id": "flip_direction",
+      "label": "Flip vertically",
+      "default": false,
+      "info": "Turns the shape upside down."
+    },
+    {
+      "type": "checkbox",
+      "id": "keep_proportion",
+      "label": "Keep SVG proportions",
+      "default": false,
+      "info": "Avoids stretching on extreme aspect ratios. If off, the divider stretches to fill the width."
+    },
+    {
+      "type": "color",
+      "id": "color",
+      "label": "Divider color",
+      "default": "#e0e0e0",
+      "info": "Used when “Use theme colors” is off."
+    },
+    {
+      "type": "range",
+      "id": "height",
+      "min": 10,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Height",
+      "default": 50
+    },
+
+    { "type": "header", "content": "Border" },
+    {
+      "type": "checkbox",
+      "id": "show_border",
+      "label": "Show border",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "border_style",
+      "label": "Border style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" }
+      ],
+      "default": "solid"
+    },
+
+    { "type": "header", "content": "Gradient" },
+    {
+      "type": "checkbox",
+      "id": "use_gradient",
+      "label": "Use gradient fill",
+      "default": false,
+      "info": "Applies the gradient to the divider (ignored for ‘Gradient rectangle’, which is always gradient)."
+    },
+    {
+      "type": "color_background",
+      "id": "gradient_background",
+      "label": "Gradient",
+      "default": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+    },
+
+    { "type": "header", "content": "Spacing" },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 20
+    }
+  ],
+  "presets": [{ "name": "Divider" }]
+}
+{% endschema %}

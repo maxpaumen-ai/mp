@@ -1,0 +1,57 @@
+{%- comment -%}
+  Accent Typography Classes Helper
+
+  Generates CSS classes for accent typography based on section settings.
+
+  Usage in sections:
+  {% assign accent_classes = '' | append: {% render 'accent-typography-classes', section: section %} %}
+  <div class="{{ accent_classes }}">...</div>
+
+  Or for specific elements:
+  {% assign accent_classes = '' | append: {% render 'accent-typography-classes', section: section, size: 'lg', weight: 'bold' %} %}
+{%- endcomment -%}
+
+{%- liquid
+  assign base_class = 'accent-font'
+  assign classes = ''
+
+  # Use passed parameters or section settings
+  assign use_accent = use_accent_font | default: section.settings.use_accent_font
+  assign font_size = size | default: section.settings.accent_font_size | default: 'base'
+  assign font_weight = weight | default: section.settings.accent_font_weight | default: 'normal'
+  assign text_transform = transform | default: section.settings.accent_text_transform | default: 'none'
+  assign is_italic = italic | default: section.settings.accent_font_italic | default: false
+
+  # Only generate classes if accent font is enabled
+  if use_accent
+    # Base accent font class
+    assign classes = classes | append: base_class
+
+    # Add size modifier
+    unless font_size == 'base'
+      assign classes = classes | append: ' ' | append: base_class | append: '--' | append: font_size
+    endunless
+
+    # Add weight modifier
+    unless font_weight == 'normal'
+      assign classes = classes | append: ' ' | append: base_class | append: '--' | append: font_weight
+    endunless
+
+    # Add text transform modifier
+    unless text_transform == 'none'
+      assign classes = classes | append: ' ' | append: base_class | append: '--' | append: text_transform
+    endunless
+
+    # Add italic modifier
+    if is_italic
+      assign classes = classes | append: ' ' | append: base_class | append: '--italic'
+    endif
+
+    # Add predefined combination classes if specified
+    if combination
+      assign classes = classes | append: ' ' | append: base_class | append: '--' | append: combination
+    endif
+  endif
+-%}
+
+{{- classes | strip -}}

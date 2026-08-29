@@ -1,0 +1,2414 @@
+{% if section.settings.override_global_accent %}
+  {% if section.settings.accent_font_family != 'inherit' and section.settings.accent_font_family != 'serif' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% case section.settings.accent_font_family %}
+      {% when 'Georgia Pro' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Georgia+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Bodoni Moda' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Instrument Serif' %}
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'DM Serif Text' %}
+        <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'Nothing You Could Do' %}
+        <link href="https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+    {% endcase %}
+  {% endif %}
+{% endif %}
+
+<style>
+  .video-section-{{ section.id }} {
+    padding-top: {{ section.settings.section_padding_top }}px;
+    overflow: hidden;
+    padding-bottom: {{ section.settings.section_padding_bottom }}px;
+    {% if section.settings.use_theme_colors %}
+      {% if settings.global_section_use_gradient_background %}
+        background: var(--gradient-background) !important;
+      {% else %}
+        background-color: {{ settings.global_section_background_color }} !important;
+      {% endif %}
+    {% else %}
+      background-color: {{ section.settings.section_background_color }};
+    {% endif %}
+    position: relative;
+    z-index: 1;
+  }
+
+   .video-section-{{ section.id }} .container {
+     max-width: {{ section.settings.container_max_width }}px;
+     margin: 0 auto;
+     padding: 0 {{ section.settings.container_padding_horizontal }}px;
+   }
+
+  .video-section-{{ section.id }} .video-slider-header {
+		text-align: center;
+    margin-bottom: {{ section.settings.header_margin_bottom }}px;
+    padding-left: {{ section.settings.header_padding_horizontal | default: 20 }}px;
+    padding-right: {{ section.settings.header_padding_horizontal | default: 20 }}px;
+    width: 100%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (max-width: 768px) {
+    .video-section-{{ section.id }} .video-slider-header {
+      margin-bottom: {{ section.settings.header_margin_bottom_mobile | default: 24 }}px;
+      padding-left: {{ section.settings.header_padding_horizontal_mobile | default: 15 }}px;
+      padding-right: {{ section.settings.header_padding_horizontal_mobile | default: 15 }}px;
+    }
+  }
+
+   .video-section-{{ section.id }} .main-heading {
+     font-family: var(--font-heading-family);
+     font-size: {{ section.settings.main_heading_size }}px;
+     font-weight: var(--font-weight-bold) !important;
+     color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.main_heading_color }}{% endif %} !important;
+     margin: 0 auto {{ section.settings.main_heading_margin_bottom }}px auto;
+     letter-spacing: {{section.settings.main_heading_letter_spacing}}px;
+     line-height: {{ section.settings.main_heading_line_height }};
+     text-align: {{ section.settings.main_heading_alignment }};
+     display: block;
+  	width: 100%;
+  }
+
+   .video-section-{{ section.id }} .main-heading .global-accent-text {
+     {% comment %} Use proper global accent text styling {% endcomment %}
+     padding: 2px 4px !important;
+     margin: -2px -4px !important;
+     display: inline-block !important;
+
+     {% if settings.global_accent_text_gradient_dark != blank %}
+       background: {{ settings.global_accent_text_gradient_dark }} !important;
+       -webkit-background-clip: text !important;
+       -webkit-text-fill-color: transparent !important;
+       background-clip: text !important;
+       color: transparent !important;
+       line-height: 1.3 !important;
+     {% else %}
+       color: {{ settings.global_section_accent_1_color | default: '#ff6b35' }} !important;
+     {% endif %}
+
+     {% comment %} Apply global accent typography if available {% endcomment %}
+     font-family: var(--font-accent-family, inherit) !important;
+     font-style: var(--font-accent-style, normal) !important;
+     font-weight: var(--font-accent-weight, inherit) !important;
+     letter-spacing: var(--font-accent-letter-spacing, inherit) !important;
+   }
+
+   .video-section-{{ section.id }} .main-heading .global-accent-text,
+   .video-section-{{ section.id }} .main-heading .custom-accent-text {
+     {% comment %} Always apply core accent text styling {% endcomment %}
+     padding: 2px 4px !important;
+     margin: -2px -4px !important;
+     display: inline-block !important;
+     margin-left: {{ section.settings.accent_text_margin_left | default: 0 }}px !important;
+
+     {% comment %} Check for gradient first - it works regardless of global/local settings {% endcomment %}
+     {% if section.settings.use_accent_gradient %}
+       background: {{ section.settings.accent_text_gradient }} !important;
+       -webkit-background-clip: text !important;
+       -webkit-text-fill-color: transparent !important;
+       background-clip: text !important;
+       color: transparent !important;
+       line-height: 1.3 !important;
+     {% else %}
+       {% comment %} Apply solid color based on global or local settings {% endcomment %}
+       color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.accent_color }}{% endif %} !important;
+     {% endif %}
+
+     {% if section.settings.override_global_accent %}
+       {% comment %} Use section-specific typography settings when override is enabled {% endcomment %}
+       {% if section.settings.accent_font_family != 'inherit' %}
+         {% case section.settings.accent_font_family %}
+           {% when 'serif' %}
+             font-family: serif !important;
+           {% when 'Georgia Pro' %}
+             font-family: 'Georgia Pro', Georgia, serif !important;
+           {% when 'Bodoni Moda' %}
+             font-family: 'Bodoni Moda', Georgia, serif !important;
+           {% when 'Instrument Serif' %}
+             font-family: 'Instrument Serif', Georgia, serif !important;
+           {% when 'DM Serif Text' %}
+             font-family: 'DM Serif Text', Georgia, serif !important;
+           {% when 'Nothing You Could Do' %}
+             font-family: 'Nothing You Could Do', cursive !important;
+         {% endcase %}
+       {% else %}
+         font-family: var(--font-accent-family, var(--font-body-family)) !important;
+       {% endif %}
+       font-style: {{ section.settings.accent_font_style | default: 'normal' }} !important;
+       font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+     {% else %}
+       {% comment %} Use global accent text styling {% endcomment %}
+       font-family: var(--font-accent-family, inherit) !important;
+       font-size: var(--font-accent-size, inherit) !important;
+       font-style: var(--font-accent-style, normal) !important;
+       font-weight: var(--font-accent-weight, inherit) !important;
+       letter-spacing: var(--font-accent-letter-spacing, inherit) !important;
+       text-transform: var(--font-accent-text-transform, none) !important;
+     {% endif %}
+   }
+
+     .video-section-{{ section.id }} .subtitle {
+     font-family: var(--font-body-family);
+     font-size: {{ section.settings.subtitle_size }}px;
+     font-weight: {% if section.settings.use_theme_colors %}var(--font-weight-regular){% else %}{{ section.settings.subtitle_font_weight }}{% endif %};
+     color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subtitle_color }}{% endif %};
+     letter-spacing: var(--letter-spacing-body);
+     line-height: {{ section.settings.subtitle_line_height }};
+     text-align: {{ section.settings.subtitle_alignment }};
+     margin: 0 auto 20px auto;
+     display: block;
+  	width: 100%;
+  }
+
+   /* Social Media Badge Styles */
+   .video-section-{{ section.id }} .video-slider-social-badge {
+     display: inline-flex !important;
+     align-items: center !important;
+     padding: {{ section.settings.badge_padding_vertical | default: 4 }}px {{ section.settings.badge_padding_horizontal | default: 12 }}px !important;
+     {% if section.settings.show_badge_background %}
+       background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.badge_background_color | default: '#f8f9fa' }}{% endif %} !important;
+       border: 1px solid transparent !important;
+       background-clip: padding-box !important;
+     {% else %}
+       background-color: transparent !important;
+       border: none !important;
+     {% endif %}
+     border-radius: {{ section.settings.badge_border_radius | default: 50 }}px !important;
+     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+     font-size: {{ section.settings.badge_font_size | default: 11 }}px !important;
+     color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.badge_text_color | default: '#262626' }}{% endif %} !important;
+     position: relative !important;
+     margin-bottom: 10px;
+     text-align: {{ section.settings.main_heading_alignment }};
+     gap: {{ section.settings.badge_icon_gap | default: 6 }}px !important;
+     {% if section.settings.main_heading_alignment == 'center' %}
+       margin-left: auto;
+       margin-right: auto;
+     {% elsif section.settings.main_heading_alignment == 'right' %}
+       margin-left: auto;
+       margin-right: 0;
+     {% else %}
+       margin-left: 0;
+       margin-right: auto;
+     {% endif %}
+   }
+
+   {% if section.settings.show_badge_background %}
+   .video-section-{{ section.id }} .video-slider-social-badge::before {
+     content: '' !important;
+     position: absolute !important;
+     top: -1px !important;
+     right: -1px !important;
+     bottom: -1px !important;
+     left: -1px !important;
+     z-index: -1 !important;
+     border-radius: {{ section.settings.badge_border_radius | default: 50 }}px !important;
+     {% if section.settings.social_platform == 'tiktok' %}
+       background: linear-gradient(45deg, #00f2ea, #ff0050) !important;
+     {% elsif section.settings.social_platform == 'instagram' %}
+       background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045) !important;
+     {% elsif section.settings.social_platform == 'facebook' %}
+       background: #1877F2 !important;
+     {% endif %}
+   }
+   {% endif %}
+
+   .video-section-{{ section.id }} .video-slider-social-icon {
+     width: {{ section.settings.badge_icon_size | default: 12 }}px !important;
+     height: {{ section.settings.badge_icon_size | default: 12 }}px !important;
+     flex-shrink: 0 !important;
+     display: block !important;
+   }
+
+   .video-section-{{ section.id }} .video-slider-social-text {
+     font-weight: {% if section.settings.use_theme_colors %}var(--font-weight-semibold){% else %}500{% endif %} !important;
+     {% if section.settings.use_gradient_text %}
+       {% if section.settings.social_platform == 'tiktok' %}
+         background: linear-gradient(45deg, #00f2ea, #ff0050) !important;
+       {% elsif section.settings.social_platform == 'instagram' %}
+         background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045) !important;
+       {% elsif section.settings.social_platform == 'facebook' %}
+         background: linear-gradient(45deg, #1877F2, #4267B2) !important;
+       {% endif %}
+       -webkit-background-clip: text !important;
+       -webkit-text-fill-color: transparent !important;
+       background-clip: text !important;
+     {% endif %}
+   }
+
+   /* Rich text badge styling */
+   .video-section-{{ section.id }} .video-slider-social-text p {
+     margin: 0 !important;
+     display: inline !important;
+   }
+
+   .video-section-{{ section.id }} .video-slider-social-text strong,
+   .video-section-{{ section.id }} .video-slider-social-text b {
+     font-weight: 700 !important;
+   }
+
+   @media (max-width: 768px) {
+     .video-section-{{ section.id }} .video-slider-social-badge {
+       font-size: {{ section.settings.badge_font_size_mobile | default: section.settings.badge_font_size | default: 11 }}px !important;
+       padding: {{ section.settings.badge_padding_vertical_mobile | default: section.settings.badge_padding_vertical | default: 4 }}px {{ section.settings.badge_padding_horizontal_mobile | default: section.settings.badge_padding_horizontal | default: 12 }}px !important;
+     }
+
+     .video-section-{{ section.id }} .video-slider-social-icon {
+       width: {{ section.settings.badge_icon_size_mobile | default: section.settings.badge_icon_size | default: 12 }}px !important;
+       height: {{ section.settings.badge_icon_size_mobile | default: section.settings.badge_icon_size | default: 12 }}px !important;
+     }
+   }
+
+  .video-section-{{ section.id }} .cards-grid {
+    margin-top: {{ section.settings.grid_margin_top }}px;
+    position: relative;
+	width: 100%;
+    height: {{ section.settings.desktop_container_height }}px;
+    {% if section.settings.enable_video_grid_max_width %}
+      max-width: {{ section.settings.video_grid_max_width }}px;
+      margin-left: auto;
+      margin-right: auto;
+    {% endif %}
+  }
+
+   {% if section.settings.enable_gradient_mask %}
+   @media screen and (min-width: 390px) {
+     .video-section-{{ section.id }} .cards-grid {
+       -webkit-mask: linear-gradient(to right,
+         transparent 0%,
+         black {{ section.settings.mask_fade_distance }}px,
+         black calc(100% - {{ section.settings.mask_fade_distance }}px),
+         transparent 100%);
+       mask: linear-gradient(to right,
+         transparent 0%,
+         black {{ section.settings.mask_fade_distance }}px,
+         black calc(100% - {{ section.settings.mask_fade_distance }}px),
+         transparent 100%);
+     }
+   }
+   {% endif %}
+
+  .video-section-{{ section.id }} .cards-container {
+	display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    transition: transform 0.3s ease;
+    width: fit-content;
+    margin: 0 auto;
+  }
+
+     /* Navigation buttons styling */
+   .video-section-{{ section.id }} .video-navigation-container {
+  	width: 100%;
+     margin-top: 45px;
+     display: flex;
+     justify-content: center;
+  }
+
+   .video-section-{{ section.id }} .video-navigation {
+  	display: flex;
+     justify-content: center;
+     gap: 12px;
+     margin-top: 20px;
+   }
+
+  /* Navigation buttons now use global-nav-button snippet */
+
+   {% if section.settings.hide_navigation_desktop %}
+   @media screen and (min-width: 1025px) {
+     .video-section-{{ section.id }} .video-navigation-container {
+  	display: none;
+  }
+   }
+   {% endif %}
+
+  @media screen and (max-width: 768px) {
+    .video-section-{{ section.id }} .video-navigation-container {
+margin-top: 20px;
+    }
+  }
+
+   .video-section-{{ section.id }} .card {
+     border-radius: {{ section.settings.card_border_radius }}px !important;
+     width: {{ section.settings.desktop_card_width }}px;
+     height: {{ section.settings.desktop_container_height }}px !important;
+     max-height: {{ section.settings.desktop_container_height }}px !important;
+     position: relative;
+     overflow: hidden;
+     display: flex;
+     flex-direction: column;
+     justify-content: flex-end;
+     padding: {{ section.settings.card_padding }}px !important;
+     transition: all {{ section.settings.transition_duration }}s ease;
+     flex-shrink: 0;
+     {% if section.settings.enable_video_border %}
+       border: {{ section.settings.video_border_width }}px {{ section.settings.video_border_style }} {{ section.settings.video_border_color }};
+     {% endif %}
+     {% if section.settings.enable_shadows %}
+       box-shadow: {{ section.settings.card_shadow }};
+     {% endif %}
+   }
+
+
+
+
+
+    .video-section-{{ section.id }} .card-video {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    border: none;
+    outline: none;
+    border-radius: {{ section.settings.card_border_radius }}px;
+  }
+
+   /* Hide video controls completely */
+   .video-section-{{ section.id }} .card-video::-webkit-media-controls {
+     display: none !important;
+   }
+
+   .video-section-{{ section.id }} .card-video::-webkit-media-controls-panel {
+     display: none !important;
+   }
+
+   .video-section-{{ section.id }} .card-video::-webkit-media-controls-enclosure {
+     display: none !important;
+   }
+
+   /* Video shows first frame as thumbnail */
+   .video-section-{{ section.id }} .card-video {
+     object-fit: cover;
+     cursor: pointer;
+     opacity: 1;
+   }
+
+  /* Fallback image styling */
+  .video-section-{{ section.id }} .card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+		width: 100%;
+		height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    border-radius: {{ section.settings.card_border_radius }}px;
+  }
+
+  /* Card styling */
+  .video-section-{{ section.id }} .card {
+    background-size: cover;
+    background-position: center;
+    min-height: 300px;
+    border-radius: {{ section.settings.card_border_radius }}px !important;
+  }
+
+   /* Play button overlay */
+   .video-section-{{ section.id }} .card::before {
+     content: '';
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     width: 60px;
+     height: 60px;
+     background: {{section.settings.play_btn_background}};
+     border-radius: 50%;
+     z-index: 3;
+     pointer-events: none;
+     transition: opacity 0.3s ease;
+   }
+
+  .video-section-{{ section.id }} .card::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 51%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-left: 20px solid {{section.settings.play_btn}};
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    z-index: 4;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+   .video-section-{{ section.id }} .card:hover::before,
+   .video-section-{{ section.id }} .card:hover::after {
+     opacity: 0.8;
+   }
+
+   /* Hide play button when video is playing */
+   .video-section-{{ section.id }} .card.playing::before,
+   .video-section-{{ section.id }} .card.playing::after {
+     opacity: 0;
+   }
+
+   .video-section-{{ section.id }} .card-video.paused {
+     filter: brightness(0.9);
+   }
+
+   .video-section-{{ section.id }} .card-video:not(.paused) {
+     filter: brightness(1);
+   }
+
+
+
+  .video-section-{{ section.id }} .card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+    z-index: 1;
+    border-radius: {{ section.settings.card_border_radius }}px;
+	}
+
+    .video-section-{{ section.id }} .card-overlay {
+      position: absolute !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: {{ section.settings.gradient_overlay_height | default: 60 }}% !important;
+  	{%- liquid
+  		assign overlay_color = section.settings.overlay_color | color_to_rgb
+  		assign overlay_rgb = overlay_color | replace: 'rgb(', '' | replace: ')', ''
+        assign overlay_opacity = section.settings.overlay_opacity | default: 0.5
+        assign mid_opacity = overlay_opacity | times: 0.7
+      -%}
+      background: linear-gradient(to top, rgba({{ overlay_rgb }}, {{ overlay_opacity }}) 0%, rgba({{ overlay_rgb }}, {{ mid_opacity }}) 50%, rgba({{ overlay_rgb }}, 0) 100%) !important;
+      pointer-events: none !important;
+      z-index: 2 !important;
+      display: block !important;
+    }
+
+   .video-section-{{ section.id }} .card-content {
+  		position: absolute;
+  		bottom: 0;
+  		left: 0;
+  		right: 0;
+  	z-index: 2;
+     padding: 0;
+   }
+
+      .video-section-{{ section.id }} .video-info {
+      padding: {{ section.settings.video_info_padding }}px;
+      margin: 0;
+  	width: 100%;
+      box-sizing: border-box;
+      background: transparent;
+    }
+
+    .video-section-{{ section.id }} .video-info .video-review-custom-title {
+      font-family: var(--font-heading-family);
+      font-size: {{ section.settings.title_size }}px;
+      font-weight: {% if section.settings.use_theme_colors %}var(--font-weight-bold){% else %}{{ section.settings.title_font_weight }}{% endif %} !important;
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_color }}{% endif %} !important;
+      letter-spacing: {% if section.settings.title_letter_spacing_style == 'body' %}var(--letter-spacing-body){% else %}var(--letter-spacing-heading){% endif %};
+      line-height: {{ section.settings.title_line_height }};
+      text-align: {{ section.settings.title_alignment }};
+      margin-bottom: {{section.settings.title_margin_bottom}}px;
+
+    }
+
+                   .video-section-{{ section.id }} .video-info .instagram-name {
+      font-family: var(--font-heading-family);
+      font-size: {{ section.settings.title_size }}px;
+      font-weight: {% if section.settings.use_theme_colors %}var(--font-weight-bold){% else %}{{ section.settings.title_font_weight }}{% endif %};
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_color }}{% endif %} !important;
+      letter-spacing: {% if section.settings.title_letter_spacing_style == 'body' %}var(--letter-spacing-body){% else %}var(--letter-spacing-heading){% endif %};
+      line-height: {{ section.settings.title_line_height }};
+      text-align: {{ section.settings.title_alignment }};
+      margin: 0 0 0.5rem 0;
+  	display: flex;
+  	align-items: center;
+      gap: 6px;
+      {% if section.settings.title_alignment == 'center' %}
+  	justify-content: center;
+      {% elsif section.settings.title_alignment == 'right' %}
+        justify-content: flex-end;
+      {% else %}
+        justify-content: flex-start;
+      {% endif %}
+    }
+
+       .video-section-{{ section.id }} .video-info .instagram-name .video-slider-instagram-icon {
+      width: {{ section.settings.title_size | times: 0.75 }}px;
+      height: {{ section.settings.title_size | times: 0.75 }}px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-section-{{ section.id }} .video-info .instagram-name .video-slider-instagram-icon svg {
+      width: 100%;
+      height: 100%;
+      fill: {{ section.settings.instagram_icon_color | default: section.settings.title_color }};
+  	display: block;
+  }
+
+    .video-section-{{ section.id }} .video-info .instagram-name span {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+   .video-section-{{ section.id }} .video-info .description {
+     font-family: var(--font-body-family);
+     font-size: {{ section.settings.description_size }}px;
+     font-weight: {% if section.settings.use_theme_colors %}var(--font-weight-regular){% else %}{{ section.settings.description_font_weight }}{% endif %} !important;
+     color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.description_color }}{% endif %};
+     line-height: {{ section.settings.description_line_height }};
+     letter-spacing: var(--letter-spacing-body);
+     text-align: {{ section.settings.description_alignment }};
+     margin: 0;
+  }
+
+  @media screen and (max-width: 1024px) {
+     .video-section-{{ section.id }} .cards-grid {
+       max-width: none;
+       overflow: visible;
+       height: auto;
+     }
+
+     .video-section-{{ section.id }} .cards-container {
+       display: grid;
+       grid-template-columns: repeat({{ section.settings.tablet_columns }}, 1fr);
+       gap: 15px;
+       width: 100%;
+       align-items: stretch;
+     }
+
+     .video-section-{{ section.id }} .card {
+  	width: 100%;
+       height: auto;
+       max-height: none;
+       aspect-ratio: 9 / 16;
+     }
+
+
+
+     .video-section-{{ section.id }} .main-heading {
+       font-size: {{ section.settings.main_heading_size | times: 0.9 }}px;
+     }
+
+     .video-section-{{ section.id }} .subtitle {
+       font-size: {{ section.settings.subtitle_size | times: 0.9 }}px;
+     }
+
+     .video-section-{{ section.id }} .video-info .description {
+       font-size: {{ section.settings.description_size | times: 0.9 }}px;
+     }
+
+     .video-section-{{ section.id }} .card {
+       aspect-ratio: 9 / 16;
+  	height: auto;
+       padding: {{ section.settings.tablet_card_padding }}px;
+     }
+   }
+
+    @media screen and (max-width: 768px) {
+    .video-section-{{ section.id }} {
+    padding-top: {{ section.settings.mobile_section_padding_top }}px;
+    padding-bottom: {{ section.settings.mobile_section_padding_bottom }}px;
+  }
+
+  .video-section-{{ section.id }} .container {
+    padding: 0 0;
+  }
+
+  .video-section-{{ section.id }} .cards-grid {
+    overflow: visible !important;
+    padding-bottom: 0;
+    height: auto;
+    overflow-x: auto !important; /* Enable horizontal scrolling */
+    scroll-snap-type: x mandatory; /* Enable snap scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar IE/Edge */
+    margin-top:0;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .video-section-{{ section.id }} .cards-grid::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .video-section-{{ section.id }} .cards-container {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: max-content;
+    padding: 0 calc(50vw - 30vw); /* Add padding to center first and last cards */
+  }
+
+  .video-section-{{ section.id }} .card {
+    aspect-ratio: 9 / 16;
+    height: auto;
+    max-height: none;
+    width: 60vw;
+    flex-shrink: 0;
+    
+    border-radius: {{ section.settings.card_border_radius }}px !important;
+    scroll-snap-align: center; /* Center each card when scrolling */
+    scroll-snap-stop: always; /* Force stop at each card */
+  }
+.video-section-{{ section.id }} .card-content {
+padding: {{ section.settings.mobile_content_padding }}px;
+}
+.video-section-{{ section.id }} .card-image {
+padding: {{ section.settings.mobile_content_padding }}px;
+}
+
+  .video-section-{{ section.id }} .main-heading {
+    font-size: {{ section.settings.main_heading_size_mobile | default: 24 }}px;
+  }
+
+  .video-section-{{ section.id }} .subtitle {
+    font-size: {{ section.settings.subtitle_size | times: 0.8 }}px;
+  }
+
+  .video-section-{{ section.id }} .video-info .video-review-custom-title {
+    font-size: {{ section.settings.title_size | times: 0.6 | plus: 5 }}px;
+  }
+
+  .video-section-{{ section.id }} .video-info .instagram-name {
+    font-size: {{ section.settings.title_size | times: 0.5 | plus: 5 }}px;
+    gap: 5px;
+  }
+
+  .video-section-{{ section.id }} .video-info .instagram-name .video-slider-instagram-icon {
+    width: {{ section.settings.title_size | times: 0.8 | plus: 5 | times: 0.75 }}px;
+    height: {{ section.settings.title_size | times: 0.8 | plus: 5 | times: 0.75 }}px;
+  }
+
+  .video-section-{{ section.id }} .video-info .description {
+    font-size: {{ section.settings.description_size | times: 0.6 | plus: 5 }}px;
+  }
+
+  .video-section-{{ section.id }} .video-info {
+    padding: {{ section.settings.mobile_video_info_padding }}px;
+  }
+  
+  .video-section-{{ section.id }} .video-navigation-container {
+    display: flex;
+  }
+  }
+  html {
+    overflow-x:hidden;
+    }
+</style>
+
+<section class="video-section-{{ section.id }}" data-use-theme-colors="{{ section.settings.use_theme_colors }}">
+  <div class="container">
+    {%- assign has_heading_content = false -%}
+    {%- if section.settings.heading_regular != blank -%}
+      {%- assign has_heading_content = true -%}
+    {%- endif -%}
+    {%- if section.settings.heading_accent != blank -%}
+      {%- assign has_heading_content = true -%}
+    {%- endif -%}
+
+    {%- comment -%} Define social badge HTML to avoid duplication {%- endcomment -%}
+    {%- capture social_badge_html -%}
+       {%- if section.settings.show_social_badge -%}
+         {%- if section.settings.social_platform == 'tiktok' -%}
+           <div class="video-slider-social-badge">
+             <img class="video-slider-social-icon" src="https://cdn4.iconfinder.com/data/icons/social-media-flat-7/64/Social-media_Tiktok-512.png" width="9.8" height="9.8" alt="TikTok" />
+             <span class="video-slider-social-text">
+               {%- if section.settings.badge_richtext != blank -%}
+                 {{ section.settings.badge_richtext }}
+               {%- else -%}
+                 {{ section.settings.badge_text | default: 'Over ' }} {{ section.settings.view_count }}{{ section.settings.badge_suffix | default: 'M Views On TikTok' }}
+               {%- endif -%}
+             </span>
+           </div>
+         {%- elsif section.settings.social_platform == 'instagram' -%}
+           <div class="video-slider-social-badge">
+             <svg class="video-slider-social-icon" width="9.8" height="9.8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+               <defs>
+                 <linearGradient id="instagramGradientVideoSlider{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%">
+                   <stop offset="0%" stop-color="#833ab4" />
+                   <stop offset="50%" stop-color="#fd1d1d" />
+                   <stop offset="100%" stop-color="#fcb045" />
+                 </linearGradient>
+               </defs>
+               <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" fill="url(#instagramGradientVideoSlider{{ section.id }})"/>
+             </svg>
+             <span class="video-slider-social-text">
+               {%- if section.settings.badge_richtext != blank -%}
+                 {{ section.settings.badge_richtext }}
+               {%- else -%}
+                 {{ section.settings.badge_text | default: 'Over ' }} {{ section.settings.view_count }}{{ section.settings.badge_suffix | default: 'M Views On Instagram' }}
+               {%- endif -%}
+             </span>
+           </div>
+         {%- elsif section.settings.social_platform == 'facebook' -%}
+           <div class="video-slider-social-badge">
+             <svg class="video-slider-social-icon" width="9.8" height="9.8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
+             </svg>
+             <span class="video-slider-social-text">
+               {%- if section.settings.badge_richtext != blank -%}
+                 {{ section.settings.badge_richtext }}
+               {%- else -%}
+                 {{ section.settings.badge_text | default: 'Over ' }} {{ section.settings.view_count }}{{ section.settings.badge_suffix | default: 'M Views On Facebook' }}
+               {%- endif -%}
+             </span>
+           </div>
+         {%- endif -%}
+       {%- endif -%}
+     {%- endcapture -%}
+
+     {%- if has_heading_content or section.settings.subtitle != blank or section.settings.show_social_badge -%}
+       <div class="video-slider-header">
+         {%- comment -%} Show badge above heading if setting is enabled {%- endcomment -%}
+         {%- if section.settings.badge_above_heading -%}
+           {{ social_badge_html }}
+         {%- endif -%}
+
+        {%- if has_heading_content -%}
+          <h2 class="main-heading">
+            {%- if section.settings.heading_regular != blank -%}
+              {{ section.settings.heading_regular }}
+            {%- endif -%}
+            {%- if section.settings.heading_accent != blank -%}
+              <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+                {{ section.settings.heading_accent }}
+              </span>
+            {%- endif -%}
+          </h2>
+        {%- endif -%}
+        {%- if section.settings.subtitle != blank -%}
+          <p class="subtitle">{{ section.settings.subtitle }}</p>
+        {%- endif -%}
+
+        {%- comment -%} Show badge below subtitle if setting is disabled {%- endcomment -%}
+        {%- unless section.settings.badge_above_heading -%}
+          {{ social_badge_html }}
+        {%- endunless -%}
+      </div>
+    {%- endif -%}
+
+    <div class="cards-grid">
+      <div class="cards-container" id="video-slider-{{ section.id }}">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'video_card' -%}
+              <div class="card" style="color: {{ block.settings.card_text_color }};" {{ block.shopify_attributes }}>
+                {%- if block.settings.video_file != blank -%}
+                  {%- if block.settings.video_file.sources.size > 0 -%}
+                    <video
+                      class="card-video"
+                      {% if block.settings.mute_video or section.settings.autoplay_videos %}
+                        muted
+                      {% endif %}
+                      {% if block.settings.loop_video %}
+                        loop
+                      {% endif %}
+                      {% if section.settings.autoplay_videos %}
+                        autoplay
+                      {% endif %}
+                      playsinline
+                      {% if section.settings.autoplay_videos %}
+                        preload="auto"
+                      {% elsif block.settings.video_thumbnail != blank %}
+                        preload="none"
+                      {% else %}
+                        preload="metadata"
+                      {% endif %}
+                      {% if block.settings.video_thumbnail != blank %}
+                        poster="{{ block.settings.video_thumbnail | image_url: width: 800 }}"
+                      {% endif %}
+                      onclick="toggleVideoPlayback(this)"
+                    >
+                      {%- for source in block.settings.video_file.sources -%}
+                        <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                      {%- endfor -%}
+                    </video>
+                  {%- else -%}
+                    <video
+                      class="card-video"
+                      {% if block.settings.mute_video or section.settings.autoplay_videos %}
+                        muted
+                      {% endif %}
+                      {% if block.settings.loop_video %}
+                        loop
+                      {% endif %}
+                      {% if section.settings.autoplay_videos %}
+                        autoplay
+                      {% endif %}
+                      playsinline
+                      {% if section.settings.autoplay_videos %}
+                        preload="auto"
+                      {% elsif block.settings.video_thumbnail != blank %}
+                        preload="none"
+                      {% else %}
+                        preload="metadata"
+                      {% endif %}
+                      {% if block.settings.video_thumbnail != blank %}
+                        poster="{{ block.settings.video_thumbnail | image_url: width: 800 }}"
+                      {% endif %}
+                      onclick="toggleVideoPlayback(this)"
+                    >
+                      <source src="{{ block.settings.video_file }}" type="video/mp4">
+                    </video>
+                  {%- endif -%}
+                {%- elsif block.settings.video_url != blank -%}
+                  {%- if block.settings.video_url contains 'youtube.com'
+                    or block.settings.video_url contains 'youtu.be'
+                  -%}
+                    {%- assign video_id = block.settings.video_url | split: 'v=' | last | split: '&' | first -%}
+                    {%- if block.settings.video_url contains 'youtu.be' -%}
+                      {%- assign video_id = block.settings.video_url
+                        | split: 'youtu.be/'
+                        | last
+                        | split: '?'
+                        | first
+                      -%}
+                    {%- endif -%}
+                    <iframe
+                      class="card-video"
+                      src="https://www.youtube.com/embed/{{ video_id }}?autoplay={% if section.settings.autoplay_videos %}1{% else %}0{% endif %}&mute=1&loop=1&playlist={{ video_id }}&controls=0&showinfo=0&rel=0&modestbranding=1"
+                      frameborder="0"
+                      allow="autoplay; encrypted-media"
+                    ></iframe>
+                  {%- elsif block.settings.video_url contains 'vimeo.com' -%}
+                    {%- assign video_id = block.settings.video_url | split: 'vimeo.com/' | last | split: '?' | first -%}
+                    <iframe
+                      class="card-video"
+                      src="https://player.vimeo.com/video/{{ video_id }}?autoplay={% if section.settings.autoplay_videos %}1{% else %}0{% endif %}&muted=1&loop=1&background={% if section.settings.autoplay_videos %}1{% else %}0{% endif %}&controls=0"
+                      frameborder="0"
+                      allow="autoplay; fullscreen"
+                    ></iframe>
+                  {%- else -%}
+                    <video
+                      class="card-video"
+                      {% if block.settings.mute_video or section.settings.autoplay_videos %}
+                        muted
+                      {% endif %}
+                      {% if block.settings.loop_video %}
+                        loop
+                      {% endif %}
+                      {% if section.settings.autoplay_videos %}
+                        autoplay
+                      {% endif %}
+                      playsinline
+                      {% if section.settings.autoplay_videos %}
+                        preload="auto"
+                      {% elsif block.settings.video_thumbnail != blank %}
+                        preload="none"
+                      {% else %}
+                        preload="metadata"
+                      {% endif %}
+                      {% if block.settings.video_thumbnail != blank %}
+                        poster="{{ block.settings.video_thumbnail | image_url: width: 800 }}"
+                      {% endif %}
+                      onclick="toggleVideoPlayback(this)"
+                    >
+                      <source src="{{ block.settings.video_url }}" type="video/mp4">
+                      <source src="{{ block.settings.video_url }}" type="video/quicktime">
+                      <source src="{{ block.settings.video_url }}" type="video/x-msvideo">
+                      <source src="{{ block.settings.video_url }}" type="video/x-matroska">
+                    </video>
+                  {%- endif -%}
+                {%- elsif block.settings.video_thumbnail != blank -%}
+                  <img
+                    class="card-image"
+                    src="{{ block.settings.video_thumbnail | image_url: width: 800 }}"
+                    alt="{{ block.settings.title | escape }}"
+                    loading="lazy"
+                    width="800"
+                    height="1422"
+                  >
+                {%- endif -%}
+                {% if section.settings.enable_video_overlay %}<div class="card-overlay"></div>{% endif %}
+                <div class="card-content">
+                  <div class="video-info">
+                    {%- if block.settings.show_as_instagram_name -%}
+                      {%- if block.settings.instagram_name != blank -%}
+                        <div class="instagram-name">
+                          <div class="video-slider-instagram-icon">
+                            <svg
+                              viewBox="0 0 256 256"
+                              xmlns="http://www.w3.org/2000/svg"
+                              preserveAspectRatio="xMidYMid"
+                            >
+                              <path d="M127.999746,23.06353 C162.177385,23.06353 166.225393,23.1936027 179.722476,23.8094161 C192.20235,24.3789926 198.979853,26.4642218 203.490736,28.2166477 C209.464938,30.5386501 213.729395,33.3128586 218.208268,37.7917319 C222.687141,42.2706052 225.46135,46.5350617 227.782844,52.5092638 C229.535778,57.0201472 231.621007,63.7976504 232.190584,76.277016 C232.806397,89.7746075 232.93647,93.8226147 232.93647,128.000254 C232.93647,162.177893 232.806397,166.225901 232.190584,179.722984 C231.621007,192.202858 229.535778,198.980361 227.782844,203.491244 C225.46135,209.465446 222.687141,213.729903 218.208268,218.208776 C213.729395,222.687649 209.464938,225.461858 203.490736,227.783352 C198.979853,229.536286 192.20235,231.621516 179.722476,232.191092 C166.227425,232.806905 162.179418,232.936978 127.999746,232.936978 C93.8200742,232.936978 89.772067,232.806905 76.277016,232.191092 C63.7971424,231.621516 57.0196391,229.536286 52.5092638,227.783352 C46.5345536,225.461858 42.2700971,222.687649 37.7912238,218.208776 C33.3123505,213.729903 30.538142,209.465446 28.2166477,203.491244 C26.4637138,198.980361 24.3784845,192.202858 23.808908,179.723492 C23.1930946,166.225901 23.0630219,162.177893 23.0630219,128.000254 C23.0630219,93.8226147 23.1930946,89.7746075 23.808908,76.2775241 C24.3784845,63.7976504 26.4637138,57.0201472 28.2166477,52.5092638 C30.538142,46.5350617 33.3123505,42.2706052 37.7912238,37.7917319 C42.2700971,33.3128586 46.5345536,30.5386501 52.5092638,28.2166477 C57.0196391,26.4642218 63.7971424,24.3789926 76.2765079,23.8094161 C89.7740994,23.1936027 93.8221066,23.06353 127.999746,23.06353 M127.999746,0 C93.2367791,0 88.8783247,0.147348072 75.2257637,0.770274749 C61.601148,1.39218523 52.2968794,3.55566141 44.1546281,6.72008828 C35.7374966,9.99121548 28.5992446,14.3679613 21.4833489,21.483857 C14.3674532,28.5997527 9.99070739,35.7380046 6.71958019,44.1551362 C3.55515331,52.2973875 1.39167714,61.6016561 0.769766653,75.2262718 C0.146839975,88.8783247 0,93.2372872 0,128.000254 C0,162.763221 0.146839975,167.122183 0.769766653,180.774236 C1.39167714,194.398852 3.55515331,203.703121 6.71958019,211.845372 C9.99070739,220.261995 14.3674532,227.400755 21.4833489,234.516651 C28.5992446,241.632547 35.7374966,246.009293 44.1546281,249.28042 C52.2968794,252.444847 61.601148,254.608323 75.2257637,255.230233 C88.8783247,255.85316 93.2367791,256 127.999746,256 C162.762713,256 167.121675,255.85316 180.773728,255.230233 C194.398344,254.608323 203.702613,252.444847 211.844864,249.28042 C220.261995,246.009293 227.400247,241.632547 234.516143,234.516651 C241.632039,227.400755 246.008785,220.262503 249.279912,211.845372 C252.444339,203.703121 254.607815,194.398852 255.229725,180.774236 C255.852652,167.122183 256,162.763221 256,128.000254 C256,93.2372872 255.852652,88.8783247 255.229725,75.2262718 C254.607815,61.6016561 252.444339,52.2973875 249.279912,44.1551362 C246.008785,35.7380046 241.632039,28.5997527 234.516143,21.483857 C227.400247,14.3679613 220.261995,9.99121548 211.844864,6.72008828 C203.702613,3.55566141 194.398344,1.39218523 180.773728,0.770274749 C167.121675,0.147348072 162.762713,0 127.999746,0 Z M127.999746,62.2703115 C91.698262,62.2703115 62.2698034,91.69877 62.2698034,128.000254 C62.2698034,164.301738 91.698262,193.730197 127.999746,193.730197 C164.30123,193.730197 193.729689,164.301738 193.729689,128.000254 C193.729689,91.69877 164.30123,62.2703115 127.999746,62.2703115 Z M127.999746,170.667175 C104.435741,170.667175 85.3328252,151.564259 85.3328252,128.000254 C85.3328252,104.436249 104.435741,85.3333333 127.999746,85.3333333 C151.563751,85.3333333 170.666667,104.436249 170.666667,128.000254 C170.666667,151.564259 151.563751,170.667175 127.999746,170.667175 Z M211.686338,59.6734287 C211.686338,68.1566129 204.809755,75.0337031 196.326571,75.0337031 C187.843387,75.0337031 180.966297,68.1566129 180.966297,59.6734287 C180.966297,51.1902445 187.843387,44.3136624 196.326571,44.3136624 C204.809755,44.3136624 211.686338,51.1902445 211.686338,59.6734287 Z"/>
+                            </svg>
+                          </div>
+                          <span>{{ block.settings.instagram_name }}</span>
+                        </div>
+                      {%- endif -%}
+                    {%- else -%}
+                      {%- if block.settings.title != blank -%}
+                        <h3 class="video-review-custom-title">{{ block.settings.title }}</h3>
+                      {%- endif -%}
+                    {%- endif -%}
+                    {%- if block.settings.description != blank -%}
+                      <div class="description">{{ block.settings.description }}</div>
+                    {%- endif -%}
+                  </div>
+                </div>
+              </div>
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- if section.settings.show_navigation_arrows -%}
+      <div class="video-navigation-container">
+        <div class="video-navigation">
+          {% render 'global-nav-button', 
+            direction: 'prev', 
+            aria_label: 'Previous videos',
+            use_global: section.settings.use_global_nav_buttons,
+            section_settings: section.settings
+          %}
+          {% render 'global-nav-button', 
+            direction: 'next', 
+            aria_label: 'Next videos',
+            use_global: section.settings.use_global_nav_buttons,
+            section_settings: section.settings
+          %}
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<script>
+function toggleVideoPlayback(video) {
+  const card = video.closest('.card');
+  
+  if (video.paused) {
+    if (video.readyState < 2) {
+      video.load();
+    }
+    
+    video.play().then(() => {
+      video.classList.remove('paused');
+      card.classList.add('playing');
+    }).catch(error => {
+      console.warn('Video play failed:', error);
+    });
+  } else {
+    video.pause();
+    video.classList.add('paused');
+    card.classList.remove('playing');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Video initialization
+  const videos = document.querySelectorAll('.video-section-{{ section.id }} .card-video');
+  const autoplayEnabled = {{ section.settings.autoplay_videos | default: false }};
+  
+  videos.forEach(video => {
+    const card = video.closest('.card');
+    const hasPoster = video.hasAttribute('poster') && video.getAttribute('poster') !== '';
+    
+    // Only initialize as paused if autoplay is NOT enabled
+    if (!autoplayEnabled) {
+      video.classList.add('paused');
+      card.classList.remove('playing');
+      
+      // Only load video if there's no custom poster (we want to show first frame)
+      // If there's a poster, don't load the video - let the poster show
+      if (!hasPoster && video.readyState < 1) {
+        video.load();
+      }
+      
+      // Don't set currentTime if there's a poster - it will replace the poster with video frame
+      if (!hasPoster) {
+      video.currentTime = 0;
+      }
+    } else {
+      // For autoplay videos, mark as playing
+      video.classList.remove('paused');
+      card.classList.add('playing');
+    }
+    
+    video.addEventListener('ended', function() {
+      if (!video.loop) {
+        video.classList.add('paused');
+        card.classList.remove('playing');
+      }
+    });
+    
+    {% unless section.settings.autoplay_videos %}
+    // Only set currentTime on loadedmetadata if there's no poster
+    video.addEventListener('loadedmetadata', function() {
+      if (!hasPoster) {
+      video.currentTime = 0;
+      }
+    });
+    {% endunless %}
+  });
+
+  // Infinite carousel with 7 sets (3 left + 1 original + 3 right)
+  const container = document.querySelector('.video-section-{{ section.id }} .cards-grid');
+  const slider = document.getElementById('video-slider-{{ section.id }}');
+  const prevButton = document.querySelector('.video-section-{{ section.id }} .nav-button.prev');
+  const nextButton = document.querySelector('.video-section-{{ section.id }} .nav-button.next');
+  
+  if (!slider || !prevButton || !nextButton || !container) return;
+  
+  const originalCards = Array.from(slider.querySelectorAll('.card'));
+  if (originalCards.length === 0) return;
+  
+  const totalOriginalCards = originalCards.length;
+  let isTransitioning = false;
+  
+  // Clone 3 sets to the LEFT (prepend in reverse order)
+  for (let set = 3; set >= 1; set--) {
+    for (let i = totalOriginalCards - 1; i >= 0; i--) {
+      const clone = originalCards[i].cloneNode(true);
+      clone.classList.add('clone');
+      clone.setAttribute('data-set', `left-${set}`);
+      slider.insertBefore(clone, slider.firstChild);
+    }
+  }
+  
+  // Mark original cards as the center set
+  originalCards.forEach(card => {
+    card.setAttribute('data-set', 'original');
+  });
+  
+  // Clone 3 sets to the RIGHT (append)
+  for (let set = 1; set <= 3; set++) {
+    for (let i = 0; i < totalOriginalCards; i++) {
+      const clone = originalCards[i].cloneNode(true);
+      clone.classList.add('clone');
+      clone.setAttribute('data-set', `right-${set}`);
+      slider.appendChild(clone);
+    }
+  }
+  
+  // Get all cards including clones (should be 7 * totalOriginalCards)
+  const allCards = Array.from(slider.querySelectorAll('.card'));
+  
+  // Start at the first card of the original set (middle)
+  let currentCardIndex = totalOriginalCards * 3; // Skip the 3 left sets
+  
+  function getCardCenterPosition(cardIndex) {
+    const containerWidth = container.offsetWidth;
+    const gap = 20;
+    
+    let offset = 0;
+    for (let i = 0; i < cardIndex; i++) {
+      offset += allCards[i].offsetWidth + gap;
+    }
+    
+    const cardWidth = allCards[cardIndex].offsetWidth;
+    const containerCenter = containerWidth / 2;
+    const cardCenter = cardWidth / 2;
+    
+    return containerCenter - cardCenter - offset;
+  }
+  
+  function goToCard(cardIndex, instant = false) {
+    if (instant) {
+      slider.style.transition = 'none';
+    } else {
+      slider.style.transition = 'transform 0.3s ease';
+    }
+    
+    const position = getCardCenterPosition(cardIndex);
+    slider.style.transform = `translateX(${position}px)`;
+    
+    if (instant) {
+      slider.offsetHeight;
+    }
+  }
+  
+  prevButton.addEventListener('click', function() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    
+    currentCardIndex--;
+    
+    if (currentCardIndex < 0) {
+      currentCardIndex = allCards.length - 1;
+    }
+    
+    goToCard(currentCardIndex, false);
+    
+    setTimeout(() => {
+      isTransitioning = false;
+    }, 300);
+  });
+  
+  nextButton.addEventListener('click', function() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    
+    currentCardIndex++;
+    
+    if (currentCardIndex >= allCards.length) {
+      currentCardIndex = 0;
+    }
+    
+    goToCard(currentCardIndex, false);
+    
+    setTimeout(() => {
+      isTransitioning = false;
+    }, 300);
+  });
+  
+  // Handle window resize
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      goToCard(currentCardIndex, true);
+    }, 250);
+  });
+  
+  // Initialize - center first card of original set
+  setTimeout(function() {
+    goToCard(currentCardIndex, true);
+  }, 100);
+});
+</script>
+
+{% schema %}
+	{
+  "name": "Video Reviews Orig",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": false,
+      "info": "Apply global theme colors to this section"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Section Padding Top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Section Padding Bottom",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section Background Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Container"
+    },
+    {
+      "type": "range",
+      "id": "container_max_width",
+      "min": 800,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Container Max Width",
+      "default": 1100
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_video_grid_max_width",
+      "label": "Enable Video Grid Max Width",
+      "default": false,
+      "info": "When enabled, limits the video grid width on desktop"
+    },
+    {
+      "type": "range",
+      "id": "video_grid_max_width",
+      "min": 800,
+      "max": 1800,
+      "step": 50,
+      "unit": "px",
+      "label": "Video Grid Max Width",
+      "default": 1400,
+      "info": "Maximum width of the video grid on desktop (only applies when enabled above)"
+    },
+    {
+      "type": "range",
+      "id": "container_padding_horizontal",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Horizontal Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "desktop_container_height",
+      "min": 300,
+      "max": 800,
+      "step": 20,
+      "unit": "px",
+      "label": "Desktop Container Height",
+      "default": 500,
+      "info": "Fixed height of the video container on desktop"
+    },
+    {
+      "type": "range",
+      "id": "desktop_card_width",
+      "min": 200,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "label": "Desktop Card Width",
+      "default": 300,
+      "info": "Width of each video card on desktop"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation_arrows",
+      "label": "Show Navigation Arrows",
+      "default": true,
+      "info": "Display navigation arrows to scroll through videos"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_global_nav_buttons",
+      "label": "Use Global Navigation Button Styling",
+      "default": true,
+      "info": "Use global navigation button settings from theme settings. When disabled, use section-specific settings below."
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay_videos",
+      "label": "Autoplay All Videos",
+      "default": false,
+      "info": "Automatically play all videos at once. Videos must be muted for autoplay to work in most browsers."
+    },
+    {
+      "type": "header",
+      "content": "Custom Navigation Button Styling",
+      "info": "Only applies when 'Use Global Navigation Button Styling' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "nav_button_bg",
+      "label": "Navigation Button Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "nav_button_color",
+      "label": "Navigation Button Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "nav_button_border",
+      "label": "Navigation Button Border",
+      "default": "#cccccc"
+    },
+    {
+      "type": "range",
+      "id": "nav_button_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Navigation Button Border Radius",
+      "default": 8
+    },
+
+    {
+      "type": "checkbox",
+      "id": "hide_navigation_desktop",
+      "label": "Hide Navigation on Desktop",
+      "default": false,
+      "info": "Hide navigation arrows on desktop screens (1025px+)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_gradient_mask",
+      "label": "Enable Edge Gradient Mask",
+      "default": false,
+      "info": "Fade video edges to show partial next/previous videos for carousel effect"
+    },
+    {
+      "type": "range",
+      "id": "mask_fade_distance",
+      "min": 50,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Gradient Mask Fade Distance",
+      "default": 100,
+      "info": "Distance of the gradient fade from the edges"
+    },
+    {
+      "type": "range",
+      "id": "tablet_columns",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "label": "Tablet Columns",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "mobile_columns",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "label": "Mobile Columns",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Main Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_regular",
+      "label": "Heading (Regular Text)",
+      "default": "Real Customer"
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heading (Accent Text)",
+      "default": "Success Stories"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Accent Text Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin_left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Text Color",
+      "default": "#EF4A65",
+      "info": "Color for the accent text (used when gradient is disabled)"
+    },
+    {
+      "type": "range",
+      "id": "main_heading_size",
+      "min": 12,
+      "max": 72,
+      "step": 1,
+      "unit": "px",
+      "label": "Main Heading Size (Desktop)",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "main_heading_size_mobile",
+      "min": 12,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Main Heading Size (Mobile)",
+      "default": 28,
+      "info": "Heading size on mobile devices (768px and below)"
+    },
+    {
+      "type": "range",
+      "id": "main_heading_line_height",
+      "min": 0.5,
+      "max": 2,
+      "step": 0.1,
+      "label": "Main Heading Line Height",
+      "default": 1.2
+    },
+    {
+      "type": "select",
+      "id": "main_heading_alignment",
+      "label": "Main Heading Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "main_heading_color",
+      "label": "Main Heading Color",
+      "default": "#181818"
+    },
+    {
+      "type": "range",
+      "id": "main_heading_margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Main Heading Margin Bottom",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Subtitle"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Watch authentic testimonials from customers who transformed their lives"
+    },
+
+    {
+      "type": "range",
+      "id": "subtitle_font_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "label": "Subtitle Font Weight",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "min": 12,
+      "max": 72,
+      "step": 1,
+      "unit": "px",
+      "label": "Subtitle Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "subtitle_line_height",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "label": "Subtitle Line Height",
+      "default": 1.5
+    },
+    {
+      "type": "select",
+      "id": "subtitle_alignment",
+      "label": "Subtitle Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle Color",
+      "default": "#181818"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+
+    {
+      "type": "range",
+      "id": "title_font_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "label": "Card Title Font Weight",
+      "default": 700
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 12,
+      "max": 72,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Title Size",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "title_line_height",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "label": "Card Title Line Height",
+      "default": 1.2
+    },
+    {
+      "type": "select",
+      "id": "title_alignment",
+      "label": "Card Title Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "title_letter_spacing_style",
+      "label": "Card Title Letter Spacing Style",
+      "options": [
+        { "value": "heading", "label": "Heading Style" },
+        { "value": "body", "label": "Body Style" }
+      ],
+      "default": "heading",
+      "info": "Choose letter spacing style for video titles"
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Card Title Margin Bottom",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Card Title Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "instagram_icon_color",
+      "label": "Instagram Icon Color",
+      "default": "#FFFFFF",
+      "info": "Color for Instagram icons. Falls back to title color if not set."
+    },
+
+    {
+      "type": "range",
+      "id": "description_font_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "label": "Card Description Font Weight",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 12,
+      "max": 72,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Description Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "description_line_height",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "label": "Card Description Line Height",
+      "default": 1.5
+    },
+    {
+      "type": "select",
+      "id": "description_alignment",
+      "label": "Card Description Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Card Description Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+
+    {
+      "type": "header",
+      "content": "Social Media Badge"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social_badge",
+      "label": "Show social media views badge",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_badge_background",
+      "label": "Show badge background",
+      "default": true,
+      "info": "When disabled, only the icon and text are shown without the background pill"
+    },
+    {
+      "type": "checkbox",
+      "id": "badge_above_heading",
+      "label": "Show badge above heading",
+      "default": true,
+      "info": "When enabled, the social media badge appears above the heading. When disabled, it appears below the subtitle."
+    },
+    {
+      "type": "select",
+      "id": "social_platform",
+      "label": "Platform",
+      "options": [
+        {
+          "value": "tiktok",
+          "label": "TikTok"
+        },
+        {
+          "value": "instagram",
+          "label": "Instagram"
+        },
+        {
+          "value": "facebook",
+          "label": "Facebook"
+        }
+      ],
+      "default": "instagram"
+    },
+    {
+      "type": "richtext",
+      "id": "badge_richtext",
+      "label": "Badge Text (Rich Text)",
+      "default": "<p>Over <strong>56M</strong> Views On Instagram</p>",
+      "info": "Use bold for emphasis. If filled, this overrides the prefix/suffix fields below."
+    },
+    {
+      "type": "number",
+      "id": "view_count",
+      "label": "View count (raw number)",
+      "default": 56,
+      "info": "Only used if Badge Text (Rich Text) is empty"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge prefix text",
+      "default": "Over ",
+      "info": "Only used if Badge Text (Rich Text) is empty"
+    },
+    {
+      "type": "text",
+      "id": "badge_suffix",
+      "label": "Badge suffix text",
+      "default": "M Views On Instagram",
+      "info": "Only used if Badge Text (Rich Text) is empty"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_text",
+      "label": "Use gradient text",
+      "default": false,
+      "info": "Make the badge text match the gradient border colors"
+    },
+    {
+      "type": "color",
+      "id": "badge_background_color",
+      "label": "Badge background color",
+      "default": "#f8f9fa",
+      "info": "Background color of the social media badge"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Badge text color",
+      "default": "#262626",
+      "info": "Text color when gradient text is disabled"
+    },
+    {
+      "type": "range",
+      "id": "badge_font_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Font Size (Desktop)",
+      "default": 11
+    },
+    {
+      "type": "range",
+      "id": "badge_font_size_mobile",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Font Size (Mobile)",
+      "default": 11
+    },
+    {
+      "type": "range",
+      "id": "badge_icon_size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Icon Size (Desktop)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "badge_icon_size_mobile",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Icon Size (Mobile)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "badge_icon_gap",
+      "min": 2,
+      "max": 15,
+      "step": 1,
+      "unit": "px",
+      "label": "Icon to Text Gap",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "badge_padding_vertical",
+      "min": 2,
+      "max": 15,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Vertical Padding (Desktop)",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "badge_padding_horizontal",
+      "min": 6,
+      "max": 25,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Horizontal Padding (Desktop)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "badge_padding_vertical_mobile",
+      "min": 2,
+      "max": 15,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Vertical Padding (Mobile)",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "badge_padding_horizontal_mobile",
+      "min": 6,
+      "max": 25,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Horizontal Padding (Mobile)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "badge_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Border Radius",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "header_margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Header Margin Bottom (Desktop)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "header_padding_horizontal",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Header Horizontal Padding (Desktop)",
+      "default": 20,
+      "info": "Left and right padding for the header container (title and subtitle)"
+    },
+    {
+      "type": "range",
+      "id": "header_padding_horizontal_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Header Horizontal Padding (Mobile)",
+      "default": 15,
+      "info": "Left and right padding for the header container on mobile (768px and below)"
+    },
+    {
+      "type": "range",
+      "id": "grid_margin_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Grid Margin Top",
+      "default": 40
+    },
+
+    {
+      "type": "range",
+      "id": "card_padding",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Card Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Content Padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "card_height",
+      "min": 200,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "label": "Card Height",
+      "default": 400
+    },
+    {
+      "type": "header",
+      "content": "Visual Effects"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_shadows",
+      "label": "Enable Drop Shadows",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Border Radius",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_video_border",
+      "label": "Enable Video Border",
+      "default": false,
+      "info": "Add a border around video cards"
+    },
+    {
+      "type": "range",
+      "id": "video_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Video Border Width",
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "video_border_style",
+      "label": "Video Border Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "video_border_color",
+      "label": "Video Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "transition_duration",
+      "min": 0.1,
+      "max": 1,
+      "step": 0.1,
+      "unit": "s",
+      "label": "Transition Duration",
+      "default": 0.3
+    },
+    {
+      "type": "text",
+      "id": "card_shadow",
+      "label": "Card Shadow",
+      "default": "0 4px 15px rgba(0, 0, 0, 0.1)"
+    },
+
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Video Overlay Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "label": "Video Overlay Opacity",
+      "default": 0.3
+    },
+    {
+      "type": "range",
+      "id": "gradient_overlay_height",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Gradient Overlay Height",
+      "default": 60,
+      "info": "Height of the gradient overlay from bottom of video (20% = subtle, 100% = full height)"
+    },
+    {
+      "type": "range",
+      "id": "video_info_padding",
+      "min": 10,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Video Info Padding (Desktop)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "mobile_video_info_padding",
+      "min": 10,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Video Info Padding (Mobile)",
+      "default": 20
+    },
+
+    {
+      "type": "range",
+      "id": "tablet_card_height",
+      "min": 200,
+      "max": 500,
+      "step": 20,
+      "unit": "px",
+      "label": "Tablet Card Height",
+      "default": 360
+    },
+    {
+      "type": "range",
+      "id": "tablet_card_padding",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Tablet Card Padding",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Mobile Settings"
+    },
+    {
+      "type": "range",
+      "id": "mobile_section_padding_top",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "label": "Mobile Section Padding Top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "mobile_section_padding_bottom",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "label": "Mobile Section Padding Bottom",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "mobile_container_padding",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile Container Padding",
+      "default": 20
+    },
+
+    {
+      "type": "range",
+      "id": "header_margin_bottom_mobile",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Header Margin Bottom (Mobile)",
+      "default": 24,
+      "info": "Bottom margin for the header on mobile devices (768px and below)"
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_padding",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile Card Padding",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile Content Padding",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "play_btn",
+      "label": "Play Button Color",
+      "default": "#000"
+    },
+    {
+      "type": "color",
+      "id": "play_btn_background",
+      "label": "Play Button Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_video_overlay",
+      "label": "Enable Video Overlay",
+      "default": true,
+      "info": "Add a semi-transparent overlay to the video"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "video_card",
+      "name": "Video Review",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video_file",
+          "label": "Video File Upload",
+          "info": "Upload MP4, MOV, AVI, or MKV video files directly. Takes priority over video URL."
+        },
+        {
+          "type": "url",
+          "id": "video_url",
+          "label": "Video URL",
+          "info": "Enter YouTube, Vimeo, or direct video file URL. Video will play automatically in background."
+        },
+        {
+          "type": "image_picker",
+          "id": "video_thumbnail",
+          "label": "Custom Video Thumbnail",
+          "info": "Optional: Upload a custom thumbnail. If left empty, the video's first frame will be used automatically."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Review Title",
+          "default": "Amazing Results!"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_as_instagram_name",
+          "label": "Show as Instagram Name",
+          "default": false,
+          "info": "Display as Instagram username with Instagram icon instead of regular title"
+        },
+        {
+          "type": "text",
+          "id": "instagram_name",
+          "label": "Instagram Username",
+          "default": "@username",
+          "info": "Enter Instagram username (with or without @)"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Review Description",
+          "default": "This product completely transformed my results and exceeded all expectations."
+        },
+        {
+          "type": "color_background",
+          "id": "card_background",
+          "label": "Card Background",
+          "default": "linear-gradient(135deg, #6EE4FF 0%, #19bdff 100%)"
+        },
+        {
+          "type": "color",
+          "id": "card_text_color",
+          "label": "Card Text Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "header",
+          "content": "Video Settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "mute_video",
+          "label": "Mute Video",
+          "default": false,
+          "info": "Mute video by default (required for autoplay in most browsers)"
+        },
+        {
+          "type": "checkbox",
+          "id": "loop_video",
+          "label": "Loop Video",
+          "default": true,
+          "info": "Continuously loop the video"
+					}
+				]
+			}
+		],
+		"presets": [
+			{
+      "name": "Video Reviews Orig",
+      "blocks": [
+        {
+          "type": "video_card",
+          "settings": {
+            "title": "Incredible Transformation",
+            "description": "See how this customer achieved amazing results!",
+            "card_background": "linear-gradient(135deg, #6EE4FF 0%, #19bdff 100%)",
+            "card_text_color": "#FFFFFF"
+          }
+        },
+        {
+          "type": "video_card",
+          "settings": {
+            "title": "Life-Changing Results",
+            "description": "Another success story from our community.",
+            "card_background": "linear-gradient(135deg, #6EE4FF 0%, #19bdff 100%)",
+            "card_text_color": "#FFFFFF"
+          }
+        },
+        {
+          "type": "video_card",
+          "settings": {
+            "show_as_instagram_name": true,
+            "instagram_name": "@happycustomer",
+            "description": "Love this product! Highly recommend to everyone.",
+            "card_background": "linear-gradient(135deg, #6EE4FF 0%, #19bdff 100%)",
+            "card_text_color": "#FFFFFF"
+          }
+        },
+        {
+          "type": "video_card",
+          "settings": {
+            "title": "Outstanding Progress",
+            "description": "Watch this amazing transformation journey.",
+            "card_background": "linear-gradient(135deg, #6EE4FF 0%, #19bdff 100%)",
+            "card_text_color": "#FFFFFF"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

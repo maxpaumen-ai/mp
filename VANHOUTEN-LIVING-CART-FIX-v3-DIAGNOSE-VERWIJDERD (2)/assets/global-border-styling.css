@@ -1,0 +1,229 @@
+/* Global Border Styling System */
+/* 
+   This file is only loaded when "Enable Global Border Styling System" 
+   is turned ON in Theme Settings > Global Component Borders.
+   
+   When disabled, sections will use their individual border settings.
+*/
+
+/* ================================================
+   Global Border Classes
+   ================================================ */
+
+/* Global Border Base Class */
+.global-border {
+  border-radius: var(--global-border-radius);
+  border: var(--global-border-width) var(--global-border-style) var(--global-border-color);
+  opacity: calc(var(--global-border-opacity) / 100);
+}
+
+/* Card Border Class */
+.global-card-border {
+  border-radius: var(--global-border-radius);
+  border: var(--global-card-border);
+}
+
+/* Input Border Class */
+.global-input-border {
+  border-radius: var(--global-border-radius);
+  border: var(--global-input-border);
+  transition: border-color 0.2s ease;
+}
+
+.global-input-border:focus {
+  border-color: var(--global-input-focus-border-color);
+  outline: none;
+}
+
+/* Container Border Class */
+.global-container-border {
+  border-radius: var(--global-border-radius);
+  border: var(--global-container-border);
+}
+
+/* ================================================
+   Component-Specific Border Applications
+   ================================================ */
+
+/* Product and Collection Cards */
+.global-border-styling .card,
+.global-border-styling .product-card,
+.global-border-styling .collection-card,
+.global-border-styling .blog-card,
+.global-border-styling .article-card {
+  border-radius: var(--global-border-radius) !important;
+  border: var(--global-card-border) !important;
+}
+
+/* Form Inputs */
+.global-border-styling input[type="text"],
+.global-border-styling input[type="email"],
+.global-border-styling input[type="password"],
+.global-border-styling input[type="tel"],
+.global-border-styling input[type="number"],
+.global-border-styling input[type="search"],
+.global-border-styling textarea,
+.global-border-styling select {
+  border-radius: var(--global-border-radius) !important;
+  border: var(--global-input-border) !important;
+  transition: border-color 0.2s ease;
+}
+
+.global-border-styling input[type="text"]:focus,
+.global-border-styling input[type="email"]:focus,
+.global-border-styling input[type="password"]:focus,
+.global-border-styling input[type="tel"]:focus,
+.global-border-styling input[type="number"]:focus,
+.global-border-styling input[type="search"]:focus,
+.global-border-styling textarea:focus,
+.global-border-styling select:focus {
+  border-color: var(--global-input-focus-border-color) !important;
+  outline: none;
+}
+
+/* Container Elements */
+.global-border-styling .section-container,
+.global-border-styling .content-block,
+.global-border-styling .text-block,
+.global-border-styling .media-container {
+  border-radius: var(--global-border-radius) !important;
+  border: var(--global-container-border) !important;
+}
+
+/* ================================================
+   Utility Classes
+   ================================================ */
+
+/* Border Radius Utilities */
+.border-radius-global {
+  border-radius: var(--global-border-radius) !important;
+}
+
+.border-radius-none {
+  border-radius: 0 !important;
+}
+
+.border-radius-small {
+  border-radius: calc(var(--global-border-radius) / 2) !important;
+}
+
+.border-radius-large {
+  border-radius: calc(var(--global-border-radius) * 1.5) !important;
+}
+
+/* Border Width Utilities */
+.border-width-global {
+  border-width: var(--global-border-width) !important;
+}
+
+.border-width-none {
+  border-width: 0 !important;
+}
+
+.border-width-thin {
+  border-width: 1px !important;
+}
+
+.border-width-thick {
+  border-width: calc(var(--global-border-width) * 2) !important;
+}
+
+/* Border Color Utilities */
+.border-color-global {
+  border-color: var(--global-border-color) !important;
+}
+
+.border-color-card {
+  border-color: var(--global-card-border-color) !important;
+}
+
+.border-color-input {
+  border-color: var(--global-input-border-color) !important;
+}
+
+.border-color-container {
+  border-color: var(--global-container-border-color) !important;
+}
+
+/* ================================================
+   Responsive Border Adjustments
+   ================================================ */
+
+@media (max-width: 768px) {
+  /* Slightly reduce border radius on mobile for better touch interaction */
+  .global-border,
+  .global-card-border,
+  .global-input-border,
+  .global-container-border {
+    border-radius: calc(var(--global-border-radius) * 0.75);
+  }
+}
+
+/* ================================================
+   Hover and Focus Effects
+   ================================================ */
+
+/* Card Hover Effects */
+.global-border-styling .card:hover,
+.global-border-styling .product-card:hover,
+.global-border-styling .collection-card:hover {
+  border-color: var(--global-border-color);
+  opacity: calc(var(--global-border-opacity) * 1.2 / 100);
+  transition:
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+/* Input Focus Ring */
+.global-border-styling input:focus,
+.global-border-styling textarea:focus,
+.global-border-styling select:focus {
+  box-shadow: 0 0 0 2px var(--global-input-focus-border-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--global-input-focus-border-color) 20%, transparent);
+}
+
+/* ================================================
+   Component Override Classes
+   ================================================ */
+
+/* Allow components to opt-out of global styling */
+.no-global-borders,
+.no-global-borders * {
+  border: none !important;
+}
+
+.custom-borders,
+.custom-borders * {
+  /* Reset to allow custom border styling */
+  border: inherit !important;
+  border-radius: inherit !important;
+}
+
+/* ================================================
+   Legacy Support
+   ================================================ */
+
+/* Maintain compatibility with existing border classes */
+.border-radius {
+  border-radius: var(--global-border-radius);
+}
+
+.component-border {
+  border: var(--global-border-width) var(--global-border-style) var(--global-border-color);
+  border-radius: var(--global-border-radius);
+}
+
+/* ================================================
+   System Status Information
+   ================================================ */
+
+/* 
+   When "Enable Global Border Styling System" is DISABLED:
+   - This CSS file will NOT be loaded
+   - CSS variables will NOT be set
+   - The "global-border-styling" class will NOT be added to body
+   - Sections will fall back to their individual border settings
+   - The global-border-helper snippet will return "custom-borders" class
+   
+   This ensures clean separation between global and individual styling.
+*/

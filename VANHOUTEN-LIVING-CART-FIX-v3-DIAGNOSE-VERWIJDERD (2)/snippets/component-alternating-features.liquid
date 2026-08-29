@@ -1,0 +1,314 @@
+{% comment %}
+  Alternating Features Component
+  Displays an image alongside feature items with alternating layout
+  
+  Required parameters:
+  - section: section object with settings and blocks
+{% endcomment %}
+
+{{ 'alternating-features.css' | asset_url | stylesheet_tag }}
+
+<div 
+  class="alternating-features  {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}" 
+  data-component="alternating-features"
+  data-section-id="{{ section.id }}"
+  data-use-theme-colors="{{ section.settings.use_theme_colors }}"
+  data-use-gradient="{{ section.settings.use_gradient }}"
+  data-icon-background="{{ section.settings.icon_background_enabled }}"
+  data-icon-fit="{{ section.settings.icon_object_fit | default: 'contain' }}"
+  data-padding-top="{{ section.settings.padding_top | default: 60 }}"
+  data-padding-bottom="{{ section.settings.padding_bottom | default: 60 }}"
+  data-icon-size="{{ section.settings.icon_size | default: 70 }}"
+  data-feature-spacing="{{ section.settings.feature_spacing | default: 30 }}"
+>
+  {% assign use_side_heading = false %}
+  {% if section.settings.hide_main_image and section.settings.side_heading_layout %}
+    {% assign use_side_heading = true %}
+  {% endif %}
+
+  <div class="alternating-features__container">
+    
+    {% comment %} Section Title (above content unless side heading layout) {% endcomment %}
+    {% unless use_side_heading %}
+      {% if section.settings.title != blank or section.settings.title_accent != blank %}
+        <h2 class="alternating-features__title">
+          {% if section.settings.title != blank %}{{ section.settings.title }}{% endif %}
+          {% if section.settings.title_accent != blank %}
+            <span class="alternating-features__accent{% unless section.settings.override_global_accent %} global-accent-text{% endunless %}">{{ section.settings.title_accent }}</span>
+          {% endif %}
+        </h2>
+      {% endif %}
+      {% if section.settings.subheading != blank %}
+        <p class="alternating-features__subheading">{{ section.settings.subheading }}</p>
+      {% endif %}
+    {% endunless %}
+    
+    {% assign show_image = false %}
+    {% unless section.settings.hide_main_image %}
+      {% if section.settings.main_image != blank %}
+        {% assign show_image = true %}
+      {% endif %}
+    {% endunless %}
+    <div class="alternating-features__content{% unless show_image %} alternating-features__content--no-image{% endunless %}{% if use_side_heading %} alternating-features__content--side-heading{% endif %}">
+      
+      {% comment %} Main Image Column {% endcomment %}
+      {% unless section.settings.hide_main_image %}
+        {% if section.settings.main_image != blank %}
+          <div class="alternating-features__image-column">
+            <img 
+              src="{{ section.settings.main_image | image_url: width: 800 }}" 
+              alt="{{ section.settings.title | default: 'Feature image' | escape }}"
+              class="alternating-features__image"
+              loading="{% if forloop.first and template.name == 'index' %}eager{% else %}lazy{% endif %}" 
+              width="800"
+              height="{{ 800 | divided_by: section.settings.main_image.aspect_ratio | round }}"
+            >
+          </div>
+        {% endif %}
+      {% endunless %}
+      
+      {% comment %} Side Heading Column (when hide image + side heading enabled) {% endcomment %}
+      {% if use_side_heading %}
+        {% if section.settings.title != blank or section.settings.title_accent != blank or section.settings.subheading != blank %}
+          <div class="alternating-features__heading-column">
+            {% if section.settings.title != blank or section.settings.title_accent != blank %}
+              <h2 class="alternating-features__title alternating-features__title--side">
+                {% if section.settings.title != blank %}{{ section.settings.title }}{% endif %}
+                {% if section.settings.title_accent != blank %}
+                  <span class="alternating-features__accent{% unless section.settings.override_global_accent %} global-accent-text{% endunless %}">{{ section.settings.title_accent }}</span>
+                {% endif %}
+              </h2>
+            {% endif %}
+            {% if section.settings.subheading != blank %}
+              <p class="alternating-features__subheading alternating-features__subheading--side">{{ section.settings.subheading }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endif %}
+
+      {% comment %} Features Column {% endcomment %}
+      <div class="alternating-features__features-column">
+        {% for block in section.blocks limit: 6 %}
+          {% if block.type == 'feature' %}
+            {% assign is_odd = forloop.index0 | modulo: 2 %}
+            <div 
+              class="alternating-features__item {% if is_odd == 1 %}alternating-features__item--odd{% endif %}" 
+              {{ block.shopify_attributes }}
+            >
+              <div class="alternating-features__feature">
+                {% if block.settings.icon != blank %}
+                  <div class="alternating-features__icon-container">
+                    <img 
+                      src="{{ block.settings.icon | image_url: width: 200 }}" 
+                      srcset="{{ block.settings.icon | image_url: width: 70 }} 1x,
+                              {{ block.settings.icon | image_url: width: 140 }} 2x,
+                              {{ block.settings.icon | image_url: width: 200 }} 3x"
+                      alt="{{ block.settings.title | escape }}"
+                      class="alternating-features__icon"
+                      width="200"
+                      height="200"
+                      loading="lazy"
+                    >
+                  </div>
+                {% elsif block.settings.feature_image != blank %}
+                  <div class="alternating-features__icon-container alternating-features__icon-container--image">
+                    <img 
+                      src="{{ block.settings.feature_image | image_url: width: 400 }}" 
+                      srcset="{{ block.settings.feature_image | image_url: width: 200 }} 1x,
+                              {{ block.settings.feature_image | image_url: width: 300 }} 2x,
+                              {{ block.settings.feature_image | image_url: width: 400 }} 3x"
+                      alt="{{ block.settings.title | escape }}"
+                      class="alternating-features__icon"
+                      width="400"
+                      height="400"
+                      loading="lazy"
+                    >
+                  </div>
+                {% endif %}
+                
+                <div class="alternating-features__content-wrapper">
+                  {% if block.settings.title != blank %}
+                    <h3 class="alternating-features__feature-title">{{ block.settings.title }}</h3>
+                  {% endif %}
+                  
+                  {% if block.settings.description != blank %}
+                    <p class="alternating-features__feature-description">{{ block.settings.description }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+        
+        {% comment %} Empty State {% endcomment %}
+        {% if section.blocks.size == 0 %}
+          <div class="alternating-features__placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/>
+              <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <p>Add features to display them here</p>
+          </div>
+        {% endif %}
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+{% comment %} Dynamic Styles {% endcomment %}
+<style>
+  {% comment %}
+    CSS VARIABLE MAPPING:
+    --section-text          → heading_color (Section heading: "How Our Product")
+    --feature-title-color   → feature_title_color (Feature titles: "Quality First", "Customer Support")
+    --section-text-secondary → description_color (Feature descriptions)
+    --accent-color          → accent_color (Accent text: "Helps You")
+    --section-bg            → background_color or gradient
+    --icon-bg-color         → icon_background_color
+    --icon-color            → icon_color
+    --divider-color         → divider_color
+  {% endcomment %}
+  
+  .alternating-features[data-section-id="{{ section.id }}"] {
+    {% comment %} Background {% endcomment %}
+    {% if section.settings.use_theme_colors %}
+      --section-bg: {{ settings.global_section_background_color | default: '#FFFFFF' }};
+    {% elsif section.settings.use_gradient %}
+      --section-bg: linear-gradient({{ section.settings.gradient_angle | default: 90 }}deg, {{ section.settings.gradient_start_color | default: '#EF4A65' }} 0%, {{ section.settings.gradient_end_color | default: '#990000' }} 100%);
+    {% else %}
+      --section-bg: {{ section.settings.background_color | default: '#EF4A65' }};
+    {% endif %}
+    
+    {% comment %} Section Heading Color (main title) {% endcomment %}
+    {% if section.settings.use_theme_colors %}
+      --section-text: {{ settings.global_section_text_color | default: '#000000' }};
+    {% else %}
+      --section-text: {{ section.settings.heading_color | default: '#FFFFFF' }};
+    {% endif %}
+    
+    {% comment %} Subheading Color {% endcomment %}
+    {% if section.settings.use_theme_colors %}
+      --subheading-color: rgba({{ settings.global_section_text_color | default: '0,0,0' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.8);
+    {% else %}
+      --subheading-color: {{ section.settings.subheading_color | default: '#DDDDDD' }};
+    {% endif %}
+    
+    {% comment %} Feature Title Color (individual feature titles) {% endcomment %}
+    {% if section.settings.use_theme_colors %}
+      --feature-title-color: {{ settings.global_section_text_color | default: '#000000' }};
+    {% else %}
+      --feature-title-color: {{ section.settings.feature_title_color | default: '#FFFFFF' }};
+    {% endif %}
+    
+    {% comment %} Description Color (feature descriptions) {% endcomment %}
+    {% if section.settings.use_theme_colors %}
+      --section-text-secondary: rgba({{ settings.global_section_text_color | default: '0,0,0' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.7);
+    {% else %}
+      --section-text-secondary: {{ section.settings.description_color | default: '#DDDDDD' }};
+    {% endif %}
+    
+    {% comment %} Accent Color {% endcomment %}
+    {% if section.settings.use_theme_colors %}
+      --accent-color: {{ settings.global_section_accent_1_color | default: '#EF4A65' }};
+    {% else %}
+      --accent-color: {{ section.settings.accent_color | default: '#FFFFFF' }};
+    {% endif %}
+    
+    {% comment %} Icon Colors {% endcomment %}
+    {% if section.settings.use_theme_colors %}
+      --icon-bg-color: {{ settings.global_section_accent_1_color | default: '#EF4A65' }};
+      --icon-color: {{ settings.global_section_background_color | default: '#FFFFFF' }};
+    {% else %}
+      --icon-bg-color: {{ section.settings.icon_background_color | default: '#FFFFFF' }};
+      --icon-color: {{ section.settings.icon_color | default: '#000000' }};
+    {% endif %}
+    
+    {% comment %} Divider Color {% endcomment %}
+    {% if section.settings.use_theme_colors %}
+      --divider-color: rgba({{ settings.global_section_text_color | default: '0,0,0' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.15);
+    {% else %}
+      --divider-color: {{ section.settings.divider_color | default: 'rgba(255,255,255,0.2)' }};
+    {% endif %}
+    --section-padding-top: {{ section.settings.padding_top | default: 60 }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom | default: 60 }}px;
+    --section-border-radius: {{ section.settings.section_border_radius | default: 0 }}px;
+    --section-title-size-desktop: {{ section.settings.section_title_size_desktop | default: 34 }}px;
+    --section-title-size-mobile: {{ section.settings.section_title_size_mobile | default: 28 }}px;
+    --heading-alignment-mobile: {{ section.settings.heading_alignment_mobile | default: 'center' }};
+    --heading-alignment-desktop: {{ section.settings.heading_alignment_desktop | default: 'center' }};
+    --heading-line-height-mobile: {{ section.settings.heading_line_height_mobile | default: 1.2 }};
+    --heading-line-height-desktop: {{ section.settings.heading_line_height_desktop | default: 1.2 }};
+    --subheading-line-height-mobile: {{ section.settings.subheading_line_height_mobile | default: 1.5 }};
+    --subheading-line-height-desktop: {{ section.settings.subheading_line_height_desktop | default: 1.5 }};
+    --icon-size: {{ section.settings.icon_size | default: 70 }}px;
+    --icon-image-size: {{ section.settings.icon_image_size | default: 35 }}px;
+    --icon-object-fit: {{ section.settings.icon_object_fit | default: 'contain' }};
+    --icon-border-radius: {{ section.settings.icon_border_radius | default: 50 }}%;
+    --feature-spacing: {{ section.settings.feature_spacing | default: 30 }}px;
+    --divider-spacing-top: {{ section.settings.divider_spacing_top | default: 20 }}px;
+    --divider-spacing-bottom: {{ section.settings.divider_spacing_bottom | default: 20 }}px;
+    --image-border-radius: {{ section.settings.image_border_radius | default: 8 }}px;
+    --feature-image-object-fit: {{ section.settings.feature_image_object_fit | default: 'contain' }};
+    --feature-title-size-mobile: {{ section.settings.feature_title_size_mobile | default: 14 }}px;
+    --feature-title-size-desktop: {{ section.settings.feature_title_size_desktop | default: 16 }}px;
+    --description-size-mobile: {{ section.settings.description_size_mobile | default: 13 }}px;
+    --description-size-desktop: {{ section.settings.description_size_desktop | default: 14 }}px;
+  }
+  
+  {% comment %} Accent text styling {% endcomment %}
+  .alternating-features[data-section-id="{{ section.id }}"] .alternating-features__accent {
+    {% unless section.settings.use_accent_gradient %}
+      color: var(--accent-color);
+    {% endunless %}
+    
+    {% if section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient | default: 'linear-gradient(45deg, #EF4A65, #FF6B9D)' }};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    {% endif %}
+    
+    {% if section.settings.override_global_accent %}
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %}
+            font-family: serif !important;
+          {% when 'Georgia Pro' %}
+            font-family: 'Georgia Pro', Georgia, serif !important;
+          {% when 'Bodoni Moda' %}
+            font-family: 'Bodoni Moda', Georgia, serif !important;
+          {% when 'Instrument Serif' %}
+            font-family: 'Instrument Serif', Georgia, serif !important;
+          {% when 'DM Serif Text' %}
+            font-family: 'DM Serif Text', Georgia, serif !important;
+          {% when 'Nothing You Could Do' %}
+            font-family: 'Nothing You Could Do', cursive !important;
+        {% endcase %}
+      {% endif %}
+      font-style: {{ section.settings.accent_font_style | default: 'normal' }} !important;
+      {% if section.settings.accent_font_weight != 'inherit' %}
+        font-weight: {{ section.settings.accent_font_weight }} !important;
+      {% endif %}
+    {% endif %}
+  }
+  
+  {% unless section.settings.icon_background_enabled %}
+    .alternating-features[data-section-id="{{ section.id }}"] .alternating-features__icon-container {
+      background-color: transparent !important;
+    }
+  {% endunless %}
+
+  .alternating-features[data-section-id="{{ section.id }}"] .alternating-features__icon-container--image .alternating-features__icon {
+    object-fit: var(--feature-image-object-fit, contain) !important;
+  }
+
+  {% if section.settings.bold_feature_title %}
+    .alternating-features[data-section-id="{{ section.id }}"] .alternating-features__feature-title {
+      font-weight: 700 !important;
+    }
+  {% endif %}
+</style>
+
+<script src="{{ 'alternating-features.js' | asset_url }}" defer></script>

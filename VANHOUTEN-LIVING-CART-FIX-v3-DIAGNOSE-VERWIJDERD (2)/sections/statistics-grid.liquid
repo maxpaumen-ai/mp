@@ -1,0 +1,1253 @@
+{% comment %} Google Fonts for accent text customization {% endcomment %}
+{% render 'accent-font-loader' %}
+
+{{ 'section-statistics.css' | asset_url | stylesheet_tag }}
+
+<section class="stats-grid-section {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  <div class="page-width">
+    <div class="stats-grid-section__container">
+      <div class="stats-grid-section-header text-center">
+        <h2
+          class="stats-grid-section-title"
+          style="font-size: {{ section.settings.heading_font_size_desktop | default: 36 }}px; letter-spacing: var(--letter-spacing-heading); font-weight: var(--font-weight-bold); color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.heading_color | default: '#ffffff' }}{% endif %} !important;"
+        >
+          {{ section.settings.heading_part_1 }}
+          {% if section.settings.heading_part_2 != blank %}
+            <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+              {{- section.settings.heading_part_2 -}}
+            </span>
+          {% endif %}
+        </h2>
+        {% if section.settings.subheading != blank %}
+          <div
+            class="stats-grid-section-subheading"
+            style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.subtitle_color | default: '#ffffff' }}{% endif %} !important; font-size: {{ section.settings.text_font_size }}px; letter-spacing: var(--letter-spacing-body);"
+          >
+            {{ section.settings.subheading }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="stats-grid">
+        {% for block in section.blocks %}
+          {% if block.type == 'statistic' %}
+            <div class="stats-grid-item" {{ block.shopify_attributes }}>
+              <div class="stats-grid-card{% if section.settings.remove_card_background %} no-card-bg{% endif %}">
+                {% if section.settings.hide_progress_circle %}
+                  <!-- Show percentage without circle -->
+                  <div class="stats-grid-percentage-only" style="{% unless section.settings.use_theme_colors %}color: {{ section.settings.percentage_text_color | default: '#EF4A65' }};{% endunless %}">
+                    {{ block.settings.percentage }}%
+                  </div>
+                {% else %}
+                  <div class="stats-grid-circle-container">
+                    <div
+                      class="stats-grid-circle"
+                      data-percentage="{{ block.settings.percentage }}"
+                      style="--circle-stroke: {% if section.settings.use_gradient_circle %}url(#circleGradient-{{ forloop.index }}){% else %}{% if section.settings.use_theme_colors %}{{ settings.colors_accent_1 | default: settings.global_section_accent_1_color | default: '#EF4A65' }}{% else %}{{ section.settings.accent_color | default: '#EF4A65' }}{% endif %}{% endif %};"
+                    >
+                      <svg class="stats-grid-circle-svg" viewBox="0 0 120 120">
+                        <defs>
+                          {% if section.settings.use_gradient_circle %}
+                            {% if section.settings.circle_gradient_type == 'radial' %}
+                              <radialGradient id="circleGradient-{{ forloop.index }}" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" style="stop-color:{{ section.settings.circle_gradient_start | default: '#EF4A65' }};stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:{{ section.settings.circle_gradient_end | default: '#D81B60' }};stop-opacity:1" />
+                              </radialGradient>
+                            {% else %}
+                              <linearGradient id="circleGradient-{{ forloop.index }}" x1="0%" y1="0%" x2="100%" y2="0%" gradientTransform="rotate({{ section.settings.circle_gradient_angle | default: 90 }} 60 60)">
+                                <stop offset="0%" style="stop-color:{{ section.settings.circle_gradient_start | default: '#EF4A65' }};stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:{{ section.settings.circle_gradient_end | default: '#D81B60' }};stop-opacity:1" />
+                              </linearGradient>
+                            {% endif %}
+                          {% endif %}
+                        </defs>
+                        <circle class="stats-grid-circle-bg" cx="60" cy="60" r="50" style="stroke: {% if section.settings.use_theme_colors %}{{ settings.colors_accent_2 | default: settings.global_section_accent_2_color | default: '#e6e6e6' }}{% else %}{{ section.settings.circle_bg_color | default: '#e6e6e6' }}{% endif %};"></circle>
+                        <circle class="stats-grid-circle-progress" cx="60" cy="60" r="50"></circle>
+                      </svg>
+                      <div
+                        class="stats-grid-percentage-text"
+                        style="{% unless section.settings.use_theme_colors %}color: {{ section.settings.percentage_text_color | default: '#EF4A65' }};{% endunless %}"
+                      >
+                        {{ block.settings.percentage }}%
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+                <div class="stats-grid-content">
+                  <h3
+                    class="stats-grid-title"
+                    style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.statistic_title_color | default: '#000000' }}{% endif %} !important;"
+                  >
+                    {{ block.settings.title }}
+                  </h3>
+                  <div
+                    class="stats-grid-description"
+                    style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.statistic_description_color | default: '#333333' }}{% endif %} !important;"
+                  >
+                    {{ block.settings.description }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+    .stats-grid-section {
+      text-align: center;
+      padding: {{ section.settings.desktop_padding_top }}px {{ section.settings.desktop_padding_right }}px {{ section.settings.desktop_padding_bottom }}px {{ section.settings.desktop_padding_left }}px;
+      {% if section.settings.use_theme_colors %}
+        background-color: {{ settings.global_section_text_color }};
+      {% elsif section.settings.use_gradient %}
+        background: {{ section.settings.gradient_background | default: 'linear-gradient(180deg, #EF4A65, #D81B60)' }};
+      {% else %}
+        background-color: {{ section.settings.background_color | default: '#EF4A65' }};
+      {% endif %}
+    }
+
+    /* Remove page-width horizontal padding for full-width grid */
+    .stats-grid-section .page-width {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .stats-grid-section__container {
+      margin: 0 auto;
+      width: 100%;
+      max-width: {{ section.settings.section_max_width | default: 1200 }}px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+
+    .stats-grid-section-header {
+      margin-bottom: {{ section.settings.header_bottom_margin }}px;
+      width: 100%;
+    }
+
+    .stats-grid-section-title {
+      margin-bottom: 15px;
+      letter-spacing: var(--letter-spacing-heading) !important;
+      {% if section.settings.use_theme_colors %}
+        color: {{ settings.global_section_background_color }} !important;
+      {% endif %}
+    }
+
+    .stats-grid-section-title span:last-child {
+      color: var(--heading-accent-color);
+      margin-left: {{ section.settings.accent_text_margin }}px;
+    }
+
+    .stats-grid-section-subheading {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: 1fr;
+      gap: min(20px, 2vw);
+      margin-top: {{ section.settings.stats_grid_margin_top | default: 30 }}px;
+      width: 100%;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      box-sizing: border-box;
+      place-items: center;
+      justify-content: center;
+    }
+
+    .stats-grid-item {
+      {% unless section.settings.hide_progress_circle %}
+      aspect-ratio: 1/1.15;
+      {% endunless %}
+      width: 100%;
+      max-width: 280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .stats-grid-card {
+      background-color: {% if section.settings.use_theme_colors %}{{ settings.colors_background | default: settings.global_section_background_color | default: '#ffffff' }}{% else %}{{ section.settings.card_background_color | default: '#ffffff' }}{% endif %};
+      border-radius: {{ section.settings.card_border_radius | default: 10 }}px;
+      padding: clamp(12px, 2.5vw, 17.5px) clamp(8px, 2vw, 15px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      width: 100%;
+      height: 100%;
+      {% if section.settings.hide_progress_circle %}
+      aspect-ratio: unset;
+      min-height: {{ section.settings.card_min_height_desktop_no_circle | default: 180 }}px;
+      {% else %}
+      aspect-ratio: 1/1.15;
+      {% endif %}
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    .stats-grid-card.no-card-bg {
+      background-color: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+
+    .stats-grid-percentage-only {
+      font-weight: var(--font-weight-bold) !important;
+      margin-bottom: {{ section.settings.percentage_margin_bottom_desktop | default: 10 }}px;
+      font-size: {{ section.settings.percentage_font_size_desktop | default: 48 }}px;
+      {% if section.settings.use_theme_colors %}
+        background: {{ settings.global_accent_text_gradient_dark }} !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        color: transparent !important;
+      {% endif %}
+    }
+
+    @media screen and (max-width: 749px) {
+      .stats-grid-percentage-only {
+        font-size: {{ section.settings.percentage_font_size_mobile | default: 36 }}px;
+        margin-bottom: {{ section.settings.percentage_margin_bottom_mobile | default: 10 }}px;
+      }
+    }
+
+    .stats-grid-circle-container {
+      margin-bottom: 5px;
+      width: {{ section.settings.circle_width_desktop | default: 50 }}%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .stats-grid-circle {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 100%;
+    }
+
+    .stats-grid-circle-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .stats-grid-circle-bg {
+      fill: none;
+      stroke-width: 8;
+    }
+
+    .stats-grid-circle-progress {
+      fill: none;
+      stroke: var(--circle-stroke);
+      stroke-width: 8;
+      stroke-dasharray: 314;
+      stroke-dashoffset: 314;
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+
+    .stats-grid-percentage-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: {{ section.settings.percentage_text_font_size_desktop | default: 22 }}px;
+      font-weight: var(--font-weight-semibold) !important;
+      {% if section.settings.use_theme_colors %}
+        background: {{ settings.global_accent_text_gradient_dark }} !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        color: transparent !important;
+      {% endif %}
+    }
+
+    .stats-grid-title {
+      font-size: {{ section.settings.statistic_title_font_size_desktop | default: 18 }}px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      letter-spacing: var(--letter-spacing-body);
+      color: inherit !important;
+      text-align: center;
+      word-wrap: break-word;
+      hyphens: auto;
+    }
+
+    .stats-grid-description {
+      font-size: {{ section.settings.statistic_description_font_size_desktop | default: 14 }}px;
+      line-height: 1.4;
+      letter-spacing: var(--letter-spacing-body);
+      color: inherit !important;
+      text-align: center;
+      word-wrap: break-word;
+      hyphens: auto;
+    }
+
+    .stats-grid-content {
+      width: 100%;
+      text-align: center;
+      flex-grow: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-width: 0;
+    }
+
+    /* Tablet Layout */
+    @media screen and (max-width: 989px) and (min-width: 750px) {
+      .stats-grid {
+        max-width: 600px;
+        grid-auto-rows: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .stats-grid-item {
+        max-width: 280px;
+      }
+
+      .stats-grid-circle-container {
+        width: {{ section.settings.circle_width_tablet | default: 55 }}%;
+      }
+    }
+
+    /* Mobile Layout */
+    @media screen and (max-width: 749px) {
+      .stats-grid-section {
+        padding: {{ section.settings.mobile_padding_top }}px {{ section.settings.mobile_padding_right }}px {{ section.settings.mobile_padding_bottom }}px {{ section.settings.mobile_padding_left }}px !important;
+      }
+
+      .stats-grid-section-title {
+        font-size: {{ section.settings.heading_font_size_mobile | default: 28 }}px !important;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat({{ section.settings.mobile_columns | default: 2 }}, 1fr);
+        grid-auto-rows: 1fr;
+        gap: 8px;
+        {% if section.settings.mobile_columns == '1' %}
+          max-width: 300px;
+        {% else %}
+          max-width: 500px;
+        {% endif %}
+        margin-left: auto;
+        margin-right: auto;
+        justify-content: center;
+      }
+
+      .stats-grid-item {
+        max-width: 220px;
+        margin: 0 auto;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .stats-grid-card {
+        max-width: none;
+        max-height: none;
+        padding: 14.5px 8px;
+        margin: 0 auto;
+        width: 100%;
+        {% if section.settings.hide_progress_circle %}
+        min-height: {{ section.settings.card_min_height_mobile_no_circle | default: 140 }}px;
+        {% endif %}
+      }
+
+      .stats-grid-circle-container {
+        width: {{ section.settings.circle_width_mobile | default: 60 }}%;
+        margin-bottom: 0px;
+      }
+
+      .stats-grid-percentage-text {
+        font-size: {{ section.settings.percentage_text_font_size_mobile | default: 18 }}px;
+      }
+
+      .stats-grid-title {
+        font-size: {{ section.settings.statistic_title_font_size_mobile | default: 15 }}px;
+        margin-bottom: 4px;
+        margin-top: 8px;
+      }
+
+      .stats-grid-description {
+        font-size: {{ section.settings.statistic_description_font_size_mobile | default: 12 }}px;
+        line-height: 1.3;
+      }
+    }
+
+
+    /* Enhanced accent text styling with global and local customization options */
+    .stats-grid-section .global-accent-text,
+    .stats-grid-section .custom-accent-text {
+      {% comment %} Apply color or gradient based on theme colors and settings {% endcomment %}
+      {% if section.settings.use_theme_colors %}
+        {% comment %} Use global light gradient when theme colors are enabled {% endcomment %}
+        background: {{ settings.global_accent_text_gradient_light }} !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        color: transparent !important;
+        display: inline-block !important;
+        padding: 2px 4px !important;
+        margin-top: -2px !important;
+        margin-bottom: -2px !important;
+        margin-right: -4px !important;
+        margin-left: {{ section.settings.accent_text_margin | minus: 4 }}px !important;
+        line-height: 1.3 !important;
+      {% elsif section.settings.use_accent_gradient %}
+        background: {{ section.settings.accent_text_gradient }} !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        color: transparent !important;
+        display: inline-block !important;
+        padding: 2px 4px !important;
+        margin-top: -2px !important;
+        margin-bottom: -2px !important;
+        margin-right: -4px !important;
+        margin-left: {{ section.settings.accent_text_margin | minus: 4 }}px !important;
+        line-height: 1.3 !important;
+      {% else %}
+        {% comment %} Apply solid color {% endcomment %}
+        color: {{ section.settings.heading_accent_color | default: '#ffffff' }} !important;
+        margin-left: {{ section.settings.accent_text_margin }}px !important;
+      {% endif %}
+
+      {% if section.settings.override_global_accent %}
+        {% comment %} Use section-specific typography settings when override is enabled {% endcomment %}
+        {% if section.settings.accent_font_family != 'inherit' %}
+          {% case section.settings.accent_font_family %}
+            {% when 'serif' %}
+              font-family: serif !important;
+            {% when 'Georgia Pro' %}
+              font-family: 'Georgia Pro', Georgia, serif !important;
+            {% when 'Bodoni Moda' %}
+              font-family: 'Bodoni Moda', Georgia, serif !important;
+            {% when 'Instrument Serif' %}
+              font-family: 'Instrument Serif', Georgia, serif !important;
+            {% when 'DM Serif Text' %}
+              font-family: 'DM Serif Text', Georgia, serif !important;
+            {% when 'Nothing You Could Do' %}
+              font-family: 'Nothing You Could Do', cursive !important;
+          {% endcase %}
+        {% else %}
+          font-family: var(--font-accent-family, var(--font-body-family)) !important;
+        {% endif %}
+
+        font-style: {% if section.settings.accent_font_style != 'normal' %}{{ section.settings.accent_font_style }}{% else %}var(--font-accent-style, normal){% endif %} !important;
+        font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+
+      {% else %}
+        {% comment %} Use global accent typography system {% endcomment %}
+        font-family: var(--font-accent-family, var(--font-body-family)) !important;
+        font-style: var(--font-accent-style, normal) !important;
+        font-weight: var(--font-accent-weight, inherit) !important;
+        letter-spacing: var(--font-accent-letter-spacing, inherit) !important;
+        text-transform: var(--font-accent-text-transform, none) !important;
+      {% endif %}
+        padding-right: 4px !important;
+    display: inline-block !important;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Function to animate circles based on percentage
+    function animateStatCircles() {
+      const circles = document.querySelectorAll('.stats-grid-circle');
+
+      circles.forEach((circle) => {
+        const percentage = parseInt(circle.getAttribute('data-percentage'));
+        const circumference = 2 * Math.PI * 50; // r = 50
+        const progressCircle = circle.querySelector('.stats-grid-circle-progress');
+
+        // Calculate the offset based on percentage
+        const offset = circumference - (percentage / 100) * circumference;
+
+        // Set the dash offset to show the correct percentage
+        setTimeout(() => {
+          progressCircle.style.strokeDasharray = circumference;
+          progressCircle.style.strokeDashoffset = offset;
+        }, 100);
+      });
+    }
+
+    // Initialize the animation
+    animateStatCircles();
+
+    // Re-animate when they come into view
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animateStatCircles();
+          }
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    document.querySelectorAll('.stats-grid-section').forEach((section) => {
+      observer.observe(section);
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Statistics Grid",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Theme Integration"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use theme colors",
+      "info": "When enabled, section will inherit global theme colors as defaults. When disabled, only custom colors below will be used.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading_part_1",
+      "label": "Heading - Part 1",
+      "default": "Our Key"
+    },
+    {
+      "type": "text",
+      "id": "heading_part_2",
+      "label": "Heading - Part 2 (Accent)",
+      "default": "Statistics"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Add a subheading to introduce your statistics and provide context."
+    },
+    {
+      "type": "range",
+      "id": "header_bottom_margin",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Header Bottom Margin",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "stats_grid_margin_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Stats Grid Top Margin",
+      "default": 30,
+      "info": "Space above the statistics grid"
+    },
+    {
+      "type": "header",
+      "content": "Layout Options"
+    },
+    {
+      "type": "select",
+      "id": "mobile_columns",
+      "label": "Mobile Columns",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 Column"
+        },
+        {
+          "value": "2",
+          "label": "2 Columns"
+        }
+      ],
+      "default": "2",
+      "info": "Number of columns on mobile devices"
+    },
+    {
+      "type": "range",
+      "id": "section_max_width",
+      "min": 600,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Section Max Width",
+      "default": 1200,
+      "info": "Maximum width of the section content container"
+    },
+    {
+      "type": "header",
+      "content": "Card Options"
+    },
+    {
+      "type": "checkbox",
+      "id": "remove_card_background",
+      "label": "Remove Card Background",
+      "default": false,
+      "info": "Hide the card background and shadow behind statistics"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_progress_circle",
+      "label": "Hide Progress Circle",
+      "default": false,
+      "info": "Remove the circular progress indicator (percentage will still show)"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Border Radius",
+      "default": 10,
+      "info": "Corner roundness for statistic cards"
+    },
+    {
+      "type": "range",
+      "id": "card_min_height_desktop_no_circle",
+      "min": 100,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "label": "Card Min Height - Desktop (No Circle)",
+      "default": 180,
+      "info": "Minimum height of cards on desktop when progress circle is hidden"
+    },
+    {
+      "type": "range",
+      "id": "card_min_height_mobile_no_circle",
+      "min": 80,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "Card Min Height - Mobile (No Circle)",
+      "default": 140,
+      "info": "Minimum height of cards on mobile when progress circle is hidden"
+    },
+    {
+      "type": "range",
+      "id": "percentage_font_size_desktop",
+      "min": 24,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Percentage Font Size - Desktop (No Circle)",
+      "default": 48,
+      "info": "Desktop font size for percentage when progress circle is hidden"
+    },
+    {
+      "type": "range",
+      "id": "percentage_font_size_mobile",
+      "min": 18,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Percentage Font Size - Mobile (No Circle)",
+      "default": 36,
+      "info": "Mobile font size for percentage when progress circle is hidden"
+    },
+    {
+      "type": "range",
+      "id": "percentage_margin_bottom_desktop",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Percentage Margin Bottom - Desktop (No Circle)",
+      "default": 10,
+      "info": "Space below the percentage text on desktop when progress circle is hidden"
+    },
+    {
+      "type": "range",
+      "id": "percentage_margin_bottom_mobile",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Percentage Margin Bottom - Mobile (No Circle)",
+      "default": 10,
+      "info": "Space below the percentage text on mobile when progress circle is hidden"
+    },
+    {
+      "type": "header",
+      "content": "Background Options"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section Background Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Card Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient",
+      "label": "Use Gradient Background",
+      "default": false
+    },
+    {
+      "type": "color_background",
+      "id": "gradient_background",
+      "label": "Gradient Background",
+      "default": "linear-gradient(180deg, #EF4A65, #D81B60)",
+      "info": "Choose a gradient for the section background"
+    },
+    {
+      "type": "header",
+      "content": "Circle Colors"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Progress Circle Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "color",
+      "id": "circle_bg_color",
+      "label": "Background Circle Color",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_circle",
+      "label": "Use Gradient Circle",
+      "default": false,
+      "info": "Apply gradient effect to the progress circles"
+    },
+    {
+      "type": "select",
+      "id": "circle_gradient_type",
+      "label": "Circle Gradient Type",
+      "options": [
+        {
+          "value": "linear",
+          "label": "Linear"
+        },
+        {
+          "value": "radial",
+          "label": "Radial"
+        }
+      ],
+      "default": "linear"
+    },
+    {
+      "type": "color",
+      "id": "circle_gradient_start",
+      "label": "Circle Gradient Start Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "color",
+      "id": "circle_gradient_end",
+      "label": "Circle Gradient End Color",
+      "default": "#D81B60"
+    },
+    {
+      "type": "range",
+      "id": "circle_gradient_angle",
+      "min": 0,
+      "max": 360,
+      "step": 5,
+      "unit": "deg",
+      "label": "Circle Gradient Angle",
+      "default": 90
+    },
+    {
+      "type": "header",
+      "content": "Text Colors"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color (Part 1)",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_accent_color",
+      "label": "Heading Accent Color (Part 2)",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "statistic_title_color",
+      "label": "Statistic Title Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "statistic_description_color",
+      "label": "Statistic Description Color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "percentage_text_color",
+      "label": "Percentage Number Color",
+      "default": "#EF4A65",
+      "info": "Color for the percentage number text (applies when not using theme colors)"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size_desktop",
+      "min": 20,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Heading Font Size (Desktop)",
+      "default": 36,
+      "info": "Heading font size for desktop and tablet screens (750px and above)"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size_mobile",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Heading Font Size (Mobile)",
+      "default": 28,
+      "info": "Heading font size for mobile screens (749px and below)"
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Section Subheading Font Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "statistic_title_font_size_desktop",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "Statistic Title Font Size - Desktop",
+      "default": 18,
+      "info": "Font size for individual statistic titles on desktop"
+    },
+    {
+      "type": "range",
+      "id": "statistic_title_font_size_mobile",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Statistic Title Font Size - Mobile",
+      "default": 15,
+      "info": "Font size for individual statistic titles on mobile"
+    },
+    {
+      "type": "range",
+      "id": "statistic_description_font_size_desktop",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Statistic Description Font Size - Desktop",
+      "default": 14,
+      "info": "Font size for individual statistic descriptions on desktop"
+    },
+    {
+      "type": "range",
+      "id": "statistic_description_font_size_mobile",
+      "min": 8,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Statistic Description Font Size - Mobile",
+      "default": 12,
+      "info": "Font size for individual statistic descriptions on mobile"
+    },
+    {
+      "type": "range",
+      "id": "percentage_text_font_size_desktop",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Percentage Text Font Size - Desktop",
+      "default": 22,
+      "info": "Font size for the percentage text inside the circle on desktop (750px and above)"
+    },
+    {
+      "type": "range",
+      "id": "percentage_text_font_size_mobile",
+      "min": 10,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Percentage Text Font Size - Mobile",
+      "default": 18,
+      "info": "Font size for the percentage text inside the circle on mobile (749px and below)"
+    },
+    {
+      "type": "range",
+      "id": "circle_width_desktop",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Circle Width - Desktop",
+      "default": 50,
+      "info": "Width of the progress circle relative to its container on desktop (990px and above)"
+    },
+    {
+      "type": "range",
+      "id": "circle_width_tablet",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Circle Width - Tablet",
+      "default": 55,
+      "info": "Width of the progress circle relative to its container on tablet (750px to 989px)"
+    },
+    {
+      "type": "range",
+      "id": "circle_width_mobile",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Circle Width - Mobile",
+      "default": 60,
+      "info": "Width of the progress circle relative to its container on mobile (749px and below)"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin",
+      "min": -10,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 5,
+      "info": "Adjust the spacing between the regular text and accent text"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "header",
+      "content": "Section-Specific Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Section Accent Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text"
+    },
+    {
+      "type": "header",
+      "content": "Desktop Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_top",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_right",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Right Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_bottom",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_left",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Left Padding",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Mobile Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Right Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Left Padding",
+      "default": 20
+    }
+  ],
+  "blocks": [
+    {
+      "type": "statistic",
+      "name": "Statistic",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "range",
+          "id": "percentage",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Percentage",
+          "default": 75
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Statistic Title"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Brief description about this statistic"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Statistics Grid",
+      "blocks": [
+        {
+          "type": "statistic",
+          "settings": {
+            "percentage": 75,
+            "title": "First Statistic",
+            "description": "Brief description about the first statistic."
+          }
+        },
+        {
+          "type": "statistic",
+          "settings": {
+            "percentage": 82,
+            "title": "Second Statistic",
+            "description": "Brief description about the second statistic."
+          }
+        },
+        {
+          "type": "statistic",
+          "settings": {
+            "percentage": 68,
+            "title": "Third Statistic",
+            "description": "Brief description about the third statistic."
+          }
+        },
+        {
+          "type": "statistic",
+          "settings": {
+            "percentage": 90,
+            "title": "Fourth Statistic",
+            "description": "Brief description about the fourth statistic."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

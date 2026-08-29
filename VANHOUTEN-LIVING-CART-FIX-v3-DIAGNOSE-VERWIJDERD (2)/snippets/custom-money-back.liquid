@@ -1,0 +1,272 @@
+{% comment %}
+  Custom Money Back Guarantee Snippet
+
+  Customization parameters:
+  - use_theme_colors: Use global theme colors for gradient (default: true)
+  - title_text: Heading text (default: "30-Day Money Back Guarantee")
+  - description_text: Paragraph text (default: "That's how confident we are in your results. But if you're not thrilled, send it back and we'll refund your purchase.")
+  - badge_image: Badge image (default: URL to the money-back badge)
+  - badge_svg: SVG badge icon content (optional, overrides badge_image if provided)
+  - badge_size: Size of the badge in pixels (default: 50)
+  - gradient_start_color: Start color for background gradient (default: "#ffff00")
+  - gradient_end_color: End color for background gradient (default: "#ffa500")
+  - title_color: Color of the title text (default: "#000000")
+  - text_color: Color of the description text (default: "#000000")
+  - border_style: Style of the border (default: "dotted")
+  - border_color: Color of the border (default: "black")
+  - border_radius: Border radius in pixels (default: 6)
+  - margin_top: Top margin in pixels (default: -10)
+  - margin_bottom: Bottom margin in pixels (default: -10)
+  - padding_top: Top padding in pixels (default: 3)
+  - padding_right: Right padding in pixels (default: 10)
+  - padding_bottom: Bottom padding in pixels (default: 3)
+  - padding_left: Left padding in pixels (default: 10)
+  - enable_shine: Enable shine animation (default: true)
+{% endcomment %}
+
+{% liquid
+  # Check if use_theme_colors is explicitly false, otherwise default to true
+  if use_theme_colors == false
+    assign use_theme_colors = false
+  else
+    assign use_theme_colors = true
+  endif
+%}
+
+<div class="custom-money-back-guarantee" {{ block.shopify_attributes }}>
+  <div class="custom-guarantee-content">
+    <div class="custom-guarantee-icon">
+      {%- liquid
+        assign circle_size = badge_size | default: 50
+        if show_badge_circle
+          assign circle_padding = badge_circle_padding | default: 8
+          assign circle_size = badge_size | default: 50 | plus: circle_padding | plus: circle_padding
+        endif
+      -%}
+      <div
+        class="custom-badge-circle{% if show_badge_circle %} has-circle{% endif %}"
+        style="
+          width: {{ circle_size }}px;
+          height: {{ circle_size }}px;
+          {% if show_badge_circle %}
+            background-color: {{ badge_circle_bg_color | default: '#ffffff' }};
+            border-radius: 50%;
+            {% if badge_circle_show_border %}
+              border: {{ badge_circle_border_width | default: 2 }}px {{ badge_circle_border_style | default: 'solid' }} {{ badge_circle_border_color | default: '#000000' }};
+            {% endif %}
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          {% endif %}
+        "
+      >
+        <div
+          class="custom-badge-container"
+          style="width: {{ badge_size | default: 50 }}px; height: {{ badge_size | default: 50 }}px;"
+        >
+          {% if badge_svg != blank and use_svg_badge %}
+            <div class="custom-badge-svg">
+              {{ badge_svg }}
+            </div>
+          {% elsif badge_image != blank %}
+            {% if badge_image.src %}
+              {% if badge_image.content_type contains 'svg' and use_svg_badge %}
+                <div class="custom-badge-svg">
+                  {{ badge_image.content }}
+                </div>
+              {% else %}
+                <img
+                  src="{{ badge_image | img_url: '100x' }}"
+                  alt="Money Back Guarantee"
+                  class="custom-badge-image"
+                  width=""
+                  height=""
+                >
+              {% endif %}
+            {% else %}
+              <img src="{{ badge_image }}" alt="Money Back Guarantee" class="custom-badge-image" width="" height="">
+            {% endif %}
+          {% else %}
+            <img
+              src="https://cdn.shopify.com/s/files/1/0610/9937/6753/files/menoy1.png?v=1740592879"
+              alt="Money Back Guarantee"
+              class="custom-badge-image"
+              width=""
+              height=""
+            >
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="custom-guarantee-text">
+      <h3>{{ title_text | default: '30-Day Money Back Guarantee' }}</h3>
+      {% if description_text != blank %}
+        <p>{{ description_text }}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .custom-money-back-guarantee {
+    {% if use_theme_colors %}
+      background: {{ settings.global_accent_text_gradient_light }};
+    {% else %}
+      background: linear-gradient(135deg,
+        {{ gradient_start_color | default: "#ffff00" }} 0%,
+        {{ gradient_end_color | default: "#ffa500" }} 100%);
+    {% endif %}
+    border-radius: {{ border_radius | default: 6 }}px;
+    padding: {{ padding_top | default: 3 }}px {{ padding_right | default: 10 }}px {{ padding_bottom | default: 3 }}px {{ padding_left | default: 10 }}px;
+    margin: {{ margin_top | default: -10 }}px 0 {{ margin_bottom | default: -10 }}px 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    max-height: none;
+    position: relative;
+    border: 1px {{ border_style | default: "dotted" }} {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ border_color | default: "black" }}{% endif %};
+    overflow: hidden;
+    letter-spacing: var(--letter-spacing-heading);
+    width: 100%;
+  }
+
+  .custom-money-back-guarantee::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: transparent;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 5px;
+  }
+
+  {% if enable_shine != false %}
+  .custom-money-back-guarantee::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.6) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    z-index: 1;
+    animation: custom-shine-animation 6s ease-in-out infinite;
+    transform: skewX(-20deg);
+    pointer-events: none;
+  }
+
+  @keyframes custom-shine-animation {
+    0% {
+      left: -100%;
+    }
+    30%, 100% {
+      left: 150%;
+    }
+  }
+  {% endif %}
+
+  .custom-guarantee-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .custom-badge-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+
+  .custom-badge-circle.has-circle {
+    box-sizing: border-box;
+  }
+
+  .custom-badge-container {
+    min-width: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .custom-badge-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .custom-badge-svg {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .custom-badge-svg svg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .custom-guarantee-text {
+    flex: 1;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .custom-guarantee-text h3 {
+    font-size: {{ title_font_size | default: 15 }}px;
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 2px 0;
+    line-height: 1.2;
+    color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ title_color | default: "#000" }}{% endif %} !important;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .custom-guarantee-text p {
+    font-size: {{ description_font_size | default: 13 }}px;
+    line-height: 1.3;
+    margin: 0;
+    color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_color | default: "#000" }}{% endif %} !important;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  @media screen and (max-width: 450px) {
+    .custom-badge-container {
+      width: {{ badge_size | default: 50 }}px !important;
+      height: {{ badge_size | default: 50 }}px !important;
+      min-width: 32px;
+    }
+
+    .custom-guarantee-text h3 {
+      font-size: calc({{ title_font_size | default: 15 }}px * 0.9);
+      letter-spacing: var(--letter-spacing-body);
+    }
+
+    .custom-guarantee-text p {
+      font-size: calc({{ description_font_size | default: 13 }}px * 0.9);
+      letter-spacing: var(--letter-spacing-body);
+    }
+  }
+
+  /* Desktop full width styling */
+  @media screen and (min-width: 750px) {
+    .custom-money-back-guarantee {
+      width: 100%;
+      max-width: none;
+    }
+  }
+</style>

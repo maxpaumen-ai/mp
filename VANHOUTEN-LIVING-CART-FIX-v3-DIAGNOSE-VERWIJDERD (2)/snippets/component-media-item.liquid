@@ -1,0 +1,74 @@
+{% comment %}
+  Component: Individual Media Item
+  
+  Parameters:
+  - item: block object with settings (required)
+  - show_divider: boolean (default: false)
+  - index: number (for animations)
+{% endcomment %}
+
+{%- liquid
+  assign show_divider = show_divider | default: false
+  assign media_type = item.settings.media_type | default: 'image'
+-%}
+
+<article class="media-item" 
+         data-index="{{ index }}" 
+         data-block-id="{{ item.id }}" 
+         {{ item.shopify_attributes }}>
+  
+  <!-- Media Container -->
+  <div class="media-item__media">
+    {% if media_type == 'video' and item.settings.step_video %}
+      <video 
+        class="media-item__video"
+        controls 
+        muted 
+        playsinline>
+        {% for source in item.settings.step_video.sources %}
+          <source src="{{ source.url }}" type="{{ source.mime_type }}">
+        {% endfor %}
+        Your browser does not support the video tag.
+      </video>
+    {% elsif media_type == 'image' and item.settings.step_image %}
+      <img 
+        src="{{ item.settings.step_image | image_url: width: 600 }}"
+        srcset="{{ item.settings.step_image | image_url: width: 300 }} 300w,
+                {{ item.settings.step_image | image_url: width: 400 }} 400w,
+                {{ item.settings.step_image | image_url: width: 600 }} 600w,
+                {{ item.settings.step_image | image_url: width: 800 }} 800w"
+        sizes="(max-width: 768px) 300px, 400px"
+        alt="{{ item.settings.step_image.alt | default: item.settings.step_title | escape }}"
+        class="media-item__image"
+        loading="lazy"
+        width="400"
+        height="400">
+    {% else %}
+      <div class="media-item__placeholder">
+        <span class="media-item__placeholder-text">
+          {% if media_type == 'video' %}Video{% else %}Image{% endif %} Placeholder
+        </span>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Content -->
+  {% if item.settings.step_title != blank or item.settings.step_description != blank %}
+    <div class="media-item__content">
+      
+      {% if item.settings.step_title != blank %}
+        <h3 class="media-item__title">{{ item.settings.step_title }}</h3>
+      {% endif %}
+
+      <!-- Divider -->
+      {% if show_divider and item.settings.step_title != blank and item.settings.step_description != blank %}
+        <div class="media-item__divider"></div>
+      {% endif %}
+
+      {% if item.settings.step_description != blank %}
+        <p class="media-item__description">{{ item.settings.step_description }}</p>
+      {% endif %}
+      
+    </div>
+  {% endif %}
+</article>

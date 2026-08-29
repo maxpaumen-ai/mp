@@ -1,0 +1,91 @@
+<style>
+  .stock-indicator-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-body-family-override);
+    font-size: 13px;
+    margin: {{ margin | default: '0 0 20px 0' }};
+    white-space: nowrap;
+    color: {{ empty_color | default: '#6B7280' }};
+  }
+
+  .stock-indicator-dot-container {
+    position: relative;
+    margin-right: 12px;
+    {% if show_dot == false %}display: none;{% endif %}
+  }
+
+  .stock-indicator-dot {
+    display: block;
+    width: {{ dot_size | default: 8 }}px;
+    height: {{ dot_size | default: 8 }}px;
+    background-color: {{ indicator_color | default: "#00BE20" }};
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+  }
+
+  .stock-indicator-pulse {
+    display: block;
+    width: {{ dot_size | default: 8 }}px;
+    height: {{ dot_size | default: 8 }}px;
+    background-color: {{ indicator_color | default: "#00BE20" }};
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    animation: stock-pulse {{ animation_duration | default: 2 }}s {{ animation_style | default: "ease-in-out" }} infinite;
+  }
+
+  .stock-indicator-text {
+    font-family: var(--type-body-font);
+    font-size: {{ font_size | default: 13 }}px;
+    letter-spacing: var(--letter-spacing-body);
+    color: {{ indicator_color | default: "#00BE20" }};
+  }
+
+  @keyframes stock-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+</style>
+
+<div class="stock-indicator-container" {{ block.shopify_attributes }}>
+  <div class="stock-indicator-dot-container">
+    <!-- Static dot -->
+    <span class="stock-indicator-dot"></span>
+    <!-- Pulsing circle -->
+    <span class="stock-indicator-pulse"></span>
+  </div>
+  <span class="stock-indicator-text">
+    {% if indicator_text %}
+      {% if bold_first_word != false %}
+        {% assign words = indicator_text | split: ' ' %}
+        {% if words.size > 0 %}
+          <strong>{{ words | first }}</strong>
+          {% if words.size > 1 %}
+            {% assign remaining_words = words | slice: 1, words.size | join: ' ' %}
+            {{ remaining_words }}
+          {% endif %}
+        {% else %}
+          {{ indicator_text }}
+        {% endif %}
+      {% else %}
+        {{ indicator_text }}
+      {% endif %}
+    {% else %}
+      <strong>In Stock</strong> ready to ship!
+    {% endif %}
+  </span>
+</div>

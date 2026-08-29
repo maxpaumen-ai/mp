@@ -1,0 +1,1738 @@
+{{ 'testimonials.css' | asset_url | stylesheet_tag }}
+
+{% render 'accent-font-loader' %}
+
+<div
+  class="testimonials-section section-{{ section.id }}  {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}"
+  data-use-theme-colors="{{ section.settings.use_theme_colors }}"
+  {% if section.settings.anchor_id != blank %}
+    id="{{ section.settings.anchor_id }}"
+  {% endif %}
+  style="
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    {% if section.settings.use_theme_colors %}
+      {% if settings.global_section_use_gradient_background %}
+        background: var(--gradient-background) !important;
+      {% else %}
+        background-color: {{ settings.global_section_background_color }} !important;
+      {% endif %}
+    {% else %}
+      background: {{ section.settings.section_background }} !important;
+    {% endif %}
+  "
+>
+  <div class="testimonials-container">
+    {% if section.settings.heading != blank
+      or section.settings.heading_accent != blank
+      or section.settings.subtitle != blank
+      or section.settings.show_rating
+    %}
+      <div class="testimonials-header">
+        {% if section.settings.heading != blank or section.settings.heading_accent != blank %}
+          {% assign heading_tag = section.settings.heading_tag %}
+          <{{ heading_tag }}
+            class="testimonials-heading testimonials-custom-heading"
+            style="
+              color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.heading_color }}{% endif %} !important;
+              font-size: {{ section.settings.heading_size }}px;
+              line-height: {{ section.settings.heading_line_height }};
+              letter-spacing: var(--letter-spacing-heading);
+              font-weight: var(--font-weight-bold) !important;
+              --heading-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.heading_color }}{% endif %};
+            "
+          >
+            {% if section.settings.heading != blank %}{{ section.settings.heading }}{% endif %}
+            {% if section.settings.heading_accent != blank %}
+              <span class="{% if section.settings.override_global_accent %}testimonials-custom-accent-text{% else %}testimonials-global-accent-text{% endif %}">
+                {{ section.settings.heading_accent }}
+              </span>
+            {% endif %}
+          </{{ heading_tag }}>
+        {% endif %}
+
+        {% if section.settings.subtitle != blank %}
+          <div
+            class="testimonials-subtitle testimonials-custom-subtitle"
+            style="
+              color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subtitle_color }}{% endif %} !important;
+              font-size: {{ section.settings.subtitle_size }}px;
+              margin-bottom: 20px;
+              font-weight: var(--font-weight-regular);
+              letter-spacing: var(--letter-spacing-body);
+              text-align: center;
+              line-height: 1.4;
+              --subtitle-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subtitle_color }}{% endif %};
+            "
+          >
+            {{ section.settings.subtitle }}
+          </div>
+        {% endif %}
+
+        {% if section.settings.show_rating %}
+          <div class="testimonials-rating-summary-wrapper">
+            <div
+              class="testimonials-rating-summary"
+              style="
+                background: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% elsif section.settings.use_rating_summary_gradient %}{{ section.settings.rating_summary_background }}{% else %}{{ section.settings.rating_summary_bg_color }}{% endif %};
+                {% if section.settings.enable_rating_summary_border %}
+                  border: {{ section.settings.rating_summary_border_width }}px {{ section.settings.rating_summary_border_style }} {{ section.settings.rating_summary_border_color }};
+                {% endif %}
+                border-radius: {{ section.settings.rating_summary_border_radius | default: 50 }}px;
+              "
+            >
+              <span class="testimonials-rating-stars">
+                <div class="testimonials-stars">
+                  {% if section.settings.use_trustpilot_stars %}
+                    {% for i in (1..section.settings.rating_max) %}
+                      <svg
+                        class="testimonials-star testimonials-summary-star trustpilot-star"
+                        viewBox="0 0 96 96"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect width="96" height="96" fill="{% if i <= section.settings.rating_value %}{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.summary_star_color }}{% endif %}{% else %}{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color | color_modify: 'alpha', 0.5 }}{% else %}{{ section.settings.summary_star_empty_color }}{% endif %}{% endif %}"/>
+                        <path d="M48 64.7L62.6 61l6.1 18.8zm33.6-24.3H55.9L48 16.2l-7.9 24.2H14.4l20.8 15-7.9 24.2 20.8-15 12.8-9.2z" fill="#fff"/>
+                      </svg>
+                    {% endfor %}
+                  {% else %}
+                    {% for i in (1..section.settings.rating_max) %}
+                      <svg
+                        class="testimonials-star testimonials-summary-star"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z" fill="{% if i <= section.settings.rating_value %}{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.summary_star_color }}{% endif %}{% else %}{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color | color_modify: 'alpha', 0.5 }}{% else %}{{ section.settings.summary_star_empty_color }}{% endif %}{% endif %}"/>
+                      </svg>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+              </span>
+              <div class="testimonials-rating-text">
+                {{ section.settings.rating_summary_text }}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if section.blocks.size > 0 %}
+      <div class="testimonials-carousel" id="testimonials-{{ section.id }}">
+        <div class="testimonials-track">
+          {% for block in section.blocks %}
+            {% case block.type %}
+              {% when 'testimonial' %}
+                <div
+                  class="testimonial-card"
+                  {{ block.shopify_attributes }}
+                  style="
+                    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.card_background }}{% endif %};
+                    border-radius: {{ section.settings.card_border_radius }}px;
+                    {% if section.settings.enable_card_border %}
+                      border: {{ section.settings.card_border_width }}px {{ section.settings.card_border_style }} {{ section.settings.card_border_color }};
+                    {% endif %}
+                  "
+                >
+                  <!-- Stars at the top -->
+                  {% if block.settings.show_stars %}
+                    <div class="testimonials-card-rating">
+                      <div class="testimonials-card-stars">
+                        <div class="testimonials-stars">
+                          {% if section.settings.use_trustpilot_stars %}
+                            {% for i in (1..5) %}
+                              <svg
+                                class="testimonials-star testimonials-card-star trustpilot-star"
+                                viewBox="0 0 96 96"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+<rect
+  width="96"
+  height="96"
+  fill="
+    {% if i <= block.settings.rating %}
+      {% if section.settings.use_trustpilot_stars %}
+        {{ section.settings.trustpilot_star_color | default: '#00B67A' }}
+      {% elsif section.settings.use_theme_colors %}
+        {{ settings.global_section_accent_1_color }}
+      {% else %}
+        {{ section.settings.star_color }}
+      {% endif %}
+    {% else %}
+      {% if section.settings.use_theme_colors %}
+        {{ settings.global_section_text_color | color_lighten: 40 }}
+      {% else %}
+        {{ section.settings.star_empty_color }}
+      {% endif %}
+    {% endif %}
+  "
+/>
+                                <path d="M48 64.7L62.6 61l6.1 18.8zm33.6-24.3H55.9L48 16.2l-7.9 24.2H14.4l20.8 15-7.9 24.2 20.8-15 12.8-9.2z" fill="#fff"/>
+                              </svg>
+                            {% endfor %}
+                          {% else %}
+                            {% for i in (1..5) %}
+                              <svg
+                                class="testimonials-star testimonials-card-star"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z" fill="{% if i <= block.settings.rating %}{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.star_color }}{% endif %}{% else %}{% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 40 }}{% else %}{{ section.settings.star_empty_color }}{% endif %}{% endif %}"/>
+                              </svg>
+                            {% endfor %}
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  <!-- Title below stars -->
+                  {% if block.settings.title != blank %}
+                    <h3
+                      class="testimonial-title"
+                      style="
+                        color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.testimonial_title_color }}{% endif %} !important;
+                        font-weight: var(--font-weight-bold);
+                        letter-spacing: var(--letter-spacing-{{ section.settings.testimonial_title_letter_spacing }});
+                      "
+                    >
+                      {{ block.settings.title }}
+                    </h3>
+                  {% endif %}
+
+                  <!-- Content below title -->
+                  {% if block.settings.content != blank %}
+                    <div
+                      class="testimonial-content"
+                      style="
+                        color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.card_text_color }}{% endif %};
+                        font-weight: var(--font-weight-regular);
+                        letter-spacing: var(--letter-spacing-body);
+                      "
+                    >
+                      {{ block.settings.content }}
+                    </div>
+                  {% endif %}
+
+                  {% if block.settings.author_name != blank %}
+                    <div class="testimonial-author-container">
+                      <div class="testimonial-author">
+                        <div
+                          class="author-avatar"
+                          style="
+                            background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.avatar_color }}{% endif %};
+                            color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.avatar_text_color }}{% endif %};
+                            font-weight: var(--font-weight-bold);
+                          "
+                        >
+                          {% if block.settings.avatar_image != blank %}
+                            <img src="{{ block.settings.avatar_image | image_url: width: 200 }}" alt="{{ block.settings.author_name }}" loading="lazy" width="" height="">
+                          {% else %}
+                            {{ block.settings.author_name | slice: 0 }}
+                          {% endif %}
+                        </div>
+                        <div class="author-info">
+                          <div class="author-info-container">
+                            <div class="author-info-details">
+                              <span
+                                class="author-name"
+                                style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.card_text_color }}{% endif %};"
+                              >
+                                {{- block.settings.author_name -}}
+                              </span>
+                              {% if block.settings.verified %}
+                                <span
+                                  class="testimonials-verified-badge"
+                                  style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.verified_color }}{% endif %};"
+                                >
+                                  <svg
+                                    class="verified-icon"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M9.5924 3.20027C9.34888 3.4078 9.22711 3.51158 9.09706 3.59874C8.79896 3.79854 8.46417 3.93721 8.1121 4.00672C7.95851 4.03705 7.79903 4.04977 7.48008 4.07522C6.6787 4.13918 6.278 4.17115 5.94371 4.28923C5.17051 4.56233 4.56233 5.17051 4.28923 5.94371C4.17115 6.278 4.13918 6.6787 4.07522 7.48008C4.04977 7.79903 4.03705 7.95851 4.00672 8.1121C3.93721 8.46417 3.79854 8.79896 3.59874 9.09706C3.51158 9.22711 3.40781 9.34887 3.20027 9.5924C2.67883 10.2043 2.4181 10.5102 2.26522 10.8301C1.91159 11.57 1.91159 12.43 2.26522 13.1699C2.41811 13.4898 2.67883 13.7957 3.20027 14.4076C3.40778 14.6511 3.51158 14.7729 3.59874 14.9029C3.79854 15.201 3.93721 15.5358 4.00672 15.8879C4.03705 16.0415 4.04977 16.201 4.07522 16.5199C4.13918 17.3213 4.17115 17.722 4.28923 18.0563C4.56233 18.8295 5.17051 19.4377 5.94371 19.7108C6.278 19.8288 6.6787 19.8608 7.48008 19.9248C7.79903 19.9502 7.95851 19.963 8.1121 19.9933C8.46417 20.0628 8.79896 20.2015 9.09706 20.4013C9.22711 20.4884 9.34887 20.5922 9.5924 20.7997C10.2043 21.3212 10.5102 21.5819 10.8301 21.7348C11.57 22.0884 12.43 22.0884 13.1699 21.7348C13.4898 21.5819 13.7957 21.3212 14.4076 20.7997C14.6511 20.5922 14.7729 20.4884 14.9029 20.4013C15.201 20.2015 15.5358 20.0628 15.8879 19.9933C16.0415 19.963 16.201 19.9502 16.5199 19.9248C17.3213 19.8608 17.722 19.8288 18.0563 19.7108C18.8295 19.4377 19.4377 18.8295 19.7108 18.0563C19.8288 17.722 19.8608 17.3213 19.9248 16.5199C19.9502 16.201 19.963 16.0415 19.9933 15.8879C20.0628 15.5358 20.2015 15.201 20.4013 14.9029C20.4884 14.7729 20.5922 14.6511 20.7997 14.4076C21.3212 13.7957 21.5819 13.4898 21.7348 13.1699C22.0884 12.43 22.0884 11.57 21.7348 10.8301C21.5819 10.5102 21.3212 10.2043 20.7997 9.5924C20.5922 9.34887 20.4884 9.22711 20.4013 9.09706C20.2015 8.79896 20.0628 8.46417 19.9933 8.1121C19.963 7.95851 19.9502 7.79903 19.9248 7.48008C19.8608 6.6787 19.8288 6.278 19.7108 5.94371C19.4377 5.17051 18.8295 4.56233 18.0563 4.28923C17.722 4.17115 17.3213 4.13918 16.5199 4.07522C16.201 4.04977 16.0415 4.03705 15.8879 4.00672C15.5358 3.93721 15.201 3.79854 14.9029 3.59874C14.7729 3.51158 14.6511 3.40781 14.4076 3.20027C13.7957 2.67883 13.4898 2.41811 13.1699 2.26522C12.43 1.91159 11.57 1.91159 10.8301 2.26522C10.5102 2.4181 10.2043 2.67883 9.5924 3.20027ZM16.3735 9.86314C16.6913 9.5453 16.6913 9.03 16.3735 8.71216C16.0557 8.39433 15.5403 8.39433 15.2225 8.71216L10.3723 13.5624L8.77746 11.9676C8.45963 11.6498 7.94432 11.6498 7.62649 11.9676C7.30866 12.2854 7.30866 12.8007 7.62649 13.1186L9.79678 15.2889C10.1146 15.6067 10.6299 15.6067 10.9478 15.2889L16.3735 9.86314Z" fill="{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.verified_color }}{% endif %}"/>
+                                  </svg>
+                                  {{ section.settings.verified_text }}
+                                </span>
+                              {% endif %}
+                            </div>
+                          </div>
+                          {% if block.settings.show_purchase_date and block.settings.purchase_date != blank %}
+                            <p
+                              class="testimonials-product-purchase-date"
+                              style="
+                                color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 20 }}{% else %}{{ section.settings.purchase_date_color }}{% endif %};
+                                background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_bg_color }}{% else %}{{ section.settings.author_info_bg_color }}{% endif %};
+                                {% if section.settings.enable_author_info_border %}
+                                  border: {{ section.settings.author_info_border_width }}px {{ section.settings.author_info_border_style }} {{ section.settings.author_info_border_color }};
+                                  border-radius: {{ section.settings.author_info_border_radius }}px;
+                                {% endif %}
+                              "
+                            >
+                              <svg
+                                class="testimonials-purchase-date-icon"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="11"
+                                height="11"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="{% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 20 }}{% else %}{{ section.settings.purchase_date_icon_color }}{% endif %}"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                style="display: block;"
+                              >
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <path d="M16 10a4 4 0 0 1-8 0"></path>
+                              </svg>
+                              {{ section.settings.purchase_date_prefix | default: 'Purchased on' | escape }}
+                              {{ block.settings.purchase_date }}
+                            </p>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+            {% endcase %}
+          {% endfor %}
+        </div>
+
+        {% if section.settings.show_navigation %}
+          <div class="testimonials-navigation">
+            {% render 'global-nav-button', 
+              direction: 'prev', 
+              aria_label: 'Previous testimonials',
+              section_settings: section.settings
+            %}
+            {% render 'global-nav-button', 
+              direction: 'next', 
+              aria_label: 'Next testimonials',
+              section_settings: section.settings
+            %}
+          </div>
+        {% endif %}
+
+        {% if section.settings.show_dots %}
+          <div class="testimonials-dots" id="dots-{{ section.id }}">
+            {% for block in section.blocks %}
+              <button
+                class="dot {% if forloop.first %}active{% endif %}"
+                data-slide="{{ forloop.index0 }}"
+                style="
+                                  background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.3 }}{% else %}{{ section.settings.dot_color }}{% endif %};
+                "
+              ></button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+
+  
+  .testimonials-section.section-{{ section.id }} {
+    --testimonials-gap: {{ section.settings.card_gap }}px;
+    --card-width-mobile: {{ section.settings.card_width_mobile }}%;
+    --card-width-desktop: {{ section.settings.card_width_desktop }}px;
+  }
+
+  .testimonials-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .testimonials-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .testimonials-heading {
+    margin-bottom: 20px;
+    font-size: {{ section.settings.heading_size }}px;
+    line-height: {{ section.settings.heading_line_height }};
+  }
+
+  .testimonials-subtitle {
+    margin-bottom: 20px;
+    font-size: {{ section.settings.subtitle_size }}px;
+    line-height: 1.4;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Enhanced accent text styling with global and local customization options */
+  .testimonials-section .testimonials-global-accent-text,
+  .testimonials-section .testimonials-custom-accent-text {
+    {% comment %} Always apply core accent text styling {% endcomment %}
+    padding: 2px 4px !important;
+    margin: -2px -4px !important;
+    display: inline-block !important;
+    margin-left: {{ section.settings.accent_text_margin_left }}px !important;
+
+    {% comment %} Apply color or gradient based on theme colors and settings {% endcomment %}
+    {% if section.settings.use_theme_colors %}
+      {% comment %} Use global dark gradient when theme colors are enabled {% endcomment %}
+      background: {{ settings.global_accent_text_gradient_dark }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+    {% elsif section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+    {% else %}
+      {% comment %} Apply solid color based on global or local settings {% endcomment %}
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.accent_color }}{% endif %} !important;
+    {% endif %}
+
+    {% if section.settings.override_global_accent %}
+      {% comment %} Use section-specific typography settings when override is enabled {% endcomment %}
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %}
+            font-family: serif !important;
+          {% when 'Georgia Pro' %}
+            font-family: 'Georgia Pro', Georgia, serif !important;
+          {% when 'Bodoni Moda' %}
+            font-family: 'Bodoni Moda', Georgia, serif !important;
+          {% when 'Instrument Serif' %}
+            font-family: 'Instrument Serif', Georgia, serif !important;
+          {% when 'DM Serif Text' %}
+            font-family: 'DM Serif Text', Georgia, serif !important;
+          {% when 'Nothing You Could Do' %}
+            font-family: 'Nothing You Could Do', cursive !important;
+        {% endcase %}
+      {% else %}
+        font-family: var(--font-accent-family, var(--font-body-family)) !important;
+      {% endif %}
+
+      font-style: {% if section.settings.accent_font_style != 'normal' %}{{ section.settings.accent_font_style }}{% else %}var(--font-accent-style, normal){% endif %} !important;
+      font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+
+    {% else %}
+      {% comment %} Use global accent typography system {% endcomment %}
+      font-family: var(--font-accent-family, var(--font-body-family)) !important;
+      font-style: var(--font-accent-style, normal) !important;
+      font-weight: var(--font-accent-weight, inherit) !important;
+      letter-spacing: var(--font-accent-letter-spacing, inherit) !important;
+      text-transform: var(--font-accent-text-transform, none) !important;
+    {% endif %}
+  }
+
+  .testimonials-rating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rating-stars {
+    display: flex;
+    gap: 4px;
+    font-size: 20px;
+  }
+
+  .testimonials-rating-text {
+    margin: 0;
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.rating_summary_text_color }}{% endif %};
+  }
+
+  .testimonials-rating-text p {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .testimonials-rating-text strong,
+  .testimonials-rating-text b {
+    font-weight: 700 !important;
+  }
+
+  .star {
+    opacity: 0.3;
+  }
+
+  .star.filled {
+    opacity: 1;
+  }
+
+  .testimonials-carousel {
+    position: relative;
+    overflow: hidden;
+  }
+
+  {% if section.settings.enable_mask_fade %}
+  .testimonials-carousel {
+    -webkit-mask: linear-gradient(to right,
+      transparent 0%,
+      black 100px,
+      black calc(100% - 100px),
+      transparent 100%);
+    mask: linear-gradient(to right,
+      transparent 0%,
+      black 100px,
+      black calc(100% - 100px),
+      transparent 100%);
+  }
+
+  /* Desktop: Adjust mask for 5-card layout */
+  @media screen and (min-width: 750px) {
+    .testimonials-carousel {
+      -webkit-mask: linear-gradient(to right,
+        transparent 0%,
+        black 150px,
+        black calc(100% - 150px),
+        transparent 100%);
+      mask: linear-gradient(to right,
+        transparent 0%,
+        black 150px,
+        black calc(100% - 150px),
+        transparent 100%);
+    }
+  }
+  {% endif %}
+
+  .testimonials-track {
+    display: flex;
+    gap: var(--testimonials-gap);
+    transition: transform 0.3s ease;
+    padding-bottom: 20px;
+    justify-content: flex-start;
+  }
+
+  .testimonial-card {
+    flex: 0 0 var(--card-width-mobile);
+    padding: 24px;
+    border-radius: {{ section.settings.card_border_radius }}px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 200px;
+  }
+
+  /* Desktop: 5 cards visible (3 full, 2 partial) */
+  @media screen and (min-width: 750px) {
+    .testimonials-carousel {
+      overflow: visible; /* Allow partial cards to show */
+    }
+
+    .testimonial-card {
+      flex: 0 0 300px; /* Fixed width for consistent sizing */
+      max-width: 300px;
+      {% if section.settings.individual_card_height %}
+        height: min-content;
+      {% endif %}
+    }
+
+    .testimonials-track {
+      display: flex;
+      align-items: {% if section.settings.individual_card_height %}flex-start{% else %}stretch{% endif %};
+    }
+  }
+
+  .card-rating {
+    display: flex;
+    gap: 4px;
+    
+  }
+.testimonials-card-star {
+  width: {{ section.settings.card_rating_size }}px !important;
+  Height: {{ section.settings.card_rating_size }}px !important;
+
+}
+
+  .testimonial-title {
+    font-size: {{ section.settings.testimonial_title_size }}px;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  /* Ensure custom title colors take precedence */
+  .testimonial-card .testimonial-title[style*="color"] {
+    color: inherit !important;
+  }
+
+  .testimonial-content {
+    flex: 1;
+    letter-spacing: var(--letter-spacing-body);
+    line-height: 1.5;
+    font-size: {{ section.settings.testimonial_content_size }}px;
+  }
+
+  .testimonial-author-container {
+    margin-top: auto;
+    padding-top: 8px;
+  }
+
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: {{ section.settings.author_avatar_text_size }}px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .author-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  .author-info {
+    flex-grow: 1;
+    height: 40px;
+    gap: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .author-info-container {
+    display: flex;
+  }
+
+  .author-info-details {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    border-radius: 50px;
+    padding: 1px 2px;
+    width: auto;
+    max-width: fit-content;
+  }
+
+  .author-name {
+    font-size: {{ section.settings.author_name_size }}px;
+    margin: 0;
+    line-height: 1.2;
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .testimonials-verified-badge {
+    font-size: {{ section.settings.verified_badge_size }}px !important;
+    display: flex;
+    margin-left: 4px;
+    align-items: center;
+    gap: 4px;
+    font-weight: var(--font-weight-bold);
+  }
+
+  .verified-icon {
+    color: white;
+    border-radius: 50%;
+    width: {{ section.settings.verified_icon_size }}px;
+    height: {{ section.settings.verified_icon_size }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: {{ section.settings.verified_icon_size | minus: 2 }}px;
+  }
+
+  .testimonials-product-purchase-date {
+    font-size: {{ section.settings.purchase_date_size }}px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0px 0 0 0;
+  }
+
+  .testimonials-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  /* Navigation buttons now use global-nav-button snippet */
+  .testimonials-navigation .global-nav-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  
+  .testimonials-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    align-items: center;
+    min-height: 16px;
+    padding: 4px 0;
+    overflow: visible;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    opacity: 0.4;
+    transform: none !important;
+    scale: none !important;
+    flex-shrink: 0;
+    overflow: visible;
+  }
+
+  .dot.active {
+    opacity: 1;
+    transform: none !important;
+    scale: none !important;
+    width: 8px !important;
+    height: 8px !important;
+  }
+
+  @media screen and (max-width: 749px) {
+    .testimonials-container {
+      padding: 0 15px;
+    }
+
+    .testimonials-header {
+      margin-bottom: 30px;
+    }
+
+    .testimonials-heading {
+      font-size: {{ section.settings.heading_size_mobile }}px !important;
+    }
+
+    .testimonials-subtitle {
+      font-size: {{ section.settings.subtitle_size }}px !important;
+    }
+
+    .testimonial-title {
+      font-size: {{ section.settings.testimonial_title_size_mobile }}px !important;
+    }
+
+    .testimonial-content {
+      font-size: {{ section.settings.testimonial_content_size_mobile }}px !important;
+    }
+
+    .testimonials-verified-badge {
+      font-size: {{ section.settings.verified_badge_size_mobile }}px !important;
+    }
+
+    .testimonials-product-purchase-date {
+      font-size: {{ section.settings.purchase_date_size_mobile }}px !important;
+    }
+
+
+
+    .testimonial-card {
+      scroll-snap-align: start;
+    }
+
+    .testimonials-navigation {
+      display: none;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .testimonial-card {
+      flex: 0 0 var(--card-width-desktop);
+    }
+
+    .testimonials-track {
+      overflow: visible;
+    }
+  }
+</style>
+
+{{ 'testimonials-carousel.js' | asset_url | script_tag }}
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "Apply global theme colors to this section"
+    },
+    {
+      "type": "color_background",
+      "id": "section_background",
+      "label": "Section Background",
+      "default": "linear-gradient(180deg, #1a1a1a, #2a2a2a)",
+      "info": "Used when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "header",
+      "content": "Custom Colors (when theme colors are disabled)"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#ffffff",
+      "info": "Color for the main heading when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle Color",
+      "default": "#cccccc",
+      "info": "Color for the subtitle text when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff",
+      "info": "Color for testimonial text when theme colors are disabled"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 60,
+      "label": "Top Padding (px)"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 60,
+      "label": "Bottom Padding (px)"
+    },
+    {
+      "type": "header",
+      "content": "Header Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Customer"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 24,
+      "max": 60,
+      "step": 2,
+      "default": 42,
+      "label": "Heading Size (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "default": 28,
+      "label": "Heading Size (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "min": 0.8,
+      "max": 2.0,
+      "step": 0.1,
+      "default": 1.2,
+      "label": "Heading Line Height"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading Tag",
+      "default": "h2",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        },
+        {
+          "value": "p",
+          "label": "P"
+        },
+        {
+          "value": "span",
+          "label": "Span"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heading Accent Text",
+      "default": "Testimonials",
+      "info": "Optional accent text to highlight part of the heading"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Real experiences from real customers who love our products and service.",
+      "info": "Optional subtitle text to appear below the heading"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "default": 18,
+      "label": "Subtitle Size (px)"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Text Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "header",
+      "content": "Section-Specific Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Section Accent Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text"
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin_left",
+      "min": -10,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Text Sizing"
+    },
+
+    {
+      "type": "checkbox",
+      "id": "use_trustpilot_stars",
+      "label": "Use Trustpilot Stars",
+      "default": false,
+      "info": "Use Trustpilot-style star icons instead of regular stars"
+    },
+    {
+      "type": "color",
+      "id": "trustpilot_star_color",
+      "label": "Trustpilot Star Color",
+      "default": "#00B67A",
+      "info": "Color for filled Trustpilot stars (default is Trustpilot green)"
+    },
+    {
+      "type": "color",
+      "id": "trustpilot_star_empty_color",
+      "label": "Trustpilot Empty Star Color",
+      "default": "#dcdce6",
+      "info": "Color for empty Trustpilot stars"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_title_size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "default": 18,
+      "label": "Testimonial Title Size (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_title_size_mobile",
+      "min": 12,
+      "max": 30,
+      "step": 1,
+      "default": 16,
+      "label": "Testimonial Title Size (Mobile)"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_title_letter_spacing",
+      "label": "Testimonial Title Letter Spacing",
+      "options": [
+        { "value": "heading", "label": "Heading (var(--letter-spacing-heading))" },
+        { "value": "body", "label": "Body (var(--letter-spacing-body))" }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_content_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "default": 14,
+      "label": "Testimonial Content Size (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_content_size_mobile",
+      "min": 11,
+      "max": 16,
+      "step": 1,
+      "default": 13,
+      "label": "Testimonial Content Size (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "author_name_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "default": 12,
+      "label": "Author Name Size"
+    },
+    {
+      "type": "range",
+      "id": "author_avatar_text_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "default": 16,
+      "label": "Author Avatar Text Size"
+    },
+    {
+      "type": "range",
+      "id": "verified_badge_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "default": 12,
+      "label": "Verified Badge Text Size"
+    },
+    {
+      "type": "range",
+      "id": "verified_badge_size_mobile",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "default": 11,
+      "label": "Verified Badge Text Size (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "verified_icon_size",
+      "min": 8,
+      "max": 14,
+      "step": 1,
+      "default": 10,
+      "label": "Verified Icon Size"
+    },
+    {
+      "type": "range",
+      "id": "purchase_date_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "default": 12,
+      "label": "Purchase Date Text Size"
+    },
+    {
+      "type": "range",
+      "id": "purchase_date_size_mobile",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "default": 11,
+      "label": "Purchase Date Text Size (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "card_rating_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "default": 16,
+      "label": "Card Rating Text Size"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show Overall Rating",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_mask_fade",
+      "label": "Enable Edge Mask Fade",
+      "default": true,
+      "info": "Fade carousel edges for a softer appearance"
+    },
+    {
+      "type": "richtext",
+      "id": "rating_summary_text",
+      "label": "Rating Summary Text",
+      "default": "<p>Excellent 4.8/5 based on 2,500+ customer reviews</p>",
+      "info": "Complete rating text with formatting support"
+    },
+    {
+      "type": "range",
+      "id": "rating_value",
+      "min": 1,
+      "max": 5,
+      "step": 0.1,
+      "default": 4.8,
+      "label": "Rating Value"
+    },
+    {
+      "type": "range",
+      "id": "rating_max",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "default": 5,
+      "label": "Maximum Rating"
+    },
+    {
+      "type": "color",
+      "id": "summary_star_color",
+      "label": "Summary Star Color",
+      "default": "#FFD700",
+      "info": "Color for stars in the rating summary section"
+    },
+    {
+      "type": "color",
+      "id": "summary_star_empty_color",
+      "label": "Summary Empty Star Color",
+      "default": "#e5e5e5",
+      "info": "Color for empty stars in the rating summary section"
+    },
+    {
+      "type": "color",
+      "id": "rating_summary_text_color",
+      "label": "Rating Summary Text Color",
+      "default": "#333333",
+      "info": "Color for the rating summary text"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Card Star Color",
+      "default": "#9ACD32",
+      "info": "Color for stars in testimonial cards"
+    },
+    {
+      "type": "color",
+      "id": "star_empty_color",
+      "label": "Card Empty Star Color",
+      "default": "#e5e5e5",
+      "info": "Color for empty stars in testimonial cards"
+    },
+    {
+      "type": "header",
+      "content": "Rating Summary Styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_rating_summary_gradient",
+      "label": "Use Gradient Background",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "rating_summary_bg_color",
+      "label": "Rating Summary Background (Solid)",
+      "default": "#f8f8f8"
+    },
+    {
+      "type": "color_background",
+      "id": "rating_summary_background",
+      "label": "Rating Summary Background (Gradient)",
+      "default": "linear-gradient(45deg, #f8f8f8, #e8e8e8)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_rating_summary_border",
+      "label": "Enable Border",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "rating_summary_border_width",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 1,
+      "label": "Border Width (px)"
+    },
+    {
+      "type": "select",
+      "id": "rating_summary_border_style",
+      "label": "Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "rating_summary_border_color",
+      "label": "Border Color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "range",
+      "id": "rating_summary_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 25,
+      "label": "Border Radius (px)"
+    },
+    {
+      "type": "header",
+      "content": "Card Styling"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card Background",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Card Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "testimonial_title_color",
+      "label": "Testimonial Title Color",
+      "default": "#ffffff",
+      "info": "Color for all testimonial titles in the cards"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 12,
+      "label": "Card Border Radius (px)"
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "default": 20,
+      "label": "Gap Between Cards (px)"
+    },
+    {
+      "type": "range",
+      "id": "card_width_mobile",
+      "min": 70,
+      "max": 95,
+      "step": 5,
+      "default": 85,
+      "label": "Card Width Mobile (%)"
+    },
+    {
+      "type": "range",
+      "id": "card_width_desktop",
+      "min": 250,
+      "max": 400,
+      "step": 10,
+      "default": 320,
+      "label": "Card Width Desktop (px)"
+    },
+    {
+      "type": "checkbox",
+      "id": "individual_card_height",
+      "label": "Individual Height",
+      "default": true,
+      "info": "Allow each testimonial card to size to its own content"
+    },
+    {
+      "type": "header",
+      "content": "Card Border"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_card_border",
+      "label": "Enable Card Border",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 1,
+      "label": "Border Width (px)"
+    },
+    {
+      "type": "select",
+      "id": "card_border_style",
+      "label": "Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Border Color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "header",
+      "content": "Author Settings"
+    },
+    {
+      "type": "color",
+      "id": "avatar_color",
+      "label": "Avatar Background Color",
+      "default": "#9ACD32"
+    },
+    {
+      "type": "color",
+      "id": "avatar_text_color",
+      "label": "Avatar Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "verified_color",
+      "label": "Verified Badge Color",
+      "default": "#4CAF50"
+    },
+    {
+      "type": "text",
+      "id": "verified_text",
+      "label": "Verified Text",
+      "default": "Verified customer"
+    },
+    {
+      "type": "header",
+      "content": "Author Info Container"
+    },
+    {
+      "type": "color",
+      "id": "author_info_bg_color",
+      "label": "Author Info Background Color",
+      "default": "#f8f8f8"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_author_info_border",
+      "label": "Enable Author Info Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "author_info_border_width",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 1,
+      "label": "Author Info Border Width (px)"
+    },
+    {
+      "type": "select",
+      "id": "author_info_border_style",
+      "label": "Author Info Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "author_info_border_color",
+      "label": "Author Info Border Color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "range",
+      "id": "author_info_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 50,
+      "label": "Author Info Border Radius (px)"
+    },
+    {
+      "type": "header",
+      "content": "Purchase Date Settings"
+    },
+    {
+      "type": "text",
+      "id": "purchase_date_prefix",
+      "label": "Purchase Date Prefix",
+      "default": "Purchased on",
+      "info": "Text that appears before the purchase date"
+    },
+    {
+      "type": "color",
+      "id": "purchase_date_color",
+      "label": "Purchase Date Text Color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "purchase_date_icon_color",
+      "label": "Purchase Date Icon Color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show Navigation Arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show Dots",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "nav_button_bg",
+      "label": "Navigation Button Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "nav_button_color",
+      "label": "Navigation Button Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "nav_button_border",
+      "label": "Navigation Button Border",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "range",
+      "id": "nav_button_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 25,
+      "label": "Navigation Button Radius (px)"
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Dot Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Section Navigation"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anchor ID",
+      "info": "Add a unique ID for this section to enable direct linking (e.g., 'testimonials'). Use only letters, numbers, and hyphens.",
+      "placeholder": "my-section-id"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_stars",
+          "label": "Show Stars",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Testimonial Title",
+          "default": "Outstanding Quality",
+          "info": "Add a title for this testimonial (e.g., 'Great Product', 'Excellent Service')"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Testimonial Content",
+          "default": "<p>I've been shopping with this brand for over a year now and the quality never disappoints. Every purchase has exceeded my expectations and their customer service is exceptional.</p>"
+        },
+        {
+          "type": "text",
+          "id": "author_name",
+          "label": "Author Name",
+          "default": "Sarah M."
+        },
+        {
+          "type": "image_picker",
+          "id": "avatar_image",
+          "label": "Avatar Image",
+          "info": "Optional. If left empty, will show first letter of author name."
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5,
+          "label": "Star Rating"
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verified Customer",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_purchase_date",
+          "label": "Show Purchase Date",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "purchase_date",
+          "label": "Purchase Date",
+          "default": "March 14th, 2024",
+          "info": "Enter the purchase date (e.g., 'March 14th, 2024' or '2 weeks ago')"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [
+        {
+          "type": "testimonial"
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "title": "Worth It!",
+            "content": "<p>Okay, so I thought about the price, but this jacket is 100% worth every penny. The way it's made is top-notch, and it's surprisingly warm without being super bulky. A total keeper.</p>",
+            "author_name": "Jessica M."
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "title": "Must-Have",
+            "content": "<p>Your basic tees are anything but basic. They're crazy soft, really well-made, and they wash up perfectly every time. I've bought them in every color, seriously!</p>",
+            "author_name": "Liam B."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

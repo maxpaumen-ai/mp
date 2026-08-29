@@ -1,0 +1,1226 @@
+{% comment %}
+  VANHOUTEN LIVING
+  Related Products — Hybrid Carousel
+
+  1. Shopify recommendations
+  2. Fallback collection
+  3. Current product excluded
+  4. Duplicate products excluded
+{% endcomment %}
+
+<section
+  id="VHLRelated-{{ section.id }}"
+  class="vhl-related"
+  style="
+    --vhl-bg: {{ section.settings.background }};
+    --vhl-pt: {{ section.settings.padding_top }}px;
+    --vhl-pb: {{ section.settings.padding_bottom }}px;
+  "
+>
+
+  <div
+    class="vhl-related__loader"
+    data-vhl-related
+    data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit=10&intent=related"
+  >
+
+    {% if recommendations.performed? %}
+
+      {% liquid
+        assign max_products = section.settings.products_to_show
+        assign fallback_collection = section.settings.fallback_collection
+        assign shown = 0
+        assign used_ids = '|'
+      %}
+
+      <div class="vhl-related__inner">
+
+        <!-- HEADER -->
+        <div class="vhl-related__header">
+
+          <div class="vhl-related__heading-wrap">
+
+            {% if section.settings.eyebrow != blank %}
+              <div class="vhl-related__eyebrow">
+                {{ section.settings.eyebrow }}
+              </div>
+            {% endif %}
+
+            <h2 class="vhl-related__heading">
+              {{ section.settings.heading }}
+            </h2>
+
+          </div>
+
+
+          <div class="vhl-related__arrows">
+
+            <button
+              type="button"
+              class="vhl-related__arrow vhl-related__prev"
+              aria-label="Vorige producten"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M15 18l-6-6 6-6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="vhl-related__arrow vhl-related__next"
+              aria-label="Volgende producten"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M9 6l6 6-6 6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- PRODUCT TRACK -->
+        <div class="vhl-related__track">
+
+          {% comment %}
+            ========================================
+            1. SHOPIFY RECOMMENDATIONS
+            ========================================
+          {% endcomment %}
+
+          {% for related_product in recommendations.products %}
+
+            {% if shown < max_products %}
+
+              {% capture product_key %}
+                |{{ related_product.id }}|
+              {% endcapture %}
+
+              {% unless used_ids contains product_key %}
+
+                {% unless related_product.id == product.id %}
+
+                  <article
+                    class="vhl-related__card"
+                    data-product-id="{{ related_product.id }}"
+                  >
+
+                    <a
+                      href="{{ related_product.url }}"
+                      class="vhl-related__image-link"
+                    >
+
+                      <div class="vhl-related__image-box">
+
+                        {% if related_product.featured_image != blank %}
+
+                          {{
+                            related_product.featured_image
+                            | image_url: width: 1000
+                            | image_tag:
+                              loading: 'lazy',
+                              widths: '360, 540, 720, 900, 1000',
+                              sizes: '(min-width: 990px) 25vw, 76vw',
+                              class: 'vhl-related__image',
+                              alt: related_product.title
+                          }}
+
+                        {% else %}
+
+                          {{ 'product-1'
+                            | placeholder_svg_tag:
+                            'vhl-related__placeholder'
+                          }}
+
+                        {% endif %}
+
+                      </div>
+
+                    </a>
+
+
+                    <div class="vhl-related__info">
+
+                      <a
+                        href="{{ related_product.url }}"
+                        class="vhl-related__title"
+                      >
+                        {{ related_product.title }}
+                      </a>
+
+                      <div class="vhl-related__price">
+
+                        {% if related_product.compare_at_price_max > related_product.price %}
+
+                          <span class="vhl-related__sale">
+                            {{ related_product.price | money }}
+                          </span>
+
+                          <span class="vhl-related__compare">
+                            {{ related_product.compare_at_price_max | money }}
+                          </span>
+
+                        {% elsif related_product.price_varies %}
+
+                          Vanaf {{ related_product.price_min | money }}
+
+                        {% else %}
+
+                          {{ related_product.price | money }}
+
+                        {% endif %}
+
+                      </div>
+
+                    </div>
+
+                  </article>
+
+
+                  {% assign shown = shown | plus: 1 %}
+
+                  {% capture used_ids %}
+                    {{ used_ids }}{{ related_product.id }}|
+                  {% endcapture %}
+
+                {% endunless %}
+
+              {% endunless %}
+
+            {% endif %}
+
+          {% endfor %}
+
+
+
+          {% comment %}
+            ========================================
+            2. FALLBACK COLLECTION
+            ========================================
+          {% endcomment %}
+
+          {% if shown < max_products and fallback_collection != blank %}
+
+            {% for fallback_product in fallback_collection.products limit: 20 %}
+
+              {% if shown < max_products %}
+
+                {% capture fallback_key %}
+                  |{{ fallback_product.id }}|
+                {% endcapture %}
+
+                {% unless used_ids contains fallback_key %}
+
+                  {% unless fallback_product.id == product.id %}
+
+                    <article
+                      class="vhl-related__card"
+                      data-product-id="{{ fallback_product.id }}"
+                    >
+
+                      <a
+                        href="{{ fallback_product.url }}"
+                        class="vhl-related__image-link"
+                      >
+
+                        <div class="vhl-related__image-box">
+
+                          {% if fallback_product.featured_image != blank %}
+
+                            {{
+                              fallback_product.featured_image
+                              | image_url: width: 1000
+                              | image_tag:
+                                loading: 'lazy',
+                                widths: '360, 540, 720, 900, 1000',
+                                sizes: '(min-width: 990px) 25vw, 76vw',
+                                class: 'vhl-related__image',
+                                alt: fallback_product.title
+                            }}
+
+                          {% else %}
+
+                            {{ 'product-1'
+                              | placeholder_svg_tag:
+                              'vhl-related__placeholder'
+                            }}
+
+                          {% endif %}
+
+                        </div>
+
+                      </a>
+
+
+                      <div class="vhl-related__info">
+
+                        <a
+                          href="{{ fallback_product.url }}"
+                          class="vhl-related__title"
+                        >
+                          {{ fallback_product.title }}
+                        </a>
+
+                        <div class="vhl-related__price">
+
+                          {% if fallback_product.compare_at_price_max > fallback_product.price %}
+
+                            <span class="vhl-related__sale">
+                              {{ fallback_product.price | money }}
+                            </span>
+
+                            <span class="vhl-related__compare">
+                              {{ fallback_product.compare_at_price_max | money }}
+                            </span>
+
+                          {% elsif fallback_product.price_varies %}
+
+                            Vanaf {{ fallback_product.price_min | money }}
+
+                          {% else %}
+
+                            {{ fallback_product.price | money }}
+
+                          {% endif %}
+
+                        </div>
+
+                      </div>
+
+                    </article>
+
+
+                    {% assign shown = shown | plus: 1 %}
+
+                    {% capture used_ids %}
+                      {{ used_ids }}{{ fallback_product.id }}|
+                    {% endcapture %}
+
+                  {% endunless %}
+
+                {% endunless %}
+
+              {% endif %}
+
+            {% endfor %}
+
+          {% endif %}
+
+        </div>
+
+
+        <!-- PROGRESS BAR -->
+        <div class="vhl-related__progress">
+          <div class="vhl-related__progress-bar"></div>
+        </div>
+
+      </div>
+
+    {% endif %}
+
+  </div>
+
+</section>
+
+
+<style>
+
+/* =========================================
+   SECTION
+========================================= */
+
+#VHLRelated-{{ section.id }} {
+  width: 100%;
+  overflow: hidden;
+
+  background: var(--vhl-bg);
+
+  padding-top: var(--vhl-pt);
+  padding-bottom: var(--vhl-pb);
+}
+
+#VHLRelated-{{ section.id }} * {
+  box-sizing: border-box;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__inner {
+  width: min(100% - 64px, 1480px);
+  margin: 0 auto;
+}
+
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+#VHLRelated-{{ section.id }} .vhl-related__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 32px;
+
+  margin-bottom: 38px;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__eyebrow {
+  margin-bottom: 10px;
+
+  color: #77736f;
+
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.3;
+
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__heading {
+  margin: 0;
+
+  color: #383735;
+
+  font-size: clamp(30px, 2.7vw, 42px);
+  font-weight: 600;
+  line-height: 1.06;
+
+  letter-spacing: -.035em;
+}
+
+
+
+/* =========================================
+   ARROWS
+========================================= */
+
+#VHLRelated-{{ section.id }} .vhl-related__arrows {
+  display: flex;
+  gap: 8px;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__arrow {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #d8d6d2;
+  border-radius: 50%;
+
+  background: #ffffff;
+  color: #393836;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    opacity .2s ease;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__arrow:hover:not(:disabled) {
+  background: #f5f4f2;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__arrow svg {
+  width: 17px;
+  height: 17px;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__arrow:disabled {
+  opacity: .25;
+  cursor: default;
+}
+
+
+
+/* =========================================
+   SLIDER
+========================================= */
+
+#VHLRelated-{{ section.id }} .vhl-related__track {
+  display: flex;
+
+  width: 100%;
+
+  gap: 28px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+
+  scrollbar-width: none;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__track::-webkit-scrollbar {
+  display: none;
+}
+
+
+
+/* =========================================
+   PRODUCT CARD
+========================================= */
+
+#VHLRelated-{{ section.id }} .vhl-related__card {
+  flex: 0 0 calc((100% - 84px) / 4);
+
+  min-width: 0;
+
+  scroll-snap-align: start;
+}
+
+
+
+/* =========================================
+   PRODUCT IMAGE
+========================================= */
+
+#VHLRelated-{{ section.id }} .vhl-related__image-link {
+  display: block;
+
+  color: inherit;
+  text-decoration: none;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__image-box {
+  width: 100%;
+
+  aspect-ratio: 1 / 1;
+
+  overflow: hidden;
+
+  background: #f6f6f4;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  transform: scale(.95);
+
+  transition: transform .45s ease;
+}
+
+
+#VHLRelated-{{ section.id }}
+.vhl-related__card:hover
+.vhl-related__image {
+
+  transform: scale(.985);
+
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+
+
+/* =========================================
+   PRODUCT INFO
+========================================= */
+
+#VHLRelated-{{ section.id }} .vhl-related__info {
+  padding-top: 15px;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__title {
+  display: block;
+
+  color: #3b3a38;
+
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+
+  text-decoration: none;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__title:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__price {
+  margin-top: 5px;
+
+  color: #575552;
+
+  font-size: 12px;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__sale {
+  margin-right: 6px;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__compare {
+  opacity: .5;
+
+  text-decoration: line-through;
+}
+
+
+
+/* =========================================
+   PROGRESS
+========================================= */
+
+#VHLRelated-{{ section.id }} .vhl-related__progress {
+  position: relative;
+
+  width: 100%;
+  height: 2px;
+
+  margin-top: 45px;
+
+  overflow: hidden;
+
+  background: #e5e3df;
+}
+
+
+#VHLRelated-{{ section.id }} .vhl-related__progress-bar {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  height: 2px;
+
+  background: #363533;
+
+  transform: translateX(0);
+}
+
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media screen and (max-width: 989px) {
+
+  #VHLRelated-{{ section.id }} .vhl-related__inner {
+    width: calc(100% - 40px);
+  }
+
+
+  #VHLRelated-{{ section.id }} .vhl-related__track {
+    gap: 18px;
+  }
+
+
+  #VHLRelated-{{ section.id }} .vhl-related__card {
+    flex: 0 0 calc((100% - 18px) / 2);
+  }
+
+}
+
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media screen and (max-width: 749px) {
+
+  #VHLRelated-{{ section.id }} {
+    padding-top: 60px;
+    padding-bottom: 64px;
+  }
+
+
+  #VHLRelated-{{ section.id }} .vhl-related__inner {
+    width: 100%;
+  }
+
+
+  #VHLRelated-{{ section.id }} .vhl-related__header {
+    padding: 0 20px;
+
+    margin-bottom: 26px;
+  }
+
+
+  #VHLRelated-{{ section.id }} .vhl-related__heading {
+    font-size: 29px;
+  }
+
+
+  #VHLRelated-{{ section.id }} .vhl-related__arrows {
+    display: none;
+  }
+
+
+  #VHLRelated-{{ section.id }} .vhl-related__track {
+    gap: 12px;
+
+    padding-left: 20px;
+    padding-right: 20px;
+
+    scroll-padding-left: 20px;
+  }
+
+
+  #VHLRelated-{{ section.id }} .vhl-related__card {
+    flex: 0 0 76%;
+  }
+
+
+  #VHLRelated-{{ section.id }} .vhl-related__progress {
+    width: calc(100% - 40px);
+
+    margin:
+      34px
+      20px
+      0;
+  }
+
+}
+
+</style>
+
+
+<script>
+
+(function () {
+
+  var sectionId =
+    'VHLRelated-{{ section.id }}';
+
+
+  /* =========================================
+     CAROUSEL
+  ========================================= */
+
+  function initCarousel(section) {
+
+    if (!section) return;
+
+
+    var track =
+      section.querySelector(
+        '.vhl-related__track'
+      );
+
+
+    var prev =
+      section.querySelector(
+        '.vhl-related__prev'
+      );
+
+
+    var next =
+      section.querySelector(
+        '.vhl-related__next'
+      );
+
+
+    var progress =
+      section.querySelector(
+        '.vhl-related__progress-bar'
+      );
+
+
+    if (!track) return;
+
+
+
+    function getCardDistance() {
+
+      var card =
+        track.querySelector(
+          '.vhl-related__card'
+        );
+
+
+      if (!card) return 300;
+
+
+      var styles =
+        window.getComputedStyle(track);
+
+
+      var gap =
+        parseFloat(styles.gap) || 0;
+
+
+      return (
+        card.getBoundingClientRect().width
+        + gap
+      );
+
+    }
+
+
+
+    function updateSlider() {
+
+      var maxScroll =
+        track.scrollWidth -
+        track.clientWidth;
+
+
+      var current =
+        track.scrollLeft;
+
+
+
+      /* BUTTON STATES */
+
+      if (prev) {
+
+        prev.disabled =
+          current <= 2;
+
+      }
+
+
+      if (next) {
+
+        next.disabled =
+          maxScroll <= 2 ||
+          current >= maxScroll - 2;
+
+      }
+
+
+
+      /* PROGRESS BAR */
+
+      if (progress) {
+
+        if (maxScroll <= 0) {
+
+          progress.style.width =
+            '100%';
+
+
+          progress.style.transform =
+            'translateX(0)';
+
+
+          return;
+
+        }
+
+
+        var visibleRatio =
+          track.clientWidth /
+          track.scrollWidth;
+
+
+        var indicatorWidth =
+          Math.max(
+            visibleRatio * 100,
+            15
+          );
+
+
+        var availableSpace =
+          100 - indicatorWidth;
+
+
+        var scrollPercentage =
+          current / maxScroll;
+
+
+        progress.style.width =
+          indicatorWidth + '%';
+
+
+        progress.style.transform =
+          'translateX(' +
+          (
+            (availableSpace / indicatorWidth)
+            * scrollPercentage
+            * 100
+          ) +
+          '%)';
+
+      }
+
+    }
+
+
+
+    /* PREVIOUS */
+
+    if (
+      prev &&
+      !prev.dataset.vhlBound
+    ) {
+
+      prev.dataset.vhlBound =
+        'true';
+
+
+      prev.addEventListener(
+        'click',
+        function () {
+
+          track.scrollBy({
+            left: -getCardDistance(),
+            behavior: 'smooth'
+          });
+
+        }
+      );
+
+    }
+
+
+
+    /* NEXT */
+
+    if (
+      next &&
+      !next.dataset.vhlBound
+    ) {
+
+      next.dataset.vhlBound =
+        'true';
+
+
+      next.addEventListener(
+        'click',
+        function () {
+
+          track.scrollBy({
+            left: getCardDistance(),
+            behavior: 'smooth'
+          });
+
+        }
+      );
+
+    }
+
+
+
+    /* TRACK SCROLL */
+
+    if (!track.dataset.vhlBound) {
+
+      track.dataset.vhlBound =
+        'true';
+
+
+      track.addEventListener(
+        'scroll',
+        updateSlider,
+        { passive: true }
+      );
+
+    }
+
+
+
+    updateSlider();
+
+
+    window.setTimeout(
+      updateSlider,
+      100
+    );
+
+  }
+
+
+
+  /* =========================================
+     LOAD SHOPIFY RECOMMENDATIONS
+  ========================================= */
+
+  function loadRecommendations() {
+
+    var section =
+      document.getElementById(
+        sectionId
+      );
+
+
+    if (!section) return;
+
+
+    var loader =
+      section.querySelector(
+        '[data-vhl-related]'
+      );
+
+
+    if (!loader) return;
+
+
+
+    /*
+      Wanneer Shopify recommendations al
+      heeft gerenderd, alleen carousel starten.
+    */
+
+    if (
+      loader.querySelector(
+        '.vhl-related__track'
+      )
+    ) {
+
+      initCarousel(section);
+
+      return;
+
+    }
+
+
+
+    var url =
+      loader.getAttribute(
+        'data-url'
+      );
+
+
+    if (!url) return;
+
+
+
+    fetch(url)
+
+      .then(function (response) {
+
+        if (!response.ok) {
+
+          throw new Error(
+            'Recommendations request failed'
+          );
+
+        }
+
+
+        return response.text();
+
+      })
+
+
+      .then(function (text) {
+
+        var parser =
+          new DOMParser();
+
+
+        var html =
+          parser.parseFromString(
+            text,
+            'text/html'
+          );
+
+
+        var incoming =
+          html.querySelector(
+            '#VHLRelated-{{ section.id }} [data-vhl-related]'
+          );
+
+
+        if (!incoming) return;
+
+
+
+        var incomingTrack =
+          incoming.querySelector(
+            '.vhl-related__track'
+          );
+
+
+        if (!incomingTrack) return;
+
+
+
+        loader.innerHTML =
+          incoming.innerHTML;
+
+
+
+        initCarousel(section);
+
+      })
+
+
+      .catch(function (error) {
+
+        console.warn(
+          'VHL Related Products:',
+          error
+        );
+
+      });
+
+  }
+
+
+
+  /* =========================================
+     START
+  ========================================= */
+
+  if (
+    document.readyState ===
+    'loading'
+  ) {
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      loadRecommendations
+    );
+
+  } else {
+
+    loadRecommendations();
+
+  }
+
+
+
+  /*
+    Shopify theme editor ondersteuning
+  */
+
+  document.addEventListener(
+    'shopify:section:load',
+    function (event) {
+
+      if (
+        event.target &&
+        event.target.id === sectionId
+      ) {
+
+        loadRecommendations();
+
+      }
+
+    }
+  );
+
+
+})();
+
+</script>
+
+
+{% schema %}
+{
+  "name": "VHL Related Products",
+
+  "settings": [
+
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "VANHOUTEN LIVING"
+    },
+
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titel",
+      "default": "Misschien ook iets voor jou."
+    },
+
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Aantal producten",
+      "min": 4,
+      "max": 10,
+      "step": 1,
+      "default": 8
+    },
+
+    {
+      "type": "collection",
+      "id": "fallback_collection",
+      "label": "Fallback collectie"
+    },
+
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Achtergrond",
+      "default": "#FFFFFF"
+    },
+
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Bovenruimte",
+      "min": 40,
+      "max": 150,
+      "step": 2,
+      "unit": "px",
+      "default": 94
+    },
+
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Onderruimte",
+      "min": 40,
+      "max": 150,
+      "step": 2,
+      "unit": "px",
+      "default": 104
+    }
+
+  ],
+
+  "presets": [
+    {
+      "name": "VHL Related Products"
+    }
+  ]
+}
+{% endschema %}

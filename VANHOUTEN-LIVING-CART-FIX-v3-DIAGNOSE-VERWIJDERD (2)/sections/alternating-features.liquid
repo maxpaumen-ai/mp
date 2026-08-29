@@ -1,0 +1,647 @@
+{% comment %}
+  Alternating Features Section
+  Wrapper section that calls the reusable component
+{% endcomment %}
+
+{% render 'component-alternating-features', section: section %}
+
+{% schema %}
+{
+  "name": "Alternating Features",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "aside"],
+    "templates": ["password"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Theme Integration"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "Apply the global theme colors in inverse manner (accent color as background)"
+    },
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Our Product"
+    },
+    {
+      "type": "text",
+      "id": "title_accent",
+      "label": "Section Title Accent",
+      "default": "Is Made For You"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "info": "Optional text displayed below the section title"
+    },
+    {
+      "type": "image_picker",
+      "id": "main_image",
+      "label": "Main Image"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_main_image",
+      "label": "Hide Main Image",
+      "default": false,
+      "info": "When enabled, the main image will be hidden and features will take full width"
+    },
+    {
+      "type": "checkbox",
+      "id": "side_heading_layout",
+      "label": "Side Heading Layout",
+      "default": false,
+      "info": "When Hide Main Image is on, places the section heading in a column beside the features instead of above them"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment_mobile",
+      "label": "Heading Alignment (Mobile)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment_desktop",
+      "label": "Heading Alignment (Desktop)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Section Border Radius",
+      "default": 0,
+      "info": "Adds rounded corners to the entire section"
+    },
+    {
+      "type": "range",
+      "id": "feature_spacing",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Spacing between features",
+      "default": 30,
+      "info": "Controls the vertical gap between each feature item"
+    },
+    {
+      "type": "range",
+      "id": "divider_spacing_top",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Divider Top Spacing",
+      "default": 20,
+      "info": "Space above the divider line"
+    },
+    {
+      "type": "range",
+      "id": "divider_spacing_bottom",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Divider Bottom Spacing",
+      "default": 20,
+      "info": "Space below the divider line"
+    },
+    {
+      "type": "header",
+      "content": "Colors & Background"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient",
+      "label": "Use Gradient Background",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "gradient_start_color",
+      "label": "Gradient Start Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "color",
+      "id": "gradient_end_color",
+      "label": "Gradient End Color",
+      "default": "#990000"
+    },
+    {
+      "type": "range",
+      "id": "gradient_angle",
+      "min": 0,
+      "max": 360,
+      "step": 10,
+      "unit": "deg",
+      "label": "Gradient Angle",
+      "default": 90
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Section Heading Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading Color",
+      "default": "#DDDDDD"
+    },
+    {
+      "type": "color",
+      "id": "feature_title_color",
+      "label": "Feature Title Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description Color",
+      "default": "#DDDDDD"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider Color",
+      "default": "rgba(255,255,255,0.2)"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#FFFFFF",
+      "info": "Used for accent text and highlights"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Section Accent Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text"
+    },
+    {
+      "type": "header",
+      "content": "Icon Settings"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "min": 40,
+      "max": 120,
+      "step": 10,
+      "unit": "px",
+      "label": "Icon Container Size",
+      "default": 70,
+      "info": "Size of the circular icon container"
+    },
+    {
+      "type": "range",
+      "id": "icon_image_size",
+      "min": 20,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Icon Image Size",
+      "default": 35,
+      "info": "Size of the icon image within the container"
+    },
+    {
+      "type": "checkbox",
+      "id": "icon_background_enabled",
+      "label": "Enable Icon Background",
+      "default": true,
+      "info": "When disabled, icons will appear without the circular background"
+    },
+    {
+      "type": "color",
+      "id": "icon_background_color",
+      "label": "Icon Background Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon Color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "icon_object_fit",
+      "label": "Icon Image Fit",
+      "options": [
+        {
+          "value": "contain",
+          "label": "Contain (fit inside)"
+        },
+        {
+          "value": "cover",
+          "label": "Cover (fill container)"
+        }
+      ],
+      "default": "contain",
+      "info": "How the icon image fits within its container"
+    },
+    {
+      "type": "range",
+      "id": "icon_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "label": "Icon Container Border Radius",
+      "default": 50,
+      "info": "Corner roundness of icon container (50% = circle, 0% = square)"
+    },
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Image Border Radius",
+      "default": 8
+    },
+    {
+      "type": "select",
+      "id": "feature_image_object_fit",
+      "label": "Feature Image Fit",
+      "options": [
+        {
+          "value": "contain",
+          "label": "Contain (fit inside)"
+        },
+        {
+          "value": "cover",
+          "label": "Cover (fill container)"
+        }
+      ],
+      "default": "contain",
+      "info": "How the Feature Image fits within its container (does not affect icon images)"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "checkbox",
+      "id": "bold_feature_title",
+      "label": "Bold Feature Title",
+      "default": false,
+      "info": "When enabled, feature titles use bold (700) font weight"
+    },
+    {
+      "type": "range",
+      "id": "section_title_size_desktop",
+      "min": 20,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Heading Size - Desktop",
+      "default": 34,
+      "info": "Font size for the section heading on desktop (768px and above)"
+    },
+    {
+      "type": "range",
+      "id": "section_title_size_mobile",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Heading Size - Mobile",
+      "default": 28,
+      "info": "Font size for the section heading on mobile (767px and below)"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height_desktop",
+      "min": 0.8,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "Heading Line Height (Desktop)",
+      "default": 1.2
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height_mobile",
+      "min": 0.8,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "Heading Line Height (Mobile)",
+      "default": 1.2
+    },
+    {
+      "type": "range",
+      "id": "subheading_line_height_desktop",
+      "min": 0.8,
+      "max": 2.5,
+      "step": 0.1,
+      "label": "Subheading Line Height (Desktop)",
+      "default": 1.5
+    },
+    {
+      "type": "range",
+      "id": "subheading_line_height_mobile",
+      "min": 0.8,
+      "max": 2.5,
+      "step": 0.1,
+      "label": "Subheading Line Height (Mobile)",
+      "default": 1.5
+    },
+    {
+      "type": "range",
+      "id": "feature_title_size_mobile",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Feature Title Font Size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "feature_title_size_desktop",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Feature Title Font Size (Desktop)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "description_size_mobile",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Font Size (Mobile)",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "description_size_desktop",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Font Size (Desktop)",
+      "default": 14
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Feature Title"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Describe your feature in detail and explain how it benefits your customers. This is a great place to highlight what makes your product different."
+        },
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Feature Icon",
+          "info": "Small icon image that will be displayed in a circular container"
+        },
+        {
+          "type": "image_picker",
+          "id": "feature_image",
+          "label": "Feature Image",
+          "info": "Alternative to icon - displays a larger image instead of a small icon (icon will be used if both are provided)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Alternating Features",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "title": "Quality First",
+            "description": "We prioritize quality in everything we do. Our products are built to last and exceed industry standards."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "title": "Customer Support",
+            "description": "Our dedicated support team is available to help you with any questions or concerns you may have."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "title": "Easy to Use",
+            "description": "Designed with simplicity in mind, our products are intuitive and user-friendly for everyone."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "title": "Fast Delivery",
+            "description": "We ship quickly and efficiently to ensure you receive your order as soon as possible."
+          }
+        }
+      ],
+      "settings": {
+        "background_color": "#EF4A65",
+        "title": "How Our Product",
+        "title_accent": "Helps You",
+        "heading_color": "#FFFFFF",
+        "feature_title_color": "#FFFFFF",
+        "description_color": "#FFFFFF",
+        "accent_color": "#000000"
+      }
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,418 @@
+{% comment %}
+  VanHouten Living — vertrouwen/USP-balk
+  Bestand: sections/vhl-trust-bar.liquid
+{% endcomment %}
+
+<section
+  id="VHLTrustBar-{{ section.id }}"
+  class="vhl-trust-bar"
+  style="
+    --vhl-trust-bg: {{ section.settings.background_color }};
+    --vhl-trust-text: {{ section.settings.text_color }};
+    --vhl-trust-muted: {{ section.settings.secondary_text_color }};
+    --vhl-trust-border: {{ section.settings.border_color }};
+    --vhl-trust-icon: {{ section.settings.icon_color }};
+    --vhl-trust-padding-top: {{ section.settings.padding_top }}px;
+    --vhl-trust-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="vhl-trust-bar__inner">
+    <div class="vhl-trust-bar__list">
+      {%- for block in section.blocks -%}
+        <div class="vhl-trust-bar__item" {{ block.shopify_attributes }}>
+          <div class="vhl-trust-bar__icon" aria-hidden="true">
+            {%- case block.settings.icon -%}
+              {%- when 'truck' -%}
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M3 5.5h11v11H3zM14 9h3.6L21 12.5v4H14z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                  <circle cx="7" cy="18" r="1.7" stroke="currentColor" stroke-width="1.5"/>
+                  <circle cx="18" cy="18" r="1.7" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+              {%- when 'return' -%}
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M8 7H4v-4M4.5 7.5A8 8 0 1 1 4 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {%- when 'shield' -%}
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 3.5 19 6v5.2c0 4.4-2.9 7.7-7 9.3-4.1-1.6-7-4.9-7-9.3V6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                  <path d="m8.8 12 2.1 2.1 4.4-4.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {%- when 'star' -%}
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>
+              {%- when 'lock' -%}
+                <svg viewBox="0 0 24 24" fill="none">
+                  <rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            {%- endcase -%}
+          </div>
+
+          <div class="vhl-trust-bar__content">
+            {%- if block.settings.heading != blank -%}
+              <p class="vhl-trust-bar__heading">{{ block.settings.heading | escape }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.text != blank -%}
+              <p class="vhl-trust-bar__text">{{ block.settings.text | escape }}</p>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  #VHLTrustBar-{{ section.id }} {
+    width: 100%;
+    background: var(--vhl-trust-bg);
+    color: var(--vhl-trust-text);
+    border-top: 1px solid var(--vhl-trust-border);
+    border-bottom: 1px solid var(--vhl-trust-border);
+  }
+
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__inner {
+    width: min(100%, {{ section.settings.max_width }}px);
+    margin: 0 auto;
+    padding: var(--vhl-trust-padding-top) 24px var(--vhl-trust-padding-bottom);
+  }
+
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__list {
+    display: grid;
+    grid-template-columns: repeat({{ section.blocks.size }}, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-width: 0;
+    padding: 8px 28px;
+  }
+
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__item + .vhl-trust-bar__item {
+    border-left: 1px solid var(--vhl-trust-border);
+  }
+
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__icon {
+    flex: 0 0 auto;
+    width: {{ section.settings.icon_size }}px;
+    height: {{ section.settings.icon_size }}px;
+    color: var(--vhl-trust-icon);
+  }
+
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__content {
+    min-width: 0;
+  }
+
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__heading,
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__text {
+    margin: 0;
+  }
+
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__heading {
+    color: var(--vhl-trust-text);
+    font-size: {{ section.settings.heading_size }}px;
+    font-weight: {{ section.settings.heading_weight }};
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+  }
+
+  #VHLTrustBar-{{ section.id }} .vhl-trust-bar__text {
+    margin-top: 3px;
+    color: var(--vhl-trust-muted);
+    font-size: {{ section.settings.text_size }}px;
+    line-height: 1.35;
+  }
+
+  @media screen and (max-width: 989px) {
+    #VHLTrustBar-{{ section.id }} .vhl-trust-bar__inner {
+      padding-right: 16px;
+      padding-left: 16px;
+    }
+
+    #VHLTrustBar-{{ section.id }} .vhl-trust-bar__list {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #VHLTrustBar-{{ section.id }} .vhl-trust-bar__list::-webkit-scrollbar {
+      display: none;
+    }
+
+    #VHLTrustBar-{{ section.id }} .vhl-trust-bar__item {
+      flex: 0 0 82%;
+      justify-content: flex-start;
+      padding: 8px 20px;
+      scroll-snap-align: center;
+    }
+
+    #VHLTrustBar-{{ section.id }} .vhl-trust-bar__item + .vhl-trust-bar__item {
+      border-left: 1px solid var(--vhl-trust-border);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    #VHLTrustBar-{{ section.id }} .vhl-trust-bar__inner {
+      padding-top: {{ section.settings.mobile_padding_top }}px;
+      padding-bottom: {{ section.settings.mobile_padding_bottom }}px;
+    }
+
+    #VHLTrustBar-{{ section.id }} .vhl-trust-bar__item {
+      flex-basis: 88%;
+      gap: 12px;
+      padding-right: 16px;
+      padding-left: 16px;
+    }
+
+    #VHLTrustBar-{{ section.id }} .vhl-trust-bar__heading {
+      font-size: {{ section.settings.mobile_heading_size }}px;
+    }
+
+    #VHLTrustBar-{{ section.id }} .vhl-trust-bar__text {
+      font-size: {{ section.settings.mobile_text_size }}px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "VHL voordelen",
+  "tag": "section",
+  "class": "vhl-trust-bar-section",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Kleuren"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Achtergrondkleur",
+      "default": "#F7F4EF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Titelkleur",
+      "default": "#242321"
+    },
+    {
+      "type": "color",
+      "id": "secondary_text_color",
+      "label": "Subtekstkleur",
+      "default": "#6E6962"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icoonkleur",
+      "default": "#242321"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Lijnkleur",
+      "default": "#DED8D0"
+    },
+    {
+      "type": "header",
+      "content": "Typografie"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Titelgrootte desktop",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "mobile_heading_size",
+      "label": "Titelgrootte mobiel",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Titeldikte",
+      "default": "500",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi bold" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Subtekstgrootte desktop",
+      "min": 11,
+      "max": 17,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "mobile_text_size",
+      "label": "Subtekstgrootte mobiel",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icoongrootte",
+      "min": 18,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "default": 26
+    },
+    {
+      "type": "header",
+      "content": "Afmetingen"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximale breedte",
+      "min": 1000,
+      "max": 1800,
+      "step": 100,
+      "unit": "px",
+      "default": 1400
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Ruimte boven desktop",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Ruimte onder desktop",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_top",
+      "label": "Ruimte boven mobiel",
+      "min": 8,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_bottom",
+      "label": "Ruimte onder mobiel",
+      "min": 8,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Voordeel",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icoon",
+          "default": "truck",
+          "options": [
+            { "value": "truck", "label": "Verzending" },
+            { "value": "return", "label": "Retour" },
+            { "value": "shield", "label": "Garantie" },
+            { "value": "lock", "label": "Veilig betalen" },
+            { "value": "star", "label": "Kwaliteit" }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Titel",
+          "default": "Gratis verzending"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Subtekst",
+          "default": "Vanaf €50"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "VHL voordelen",
+      "blocks": [
+        {
+          "type": "benefit",
+          "settings": {
+            "icon": "truck",
+            "heading": "Gratis verzending",
+            "text": "Vanaf €50"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "icon": "return",
+            "heading": "30 dagen retourneren",
+            "text": "Zorgeloos en eenvoudig"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "icon": "lock",
+            "heading": "Veilig betalen",
+            "text": "Met iDEAL en vertrouwde methodes"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

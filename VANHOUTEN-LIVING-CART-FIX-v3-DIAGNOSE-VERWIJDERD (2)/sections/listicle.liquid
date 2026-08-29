@@ -1,0 +1,362 @@
+{%- liquid
+  assign section_id = section.id
+-%}
+
+<section class="section-{{ section_id }} listicle-section{% if section.settings.disable_scroll_animation %} scroll-trigger--cancel{% endif %}" data-section-id="{{ section_id }}"{% if section.settings.disable_scroll_animation %} data-no-animation="true"{% endif %}>
+      <div class="container">
+    <div class="listicle-content" style="gap: {{ section.settings.gap }}px; display: flex; flex-direction: column;">
+      {% content_for 'blocks' %}
+                        </div>
+                      </div>
+</section>
+                  
+                  <style>
+  {% if section.settings.use_custom_font %}
+    {{ section.settings.section_font_family | font_face: font_display: 'swap' }}
+  {% endif %}
+
+  .section-{{ section_id }} {
+    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.section_background_color }}{% endif %};
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.section_text_color }}{% endif %};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    {% if section.settings.use_custom_font %}
+    font-family: {{ section.settings.section_font_family.family }}, {{ section.settings.section_font_family.fallback_families }};
+    {% endif %}
+  }
+  
+  /* Ensure visibility when scroll animations are disabled */
+  {% if section.settings.disable_scroll_animation %}
+  .section-{{ section_id }},
+  .section-{{ section_id }}.scroll-trigger,
+  .section-{{ section_id }}.scroll-trigger.animate--fade-in,
+  .section-{{ section_id }}.scroll-trigger.animate--fade-up,
+  .section-{{ section_id }}.scroll-trigger.animate--slide-in,
+  .section-{{ section_id }}.scroll-trigger--offscreen {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    visibility: visible !important;
+  }
+  {% endif %}
+  
+  
+  {% if section.settings.use_custom_font %}
+  .section-{{ section_id }},
+  .section-{{ section_id }} *,
+  .section-{{ section_id }} h1,
+  .section-{{ section_id }} h2,
+  .section-{{ section_id }} h3,
+  .section-{{ section_id }} h4,
+  .section-{{ section_id }} h5,
+  .section-{{ section_id }} h6,
+  .section-{{ section_id }} p,
+  .section-{{ section_id }} span,
+  .section-{{ section_id }} a,
+  .section-{{ section_id }} .listicle-title {
+    font-family: {{ section.settings.section_font_family.family }}, {{ section.settings.section_font_family.fallback_families }} !important;
+  }
+  {% endif %}
+
+  .section-{{ section_id }} h1,
+  .section-{{ section_id }} h2,
+  .section-{{ section_id }} h3,
+  .section-{{ section_id }} h4,
+  .section-{{ section_id }} h5,
+  .section-{{ section_id }} h6,
+  .section-{{ section_id }} .listicle-title {
+    letter-spacing: {{ section.settings.heading_letter_spacing }}px !important;
+  }
+
+  .section-{{ section_id }} p,
+  .section-{{ section_id }} span,
+  .section-{{ section_id }} a,
+  .section-{{ section_id }} li {
+    letter-spacing: {{ section.settings.body_letter_spacing }}px !important;
+  }
+
+  {%- case section.settings.font_size_preset -%}
+    {%- when 'small' -%}
+      {%- assign heading_d = 36 -%}{%- assign heading_m = 28 -%}
+      {%- assign subheading_d = 22 -%}{%- assign subheading_m = 18 -%}
+      {%- assign title_d = 18 -%}{%- assign title_m = 16 -%}
+      {%- assign subtitle_d = 14 -%}{%- assign subtitle_m = 13 -%}
+      {%- assign body_d = 14 -%}{%- assign body_m = 13 -%}
+    {%- when 'medium' -%}
+      {%- assign heading_d = 40 -%}{%- assign heading_m = 32 -%}
+      {%- assign subheading_d = 26 -%}{%- assign subheading_m = 22 -%}
+      {%- assign title_d = 22 -%}{%- assign title_m = 18 -%}
+      {%- assign subtitle_d = 16 -%}{%- assign subtitle_m = 15 -%}
+      {%- assign body_d = 16 -%}{%- assign body_m = 15 -%}
+    {%- when 'large' -%}
+      {%- assign heading_d = 48 -%}{%- assign heading_m = 40 -%}
+      {%- assign subheading_d = 32 -%}{%- assign subheading_m = 26 -%}
+      {%- assign title_d = 26 -%}{%- assign title_m = 22 -%}
+      {%- assign subtitle_d = 18 -%}{%- assign subtitle_m = 16 -%}
+      {%- assign body_d = 20 -%}{%- assign body_m = 16 -%}
+    {%- when 'x-large' -%}
+      {%- assign heading_d = 56 -%}{%- assign heading_m = 44 -%}
+      {%- assign subheading_d = 36 -%}{%- assign subheading_m = 30 -%}
+      {%- assign title_d = 30 -%}{%- assign title_m = 24 -%}
+      {%- assign subtitle_d = 20 -%}{%- assign subtitle_m = 18 -%}
+      {%- assign body_d = 22 -%}{%- assign body_m = 18 -%}
+  {%- endcase -%}
+
+  .section-{{ section_id }} h1,
+  .section-{{ section_id }} .listicle-title {
+    font-size: {{ heading_d }}px !important;
+  }
+
+  .section-{{ section_id }} h2 {
+    font-size: {{ subheading_d }}px !important;
+  }
+
+  .section-{{ section_id }} h3,
+  .section-{{ section_id }} .item-title {
+    font-size: {{ title_d }}px !important;
+  }
+
+  .section-{{ section_id }} .author-name,
+  .section-{{ section_id }} .highlight-content h4,
+  .section-{{ section_id }} h4 {
+    font-size: {{ subtitle_d }}px !important;
+  }
+
+  .section-{{ section_id }} .item-content,
+  .section-{{ section_id }} .item-content p,
+  .section-{{ section_id }} .summary-content,
+  .section-{{ section_id }} .summary-content p,
+  .section-{{ section_id }} .callout-quote-content,
+  .section-{{ section_id }} .callout-quote-content p,
+  .section-{{ section_id }} .highlight-content p,
+  .section-{{ section_id }} .author-date {
+    font-size: {{ body_d }}px !important;
+  }
+
+  @media (max-width: 768px) {
+    .section-{{ section_id }} h1,
+    .section-{{ section_id }} .listicle-title {
+      font-size: {{ heading_m }}px !important;
+    }
+
+    .section-{{ section_id }} h2 {
+      font-size: {{ subheading_m }}px !important;
+    }
+
+    .section-{{ section_id }} h3,
+    .section-{{ section_id }} .item-title {
+      font-size: {{ title_m }}px !important;
+    }
+
+    .section-{{ section_id }} .author-name,
+    .section-{{ section_id }} .highlight-content h4,
+    .section-{{ section_id }} h4 {
+      font-size: {{ subtitle_m }}px !important;
+    }
+
+    .section-{{ section_id }} .item-content,
+    .section-{{ section_id }} .item-content p,
+    .section-{{ section_id }} .summary-content,
+    .section-{{ section_id }} .summary-content p,
+    .section-{{ section_id }} .callout-quote-content,
+    .section-{{ section_id }} .callout-quote-content p,
+    .section-{{ section_id }} .highlight-content p,
+    .section-{{ section_id }} .author-date {
+      font-size: {{ body_m }}px !important;
+    }
+  }
+  
+  .section-{{ section_id }} .container {
+    max-width: {{ section.settings.section_max_width }}px;
+    margin: 0 auto;
+    padding-left: {{ section.settings.container_padding_horizontal }}px;
+    padding-right: {{ section.settings.container_padding_horizontal }}px;
+                    }
+                    
+                    @media (max-width: 768px) {
+    .section-{{ section_id }} .container {
+      padding-left: {{ section.settings.mobile_container_padding }}px;
+      padding-right: {{ section.settings.mobile_container_padding }}px;
+                      }
+                    }
+                  </style>
+    
+    {% schema %}
+    {
+  "name": "Listicle (Theme Blocks)",
+      "tag": "section",
+      "class": "section",
+  "blocks": [
+    { "type": "listicle-header" },
+    { "type": "listicle-summary" },
+    { "type": "listicle-timer" },
+    { "type": "listicle-sticky-atc" },
+    { "type": "listicle-item" },
+    { "type": "listicle-callout-quote" },
+    { "type": "comparison-table" },
+    { "type": "limited-time-sale" },
+    { "type": "advertorial-footer" },
+    { "type": "lts-chip" },
+    { "type": "lts-headline" },
+    { "type": "lts-description" },
+    { "type": "lts-button" },
+    { "type": "lts-countdown" },
+    { "type": "lts-meta-box" },
+    { "type": "lts-guarantee" }
+  ],
+      "settings": [
+        {
+          "type": "header",
+          "content": "Section Layout"
+        },
+    {
+      "type": "range",
+      "id": "section_max_width",
+      "min": 600,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "label": "Section Max Width",
+      "default": 750
+        },
+        {
+          "type": "range",
+          "id": "padding_top",
+          "min": 0,
+          "max": 200,
+          "step": 10,
+          "unit": "px",
+          "label": "Section Padding Top",
+          "default": 60
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 200,
+          "step": 10,
+          "unit": "px",
+          "label": "Section Padding Bottom",
+          "default": 60
+        },
+        {
+          "type": "range",
+      "id": "gap",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "px",
+      "label": "Gap Between Blocks",
+              "default": 30
+            },
+            {
+              "type": "header",
+      "content": "Typography"
+            },
+            {
+              "type": "checkbox",
+      "id": "use_custom_font",
+      "label": "Use Custom Font Family",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "section_font_family",
+      "label": "Section Font Family",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "range",
+      "id": "heading_letter_spacing",
+      "min": -3,
+      "max": 5,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Heading Letter Spacing",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "body_letter_spacing",
+      "min": -3,
+      "max": 5,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Body Letter Spacing",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Font Size Preset"
+    },
+    {
+      "type": "select",
+      "id": "font_size_preset",
+      "label": "Font Size Preset",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "x-large", "label": "X-Large" }
+      ],
+      "default": "medium",
+      "info": "Controls all font sizes across the section"
+    },
+    {
+      "type": "header",
+      "content": "Theme Integration"
+            },
+            {
+              "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": false
+            },
+            {
+              "type": "checkbox",
+      "id": "disable_scroll_animation",
+      "label": "Disable Scroll Animation",
+      "default": true,
+      "info": "Turn off fade-in animation on scroll. Enable this if the section appears blank/white."
+            },
+            {
+              "type": "color",
+      "id": "section_background_color",
+      "label": "Section Background Color",
+      "default": "#FFFFFF"
+            },
+            {
+              "type": "color",
+      "id": "section_text_color",
+      "label": "Section Text Color",
+      "default": "#333333"
+            },
+            {
+              "type": "range",
+      "id": "container_padding_horizontal",
+              "min": 0,
+              "max": 100,
+              "step": 5,
+              "unit": "px",
+      "label": "Container Horizontal Padding",
+              "default": 20
+            },
+            {
+              "type": "range",
+      "id": "mobile_container_padding",
+              "min": 0,
+              "max": 50,
+              "step": 5,
+              "unit": "px",
+              "label": "Mobile Container Padding",
+              "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Listicle (Theme Blocks)"
+    }
+  ]
+}
+{% endschema %}

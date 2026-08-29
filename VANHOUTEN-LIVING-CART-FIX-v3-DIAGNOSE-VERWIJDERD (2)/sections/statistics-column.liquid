@@ -1,0 +1,2212 @@
+{{ 'statistics-column.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign heading_tag = section.settings.heading_tag
+%}
+
+<style>
+  .section-{{ section.id }} {
+    --stats-number-size-mobile: {{ section.settings.number_size_mobile }}px;
+    --stats-number-size-desktop: {{ section.settings.number_size_desktop }}px;
+    --stats-title-size-mobile: {{ section.settings.title_size_mobile }}px;
+    --stats-title-size-desktop: {{ section.settings.title_size_desktop }}px;
+    --stats-description-size-mobile: {{ section.settings.description_size_mobile }}px;
+    --stats-description-size-desktop: {{ section.settings.description_size_desktop }}px;
+    --stats-disclaimer-padding-top: {{ section.settings.disclaimer_padding_top }}px;
+    --stats-disclaimer-padding-bottom: {{ section.settings.disclaimer_padding_bottom }}px;
+    --stats-disclaimer-padding-left: {{ section.settings.disclaimer_padding_left }}px;
+    --stats-disclaimer-padding-right: {{ section.settings.disclaimer_padding_right }}px;
+    --stats-disclaimer-size-mobile: {{ section.settings.disclaimer_size_mobile }}px;
+    --stats-disclaimer-size-desktop: {{ section.settings.disclaimer_size_desktop }}px;
+    --stats-disclaimer-border-radius: {{ section.settings.disclaimer_border_radius }}px;
+    --stats-disclaimer-background: {{ section.settings.disclaimer_background_color }};
+    --stats-disclaimer-color: {{ section.settings.disclaimer_color }};
+    --stats-disclaimer-icon-color: {{ section.settings.disclaimer_icon_color }};
+    --stats-disclaimer-line-height: {{ section.settings.disclaimer_line_height }};
+    --stats-disclaimer-border-width: {{ section.settings.disclaimer_border_width }}px;
+    --stats-disclaimer-border-style: {{ section.settings.disclaimer_border_style }};
+    --stats-disclaimer-border-color: {{ section.settings.disclaimer_border_color }};
+    {% if section.settings.enable_top_border %}
+      border-top: {{ section.settings.top_border_width }}px solid {{ section.settings.top_border_color }};
+    {% endif %}
+    {% if section.settings.enable_bottom_border %}
+      border-bottom: {{ section.settings.bottom_border_width }}px solid {{ section.settings.bottom_border_color }};
+    {% endif %}
+  }
+
+
+
+  .section-{{ section.id }} .stats-column-title {
+    font-size: var(--stats-title-size-mobile);
+    color: {{ section.settings.title_color }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }} .stats-column-title {
+      font-size: var(--stats-title-size-desktop);
+    }
+  }
+
+  .section-{{ section.id }} .stats-column-description {
+    font-size: var(--stats-description-size-mobile);
+    color: {{ section.settings.description_color }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }} .stats-column-description {
+      font-size: var(--stats-description-size-desktop);
+    }
+  }
+
+
+
+  .section-{{ section.id }} .studies-disclaimer {
+    margin-top: 2rem;
+  }
+
+  .section-{{ section.id }} .studies-disclaimer-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: var(--stats-disclaimer-padding-top) var(--stats-disclaimer-padding-right) var(--stats-disclaimer-padding-bottom) var(--stats-disclaimer-padding-left);
+    background-color: {% if section.settings.use_theme_colors %}color-mix(in srgb, {{ settings.global_section_text_color }} 5%, transparent){% else %}var(--stats-disclaimer-background){% endif %};
+    border-radius: var(--stats-disclaimer-border-radius);
+    border: var(--stats-disclaimer-border-width) var(--stats-disclaimer-border-style) {% if section.settings.use_theme_colors %}color-mix(in srgb, {{ settings.global_section_text_color }} 20%, transparent){% else %}var(--stats-disclaimer-border-color){% endif %};
+  }
+
+  .section-{{ section.id }} .disclaimer-icon {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+    opacity: 0.7;
+    color: var(--stats-disclaimer-icon-color);
+  }
+
+  .section-{{ section.id }} .disclaimer-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  .section-{{ section.id }} .studies-disclaimer-text {
+    font-weight: var(--font-weight-regular);
+    margin: 0;
+    line-height: var(--stats-disclaimer-line-height);
+    letter-spacing: var(--letter-spacing-body);
+    flex: 1;
+    font-size: var(--stats-disclaimer-size-mobile);
+    color: var(--stats-disclaimer-color);
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }} .studies-disclaimer-text {
+      font-size: var(--stats-disclaimer-size-desktop);
+    }
+  }
+
+  .section-{{ section.id }} .studies-disclaimer-text strong {
+    color: var(--stats-disclaimer-icon-color);
+  }
+</style>
+
+{% comment %} Google Fonts for accent text customization {% endcomment %}
+{% if section.settings.override_global_accent %}
+  {% if section.settings.accent_font_family != 'inherit' and section.settings.accent_font_family != 'serif' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% case section.settings.accent_font_family %}
+      {% when 'Georgia Pro' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Georgia+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Bodoni Moda' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Instrument Serif' %}
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'DM Serif Text' %}
+        <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'Nothing You Could Do' %}
+        <link href="https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+    {% endcase %}
+  {% endif %}
+{% endif %}
+
+{% assign use_theme_colors = section.settings.use_theme_colors %}
+
+{%- style -%}
+  .statistics-section-custom-background-{{ section.id }} {
+    background: {{ section.settings.section_background | default: '#FFFFFF' }};
+  }
+
+  /* Page-width container padding customization - applies regardless of contain_section */
+  .section-{{ section.id }} .page-width {
+    padding-left: {{ section.settings.section_padding_horizontal_mobile | default: 15 }}px;
+    padding-right: {{ section.settings.section_padding_horizontal_mobile | default: 15 }}px;
+    padding-top: {{ section.settings.section_padding_top_mobile | default: 0 }}px;
+    padding-bottom: {{ section.settings.section_padding_bottom_mobile | default: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }} .page-width {
+      padding-left: {{ section.settings.section_padding_horizontal_desktop | default: 15 }}px;
+      padding-right: {{ section.settings.section_padding_horizontal_desktop | default: 15 }}px;
+      padding-top: {{ section.settings.section_padding_top_desktop | default: 0 }}px;
+      padding-bottom: {{ section.settings.section_padding_bottom_desktop | default: 0 }}px;
+    }
+  }
+
+  .stats-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .stats-column-content {
+    flex: 1;
+    {% if section.settings.image_position_mobile == 'below' %}
+      order: 1;
+    {% else %}
+      order: 2;
+    {% endif %}
+  }
+
+  .stats-column-image {
+    flex: 1;
+    width: 100%;
+    {% if section.settings.image_position_mobile == 'below' %}
+      order: 2;
+    {% else %}
+      order: 1;
+    {% endif %}
+  }
+
+  @media screen and (min-width: 990px) {
+    .stats-column {
+      flex-direction: row;
+      align-items: center;
+      gap: 4rem;
+    }
+
+    .stats-column-content {
+      {% if section.settings.image_position_desktop == 'left' %}
+        order: 2;
+      {% else %}
+        order: 1;
+      {% endif %}
+      max-width: calc(100% - {{ section.settings.image_column_width | default: 50 }}%);
+    }
+
+    .stats-column-image {
+      {% if section.settings.image_position_desktop == 'left' %}
+        order: 1;
+      {% else %}
+        order: 2;
+      {% endif %}
+      max-width: {{ section.settings.image_column_width | default: 50 }}%;
+      margin-bottom: 0;
+    }
+  }
+
+  .stats-column-image img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: {{ section.settings.image_border_radius }}px;
+  }
+
+  /* Two Column Layout Styles */
+  .stats-column.two-column-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  @media screen and (min-width: 990px) {
+    /* Desktop container padding */
+    .stats-column-container.contained {
+      padding: {{ section.settings.container_padding_top | default: 40 }}px {{ section.settings.container_padding_right | default: 40 }}px {{ section.settings.container_padding_bottom | default: 40 }}px {{ section.settings.container_padding_left | default: 40 }}px !important;
+    }
+
+    .stats-column.two-column-layout {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 4rem;
+    }
+
+    {% if section.settings.center_text_vertically %}
+    .stats-column.two-column-layout {
+      align-items: center;
+    }
+
+    .stats-column.two-column-layout .stats-column-header-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+    }
+    {% endif %}
+
+    .stats-column.two-column-layout .stats-column-header-section {
+      flex: 1;
+      max-width: 50%;
+    }
+
+    .stats-column.two-column-layout .stats-column-content {
+      flex: 1;
+      max-width: 50%;
+    }
+
+    /* Hide desktop header in two-column layout since it's in the header section */
+    .stats-column.two-column-layout .stats-column-content .desktop-header {
+      display: none;
+    }
+  }
+
+  /* Container Styles */
+  .stats-column-container {
+    width: 100%;
+  }
+
+  .stats-column-container.contained {
+    max-width: {{ section.settings.section_max_width | default: 1200 }}px;
+    margin: 0 auto;
+  }
+
+  /* Override page-width max-width when contain_section is enabled */
+  {% if section.settings.contain_section %}
+    .section-{{ section.id }} .page-width {
+      max-width: {{ section.settings.section_max_width | default: 1200 }}px;
+    }
+
+    {% if section.settings.container_bg_image != blank %}
+      .section-{{ section.id }} .stats-column-container.contained {
+        background-image: url('{{ section.settings.container_bg_image | image_url: width: 1600 }}');
+        background-size: {{ section.settings.container_bg_size | default: 'cover' }};
+        background-position: {{ section.settings.container_bg_position | default: 'center center' }};
+        background-repeat: no-repeat;
+        position: relative;
+        overflow: hidden;
+      }
+    {% endif %}
+
+    {% if section.settings.container_bg_image_mobile != blank %}
+      @media screen and (max-width: 749px) {
+        .section-{{ section.id }} .stats-column-container.contained {
+          background-image: url('{{ section.settings.container_bg_image_mobile | image_url: width: 800 }}') !important;
+          background-size: {{ section.settings.container_bg_size | default: 'cover' }};
+          background-position: {{ section.settings.container_bg_position | default: 'center center' }};
+          background-repeat: no-repeat;
+          position: relative;
+          overflow: hidden;
+        }
+      }
+    {% endif %}
+
+    {% if section.settings.enable_container_bg_overlay %}
+      {% if section.settings.container_bg_image != blank or section.settings.container_bg_image_mobile != blank %}
+        .section-{{ section.id }} .stats-column-container.contained::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: {{ section.settings.container_bg_overlay_color | default: '#000000' }};
+          opacity: {{ section.settings.container_bg_overlay_opacity | default: 30 | divided_by: 100.0 }};
+          z-index: 0;
+          pointer-events: none;
+          border-radius: {{ section.settings.container_border_radius | default: 12 }}px;
+        }
+
+        .section-{{ section.id }} .stats-column-container.contained > * {
+          position: relative;
+          z-index: 1;
+        }
+      {% endif %}
+    {% endif %}
+  {% endif %}
+
+  .stats-column-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .stats-column-list {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+    }
+  }
+
+  .stats-column-item {
+    display: flex;
+    {% if section.settings.move_text_below_number %}
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    {% else %}
+      align-items: {% if section.settings.stat_text_vertical_alignment == 'flex-end' %}flex-end{% else %}center{% endif %};
+      gap: 1.5rem;
+    {% endif %}
+    padding: 1.5rem 0;
+    width: 100%;
+    min-height: 100px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .stats-column-item {
+      {% if section.settings.move_text_below_number %}
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        max-height: none;
+      {% else %}
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 2rem;
+        max-height: 150px;
+      {% endif %}
+      padding: 1.5rem 0;
+      margin: 0;
+      width: 100%;
+    }
+  }
+
+  .stats-column-item:not(:last-child) {
+    border-bottom: 1px solid {{ section.settings.divider_color | default: '#e0e0e0' }};
+  }
+
+  .section-{{ section.id }} .stats-column-number {
+    font-size: {{ section.settings.number_size_mobile }}px !important;
+    font-weight: var(--font-weight-bold) !important;
+    {% if use_theme_colors %}
+      background: {{ settings.global_accent_text_gradient_light }} !important;
+      background-image: {{ settings.global_accent_text_gradient_light }} !important;
+      -webkit-background-clip: text !important;
+      -moz-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      -moz-text-fill-color: transparent !important;
+      color: transparent !important;
+    {% elsif section.settings.number_gradient != blank %}
+      background: {{ section.settings.number_gradient }} !important;
+      background-image: {{ section.settings.number_gradient }} !important;
+      -webkit-background-clip: text !important;
+      -moz-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      -moz-text-fill-color: transparent !important;
+      color: transparent !important;
+    {% else %}
+      color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.number_color }}{% endif %} !important;
+    {% endif %}
+    line-height: 1;
+    {% if section.settings.move_text_below_number %}
+      width: 100%;
+      text-align: left;
+    {% else %}
+      flex-shrink: 0;
+      min-width: 4rem;
+    {% endif %}
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  @media screen and (max-width: 749px) {
+    .section-{{ section.id }} .stats-column-number {
+      font-size: {{ section.settings.number_size_mobile | plus: 16 }}px !important;
+      {% if section.settings.move_text_below_number %}
+        width: 100%;
+        text-align: left;
+      {% else %}
+        min-width: 6rem;
+      {% endif %}
+      text-align: left;
+      margin: 0;
+      padding: 0;
+      {% if use_theme_colors %}
+        background: {{ settings.global_accent_text_gradient_light }} !important;
+        background-image: {{ settings.global_accent_text_gradient_light }} !important;
+        -webkit-background-clip: text !important;
+        -moz-background-clip: text !important;
+        background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        -moz-text-fill-color: transparent !important;
+        color: transparent !important;
+      {% elsif section.settings.number_gradient != blank %}
+        background: {{ section.settings.number_gradient }} !important;
+        background-image: {{ section.settings.number_gradient }} !important;
+        -webkit-background-clip: text !important;
+        -moz-background-clip: text !important;
+        background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        -moz-text-fill-color: transparent !important;
+        color: transparent !important;
+      {% else %}
+        color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.number_color }}{% endif %} !important;
+      {% endif %}
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }} .stats-column-number {
+      font-size: {{ section.settings.number_size_desktop }}px !important;
+      {% if section.settings.move_text_below_number %}
+        width: 100%;
+        text-align: left;
+      {% else %}
+        min-width: 6rem;
+      {% endif %}
+      {% if use_theme_colors %}
+        background: {{ settings.global_accent_text_gradient_light }} !important;
+        background-image: {{ settings.global_accent_text_gradient_light }} !important;
+        -webkit-background-clip: text !important;
+        -moz-background-clip: text !important;
+        background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        -moz-text-fill-color: transparent !important;
+        color: transparent !important;
+      {% elsif section.settings.number_gradient != blank %}
+        background: {{ section.settings.number_gradient }} !important;
+        background-image: {{ section.settings.number_gradient }} !important;
+        -webkit-background-clip: text !important;
+        -moz-background-clip: text !important;
+        background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        -moz-text-fill-color: transparent !important;
+        color: transparent !important;
+      {% else %}
+        color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.number_color }}{% endif %} !important;
+      {% endif %}
+    }
+  }
+
+  .stats-column-text {
+    {% if section.settings.move_text_below_number %}
+      width: 100%;
+      text-align: left;
+    {% else %}
+      flex: 1;
+      text-align: left;
+    {% endif %}
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stats-column-title-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: {{ section.settings.stat_text_vertical_alignment | default: 'flex-start' }};
+    flex: 1;
+    min-height: 100%;
+  }
+
+  @media screen and (max-width: 749px) {
+    .stats-column-text {
+      width: auto;
+      flex: 1;
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .stats-column-title {
+    font-size: {{ section.settings.title_size_mobile }}px;
+    font-weight: var(--font-weight-semibold);
+    color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.title_color }}{% endif %} !important;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  @media screen and (max-width: 749px) {
+    .stats-column-title {
+      font-size: {{ section.settings.title_size_mobile | plus: 0 }}px;
+      color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.title_color }}{% endif %} !important;
+      margin: 0 0 0.5rem 0;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .stats-column-title {
+      font-size: {{ section.settings.title_size_desktop }}px;
+    }
+  }
+
+  .stats-column-description {
+    font-size: {{ section.settings.description_size_mobile }}px;
+    font-weight: var(--font-weight-regular);
+    color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.description_color }}{% endif %} !important;
+    margin: 0;
+    line-height: 1.4;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  @media screen and (max-width: 749px) {
+    .stats-column-description {
+      font-size: {{ section.settings.description_size_mobile | plus: 0 }}px;
+      color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.description_color }}{% endif %} !important;
+      line-height: 1.5;
+      margin: 0;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .stats-column-description {
+      font-size: {{ section.settings.description_size_desktop }}px;
+      color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.description_color }}{% endif %} !important;
+    }
+  }
+
+  .stats-column-section-header {
+    text-align: center;
+    margin-bottom: {{ section.settings.header_margin_bottom | default: 48 }}px;
+  }
+
+  /* Heading vertical alignment for two-column layout */
+  .stats-column-header-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: {{ section.settings.heading_vertical_alignment | default: 'center' }};
+  }
+
+  /* Mobile Header - visible on mobile, hidden on desktop */
+  .stats-column-section-header.mobile-header {
+    display: block;
+  }
+
+  /* Desktop Header - hidden on mobile, visible on desktop */
+  .stats-column-section-header.desktop-header {
+    display: none;
+  }
+
+  @media screen and (min-width: 990px) {
+    .stats-column-section-header.mobile-header {
+      display: none;
+    }
+
+    .stats-column-section-header.desktop-header {
+      display: block;
+    }
+  }
+
+  .section-{{ section.id }} .section-subtitle-container {
+    width: 100%;
+    text-align: {{ section.settings.heading_text_alignment | default: 'center' }};
+    margin: 0 auto;
+    display: flex;
+    justify-content: {% if section.settings.heading_text_alignment == 'left' %}flex-start{% elsif section.settings.heading_text_alignment == 'right' %}flex-end{% else %}center{% endif %};
+    align-items: center;
+  }
+
+  .section-{{ section.id }} .stats-section-title {
+    font-size: {{ section.settings.heading_size_mobile }}px;
+    font-weight: var(--font-weight-bold);
+    color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.heading_color }}{% endif %} !important;
+    margin: 0 0 1rem 0;
+    letter-spacing: var(--letter-spacing-heading);
+    text-align: {{ section.settings.heading_text_alignment | default: 'center' }};
+    line-height: {{ section.settings.heading_line_height | default: 1.2 }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }} .stats-section-title {
+      font-size: {{ section.settings.heading_size_desktop }}px;
+    }
+  }
+
+  .section-{{ section.id }} .section-subtitle {
+    font-size: {{ section.settings.subtitle_size_mobile }}px;
+    font-weight: var(--font-weight-regular);
+    color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.subtitle_color }}{% endif %} !important;
+    margin: 0;
+    letter-spacing: var(--letter-spacing-body);
+    text-align: {{ section.settings.heading_text_alignment | default: 'center' }} !important;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .section-{{ section.id }} .section-subtitle p {
+    margin: 0;
+    text-align: {{ section.settings.heading_text_alignment | default: 'center' }} !important;
+    font-size: inherit;
+    color: inherit;
+    font-weight: inherit;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }} .section-subtitle {
+      font-size: {{ section.settings.subtitle_size_desktop }}px;
+    }
+  }
+
+
+
+  /* Enhanced accent text styling with global and local customization options */
+  .section-{{ section.id }} .stats-section-title .global-accent-text,
+  .section-{{ section.id }} .stats-section-title .custom-accent-text {
+    {% comment %} Always apply core accent text styling {% endcomment %}
+    margin-left: {{ section.settings.accent_text_margin_left }}px !important;
+
+    {% comment %} Check for theme colors first - use global light gradient when enabled {% endcomment %}
+    {% if use_theme_colors %}
+      background: {{ settings.global_accent_text_gradient_light }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+      display: inline-block !important;
+      padding: 2px 4px !important;
+      margin: -2px -4px !important;
+      line-height: 1.3 !important;
+    {% elsif section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+      display: inline-block !important;
+      padding: 2px 4px !important;
+      margin: -2px -4px !important;
+      line-height: 1.3 !important;
+    {% else %}
+      {% comment %} Apply solid color {% endcomment %}
+      color: {{ section.settings.accent_color }} !important;
+    {% endif %}
+
+    {% if section.settings.override_global_accent %}
+      {% comment %} Use section-specific typography settings when override is enabled {% endcomment %}
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %}
+            font-family: serif !important;
+          {% when 'Georgia Pro' %}
+            font-family: 'Georgia Pro', Georgia, serif !important;
+          {% when 'Bodoni Moda' %}
+            font-family: 'Bodoni Moda', Georgia, serif !important;
+          {% when 'Instrument Serif' %}
+            font-family: 'Instrument Serif', Georgia, serif !important;
+          {% when 'DM Serif Text' %}
+            font-family: 'DM Serif Text', Georgia, serif !important;
+          {% when 'Nothing You Could Do' %}
+            font-family: 'Nothing You Could Do', cursive !important;
+        {% endcase %}
+      {% else %}
+        font-family: var(--font-accent-family, var(--font-body-family)) !important;
+      {% endif %}
+
+      font-style: {% if section.settings.accent_font_style != 'normal' %}{{ section.settings.accent_font_style }}{% else %}var(--font-accent-style, normal){% endif %} !important;
+      font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+
+    {% else %}
+      {% comment %} Use global accent typography system {% endcomment %}
+      font-family: var(--font-accent-family, var(--font-body-family)) !important;
+      font-style: var(--font-accent-style, normal) !important;
+      font-weight: var(--font-accent-weight, inherit) !important;
+      letter-spacing: var(--font-accent-letter-spacing, inherit) !important;
+      text-transform: var(--font-accent-text-transform, none) !important;
+    {% endif %}
+  }
+
+  /* Theme background styling */
+  .statistics-section-theme-background-{{ section.id }} {
+    background-color: {{ settings.global_section_text_color }} !important;
+  }
+{%- endstyle -%}
+
+<div class="section-{{ section.id }} {% if use_theme_colors == false or section.settings.override_theme_section_background %}statistics-section-custom-background-{{ section.id }}{% else %}statistics-section-theme-background-{{ section.id }}{% endif %} stats-column-section  {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  <div class="page-width">
+    <div
+      class="stats-column-container {% if section.settings.contain_section %}contained{% endif %}"
+      style="
+        {% if section.settings.contain_section %}
+          padding: {{ section.settings.container_padding_top_mobile | default: 20 }}px {{ section.settings.container_padding_right_mobile | default: 20 }}px {{ section.settings.container_padding_bottom_mobile | default: 20 }}px {{ section.settings.container_padding_left_mobile | default: 20 }}px;
+          border-radius: {{ section.settings.container_border_radius | default: 12 }}px;
+          {% if section.settings.container_bg_image == blank and section.settings.container_bg_image_mobile == blank %}
+            background: {{ section.settings.container_background | default: '#FFFFFF' }};
+          {% else %}
+            background-color: {{ section.settings.container_background | default: '#FFFFFF' }};
+          {% endif %}
+          {% if section.settings.enable_border %}
+            border: {{ section.settings.border_width | default: 1 }}px {{ section.settings.border_style | default: 'solid' }} {{ section.settings.border_color | default: '#E5E7EB' }};
+          {% endif %}
+          {% if section.settings.enable_shadow %}
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          {% endif %}
+        {% endif %}
+      "
+    >
+        <!-- Mobile Header -->
+        {%- if section.settings.heading != blank or section.settings.subtitle != blank -%}
+          <div class="stats-column-section-header mobile-header">
+            {%- if section.settings.heading != blank -%}
+              {% if section.settings.heading_accent != blank %}
+                <{{ heading_tag }} class="stats-section-title">
+                  {{ section.settings.heading }}
+                  <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+                    {{ section.settings.heading_accent }}
+                  </span>
+                </{{ heading_tag }}>
+              {% else %}
+                <{{ heading_tag }} class="stats-section-title">{{ section.settings.heading }}</{{ heading_tag }}>
+              {% endif %}
+            {%- endif -%}
+            {%- if section.settings.subtitle != blank -%}
+              <div class="section-subtitle-container">
+                <div class="section-subtitle">{{ section.settings.subtitle }}</div>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <div class="stats-column{% if section.settings.enable_two_column_layout %} two-column-layout{% endif %}">
+          {% if section.settings.enable_two_column_layout %}
+            <!-- Two Column Layout: Title/Subtitle Column -->
+            <div class="stats-column-header-section">
+              {%- if section.settings.heading != blank or section.settings.subtitle != blank -%}
+                <div class="stats-column-section-header desktop-header">
+                  {%- if section.settings.heading != blank -%}
+                    {% if section.settings.heading_accent != blank %}
+                      <{{ heading_tag }} class="stats-section-title">
+                        {{ section.settings.heading }}
+                        <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+                          {{ section.settings.heading_accent }}
+                        </span>
+                      </{{ heading_tag }}>
+                    {% else %}
+                      <{{ heading_tag }} class="stats-section-title">{{ section.settings.heading }}</{{ heading_tag }}>
+                    {% endif %}
+                  {%- endif -%}
+                  {%- if section.settings.subtitle != blank -%}
+                    <div class="section-subtitle-container">
+                      <div class="section-subtitle">{{ section.settings.subtitle }}</div>
+                    </div>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
+          {% endif %}
+
+          <div class="stats-column-content">
+            {% unless section.settings.enable_two_column_layout %}
+              <!-- Original Layout: Desktop Header (inside stats-column-content) -->
+              {%- if section.settings.heading != blank or section.settings.subtitle != blank -%}
+                <div class="stats-column-section-header desktop-header">
+                  {%- if section.settings.heading != blank -%}
+                    {% if section.settings.heading_accent != blank %}
+                      <{{ heading_tag }} class="stats-section-title">
+                        {{ section.settings.heading }}
+                        <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+                          {{ section.settings.heading_accent }}
+                        </span>
+                      </{{ heading_tag }}>
+                    {% else %}
+                      <h2 class="stats-section-title">{{ section.settings.heading }}</h2>
+                    {% endif %}
+                  {%- endif -%}
+                  {%- if section.settings.subtitle != blank -%}
+                    <div class="section-subtitle-container">
+                      <div class="section-subtitle">{{ section.settings.subtitle }}</div>
+                    </div>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            {% endunless %}
+
+            <div class="stats-column-list">
+              {%- for block in section.blocks -%}
+                <div class="stats-column-item" {{ block.shopify_attributes }}>
+                  {% comment %} Extract numeric value and suffix for animation {% endcomment %}
+                  {%- liquid
+                    assign number_text = block.settings.number | strip
+                    assign numeric_part = ''
+                    assign suffix_part = ''
+                    assign has_numeric = false
+                  -%}
+
+                  {% comment %} Check if the number contains text patterns that should disable counter animation {% endcomment %}
+                  {%- liquid
+                    assign disable_counter = false
+                    assign lowercase_number = number_text | downcase
+
+                    # Check for text patterns that indicate non-countable content
+                    if lowercase_number contains ' of ' or lowercase_number contains ' out of ' or lowercase_number contains ' in ' or lowercase_number contains ' to ' or lowercase_number contains ' and ' or lowercase_number contains ' or ' or lowercase_number contains '/' and lowercase_number contains ' '
+                      assign disable_counter = true
+                    endif
+
+                    # Check for multiple separate numbers (like "3 of 4" or "1 in 5")
+                    assign number_count = 0
+                    assign chars = number_text | split: ''
+                    assign in_number = false
+                    for char in chars
+                      assign is_digit = false
+                      if char == '0' or char == '1' or char == '2' or char == '3' or char == '4' or char == '5' or char == '6' or char == '7' or char == '8' or char == '9'
+                        assign is_digit = true
+                        if in_number == false
+                          assign number_count = number_count | plus: 1
+                          assign in_number = true
+                        endif
+                      else
+                        assign in_number = false
+                      endif
+                    endfor
+
+                    if number_count > 1
+                      assign disable_counter = true
+                    endif
+                  -%}
+
+                  {% comment %} Extract numbers and suffixes like 100+, 99%, 24/7, etc. {% endcomment %}
+                  {%- liquid
+                    assign chars = number_text | split: ''
+                    for char in chars
+                      assign is_digit = false
+                      assign is_decimal = false
+                      if char == '0' or char == '1' or char == '2' or char == '3' or char == '4' or char == '5' or char == '6' or char == '7' or char == '8' or char == '9'
+                        assign is_digit = true
+                        assign has_numeric = true
+                      elsif char == '.' or char == ','
+                        assign is_decimal = true
+                      endif
+
+                      if is_digit or is_decimal
+                        assign numeric_part = numeric_part | append: char
+                      else
+                        assign suffix_part = suffix_part | append: char
+                      endif
+                    endfor
+                  -%}
+
+                  {% comment %} Clean up numeric part - remove trailing decimals if they are .0 {% endcomment %}
+                  {%- liquid
+                    if numeric_part contains '.'
+                      assign decimal_check = numeric_part | split: '.'
+                      if decimal_check[1] == '0' or decimal_check[1] == '00'
+                        assign numeric_part = decimal_check[0]
+                      endif
+                    endif
+                  -%}
+
+                  {% if section.settings.enable_counter_animation and has_numeric and disable_counter == false %}
+                    <div
+                      class="stats-column-number counter-animate"
+                      data-target="{{ numeric_part }}"
+                      data-suffix="{{ suffix_part }}"
+                      data-duration="2000"
+                      data-delay="200"
+                    >
+                      0{{ suffix_part }}
+                    </div>
+                  {% else %}
+                    <div class="stats-column-number">{{ block.settings.number }}</div>
+                  {% endif %}
+
+                  <div class="stats-column-text">
+                    <div class="stats-column-title-wrapper">
+                      {%- if block.settings.title != blank -%}
+                        <h3 class="stats-column-title">{{ block.settings.title }}</h3>
+                      {%- endif -%}
+                    </div>
+                    {%- if block.settings.description != blank -%}
+                      <p class="stats-column-description">{{ block.settings.description }}</p>
+                    {%- endif -%}
+                  </div>
+                </div>
+              {%- endfor -%}
+            </div>
+
+            {%- if section.settings.disclaimer_text != blank and section.settings.show_disclaimer -%}
+              <div class="studies-disclaimer">
+                <div class="studies-disclaimer-content">
+                  <div class="disclaimer-icon">
+                    <svg
+                      fill="currentColor"
+                      version="1.1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 416.979 416.979"
+                    >
+                      <path d="M356.004,61.156c-81.37-81.47-213.377-81.551-294.848-0.182c-81.47,81.371-81.552,213.379-0.181,294.85
+                        c81.369,81.47,213.378,81.551,294.849,0.181C437.293,274.636,437.375,142.626,356.004,61.156z M237.6,340.786
+                        c0,3.217-2.607,5.822-5.822,5.822h-46.576c-3.215,0-5.822-2.605-5.822-5.822V167.885c0-3.217,2.607-5.822,5.822-5.822h46.576
+                        c3.215,0,5.822,2.604,5.822,5.822V340.786z M208.49,137.901c-18.618,0-33.766-15.146-33.766-33.765
+                        c0-18.617,15.147-33.766,33.766-33.766c18.619,0,33.766,15.148,33.766,33.766C242.256,122.755,227.107,137.901,208.49,137.901z"/>
+                    </svg>
+                  </div>
+                  <p class="studies-disclaimer-text">{{ section.settings.disclaimer_text }}</p>
+                </div>
+              </div>
+            {%- endif -%}
+          </div>
+
+          {% unless section.settings.enable_two_column_layout %}
+            {%- if section.settings.image != blank -%}
+              <div class="stats-column-image">
+                <img
+                  src="{{ section.settings.image | image_url: width: 800 }}"
+                  alt="{{ section.settings.image.alt | escape }}"
+                  width="{{ section.settings.image.width }}"
+                  height="{{ section.settings.image.height }}"
+                  loading="lazy"
+                >
+              </div>
+            {%- endif -%}
+          {% endunless %}
+        </div>
+      </div>
+      <!-- Close stats-column-container -->
+    </div>
+  </div>
+
+{% if section.settings.enable_counter_animation %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Counter Animation Function
+      function animateCounter(element) {
+        const target = parseFloat(element.dataset.target);
+        const suffix = element.dataset.suffix || '';
+        const duration = parseInt(element.dataset.duration) || 2000;
+        const delay = parseInt(element.dataset.delay) || 200;
+
+        // Don't animate if target is not a valid number
+        if (isNaN(target)) {
+          element.textContent = element.dataset.target + suffix;
+          return;
+        }
+
+        // Add delay before starting animation
+        setTimeout(() => {
+          const startTime = performance.now();
+          const startValue = 0;
+
+          function updateCounter(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Use easeOutCubic for smooth animation
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            const currentValue = startValue + (target - startValue) * easeProgress;
+
+            // Format the number based on target type
+            let displayValue;
+            if (target % 1 === 0) {
+              // Integer
+              displayValue = Math.floor(currentValue);
+            } else {
+              // Decimal - preserve original decimal places
+              const decimalPlaces = target.toString().split('.')[1]?.length || 1;
+              displayValue = currentValue.toFixed(decimalPlaces);
+            }
+
+            element.textContent = displayValue + suffix;
+
+            if (progress < 1) {
+              requestAnimationFrame(updateCounter);
+            } else {
+              // Ensure final value is exact
+              element.textContent = target + suffix;
+            }
+          }
+
+          requestAnimationFrame(updateCounter);
+        }, delay);
+      }
+
+      // Intersection Observer for triggering animations when elements come into view
+      const observerOptions = {
+        threshold: 0.3,
+        rootMargin: '0px 0px -50px 0px',
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !entry.target.classList.contains('animated')) {
+            entry.target.classList.add('animated');
+            animateCounter(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      // Observe all counter elements
+      const counters = document.querySelectorAll('.section-{{ section.id }} .counter-animate');
+      counters.forEach((counter) => {
+        observer.observe(counter);
+      });
+    });
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Statistics Column",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use theme colors",
+      "default": false,
+      "info": "Use global theme colors instead of custom section colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_theme_section_background",
+      "label": "Override Theme Section Background",
+      "default": false,
+      "info": "When theme colors are ON, use custom section background instead of theme background"
+    },
+    {
+      "type": "header",
+      "content": "General Settings"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "default": "Our Impact",
+      "label": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heading Accent Text",
+      "default": "Statistics"
+    },
+    {
+      "type": "richtext",
+      "id": "subtitle",
+      "label": "Section Description",
+      "info": "Optional descriptive text that appears below the section heading"
+    },
+    {
+      "type": "range",
+      "id": "header_margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Header Margin Bottom",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "heading_vertical_alignment",
+      "label": "Heading Vertical Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Top"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Bottom"
+        }
+      ],
+      "default": "center",
+      "info": "Align the heading text within its container (useful for two-column layout)"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading size (mobile)",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "min": 24,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading size (desktop)",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "min": 0.5,
+      "max": 2,
+      "step": 0.1,
+      "label": "Heading line height",
+      "default": 1.2,
+      "info": "Line height multiplier for the heading text"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading Tag",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        },
+        {
+          "value": "p",
+          "label": "P"
+        },
+        {
+          "value": "span",
+          "label": "Span"
+        }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "select",
+      "id": "heading_text_alignment",
+      "label": "Heading & subtitle alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center",
+      "info": "Text alignment for section heading and subtitle"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Section description color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size_mobile",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Section description size (mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size_desktop",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Section description size (desktop)",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Accent Text"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin_left",
+      "min": -10,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Section Accent Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text"
+    },
+    {
+      "type": "header",
+      "content": "Statistics Styling"
+    },
+    {
+      "type": "color",
+      "id": "number_color",
+      "label": "Number color",
+      "default": "#000000"
+    },
+    {
+      "type": "color_background",
+      "id": "number_gradient",
+      "label": "Number Gradient",
+      "default": "linear-gradient(135deg, #000000, #666666)",
+      "info": "Choose a gradient for the statistic numbers. Leave empty to use solid color."
+    },
+    {
+      "type": "range",
+      "id": "number_size_mobile",
+      "min": 24,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Number size (mobile)",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "number_size_desktop",
+      "min": 32,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Number size (desktop)",
+      "default": 48
+    },
+    {
+      "type": "select",
+      "id": "stat_text_vertical_alignment",
+      "label": "Stat Text Vertical Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Top"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Bottom"
+        }
+      ],
+      "default": "flex-start",
+      "info": "Align the stat title/description text vertically next to the number"
+    },
+    {
+      "type": "checkbox",
+      "id": "move_text_below_number",
+      "label": "Move Text Below Number",
+      "default": false,
+      "info": "Position the stats text below the number in a column layout, left-aligned"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "title_size_mobile",
+      "min": 14,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Title size (mobile)",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "title_size_desktop",
+      "min": 16,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Title size (desktop)",
+      "default": 22
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "description_size_mobile",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size (mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "description_size_desktop",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size (desktop)",
+      "default": 16
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_two_column_layout",
+      "label": "Enable Two Column Layout (No Image)",
+      "default": false,
+      "info": "Create a two-column layout with statistics on one side and title/subtitle on the other, without an image"
+    },
+    {
+      "type": "checkbox",
+      "id": "center_text_vertically",
+      "label": "Center Text Vertically with Statistics",
+      "default": false,
+      "info": "Vertically center the heading and subtitle with the statistics content (only applies to two-column layout on desktop)"
+    },
+    {
+      "type": "header",
+      "content": "Counter Animation"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_counter_animation",
+      "label": "Enable Counter Animation",
+      "default": true,
+      "info": "Animate numbers counting up when they come into view"
+    },
+    {
+      "type": "header",
+      "content": "Container Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "contain_section",
+      "label": "Contain Section",
+      "default": false,
+      "info": "Add padding and border around the section content"
+    },
+    {
+      "type": "range",
+      "id": "section_max_width",
+      "min": 600,
+      "max": 1800,
+      "step": 50,
+      "unit": "px",
+      "label": "Section Max Width",
+      "default": 1200,
+      "info": "Maximum width of the section container (applies when Contain Section is enabled)"
+    },
+    {
+      "type": "header",
+      "content": "Container Padding - Desktop"
+    },
+    {
+      "type": "range",
+      "id": "container_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Top Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "container_padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Right Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "container_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Bottom Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "container_padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Left Padding",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Container Padding - Mobile"
+    },
+    {
+      "type": "range",
+      "id": "container_padding_top_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Top Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "container_padding_right_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Right Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "container_padding_bottom_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Bottom Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "container_padding_left_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Left Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "container_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Container Border Radius",
+      "default": 12
+    },
+    {
+      "type": "color_background",
+      "id": "container_background",
+      "label": "Container Background",
+      "default": "linear-gradient(to bottom, #FFFFFF, #F8F8F8)"
+    },
+    {
+      "type": "header",
+      "content": "Container Background Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "container_bg_image",
+      "label": "Container Background Image (Desktop)",
+      "info": "Background image for the container when Contain Section is enabled"
+    },
+    {
+      "type": "image_picker",
+      "id": "container_bg_image_mobile",
+      "label": "Container Background Image (Mobile)",
+      "info": "Mobile background image. If not set, desktop image will be used."
+    },
+    {
+      "type": "select",
+      "id": "container_bg_size",
+      "label": "Background Size",
+      "options": [
+        { "value": "cover", "label": "Cover" },
+        { "value": "contain", "label": "Contain" },
+        { "value": "auto", "label": "Auto" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "container_bg_position",
+      "label": "Background Position",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "top center", "label": "Top Center" },
+        { "value": "bottom center", "label": "Bottom Center" },
+        { "value": "left center", "label": "Left Center" },
+        { "value": "right center", "label": "Right Center" },
+        { "value": "top left", "label": "Top Left" },
+        { "value": "top right", "label": "Top Right" },
+        { "value": "bottom left", "label": "Bottom Left" },
+        { "value": "bottom right", "label": "Bottom Right" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_container_bg_overlay",
+      "label": "Enable Background Image Overlay",
+      "default": false,
+      "info": "Add an overlay over the background image for better text readability"
+    },
+    {
+      "type": "color",
+      "id": "container_bg_overlay_color",
+      "label": "Background Overlay Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "container_bg_overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Background Overlay Opacity",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Border Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_border",
+      "label": "Enable Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "border_style",
+      "label": "Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#E5E7EB"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_shadow",
+      "label": "Enable Shadow",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section Padding - Desktop"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding - Desktop",
+      "default": 0,
+      "info": "Top padding for the page-width container"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding - Desktop",
+      "default": 0,
+      "info": "Bottom padding for the page-width container"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_horizontal_desktop",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Horizontal Padding - Desktop",
+      "default": 15,
+      "info": "Horizontal padding for the page-width container"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding - Mobile"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top_mobile",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding - Mobile",
+      "default": 0,
+      "info": "Top padding for the page-width container on mobile"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom_mobile",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding - Mobile",
+      "default": 0,
+      "info": "Bottom padding for the page-width container on mobile"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_horizontal_mobile",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "label": "Horizontal Padding - Mobile",
+      "default": 15,
+      "info": "Horizontal padding for the page-width container on mobile"
+    },
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 8
+    },
+    {
+      "type": "select",
+      "id": "image_position_desktop",
+      "label": "Image position (Desktop)",
+      "options": [
+        {
+          "value": "right",
+          "label": "Right of statistics"
+        },
+        {
+          "value": "left",
+          "label": "Left of statistics"
+        }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "select",
+      "id": "image_position_mobile",
+      "label": "Image position (Mobile)",
+      "options": [
+        {
+          "value": "above",
+          "label": "Above statistics"
+        },
+        {
+          "value": "below",
+          "label": "Below statistics"
+        }
+      ],
+      "default": "above"
+    },
+    {
+      "type": "range",
+      "id": "image_column_width",
+      "min": 30,
+      "max": 70,
+      "step": 5,
+      "unit": "%",
+      "label": "Image Column Width (Desktop)",
+      "default": 50,
+      "info": "Width of the image column when positioned to the left or right of statistics on desktop"
+    },
+    {
+      "type": "header",
+      "content": "Disclaimer Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_disclaimer",
+      "label": "Show disclaimer",
+      "default": true,
+      "info": "Toggle to show or hide the disclaimer section"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "disclaimer_text",
+      "label": "Disclaimer text",
+      "default": "* Based on internal studies and customer feedback surveys.",
+      "info": "Optional disclaimer text that appears below the statistics. You can use bold and italic formatting."
+    },
+    {
+      "type": "color",
+      "id": "disclaimer_color",
+      "label": "Disclaimer text color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "disclaimer_icon_color",
+      "label": "Disclaimer icon color",
+      "default": "#007acc"
+    },
+    {
+      "type": "color",
+      "id": "disclaimer_background_color",
+      "label": "Disclaimer background color",
+      "default": "#f8f8f8"
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_size_mobile",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Disclaimer size (mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_size_desktop",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Disclaimer size (desktop)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_line_height",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "label": "Disclaimer line height",
+      "default": 1.4,
+      "info": "Controls the spacing between lines in the disclaimer text"
+    },
+    {
+      "type": "header",
+      "content": "Disclaimer Spacing"
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_padding_top",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Disclaimer padding top",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_padding_bottom",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Disclaimer padding bottom",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_padding_left",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Disclaimer padding left",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_padding_right",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Disclaimer padding right",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Disclaimer border radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Disclaimer Border"
+    },
+    {
+      "type": "select",
+      "id": "disclaimer_border_style",
+      "label": "Disclaimer border style",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_border_width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Disclaimer border width",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "disclaimer_border_color",
+      "label": "Disclaimer border color",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "header",
+      "content": "Section Borders"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_top_border",
+      "label": "Enable top border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "top_border_width",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Top border width",
+      "default": 1,
+      "info": "Only used when top border is enabled"
+    },
+    {
+      "type": "color",
+      "id": "top_border_color",
+      "label": "Top border color",
+      "default": "#e0e0e0",
+      "info": "Only used when top border is enabled"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bottom_border",
+      "label": "Enable bottom border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "bottom_border_width",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom border width",
+      "default": 1,
+      "info": "Only used when bottom border is enabled"
+    },
+    {
+      "type": "color",
+      "id": "bottom_border_color",
+      "label": "Bottom border color",
+      "default": "#e0e0e0",
+      "info": "Only used when bottom border is enabled"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_background",
+      "id": "section_background",
+      "label": "Section Background",
+      "default": "linear-gradient(135deg, #F8F8F8, #FFFFFF)"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider Color",
+      "default": "#e0e0e0",
+      "info": "Color of the divider lines between statistics (works with both theme colors and custom colors)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "statistic",
+      "name": "Statistic",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Number",
+          "default": "100+"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Happy Customers"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Customers who love our products and services"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Statistics Column",
+      "settings": {
+        "heading_accent": "Statistics",
+        "show_disclaimer": true,
+        "disclaimer_text": "* Based on internal studies and customer feedback surveys."
+      },
+      "blocks": [
+        {
+          "type": "statistic",
+          "settings": {
+            "number": "500K+",
+            "title": "Happy Customers",
+            "description": "Customers trust us with their business worldwide"
+          }
+        },
+        {
+          "type": "statistic",
+          "settings": {
+            "number": "99%",
+            "title": "Satisfaction Rate",
+            "description": "Customer satisfaction is our top priority"
+          }
+        },
+        {
+          "type": "statistic",
+          "settings": {
+            "number": "24/7",
+            "title": "Support Available",
+            "description": "Round-the-clock customer support when you need it"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<script src="{{ 'statistics-column.js' | asset_url }}" defer></script>

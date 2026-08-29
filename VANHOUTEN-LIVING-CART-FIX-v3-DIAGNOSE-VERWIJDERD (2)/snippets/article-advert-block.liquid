@@ -1,0 +1,1256 @@
+{% assign ai_gen_id = section.id | replace: '_', '' | downcase %}
+
+{% comment %}
+  Single snippet that renders each block type.
+  Expected variables passed from the section:
+    - block
+    - section
+    - index  (1-based index passed from forloop.index)
+{% endcomment %}
+
+{% case block.type %}
+  {% when 'article_category' %}
+    <div
+      class="article-category-{{ ai_gen_id }}"
+      {{ block.shopify_attributes }}
+      style="margin-top: {{ block.settings.margin_top | default: 0 }}px; margin-bottom: {{ block.settings.margin_bottom | default: 8 }}px;"
+    >
+      {% if block.settings.category_text != blank %}
+        <span
+          class="article-category-text-{{ ai_gen_id }}"
+          style="
+            font-size: {{ block.settings.category_font_size | default: 14 }}px;
+            font-weight: {{ block.settings.category_font_weight | default: '600' }};
+            color: {{ block.settings.category_color | default: '#0066cc' }};
+            text-align: {{ block.settings.category_alignment | default: 'left' }};
+            text-decoration: underline;
+            text-decoration-color: {{ block.settings.underline_color | default: '#0066cc' }};
+            text-decoration-thickness: {{ block.settings.underline_thickness | default: 2 }}px;
+            text-underline-offset: {{ block.settings.underline_offset | default: 2 }}px;
+            text-transform: uppercase;
+            letter-spacing: var(--letter-spacing-body);
+            display: inline-block;
+            margin: 0;
+            padding: 0;
+            line-height: 1.2;
+          "
+        >
+          {{- block.settings.category_text -}}
+        </span>
+      {% endif %}
+    </div>
+
+  {% when 'breadcrumb' %}
+    <nav
+      class="article-breadcrumb-{{ ai_gen_id }}"
+      {{ block.shopify_attributes }}
+      style="
+        margin-top: {{ block.settings.margin_top | default: 0 }}px;
+        margin-bottom: {{ block.settings.margin_bottom | default: 8 }}px;
+        font-size: {{ block.settings.font_size | default: 13 }}px;
+        letter-spacing: var(--letter-spacing-body);
+      "
+      aria-label="Breadcrumb"
+    >
+      <ol style="
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      ">
+        {% if block.settings.link_1_text != blank %}
+          <li style="display: flex; align-items: center; gap: 8px;">
+            {% if block.settings.link_1_url != blank %}
+              <a
+                href="{{ block.settings.link_1_url }}"
+                style="
+                  color: {{ block.settings.text_color | default: '#666666' }};
+                  text-decoration: none;
+                  transition: color 0.2s ease;
+                  letter-spacing: var(--letter-spacing-body);
+                "
+                onmouseover="this.style.color='{{ block.settings.current_page_color | default: '#000000' }}'"
+                onmouseout="this.style.color='{{ block.settings.text_color | default: '#666666' }}'"
+              >
+                {{ block.settings.link_1_text }}
+              </a>
+            {% else %}
+              <span style="color: {{ block.settings.text_color | default: '#666666' }}; letter-spacing: var(--letter-spacing-body);">
+                {{ block.settings.link_1_text }}
+              </span>
+            {% endif %}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="{{ block.settings.text_color | default: '#666666' }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </li>
+        {% endif %}
+
+        {% if block.settings.link_2_text != blank %}
+          <li style="display: flex; align-items: center; gap: 8px;">
+            {% if block.settings.link_2_url != blank %}
+              <a
+                href="{{ block.settings.link_2_url }}"
+                style="
+                  color: {{ block.settings.text_color | default: '#666666' }};
+                  text-decoration: none;
+                  transition: color 0.2s ease;
+                  letter-spacing: var(--letter-spacing-body);
+                "
+                onmouseover="this.style.color='{{ block.settings.current_page_color | default: '#000000' }}'"
+                onmouseout="this.style.color='{{ block.settings.text_color | default: '#666666' }}'"
+              >
+                {{ block.settings.link_2_text }}
+              </a>
+            {% else %}
+              <span style="color: {{ block.settings.text_color | default: '#666666' }}; letter-spacing: var(--letter-spacing-body);">
+                {{ block.settings.link_2_text }}
+              </span>
+            {% endif %}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="{{ block.settings.text_color | default: '#666666' }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </li>
+        {% endif %}
+
+        {% if block.settings.link_3_text != blank %}
+          <li>
+            <span
+              style="
+                color: {{ block.settings.current_page_color | default: '#000000' }};
+                font-weight: 500;
+                letter-spacing: var(--letter-spacing-body);
+              "
+              aria-current="page"
+            >
+              {{ block.settings.link_3_text }}
+            </span>
+          </li>
+        {% endif %}
+      </ol>
+    </nav>
+
+  {% when 'header' %}
+    <style>
+      /* Remove all margins from title and any nested elements */
+      .article-advert-title-{{ ai_gen_id }},
+      .article-advert-title-{{ ai_gen_id }} *,
+      .article-advert-title-{{ ai_gen_id }} p,
+      .article-advert-title-{{ ai_gen_id }} > * {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+    </style>
+    <div
+      class="article-advert-header-{{ ai_gen_id }}"
+      style="margin-top: {{ block.settings.margin_top | default: 0 }}px; margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;"
+      {{ block.shopify_attributes }}
+    >
+      <h2
+        class="article-advert-title-{{ ai_gen_id }}"
+        style="
+          font-size: {{ block.settings.title_size | default: section.settings.title_size }}px;
+          line-height: {{ block.settings.title_line_height | default: 1.2 }};
+          color: {% if block.settings.use_section_colors %}{{ section.settings.title_color }}{% else %}{{ block.settings.title_color }}{% endif %};
+          font-weight: 700 !important;
+          letter-spacing: var(--letter-spacing-body);
+          margin: 0 !important;
+          padding: 0 !important;
+        "
+      >
+        {% liquid
+          assign title_content = block.settings.title_text | default: '<p>Article Title</p>' | strip_html
+          if block.settings.title_highlight_text != blank
+            assign highlight_text = block.settings.title_highlight_text | strip
+            assign highlight_color = block.settings.title_highlight_color | default: '#e26900'
+            assign span_open = '<span style="color: ' | append: highlight_color | append: ' !important;">'
+            assign span_close = '</span>'
+            assign replacement = span_open | append: highlight_text | append: span_close
+            assign highlighted_content = title_content | replace: highlight_text, replacement
+            echo highlighted_content
+          else
+            echo title_content
+          endif
+        %}
+      </h2>
+
+      {% if block.settings.section_subtitle != blank %}
+        <p
+          class="article-advert-subtitle-{{ ai_gen_id }}"
+          style="
+            font-size: {{ block.settings.subtitle_size | default: section.settings.subtitle_size }}px;
+            line-height: {{ block.settings.subtitle_line_height | default: 1.4 }};
+            color: {% if block.settings.use_section_colors %}{{ section.settings.subtitle_color }}{% else %}{{ block.settings.subtitle_color }}{% endif %};
+            margin-top: {{ block.settings.subtitle_margin_top | default: 5 }}px;
+            letter-spacing: var(--letter-spacing-body);
+          "
+        >
+          {{ block.settings.section_subtitle }}
+        </p>
+      {% endif %}
+    </div>
+
+  {% when 'symptom' %}
+    <article
+      class="article-advert-feature-box-{{ ai_gen_id }} feature-box-{{ block.id }}"
+      {{ block.shopify_attributes }}
+      style="
+        background: {% if block.settings.use_section_colors %}{{ section.settings.box_background }}{% else %}{{ block.settings.custom_background_color }}{% endif %};
+        border-radius: {{ section.settings.box_border_radius }}px;
+        border: {{ block.settings.custom_border_width | default: 2 }}px solid {% if block.settings.use_section_colors %}{{ section.settings.box_border_color }}{% else %}{{ block.settings.custom_border_color }}{% endif %} !important;
+        margin-top: {{ block.settings.margin_top | default: 0 }}px;
+        margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;
+        padding: {% if block.settings.remove_box_padding %}0{% else %}{{ block.settings.box_padding_desktop | default: 20 }}px{% endif %} !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: {{ block.settings.element_vertical_gap | default: 16 }}px !important;
+      "
+    >
+    
+    <style>
+      @media (max-width: 749px) {
+        .feature-box-{{ block.id }} {
+          padding: {% if block.settings.remove_box_padding %}0{% else %}{{ block.settings.box_padding_mobile | default: 16 }}px{% endif %} !important;
+        }
+      }
+      
+      .feature-header-{{ block.id }} {
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+        margin: 0 !important;
+      }
+      
+      .feature-icon-container-{{ block.id }} {
+        width: {{ block.settings.icon_container_size | default: 48 }}px !important;
+        height: {{ block.settings.icon_container_size | default: 48 }}px !important;
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: {{ block.settings.icon_border_radius | default: 8 }}px !important;
+        background: {% if block.settings.use_section_colors %}{{ section.settings.box_border_color | default: '#FFB800' }}{% else %}{{ block.settings.icon_background_color | default: '#FFB800' }}{% endif %} !important;
+        background-color: {% if block.settings.use_section_colors %}{{ section.settings.box_border_color | default: '#FFB800' }}{% else %}{{ block.settings.icon_background_color | default: '#FFB800' }}{% endif %} !important;
+        margin: 0 !important;
+      }
+      
+      .feature-box-{{ block.id }} .article-advert-feature-description-{{ ai_gen_id }},
+      .feature-box-{{ block.id }} .article-advert-feature-science-{{ ai_gen_id }},
+      .feature-box-{{ block.id }} .article-advert-feature-supporting-divider-{{ ai_gen_id }},
+      .feature-box-{{ block.id }} .feature-bottom-line-{{ block.id }} {
+        margin: 0 !important;
+      }
+      
+      .feature-bottom-line-{{ block.id }} {
+        width: 100% !important;
+        height: 1px !important;
+        background: {% if block.settings.use_section_colors %}{{ section.settings.box_border_color | default: '#e0e0e0' }}{% else %}{{ block.settings.custom_divider_color | default: '#e0e0e0' }}{% endif %} !important;
+      }
+      
+      .article-advert-feature-supporting-divider-{{ ai_gen_id }} {
+        width: 100% !important;
+        height: 2px !important;
+        background-color: {% if block.settings.use_section_colors %}{{ section.settings.box_border_color | default: '#e0e0e0' }}{% else %}{{ block.settings.custom_divider_color | default: '#e0e0e0' }}{% endif %} !important;
+        display: block !important;
+        min-height: 2px !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      
+      /* Remove all margins from supporting text and nested elements */
+      .article-advert-feature-science-{{ ai_gen_id }},
+      .article-advert-feature-science-{{ ai_gen_id }} *,
+      .article-advert-feature-science-{{ ai_gen_id }} p,
+      .article-advert-feature-science-{{ ai_gen_id }} > * {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+    </style>
+    
+      <!-- Feature Header: Icon + Title -->
+      <div class="feature-header-{{ block.id }}">
+        {% if block.settings.symptom_icon %}
+          <div class="feature-icon-container-{{ block.id }}">
+            {% liquid
+              assign icon_size = block.settings.science_icon_size | default: section.settings.science_icon_size | default: 24
+              assign icon_size_2x = icon_size | times: 2
+            %}
+            <img
+              src="{{ block.settings.symptom_icon | image_url: width: icon_size_2x }}"
+              alt="{{ block.settings.symptom_title }}"
+              width="{{ icon_size }}"
+              height="{{ icon_size }}"
+              style="width: {{ icon_size }}px; height: {{ icon_size }}px; object-fit: contain;"
+              loading="lazy"
+            >
+          </div>
+        {% endif %}
+        
+        <h3
+          id="symptom-{{ ai_gen_id }}-{{ index }}"
+          class="article-advert-feature-title-{{ ai_gen_id }}"
+          style="
+            font-size: {{ block.settings.symptom_title_size | default: section.settings.symptom_title_size }}px;
+            color: {% if block.settings.use_section_colors %}{{ section.settings.symptom_title_color }}{% else %}{{ block.settings.custom_title_color }}{% endif %};
+            font-weight: 700 !important;
+            letter-spacing: var(--letter-spacing-body);
+            margin: 0;
+            flex: 1;
+          "
+        >
+          {{ block.settings.symptom_title }}
+        </h3>
+      </div>
+
+      <!-- Description -->
+      {% if block.settings.symptom_description != blank %}
+        <div
+          class="article-advert-feature-description-{{ ai_gen_id }}"
+          style="
+            font-size: {{ block.settings.description_size | default: section.settings.description_size }}px;
+            color: {% if block.settings.use_section_colors %}{{ section.settings.description_color }}{% else %}{{ block.settings.custom_description_color }}{% endif %};
+            letter-spacing: var(--letter-spacing-body);
+            line-height: 1.6;
+          "
+        >
+          {{ block.settings.symptom_description }}
+        </div>
+      {% endif %}
+
+      <!-- Supporting Text Divider (only show if divider enabled AND supporting text exists) -->
+      {% if block.settings.show_supporting_divider and block.settings.symptom_science_text != blank %}
+        <div class="article-advert-feature-supporting-divider-{{ ai_gen_id }}"></div>
+      {% endif %}
+
+      <!-- Supporting Text -->
+      {% if block.settings.symptom_science_text != blank %}
+        <div
+          class="article-advert-feature-science-{{ ai_gen_id }}"
+          style="
+            font-size: {{ block.settings.science_text_size | default: section.settings.science_text_size }}px;
+            color: {% if block.settings.use_section_colors %}{{ section.settings.science_text_color }}{% else %}{{ block.settings.custom_science_color }}{% endif %};
+            letter-spacing: var(--letter-spacing-body);
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+          "
+        >
+          {% if block.settings.supporting_text_icon %}
+            <img
+              src="{{ block.settings.supporting_text_icon | image_url: width: 24 }}"
+              alt="Icon"
+              width="24"
+              height="24"
+              style="
+                flex-shrink: 0;
+                margin-top: 2px;
+              "
+            >
+          {% endif %}
+          <div style="flex: 1;">
+          {% liquid
+            assign science_content = block.settings.symptom_science_text
+            if block.settings.highlight_words != blank
+              assign highlight_words_array = block.settings.highlight_words | split: ','
+              assign highlighted_content = science_content
+              for word in highlight_words_array
+                assign trimmed_word = word | strip
+                if trimmed_word != blank
+                  assign highlight_bg = block.settings.highlight_background_color | default: '#e0e0e0'
+                  assign highlight_text = block.settings.highlight_text_color | default: '#000000'
+                  assign span_open = '<span style="background-color: ' | append: highlight_bg | append: '; color: ' | append: highlight_text | append: '; padding: 2px 4px; border-radius: 3px;">'
+                  assign span_close = '</span>'
+                  assign replacement = span_open | append: trimmed_word | append: span_close
+                  assign highlighted_content = highlighted_content | replace: trimmed_word, replacement
+                endif
+              endfor
+              echo highlighted_content
+            else
+              echo science_content
+            endif
+          %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Bottom Line -->
+      <div class="feature-bottom-line-{{ block.id }}"></div>
+    </article>
+
+  {% when 'cta' %}
+    <div
+      class="article-advert-cta-{{ ai_gen_id }}"
+      style="margin-top: {{ block.settings.margin_top | default: 0 }}px; margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;"
+      {{ block.shopify_attributes }}
+    >
+      <a
+        href="{{ block.settings.cta_link }}"
+        class="article-advert-button-{{ ai_gen_id }}"
+        style="
+          {% if block.settings.use_section_button_style %}
+            background: {{ section.settings.button_background_color }};
+            color: {{ section.settings.button_text_color }};
+            font-size: {{ section.settings.button_font_size }}px;
+            border-radius: {{ section.settings.button_border_radius }}px;
+            padding: {{ section.settings.button_vertical_padding }}px {{ section.settings.button_horizontal_padding }}px;
+            border: {{ section.settings.button_border_width }}px solid {{ section.settings.button_border_color }};
+          {% else %}
+            background: {{ block.settings.cta_background }};
+            color: {{ block.settings.cta_text_color }};
+            font-size: {{ block.settings.cta_font_size }}px;
+            border-radius: {{ block.settings.cta_border_radius }}px;
+            padding: {{ block.settings.cta_padding_top | default: 12 }}px {{ block.settings.cta_padding_right | default: 24 }}px {{ block.settings.cta_padding_bottom | default: 12 }}px {{ block.settings.cta_padding_left | default: 24 }}px;
+            border: {{ block.settings.cta_border_width }}px solid {{ block.settings.cta_border_color }};
+          {% endif %}
+          text-decoration: none !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 8px !important;
+          font-weight: bold !important;
+          text-align: center !important;
+          transition: all 0.3s ease !important;
+          white-space: nowrap !important;
+        "
+      >
+        {{ block.settings.cta_text }}
+        {% if section.settings.button_show_arrow %}
+          <svg
+            width="{{ section.settings.button_arrow_size }}px"
+            height="{{ section.settings.button_arrow_size }}px"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M8 6L8 2L10 2L16 8L10 14L8 14L8 10L-1.74845e-07 10L-3.01991e-07 6L8 6Z" fill="currentColor"/>
+          </svg>
+        {% endif %}
+      </a>
+    </div>
+
+  {% when 'article_heading' %}
+    <style>
+      /* Remove all margins from article heading and any nested elements */
+      .article-heading__text-{{ ai_gen_id }},
+      .article-heading__text-{{ ai_gen_id }} *,
+      .article-heading__text-{{ ai_gen_id }} p,
+      .article-heading__text-{{ ai_gen_id }} > * {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+    </style>
+    <div
+      class="article-heading-{{ ai_gen_id }}"
+      style="
+        margin: {{ block.settings.margin_top | default: 0 }}px auto {{ block.settings.margin_bottom | default: 0 }}px;
+        width: 100%;
+        text-align: {{ block.settings.text_alignment | default: 'left' }};
+      "
+      {{ block.shopify_attributes }}
+    >
+      <div
+        class="article-heading__container-{{ ai_gen_id }}"
+        style="
+          max-width: 728px;
+          margin: 0;
+        "
+      >
+        <div
+          class="article-heading__text-{{ ai_gen_id }}"
+          style="
+            font-size: {{ block.settings.heading_font_size | default: 38 }}px;
+            line-height: {{ block.settings.heading_line_height | default: 1.2 }};
+            margin: 0 !important;
+            padding: 0 !important;
+            font-weight: 700 !important;
+            color: {{ block.settings.text_color | default: '#000000' }};
+            font-family: inherit !important;
+            letter-spacing: var(--letter-spacing-body);
+          "
+        >
+          {% liquid
+            assign heading_content = block.settings.heading_text | default: '<p>Article Heading</p>'
+            if block.settings.highlight_text != blank
+              assign highlight_text = block.settings.highlight_text | strip
+              assign highlight_color = block.settings.highlight_color | default: '#e26900'
+              assign span_open = '<span style="color: ' | append: highlight_color | append: ' !important;">'
+              assign span_close = '</span>'
+              assign replacement = span_open | append: highlight_text | append: span_close
+              assign highlighted_content = heading_content | replace: highlight_text, replacement
+              echo highlighted_content
+            else
+              echo heading_content
+            endif
+          %}
+        </div>
+      </div>
+    </div>
+
+  {% when 'article_description' %}
+    <div
+      class="article-description-{{ ai_gen_id }}"
+      style="
+        margin: {{ block.settings.margin_top | default: 0 }}px auto {{ block.settings.margin_bottom | default: 0 }}px;
+        width: 100%;
+        text-align: {{ block.settings.text_alignment | default: 'left' }};
+      "
+      {{ block.shopify_attributes }}
+    >
+      <div
+        class="article-description__container-{{ ai_gen_id }}"
+        style="
+          max-width: 728px;
+          margin: 0 auto;
+        "
+      >
+        <div
+          class="article-description__text-{{ ai_gen_id }}"
+          style="
+            font-size: {{ block.settings.description_font_size | default: 20 }}px;
+            line-height: 1.5;
+            margin: 0;
+            color: {{ block.settings.text_color | default: '#000000' }};
+            opacity: 0.8;
+            letter-spacing: var(--letter-spacing-body);
+          "
+        >
+          {{ block.settings.description_text | default: 'Article description goes here.' }}
+        </div>
+      </div>
+    </div>
+
+  {% when 'article_author' %}
+    <div
+      class="article-author-{{ ai_gen_id }}"
+      style="
+        margin: {{ block.settings.margin_top | default: 0 }}px auto {{ block.settings.margin_bottom | default: 0 }}px;
+        width: 100%;
+      "
+      {{ block.shopify_attributes }}
+    >
+      <div
+        class="article-author__container-{{ ai_gen_id }}"
+        style="
+          max-width: 728px;
+          margin: 0 0;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          justify-content: {{ block.settings.text_alignment | default: 'left' | replace: 'left', 'flex-start' | replace: 'center', 'center' }};
+        "
+      >
+        <div
+          class="article-author__image-{{ ai_gen_id }}"
+          style="
+            width: {{ block.settings.author_image_size | default: 50 }}px;
+            height: {{ block.settings.author_image_size | default: 50 }}px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+          "
+        >
+          {% if block.settings.author_image %}
+            <img
+              src="{{ block.settings.author_image | image_url: width: 200 }}"
+              alt="{{ block.settings.author_name | default: 'Author' | escape }}"
+              width="{{ block.settings.author_image_size | default: 50 }}"
+              height="{{ block.settings.author_image_size | default: 50 }}"
+              style="width: 100%; height: 100%; object-fit: cover;"
+            >
+          {% else %}
+            {{ 'image' | placeholder_svg_tag }}
+          {% endif %}
+        </div>
+        <div class="author-name" style="display: flex; align-items: center; gap: 8px;">
+          <div
+            class="article-author__name-{{ ai_gen_id }}"
+            style="font-size: {{ block.settings.author_name_font_size | default: 16 }}px; font-weight: 500; color: {{ block.settings.text_color | default: '#000000' }}; letter-spacing: var(--letter-spacing-body);"
+          >
+            {{ block.settings.author_name | default: '<p>Author Name</p>' }}
+          </div>
+          <div style="font-size: {{ block.settings.publish_date_font_size | default: 14 }}px; color: {{ block.settings.text_color | default: '#000000' }}; opacity: 0.7; letter-spacing: var(--letter-spacing-body);">
+            |
+          </div>
+          <div
+            class="article-author__date-{{ ai_gen_id }}"
+            style="font-size: {{ block.settings.publish_date_font_size | default: 14 }}px; color: {{ block.settings.text_color | default: '#000000' }}; opacity: 0.7; letter-spacing: var(--letter-spacing-body);"
+          >
+            {{ block.settings.publish_date | default: 'Publication Date' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {% when 'article_image' %}
+    <div
+      class="article-image-{{ ai_gen_id }} {% if block.settings.full_width_mobile %}article-image--full-width-mobile{% endif %}"
+      style="
+        margin: {{ block.settings.margin_top | default: 0 }}px 0px {{ block.settings.margin_bottom | default: 0 }}px;
+        width: 100%;
+      "
+      {{ block.shopify_attributes }}
+    >
+      <div
+        class="article-image__container-{{ ai_gen_id }}"
+        style="
+          max-width: 728px;
+          margin: 0;
+          border-radius: {{ block.settings.border_radius | default: 8 }}px !important;
+          overflow: hidden !important;
+        "
+      >
+        {% if block.settings.article_image %}
+          <img
+            src="{{ block.settings.article_image | image_url }}"
+            alt="Image"
+            width="{{ block.settings.article_image.width | default: 800 }}"
+            height="{{ block.settings.article_image.height | default: 600 }}"
+            style="width: 100%; height: auto; display: block; border-radius: {{ block.settings.border_radius | default: 8 }}px !important;"
+          >
+        {% else %}
+          {{ 'image' | placeholder_svg_tag }}
+        {% endif %}
+      </div>
+    </div>
+
+    <style>
+      .article-image__container-{{ ai_gen_id }} {
+        border-radius: {{ block.settings.border_radius | default: 8 }}px !important;
+        overflow: hidden !important;
+      }
+      
+      .article-image__container-{{ ai_gen_id }} img {
+        border-radius: {{ block.settings.border_radius | default: 8 }}px !important;
+      }
+      
+      @media (max-width: 767px) {
+        .article-image--full-width-mobile {
+          margin-left: calc(-50vw + 50%) !important;
+          margin-right: calc(-50vw + 50%) !important;
+          width: 100vw !important;
+          max-width: 100vw !important;
+        }
+        
+        .article-image--full-width-mobile .article-image__container-{{ ai_gen_id }} {
+          max-width: 100% !important;
+          border-radius: 0 !important;
+        }
+        
+        .article-image--full-width-mobile .article-image__container-{{ ai_gen_id }} img {
+          border-radius: 0 !important;
+        }
+      }
+    </style>
+
+  {% when 'article_reading_time' %}
+    <div
+      class="article-reading-time-{{ ai_gen_id }}"
+      style="
+        margin: {{ block.settings.margin_top | default: 0 }}px auto {{ block.settings.margin_bottom | default: 0 }}px;
+        width: 100%;
+      "
+      {{ block.shopify_attributes }}
+    >
+      <div
+        class="article-reading-time__container-{{ ai_gen_id }}"
+        style="
+          max-width: 728px;
+          margin: 0 auto;
+          display: flex;
+          justify-content: center;
+        "
+      >
+        <div
+          class="article-reading-time__badge-{{ ai_gen_id }}"
+          style="
+            background-color: {{ block.settings.reading_time_bg_color | default: '#f0f0f0' }};
+            color: {{ block.settings.reading_time_text_color | default: '#085e03' }};
+            align-items: center;
+            padding: 8px 20px;
+            display: flex;
+            border-radius: 50px;
+            font-size: {{ block.settings.reading_time_font_size | default: 14 }}px;
+            gap: 8px;
+            border: {{ block.settings.reading_time_border_width | default: 1 }}px solid {{ block.settings.reading_time_border_color | default: '#085e03' }};
+            justify-content: center;
+          "
+        >
+          {% if block.settings.custom_icon %}
+            <img
+              src="{{ block.settings.custom_icon | image_url: width: 64 }}"
+              alt="Reading time icon"
+              width="{{ block.settings.icon_size | default: 16 }}"
+              height="{{ block.settings.icon_size | default: 16 }}"
+              style="flex-shrink: 0; object-fit: contain;"
+            >
+          {% else %}
+            <svg xmlns="http://www.w3.org/2000/svg" width="{{ block.settings.icon_size | default: 16 }}" height="{{ block.settings.icon_size | default: 16 }}" viewBox="0 0 32 32" style="flex-shrink: 0;">
+              <path fill="{{ block.settings.reading_time_text_color | default: '#085e03' }}" d="M29,4H3C1.343,4,0,5.343,0,7v18c0,1.657,1.343,3,3,3h10c0,0.552,0.448,1,1,1h4c0.552,0,1-0.448,1-1h10
+              	c1.657,0,3-1.343,3-3V7C32,5.343,30.657,4,29,4z M29,5v20H18.708c-0.618,0-1.236,0.146-1.789,0.422l-0.419,0.21V5H29z M15.5,5
+              	v20.632l-0.419-0.21C14.528,25.146,13.91,25,13.292,25H3V5H15.5z M31,25c0,1.103-0.897,2-2,2H18v1h-4v-1H3c-1.103,0-2-0.897-2-2V7
+              	c0-0.737,0.405-1.375,1-1.722V25c0,0.552,0.448,1,1,1h10.292c0.466,0,0.925,0.108,1.342,0.317l0.919,0.46
+              	c0.141,0.07,0.294,0.106,0.447,0.106c0.153,0,0.306-0.035,0.447-0.106l0.919-0.46C17.783,26.108,18.242,26,18.708,26H29
+              	c0.552,0,1-0.448,1-1V5.278C30.595,5.625,31,6.263,31,7V25z M6,12.5C6,12.224,6.224,12,6.5,12h5c0.276,0,0.5,0.224,0.5,0.5
+              	S11.776,13,11.5,13h-5C6.224,13,6,12.776,6,12.5z M6,14.5C6,14.224,6.224,14,6.5,14h5c0.276,0,0.5,0.224,0.5,0.5S11.776,15,11.5,15
+              	h-5C6.224,15,6,14.776,6,14.5z M6,16.5C6,16.224,6.224,16,6.5,16h5c0.276,0,0.5,0.224,0.5,0.5S11.776,17,11.5,17h-5
+              	C6.224,17,6,16.776,6,16.5z M20,12.5c0-0.276,0.224-0.5,0.5-0.5h5c0.276,0,0.5,0.224,0.5,0.5S25.776,13,25.5,13h-5
+              	C20.224,13,20,12.776,20,12.5z M20,14.5c0-0.276,0.224-0.5,0.5-0.5h5c0.276,0,0.5,0.224,0.5,0.5S25.776,15,25.5,15h-5
+              	C20.224,15,20,14.776,20,14.5z M20,16.5c0-0.276,0.224-0.5,0.5-0.5h5c0.276,0,0.5,0.224,0.5,0.5S25.776,17,25.5,17h-5
+              	C20.224,17,20,16.776,20,16.5z"/>
+            </svg>
+          {% endif %}
+          <span style="letter-spacing: var(--letter-spacing-body);">{{ block.settings.reading_time_text | default: 'Estimated 5-7 Minute Read' }}</span>
+        </div>
+      </div>
+    </div>
+
+  {% when 'divider_line' %}
+    <div
+      class="divider-line-{{ ai_gen_id }}"
+      style="
+        margin: {{ block.settings.margin_top | default: 20 }}px auto {{ block.settings.margin_bottom | default: 20 }}px;
+        width: 100%;
+      "
+      {{ block.shopify_attributes }}
+    >
+      <div
+        class="divider-line__container-{{ ai_gen_id }}"
+        style="
+          max-width: 728px;
+          margin: 0 auto;
+          display: flex;
+          justify-content: {{ block.settings.divider_alignment | default: 'center' }};
+        "
+      >
+        <div
+          class="divider-line__line-{{ ai_gen_id }}"
+          style="
+            width: {{ block.settings.divider_width | default: 100 }}%;
+            height: {{ block.settings.divider_height | default: 1 }}px;
+            background-color: {{ block.settings.divider_color | default: '#e0e0e0' }};
+            border: none;
+            margin: 0;
+            display: block;
+            min-height: {{ block.settings.divider_height | default: 1 }}px;
+            opacity: 1;
+          "
+        ></div>
+      </div>
+    </div>
+
+  {% when 'text_block' %}
+    <div
+      class="text-block-{{ ai_gen_id }}"
+      style="
+        margin: {{ block.settings.margin_top | default: 0 }}px auto {{ block.settings.margin_bottom | default: 0 }}px;
+        width: 100%;
+      "
+      {{ block.shopify_attributes }}
+    >
+      <div
+        class="text-block__container-{{ ai_gen_id }}"
+        style="
+          max-width: 728px;
+          margin: 0;
+        "
+      >
+        <div
+          class="text-block__content-{{ ai_gen_id }}"
+          style="
+            font-size: {{ block.settings.text_font_size | default: 16 }}px;
+            line-height: {{ block.settings.line_height | default: 1.5 }};
+            color: {{ block.settings.text_color | default: '#000000' }};
+            text-align: {{ block.settings.text_alignment | default: 'left' }};
+            letter-spacing: var(--letter-spacing-body);
+          "
+        >
+          {% liquid
+            assign text_content = block.settings.text_content | default: '<p>Add your text content here.</p>'
+
+            if block.settings.highlight_words != blank
+              assign highlight_words = block.settings.highlight_words | split: ','
+              assign highlight_bg = block.settings.highlight_background_color | default: '#ffeb3b'
+              assign highlight_text_color = block.settings.highlight_text_color | default: '#000000'
+              assign highlight_padding = block.settings.highlight_padding | default: 2
+              assign highlight_radius = block.settings.highlight_border_radius | default: 3
+
+              assign highlighted_content = text_content
+
+              for word in highlight_words
+                assign clean_word = word | strip
+                if clean_word != blank
+                  assign highlight_style = 'background-color: ' | append: highlight_bg | append: '; color: ' | append: highlight_text_color | append: '; padding: ' | append: highlight_padding | append: 'px; border-radius: ' | append: highlight_radius | append: 'px; box-decoration-break: clone; -webkit-box-decoration-break: clone;'
+                  assign highlight_span = '<span style="' | append: highlight_style | append: '">' | append: clean_word | append: '</span>'
+                  assign highlighted_content = highlighted_content | replace: clean_word, highlight_span
+                endif
+              endfor
+
+              echo highlighted_content
+            else
+              echo text_content
+            endif
+          %}
+        </div>
+      </div>
+    </div>
+
+  {% when 'icon_bullet_list' %}
+    <div
+      class="icon-bullet-list-{{ ai_gen_id }}"
+      style="
+        margin: {{ block.settings.margin_top | default: 0 }}px 0 {{ block.settings.margin_bottom | default: 0 }}px;
+        width: 100%;
+      "
+      {{ block.shopify_attributes }}
+    >
+      <div
+        class="icon-bullet-list__container-{{ ai_gen_id }}"
+        style="
+          max-width: 728px;
+          margin: 0;
+        "
+      >
+        <style>
+          .icon-bullet-list__content-{{ ai_gen_id }} ul {
+            list-style: none !important;
+            padding-left: 0 !important;
+            margin: 0 !important;
+          }
+
+          .icon-bullet-list__content-{{ ai_gen_id }} li {
+            display: flex !important;
+            align-items: flex-start !important;
+            margin-bottom: {{ block.settings.item_spacing | default: 12 }}px !important;
+            padding: 0 !important;
+            font-size: {{ block.settings.list_font_size | default: 16 }}px !important;
+            color: {{ block.settings.list_text_color | default: '#333333' }} !important;
+            line-height: {{ block.settings.line_height | default: 1.4 }} !important;
+            letter-spacing: var(--letter-spacing-body) !important;
+          }
+
+          .icon-bullet-list__content-{{ ai_gen_id }} li:last-child {
+            margin-bottom: 0 !important;
+          }
+
+          .icon-bullet-list__content-{{ ai_gen_id }} .bullet-icon {
+            width: {{ block.settings.icon_size | default: 20 }}px !important;
+            height: {{ block.settings.icon_size | default: 20 }}px !important;
+            min-width: {{ block.settings.icon_size | default: 20 }}px !important;
+            min-height: {{ block.settings.icon_size | default: 20 }}px !important;
+            margin-right: 12px !important;
+            flex-shrink: 0 !important;
+            margin-top: 0 !important;
+            object-fit: contain !important;
+            display: block !important;
+            vertical-align: top !important;
+          }
+
+          .icon-bullet-list__content-{{ ai_gen_id }} .bullet-text {
+            flex: 1 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+        </style>
+
+        <div class="icon-bullet-list__content-{{ ai_gen_id }}">
+          {% assign list_items = block.settings.list_content | split: '<li>' %}
+          {% if list_items.size > 1 %}
+            <ul>
+              {% for item in list_items %}
+                {% unless forloop.first %}
+                  {% assign clean_item = item | split: '</li>' | first | strip %}
+                  {% if clean_item != blank %}
+                    <li>
+                      {% if block.settings.bullet_icon %}
+                        <img
+                          src="{{ block.settings.bullet_icon | image_url }}"
+                          alt="Bullet Icon"
+                          class="bullet-icon"
+                          width="{{ block.settings.icon_size | default: 20 }}"
+                          height="{{ block.settings.icon_size | default: 20 }}"
+                        >
+                      {% else %}
+                        <svg
+                          class="bullet-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 256 256"
+                          width="{{ block.settings.icon_size | default: 20 }}"
+                          height="{{ block.settings.icon_size | default: 20 }}"
+                          style="flex-shrink: 0;"
+                          fill="{% if block.settings.use_section_colors %}{{ section.settings.list_text_color | default: '#333333' }}{% else %}{{ block.settings.list_text_color | default: '#333333' }}{% endif %}"
+                        >
+                          <path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-52.2,6.84-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/>
+                        </svg>
+                      {% endif %}
+                      <span class="bullet-text">{{ clean_item }}</span>
+                    </li>
+                  {% endif %}
+                {% endunless %}
+              {% endfor %}
+            </ul>
+          {% else %}
+            {{ block.settings.list_content | default: '<ul><li>Add your list items here</li></ul>' }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  {% when 'timeline' %}
+    <div
+      class="timeline-{{ ai_gen_id }}"
+      style="
+        margin: {{ block.settings.margin_top | default: 0 }}px auto {{ block.settings.margin_bottom | default: 0 }}px;
+        width: 100%;
+      "
+      {{ block.shopify_attributes }}
+    >
+      <div
+        class="timeline__container-{{ ai_gen_id }}"
+        style="
+          max-width: 728px;
+          margin: 0 auto;
+          position: relative;
+        "
+      >
+        <style>
+          .ai-timeline__content-{{ ai_gen_id }} {
+            position: relative;
+            padding-left: 60px;
+          }
+
+          .ai-timeline__content-{{ ai_gen_id }}::before {
+            content: '';
+            position: absolute;
+            left: {{ block.settings.timeline_line_width | default: 2 | divided_by: 2 | minus: 1 }}px;
+            top: {{ block.settings.timeline_dot_size | default: 30 | plus: 10 }}px;
+            bottom: -{{ block.settings.timeline_spacing | default: 40 | divided_by: 2 }}px;
+            width: {{ block.settings.timeline_line_width | default: 2 }}px;
+            background: {{ block.settings.timeline_line_color | default: '#22c55e' }};
+          }
+
+          .ai-timeline__item-{{ ai_gen_id }} {
+            position: relative;
+            margin-bottom: {{ block.settings.timeline_spacing | default: 40 }}px;
+            background: {{ block.settings.timeline_background_color | default: '#f9fafb' }};
+            border-radius: {{ block.settings.timeline_border_radius | default: 8 }}px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+          }
+
+          .ai-timeline__item-{{ ai_gen_id }}:last-child {
+            margin-bottom: 0;
+          }
+
+          .ai-timeline__item-{{ ai_gen_id }}:last-child::after {
+            display: none;
+          }
+
+          .ai-timeline__circle-{{ ai_gen_id }} {
+            position: absolute;
+            left: -{{ block.settings.timeline_dot_size | default: 30 | divided_by: 2 | plus: 15 }}px;
+            top: 10px;
+            width: {{ block.settings.timeline_dot_size | default: 30 }}px;
+            height: {{ block.settings.timeline_dot_size | default: 30 }}px;
+            border-radius: 50%;
+            background: {{ block.settings.timeline_dot_color | default: '#22c55e' }};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+          }
+
+          .ai-timeline__circle-{{ ai_gen_id }} svg {
+            width: 16px;
+            height: 16px;
+            fill: white !important;
+          }
+
+          .ai-timeline__circle-{{ ai_gen_id }} img {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+          }
+
+          .ai-timeline__title-{{ ai_gen_id }} {
+            font-size: {{ block.settings.timeline_title_size | default: 20 }}px !important;
+            color: {{ block.settings.timeline_title_color | default: '#1f2937' }} !important;
+            font-weight: 700 !important;
+            margin: 0 0 8px 0 !important;
+            padding: 0 !important;
+            letter-spacing: var(--letter-spacing-body) !important;
+          }
+
+          .ai-timeline__text-{{ ai_gen_id }} {
+            font-size: {{ block.settings.timeline_text_size | default: 16 }}px !important;
+            color: {{ block.settings.timeline_text_color | default: '#6b7280' }} !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1.5 !important;
+            letter-spacing: var(--letter-spacing-body) !important;
+          }
+        </style>
+
+        <div class="timeline__content-{{ ai_gen_id }}">
+          {% assign timeline_items = 'timeline_item_1,timeline_item_2,timeline_item_3,timeline_item_4' | split: ',' %}
+          {% assign icon_array = 'timeline_icon_1,timeline_icon_2,timeline_icon_3,timeline_icon_4' | split: ',' %}
+
+          {% for item_prefix in timeline_items %}
+            {% assign title_setting = item_prefix | append: '_title' %}
+            {% assign text_setting = item_prefix | append: '_text' %}
+            {% assign title_content = block.settings[title_setting] %}
+            {% assign text_content = block.settings[text_setting] %}
+            {% assign icon_setting = icon_array[forloop.index0] %}
+
+            {% if title_content != blank or text_content != blank %}
+              <div class="timeline__item-{{ ai_gen_id }}">
+                <div class="timeline__circle-{{ ai_gen_id }}">
+                  {% if block.settings[icon_setting] %}
+                    <img
+                      src="{{ block.settings[icon_setting] | image_url }}"
+                      alt="Timeline Icon"
+                      width="{{ block.settings.timeline_icon_size | default: 30 }}"
+                      height="{{ block.settings.timeline_icon_size | default: 30 }}"
+                    >
+                  {% else %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z"/>
+                    </svg>
+                  {% endif %}
+                </div>
+
+                {% if title_content != blank %}
+                  <h3 class="timeline__title-{{ ai_gen_id }}">{{ title_content }}</h3>
+                {% endif %}
+
+                {% if text_content != blank %}
+                  <p class="timeline__text-{{ ai_gen_id }}">{{ text_content }}</p>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  {% when 'social_sharing' %}
+    <div
+      class="social-sharing-{{ ai_gen_id }}"
+      {{ block.shopify_attributes }}
+      style="margin-top: {{ block.settings.margin_top | default: 0 }}px; margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;"
+    >
+      <div
+        class="social-sharing-icons-{{ ai_gen_id }}"
+        style="
+          display: flex;
+          gap: {{ block.settings.icon_spacing | default: 16 }}px;
+          justify-content: {{ block.settings.alignment | default: 'left' }};
+          align-items: center;
+        "
+      >
+        {% if block.settings.show_facebook %}
+          <a
+            href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url | append: request.path | url_encode }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-icon-{{ ai_gen_id }}"
+            style="
+              color: {{ block.settings.icon_color | default: '#666666' }};
+              text-decoration: none;
+              transition: color 0.3s ease;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+            "
+            onmouseover="this.style.color='{{ block.settings.icon_hover_color | default: '#333333' }}'"
+            onmouseout="this.style.color='{{ block.settings.icon_color | default: '#666666' }}'"
+          >
+            <svg
+              width="{{ block.settings.icon_size | default: 24 }}"
+              height="{{ block.settings.icon_size | default: 24 }}"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+          </a>
+        {% endif %}
+
+        {% if block.settings.show_x %}
+          <a
+            href="https://twitter.com/intent/tweet?url={{ shop.url | append: request.path | url_encode }}&text={{ page.title | default: 'Check this out!' | url_encode }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-icon-{{ ai_gen_id }}"
+            style="
+              color: {{ block.settings.icon_color | default: '#666666' }};
+              text-decoration: none;
+              transition: color 0.3s ease;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+            "
+            onmouseover="this.style.color='{{ block.settings.icon_hover_color | default: '#333333' }}'"
+            onmouseout="this.style.color='{{ block.settings.icon_color | default: '#666666' }}'"
+          >
+            <svg
+              width="{{ block.settings.icon_size | default: 24 }}"
+              height="{{ block.settings.icon_size | default: 24 }}"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
+        {% endif %}
+
+        {% if block.settings.show_email %}
+          <a
+            href="mailto:?subject={{ page.title | default: 'Check this out!' | url_encode }}&body={{ shop.url | append: request.path | url_encode }}"
+            class="social-icon-{{ ai_gen_id }}"
+            style="
+              color: {{ block.settings.icon_color | default: '#666666' }};
+              text-decoration: none;
+              transition: color 0.3s ease;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+            "
+            onmouseover="this.style.color='{{ block.settings.icon_hover_color | default: '#333333' }}'"
+            onmouseout="this.style.color='{{ block.settings.icon_color | default: '#666666' }}'"
+          >
+            <svg
+              width="{{ block.settings.icon_size | default: 24 }}"
+              height="{{ block.settings.icon_size | default: 24 }}"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
+          </a>
+        {% endif %}
+
+        {% if block.settings.show_share %}
+          <button
+            onclick="shareContent()"
+            class="social-icon-{{ ai_gen_id }}"
+            style="
+              color: {{ block.settings.icon_color | default: '#666666' }};
+              background: none;
+              border: none;
+              cursor: pointer;
+              transition: color 0.3s ease;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              padding: 0;
+            "
+            onmouseover="this.style.color='{{ block.settings.icon_hover_color | default: '#333333' }}'"
+            onmouseout="this.style.color='{{ block.settings.icon_color | default: '#666666' }}'"
+          >
+            <svg
+              width="{{ block.settings.icon_size | default: 24 }}"
+              height="{{ block.settings.icon_size | default: 24 }}"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92S19.61 16.08 18 16.08z"/>
+            </svg>
+          </button>
+        {% endif %}
+        
+        {% if block.settings.share_text != blank %}
+          <span
+            class="social-sharing-text-{{ ai_gen_id }}"
+            style="
+              font-size: {{ block.settings.share_text_font_size | default: 14 }}px;
+              color: {{ block.settings.share_text_color | default: '#666666' }};
+              letter-spacing: var(--letter-spacing-body);
+              margin-left: 0px;
+            "
+          >
+            {{ block.settings.share_text }}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <script>
+      function shareContent() {
+        if (navigator.share) {
+          navigator
+            .share({
+              title: document.title,
+              url: window.location.href,
+            })
+            .catch(console.error);
+        } else {
+          // Fallback: copy to clipboard
+          navigator.clipboard
+            .writeText(window.location.href)
+            .then(() => {
+              alert('Link copied to clipboard!');
+            })
+            .catch(() => {
+              // Final fallback: show URL
+              prompt('Copy this link:', window.location.href);
+            });
+        }
+      }
+    </script>
+
+  {% when 'video' %}
+    <div
+      class="video-block-{{ ai_gen_id }}"
+      {{ block.shopify_attributes }}
+      style="
+        margin-top: {{ block.settings.margin_top | default: 20 }}px;
+        margin-bottom: {{ block.settings.margin_bottom | default: 20 }}px;
+        text-align: {{ block.settings.alignment | default: 'center' }};
+      "
+    >
+      {% if block.settings.video_shopify != blank %}
+        <div
+          class="video-container-{{ ai_gen_id }}"
+          style="
+            width: {{ block.settings.video_width | default: 100 }}%;
+            display: inline-block;
+            border-radius: {{ block.settings.border_radius | default: 8 }}px;
+            overflow: hidden;
+          "
+        >
+          {{
+            block.settings.video_shopify
+            | video_tag:
+              autoplay: block.settings.autoplay,
+              loop: block.settings.loop,
+              muted: block.settings.muted,
+              controls: block.settings.show_controls,
+              class: 'ai-video-player',
+              style: 'width: 100%; height: auto; display: block;'
+          }}
+        </div>
+      {% else %}
+        <div
+          style="
+            padding: 40px 20px;
+            text-align: center;
+            background: #f9f9f9;
+            border: 2px dashed #ddd;
+            border-radius: {{ block.settings.border_radius | default: 8 }}px;
+            width: {{ block.settings.video_width | default: 100 }}%;
+            display: inline-block;
+            box-sizing: border-box;
+          "
+        >
+          <p style="font-size: 16px; color: #666; margin: 0;">📹 Upload a video</p>
+        </div>
+      {% endif %}
+    </div>
+
+  {% when 'comparison_table' %}
+    {% render 'comparison-table', block: block, section: section %}
+
+{% endcase %}

@@ -1,0 +1,19 @@
+{% comment %}
+  Progress Bar
+
+  A simple progress bar component to be used with the quantity input
+
+  Usage:
+  {% render 'progress-bar' %}
+{% endcomment %}
+
+{% liquid
+  assign progress_class = progress_class | default: 'quantity-progress'
+  assign show_progress = show_progress | default: false
+%}
+
+{% if show_progress %}
+  <div class="{{ progress_class }}">
+    <div class="{{ progress_class }}__bar" style="width: 0%;"></div>
+  </div>
+{% endif %}

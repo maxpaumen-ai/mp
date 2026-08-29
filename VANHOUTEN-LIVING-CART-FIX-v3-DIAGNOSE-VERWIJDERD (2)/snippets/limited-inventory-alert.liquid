@@ -1,0 +1,97 @@
+{% comment %}
+  Limited Inventory Alert Snippet
+  Usage: Include this snippet to display a pulsing dot with limited inventory text
+  Customization via block settings when used in product sections
+{% endcomment %}
+
+{% assign dot_color = dot_color | default: '#e74c3c' %}
+{% assign text_color = text_color | default: '#e74c3c' %}
+{% assign show_dot = show_dot | default: true %}
+{% assign inventory_text = inventory_text | default: 'Limited inventory available' %}
+{% assign bold_first_word = bold_first_word | default: true %}
+{% assign font_size = font_size | default: 13 %}
+{% assign margin_top = margin_top | default: -10 %}
+{% assign margin_bottom = margin_bottom | default: -15 %}
+
+<div
+  style="
+    display: flex;
+    align-items: center;
+    padding: 1px 10px;
+    border-radius: 50px;
+    width: fit-content;
+    margin: {{ margin_top }}px 0px {{ margin_bottom }}px;
+  "
+  {{ block.shopify_attributes }}
+>
+  {% if show_dot %}
+    <div style="position: relative; margin-right: 12px;">
+      <!-- Static dot -->
+      <span
+        style="
+          display: block;
+          width: 8px;
+          height: 8px;
+          background-color: {{ dot_color }};
+          border-radius: 50%;
+          position: relative;
+          z-index: 2;
+        "
+      ></span>
+      <span
+        style="
+          display: block;
+          width: 8px;
+          height: 8px;
+          background-color: {{ dot_color }};
+          border-radius: 50%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          animation: pulse-{{ block.id }} 2s ease-in-out infinite;
+        "
+      ></span>
+    </div>
+  {% endif %}
+  <span
+    style="
+      font-family: var(--font-body-family-override);
+      font-size: {{ font_size }}px;
+      letter-spacing: var(--letter-spacing-body);
+      color: {{ text_color }};
+    "
+  >
+    {% if bold_first_word %}
+      {% assign words = inventory_text | split: ' ' %}
+      <strong>{{ words.first }}</strong> {{ words | slice: 1, words.size | join: ' ' }}
+    {% else %}
+      {{ inventory_text }}
+    {% endif %}
+  </span>
+</div>
+<style>
+  @keyframes pulse-{{ block.id }} {
+    0% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+
+  .limited-inventory-alert {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: {{ background_color | default: '#FFF8E6' }};
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-family: var(--font-body-family-override);
+  }
+</style>

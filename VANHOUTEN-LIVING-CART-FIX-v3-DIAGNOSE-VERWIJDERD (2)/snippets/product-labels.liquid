@@ -1,0 +1,536 @@
+{%- comment -%}
+  Product Labels Snippet
+
+  Accepts:
+  - label_1_show: Show first label (default: true)
+  - label_1_icon: Icon for first label (default: 🥭)
+  - label_1_custom_icon: Custom icon/emoji for first label (overrides label_1_icon)
+  - label_1_name: Product name for first label
+  - label_1_serving_count: Serving count for first label
+  - label_1_show_serving_count: Show serving count for first label (default: true)
+  - label_1_image: Image for first label
+  - label_1_use_image: Use image instead of icon for first label
+  - label_1_use_gradient: Use gradient background for first label
+  - label_1_background_gradient: Gradient background for first label (Shopify color_background)
+  - label_1_background_color: Background color for first label
+  - label_1_text_color: Text color for first label
+  - label_1_serving_text_color: Serving text color for first label
+  - label_1_border_color: Border color for first label
+  - label_2_show: Show second label (default: false)
+  - label_2_icon: Icon for second label
+  - label_2_custom_icon: Custom icon/emoji for second label (overrides label_2_icon)
+  - label_2_name: Product name for second label
+  - label_2_serving_count: Serving count for second label
+  - label_2_show_serving_count: Show serving count for second label (default: true)
+  - label_2_image: Image for second label
+  - label_2_use_image: Use image instead of icon for second label
+  - label_2_use_gradient: Use gradient background for second label
+  - label_2_background_gradient: Gradient background for second label (Shopify color_background)
+  - label_2_background_color: Background color for second label
+  - label_2_text_color: Text color for second label
+  - label_2_serving_text_color: Serving text color for second label
+  - label_2_border_color: Border color for second label
+  - label_3_show: Show third label (default: false)
+  - label_3_icon: Icon for third label
+  - label_3_custom_icon: Custom icon/emoji for third label (overrides label_3_icon)
+  - label_3_name: Product name for third label
+  - label_3_serving_count: Serving count for third label
+  - label_3_show_serving_count: Show serving count for third label (default: true)
+  - label_3_image: Image for third label
+  - label_3_use_image: Use image instead of icon for third label
+  - label_3_use_gradient: Use gradient background for third label
+  - label_3_background_gradient: Gradient background for third label (Shopify color_background)
+  - label_3_background_color: Background color for third label
+  - label_3_text_color: Text color for third label
+  - label_3_serving_text_color: Serving text color for third label
+  - label_3_border_color: Border color for third label
+  - container_gap: Gap between labels (default: 12px)
+  - labels_wrapper_padding_top: Top padding for labels wrapper (default: 0px)
+  - labels_wrapper_padding_bottom: Bottom padding for labels wrapper (default: 0px)
+  - labels_wrapper_left_padding: Left padding for labels wrapper (default: 0px)
+  - labels_wrapper_padding_right: Right padding for labels wrapper (default: 0px)
+  - label_bg_color: Background color for labels (default: #ffffff)
+  - label_border_color: Border color for labels (default: #e0e0e0)
+  - label_border_radius: Border radius for labels (default: 12px)
+  - label_padding_v: Vertical padding for labels (default: 12px)
+  - label_padding_h: Horizontal padding for labels (default: 16px)
+  - icon_bg_start: Icon gradient start color (default: #ff8a65)
+  - icon_bg_end: Icon gradient end color (default: #ffb74d)
+  - icon_size: Icon size (default: 24px)
+  - icon_border_radius: Border radius for icon container (default: 50%)
+  - icon_show_background: Show icon background (default: true)
+  - product_name_color: Product name text color (default: #333333)
+  - product_name_font_size: Product name font size (default: 16px)
+  - serving_info_color: Serving info text color (default: #666666)
+  - serving_info_font_size: Serving info font size (default: 14px)
+  - margin_top: Top margin (default: 0px)
+  - margin_bottom: Bottom margin (default: 0px)
+  - block: The block object for shopify_attributes
+{%- endcomment -%}
+
+{% liquid
+  assign label_1_show = label_1_show | default: true
+  assign label_1_icon = label_1_icon | default: '⭐'
+  assign label_1_custom_icon = label_1_custom_icon
+  assign label_1_name = label_1_name | default: 'Product Label'
+  assign label_1_serving_count = label_1_serving_count | default: 'Additional Info'
+  assign label_1_show_serving_count = label_1_show_serving_count
+  if label_1_show_serving_count == null
+    assign label_1_show_serving_count = true
+  endif
+  assign label_1_use_image = label_1_use_image | default: false
+  assign label_1_use_gradient = label_1_use_gradient | default: false
+  assign label_1_background_gradient = label_1_background_gradient | default: 'linear-gradient(180deg, #FF6B6B 0%, #FF8E53 100%)'
+  assign label_1_background_color = label_1_background_color | default: '#ffffff'
+  assign label_1_text_color = label_1_text_color | default: '#333333'
+  assign label_1_serving_text_color = label_1_serving_text_color | default: '#666666'
+  assign label_1_border_color = label_1_border_color | default: '#e0e0e0'
+  assign label_2_show = label_2_show | default: false
+  assign label_2_icon = label_2_icon | default: '🏆'
+  assign label_2_custom_icon = label_2_custom_icon
+  assign label_2_name = label_2_name | default: 'Featured Item'
+  assign label_2_serving_count = label_2_serving_count | default: 'Additional Info'
+  assign label_2_show_serving_count = label_2_show_serving_count
+  if label_2_show_serving_count == null
+    assign label_2_show_serving_count = true
+  endif
+  assign label_2_use_image = label_2_use_image | default: false
+  assign label_2_use_gradient = label_2_use_gradient | default: false
+  assign label_2_background_gradient = label_2_background_gradient | default: 'linear-gradient(180deg, #4ECDC4 0%, #44A08D 100%)'
+  assign label_2_background_color = label_2_background_color | default: '#ffffff'
+  assign label_2_text_color = label_2_text_color | default: '#333333'
+  assign label_2_serving_text_color = label_2_serving_text_color | default: '#666666'
+  assign label_2_border_color = label_2_border_color | default: '#e0e0e0'
+  assign label_3_show = label_3_show | default: false
+  assign label_3_icon = label_3_icon | default: '✨'
+  assign label_3_custom_icon = label_3_custom_icon
+  assign label_3_name = label_3_name | default: 'Premium Choice'
+  assign label_3_serving_count = label_3_serving_count | default: 'Additional Info'
+  assign label_3_show_serving_count = label_3_show_serving_count
+  if label_3_show_serving_count == null
+    assign label_3_show_serving_count = true
+  endif
+  assign label_3_use_image = label_3_use_image | default: false
+  assign label_3_use_gradient = label_3_use_gradient | default: false
+  assign label_3_background_gradient = label_3_background_gradient | default: 'linear-gradient(180deg, #A8EDEA 0%, #FED6E3 100%)'
+  assign label_3_background_color = label_3_background_color | default: '#ffffff'
+  assign label_3_text_color = label_3_text_color | default: '#333333'
+  assign label_3_serving_text_color = label_3_serving_text_color | default: '#666666'
+  assign label_3_border_color = label_3_border_color | default: '#e0e0e0'
+  assign container_gap = container_gap | default: 12
+  assign labels_wrapper_padding_top = labels_wrapper_padding_top | default: 0
+  assign labels_wrapper_padding_bottom = labels_wrapper_padding_bottom | default: 0
+  assign labels_wrapper_left_padding = labels_wrapper_left_padding | default: 0
+  assign labels_wrapper_padding_right = labels_wrapper_padding_right | default: 0
+  assign label_bg_color = label_bg_color | default: '#ffffff'
+  assign label_border_color = label_border_color | default: '#e0e0e0'
+  assign label_border_radius = label_border_radius | default: 12
+  assign label_padding_v = label_padding_v | default: 12
+  assign label_padding_h = label_padding_h | default: 16
+  assign icon_bg_start = icon_bg_start | default: '#ff8a65'
+  assign icon_bg_end = icon_bg_end | default: '#ffb74d'
+  assign icon_size = icon_size | default: 28
+  assign icon_border_radius = icon_border_radius | default: 50
+  assign icon_show_background = icon_show_background
+  if icon_show_background == null
+    assign icon_show_background = true
+  endif
+  assign product_name_color = product_name_color | default: '#333333'
+  assign product_name_font_size = product_name_font_size | default: 14
+  assign product_name_font_size_mobile = product_name_font_size_mobile | default: 13
+  assign serving_info_color = serving_info_color | default: '#666666'
+  assign serving_info_font_size = serving_info_font_size | default: 12
+  assign serving_info_font_size_mobile = serving_info_font_size_mobile | default: 11
+  assign label_padding_v = label_padding_v | default: 12
+  assign label_padding_h = label_padding_h | default: 16
+  assign label_padding_v_mobile = label_padding_v_mobile | default: 10
+  assign label_padding_h_mobile = label_padding_h_mobile | default: 14
+  assign icon_size = icon_size | default: 28
+  assign icon_size_mobile = icon_size_mobile | default: 24
+  assign margin_top = margin_top | default: 0
+  assign margin_bottom = margin_bottom | default: 0
+  assign label_layout = label_layout | default: 'row'
+  assign container_layout = container_layout | default: 'flex'
+  assign label_1_drop_shadow_enabled = label_1_drop_shadow_enabled | default: false
+  assign label_1_shadow_blur = label_1_shadow_blur | default: 8
+  assign label_1_shadow_spread = label_1_shadow_spread | default: 0
+  assign label_1_shadow_offset_x = label_1_shadow_offset_x | default: 0
+  assign label_1_shadow_offset_y = label_1_shadow_offset_y | default: 4
+  assign label_1_shadow_color = label_1_shadow_color | default: '#000000'
+  assign label_1_shadow_opacity = label_1_shadow_opacity | default: 25
+  assign label_2_drop_shadow_enabled = label_2_drop_shadow_enabled | default: false
+  assign label_2_shadow_blur = label_2_shadow_blur | default: 8
+  assign label_2_shadow_spread = label_2_shadow_spread | default: 0
+  assign label_2_shadow_offset_x = label_2_shadow_offset_x | default: 0
+  assign label_2_shadow_offset_y = label_2_shadow_offset_y | default: 4
+  assign label_2_shadow_color = label_2_shadow_color | default: '#000000'
+  assign label_2_shadow_opacity = label_2_shadow_opacity | default: 25
+  assign label_3_drop_shadow_enabled = label_3_drop_shadow_enabled | default: false
+  assign label_3_shadow_blur = label_3_shadow_blur | default: 8
+  assign label_3_shadow_spread = label_3_shadow_spread | default: 0
+  assign label_3_shadow_offset_x = label_3_shadow_offset_x | default: 0
+  assign label_3_shadow_offset_y = label_3_shadow_offset_y | default: 4
+  assign label_3_shadow_color = label_3_shadow_color | default: '#000000'
+  assign label_3_shadow_opacity = label_3_shadow_opacity | default: 25
+%}
+
+<div
+  class="product-labels-container product-labels-{{ block.id }}"
+  style="margin-top: {{ margin_top }}px; margin-bottom: {{ margin_bottom }}px;"
+  {{ block.shopify_attributes }}
+>
+  <div class="labels-wrapper">
+    {% if label_1_show and label_1_name != blank %}
+      <div class="product-label label-1">
+        <div class="icon">
+          {% if label_1_use_image and label_1_image %}
+            <img
+              src="{{ label_1_image | img_url: '28x' }}"
+              srcset="{{ label_1_image | img_url: '28x' }} 1x, {{ label_1_image | img_url: '56x' }} 2x"
+              alt="{{ label_1_name }}"
+              loading="lazy"
+              width=""
+              height=""
+            >
+          {% elsif label_1_custom_icon != blank %}
+            {{ label_1_custom_icon }}
+          {% else %}
+            {{ label_1_icon }}
+          {% endif %}
+        </div>
+        <div class="product-content">
+          <div class="product-name">{{ label_1_name }}</div>
+          {% unless label_1_show_serving_count == false %}
+            {% if label_1_serving_count != blank %}
+              <div class="serving-info">
+                <span class="serving-count">{{ label_1_serving_count }}</span>
+              </div>
+            {% endif %}
+          {% endunless %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if label_2_show and label_2_name != blank %}
+      <div class="product-label label-2">
+        <div class="icon">
+          {% if label_2_use_image and label_2_image %}
+            <img
+              src="{{ label_2_image | img_url: '28x' }}"
+              srcset="{{ label_2_image | img_url: '28x' }} 1x, {{ label_2_image | img_url: '56x' }} 2x"
+              alt="{{ label_2_name }}"
+              loading="lazy"
+              height=""
+              width=""
+            >
+          {% elsif label_2_custom_icon != blank %}
+            {{ label_2_custom_icon }}
+          {% else %}
+            {{ label_2_icon }}
+          {% endif %}
+        </div>
+        <div class="product-content">
+          <div class="product-name">{{ label_2_name }}</div>
+          {% unless label_2_show_serving_count == false %}
+            {% if label_2_serving_count != blank %}
+              <div class="serving-info">
+                <span class="serving-count">{{ label_2_serving_count }}</span>
+              </div>
+            {% endif %}
+          {% endunless %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if label_3_show and label_3_name != blank %}
+      <div class="product-label label-3">
+        <div class="icon">
+          {% if label_3_use_image and label_3_image %}
+            <img
+              src="{{ label_3_image | img_url: '28x' }}"
+              srcset="{{ label_3_image | img_url: '28x' }} 1x, {{ label_3_image | img_url: '56x' }} 2x"
+              alt="{{ label_3_name }}"
+              loading="lazy"
+              width=""
+              height=""
+            >
+          {% elsif label_3_custom_icon != blank %}
+            {{ label_3_custom_icon }}
+          {% else %}
+            {{ label_3_icon }}
+          {% endif %}
+        </div>
+        <div class="product-content">
+          <div class="product-name">{{ label_3_name }}</div>
+          {% unless label_3_show_serving_count == false %}
+            {% if label_3_serving_count != blank %}
+              <div class="serving-info">
+                <span class="serving-count">{{ label_3_serving_count }}</span>
+              </div>
+            {% endif %}
+          {% endunless %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .product-labels-{{ block.id }} {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    width: 100%;
+  }
+
+  .product-labels-{{ block.id }} .labels-wrapper {
+    {% if container_layout == 'grid' %}
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    {% else %}
+    display: flex;
+    justify-content: {{ labels_justify_content | default: 'flex-start' }};
+    {% endif %}
+    gap: {{ container_gap }}px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: {{ labels_wrapper_padding_top }}px;
+    padding-bottom: {{ labels_wrapper_padding_bottom }}px;
+    padding-left: {{ labels_wrapper_left_padding }}px;
+    padding-right: {{ labels_wrapper_padding_right }}px;
+  }
+
+  .product-labels-{{ block.id }} .product-label {
+    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ label_bg_color }}{% endif %};
+    border-radius: {{ label_border_radius }}px;
+    padding: {{ label_padding_v }}px {{ label_padding_h }}px;
+    display: flex;
+    font-weight: var(--font-weight-bold) !important;
+    {% if label_layout == 'column' %}
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    {% else %}
+    flex-direction: row;
+    align-items: center;
+    {% endif %}
+    gap: {% if label_layout == 'column' %}8{% else %}4{% endif %}px;
+    border: 1px solid {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.2 }}{% else %}{{ label_border_color }}{% endif %};
+    min-width: 0;
+  }
+  
+  {% if label_layout == 'column' %}
+  .product-labels-{{ block.id }} .product-content {
+    align-items: center;
+    text-align: center;
+  }
+  {% endif %}
+
+  .product-labels-{{ block.id }} .product-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    flex: 1;
+  }
+
+  .product-labels-{{ block.id }} .icon {
+    width: {{ icon_size }}px;
+    height: {{ icon_size }}px;
+    {% unless icon_show_background == false %}
+      background: linear-gradient(135deg, {{ icon_bg_start }}, {{ icon_bg_end }});
+    {% else %}
+      background: transparent;
+    {% endunless %}
+    border-radius: {{ icon_border_radius }}%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: {{ icon_size | times: 0.6 | round }}px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .product-labels-{{ block.id }} .icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: {{ icon_border_radius }}%;
+  }
+
+  .product-labels-{{ block.id }} .product-name {
+    font-weight: var(--font-weight-bold) !important;
+    letter-spacing: var(--letter-spacing-body);
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ product_name_color }}{% endif %};
+    font-size: {{ product_name_font_size }}px !important;
+  }
+
+  .product-labels-{{ block.id }} .serving-info {
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.7 }}{% else %}{{ serving_info_color }}{% endif %};
+    font-size: {{ serving_info_font_size }}px !important;
+  }
+
+  .product-labels-{{ block.id }} .serving-count {
+    font-weight: 500;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  /* Individual drop shadows for each label */
+  {% if label_1_drop_shadow_enabled %}
+  {% assign shadow_1_alpha = label_1_shadow_opacity | divided_by: 100.0 %}
+  .product-labels-{{ block.id }} .label-1 {
+    box-shadow: {{ label_1_shadow_offset_x }}px {{ label_1_shadow_offset_y }}px {{ label_1_shadow_blur }}px {{ label_1_shadow_spread }}px {{ label_1_shadow_color | color_modify: 'alpha', shadow_1_alpha }} !important;
+  }
+  {% endif %}
+
+  {% if label_2_drop_shadow_enabled %}
+  {% assign shadow_2_alpha = label_2_shadow_opacity | divided_by: 100.0 %}
+  .product-labels-{{ block.id }} .label-2 {
+    box-shadow: {{ label_2_shadow_offset_x }}px {{ label_2_shadow_offset_y }}px {{ label_2_shadow_blur }}px {{ label_2_shadow_spread }}px {{ label_2_shadow_color | color_modify: 'alpha', shadow_2_alpha }} !important;
+  }
+  {% endif %}
+
+  {% if label_3_drop_shadow_enabled %}
+  {% assign shadow_3_alpha = label_3_shadow_opacity | divided_by: 100.0 %}
+  .product-labels-{{ block.id }} .label-3 {
+    box-shadow: {{ label_3_shadow_offset_x }}px {{ label_3_shadow_offset_y }}px {{ label_3_shadow_blur }}px {{ label_3_shadow_spread }}px {{ label_3_shadow_color | color_modify: 'alpha', shadow_3_alpha }} !important;
+  }
+  {% endif %}
+
+  /* Individual background colors and text colors for each label */
+  .product-labels-{{ block.id }} .label-1 {
+    {% if label_1_use_gradient %}
+      background: {{ label_1_background_gradient }} !important;
+    {% else %}
+      background-color: {{ label_1_background_color }} !important;
+    {% endif %}
+    border-color: {{ label_1_border_color }} !important;
+  }
+
+  .product-labels-{{ block.id }} .label-1 .product-name {
+    color: {{ label_1_text_color }} !important;
+  }
+
+  .product-labels-{{ block.id }} .label-1 .serving-info {
+    color: {{ label_1_serving_text_color }} !important;
+  }
+
+  .product-labels-{{ block.id }} .label-2 {
+    {% if label_2_use_gradient %}
+      background: {{ label_2_background_gradient }} !important;
+    {% else %}
+      background-color: {{ label_2_background_color }} !important;
+    {% endif %}
+    border-color: {{ label_2_border_color }} !important;
+  }
+
+  .product-labels-{{ block.id }} .label-2 .product-name {
+    color: {{ label_2_text_color }} !important;
+  }
+
+  .product-labels-{{ block.id }} .label-2 .serving-info {
+    color: {{ label_2_serving_text_color }} !important;
+  }
+
+  .product-labels-{{ block.id }} .label-3 {
+    {% if label_3_use_gradient %}
+      background: {{ label_3_background_gradient }} !important;
+    {% else %}
+      background-color: {{ label_3_background_color }} !important;
+    {% endif %}
+    border-color: {{ label_3_border_color }} !important;
+  }
+
+  .product-labels-{{ block.id }} .label-3 .product-name {
+    color: {{ label_3_text_color }} !important;
+  }
+
+  .product-labels-{{ block.id }} .label-3 .serving-info {
+    color: {{ label_3_serving_text_color }} !important;
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .product-labels-{{ block.id }} .labels-wrapper {
+      gap: {{ container_gap | times: 0.67 | round }}px;
+      padding: 0 0px;
+    }
+
+    .product-labels-{{ block.id }} .product-label {
+      padding: {{ label_padding_v_mobile }}px {{ label_padding_h_mobile }}px;
+      gap: 6px;
+    }
+
+    .product-labels-{{ block.id }} .icon {
+      width: {{ icon_size_mobile }}px;
+      height: {{ icon_size_mobile }}px;
+      font-size: {{ icon_size_mobile | times: 0.55 | round }}px;
+    }
+
+    .product-labels-{{ block.id }} .product-name {
+      font-size: {{ product_name_font_size_mobile }}px !important;
+    }
+
+    .product-labels-{{ block.id }} .serving-info {
+      font-size: {{ serving_info_font_size_mobile }}px !important;
+      gap: 8px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .product-labels-{{ block.id }} .labels-wrapper {
+      gap: {{ container_gap | times: 0.5 | round }}px;
+      padding: 0 0px;
+    }
+
+    .product-labels-{{ block.id }} .product-label {
+      padding: {{ label_padding_v_mobile | times: 0.8 | round }}px {{ label_padding_h_mobile | times: 0.9 | round }}px;
+      gap: 4px;
+    }
+
+    .product-labels-{{ block.id }} .icon {
+      width: {{ icon_size | times: 0.85 | round }}px;
+      height: {{ icon_size | times: 0.85 | round }}px;
+      font-size: {{ icon_size | times: 0.5 | round }}px;
+    }
+
+    .product-labels-{{ block.id }} .product-name {
+      font-size: {{ product_name_font_size_mobile | times: 0.9 | round }}px !important;
+    }
+
+    .product-labels-{{ block.id }} .serving-info {
+      font-size: {{ serving_info_font_size_mobile | times: 0.9 | round }}px !important;
+    }
+  }
+
+  @media (max-width: 396px) {
+    .product-labels-{{ block.id }} .labels-wrapper {
+      gap: {{ container_gap | times: 0.4 | round }}px;
+      padding: 0 0px;
+    }
+
+    .product-labels-{{ block.id }} .product-label {
+      padding: {{ label_padding_v_mobile | times: 0.7 | round }}px {{ label_padding_h_mobile | times: 0.75 | round }}px;
+      gap: 3px;
+      border-radius: {{ label_border_radius | times: 0.8 | round }}px;
+    }
+
+    .product-labels-{{ block.id }} .icon {
+      width: {{ icon_size | times: 0.75 | round }}px;
+      height: {{ icon_size | times: 0.75 | round }}px;
+      font-size: {{ icon_size | times: 0.45 | round }}px;
+    }
+
+    .product-labels-{{ block.id }} .product-name {
+      font-size: {{ product_name_font_size_mobile | times: 0.83 | round }}px !important;
+      line-height: 1.2;
+    }
+
+    .product-labels-{{ block.id }} .serving-info {
+      font-size: {{ serving_info_font_size_mobile | times: 0.8 | round }}px !important;
+      line-height: 1.1;
+    }
+
+    .product-labels-{{ block.id }} .product-content {
+      gap: 1px;
+    }
+  }
+</style>

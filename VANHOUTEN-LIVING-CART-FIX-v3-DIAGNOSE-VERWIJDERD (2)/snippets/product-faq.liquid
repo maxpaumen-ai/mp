@@ -1,0 +1,360 @@
+{%- liquid
+  assign margin_top = margin_top | default: block.settings.margin_top
+  assign margin_bottom = margin_bottom | default: block.settings.margin_bottom
+  assign border_radius = border_radius | default: block.settings.border_radius
+  assign border_color = border_color | default: block.settings.border_color
+  assign border_style = border_style | default: block.settings.border_style
+  assign image_size = image_size | default: block.settings.image_size
+  assign text_size = text_size | default: block.settings.text_size | default: 16
+  assign answer_text_size = answer_text_size | default: block.settings.answer_text_size | default: 14
+  assign item_padding = item_padding | default: block.settings.item_padding
+  assign question_padding = question_padding | default: block.settings.question_padding
+  assign image_border_radius = image_border_radius | default: block.settings.image_border_radius
+  assign image_fit = image_fit | default: block.settings.image_fit
+-%}
+
+<div class="product-faq" {{ block.shopify_attributes }}>
+  <div class="faq-container{% if border_style == 'bottom_only' %} border-bottom-only{% endif %}">
+    {% comment %} Boucler sur toutes les questions de 1 à 10 {% endcomment %}
+    {% for i in (1..10) %}
+      {%- liquid
+        assign question_key = 'question_' | append: i
+        assign answer_key = 'answer_' | append: i
+        assign image_key = 'question_' | append: i | append: '_image'
+        assign use_product_desc_key = 'use_product_description_for_question_' | append: i
+        
+        assign question = block.settings[question_key]
+        assign use_product_description = block.settings[use_product_desc_key]
+        
+        if use_product_description and i == 1 and product and product.description != blank
+          assign answer = product.description
+        else
+          assign answer = block.settings[answer_key]
+        endif
+
+        # Token replacements to allow simple dynamic variables in answers
+        assign answer_processed = answer
+        assign product_title = product.title | default: ''
+        assign product_vendor = product.vendor | default: ''
+        assign product_price = product.price | money
+        assign product_compare_at_price = product.compare_at_price | money
+        assign product_description = product.description | default: ''
+
+        assign answer_processed = answer_processed | replace: '{{ title }}', product_title
+        assign answer_processed = answer_processed | replace: '{{ product.title }}', product_title
+        assign answer_processed = answer_processed | replace: '{{ vendor }}', product_vendor
+        assign answer_processed = answer_processed | replace: '{{ price }}', product_price
+        assign answer_processed = answer_processed | replace: '{{ compare_at_price }}', product_compare_at_price
+        assign answer_processed = answer_processed | replace: '{{ description }}', product_description
+        
+        assign question_image = block.settings[image_key]
+      -%}
+
+      {% if question != blank %}
+        <div class="faq-item">
+          <div class="faq-question">
+            {% if question_image %}
+              <div
+                class="faq-question-image"
+                style="width: {{ image_size | default: 40 }}px; height: {{ image_size | default: 40 }}px;"
+              >
+                {{
+                  question_image
+                  | image_url: width: image_size
+                  | default: 40
+                  | image_tag: loading: 'lazy', alt: question
+                }}
+              </div>
+            {% endif %}
+            <span class="faq-question-text">{{ question }}</span>
+            <span class="faq-toggle">+</span>
+          </div>
+            <div class="faq-answer">
+            {{ answer_processed }}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach((item) => {
+      const question = item.querySelector('.faq-question');
+      if (question) {
+        question.addEventListener('click', function () {
+          item.classList.toggle('active');
+        });
+      }
+    });
+  });
+</script>
+
+<style>
+  .product-faq {
+    width: 100%;
+    margin: {{ margin_top | default: 20 }}px auto {{ margin_bottom | default: 20 }}px;
+    font-size: 95%;
+  }
+
+  .faq-container {
+    border-radius: {{ border_radius | default: 8 }}px;
+    overflow: hidden;
+    border: 1px solid {{ border_color | default: '#e0e0e0' }};
+    background-color: transparent;
+  }
+
+  .faq-container.border-bottom-only {
+    border: none;
+  }
+  .faq-container.border-bottom-only .faq-question {
+    padding-right: 0;
+    padding-left: 0;
+  }
+  .faq-container.border-bottom-only .faq-answer {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .faq-item {
+    border-bottom: 1px solid {{ border_color | default: '#e0e0e0' }};
+    padding: 0;
+  }
+
+  .faq-item:last-child {
+    border-bottom: none;
+  }
+
+  .faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: {{ question_padding | default: 12 }}px 16px;
+    cursor: pointer;
+    font-weight: var(--font-weight-regular);
+    position: relative;
+    {% if use_theme_colors %}
+      color: {% if section_use_theme_colors %}{{ settings.global_section_text_color | default: '#111111' }}{% else %}{{ question_color | default: '#111111' }}{% endif %};
+      background-color: {% if section_use_theme_colors %}{{ settings.global_section_background_color | default: '#FFFFFF' }}{% else %}{{ question_bg_color | default: '#FFFFFF' }}{% endif %};
+    {% else %}
+      color: {{ question_color | default: '#111111' }};
+      background-color: {{ question_bg_color | default: '#FFFFFF' }};
+    {% endif %}
+    font-size: {{ text_size | default: 15 }}px;
+    line-height: 1.3;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Hover effect removed - no color change on hover */
+
+  .faq-question-image,
+  .faq-question-svg {
+    margin-right: 12px;
+    flex-shrink: 0;
+    width: {{ image_size | default: 40 }}px;
+    height: {{ image_size | default: 40 }}px;
+    border-radius: {{ image_border_radius | default: 4 }}px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .faq-question-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: {{ image_fit | default: 'cover' }};
+  }
+
+  .faq-question-svg svg {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+  }
+
+  .faq-question-svg {
+    background-color: transparent;
+  }
+
+  .faq-question-text {
+    flex: 1;
+  }
+
+  .faq-toggle {
+    font-size: 18px;
+    font-weight: var(--font-weight-regular);
+    transition: transform 0.3s ease;
+    margin-left: 10px;
+    flex-shrink: 0;
+  }
+
+  .faq-answer {
+    padding: 0 16px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    {% if use_theme_colors %}
+      color: {% if section_use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.8 | default: '#555555' }}{% else %}{{ answer_color | default: '#555555' }}{% endif %};
+      background-color: {% if section_use_theme_colors %}{{ settings.global_section_background_color | default: '#ffffff' }}{% else %}{{ answer_bg_color | default: '#ffffff' }}{% endif %};
+    {% else %}
+      color: {{ answer_color | default: '#555555' }};
+      background-color: {{ answer_bg_color | default: '#ffffff' }};
+    {% endif %}
+    font-size: {{ answer_text_size | default: 14 }}px;
+    line-height: 1.4;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .faq-item.active .faq-toggle {
+    transform: rotate(45deg);
+  }
+
+  .faq-item.active .faq-answer {
+    max-height: 800px;
+    padding: 0 16px {{ item_padding | default: 12 }}px;
+    overflow-y: auto;
+  }
+
+  /* Ensure lists display properly inside FAQ answers */
+  .faq-answer ul,
+  .faq-answer ol {
+    list-style-position: inside;
+    margin: 0.5em 0;
+    padding-left: 0;
+  }
+
+  .faq-answer ul {
+    list-style-type: disc;
+  }
+
+  .faq-answer ol {
+    list-style-type: decimal;
+  }
+
+  .faq-answer ul li,
+  .faq-answer ol li {
+    margin-bottom: 0.25em;
+    padding-left: 0.5em;
+  }
+
+  .faq-answer p {
+    margin: 0.5em 0;
+  }
+
+  .faq-answer p:first-child {
+    margin-top: 0;
+  }
+
+  .faq-answer p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Images in FAQ answers (from product description) */
+  .faq-answer img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0.5em 0;
+  }
+
+  /* Custom scrollbar styling for FAQ answers */
+  .faq-answer::-webkit-scrollbar {
+    width: 6px;
+  }
+  .faq-answer::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+  }
+  .faq-answer::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+  }
+  .faq-answer::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  /* Media queries for responsive design */
+  @media screen and (max-width: 768px) {
+    .product-faq {
+      font-size: 90%;
+      width: 100%;
+    }
+
+    .faq-question {
+      padding: {{ question_padding | default: 10 }}px 14px;
+      font-size: {{ text_size | default: 14 }}px;
+    }
+
+    .faq-question-image,
+    .faq-question-svg {
+      width: {{ image_size | default: 40 | times: 0.875 }}px;
+      height: {{ image_size | default: 40 | times: 0.875 }}px;
+      margin-right: 10px;
+    }
+
+    .faq-toggle {
+      font-size: 16px;
+    }
+
+    .faq-answer {
+      padding: 0 14px;
+      font-size: {{ answer_text_size | default: 14 }}px;
+      letter-spacing: var(--letter-spacing-body);
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 600px;
+      padding: 0 14px {{ item_padding | default: 10 }}px;
+    }
+
+    /* Smaller scrollbar on mobile */
+    .faq-answer::-webkit-scrollbar {
+      width: 4px;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .product-faq {
+      font-size: 85%;
+      width: 100%;
+      margin: {{ margin_top | default: 20 | times: 0.8 }}px auto {{ margin_bottom | default: 20 | times: 0.8 }}px;
+    }
+
+    .faq-question {
+      padding: {{ question_padding | default: 8 }}px 12px;
+      font-size: {{ text_size | default: 14 }}px;
+    }
+
+    .faq-question-image,
+    .faq-question-svg {
+      width: {{ image_size | default: 40 | times: 0.75 }}px;
+      height: {{ image_size | default: 40 | times: 0.75 }}px;
+      margin-right: 8px;
+    }
+
+    .faq-toggle {
+      font-size: 14px;
+    }
+
+    .faq-answer {
+      padding: 0 12px;
+      font-size: {{ answer_text_size | default: 14 }}px;
+      line-height: 1.3;
+      letter-spacing: var(--letter-spacing-body);
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 500px;
+      padding: 0 12px {{ item_padding | default: 8 }}px;
+    }
+
+    /* Even smaller scrollbar on small mobile */
+    .faq-answer::-webkit-scrollbar {
+      width: 3px;
+    }
+  }
+</style>

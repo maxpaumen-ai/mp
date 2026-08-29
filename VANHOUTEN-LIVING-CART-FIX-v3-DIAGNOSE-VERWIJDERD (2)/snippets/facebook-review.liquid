@@ -1,0 +1,288 @@
+{% comment %}
+  Facebook-style review component
+  Usage:
+  {% render 'facebook-review',
+    avatar: block.settings.avatar,
+    username: block.settings.username,
+    content: block.settings.review_content,
+    star_color: block.settings.star_color,
+    empty_star_color: block.settings.empty_star_color,
+    username_font_size: block.settings.username_font_size,
+    content_font_size: block.settings.content_font_size,
+    meta_font_size: block.settings.meta_font_size,
+    action_button_font_size: block.settings.action_button_font_size,
+    margin_top: block.settings.margin_top,
+    margin_bottom: block.settings.margin_bottom
+  %}
+{% endcomment %}
+
+<div
+  id="fb-review"
+  class="fb-review"
+  style="margin-top: {{ margin_top | default: 7 }}px !important; margin-bottom: {{ margin_bottom | default: 7 }}px !important;"
+>
+  <div class="fb-review__header">
+    <div class="fb-review__avatar">
+      {% if avatar != blank %}
+        {{ avatar | image_url: width: 85 | image_tag: loading: 'lazy', alt: username | default: 'Jane Smith' }}
+      {% else %}
+        <img src="https://placehold.co/85x85?text=User" alt="{{ username | default: 'Jane Smith' }}" width="" height="">
+      {% endif %}
+    </div>
+    <div class="fb-review__user-info">
+      <p class="fb-review__username">{{ username | default: 'Jane Smith' }}</p>
+      <div class="fb-review__meta">
+        <span class="fb-review__time" id="yesterday-date">Loading date...</span>
+      </div>
+    </div>
+    <div class="fb-review__rating">
+      {% for i in (1..5) %}
+        <svg class="fb-review__star" width="13" height="13" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+        </svg>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="fb-review__content">
+    {{
+      content
+      | default: "I absolutely love this product! It's been a game changer for me. The quality is exceptional and it works exactly as described. Shipping was fast and the customer service was outstanding. Highly recommend to anyone looking for this type of solution."
+    }}
+  </div>
+
+  <div class="fb-review__actions">
+    <button class="fb-review__action-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 21H5V9H1V21ZM23 10C23 8.9 22.1 8 21 8H14.69L15.64 3.43L15.67 3.11C15.67 2.7 15.5 2.32 15.23 2.05L14.17 1L7.59 7.59C7.22 7.95 7 8.45 7 9V19C7 20.1 7.9 21 9 21H18C18.83 21 19.54 20.5 19.84 19.78L22.86 12.73C22.95 12.5 23 12.26 23 12V10.08L22.98 10.09L23 10Z" fill="currentColor"/>
+      </svg>
+      Like
+    </button>
+    <button class="fb-review__action-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21.99 4C21.99 2.9 21.1 2 20 2H4C2.9 2 2 2.9 2 4V16C2 17.1 2.9 18 4 18H18L22 22L21.99 4ZM18 14H6V12H18V14ZM18 11H6V9H18V11ZM18 8H6V6H18V8Z" fill="currentColor"/>
+      </svg>
+      Comment
+    </button>
+    <button class="fb-review__action-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 16.08C17.24 16.08 16.56 16.38 16.04 16.85L8.91 12.7C8.96 12.47 9 12.24 9 12C9 11.76 8.96 11.53 8.91 11.3L15.96 7.19C16.5 7.69 17.21 8 18 8C19.66 8 21 6.66 21 5C21 3.34 19.66 2 18 2C16.34 2 15 3.34 15 5C15 5.24 15.04 5.47 15.09 5.7L8.04 9.81C7.5 9.31 6.79 9 6 9C4.34 9 3 10.34 3 12C3 13.66 4.34 15 6 15C6.79 15 7.5 14.69 8.04 14.19L15.16 18.35C15.11 18.56 15.08 18.78 15.08 19C15.08 20.61 16.39 21.92 18 21.92C19.61 21.92 20.92 20.61 20.92 19C20.92 17.39 19.61 16.08 18 16.08Z" fill="currentColor"/>
+      </svg>
+      Share
+    </button>
+  </div>
+
+  <style id="fb-review-styles">
+    #fb-review.fb-review {
+      font-family: var(--font-body-family-override);
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 100% !important;
+      flex: 1 1 100% !important;
+      box-sizing: border-box !important;
+      border-radius: 5.8px;
+      background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+      box-shadow: 0 0.7px 2.2px rgba(0, 0, 0, 0.1);
+      margin: 7px 0 !important;
+      padding: 8.5px;
+      border: 0.7px solid #dddfe2;
+      display: block !important;
+      float: none !important;
+      left: 0 !important;
+      right: 0 !important;
+      position: relative !important;
+    }
+
+    #fb-review.fb-review * {
+      box-sizing: border-box !important;
+      margin: 0;
+      padding: 0;
+    }
+
+    #fb-review .fb-review__header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    #fb-review .fb-review__avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-right: 8.5px;
+      flex-shrink: 0;
+      background-color: #E4E6EB;
+      box-shadow: 0 0.7px 1.4px rgba(0, 0, 0, 0.1);
+    }
+
+    #fb-review .fb-review__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #fb-review .fb-review__avatar-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #1877F2;
+      color: white;
+      font-weight: var(--font-weight-bold);
+      font-size: 13px;
+    }
+
+    #fb-review .fb-review__user-info {
+      flex: 1;
+      padding-top: 1.4px;
+    }
+
+    #fb-review .fb-review__username {
+      font-weight: var(--font-weight-semibold) !important;
+      font-size: {{ username_font_size | default: 10.8 }}px;
+      color: #050505;
+      margin-bottom: 1.4px;
+      letter-spacing: -0.18px;
+      line-height: 1.2;
+    }
+
+    #fb-review .fb-review__meta {
+      display: flex;
+      align-items: center;
+      font-size: {{ meta_font_size | default: 9.4 }}px;
+      color: #65676B;
+      line-height: 1.3;
+    }
+
+    #fb-review .fb-review__time {
+      margin-right: 5.8px;
+    }
+
+    #fb-review .fb-review__rating {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      padding-right: 6.8px;
+      gap: -0.3px;
+    }
+
+    #fb-review .fb-review__star {
+      fill: {{ star_color | default: '#1877F2' }};
+      flex-shrink: 0;
+      margin-right: -2.5px;
+      height: 17px;
+      width: 17px;
+    }
+
+    #fb-review .fb-review__star--empty {
+      fill: {{ empty_star_color | default: '#CCD0D5' }};
+    }
+
+    #fb-review .fb-review__content {
+      font-size: {{ content_font_size | default: 10.2 }}px;
+      color: #050505;
+      line-height: 1.3;
+      margin-bottom: 6.8px;
+      word-wrap: break-word;
+    }
+
+    #fb-review .fb-review__actions {
+      display: flex;
+      border-top: 0.7px solid #CCD0D5;
+      margin: 0 -8.5px 0 -8.5px;
+      padding-bottom: 0;
+    }
+
+    #fb-review .fb-review__action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7.2px 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #65676B;
+      font-size: {{ action_button_font_size | default: 10.1 }}px;
+      font-weight: var(--font-weight-semibold);
+      transition: none;
+    }
+
+    #fb-review .fb-review__action-btn svg {
+      margin-right: 4.3px;
+    }
+
+    @media (max-width: 576px) {
+      #fb-review.fb-review {
+        margin: 5px 0;
+        padding: 7px;
+        border-radius: 4.3px;
+      }
+
+      #fb-review .fb-review__avatar {
+        width: 25.5px;
+        height: 25.5px;
+      }
+
+      #fb-review .fb-review__username {
+        font-size: 9.4px;
+      }
+
+      #fb-review .fb-review__content {
+        font-size: 10.2px;
+      }
+
+      #fb-review .fb-review__actions {
+        margin: 0 -7px 0 -7px;
+      }
+    }
+  </style>
+
+  <script>
+    (function () {
+      const fbReviewElement = document.getElementById('fb-review');
+      if (!fbReviewElement) return;
+
+      const yesterdayDateElement = document.getElementById('yesterday-date');
+      if (!yesterdayDateElement) return;
+
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+
+      const formatTime = (date) => {
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12;
+        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+        return `${formattedHours}:${formattedMinutes} ${ampm}`;
+      };
+
+      const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+
+      const month = months[yesterday.getMonth()];
+      const day = yesterday.getDate();
+      const timeStr = formatTime(yesterday);
+
+      const formattedDate = `${month} ${day} at ${timeStr}`;
+
+      yesterdayDateElement.textContent = formattedDate;
+    })();
+  </script>
+</div>

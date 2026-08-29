@@ -1,0 +1,88 @@
+{% comment %}
+  Announcement Bar Component
+  Displays a countdown banner with animated gradient background
+  
+  Required parameters:
+  - section: section object with settings
+{% endcomment %}
+
+{{ 'announcement-bar.css' | asset_url | stylesheet_tag }}
+
+<div 
+  class="announcement-bar" 
+  data-component="announcement-bar"
+  data-section-id="{{ section.id }}"
+  data-use-theme-colors="{{ section.settings.use_theme_colors }}"
+  data-sticky="{{ section.settings.sticky_with_header }}"
+  data-show-days="{{ section.settings.show_days }}"
+  data-custom-date="{{ section.settings.custom_date }}"
+  data-end-date="{{ section.settings.end_date }}"
+  data-timezone="{{ section.settings.timezone | default: 'America/New_York' }}"
+  {% if section.settings.sticky_with_header %}data-sticky="true"{% endif %}
+>
+  <div class="announcement-bar__container">
+    
+    {% if section.settings.announcement_text != blank %}
+      <div class="announcement-bar__text">
+        {{ section.settings.announcement_text }}
+      </div>
+    {% endif %}
+    
+    <div class="announcement-bar__countdown">
+      {% if section.settings.show_days %}
+        <div class="countdown-item">
+          <span class="countdown-time countdown-days">00</span>
+          <span class="countdown-label">{{ section.settings.days_label | default: 'DAYS' }}</span>
+        </div>
+        <span class="countdown-separator">:</span>
+      {% endif %}
+      
+      <div class="countdown-item">
+        <span class="countdown-time countdown-hours">24</span>
+        <span class="countdown-label">{{ section.settings.hours_label | default: 'HRS' }}</span>
+      </div>
+      
+      <span class="countdown-separator">:</span>
+      
+      <div class="countdown-item">
+        <span class="countdown-time countdown-minutes">00</span>
+        <span class="countdown-label">{{ section.settings.minutes_label | default: 'MIN' }}</span>
+      </div>
+      
+      <span class="countdown-separator">:</span>
+      
+      <div class="countdown-item">
+        <span class="countdown-time countdown-seconds">00</span>
+        <span class="countdown-label">{{ section.settings.seconds_label | default: 'SEC' }}</span>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+{% comment %} Dynamic CSS Variables {% endcomment %}
+<style>
+  [data-section-id="{{ section.id }}"] {
+    {% if section.settings.use_theme_colors %}
+      --announcement-bg-1: {{ settings.global_section_accent_2_color | default: '#FFF5EA' }};
+      --announcement-bg-2: {{ settings.global_section_accent_1_color | default: '#FFDAE0' }};
+      --announcement-bg-3: {{ settings.global_section_accent_2_color | default: '#FDFFE7' }};
+      --announcement-bg-4: {{ settings.global_section_accent_1_color | default: '#FF99A9' }};
+      --announcement-text-color: {{ settings.global_section_background_color | default: '#000000' }};
+      --countdown-bg-color: {{ settings.global_section_background_color | default: '#000000' }};
+      --countdown-text-color: {{ settings.global_section_text_color | default: '#FFFFFF' }};
+      --countdown-label-color: {{ settings.global_section_accent_1_color | default: '#FFFFFF' }};
+    {% else %}
+      --announcement-bg-1: {{ section.settings.gradient_color_1 | default: '#FFF5EA' }};
+      --announcement-bg-2: {{ section.settings.gradient_color_2 | default: '#FFDAE0' }};
+      --announcement-bg-3: {{ section.settings.gradient_color_3 | default: '#FDFFE7' }};
+      --announcement-bg-4: {{ section.settings.gradient_color_4 | default: '#FF99A9' }};
+      --announcement-text-color: {{ section.settings.text_color | default: '#000000' }};
+      --countdown-bg-color: {{ section.settings.timer_bg_color | default: '#000000' }};
+      --countdown-text-color: {{ section.settings.timer_text_color | default: '#FFFFFF' }};
+      --countdown-label-color: {{ section.settings.label_text_color | default: '#FFFFFF' }};
+    {% endif %}
+  }
+</style>
+
+<script src="{{ 'announcement-bar.js' | asset_url }}" defer></script>

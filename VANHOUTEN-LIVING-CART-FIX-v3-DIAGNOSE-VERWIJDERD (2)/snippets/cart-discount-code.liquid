@@ -1,0 +1,142 @@
+{% comment %}
+  VANHOUTEN LIVING — Kortingscode V1.8
+  - Bedoeld voor kortingscodes uit e-mailmarketing/campagnes.
+  - De submit-logica wordt permanent gedelegeerd vanuit assets/cart-drawer.js,
+    zodat het formulier ook na AJAX cart-updates blijft werken.
+{% endcomment %}
+
+<div id="cart-discount-code-form-block" class="cart-discount-code-wrapper">
+  <form class="cart-discount-code-form" id="CartDrawer-DiscountCode">
+    <div class="cart-discount-code-input-wrapper">
+      <label for="CartDrawer-DiscountCodeInput" class="visually-hidden">Kortingscode</label>
+      <input
+        type="text"
+        name="discount_code"
+        class="cart-discount-code-input"
+        id="CartDrawer-DiscountCodeInput"
+        placeholder="Voer je kortingscode in"
+        aria-label="Kortingscode"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+      >
+      <button
+        type="submit"
+        class="cart-discount-code-button disable-global-button-styling"
+        id="CartDrawer-DiscountCodeButton"
+        aria-label="Kortingscode toepassen"
+      >
+        <span class="cart-discount-code-button-text">Toepassen</span>
+        <span class="cart-discount-code-loading" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div class="cart-discount-code-message" id="CartDrawer-DiscountCodeMessage" role="status" aria-live="polite"></div>
+  </form>
+</div>
+
+<style>
+  .cart-drawer .cart-discount-code-wrapper {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .cart-drawer .cart-discount-code-form {
+    width: 100%;
+  }
+
+  .cart-drawer .cart-discount-code-input-wrapper {
+    width: 100%;
+    min-height: 46px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .cart-drawer .cart-discount-code-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 46px !important;
+    margin: 0 !important;
+    padding: 0 13px !important;
+    border: 1px solid #ded9d1 !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: #292824 !important;
+    font-family: inherit !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+  }
+
+  .cart-drawer .cart-discount-code-input::placeholder {
+    color: #817c74 !important;
+    opacity: 1;
+  }
+
+  .cart-drawer .cart-discount-code-input:focus {
+    outline: 1px solid #4c4b47 !important;
+    outline-offset: 1px !important;
+    border-color: #4c4b47 !important;
+  }
+
+  .cart-drawer .cart-discount-code-button {
+    position: relative !important;
+    min-width: 92px !important;
+    height: 46px !important;
+    margin: 0 !important;
+    padding: 0 15px !important;
+    border: 1px solid #4c4b47 !important;
+    border-radius: 8px !important;
+    background: #4c4b47 !important;
+    color: #fff !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    cursor: pointer !important;
+  }
+
+  .cart-drawer .cart-discount-code-button:hover {
+    background: #3f3e3a !important;
+    border-color: #3f3e3a !important;
+  }
+
+  .cart-drawer .cart-discount-code-button:disabled {
+    opacity: .65 !important;
+    cursor: wait !important;
+  }
+
+  .cart-drawer .cart-discount-code-loading {
+    display: none;
+    width: 15px;
+    height: 15px;
+    border: 2px solid rgba(255,255,255,.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: vhlDiscountSpin .7s linear infinite;
+  }
+
+  .cart-drawer .cart-discount-code-button.loading .cart-discount-code-button-text {
+    display: none;
+  }
+
+  .cart-drawer .cart-discount-code-button.loading .cart-discount-code-loading {
+    display: inline-block;
+  }
+
+  .cart-drawer .cart-discount-code-message {
+    min-height: 0;
+    margin-top: 7px;
+    color: #77736c;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .cart-drawer .cart-discount-code-message.success { color: #4f6953; }
+  .cart-drawer .cart-discount-code-message.error { color: #8a3c36; }
+
+  @keyframes vhlDiscountSpin { to { transform: rotate(360deg); } }
+</style>

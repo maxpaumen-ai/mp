@@ -1,0 +1,2094 @@
+{% comment %}
+  Component: Collection Grid Page
+
+  Description: Advanced product grid with filtering, search, and sorting functionality
+
+  Features:
+  - Collection filtering and navigation
+  - Product search functionality
+  - Sort by price, name, date
+  - Color swatches support
+  - Image aspect ratio options
+  - Responsive grid layout
+  - Sidebar filters (optional)
+  - Pagination support
+  - URL-based collection detection
+
+  Settings:
+  - use_theme_colors: boolean - Use global theme colors
+  - enable_sidebar: boolean - Show filters sidebar
+  - enable_pagination: boolean - Enable pagination
+  - show_color_swatches: boolean - Display color swatches
+  - Grid layout and styling options
+  - Typography and color controls
+{% endcomment %}
+
+{{ 'collection-grid-page.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }} {
+    /* CSS Variables for dynamic styling */
+    --section-padding-top: {{ section.settings.padding_top | default: 40 }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom | default: 40 }}px;
+    --section-background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.background_color }}{% endif %};
+
+    /* Color swatches */
+    --swatch-size: {{ section.settings.swatch_size | default: 24 }}px;
+
+    /* Typography */
+    --heading-alignment: {{ section.settings.heading_alignment | default: 'center' }};
+    --heading-size: {{ section.settings.heading_size | default: 28 }}px;
+    --heading-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.heading_color | default: '#000000' }}{% endif %};
+
+    /* Product cards */
+    --card-background: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.card_background | default: '#ffffff' }}{% endif %};
+    --card-radius: {{ section.settings.card_radius | default: 8 }}px;
+    --card-border-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.1 | default: 'rgb(240, 240, 240)' }}{% else %}rgb(240, 240, 240){% endif %};
+
+    /* Images */
+    --image-background: {{ section.settings.image_background | default: '#f8f8f8' }};
+    --image-fit: {{ section.settings.image_fit | default: 'contain' }};
+
+    /* Sale badges */
+    --badge-background: {{ section.settings.badge_background | default: '#000000' }};
+    --badge-color: {{ section.settings.badge_color | default: '#ffffff' }};
+    --badge-radius: {{ section.settings.badge_radius | default: 4 }}px;
+    {% if section.settings.badge_gradient %}
+      --badge-gradient: linear-gradient(135deg, {{ section.settings.badge_background | default: '#000000' }}, {{ section.settings.badge_gradient_color | default: '#666666' }});
+    {% endif %}
+
+    /* Product dots */
+    --dot-size: {{ section.settings.dot_size | default: 6 }}px;
+    --dot-color: {{ section.settings.dot_color | default: '#cccccc' }};
+    --dot-active-color: {{ section.settings.dot_active_color | default: '#000000' }};
+
+    /* Typography */
+    --title-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_color | default: '#000000' }}{% endif %};
+    --price-size: {{ section.settings.price_size | plus: 0 | default: 15 }}px;
+    --compare-price-color: {% if section.settings.use_theme_colors %}#b3b3b3{% else %}{{ section.settings.compare_price_color | default: '#999999' }}{% endif %};
+    --price-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.price_color | default: '#000000' }}{% endif %};
+
+    /* Stars */
+    --star-size: {{ section.settings.star_size | default: 18 }}px;
+    --star-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.star_color | default: '#FFD700' }}{% endif %};
+
+    /* Navigation */
+    --nav-text-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.nav_text_color | default: "#000000" }}{% endif %};
+    --nav-active-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.nav_active_color | default: "#000000" }}{% endif %};
+
+      /* Sorting */
+    --sort-label-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.sort_label_color | default: "#000000" }}{% endif %};
+    --sort-dropdown-bg: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.sort_dropdown_bg | default: "#ffffff" }}{% endif %};
+    --sort-dropdown-text: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.sort_dropdown_text | default: "#000000" }}{% endif %};
+    --sort-dropdown-border: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.15 | default: 'rgba(0, 0, 0, 0.15)' }}{% else %}{{ section.settings.sort_dropdown_border | default: "#e4e4e4" }}{% endif %};
+    --sort-dropdown-radius: {{ section.settings.sort_dropdown_radius | default: 4 }}px;
+
+    /* View Product button */
+    --view-product-background: {% if section.settings.use_theme_colors %}{{ settings.global_button_background_color | default: settings.global_section_accent_1_color }}{% else %}{{ section.settings.view_product_background | default: '#000000' }}{% endif %};
+    --view-product-color: {% if section.settings.use_theme_colors %}{{ settings.global_button_text_color | default: settings.global_section_button_text_color | default: settings.global_section_background_color }}{% else %}{{ section.settings.view_product_color | default: '#ffffff' }}{% endif %};
+  }
+
+  /* Sidebar filter background */
+  .section-{{ section.id }} .sidebar-filters__inner {
+    background-color: {{ section.settings.sidebar_filter_background | default: '#f5f5f5' }};
+  }
+
+  /* Image aspect ratio classes */
+  {% unless section.settings.image_aspect_ratio == 'natural' %}
+    .section-{{ section.id }} .product-image-container {
+      {% case section.settings.image_aspect_ratio %}
+        {% when '1_1' %}aspect-ratio: 1 / 1;
+        {% when '2_3' %}aspect-ratio: 2 / 3;
+        {% when '3_2' %}aspect-ratio: 3 / 2;
+        {% when '4_5' %}aspect-ratio: 4 / 5;
+        {% when '16_9' %}aspect-ratio: 16 / 9;
+        {% when '3_4' %}aspect-ratio: 3 / 4;
+        {% else %}aspect-ratio: auto;
+      {% endcase %}
+      overflow: hidden;
+    }
+  {% endunless %}
+{%- endstyle -%}
+
+<!-- URL-based collection detection -->
+{% assign url_collection_handle = null %}
+{% if section.settings.enable_url_collection_detection %}
+  {% assign url_collection = collection %}
+  {% if url_collection and url_collection.handle != blank %}
+    {% assign url_collection_handle = url_collection.handle %}
+  {% endif %}
+{% endif %}
+
+<div
+  class="collection-grid-section section-{{ section.id }}{% if section.settings.remove_card_styling %} remove-card-styling{% endif %} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}"
+  data-component="collection-grid-page"
+  data-section-id="{{ section.id }}"
+  data-url-collection="{{ url_collection_handle | default: '' }}"
+>
+  <div class="container">
+    {% if section.settings.heading != blank %}
+      <h2 class="section-heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    <!-- Search Bar (only show here if not in navigation bar) -->
+    {% if section.settings.show_search_bar and section.settings.search_in_nav_bar == false %}
+      <div class="collection-search-bar">
+        <div class="search-input-wrapper">
+          <input
+            type="text"
+            id="product-search-{{ section.id }}"
+            class="product-search-input"
+            placeholder="{{ section.settings.search_placeholder | default: 'Search products...' }}"
+            aria-label="Search products"
+          >
+          <div class="search-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </div>
+          <button type="button" class="search-clear" aria-label="Clear search" style="display: none;">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Collection Navigation and Sort by Bar -->
+    {% if section.settings.show_navigation or section.settings.show_sorting %}
+      <div class="collection-nav-sort-bar">
+        {% if section.settings.show_navigation and section.settings.enable_side_filters == false %}
+          <div class="collection-filters">
+            {% if section.settings.show_shop_all_tab %}
+              <!-- Shop All Link -->
+              {% assign shop_all_active = false %}
+              {% if url_collection_handle == null %}
+                {% assign shop_all_active = true %}
+              {% endif %}
+              <a
+                href="#"
+                data-collection="all"
+                class="collection-filter-link{% if shop_all_active %} active{% endif %}"
+              >
+                {{- 'sections.collection_grid.shop_all' | t -}}
+              </a>
+            {% endif %}
+
+            {% if section.settings.show_all_collections %}
+              <!-- Show all collections in the store - limit 1000 to ensure all collections are loaded -->
+              {% for collection in collections limit: 1000 %}
+                {% unless collection.handle == 'all' %}
+                  {% assign is_url_collection = false %}
+                  {% assign is_fallback_active = false %}
+
+                  {% if url_collection_handle == collection.handle %}
+                    {% assign is_url_collection = true %}
+                  {% endif %}
+
+                  {% if url_collection_handle == null
+                    and forloop.first
+                    and section.settings.show_shop_all_tab == false
+                  %}
+                    {% assign is_fallback_active = true %}
+                  {% endif %}
+
+                  <a
+                    href="#"
+                    data-collection="{{ collection.handle }}"
+                    class="collection-filter-link{% if is_url_collection or is_fallback_active %} active{% endif %}"
+                  >
+                    {{- collection.title -}}
+                  </a>
+                {% endunless %}
+              {% endfor %}
+            {% else %}
+              <!-- Collection Links from Blocks only -->
+              {% for block in section.blocks %}
+                {% if block.type == 'collection' and block.settings.collection != blank %}
+                  {% assign collection_item = collections[block.settings.collection] %}
+                  {% assign is_url_collection = false %}
+                  {% assign is_fallback_active = false %}
+
+                  {% if url_collection_handle == collection_item.handle %}
+                    {% assign is_url_collection = true %}
+                  {% endif %}
+
+                  {% if url_collection_handle == null
+                    and forloop.first
+                    and section.settings.show_shop_all_tab == false
+                  %}
+                    {% assign is_fallback_active = true %}
+                  {% endif %}
+
+                  <a
+                    href="#"
+                    data-collection="{{ collection_item.handle }}"
+                    class="collection-filter-link{% if is_url_collection or is_fallback_active %} active{% endif %}"
+                  >
+                    {{- collection_item.title -}}
+                  </a>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <!-- Search Bar in Navigation Bar -->
+        {% if section.settings.show_search_bar and section.settings.search_in_nav_bar %}
+          <div class="collection-search-bar nav-search-bar">
+            <div class="search-input-wrapper">
+              <input
+                type="text"
+                id="product-search-{{ section.id }}"
+                class="product-search-input"
+                placeholder="{{ section.settings.search_placeholder | default: 'Search products...' }}"
+                aria-label="Search products"
+              >
+              <div class="search-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+              </div>
+              <button type="button" class="search-clear" aria-label="Clear search" style="display: none;">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+        {% endif %}
+
+        {% if section.settings.show_sorting %}
+          <div class="sort-by-container">
+            <div class="sort-by-label">
+              {% if section.settings.sort_label != blank -%}
+                {{- section.settings.sort_label -}}
+              {%- else -%}
+                {{- 'sections.collection_grid.sort_by' | t -}}
+              {%- endif %}
+            </div>
+            <div class="sort-by-dropdown">
+              <select aria-label="Sort products">
+                <option value="best-selling">{{ 'products.facets.sort_options.best_selling' | t }}</option>
+                <option value="price-ascending">{{ 'products.facets.sort_options.price_ascending' | t }}</option>
+                <option value="price-descending">{{ 'products.facets.sort_options.price_descending' | t }}</option>
+                <option value="title-ascending">{{ 'products.facets.sort_options.title_ascending' | t }}</option>
+                <option value="title-descending">{{ 'products.facets.sort_options.title_descending' | t }}</option>
+                <option value="created-descending">{{ 'products.facets.sort_options.created_descending' | t }}</option>
+                <option value="created-ascending">{{ 'products.facets.sort_options.created_ascending' | t }}</option>
+              </select>
+              <svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if section.settings.enable_side_filters %}
+      <div class="collection-grid-with-sidebar section-{{ section.id }}">
+        <aside class="sidebar-filters">
+          <div class="sidebar-filters__inner">
+            <div class="sidebar-filters__header">
+              <span class="sidebar-filters__title">
+                <svg class="sidebar-filters__icon" width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g clip-path="url(#filter-icon-clip)"><path fill="currentColor" fill-rule="evenodd" d="M3.124 20.992c-.04.005-.082.008-.124.008H1a1 1 0 1 1 0-2h2c.042 0 .083.003.124.008a4.002 4.002 0 0 1 7.75-.008H23a1 1 0 1 1 0 2H10.874a4.002 4.002 0 0 1-7.75-.008ZM7 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM7 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm3.874-3a4.002 4.002 0 0 0-7.75.008A1.01 1.01 0 0 0 3 3H1a1 1 0 0 0 0 2h2c.042 0 .083-.003.124-.008a4.002 4.002 0 0 0 7.75.008H23a1 1 0 1 0 0-2H10.874ZM15 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0Zm2 4a4.002 4.002 0 0 1-3.874-3H1a1 1 0 1 1 0-2h12.126a4.002 4.002 0 0 1 7.75.008c.04-.005.082-.008.124-.008h2a1 1 0 1 1 0 2h-2c-.042 0-.083-.003-.124-.008A4.002 4.002 0 0 1 17 16Z" clip-rule="evenodd"/></g><defs><clipPath id="filter-icon-clip"><path fill="#fff" d="M0 0h24v24H0z"/></clipPath></defs></svg>
+                {{ 'products.facets.filter_by_label' | t | default: 'Filter' }}
+              </span>
+            </div>
+
+            <div class="sidebar-filters__content">
+            {% comment %} Collect all unique variant options from ALL products sitewide {% endcomment %}
+            {% assign all_size_options = '' %}
+            {% assign all_color_options = '' %}
+            {% assign all_material_options = '' %}
+            {% assign all_style_options = '' %}
+
+            {% comment %} Get all products from the 'all' collection which contains every product - Use limit 1000 to get all products {% endcomment %}
+            {% for product in collections.all.products limit: 1000 %}
+              {% unless product.tags contains 'hidden' or product.tags contains 'free-gift' %}
+                {% for option in product.options_with_values %}
+                  {% assign option_name = option.name | downcase | strip %}
+
+                  {% comment %} Size variants {% endcomment %}
+                  {% if option_name contains 'size' %}
+                    {% for value in option.values %}
+                      {% assign clean_value = value | strip %}
+                      {% unless all_size_options contains clean_value %}
+                        {% if all_size_options == blank %}
+                          {% assign all_size_options = clean_value %}
+                        {% else %}
+                          {% assign all_size_options = all_size_options | append: '|' | append: clean_value %}
+                        {% endif %}
+                      {% endunless %}
+                    {% endfor %}
+
+                    {% comment %} Color variants {% endcomment %}
+                  {% elsif option_name contains 'color' or option_name contains 'colour' %}
+                    {% for value in option.values %}
+                      {% assign clean_value = value | strip %}
+                      {% unless all_color_options contains clean_value %}
+                        {% if all_color_options == blank %}
+                          {% assign all_color_options = clean_value %}
+                        {% else %}
+                          {% assign all_color_options = all_color_options | append: '|' | append: clean_value %}
+                        {% endif %}
+                      {% endunless %}
+                    {% endfor %}
+
+                    {% comment %} Material/Fabric variants {% endcomment %}
+                  {% elsif option_name contains 'material' or option_name contains 'fabric' %}
+                    {% for value in option.values %}
+                      {% assign clean_value = value | strip %}
+                      {% unless all_material_options contains clean_value %}
+                        {% if all_material_options == blank %}
+                          {% assign all_material_options = clean_value %}
+                        {% else %}
+                          {% assign all_material_options = all_material_options | append: '|' | append: clean_value %}
+                        {% endif %}
+                      {% endunless %}
+                    {% endfor %}
+
+                    {% comment %} Style/Type variants {% endcomment %}
+                  {% elsif option_name contains 'style' or option_name contains 'type' %}
+                    {% for value in option.values %}
+                      {% assign clean_value = value | strip %}
+                      {% unless all_style_options contains clean_value %}
+                        {% if all_style_options == blank %}
+                          {% assign all_style_options = clean_value %}
+                        {% else %}
+                          {% assign all_style_options = all_style_options | append: '|' | append: clean_value %}
+                        {% endif %}
+                      {% endunless %}
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endunless %}
+            {% endfor %}
+
+            {% comment %} Size Filter {% endcomment %}
+            {% if all_size_options != blank %}
+              {% assign size_array = all_size_options | split: '|' | uniq | sort %}
+              <details class="sf-group" open>
+                <summary class="sf-group__title">{{ 'sections.collection_grid.size' | t | default: 'Size' }}</summary>
+                <div class="sf-group__options">
+                  {% for size in size_array %}
+                    {% if size != blank %}
+                      <label class="sf-option"
+                        ><input class="sf-input" type="checkbox" data-filter-group="size" value="{{ size }}">
+                        <span>{{ size }}</span></label
+                      >
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </details>
+            {% endif %}
+
+            {% comment %} Color Filter {% endcomment %}
+            {% if all_color_options != blank %}
+              {% assign color_array = all_color_options | split: '|' | uniq | sort %}
+              <details class="sf-group" open>
+                <summary class="sf-group__title">{{ 'sections.collection_grid.color' | t | default: 'Color' }}</summary>
+                <div class="sf-group__options sf-group__options--colors">
+                  {% for color in color_array %}
+                    {% if color != blank %}
+                      <label class="sf-option"
+                        ><input class="sf-input" type="checkbox" data-filter-group="color" value="{{ color }}">
+                        <span>{{ color }}</span></label
+                      >
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </details>
+            {% endif %}
+
+            {% comment %} Material Filter {% endcomment %}
+            {% if all_material_options != blank %}
+              {% assign material_array = all_material_options | split: '|' | uniq | sort %}
+              <details class="sf-group" open>
+                <summary class="sf-group__title">Material</summary>
+                <div class="sf-group__options">
+                  {% for material in material_array %}
+                    {% if material != blank %}
+                      <label class="sf-option"
+                        ><input class="sf-input" type="checkbox" data-filter-group="material" value="{{ material }}">
+                        <span>{{ material }}</span></label
+                      >
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </details>
+            {% endif %}
+
+            {% comment %} Style Filter {% endcomment %}
+            {% if all_style_options != blank %}
+              {% assign style_array = all_style_options | split: '|' | uniq | sort %}
+              <details class="sf-group" open>
+                <summary class="sf-group__title">Style</summary>
+                <div class="sf-group__options">
+                  {% for style in style_array %}
+                    {% if style != blank %}
+                      <label class="sf-option"
+                        ><input class="sf-input" type="checkbox" data-filter-group="style" value="{{ style }}">
+                        <span>{{ style }}</span></label
+                      >
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </details>
+            {% endif %}
+
+              <button type="button" class="sidebar-filters__apply-btn sidebar-filters__apply-btn--mobile button" data-apply-filters>
+                {{ 'products.facets.apply_filters' | t | default: 'Apply Filters' }}
+              </button>
+              <button type="button" class="sidebar-filters__clear" data-clear-filters>
+                {{ 'products.facets.clear_all' | t | default: 'Clear all' }}
+              </button>
+            </div><!-- /.sidebar-filters__content -->
+
+            <div class="sidebar-filters__apply">
+              <button type="button" class="sidebar-filters__apply-btn button" data-apply-filters>
+                {{ 'products.facets.apply_filters' | t | default: 'Apply Filters' }}
+              </button>
+            </div>
+          </div>
+        </aside>
+        <div class="product-grid-wrapper">
+          <div class="product-grid">
+    {% else %}
+      <div class="product-grid">
+    {% endif %}
+    <!-- Collection products data is now handled in external JavaScript file -->
+
+    <!-- Debug: Check if products exist -->
+    <!-- Total products in all collection: {{ collections.all.products.size }} -->
+    <!-- Collections available: {{ collections.size }} -->
+
+    <!-- Always load ALL products for "Shop All" functionality -->
+    {% assign pagination_limit = section.settings.pagination_amount | default: 24 %}
+    {% unless section.settings.enable_pagination %}
+      {% assign pagination_limit = 1000 %}
+    {% endunless %}
+
+    {% comment %} Check if 'all' collection exists and has products {% endcomment %}
+    {% if collections.all and collections.all.products.size > 0 %}
+      {% paginate collections.all.products by pagination_limit %}
+        {% assign all_products = collections.all.products %}
+
+        {% for product in all_products %}
+          {% unless product.tags contains 'hidden' or product.tags contains 'free-gift' %}
+            {% assign product_collections = '' %}
+            {% for collection in product.collections limit: 100 %}
+              {% assign product_collections = product_collections | append: collection.handle | append: ' ' %}
+            {% endfor %}
+
+            <div
+              class="product-card{% if section.settings.full_card_clickable %} full-card-clickable{% endif %}"
+              data-collection="all {{ product_collections | strip }}"
+              data-all-products="true"
+              data-type="{{ product.type | handle }}"
+              data-vendor="{{ product.vendor | handle }}"
+              data-tags="{{ product.tags | join: ',' | handle }}"
+              data-price="{{ product.price }}"
+              data-title="{{ product.title }}"
+              data-created="{{ product.created_at | date: '%s' }}"
+              data-index="{{ forloop.index }}"
+              {% if section.settings.full_card_clickable %}
+                data-product-url="{{ product.url }}"
+              {% endif %}
+              {% comment %} Determine product visibility {% endcomment %}
+              {% assign should_hide_product = false %}
+
+              {% if url_collection_handle %}
+                {% comment %} URL collection mode - show only products from URL collection {% endcomment %}
+                {% assign url_collection_product = false %}
+                {% for collection in product.collections limit: 100 %}
+                  {% if collection.handle == url_collection_handle %}
+                    {% assign url_collection_product = true %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+                {% unless url_collection_product %}
+                  {% assign should_hide_product = true %}
+                {% endunless %}
+              {% elsif section.settings.show_shop_all_tab == false %}
+                {% comment %} No Shop All tab - show products from first available collection {% endcomment %}
+                {% if section.settings.show_all_collections %}
+                  {% comment %} Find first collection and check if product belongs to it {% endcomment %}
+                  {% assign first_collection_handle = null %}
+                  {% for collection in collections limit: 1000 %}
+                    {% unless collection.handle == 'all' %}
+                      {% assign first_collection_handle = collection.handle %}
+                      {% break %}
+                    {% endunless %}
+                  {% endfor %}
+                  {% if first_collection_handle %}
+                    {% assign belongs_to_first = false %}
+                    {% for collection in product.collections limit: 100 %}
+                      {% if collection.handle == first_collection_handle %}
+                        {% assign belongs_to_first = true %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                    {% unless belongs_to_first %}
+                      {% assign should_hide_product = true %}
+                    {% endunless %}
+                  {% endif %}
+                {% else %}
+                  {% comment %} Use main collection setting {% endcomment %}
+                  {% assign main_collection = collections[section.settings.collection] %}
+                  {% if main_collection %}
+                    {% assign belongs_to_main = false %}
+                    {% for collection in product.collections limit: 100 %}
+                      {% if collection.handle == main_collection.handle %}
+                        {% assign belongs_to_main = true %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                    {% unless belongs_to_main %}
+                      {% assign should_hide_product = true %}
+                    {% endunless %}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+
+              {% if should_hide_product %}
+                style="display: none;"
+              {% endif %}
+            >
+              {% unless section.settings.show_view_product %}
+                <a href="{{ product.url }}" class="product-link">
+              {% endunless %}
+              <div class="product-image-container{% unless section.settings.image_aspect_ratio == 'natural' %} aspect-{{ section.settings.image_aspect_ratio }}{% endunless %}">
+                {% if product.compare_at_price > product.price and section.settings.show_sale_badge %}
+                  <div class="sale-badge {% if section.settings.badge_gradient %}badge-gradient{% endif %}">
+                    <span class="sale-badge-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                        <rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/>
+                      </svg>
+                    </span>
+                    {% if section.settings.sale_badge_text != blank %}
+                      {{ section.settings.sale_badge_text }}
+                    {% else %}
+                      {% assign savings = product.compare_at_price | minus: product.price %}
+                      {% if section.settings.show_percentage_off %}
+                        {% assign savings_percentage = savings | times: 100 | divided_by: product.compare_at_price %}
+                        {{ savings_percentage }}%
+                        {{ section.settings.sale_badge_off_text | default: 'general.sale_badge.off' | t }}
+                      {% else %}
+                        {% if section.settings.sale_badge_save_text != blank %}
+                          {{ section.settings.sale_badge_save_text }}
+                          {{ savings | money }}
+                        {% else %}
+                          {% assign savings_formatted = savings | money %}
+                          {{ 'general.sale_badge.save_amount' | t: amount: savings_formatted }}
+                        {% endif %}
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                {% endif %}
+
+                <div class="product-slider">
+                  {% assign max_slides = section.settings.max_image_dots | default: 8 %}
+                  {% assign slides_to_show = product.images.size %}
+                  {% if slides_to_show > max_slides %}
+                    {% assign slides_to_show = max_slides %}
+                  {% endif %}
+                  <div class="product-slider-wrapper" data-slide-count="{{ slides_to_show }}">
+                    {% if product.images.size > 0 %}
+                      {% for image in product.images limit: slides_to_show %}
+                        <div class="product-slide">
+                          <img
+                            src="{{ image | img_url: '500x' }}"
+                            alt="{{ product.title | escape }}"
+                            class="product-image"
+                            width=""
+                            height=""
+                          >
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="product-slide">
+                        <img
+                          src="{{ product.featured_image | img_url: '500x' }}"
+                          alt="{{ product.title | escape }}"
+                          class="product-image"
+                          width=""
+                          height=""
+                        >
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="collection-product-info">
+                {% if product.images.size > 1 %}
+                  <div class="product-dots">
+                    {% assign max_dots = section.settings.max_image_dots | default: 8 %}
+                    {% assign dots_to_show = product.images.size %}
+                    {% if dots_to_show > max_dots %}
+                      {% assign dots_to_show = max_dots %}
+                    {% endif %}
+                    {% for i in (1..dots_to_show) %}
+                      <span class="dot {% if forloop.first %}active{% endif %}"></span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                {% if section.settings.show_rating %}
+                  {% if section.settings.use_theme_colors %}
+                    {% assign star_filled_color = settings.global_section_accent_1_color %}
+                  {% else %}
+                    {% assign star_filled_color = section.settings.star_color | default: '#FFD700' %}
+                  {% endif %}
+                  <div class="product-rating">
+                    <!-- Get rating value with explicit fallback -->
+                    {% assign metafield_rating = product.metafields.custom.rating.value %}
+                    {% assign section_rating = section.settings.rating_value | default: 5 %}
+
+                    {% if metafield_rating and metafield_rating != blank and metafield_rating != '' %}
+                      {% assign product_rating = metafield_rating | times: 1.0 %}
+                    {% else %}
+                      {% assign product_rating = section_rating | times: 1.0 %}
+                    {% endif %}
+
+                    <!-- Ensure rating is at least 1 to see filled stars -->
+                    {% if product_rating <= 0 %}
+                      {% assign product_rating = 5 %}
+                    {% endif %}
+
+                    <div class="stars">
+                      {% assign rating_decimal = product_rating | times: 1 %}
+                      {% assign rating_whole = rating_decimal | floor %}
+                      {% assign rating_fraction = rating_decimal | minus: rating_whole %}
+                      {% assign next_star = rating_whole | plus: 1 %}
+
+                      {% for i in (1..5) %}
+                        {% if i <= rating_whole %}
+                          <span class="star star-filled">
+                            <svg fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+                            </svg>
+                          </span>
+                        {% elsif i == next_star and rating_fraction >= 0.3 %}
+                          <span class="star star-half">
+                            <svg
+                              fill="currentColor"
+                              class="star-bg"
+                              viewBox="0 0 32 32"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+                            </svg>
+                            <svg
+                              fill="currentColor"
+                              class="star-fill"
+                              viewBox="0 0 32 32"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M16,4.588 L16,22.023 L8.583,27.412 L11.416,18.693 L4,13.306 L13.167,13.306 L16,4.588 Z"/>
+                            </svg>
+                          </span>
+                        {% else %}
+                          <span class="star star-empty">
+                            <svg fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+                            </svg>
+                          </span>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                    {% if section.settings.show_rating_text %}
+                      <span class="rating-number"
+                        >(
+                        {{-
+                          product.metafields.custom.rating.value
+                          | default: section.settings.rating_number
+                          | default: '4.7'
+                        -}}
+                        )</span
+                      >
+                    {% endif %}
+                  </div>
+                {% endif %}
+
+                <h3 class="product-title">{{ product.title }}</h3>
+
+                {% if section.settings.show_color_swatches %}
+                  {% assign color_option = null %}
+                  {% assign color_option_name = null %}
+
+                  {% comment %} Look for color options with various names {% endcomment %}
+                  {% for option in product.options_with_values %}
+                    {% assign option_name_lower = option.name | downcase | strip %}
+                    {% if option_name_lower == 'color'
+                      or option_name_lower == 'colour'
+                      or option_name_lower == 'colors'
+                      or option_name_lower == 'colours'
+                    %}
+                      {% assign color_option = option %}
+                      {% assign color_option_name = option.name %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+
+                  {% comment %} If exact match not found, look for options containing color {% endcomment %}
+                  {% unless color_option %}
+                    {% for option in product.options_with_values %}
+                      {% assign option_name_lower = option.name | downcase | strip %}
+                      {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+                        {% assign color_option = option %}
+                        {% assign color_option_name = option.name %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endunless %}
+
+                  {% if color_option and color_option.values.size > 1 %}
+                    <div class="product-color-swatches">
+                      {% for value in color_option.values limit: 6 %}
+                        {% assign variant_for_value = null %}
+                        {% for variant in product.variants %}
+                          {% assign variant_option_value = variant.options[color_option.position]
+                            | default: variant[color_option_name]
+                          %}
+                          {% if variant_option_value == value %}
+                            {% assign variant_for_value = variant %}
+                            {% break %}
+                          {% endif %}
+                        {% endfor %}
+
+                        {% if variant_for_value %}
+                          <div
+                            class="color-swatch"
+                            data-variant-id="{{ variant_for_value.id }}"
+                            data-variant-image="{% if variant_for_value.image %}{{ variant_for_value.image | img_url: '500x' }}{% endif %}"
+                            title="{{ value | escape }}"
+                          >
+                            <div
+                              class="swatch-color"
+                              style="background-color: {{ value | replace: ' ', '' | downcase }}; background-image: url('{{ value | handle | append: '.png' | asset_url }}');"
+                            ></div>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endif %}
+
+                <div class="collection-product-price">
+                  <span class="collection-current-price">{{ product.price | money }}</span>
+                  {% if product.compare_at_price > product.price %}
+                    <span class="collection-regular-price">{{ product.compare_at_price | money }}</span>
+                  {% endif %}
+                </div>
+
+                {% if section.settings.show_view_product %}
+                  <div class="collection-view-product">
+                    <a href="{{ product.url }}" class="collection-view-product-btn icon-right">
+                      <span class="view-product-text">
+                        {% if section.settings.view_product_text != blank %}
+                          {{ section.settings.view_product_text }}
+                        {% else %}
+                          {{ 'products.product.view_product' | t | default: 'View Product' }}
+                        {% endif %}
+                      </span>
+                      {% if section.settings.show_view_product_icon %}
+                        <span
+                          class="view-product-icon"
+                          style="width: {{ section.settings.view_product_icon_size | default: 16 }}px; height: {{ section.settings.view_product_icon_size | default: 16 }}px;"
+                        >
+                          {% case section.settings.view_product_icon_type %}
+                            {% when 'arrow' %}
+                              <svg
+                                width="20"
+                                height="20"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                              >
+                                <path fill="currentColor" d="M13.48 10.832H3.332V9.168H13.48L8.812 4.5 10 3.332 16.668 10 10 16.668 8.812 15.5Zm0 0"/>
+                              </svg>
+                            {% when 'bag' %}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                                <line x1="3" y1="6" x2="21" y2="6"/>
+                                <path d="M16 10a4 4 0 0 1-8 0"/>
+                              </svg>
+                            {% when 'eye' %}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                              </svg>
+                            {% when 'plus' %}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M12 5v14"/>
+                                <path d="M5 12h14"/>
+                              </svg>
+                            {% when 'custom' %}
+                              {% if section.settings.view_product_custom_svg != blank %}
+                                {{ section.settings.view_product_custom_svg }}
+                              {% else %}
+                                <svg
+                                  width="20"
+                                  height="20"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path fill="currentColor" d="M13.48 10.832H3.332V9.168H13.48L8.812 4.5 10 3.332 16.668 10 10 16.668 8.812 15.5Zm0 0"/>
+                                </svg>
+                              {% endif %}
+                            {% else %}
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+                                <path fill="currentColor" d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM173.66,133.66l-32,32a8,8,0,0,1-11.32-11.32L148.69,136H88a8,8,0,0,1,0-16h60.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,173.66,133.66Z"/>
+                              </svg>
+                          {% endcase %}
+                        </span>
+                      {% endif %}
+                    </a>
+                  </div>
+                {% endif %}
+
+                {% if section.settings.show_product_metadata %}
+                  <div class="product-metadata">
+                    {% if product.metafields.custom.rating != blank and section.settings.use_product_rating %}
+                      <div class="metadata-item metadata-rating">
+                        <div class="stars">
+                          {% assign rating_decimal = product.metafields.custom.rating.value | times: 1 %}
+                          {% assign rating_whole = rating_decimal | floor %}
+                          {% assign rating_fraction = rating_decimal | minus: rating_whole %}
+                          {% assign next_star = rating_whole | plus: 1 %}
+
+                          {% for i in (1..5) %}
+                            {% if i <= rating_whole %}
+                              <span class="star star-filled">
+                                <svg fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+                                </svg>
+                              </span>
+                            {% elsif i == next_star and rating_fraction >= 0.3 %}
+                              <span class="star star-half">
+                                <svg
+                                  fill="currentColor"
+                                  class="star-bg"
+                                  viewBox="0 0 32 32"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+                                </svg>
+                                <svg
+                                  fill="currentColor"
+                                  class="star-fill"
+                                  viewBox="0 0 32 32"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path d="M16,4.588 L16,22.023 L8.583,27.412 L11.416,18.693 L4,13.306 L13.167,13.306 L16,4.588 Z"/>
+                                </svg>
+                              </span>
+                            {% else %}
+                              <span class="star star-empty">
+                                <svg fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+                                </svg>
+                              </span>
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                        <span class="metadata-rating-value">{{ product.metafields.custom.rating.value }}</span>
+                      </div>
+                    {% endif %}
+
+                    {% if section.settings.metadata_field_1 != blank
+                      and product.metafields.custom[section.settings.metadata_field_1] != blank
+                    %}
+                      <div class="metadata-item">
+                        {% if section.settings.show_metadata_labels %}
+                          <span class="metadata-label">
+                            {{- section.settings.metadata_label_1 | default: section.settings.metadata_field_1 }}:</span
+                          >
+                        {% endif %}
+                        <span class="metadata-value">
+                          {{- product.metafields.custom[section.settings.metadata_field_1] -}}
+                        </span>
+                      </div>
+                    {% endif %}
+
+                    {% if section.settings.metadata_field_2 != blank
+                      and product.metafields.custom[section.settings.metadata_field_2] != blank
+                    %}
+                      <div class="metadata-item">
+                        {% if section.settings.show_metadata_labels %}
+                          <span class="metadata-label">
+                            {{- section.settings.metadata_label_2 | default: section.settings.metadata_field_2 }}:</span
+                          >
+                        {% endif %}
+                        <span class="metadata-value">
+                          {{- product.metafields.custom[section.settings.metadata_field_2] -}}
+                        </span>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+              {% unless section.settings.show_view_product %}
+                </a>
+              {% endunless %}
+            </div>
+          {% endunless %}
+        {% endfor %}
+      {% endpaginate %}
+    {% else %}
+      <!-- Fallback: Load products from all collections -->
+      {% assign all_products_array = '' | split: '' %}
+      {% assign product_handles = '' %}
+
+      {% for collection in collections limit: 1000 %}
+        {% unless collection.handle == 'frontpage' %}
+          {% for product in collection.products limit: 100 %}
+            {% assign handle_check = product.handle | prepend: '|' | append: '|' %}
+            {% unless product_handles contains handle_check
+              or product.tags contains 'hidden'
+              or product.tags contains 'free-gift'
+            %}
+              {% assign product_handles = product_handles | append: handle_check %}
+              {% assign all_products_array = all_products_array | concat: product %}
+
+              {% comment %} Render product card {% endcomment %}
+              {% assign product_collections = '' %}
+              {% for prod_collection in product.collections limit: 100 %}
+                {% assign product_collections = product_collections | append: prod_collection.handle | append: ' ' %}
+              {% endfor %}
+
+              {% comment %} Use same structure as main product loop {% endcomment %}
+              <div
+                class="product-card{% if section.settings.full_card_clickable %} full-card-clickable{% endif %}"
+                data-collection="{{ product_collections | strip }}"
+                data-all-products="true"
+                data-type="{{ product.type | handle }}"
+                data-vendor="{{ product.vendor | handle }}"
+                data-tags="{{ product.tags | join: ',' | handle }}"
+                data-price="{{ product.price }}"
+                data-title="{{ product.title }}"
+                data-created="{{ product.created_at | date: '%s' }}"
+                {% if section.settings.full_card_clickable %}
+                  data-product-url="{{ product.url }}"
+                {% endif %}
+              >
+                {% comment %} TODO: This should match the main product card HTML exactly {% endcomment %}
+                {% comment %} For now, using simplified version - ideally extract to snippet {% endcomment %}
+
+                {% unless section.settings.show_view_product %}
+                  <a href="{{ product.url }}" class="product-link">
+                {% endunless %}
+
+                <div class="product-image-container{% unless section.settings.image_aspect_ratio == 'natural' %} aspect-{{ section.settings.image_aspect_ratio }}{% endunless %}">
+                  {% if product.compare_at_price > product.price and section.settings.show_sale_badge %}
+                    <div class="sale-badge {% if section.settings.badge_gradient %}badge-gradient{% endif %}">
+                      <span class="sale-badge-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                          <rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/>
+                        </svg>
+                      </span>
+                      {% if section.settings.sale_badge_text != blank %}
+                        {{ section.settings.sale_badge_text }}
+                      {% else %}
+                        {% assign savings = product.compare_at_price | minus: product.price %}
+                        {% if section.settings.show_percentage_off %}
+                          {% assign savings_percentage = savings | times: 100 | divided_by: product.compare_at_price %}
+                          {{ savings_percentage }}%
+                          {{ section.settings.sale_badge_off_text | default: 'general.sale_badge.off' | t }}
+                        {% else %}
+                          {% if section.settings.sale_badge_save_text != blank %}
+                            {{ section.settings.sale_badge_save_text }}
+                            {{ savings | money }}
+                          {% else %}
+                            {% assign savings_formatted = savings | money %}
+                            {{ 'general.sale_badge.save_amount' | t: amount: savings_formatted }}
+                          {% endif %}
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                  {% endif %}
+
+                  <div class="product-slider">
+                    <div class="product-slider-wrapper" data-slide-count="1">
+                      <div class="product-slide">
+                        {% if product.featured_image %}
+                          <img
+                            src="{{ product.featured_image | image_url: width: 600 }}"
+                            alt="{{ product.title | escape }}"
+                            loading="lazy"
+                            class="product-image"
+                            width=""
+                            height=""
+                          >
+                        {% else %}
+                          {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="collection-product-info">
+                  <h3 class="product-title">{{ product.title }}</h3>
+
+                  <div class="collection-product-price">
+                    <span class="collection-current-price">{{ product.price | money }}</span>
+                    {% if product.compare_at_price > product.price %}
+                      <span class="collection-regular-price">{{ product.compare_at_price | money }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                {% unless section.settings.show_view_product %}
+                  </a>
+                {% endunless %}
+              </div>
+            {% endunless %}
+          {% endfor %}
+        {% endunless %}
+      {% endfor %}
+    {% endif %}
+
+    {% if section.settings.enable_side_filters %}
+      </div>
+      <!-- /.product-grid -->
+      </div>
+      <!-- /.product-grid-wrapper -->
+      </div>
+      <!-- /.collection-grid-with-sidebar -->
+    {% else %}
+      </div>
+      <!-- /.product-grid -->
+    {% endif %}
+
+    <!-- Pagination Controls -->
+    {% if section.settings.enable_pagination and paginate.pages > 1 %}
+      <div class="pagination-wrapper">
+        <nav class="pagination" role="navigation" aria-label="Pagination">
+          {% if paginate.previous %}
+            <a
+              href="{{ paginate.previous.url }}"
+              class="pagination-item pagination-item--prev"
+              aria-label="Previous page"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
+              Previous
+            </a>
+          {% endif %}
+
+          {% for part in paginate.parts %}
+            {% if part.is_link %}
+              <a href="{{ part.url }}" class="pagination-item">{{ part.title }}</a>
+            {% else %}
+              {% if part.title == paginate.current_page %}
+                <span class="pagination-item pagination-item--current" aria-current="page">{{ part.title }}</span>
+              {% else %}
+                <span class="pagination-item pagination-item--gap">{{ part.title }}</span>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+
+          {% if paginate.next %}
+            <a href="{{ paginate.next.url }}" class="pagination-item pagination-item--next" aria-label="Next page">
+              Next
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </a>
+          {% endif %}
+        </nav>
+
+        <div class="pagination-info">
+          <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+          <span class="pagination-results">({{ paginate.items }} total products)</span>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  <!-- /.container -->
+</div>
+<!-- /.collection-grid-section -->
+
+<script src="{{ 'collection-grid-page.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Collection Grid Page",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_side_filters",
+      "label": "Enable side filter menu",
+      "default": false,
+      "info": "Adds a left sidebar with filter groups (size, color, brand). Filters products on the page without reloading."
+    },
+    {
+      "type": "color",
+      "id": "sidebar_filter_background",
+      "label": "Sidebar Filter Background Color",
+      "default": "#f5f5f5",
+      "info": "Background color for the sidebar filter panel"
+    },
+    {
+      "type": "header",
+      "content": "Collection Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "default": true,
+      "label": "Use Theme Colors",
+      "info": "Apply the global theme colors to this section - text, pricing and stars"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section Background Color",
+      "default": "#FFFFFF",
+      "info": "Background color for the entire section when theme colors are disabled"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Default Collection",
+      "info": "When 'Show All Collections' is disabled, this collection's products will be shown by default (individual collection tabs will still show their specific products)"
+    },
+    {
+      "type": "header",
+      "content": "Pagination Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_pagination",
+      "label": "Enable pagination",
+      "default": true,
+      "info": "When enabled, products will be split across multiple pages. When disabled, all products will load on a single page."
+    },
+    {
+      "type": "range",
+      "id": "pagination_amount",
+      "min": 6,
+      "max": 100,
+      "step": 2,
+      "default": 24,
+      "label": "Products per page",
+      "info": "Number of products to show per page when pagination is enabled"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_all_collections",
+      "label": "Show All Collections",
+      "default": true,
+      "info": "When enabled, displays products from all collections in your store, not just the selected main collection and blocks"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search_bar",
+      "label": "Show Search Bar",
+      "default": false,
+      "info": "Display a search bar to filter products by title, vendor, or tags"
+    },
+    {
+      "type": "checkbox",
+      "id": "search_in_nav_bar",
+      "label": "Move Search to Navigation Bar",
+      "default": false,
+      "info": "When enabled, the search bar will appear inside the collection navigation bar instead of above it"
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Search Placeholder Text",
+      "default": "Search products...",
+      "info": "Placeholder text shown in the search input"
+    },
+    {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured Collection"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 16,
+      "max": 40,
+      "step": 1,
+      "default": 28,
+      "label": "Heading font size"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 40,
+      "label": "Top padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 40,
+      "label": "Bottom padding"
+    },
+    {
+      "type": "header",
+      "content": "Product Card"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "image_background",
+      "label": "Image background",
+      "default": "#f8f8f8"
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Image fit",
+      "options": [
+        {
+          "value": "contain",
+          "label": "Contain"
+        },
+        {
+          "value": "cover",
+          "label": "Cover"
+        }
+      ],
+      "default": "contain"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Image aspect ratio",
+      "options": [
+        {
+          "value": "natural",
+          "label": "Natural"
+        },
+        {
+          "value": "1_1",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "2_3",
+          "label": "Portrait (2:3)"
+        },
+        {
+          "value": "3_2",
+          "label": "Landscape (3:2)"
+        },
+        {
+          "value": "4_5",
+          "label": "Tall Portrait (4:5)"
+        },
+        {
+          "value": "16_9",
+          "label": "Widescreen (16:9)"
+        },
+        {
+          "value": "3_4",
+          "label": "Standard Portrait (3:4)"
+        }
+      ],
+      "default": "natural",
+      "info": "Choose the aspect ratio for product images. Natural maintains original proportions."
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 8,
+      "label": "Card corner radius"
+    },
+    {
+      "type": "checkbox",
+      "id": "remove_card_styling",
+      "label": "Remove card styling",
+      "default": false,
+      "info": "Remove background, borders, and padding from product cards for a minimal look"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Image Border Radius",
+      "default": 8,
+      "info": "Border radius for product images (works independently of card styling)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_color_swatches",
+      "label": "Show color swatches",
+      "default": false,
+      "info": "Display color variant swatches for clothing products. Works best with color option names like 'Color', 'Colour', etc."
+    },
+    {
+      "type": "range",
+      "id": "swatch_size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "default": 24,
+      "label": "Swatch size (px)"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "price_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "default": 16,
+      "label": "Price font size"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Price color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "compare_price_color",
+      "label": "Compare price color",
+      "default": "#999999"
+    },
+    {
+      "type": "header",
+      "content": "Sale Badge"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sale_badge",
+      "default": true,
+      "label": "Show sale badge"
+    },
+    {
+      "type": "text",
+      "id": "sale_badge_text",
+      "label": "Custom sale badge text",
+      "info": "Leave blank to show savings amount"
+    },
+    {
+      "type": "text",
+      "id": "sale_badge_save_text",
+      "label": "Save text",
+      "info": "Text shown before savings amount (e.g. 'Save $10.00'). Leave blank to use store language default."
+    },
+    {
+      "type": "text",
+      "id": "sale_badge_off_text",
+      "label": "Off text",
+      "info": "Text shown after percentage (e.g. '25% Off'). Leave blank to use store language default."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_percentage_off",
+      "default": false,
+      "label": "Show percentage instead of amount"
+    },
+    {
+      "type": "color",
+      "id": "badge_background",
+      "label": "Badge background",
+      "default": "#FFEAE6"
+    },
+    {
+      "type": "checkbox",
+      "id": "badge_gradient",
+      "default": false,
+      "label": "Enable badge gradient"
+    },
+    {
+      "type": "color",
+      "id": "badge_gradient_color",
+      "label": "Badge gradient color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "badge_color",
+      "label": "Badge text color",
+      "default": "#FF3C16"
+    },
+    {
+      "type": "range",
+      "id": "badge_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 4,
+      "label": "Badge corner radius"
+    },
+    {
+      "type": "header",
+      "content": "Product Image Dots"
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "min": 6,
+      "max": 16,
+      "step": 1,
+      "default": 10,
+      "label": "Dot size"
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Dot color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "dot_active_color",
+      "label": "Active dot color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "max_image_dots",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 8,
+      "label": "Maximum Image Dots",
+      "info": "Limits the number of dots shown for products with many images to prevent layout issues"
+    },
+    {
+      "type": "header",
+      "content": "Product Rating"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "default": true,
+      "label": "Show product rating"
+    },
+    {
+      "type": "range",
+      "id": "rating_value",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "default": 5,
+      "label": "Rating value"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating_text",
+      "default": true,
+      "label": "Show rating number"
+    },
+    {
+      "type": "text",
+      "id": "rating_number",
+      "label": "Rating number",
+      "default": "4.7",
+      "info": "Enter the rating number"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star color",
+      "default": "#FFC107"
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Star size",
+      "default": 18,
+      "info": "Size of rating stars"
+    },
+    {
+      "type": "color",
+      "id": "rating_text_color",
+      "label": "Rating text color",
+      "default": "#777777"
+    },
+    {
+      "type": "select",
+      "id": "rating_text_weight",
+      "label": "Rating text weight",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "bold",
+          "label": "Bold"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "header",
+      "content": "Product Metadata"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_metadata",
+      "default": false,
+      "label": "Show product metadata",
+      "info": "Display metadata from product.metafields.custom"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_product_rating",
+      "default": true,
+      "label": "Use per-product rating",
+      "info": "Uses product.metafields.custom.rating value for each product"
+    },
+    {
+      "type": "text",
+      "id": "metadata_field_1",
+      "label": "Metadata field 1",
+      "info": "Enter the key name of your first custom metafield (e.g. 'size', 'material')"
+    },
+    {
+      "type": "text",
+      "id": "metadata_label_1",
+      "label": "Label for field 1",
+      "info": "Custom label to display before the metafield value"
+    },
+    {
+      "type": "text",
+      "id": "metadata_field_2",
+      "label": "Metadata field 2",
+      "info": "Enter the key name of your second custom metafield"
+    },
+    {
+      "type": "text",
+      "id": "metadata_label_2",
+      "label": "Label for field 2",
+      "info": "Custom label to display before the metafield value"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_metadata_labels",
+      "default": true,
+      "label": "Show metadata labels"
+    },
+    {
+      "type": "paragraph",
+      "content": "### How to add product metadata and ratings\n\n1. Go to your Shopify admin > Products > Select a product > Metafields\n2. Add a new metafield in the 'Custom' namespace\n3. For product ratings: create a metafield with key 'rating' and number type (decimal) with value between 0-5\n4. For other metadata: create metafields with your desired keys and use those key names in the fields above\n5. Repeat for each product you want to display metadata for"
+    },
+    {
+      "type": "header",
+      "content": "Metadata Styling"
+    },
+    {
+      "type": "range",
+      "id": "metadata_font_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "default": 12,
+      "label": "Metadata font size"
+    },
+    {
+      "type": "color",
+      "id": "metadata_label_color",
+      "label": "Metadata label color",
+      "default": "#666666"
+    },
+    {
+      "type": "select",
+      "id": "metadata_label_weight",
+      "label": "Metadata label weight",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "bold",
+          "label": "Bold"
+        }
+      ],
+      "default": "bold"
+    },
+    {
+      "type": "color",
+      "id": "metadata_value_color",
+      "label": "Metadata value color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "metadata_rating_color",
+      "label": "Metadata rating color",
+      "default": "#333333"
+    },
+    {
+      "type": "header",
+      "content": "Navigation & Sorting"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "default": true,
+      "label": "Show collection navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_shop_all_tab",
+      "default": true,
+      "label": "Show 'Shop All' Tab",
+      "info": "Display the 'Shop All' tab in collection navigation. When disabled, the first collection will be active by default."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_url_collection_detection",
+      "default": true,
+      "label": "Auto-detect collection from URL",
+      "info": "Automatically show the correct collection when customers visit collection pages (e.g., /collections/shoes). When disabled, uses default collection settings."
+    },
+    {
+      "type": "text",
+      "id": "collection_all_text",
+      "label": "Shop All text",
+      "default": "Shop All",
+      "info": "Leave blank to use theme default translation"
+    },
+    {
+      "type": "range",
+      "id": "mobile_filters_per_row",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "label": "Mobile Filters Per Row",
+      "default": 3,
+      "info": "Number of collection filter tabs to display per row on mobile devices. Filters will wrap to new lines automatically. Recommended: 3 for most cases, 2 for longer filter names, 4-5 for short names."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sorting",
+      "default": true,
+      "label": "Show sort-by dropdown"
+    },
+    {
+      "type": "text",
+      "id": "sort_label",
+      "label": "Sort by label",
+      "default": "SORT BY:",
+      "info": "Leave blank to use theme default translation"
+    },
+    {
+      "type": "header",
+      "content": "Navigation & Sorting Colors"
+    },
+    {
+      "type": "color",
+      "id": "sidebar_background_color",
+      "label": "Sidebar Background Color",
+      "default": "#ffffff",
+      "info": "Background color for the filter sidebar (only applies when 'Use Theme Colors' is disabled)"
+    },
+    {
+      "type": "checkbox",
+      "id": "remove_sidebar_border",
+      "label": "Remove Sidebar Border",
+      "default": false,
+      "info": "Remove the border around the sidebar filters"
+    },
+    {
+      "type": "color",
+      "id": "sidebar_text_color",
+      "label": "Sidebar Text Color",
+      "default": "#000000",
+      "info": "Text color for sidebar content (only applies when 'Use Theme Colors' is disabled)"
+    },
+    {
+      "type": "color",
+      "id": "sidebar_header_background",
+      "label": "Sidebar Header Background",
+      "default": "#ffffff",
+      "info": "Background color for the sidebar header (only applies when 'Use Theme Colors' is disabled)"
+    },
+    {
+      "type": "color",
+      "id": "sidebar_clear_button_color",
+      "label": "Clear Button Color",
+      "default": "#000000",
+      "info": "Color for the clear filters button (only applies when 'Use Theme Colors' is disabled)"
+    },
+    {
+      "type": "range",
+      "id": "sidebar_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Sidebar Border Radius",
+      "default": 8,
+      "info": "Border radius for the sidebar filter container"
+    },
+    {
+      "type": "color",
+      "id": "unified_border_color",
+      "label": "All Borders Color",
+      "default": "rgba(0, 0, 0, 0.1)",
+      "info": "Controls the color of all borders in the section (sidebar, cards, navigation, search, pagination, etc.)"
+    },
+    {
+      "type": "color",
+      "id": "nav_text_color",
+      "label": "Navigation Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "nav_active_color",
+      "label": "Navigation Active Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "nav_border_color",
+      "label": "Navigation Border Color",
+      "default": "rgba(0, 0, 0, 0.1)"
+    },
+    {
+      "type": "color",
+      "id": "sort_label_color",
+      "label": "Sort Label Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "sort_dropdown_bg",
+      "label": "Sort Dropdown Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "sort_dropdown_text",
+      "label": "Sort Dropdown Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "sort_dropdown_border",
+      "label": "Sort Dropdown Border",
+      "default": "#e4e4e4"
+    },
+    {
+      "type": "range",
+      "id": "sort_dropdown_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "label": "Sort Dropdown Border Radius",
+      "default": 4,
+      "info": "Controls the roundness of the sort dropdown"
+    },
+
+    {
+      "type": "checkbox",
+      "id": "show_view_product",
+      "default": true,
+      "label": "Show View Product button"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_card_clickable",
+      "default": false,
+      "label": "Make entire product card clickable",
+      "info": "When enabled, clicking anywhere on the product card (except image swipes) will redirect to the product page"
+    },
+    {
+      "type": "text",
+      "id": "view_product_text",
+      "label": "View Product button text",
+      "default": "View Product",
+      "info": "Customize the text shown on the view product button"
+    },
+
+    {
+      "type": "paragraph",
+      "content": "Note: View product button padding, font size, and border radius now use global button settings for consistency. Custom settings below apply when global styling is disabled."
+    },
+    {
+      "type": "color",
+      "id": "view_product_background",
+      "label": "View product button background",
+      "default": "#000000",
+      "info": "Used when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "view_product_color",
+      "label": "View product button text color",
+      "default": "#ffffff",
+      "info": "Used when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "header",
+      "content": "View Product Button Icon"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_product_icon",
+      "default": true,
+      "label": "Show icon in View Product button"
+    },
+    {
+      "type": "select",
+      "id": "view_product_icon_type",
+      "label": "Icon type",
+      "options": [
+        {
+          "value": "bag",
+          "label": "Shopping bag (default)"
+        },
+        {
+          "value": "arrow",
+          "label": "Arrow"
+        },
+        {
+          "value": "eye",
+          "label": "Eye"
+        },
+        {
+          "value": "plus",
+          "label": "Plus arrow"
+        },
+        {
+          "value": "custom",
+          "label": "Custom SVG"
+        }
+      ],
+      "default": "bag"
+    },
+    {
+      "type": "textarea",
+      "id": "view_product_custom_svg",
+      "label": "Custom SVG code",
+      "info": "Paste your custom SVG code here. Only shown when 'Custom SVG' is selected above. For best results, use SVGs with viewBox attribute and currentColor fill.",
+      "placeholder": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\">...</svg>"
+    },
+    {
+      "type": "range",
+      "id": "view_product_icon_size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "default": 16,
+      "label": "Icon size (px)"
+    },
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_global_button_styling",
+      "label": "Use Global Button Styling",
+      "default": true,
+      "info": "When enabled, view all and navigation buttons will use theme's global button styling. Only works if 'Enable Global Button Styling for Sections' is turned on in Theme Settings > Button Styling."
+    },
+    {
+      "type": "range",
+      "id": "custom_button_padding_y",
+      "min": 5,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Custom Button Vertical Padding",
+      "default": 12,
+      "info": "Custom vertical padding for buttons when global styling is disabled"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_font_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Custom Button Font Size",
+      "default": 14,
+      "info": "Custom font size for buttons when global styling is disabled"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Grid Page",
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,2109 @@
+{% comment %} comparison.liquid {% endcomment %}
+
+{% comment %} Google Fonts for accent text customization {% endcomment %}
+{% render 'accent-font-loader' %}
+
+<section class="comparison-section section-{{ section.id }}{% if section.settings.section_bg_image != blank %} comparison-section--has-bg{% endif %} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  <div class="parent-div">
+    {% if section.settings.section_bg_image != blank and section.settings.bg_image_position == 'fill' %}
+      <img
+        class="left-fill-image"
+        src="{{ section.settings.section_bg_image | image_url: width: 1200 }}"
+        alt="{{ section.settings.section_bg_image.alt | escape }}"
+        width="1200"
+        height="600"
+      >
+    {% endif %}
+    <div class="left-div">
+      <div class="left-top">
+        {% if section.settings.title != blank %}
+          <h2 class="main-title">{{ section.settings.title }}</h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+      {% if section.settings.section_bg_image != blank and section.settings.bg_image_position == 'center_small' %}
+        <div class="left-bg-image"></div>
+      {% endif %}
+      <div class="left-middle"></div>
+      <div class="left-bottom"></div>
+    </div>
+
+    <div class="right-div">
+      <div class="comparison-table">
+        <div class="table-head">
+          <div class="table-row">
+            <div class="table-col"></div>
+            <div
+              class="table-col brand-col"
+              {% if section.settings.brand_column_gradient %}
+                style="grid-column: 2; background: {{ section.settings.brand_column_background }}; border-top-left-radius: 14px; border-top-right-radius: 14px; overflow: visible;"
+              {% else %}
+                style="grid-column: 2; border-top-left-radius: 14px; border-top-right-radius: 14px; overflow: visible;"
+              {% endif %}
+            ><h3>{{ section.settings.brand_name | default: 'Quasi' }}</h3></div>
+
+            <div class="table-col" style="grid-column: 3;">
+              <p>{{ section.settings.other_brand_name | default: 'Other Brands' }}</p>
+            </div>
+            {% if section.settings.enable_third_column %}
+              <div class="table-col" style="grid-column: 4;">
+                <p>{{ section.settings.third_column_name | default: 'Other Brands' }}</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="table-body">
+          {% for block in section.blocks %}
+            {% case block.type %}
+              {% when 'comparison_row' %}
+                <div class="table-row" {{ block.shopify_attributes }}>
+                  <div class="table-col description-col">
+                    {% if block.settings.feature_title != blank %}
+                      <div
+                        class="feature-title"
+                        style="color: {{ block.settings.feature_title_color | default: 'inherit' }}; display: flex; align-items: center; gap: 8px;"
+                      >
+                        {% if block.settings.feature_icon != blank %}
+                          {%- assign icon_size = block.settings.feature_icon_size | default: 20 -%}
+                          <img
+                            src="{{ block.settings.feature_icon | image_url: width: icon_size }}"
+                            alt="{{ block.settings.feature_icon.alt | escape }}"
+                            class="feature-icon"
+                            width="{{ icon_size }}"
+                            height="{{ icon_size }}"
+                            style="flex-shrink: 0;"
+                          >
+                        {% endif %}
+                        <span style="flex: 1;">{{ block.settings.feature_title }}</span>
+                      </div>
+                    {% endif %}
+                    {% if block.settings.feature_desc != blank %}
+                      <div class="feature-desc">
+                        <p>{{ block.settings.feature_desc }}</p>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <div class="table-col quasi-col">
+                    {% if block.settings.our_brand_has_feature %}
+                      {% if section.settings.icon_style == 'circular' %}
+                        <svg
+                          class="check-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM16.0303 8.96967C16.3232 9.26256 16.3232 9.73744 16.0303 10.0303L11.0303 15.0303C10.7374 15.3232 10.2626 15.3232 9.96967 15.0303L7.96967 13.0303C7.67678 12.7374 7.67678 12.2626 7.96967 11.9697C8.26256 11.6768 8.73744 11.6768 9.03033 11.9697L10.5 13.4393L12.7348 11.2045L14.9697 8.96967C15.2626 8.67678 15.7374 8.67678 16.0303 8.96967Z" fill="currentColor"/>
+                        </svg>
+                      {% else %}
+                        <svg
+                          class="check-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 32 32"
+                          fill="none"
+                        >
+                          <path d="M15.8531 30.7785C24.1771 30.7785 30.925 24.0306 30.925 15.7066C30.925 7.38267 24.1771 0.634766 15.8531 0.634766C7.52916 0.634766 0.78125 7.38267 0.78125 15.7066C0.78125 24.0306 7.52916 30.7785 15.8531 30.7785Z" fill="#FBFAF6"></path>
+                          <path d="M9.07078 15.7066L13.5923 20.2282L22.6355 11.1851M30.925 15.7066C30.925 24.0306 24.1771 30.7785 15.8531 30.7785C7.52916 30.7785 0.78125 24.0306 0.78125 15.7066C0.78125 7.38267 7.52916 0.634766 15.8531 0.634766C24.1771 0.634766 30.925 7.38267 30.925 15.7066Z" stroke="#BE3C52" stroke-width="1.15938" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      {% endif %}
+                    {% else %}
+                      {% if section.settings.icon_style == 'circular' %}
+                        <svg
+                          class="cross-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM8.96963 8.96965C9.26252 8.67676 9.73739 8.67676 10.0303 8.96965L12 10.9393L13.9696 8.96967C14.2625 8.67678 14.7374 8.67678 15.0303 8.96967C15.3232 9.26256 15.3232 9.73744 15.0303 10.0303L13.0606 12L15.0303 13.9696C15.3232 14.2625 15.3232 14.7374 15.0303 15.0303C14.7374 15.3232 14.2625 15.3232 13.9696 15.0303L12 13.0607L10.0303 15.0303C9.73742 15.3232 9.26254 15.3232 8.96965 15.0303C8.67676 14.7374 8.67676 14.2625 8.96965 13.9697L10.9393 12L8.96963 10.0303C8.67673 9.73742 8.67673 9.26254 8.96963 8.96965Z" fill="currentColor"/>
+                        </svg>
+                      {% else %}
+                        <svg
+                          class="cross-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 32 32"
+                          fill="none"
+                        >
+                          <path d="M15.7408 31.1711C24.0648 31.1711 30.8127 24.4232 30.8127 16.0992C30.8127 7.77525 24.0648 1.02734 15.7408 1.02734C7.41685 1.02734 0.668945 7.77525 0.668945 16.0992C0.668945 24.4232 7.41685 31.1711 15.7408 31.1711Z" fill="white"></path>
+                          <path d="M20.2624 11.5777L11.2193 20.6208M11.2193 11.5777L20.2624 20.6208M30.8127 16.0992C30.8127 24.4232 24.0648 31.1711 15.7408 31.1711C7.41685 31.1711 0.668945 24.4232 0.668945 16.0992C0.668945 7.77525 7.41685 1.02734 15.7408 1.02734C24.0648 1.02734 30.8127 7.77525 30.8127 16.0992Z" stroke="#7F7F7F" stroke-width="1.15938" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+
+                  <div class="table-col other-col">
+                    {% if block.settings.competitor_has_feature %}
+                      {% if section.settings.icon_style == 'circular' %}
+                        <svg
+                          class="check-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM16.0303 8.96967C16.3232 9.26256 16.3232 9.73744 16.0303 10.0303L11.0303 15.0303C10.7374 15.3232 10.2626 15.3232 9.96967 15.0303L7.96967 13.0303C7.67678 12.7374 7.67678 12.2626 7.96967 11.9697C8.26256 11.6768 8.73744 11.6768 9.03033 11.9697L10.5 13.4393L12.7348 11.2045L14.9697 8.96967C15.2626 8.67678 15.7374 8.67678 16.0303 8.96967Z" fill="currentColor"/>
+                        </svg>
+                      {% else %}
+                        <svg
+                          class="check-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 32 32"
+                          fill="none"
+                        >
+                          <path d="M15.8531 30.7785C24.1771 30.7785 30.925 24.0306 30.925 15.7066C30.925 7.38267 24.1771 0.634766 15.8531 0.634766C7.52916 0.634766 0.78125 7.38267 0.78125 15.7066C0.78125 24.0306 7.52916 30.7785 15.8531 30.7785Z" fill="#FBFAF6"></path>
+                          <path d="M9.07078 15.7066L13.5923 20.2282L22.6355 11.1851M30.925 15.7066C30.925 24.0306 24.1771 30.7785 15.8531 30.7785C7.52916 30.7785 0.78125 24.0306 0.78125 15.7066C0.78125 7.38267 7.52916 0.634766 15.8531 0.634766C24.1771 0.634766 30.925 7.38267 30.925 15.7066Z" stroke="#BE3C52" stroke-width="1.15938" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      {% endif %}
+                    {% else %}
+                      {% if section.settings.icon_style == 'circular' %}
+                        <svg
+                          class="cross-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM8.96963 8.96965C9.26252 8.67676 9.73739 8.67676 10.0303 8.96965L12 10.9393L13.9696 8.96967C14.2625 8.67678 14.7374 8.67678 15.0303 8.96967C15.3232 9.26256 15.3232 9.73744 15.0303 10.0303L13.0606 12L15.0303 13.9696C15.3232 14.2625 15.3232 14.7374 15.0303 15.0303C14.7374 15.3232 14.2625 15.3232 13.9696 15.0303L12 13.0607L10.0303 15.0303C9.73742 15.3232 9.26254 15.3232 8.96965 15.0303C8.67676 14.7374 8.67676 14.2625 8.96965 13.9697L10.9393 12L8.96963 10.0303C8.67673 9.73742 8.67673 9.26254 8.96963 8.96965Z" fill="currentColor"/>
+                        </svg>
+                      {% else %}
+                        <svg
+                          class="cross-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 32 32"
+                          fill="none"
+                        >
+                          <path d="M15.7408 31.1711C24.0648 31.1711 30.8127 24.4232 30.8127 16.0992C30.8127 7.77525 24.0648 1.02734 15.7408 1.02734C7.41685 1.02734 0.668945 7.77525 0.668945 16.0992C0.668945 24.4232 7.41685 31.1711 15.7408 31.1711Z" fill="white"></path>
+                          <path d="M20.2624 11.5777L11.2193 20.6208M11.2193 11.5777L20.2624 20.6208M30.8127 16.0992C30.8127 24.4232 24.0648 31.1711 15.7408 31.1711C7.41685 31.1711 0.668945 24.4232 0.668945 16.0992C0.668945 7.77525 7.41685 1.02734 15.7408 1.02734C24.0648 1.02734 30.8127 7.77525 30.8127 16.0992Z" stroke="#7F7F7F" stroke-width="1.15938" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+
+                  {% if section.settings.enable_third_column %}
+                    <div class="table-col third-col">
+                      {% if block.settings.third_column_has_feature %}
+                        {% if section.settings.icon_style == 'circular' %}
+                          <svg
+                            class="check-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM16.0303 8.96967C16.3232 9.26256 16.3232 9.73744 16.0303 10.0303L11.0303 15.0303C10.7374 15.3232 10.2626 15.3232 9.96967 15.0303L7.96967 13.0303C7.67678 12.7374 7.67678 12.2626 7.96967 11.9697C8.26256 11.6768 8.73744 11.6768 9.03033 11.9697L10.5 13.4393L12.7348 11.2045L14.9697 8.96967C15.2626 8.67678 15.7374 8.67678 16.0303 8.96967Z" fill="currentColor"/>
+                          </svg>
+                        {% else %}
+                          <svg
+                            class="check-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 32 32"
+                            fill="none"
+                          >
+                            <path d="M15.8531 30.7785C24.1771 30.7785 30.925 24.0306 30.925 15.7066C30.925 7.38267 24.1771 0.634766 15.8531 0.634766C7.52916 0.634766 0.78125 7.38267 0.78125 15.7066C0.78125 24.0306 7.52916 30.7785 15.8531 30.7785Z" fill="#FBFAF6"></path>
+                            <path d="M9.07078 15.7066L13.5923 20.2282L22.6355 11.1851M30.925 15.7066C30.925 24.0306 24.1771 30.7785 15.8531 30.7785C7.52916 30.7785 0.78125 24.0306 0.78125 15.7066C0.78125 7.38267 7.52916 0.634766 15.8531 0.634766C24.1771 0.634766 30.925 7.38267 30.925 15.7066Z" stroke="#BE3C52" stroke-width="1.15938" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                        {% endif %}
+                      {% else %}
+                        {% if section.settings.icon_style == 'circular' %}
+                          <svg
+                            class="cross-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM8.96963 8.96965C9.26252 8.67676 9.73739 8.67676 10.0303 8.96965L12 10.9393L13.9696 8.96967C14.2625 8.67678 14.7374 8.67678 15.0303 8.96967C15.3232 9.26256 15.3232 9.73744 15.0303 10.0303L13.0606 12L15.0303 13.9696C15.3232 14.2625 15.3232 14.7374 15.0303 15.0303C14.7374 15.3232 14.2625 15.3232 13.9696 15.0303L12 13.0607L10.0303 15.0303C9.73742 15.3232 9.26254 15.3232 8.96965 15.0303C8.67676 14.7374 8.67676 14.2625 8.96965 13.9697L10.9393 12L8.96963 10.0303C8.67673 9.73742 8.67673 9.26254 8.96963 8.96965Z" fill="currentColor"/>
+                          </svg>
+                        {% else %}
+                          <svg
+                            class="cross-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 32 32"
+                            fill="none"
+                          >
+                            <path d="M15.7408 31.1711C24.0648 31.1711 30.8127 24.4232 30.8127 16.0992C30.8127 7.77525 24.0648 1.02734 15.7408 1.02734C7.41685 1.02734 0.668945 7.77525 0.668945 16.0992C0.668945 24.4232 7.41685 31.1711 15.7408 31.1711Z" fill="white"></path>
+                            <path d="M20.2624 11.5777L11.2193 20.6208M11.2193 11.5777L20.2624 20.6208M30.8127 16.0992C30.8127 24.4232 24.0648 31.1711 15.7408 31.1711C7.41685 31.1711 0.668945 24.4232 0.668945 16.0992C0.668945 7.77525 7.41685 1.02734 15.7408 1.02734C24.0648 1.02734 30.8127 7.77525 30.8127 16.0992Z" stroke="#7F7F7F" stroke-width="1.15938" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+            {% endcase %}
+          {% endfor %}
+        </div>
+        <div class="table-footer">
+          <div class="table-row">
+            <div class="table-col"></div>
+            <div
+              class="table-col brand-col"
+              style="grid-column: 2; {% if section.settings.brand_column_gradient %}background: {{ section.settings.brand_column_background }}; {% endif %}border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; overflow: visible; height: 100%; display: flex; align-items: flex-end;"
+            ></div>
+            <div class="table-col"></div>
+            {% if section.settings.enable_third_column %}
+              <div class="table-col"></div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% if section.settings.section_bg_image != blank %}
+        <div class="mobile-bg-image">
+          <img
+            src="{{ section.settings.section_bg_image | image_url: width: 1200 }}"
+            alt="Mobile background image"
+            loading="lazy"
+            style="opacity: {{ section.settings.bg_image_opacity | divided_by: 100.0 }};"
+            width="1200"
+            height="600"
+          >
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<style>
+    /* Ensure consistent box-sizing */
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Dynamic styles for section {{ section.id }} */
+    .section-{{ section.id }} {
+      background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.background_color }}{% endif %};
+      padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px 0;
+      position: relative;
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+    }
+
+    .section-{{ section.id }} .parent-div {
+      display: flex;
+      gap: {{ section.settings.layout_gap }}px;
+      padding: 0 clamp(10px, 4vw, 50px);
+      align-items: flex-start;
+      width: 100%;
+      max-width: min({{ section.settings.container_max_width }}px, 92vw);
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+  .section-{{ section.id }} .left-fill-image {
+    position: absolute;
+    top: 0;
+    left: calc(50% - 50vw);
+    width: calc(50vw - {{ section.settings.layout_gap | divided_by: 2 }}px);
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: {{ section.settings.bg_image_opacity | divided_by: 100.0 }};
+    z-index: 0;
+  }
+
+    .section-{{ section.id }} .left-div, .section-{{ section.id }} .right-div {
+      flex: 1 1 0;
+    }
+
+    .section-{{ section.id }} .left-div {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      height: 100%;
+      position: relative;
+      min-height: {% if section.settings.bg_image_position == 'fill' %}400px{% else %}auto{% endif %};
+    }
+
+    .section-{{ section.id }} .left-top {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      {% if section.settings.section_bg_image != blank and section.settings.bg_image_position == 'fill' %}
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+          margin-top: 0;
+      {% else %}
+          position: relative;
+          margin-top: {{ section.settings.left_content_margin_top }}px;
+      {% endif %}
+
+      margin-top: {{ section.settings.left_content_margin_top }}px;
+      z-index: 2;
+      position: relative;
+    }
+
+    .section-{{ section.id }} .subheading {
+      font-size: {{ section.settings.subheading_font_size }}px;
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subheading_color }}{% endif %};
+      font-weight: {{ section.settings.subheading_font_weight }};
+      margin-top: {{ section.settings.subheading_margin_top }}px;
+      margin-bottom: {{ section.settings.subheading_margin_bottom }}px;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .section-{{ section.id }} .left-bg-image {
+      {% if section.settings.section_bg_image != blank and section.settings.bg_image_position == 'center_small' %}
+        display: block;
+        width: {{ section.settings.bg_image_width }}%;
+        height: {{ section.settings.bg_image_height }}px;
+        background-image: url('{{ section.settings.section_bg_image | image_url: width: 1200 }}');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        margin: 20px auto;
+        opacity: {{ section.settings.bg_image_opacity | divided_by: 100.0 }};
+        z-index: 1;
+        grid-row: 2 / 4;
+      {% else %}
+        display: none;
+      {% endif %}
+    }
+
+    .section-{{ section.id }} .left-middle, .section-{{ section.id }} .left-bottom {
+      display: none;
+    }
+
+    .section-{{ section.id }} .subheading {
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subheading_color }}{% endif %};
+      font-size: {{ section.settings.subheading_font_size }}px;
+      font-weight: {{ section.settings.subheading_font_weight }};
+      text-align: center;
+      margin: {{ section.settings.subheading_margin_top }}px 0 0 0;
+      line-height: 1.4;
+    }
+
+    .section-{{ section.id }} .main-title {
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_color }}{% endif %};
+      font-size: clamp({{ section.settings.title_font_size | times: 0.67 | floor }}px, 3vw, {{ section.settings.title_font_size }}px) !important;
+      font-weight: {{ section.settings.title_font_weight }};
+      font-style: {{ section.settings.title_font_style }};
+      line-height: {{ section.settings.title_line_height }};
+      margin-top: 0;
+      margin-bottom: {{ section.settings.title_margin_bottom }}px;
+      text-align: center;
+      {% if section.settings.title_text_transform != 'none' %}
+        text-transform: {{ section.settings.title_text_transform }};
+      {% endif %}
+    }
+
+    .section-{{ section.id }} .right-div {
+      flex: 1;
+      position: relative;
+    }
+
+    .section-{{ section.id }} .brand-header {
+      display: grid;
+      {% if section.settings.enable_third_column %}
+        grid-template-columns: 1fr {{ section.settings.brand_column_width }}px {{ section.settings.other_brand_column_width }}px {{ section.settings.third_column_width | default: section.settings.other_brand_column_width }}px;
+      {% else %}
+        grid-template-columns: 1fr {{ section.settings.brand_column_width }}px {{ section.settings.other_brand_column_width }}px;
+      {% endif %}
+      border-radius: {{ section.settings.table_border_radius }}px {{ section.settings.table_border_radius }}px 0 0;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .section-{{ section.id }} .comparison-table .brand-col {
+      padding: {{ section.settings.brand_name_padding }}px 10px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      {% if section.settings.brand_name_text_transform != 'none' %}
+        text-transform: {{ section.settings.brand_name_text_transform }};
+      {% endif %}
+      font-size: {{ section.settings.brand_name_font_size_desktop }}px;
+    }
+
+    .section-{{ section.id }} .comparison-table .brand-col h3 {
+      margin: 0;
+      padding: 0;
+      font-weight: {{ section.settings.brand_name_font_weight }};
+      font-style: {{ section.settings.brand_name_font_style }};
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.brand_name_color }}{% endif %};
+    }
+
+    .section-{{ section.id }} .comparison-table {
+      width: 100%;
+      background: transparent;
+      margin-top: 0;
+      border-radius: {{ section.settings.table_border_radius }}px;
+      overflow: hidden;
+    }
+
+    /* Div-based table grid */
+    .section-{{ section.id }} .table-head .table-row,
+    .section-{{ section.id }} .table-body .table-row,
+    .section-{{ section.id }} .table-footer .table-row {
+      display: grid;
+      {% if section.settings.enable_third_column %}
+        grid-template-columns: 1fr {{ section.settings.brand_column_width }}px {{ section.settings.other_brand_column_width }}px {{ section.settings.third_column_width | default: section.settings.other_brand_column_width }}px;
+      {% else %}
+        grid-template-columns: 1fr {{ section.settings.brand_column_width }}px {{ section.settings.other_brand_column_width }}px;
+      {% endif %}
+      align-items: stretch;
+    }
+
+    .section-{{ section.id }} .table-row .table-col {
+      padding: {{ section.settings.table_cell_padding }}px 20px;
+      min-width: 0;
+    }
+
+    .section-{{ section.id }} .table-head {
+      background: transparent;
+      color: inherit;
+      {% if section.settings.table_outer_border_enabled %}
+        border: {{ section.settings.table_outer_border_width }}px solid transparent;
+        box-sizing: border-box;
+      {% else %}
+        border: none;
+      {% endif %}
+    }
+
+    .section-{{ section.id }} .comparison-table {
+      position: relative;
+      isolation: isolate; /* create stacking context */
+    }
+
+    .section-{{ section.id }} .table-head .table-row {
+      border: 0;
+    }
+
+    /* Allow header masks to extend outside cells */
+    .section-{{ section.id }} .table-head {
+      overflow: visible;
+      position: relative;
+      z-index: 5;
+    }
+
+    .section-{{ section.id }} .table-head .table-row .table-col {
+      font-weight: {{ section.settings.table_header_font_weight }};
+      font-size: {{ section.settings.table_header_font_size }}px;
+      text-align: center;
+    }
+
+    .section-{{ section.id }} .table-head .table-row .table-col p {
+      font-size: inherit;
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.other_brand_name_color }}{% endif %};
+      margin: 0;
+      font-weight: inherit;
+    }
+
+    .section-{{ section.id }} .table-head .table-row .table-col:first-child {
+      text-align: left;
+      background: transparent;
+    }
+
+    .section-{{ section.id }} .table-head .table-row .table-col:nth-child(2) {
+      background: transparent;
+    }
+
+    .section-{{ section.id }} .table-head .table-row .table-col:last-child {
+      background: transparent;
+    }
+
+    .section-{{ section.id }} .table-head .table-row .table-col.brand-col {
+      position: relative;
+      z-index: 2; /* Ensure brand column shows over outer border */
+      {% if section.settings.hide_brand_column_borders %}
+        border-left: none !important;
+        border-right: none !important;
+      {% endif %}
+    }
+
+    /* Mask outer border under highlight column (top & bottom) */
+    {% if section.settings.table_outer_border_enabled and section.settings.mask_outer_border_under_highlight %}
+      .section-{{ section.id }} .table-head .table-row .table-col.brand-col::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -{{ section.settings.table_outer_border_width }}px;
+        /* Cover both the outer border and the first row separator */
+        height: calc({{ section.settings.table_outer_border_width }}px + {{ section.settings.table_border_width }}px);
+        background: {% if section.settings.brand_column_gradient %}{{ section.settings.brand_column_background }}{% else %}{% if section.settings.use_theme_colors %}{{ settings.global_section_background_color | default: '#fff' }}{% else %}{{ section.settings.table_background_color }}{% endif %}{% endif %};
+        z-index: 3;
+        pointer-events: none;
+      }
+
+      .section-{{ section.id }} .table-footer .table-row .table-col.brand-col::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: -{{ section.settings.table_outer_border_width }}px;
+        height: {{ section.settings.table_outer_border_width }}px;
+        background: {% if section.settings.brand_column_gradient %}{{ section.settings.brand_column_background }}{% else %}{% if section.settings.use_theme_colors %}{{ settings.global_section_background_color | default: '#fff' }}{% else %}{{ section.settings.table_background_color }}{% endif %}{% endif %};
+        z-index: 3;
+        pointer-events: none;
+      }
+    {% endif %}
+
+    .section-{{ section.id }} .table-body {
+      {% if section.settings.table_shadow_enabled %}
+        box-shadow: 0 2px 4px rgba(0,0,0,{{ section.settings.table_shadow_opacity | divided_by: 100.0 }}),
+                    0 4px 12px rgba(0,0,0,{{ section.settings.table_shadow_opacity | times: 0.1 | divided_by: 100.0 }});
+      {% else %}
+        box-shadow: none;
+      {% endif %}
+      {% if section.settings.table_outer_border_enabled %}
+        border: {{ section.settings.table_outer_border_width }}px {{ section.settings.table_outer_border_style }} {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.2 }}{% else %}{{ section.settings.table_outer_border_color }}{% endif %};
+        box-sizing: border-box;
+      {% else %}
+        border: none;
+      {% endif %}
+      border-radius: {{ section.settings.table_border_radius }}px;
+      background: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color | default: '#fff' }}{% else %}{{ section.settings.table_background_color }}{% endif %};
+      overflow: visible;
+      position: relative;
+      z-index: 1; /* Lower z-index so brand column can overlay */
+    }
+
+    .section-{{ section.id }} .table-body .table-row {
+      border-bottom: {{ section.settings.table_border_width }}px solid {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.1 }}{% else %}{{ section.settings.table_border_color }}{% endif %};
+    }
+
+    .section-{{ section.id }} .table-body .table-row:last-child {
+      border-bottom: none;
+    }
+
+    {% if section.settings.hide_brand_column_borders %}
+      .section-{{ section.id }} .table-body .table-row .quasi-col {
+        position: relative;
+      }
+
+      .section-{{ section.id }} .table-body .table-row .quasi-col::after {
+        content: '';
+        position: absolute;
+        bottom: -{{ section.settings.table_border_width }}px;
+        left: 0;
+        right: 0;
+        height: {{ section.settings.table_border_width }}px;
+        {% if section.settings.brand_column_gradient %}
+          background: {{ section.settings.brand_column_background }};
+        {% else %}
+          background: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color | default: '#fff' }}{% else %}{{ section.settings.table_background_color }}{% endif %};
+        {% endif %}
+      }
+
+      .section-{{ section.id }} .table-body .table-row:last-child .quasi-col::after {
+        display: none;
+      }
+    {% endif %}
+
+    .section-{{ section.id }} .table-body .table-col {
+      padding: {{ section.settings.table_body_cell_padding }}px 20px;
+    }
+
+    .section-{{ section.id }} .table-body .quasi-col {
+      {% if section.settings.brand_column_gradient %}
+        background: {{ section.settings.brand_column_background }};
+      {% endif %}
+      {% if section.settings.hide_brand_column_borders %}
+        border-left: none !important;
+        border-right: none !important;
+      {% endif %}
+    }
+
+    .section-{{ section.id }} .description-col {
+      font-weight: {{ section.settings.feature_description_font_weight }};
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.feature_description_color }}{% endif %};
+    }
+
+    .section-{{ section.id }} .feature-title {
+      font-size: {{ section.settings.feature_title_font_size }}px;
+      font-weight: {{ section.settings.feature_title_font_weight }};
+      font-style: {{ section.settings.feature_title_font_style }};
+      text-transform: {% if section.settings.feature_title_uppercase %}uppercase{% else %}none{% endif %};
+      letter-spacing: {{ section.settings.feature_title_letter_spacing }}px;
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.feature_title_color }}{% endif %};
+      margin-bottom: {{ section.settings.feature_title_margin_bottom }}px;
+    }
+
+    .section-{{ section.id }} .feature-title p {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .section-{{ section.id }} .feature-desc p {
+      font-size: {{ section.settings.feature_description_font_size }}px;
+      font-weight: {{ section.settings.feature_description_font_weight }};
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.8 }}{% else %}{{ section.settings.feature_description_color }}{% endif %};
+      line-height: {{ section.settings.feature_description_line_height }};
+      margin: 0;
+    }
+
+    .section-{{ section.id }} .quasi-col {
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .section-{{ section.id }} .table-body .quasi-col {
+      {% if section.settings.brand_column_gradient %}
+        background: {{ section.settings.brand_column_background }};
+      {% endif %}
+      {% if section.settings.hide_brand_column_borders %}
+        border-left: none !important;
+        border-right: none !important;
+      {% endif %}
+      position: relative;
+      z-index: 2; /* Ensure brand column shows over outer border */
+    }
+
+    .section-{{ section.id }} .other-col {
+      background: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color | default: '#fff' }}{% else %}{{ section.settings.table_background_color }}{% endif %};
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .section-{{ section.id }} .table-body .table-col.other-col {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .section-{{ section.id }} .third-col {
+      background: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color | default: '#fff' }}{% else %}{{ section.settings.table_background_color }}{% endif %};
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .section-{{ section.id }} .table-body .table-col.third-col {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .section-{{ section.id }} .check-icon,
+    .section-{{ section.id }} .cross-icon {
+      width: {{ section.settings.icon_size }}px;
+      height: {{ section.settings.icon_size }}px;
+      flex-shrink: 0;
+    }
+
+    /* Custom icon colors */
+    .section-{{ section.id }} .quasi-col .check-icon path:last-child {
+      {% if section.settings.brand_icons_filled %}
+        fill: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.brand_check_icon_color }}{% endif %} !important;
+        stroke: none !important;
+      {% else %}
+        stroke: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.brand_check_icon_color }}{% endif %} !important;
+        fill: none !important;
+      {% endif %}
+      stroke-width: {{ section.settings.brand_icon_stroke_width | default: 1.15938 }}px !important;
+    }
+
+    .section-{{ section.id }} .quasi-col .cross-icon path:last-child {
+      {% if section.settings.brand_icons_filled %}
+        fill: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.5 }}{% else %}{{ section.settings.brand_cross_icon_color }}{% endif %} !important;
+        stroke: none !important;
+      {% else %}
+        stroke: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.5 }}{% else %}{{ section.settings.brand_cross_icon_color }}{% endif %} !important;
+        fill: none !important;
+      {% endif %}
+      stroke-width: {{ section.settings.brand_icon_stroke_width | default: 1.15938 }}px !important;
+    }
+
+    .section-{{ section.id }} .other-col .check-icon path:last-child {
+      {% if section.settings.other_icons_filled %}
+        fill: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.other_check_icon_color }}{% endif %} !important;
+        stroke: none !important;
+      {% else %}
+        stroke: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.other_check_icon_color }}{% endif %} !important;
+        fill: none !important;
+      {% endif %}
+      stroke-width: {{ section.settings.other_icon_stroke_width | default: 1.15938 }}px !important;
+    }
+
+    .section-{{ section.id }} .other-col .cross-icon path:last-child {
+      {% if section.settings.other_icons_filled %}
+        fill: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.5 }}{% else %}{{ section.settings.other_cross_icon_color }}{% endif %} !important;
+        stroke: none !important;
+      {% else %}
+        stroke: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.5 }}{% else %}{{ section.settings.other_cross_icon_color }}{% endif %} !important;
+        fill: none !important;
+      {% endif %}
+      stroke-width: {{ section.settings.other_icon_stroke_width | default: 1.15938 }}px !important;
+    }
+
+    .section-{{ section.id }} .table-footer {
+      background: transparent;
+      color: inherit;
+      border: none;
+    }
+
+    .section-{{ section.id }} .table-footer .table-row .table-col {
+      padding: 10px 20px;
+      min-width: 0;
+    }
+
+    .section-{{ section.id }} .table-footer .table-row .table-col:first-child {
+      text-align: left;
+      background: transparent;
+    }
+
+    .section-{{ section.id }} .table-footer .table-row .table-col:nth-child(2) {
+      background: transparent;
+    }
+
+    .section-{{ section.id }} .table-footer .table-row .table-col:last-child {
+      background: transparent;
+    }
+
+    .section-{{ section.id }} .table-body + .table-footer .table-row .table-col:nth-child(2) {
+      border-bottom-left-radius: {{ section.settings.table_border_radius }}px;
+      border-bottom-right-radius: {{ section.settings.table_border_radius }}px;
+    }
+
+    /* Bottom highlight overlay effect */
+    .section-{{ section.id }} .table-footer {
+      position: relative;
+      height: 10px; /* 10px vertical padding as requested */
+      {% if section.settings.table_outer_border_enabled %}
+        border: {{ section.settings.table_outer_border_width }}px solid transparent;
+        box-sizing: border-box;
+      {% else %}
+        border: none;
+      {% endif %}
+      z-index: 5; /* Ensure highlight shows over outer border */
+      margin-top: 0; /* Ensure no gap between table body and footer */
+    }
+
+    .section-{{ section.id }} .table-footer .table-row {
+      height: 100%;
+    }
+
+    .section-{{ section.id }} .table-footer .table-col.brand-col {
+      position: relative;
+      height: 100% !important;
+      min-height: 10px;
+      z-index: 3; /* Higher z-index to show over border */
+      {% if section.settings.table_outer_border_enabled %}
+        margin-bottom: -{{ section.settings.table_outer_border_width }}px; /* Extend over the outer border */
+        padding-bottom: {{ section.settings.table_outer_border_width }}px; /* Compensate for negative margin */
+      {% endif %}
+    }
+
+    .mobile-bg-image {
+    display: none;
+  }
+
+    /* Mobile responsive adjustments */
+    @media (max-width: 1024px) {
+      .section-{{ section.id }} .parent-div {
+        padding: 0;
+        margin: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .section-{{ section.id }} {
+          width: 100%;
+          max-width: 100%;
+          margin-left: 0;
+          overflow-x: hidden;
+      }
+
+      .section-{{ section.id }} .parent-div {
+        flex-direction: column;
+        gap: 50px;
+        width: 100%;
+        max-width: 100%;
+        padding: {{ section.settings.mobile_parent_div_padding_vertical | default: 0 }}px {{ section.settings.mobile_parent_div_padding_horizontal | default: 15 }}px;
+        margin: 0;
+        min-height: unset;
+        height: auto;
+      }
+
+      .section-{{ section.id }} .left-fill-image {
+      display: none;
+      }
+
+      .section-{{ section.id }} .right-div {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: visible;
+        padding: {{ section.settings.mobile_right_div_padding_vertical | default: 0 }}px {{ section.settings.mobile_right_div_padding_horizontal | default: 10 }}px;
+      }
+
+      .section-{{ section.id }} .left-div {
+        position: static;
+        background-image: none !important;
+        min-height: 0;
+        display: block;
+        height: auto;
+        padding-bottom: 25px;
+        width: 100%;
+        text-align: center;
+      }
+
+
+      .section-{{ section.id }} .left-bottom,
+      .section-{{ section.id }} .left-top {
+        position: static;
+        transform: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .section-{{ section.id }} .left-bg-image {
+        display: none;
+      }
+
+      .section-{{ section.id }}.comparison-section--has-bg::after {
+        display: none !important;
+      }
+
+      .section-{{ section.id }} .mobile-bg-image {
+        display: block;
+        width: calc(100% + 30px);
+        margin: 0;
+        padding: 30px 0 0 0;
+        overflow: hidden;
+        opacity: {{ section.settings.bg_image_opacity | divided_by: 100.0 }};
+      }
+
+      .section-{{ section.id }} .mobile-bg-image img {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        object-position: center bottom;
+        margin: 0;
+        padding: 0;
+      }
+
+      .section-{{ section.id }} .brand-header {
+        position: static;
+        width: 100%;
+        margin-bottom: 10px;
+        {% if section.settings.enable_third_column %}
+          grid-template-columns: 1fr {{ section.settings.mobile_brand_column_width }}px {{ section.settings.mobile_other_column_width }}px {{ section.settings.mobile_third_column_width | default: section.settings.mobile_other_column_width }}px;
+        {% else %}
+          grid-template-columns: 1fr {{ section.settings.mobile_brand_column_width }}px {{ section.settings.mobile_other_column_width }}px;
+        {% endif %}
+        min-width: 0;
+      }
+
+      .section-{{ section.id }} .brand-name {
+        width: {{ section.settings.mobile_brand_column_width }}px;
+        padding: 10px;
+      }
+
+      .section-{{ section.id }} .brand-name h3 {
+       font-size: {{ section.settings.brand_name_font_size_mobile }}px;
+      }
+
+      .section-{{ section.id }} .table-head .table-row .table-col,
+      .section-{{ section.id }} .table-body .table-col,
+      .section-{{ section.id }} .table-body .description-col {
+        padding: {{ section.settings.mobile_cell_padding }}px;
+      }
+
+      .section-{{ section.id }} .table-head .table-row .table-col:last-child p {
+        font-size: 12px !important;
+      }
+
+      .section-{{ section.id }} .comparison-table {
+        font-size: {{ section.settings.mobile_base_font_size }}px;
+        width: 100%;
+        max-width: 100%;
+        overflow: visible;
+        border-radius: {{ section.settings.table_border_radius }}px;
+      }
+
+      .section-{{ section.id }} .feature-desc p {
+      font-size: 12px !important;
+      }
+
+      .section-{{ section.id }} .table-footer .table-row .table-col {
+        padding: {{ section.settings.mobile_cell_padding }}px 10px;
+      }
+
+      .section-{{ section.id }} .table-head .table-row,
+      .section-{{ section.id }} .table-body .table-row,
+      .section-{{ section.id }} .table-footer .table-row {
+        display: grid;
+        {% if section.settings.enable_third_column %}
+          grid-template-columns: 1fr {{ section.settings.mobile_brand_column_width }}px {{ section.settings.mobile_other_column_width }}px {{ section.settings.mobile_third_column_width | default: section.settings.mobile_other_column_width }}px;
+        {% else %}
+          grid-template-columns: 1fr {{ section.settings.mobile_brand_column_width }}px {{ section.settings.mobile_other_column_width }}px;
+        {% endif %}
+        align-items: stretch;
+      }
+
+      .section-{{ section.id }} .check-icon,
+      .section-{{ section.id }} .cross-icon {
+        width: {{ section.settings.mobile_icon_size }}px;
+        height: {{ section.settings.mobile_icon_size }}px;
+      }
+    }
+
+    /* Load-in animation */
+    .section-{{ section.id }} {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp-{{ section.id }} 0.8s ease-out forwards;
+    }
+
+    @keyframes fadeInUp-{{ section.id }} {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Enhanced Comparison",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": false,
+      "info": "When enabled, uses colors from your theme settings for text, icons, and table background. When disabled, uses the custom colors below."
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Compare and see the difference"
+    },
+    {
+      "type": "header",
+      "content": "Subheading Customization"
+    },
+    {
+      "type": "range",
+      "id": "subheading_font_size",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 18,
+      "label": "Subheading Font Size"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading Color",
+      "default": "#666666",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "select",
+      "id": "subheading_font_weight",
+      "label": "Subheading Font Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "range",
+      "id": "subheading_margin_top",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "label": "Subheading Top Margin"
+    },
+    {
+      "type": "range",
+      "id": "subheading_margin_bottom",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "label": "Subheading Bottom Margin"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Here's How We're Different"
+    },
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Your Brand Name",
+      "default": "Quasi"
+    },
+    {
+      "type": "text",
+      "id": "other_brand_name",
+      "label": "Other Brand Name",
+      "default": "Other Brands"
+    },
+    {
+      "type": "header",
+      "content": "Background & Layout Settings"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section Background Color",
+      "default": "#FFFFFF",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20,
+      "label": "Section Top Padding"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20,
+      "label": "Section Bottom Padding"
+    },
+    {
+      "type": "range",
+      "id": "container_max_width",
+      "min": 800,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "default": 1400,
+      "label": "Container Max Width"
+    },
+    {
+      "type": "range",
+      "id": "layout_gap",
+      "min": 20,
+      "max": 120,
+      "step": 10,
+      "unit": "px",
+      "default": 60,
+      "label": "Gap Between Left and Right Sections"
+    },
+    {
+      "type": "header",
+      "content": "Background Image Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "section_bg_image",
+      "label": "Section Background Image (Decorative)",
+      "info": "Used in left column: 'Fill' covers the entire left div, 'Center Larger' places a larger image below text"
+    },
+    {
+      "type": "select",
+      "id": "bg_image_position",
+      "label": "Background Image Position",
+      "options": [
+        { "value": "fill", "label": "Fill Left Column" },
+        { "value": "center_small", "label": "Center Larger Below Text" }
+      ],
+      "default": "fill",
+      "info": "Choose how the background image is displayed in the left column"
+    },
+    {
+      "type": "range",
+      "id": "bg_image_width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80,
+      "label": "Background Image Width (Center Larger)"
+    },
+    {
+      "type": "range",
+      "id": "bg_image_height",
+      "min": 100,
+      "max": 600,
+      "step": 25,
+      "unit": "px",
+      "default": 300,
+      "label": "Background Image Height (Center Larger)"
+    },
+    {
+      "type": "range",
+      "id": "bg_image_opacity",
+      "min": 10,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "default": 100,
+      "label": "Background Image Opacity"
+    },
+    {
+      "type": "header",
+      "content": "Left Section Typography"
+    },
+    {
+      "type": "range",
+      "id": "left_content_margin_top",
+      "min": 50,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 110,
+      "label": "Left Content Top Margin"
+    },
+    {
+      "type": "color",
+      "id": "tagline_color",
+      "label": "Tagline Color",
+      "default": "#666666",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "range",
+      "id": "tagline_font_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14,
+      "label": "Tagline Font Size",
+      "info": "Automatically scales on mobile"
+    },
+    {
+      "type": "select",
+      "id": "tagline_font_weight",
+      "label": "Tagline Font Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "tagline_font_style",
+      "label": "Tagline Font Style",
+      "options": [
+        { "value": "normal", "label": "Normal" },
+        { "value": "italic", "label": "Italic" }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "range",
+      "id": "tagline_letter_spacing",
+      "min": 0,
+      "max": 3,
+      "step": 0.5,
+      "unit": "px",
+      "default": 1,
+      "label": "Tagline Letter Spacing"
+    },
+    {
+      "type": "checkbox",
+      "id": "tagline_uppercase",
+      "label": "Tagline Uppercase",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#333333",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 20,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 32,
+      "label": "Title Font Size",
+      "info": "Automatically scales on mobile"
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "Title Font Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "select",
+      "id": "title_font_style",
+      "label": "Title Font Style",
+      "options": [
+        { "value": "normal", "label": "Normal" },
+        { "value": "italic", "label": "Italic" }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "range",
+      "id": "title_line_height",
+      "min": 0.8,
+      "max": 2.0,
+      "step": 0.1,
+      "default": 1.1,
+      "label": "Title Line Height"
+    },
+    {
+      "type": "select",
+      "id": "title_text_transform",
+      "label": "Title Text Transform",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "uppercase", "label": "Uppercase" },
+        { "value": "lowercase", "label": "Lowercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0,
+      "label": "Title Bottom Margin"
+    },
+    {
+      "type": "color",
+      "id": "left_subheading_color",
+      "label": "Left Section Subheading Color",
+      "default": "#666666",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "range",
+      "id": "left_subheading_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Left Section Subheading Font Size",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "left_subheading_font_weight",
+      "label": "Left Section Subheading Font Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "range",
+      "id": "left_subheading_margin_top",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Left Section Subheading Top Margin",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Table Header Settings"
+    },
+    {
+      "type": "color",
+      "id": "brand_name_color",
+      "label": "Brand Name Color",
+      "default": "#000000",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "range",
+      "id": "brand_name_font_size_desktop",
+      "min": 14,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 32,
+      "label": "Brand Name Font Size (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "brand_name_font_size_mobile",
+      "min": 12,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 24,
+      "label": "Brand Name Font Size (Mobile)"
+    },
+    {
+      "type": "select",
+      "id": "brand_name_font_weight",
+      "label": "Brand Name Font Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "select",
+      "id": "brand_name_font_style",
+      "label": "Brand Name Font Style",
+      "options": [
+        { "value": "normal", "label": "Normal" },
+        { "value": "italic", "label": "Italic" }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "select",
+      "id": "brand_name_text_transform",
+      "label": "Brand Name Text Transform",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "uppercase", "label": "Uppercase" },
+        { "value": "lowercase", "label": "Lowercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "brand_name_padding",
+      "min": 10,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 10,
+      "label": "Brand Name Padding"
+    },
+    {
+      "type": "color",
+      "id": "other_brand_name_color",
+      "label": "Other Brand Name Color",
+      "default": "#666666",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "range",
+      "id": "table_header_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "label": "Table Header Font Size"
+    },
+    {
+      "type": "select",
+      "id": "table_header_font_weight",
+      "label": "Table Header Font Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "header",
+      "content": "Table Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "brand_column_width",
+      "min": 80,
+      "max": 180,
+      "step": 10,
+      "unit": "px",
+      "default": 120,
+      "label": "Brand Column Width"
+    },
+    {
+      "type": "range",
+      "id": "other_brand_column_width",
+      "min": 80,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "default": 100,
+      "label": "Other Brand Column Width"
+    },
+    {
+      "type": "header",
+      "content": "Third Column Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_third_column",
+      "label": "Enable Third Column",
+      "default": false,
+      "info": "Add a third comparison column (duplicate of Other Brands)"
+    },
+    {
+      "type": "text",
+      "id": "third_column_name",
+      "label": "Third Column Name",
+      "default": "Other Brands",
+      "info": "Only applies when third column is enabled"
+    },
+    {
+      "type": "range",
+      "id": "third_column_width",
+      "min": 80,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "default": 100,
+      "label": "Third Column Width",
+      "info": "Only applies when third column is enabled"
+    },
+    {
+      "type": "range",
+      "id": "mobile_third_column_width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60,
+      "label": "Mobile Third Column Width",
+      "info": "Only applies when third column is enabled"
+    },
+    {
+      "type": "range",
+      "id": "mobile_brand_column_width",
+      "min": 70,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "default": 70,
+      "label": "Mobile Brand Column Width"
+    },
+    {
+      "type": "range",
+      "id": "mobile_other_column_width",
+      "min": 60,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60,
+      "label": "Mobile Other Column Width"
+    },
+    {
+      "type": "range",
+      "id": "table_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 14,
+      "label": "Table Border Radius"
+    },
+    {
+      "type": "header",
+      "content": "Table Outer Border"
+    },
+    {
+      "type": "checkbox",
+      "id": "table_outer_border_enabled",
+      "label": "Enable Outer Border",
+      "default": false,
+      "info": "Add a border around the entire table"
+    },
+    {
+      "type": "range",
+      "id": "table_outer_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Outer Border Width",
+      "default": 1,
+      "info": "Only applies when outer border is enabled"
+    },
+    {
+      "type": "select",
+      "id": "table_outer_border_style",
+      "label": "Outer Border Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" },
+        { "value": "double", "label": "Double" }
+      ],
+      "default": "solid",
+      "info": "Only applies when outer border is enabled"
+    },
+    {
+      "type": "color",
+      "id": "table_outer_border_color",
+      "label": "Outer Border Color",
+      "default": "#E0E0E0",
+      "info": "Only applies when outer border is enabled and 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "checkbox",
+      "id": "mask_outer_border_under_highlight",
+      "label": "Mask border under highlight column (top & bottom)",
+      "default": true,
+      "info": "When enabled, hides the outer border line within the highlighted brand column at the header and footer for a seamless look. Only applies when outer border is enabled."
+    },
+    {
+      "type": "range",
+      "id": "table_cell_padding",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10,
+      "label": "Table Header Cell Padding"
+    },
+    {
+      "type": "range",
+      "id": "table_body_cell_padding",
+      "min": 12,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 18,
+      "label": "Table Body Cell Padding"
+    },
+    {
+      "type": "range",
+      "id": "mobile_cell_padding",
+      "min": 8,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 12,
+      "label": "Mobile Cell Padding"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Container Padding"
+    },
+    {
+      "type": "range",
+      "id": "mobile_parent_div_padding_vertical",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 0,
+      "label": "Mobile Parent Container Vertical Padding"
+    },
+    {
+      "type": "range",
+      "id": "mobile_parent_div_padding_horizontal",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 15,
+      "label": "Mobile Parent Container Horizontal Padding"
+    },
+    {
+      "type": "range",
+      "id": "mobile_right_div_padding_vertical",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 0,
+      "label": "Mobile Right Container Vertical Padding"
+    },
+    {
+      "type": "range",
+      "id": "mobile_right_div_padding_horizontal",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 10,
+      "label": "Mobile Right Container Horizontal Padding"
+    },
+    {
+      "type": "range",
+      "id": "mobile_base_font_size",
+      "min": 8,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "label": "Mobile Base Font Size"
+    },
+    {
+      "type": "header",
+      "content": "Brand Column Background"
+    },
+    {
+      "type": "checkbox",
+      "id": "brand_column_gradient",
+      "label": "Use Gradient for Brand Column",
+      "default": false,
+      "info": "Applies a gradient background to the brand column, header, and footer"
+    },
+    {
+      "type": "color_background",
+      "id": "brand_column_background",
+      "label": "Brand Column Background",
+      "default": "linear-gradient(85deg, #EF8D8D 0%, #F4B4B4 100%)",
+      "info": "Only applies when 'Use Gradient for Brand Column' is enabled"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_brand_column_borders",
+      "label": "Hide Brand Column Cell Borders",
+      "default": false,
+      "info": "Remove cell borders from the highlighted brand column for a cleaner look"
+    },
+    {
+      "type": "header",
+      "content": "Table Styling"
+    },
+    {
+      "type": "color",
+      "id": "table_background_color",
+      "label": "Table Background Color",
+      "default": "#FFFFFF",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "table_border_color",
+      "label": "Table Row Border Color",
+      "default": "#F0F0F0",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "range",
+      "id": "table_border_width",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 2,
+      "label": "Table Row Border Width"
+    },
+    {
+      "type": "checkbox",
+      "id": "table_shadow_enabled",
+      "label": "Enable Table Shadow",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "table_shadow_opacity",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "default": 15,
+      "label": "Table Shadow Opacity"
+    },
+    {
+      "type": "header",
+      "content": "Feature Content Typography"
+    },
+    {
+      "type": "color",
+      "id": "feature_title_color",
+      "label": "Feature Title Color",
+      "default": "#FF4D6D",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "range",
+      "id": "feature_title_font_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "label": "Feature Title Font Size"
+    },
+    {
+      "type": "select",
+      "id": "feature_title_font_weight",
+      "label": "Feature Title Font Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "select",
+      "id": "feature_title_font_style",
+      "label": "Feature Title Font Style",
+      "options": [
+        { "value": "normal", "label": "Normal" },
+        { "value": "italic", "label": "Italic" }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_title_uppercase",
+      "label": "Feature Title Uppercase",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "feature_title_letter_spacing",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "px",
+      "default": 0.5,
+      "label": "Feature Title Letter Spacing"
+    },
+    {
+      "type": "range",
+      "id": "feature_title_margin_bottom",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 4,
+      "label": "Feature Title Bottom Margin"
+    },
+    {
+      "type": "color",
+      "id": "feature_description_color",
+      "label": "Feature Description Color",
+      "default": "#666666",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "range",
+      "id": "feature_description_font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "label": "Feature Description Font Size"
+    },
+    {
+      "type": "select",
+      "id": "feature_description_font_weight",
+      "label": "Feature Description Font Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "range",
+      "id": "feature_description_line_height",
+      "min": 1.0,
+      "max": 2.0,
+      "step": 0.1,
+      "default": 1.3,
+      "label": "Feature Description Line Height"
+    },
+    {
+      "type": "header",
+      "content": "Icon Settings"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "min": 20,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 32,
+      "label": "Icon Size"
+    },
+    {
+      "type": "select",
+      "id": "icon_style",
+      "label": "Icon Style",
+      "options": [
+        { "value": "original", "label": "Original Icons" },
+        { "value": "circular", "label": "Circular Icons" }
+      ],
+      "default": "original",
+      "info": "Choose between the original outlined icons or modern circular filled icons"
+    },
+    {
+      "type": "range",
+      "id": "mobile_icon_size",
+      "min": 18,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 24,
+      "label": "Mobile Icon Size"
+    },
+    {
+      "type": "color",
+      "id": "brand_check_icon_color",
+      "label": "Brand Column Check Icon Color",
+      "default": "#BE3C52",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "brand_cross_icon_color",
+      "label": "Brand Column Cross Icon Color",
+      "default": "#7F7F7F",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "other_check_icon_color",
+      "label": "Other Column Check Icon Color",
+      "default": "#BE3C52",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "other_cross_icon_color",
+      "label": "Other Column Cross Icon Color",
+      "default": "#7F7F7F",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "checkbox",
+      "id": "brand_icons_filled",
+      "label": "Fill Brand Column Icons",
+      "default": false,
+      "info": "When enabled, icons will be filled with color instead of outlined"
+    },
+    {
+      "type": "range",
+      "id": "brand_icon_stroke_width",
+      "min": 0.5,
+      "max": 3,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Brand Column Icon Stroke Width",
+      "default": 1.2,
+      "info": "Only applies when icons are not filled"
+    },
+    {
+      "type": "checkbox",
+      "id": "other_icons_filled",
+      "label": "Fill Other Column Icons",
+      "default": false,
+      "info": "When enabled, icons will be filled with color instead of outlined"
+    },
+    {
+      "type": "range",
+      "id": "other_icon_stroke_width",
+      "min": 0.5,
+      "max": 3,
+      "step": 0.1,
+      "unit": "px",
+      "label": "Other Column Icon Stroke Width",
+      "default": 1.2,
+      "info": "Only applies when icons are not filled"
+    },
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below."
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Accent Font Family",
+      "options": [
+        { "value": "inherit", "label": "Use Global Setting" },
+        { "value": "serif", "label": "System Serif" },
+        { "value": "Georgia Pro", "label": "Georgia Pro" },
+        { "value": "Bodoni Moda", "label": "Bodoni Moda" },
+        { "value": "Instrument Serif", "label": "Instrument Serif" },
+        { "value": "DM Serif Text", "label": "DM Serif Text" },
+        { "value": "Nothing You Could Do", "label": "Nothing You Could Do" }
+      ],
+      "default": "inherit",
+      "info": "Only used when Override Global Accent Typography is enabled"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "comparison_row",
+      "name": "Comparison Row",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "feature_title",
+          "label": "Feature Title",
+          "default": "<p>VISIBLE RESULTS</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "feature_icon",
+          "label": "Feature Icon/Image"
+        },
+        {
+          "type": "range",
+          "id": "feature_icon_size",
+          "min": 12,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "label": "Feature Icon Size",
+          "default": 20
+        },
+        {
+          "type": "color",
+          "id": "feature_title_color",
+          "label": "Feature Title Color",
+          "default": "#000000"
+        },
+        {
+          "type": "text",
+          "id": "feature_desc",
+          "label": "Feature Description",
+          "default": "Glass skin in just 2 hours"
+        },
+        {
+          "type": "checkbox",
+          "id": "our_brand_has_feature",
+          "label": "Our brand has feature",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "competitor_has_feature",
+          "label": "Other brand has feature",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "third_column_has_feature",
+          "label": "Third column has feature",
+          "default": false,
+          "info": "Only applies when third column is enabled"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Enhanced Comparison",
+      "blocks": [
+        {
+          "type": "comparison_row",
+          "settings": {
+            "feature_title": "<p>VISIBLE RESULTS</p>",
+            "feature_desc": "Glass skin in just 2 hours",
+            "our_brand_has_feature": true,
+            "competitor_has_feature": false,
+            "third_column_has_feature": false
+          }
+        },
+        {
+          "type": "comparison_row",
+          "settings": {
+            "feature_title": "<p>PREMIUM QUALITY</p>",
+            "feature_desc": "Made with organic ingredients",
+            "our_brand_has_feature": true,
+            "competitor_has_feature": true,
+            "third_column_has_feature": true
+          }
+        },
+        {
+          "type": "comparison_row",
+          "settings": {
+            "feature_title": "<p>MONEY-BACK GUARANTEE</p>",
+            "feature_desc": "100% satisfaction guaranteed",
+            "our_brand_has_feature": true,
+            "competitor_has_feature": false,
+            "third_column_has_feature": false
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

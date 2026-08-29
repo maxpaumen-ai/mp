@@ -1,0 +1,96 @@
+{%- liquid
+  if empty_cart_redirect_url != blank
+    assign continue_shopping_url = empty_cart_redirect_url
+  else
+    assign continue_shopping_url = routes.all_products_collection_url
+  endif
+-%}
+
+<div class="drawer__inner-empty vhl-empty-cart">
+  {% render 'cart-header' %}
+
+  <div class="vhl-empty-cart__body">
+    <div class="vhl-empty-cart__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M6.5 8h11l-.8 11H7.3L6.5 8Z"/>
+        <path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+      </svg>
+    </div>
+
+    <h2 class="cart__empty-text">Je winkelmand is leeg</h2>
+    <p class="vhl-empty-cart__text">
+      Voeg een favoriet badkameritem toe om verder te gaan.
+    </p>
+
+    <a href="{{ continue_shopping_url }}" class="button vhl-empty-cart__button">
+      Verder winkelen
+    </a>
+  </div>
+</div>
+
+<style>
+  .cart-drawer .vhl-empty-cart {
+    height: 100%;
+    width: 100%;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    background: #fbfaf8;
+  }
+
+  .cart-drawer .vhl-empty-cart__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 24px 72px;
+    text-align: center;
+  }
+
+  .cart-drawer .vhl-empty-cart__icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #eeeae3;
+    color: #4c4b47;
+  }
+
+  .cart-drawer .vhl-empty-cart__icon svg {
+    width: 23px;
+    height: 23px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .cart-drawer .vhl-empty-cart .cart__empty-text {
+    margin: 0 0 7px !important;
+    color: #292824 !important;
+    font-size: 21px !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+  }
+
+  .cart-drawer .vhl-empty-cart__text {
+    max-width: 280px;
+    margin: 0 0 18px;
+    color: #77736c;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .cart-drawer .vhl-empty-cart__button {
+    min-height: 44px;
+    padding: 0 22px;
+    border-radius: 7px;
+    background: #4c4b47;
+    color: #fff !important;
+  }
+</style>

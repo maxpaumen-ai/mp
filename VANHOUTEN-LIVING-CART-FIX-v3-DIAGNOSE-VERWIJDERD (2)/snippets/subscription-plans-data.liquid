@@ -1,0 +1,81 @@
+{% comment %}
+  Subscription plans data (PDP only). Same shape as plan data used by subscribe-and-save to build window.subscriptionContext.
+  Expects product from PDP (theme.liquid renders only when template.name == 'product').
+
+  Usage in theme.liquid:
+    {% if template.name == 'product' %}
+      {% render 'subscription-plans-data', product: product %}
+    {% endif %}
+
+  Output: window.__subscriptionPlansData = { productId, plans }.
+  Each plan: { id, name, description, groupId, groupName, priceAdjustments: [{ valueType, value }], options }.
+  Given a variant (price in cents) and a plan id, you can compute the same object as window.subscriptionContext:
+    originalPrice = variant.price; finalPrice from plan.priceAdjustments[0] (percentage / fixed_amount / price); discountType, discountValue from that adjustment.
+{% endcomment %}
+
+{% if product != blank and product.selling_plan_groups.size > 0 %}
+  <script type="application/json" id="subscription-plans-data">
+    {
+      "productId": {{ product.id }},
+      "plans": [
+        {%- assign plan_index = 0 -%}
+        {%- for group in product.selling_plan_groups -%}
+          {%- for plan in group.selling_plans -%}
+            {%- assign plan_index = plan_index | plus: 1 -%}
+            {%- if plan_index > 1 -%},{%- endif -%}
+            {
+              "id": {{ plan.id }},
+              "name": {{ plan.name | json }},
+              "description": {{ plan.description | json }},
+              "groupId": {{ group.id | json }},
+              "groupName": {{ group.name | json }},
+              "priceAdjustments": [
+                {%- for adjustment in plan.price_adjustments -%}
+                  {%- if forloop.first -%}{%- else -%},{%- endif -%}
+                  { "valueType": {{ adjustment.value_type | json }}, "value": {{ adjustment.value }} }
+                {%- endfor -%}
+              ],
+              "options": [
+                {%- for option in plan.options -%}
+                  {%- if forloop.first -%}{%- else -%},{%- endif -%}
+                  {
+                    "name": {% if option.name != blank %}{{ option.name | json }}{% elsif option.value != blank %}{{ option.value | json }}{% else %}{{ option | json }}{% endif %},
+                    "value": {% if option.value != blank %}{{ option.value | json }}{% elsif option.name != blank %}{{ option.name | json }}{% else %}{{ option | json }}{% endif %}
+                  }
+                {%- endfor -%}
+              ]
+            }
+          {%- endfor -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+  <script>
+    (function() {
+      var el = document.getElementById('subscription-plans-data');
+      if (el && el.textContent) {
+        try {
+          window.__subscriptionPlansData = JSON.parse(el.textContent);
+        } catch (e) {
+          console.warn('[subscription-plans-data] Parse error:', e);
+        }
+      }
+    })();
+  </script>
+  {% comment %}
+    Product variants JSON for initial page load: theme-loaders.js bootstrapSubscriptionContext()
+  {% endcomment %}
+  <script type="application/json" id="product-variants-pdp">{{ product.variants | json }}</script>
+  <script>
+    (function() {
+      var el = document.getElementById('product-variants-pdp');
+      if (el && el.textContent) {
+        try {
+          window.__productVariants = JSON.parse(el.textContent);
+        } catch (e) {
+          console.warn('[subscription-plans-data] product variants parse error:', e);
+        }
+      }
+    })();
+  </script>
+{% endif %}

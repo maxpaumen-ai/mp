@@ -1,0 +1,709 @@
+{% comment %}
+  Benefits Grid Snippet (Simple Version)
+
+  Usage:
+  {% render 'benefits-grid-simple',
+    grid_class: 'custom-class',
+    columns_desktop: 2,
+    columns_mobile: 1,
+    gap: 15,
+    max_width: 500,
+    icon_bg_color: '#00C7FF',
+    icon_stroke_color: '#000000',
+    text_color: '#000000',
+    font_size_desktop: 14,
+    font_size_mobile: 12,
+    benefit1_text: 'Benefit 1',
+    benefit1_icon: 'star',
+    benefit1_custom_icon: '',
+    benefit2_text: 'Benefit 2',
+    benefit2_icon: 'clock',
+    benefit2_custom_icon: '',
+    benefit3_text: 'Benefit 3',
+    benefit3_icon: 'wand',
+    benefit3_custom_icon: '',
+    benefit4_text: 'Benefit 4',
+    benefit4_icon: 'badge',
+    benefit4_custom_icon: ''
+  %}
+{% endcomment %}
+
+{%- comment -%}Determine the grid classes based on columns{%- endcomment -%}
+{%- assign desktop_class = 'benefits-grid--columns-' | append: columns_desktop | default: 2 -%}
+{%- assign mobile_class = 'benefits-grid--mobile-columns-' | append: columns_mobile | default: 2 -%}
+
+<div
+  class="benefits-grid {{ desktop_class }} {{ mobile_class }} {{ grid_class }}"
+  style="gap: {{ gap | default: 15 }}px; max-width: {{ max_width | default: 450 }}px;"
+>
+  {% if benefit1_text != blank %}
+    <div class="benefit-item">
+      <div class="benefit-icon" style="background-color: {{ icon_bg_color | default: '#00C7FF' }};">
+        {% case benefit1_icon %}
+          {% when 'star' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          {% when 'clock' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          {% when 'wand' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M15 4V2"></path>
+              <path d="M15 16v-2"></path>
+              <path d="M8 9h2"></path>
+              <path d="M20 9h2"></path>
+              <path d="M17.8 11.8L19 13"></path>
+              <path d="M15 9h0"></path>
+              <path d="M17.8 6.2L19 5"></path>
+              <path d="M3 21l9-9"></path>
+              <path d="M12.2 6.2L11 5"></path>
+            </svg>
+          {% when 'badge' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"></path>
+              <path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"></path>
+            </svg>
+          {% when 'heart' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          {% when 'shield' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          {% when 'leaf' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+            </svg>
+          {% when 'check' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          {% else %}
+            {% if benefit1_custom_icon != blank %}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ icon_stroke_color | default: '#000000' }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                {{ benefit1_custom_icon }}
+              </svg>
+            {% else %}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ icon_stroke_color | default: '#000000' }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+            {% endif %}
+        {% endcase %}
+      </div>
+      <div
+        class="benefit-text"
+        style="color: {{ text_color | default: '#000000' }}; font-size: {{ font_size_desktop | default: 12 }}px;"
+      >
+        {{ benefit1_text }}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if benefit2_text != blank %}
+    <div class="benefit-item">
+      <div class="benefit-icon" style="background-color: {{ icon_bg_color | default: '#00C7FF' }};">
+        {% case benefit2_icon %}
+          {% when 'star' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          {% when 'clock' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          {% when 'wand' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M15 4V2"></path>
+              <path d="M15 16v-2"></path>
+              <path d="M8 9h2"></path>
+              <path d="M20 9h2"></path>
+              <path d="M17.8 11.8L19 13"></path>
+              <path d="M15 9h0"></path>
+              <path d="M17.8 6.2L19 5"></path>
+              <path d="M3 21l9-9"></path>
+              <path d="M12.2 6.2L11 5"></path>
+            </svg>
+          {% when 'badge' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"></path>
+              <path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"></path>
+            </svg>
+          {% when 'heart' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          {% when 'shield' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          {% when 'leaf' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+            </svg>
+          {% when 'check' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          {% else %}
+            {% if benefit2_custom_icon != blank %}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ icon_stroke_color | default: '#000000' }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                {{ benefit2_custom_icon }}
+              </svg>
+            {% else %}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ icon_stroke_color | default: '#000000' }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+            {% endif %}
+        {% endcase %}
+      </div>
+      <div
+        class="benefit-text"
+        style="color: {{ text_color | default: '#000000' }}; font-size: {{ font_size_desktop | default: 12 }}px;"
+      >
+        {{ benefit2_text }}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if benefit3_text != blank %}
+    <div class="benefit-item">
+      <div class="benefit-icon" style="background-color: {{ icon_bg_color | default: '#00C7FF' }};">
+        {% case benefit3_icon %}
+          {% when 'star' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          {% when 'clock' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          {% when 'wand' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M15 4V2"></path>
+              <path d="M15 16v-2"></path>
+              <path d="M8 9h2"></path>
+              <path d="M20 9h2"></path>
+              <path d="M17.8 11.8L19 13"></path>
+              <path d="M15 9h0"></path>
+              <path d="M17.8 6.2L19 5"></path>
+              <path d="M3 21l9-9"></path>
+              <path d="M12.2 6.2L11 5"></path>
+            </svg>
+          {% when 'badge' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"></path>
+              <path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"></path>
+            </svg>
+          {% when 'heart' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          {% when 'shield' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          {% when 'leaf' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+            </svg>
+          {% when 'check' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          {% else %}
+            {% if benefit3_custom_icon != blank %}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ icon_stroke_color | default: '#000000' }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                {{ benefit3_custom_icon }}
+              </svg>
+            {% else %}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ icon_stroke_color | default: '#000000' }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+            {% endif %}
+        {% endcase %}
+      </div>
+      <div
+        class="benefit-text"
+        style="color: {{ text_color | default: '#000000' }}; font-size: {{ font_size_desktop | default: 12 }}px;"
+      >
+        {{ benefit3_text }}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if benefit4_text != blank %}
+    <div class="benefit-item">
+      <div class="benefit-icon" style="background-color: {{ icon_bg_color | default: '#00C7FF' }};">
+        {% case benefit4_icon %}
+          {% when 'star' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          {% when 'clock' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          {% when 'wand' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M15 4V2"></path>
+              <path d="M15 16v-2"></path>
+              <path d="M8 9h2"></path>
+              <path d="M20 9h2"></path>
+              <path d="M17.8 11.8L19 13"></path>
+              <path d="M15 9h0"></path>
+              <path d="M17.8 6.2L19 5"></path>
+              <path d="M3 21l9-9"></path>
+              <path d="M12.2 6.2L11 5"></path>
+            </svg>
+          {% when 'badge' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"></path>
+              <path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"></path>
+            </svg>
+          {% when 'heart' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          {% when 'shield' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          {% when 'leaf' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+            </svg>
+          {% when 'check' %}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ icon_stroke_color | default: '#000000' }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          {% else %}
+            {% if benefit4_custom_icon != blank %}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ icon_stroke_color | default: '#000000' }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                {{ benefit4_custom_icon }}
+              </svg>
+            {% else %}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="{{ icon_stroke_color | default: '#000000' }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+            {% endif %}
+        {% endcase %}
+      </div>
+      <div
+        class="benefit-text"
+        style="color: {{ text_color | default: '#000000' }}; font-size: {{ font_size_desktop | default: 12 }}px;"
+      >
+        {{ benefit4_text }}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns, 2), 1fr);
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .benefits-grid--columns-1 {
+    --grid-columns: 1;
+  }
+
+  .benefits-grid--columns-2 {
+    --grid-columns: 2;
+  }
+
+  .benefits-grid--columns-3 {
+    --grid-columns: 3;
+  }
+
+  .benefits-grid--columns-4 {
+    --grid-columns: 4;
+  }
+
+  .benefit-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .benefit-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+  }
+
+  .benefit-icon svg {
+    width: 70px;
+    height: 70px;
+  }
+
+  .benefit-text {
+    line-height: 1.4;
+  }
+
+  @media (max-width: 768px) {
+    .benefits-grid--mobile-columns-1 {
+      --grid-columns: 1;
+    }
+
+    .benefits-grid--mobile-columns-2 {
+      --grid-columns: 2;
+    }
+
+    .benefit-text {
+      font-size: {{ font_size_mobile | default: 12 }}px !important;
+    }
+  }
+</style>

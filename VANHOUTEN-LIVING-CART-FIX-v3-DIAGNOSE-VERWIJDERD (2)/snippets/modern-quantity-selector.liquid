@@ -1,0 +1,321 @@
+{%- comment -%}
+  Quantity Selector
+
+  A stylish quantity selector with rounded edges and clean design.
+
+  Usage:
+  {% render 'modern-quantity-selector', product: product, variant: variant, background_color: background_color, button_color: button_color, text_color: text_color, margin_top: margin_top, margin_bottom: margin_bottom, product_form_id: product_form_id %}
+{%- endcomment -%}
+
+{%- liquid
+  assign unique_id = 'QuantitySelector-' | append: section.id | append: '-' | append: product.id
+  assign current_variant = product.selected_or_first_available_variant
+  if variant
+    assign current_variant = variant
+  endif
+  assign quantity_value = 1
+
+  assign background_color = background_color | default: '#f2f2f2'
+  assign button_color = button_color | default: '#FFFFFF'
+  assign text_color = text_color | default: '#333333'
+  assign margin_top = margin_top | default: 0
+  assign margin_bottom = margin_bottom | default: 12
+
+  assign price = current_variant.price
+-%}
+
+<div class="modern-quantity-selector btn-secondary" {{ block.shopify_attributes }} data-modern-quantity-selector>
+  <button
+    type="button"
+    class="qty-button qty-minus"
+    name="minus"
+    aria-label="{{ 'products.product.quantity.decrease' | t: product: product.title | escape }}"
+  >
+    <span>-</span>
+  </button>
+  <input
+    class="quantity-input"
+    type="number"
+    name="quantity"
+    id="{{ unique_id }}"
+    min="1"
+    value="{{ quantity_value }}"
+    form="{{ product_form_id }}"
+    data-product-id="{{ product.id }}"
+    data-min="1"
+    data-cart-app-quantity="true"
+    data-quantity-input="true"
+    aria-label="{{ 'products.product.quantity.input_label' | t: product: product.title | escape }}"
+  >
+  <button
+    type="button"
+    class="qty-button qty-plus"
+    name="plus"
+    aria-label="{{ 'products.product.quantity.increase' | t: product: product.title | escape }}"
+  >
+    <span>+</span>
+  </button>
+</div>
+
+<style>
+  .modern-quantity-selector {
+    display: flex;
+    align-items: center;
+    background-color: {{ background_color }};
+    width: fit-content;
+    padding: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    margin-top: {{ margin_top }}px;
+    margin-bottom: {{ margin_bottom }}px;
+  }
+
+  body[data-apply-button-radius-to-all="true"] .modern-quantity-selector {
+    border-radius: var(--buttons-radius-outset, 50px);
+  }
+
+  .modern-quantity-selector .qty-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background-color: {{ button_color }};
+    border: none;
+    font-size: 16px;
+    font-weight: var(--font-weight-regular);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: {{ text_color }};
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    line-height: 1;
+  }
+
+  /* Let the theme's button radius styling apply to our buttons */
+  body[data-apply-button-radius-to-all="true"] .modern-quantity-selector .qty-button {
+    border-radius: var(--buttons-radius, 50%);
+  }
+
+  .modern-quantity-selector .qty-button:hover {
+    background-color: {{ button_color | color_darken: 5 }};
+  }
+
+  .modern-quantity-selector .qty-button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .modern-quantity-selector .quantity-input {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background-color: transparent;
+    text-align: center;
+    font-size: 14px;
+    font-weight: var(--font-weight-regular);
+    color: {{ text_color }};
+    -moz-appearance: textfield;
+    padding: 0;
+  }
+
+  .modern-quantity-selector .quantity-input::-webkit-outer-spin-button,
+  .modern-quantity-selector .quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .modern-quantity-selector .quantity-input:focus {
+    outline: none;
+  }
+</style>
+
+<script>
+  const locale = window.Shopify?.locale ?? "en";
+  const country = window.Shopify?.country;
+  const countryLocale = locale.includes("-") ? locale : `${locale}-${country}`;
+
+  document.addEventListener('DOMContentLoaded', function() {
+      if (typeof Elixir_ProductFormExists !== 'function' || !Elixir_ProductFormExists()) return;
+      const productPriceLabel = document.querySelector(".shop-product-price-block");
+      const comparePriceLabel = document.querySelector(".shop-compare-price");
+
+      // Function to update the Add to Cart button price
+      function updateCartButtonPrice(selectedQuantity) {
+        const addToCartButton = document.querySelector('.product-form__submit .button__text') || 
+                                document.querySelector('.shop-add-to-cart-button .button-text') ||
+                                document.querySelector('[data-add-to-cart-text]');
+        if (!addToCartButton) return;
+        
+        const variantPrice = {{ current_variant.price | json }};
+        const variantComparePrice = {{ current_variant.compare_at_price | default: 0 | json }};
+        
+        const formatter = new Intl.NumberFormat(countryLocale, {
+          minimumFractionDigits: 2
+        });
+        
+        const totalPrice = variantPrice * selectedQuantity;
+        const formattedPrice = formatter.format(totalPrice / 100);
+        
+        // Check for text override
+        const submitButton = addToCartButton.closest('button[type="submit"]') || addToCartButton.closest('.shop-add-to-cart-button');
+        const hasTextOverride = submitButton && submitButton.dataset.textOverride === 'true';
+        const persistentText = submitButton && submitButton.dataset.persistentText;
+        
+        // Respect text override - use persistent text if available
+        let buttonText = '';
+        if (hasTextOverride && persistentText) {
+          buttonText = persistentText;
+        } else {
+          buttonText = addToCartButtonText || 'Add to Cart';
+        }
+        
+        console.log("formatted price", formattedPrice)
+        let newButtonText = buttonText;
+        
+        // Only add price to button if show_price_in_button setting is enabled
+        if (typeof showPriceInButton !== 'undefined' && showPriceInButton) {
+          newButtonText += ' - ' + formatMoneyWithoutSuffix(formattedPrice);
+
+          if (variantComparePrice && variantComparePrice > variantPrice) {
+            const totalComparePrice = variantComparePrice * selectedQuantity;
+            const formattedComparePrice = formatter.format(totalComparePrice / 100);
+            newButtonText += ` <span class="compare-price">(${formatMoneyWithoutSuffix(formattedComparePrice)})</span>`;
+            if (productPriceLabel)
+              comparePriceLabel.innerText = formatMoneyWithoutSuffix(formattedComparePrice);
+          }
+        }
+        
+        addToCartButton.innerHTML = newButtonText;
+        if (productPriceLabel)
+          productPriceLabel.innerHTML = formatMoneyWithoutSuffix(formattedPrice);
+      }
+
+    // Wait for next frame so browser has a chance to render elements
+    requestAnimationFrame(() => {
+      const selectors = document.querySelectorAll('[data-modern-quantity-selector]');
+      
+      selectors.forEach(selector => {
+        const minusButton = selector.querySelector('.qty-minus');
+        const plusButton = selector.querySelector('.qty-plus');
+        const input = selector.querySelector('.quantity-input');
+        if (!minusButton || !plusButton || !input) return;
+        
+        const formId = input.getAttribute('form');
+        if (!formId) {
+          console.warn('Quantity input is missing form attribute');
+          return;
+        }
+        
+        // Create a change event to dispatch when value changes
+        const changeEvent = new Event('change', { bubbles: true });
+        
+        // Function to validate quantity rules (min/max)
+        function validateQtyRules() {
+          const value = parseInt(input.value);
+          
+          // Disable minus button if at minimum
+          if (input.min) {
+            minusButton.classList.toggle('disabled', parseInt(value) <= parseInt(input.min));
+          }
+          
+          // Disable plus button if at maximum
+          if (input.max) {
+            const max = parseInt(input.max);
+            plusButton.classList.toggle('disabled', value >= max);
+          }
+        }
+        
+        // Function to ensure form has our quantity value
+        function setupFormSync() {
+          const form = document.getElementById(formId);
+          if (!form) return false;
+          
+          // Find any hidden quantity inputs in the form and remove them
+          form.querySelectorAll('input[type="hidden"][name="quantity"]').forEach(el => el.remove());
+          
+          // Update the data-quantity attribute on the form
+          form.setAttribute('data-quantity', input.value);
+          
+          // Sync visible input value when it changes
+          input.addEventListener('change', () => {
+            // Validate the input value
+            if (parseInt(input.value) < 1 || isNaN(parseInt(input.value))) {
+              input.value = 1;
+            }
+            
+            // Update form's data-quantity attribute
+            form.setAttribute('data-quantity', input.value);
+            
+            validateQtyRules();
+            const selectedQuantity = parseInt(input.value);
+            updateCartButtonPrice(selectedQuantity);
+            
+            // Dispatch a custom event that other components can listen for
+            form.dispatchEvent(new CustomEvent('quantity:update', {
+              bubbles: true,
+              detail: {
+                quantity: input.value,
+                productId: input.getAttribute('data-product-id')
+              }
+            }));
+          });
+          
+          // Intercept form submission
+          form.addEventListener('submit', function(e) {
+            // Make sure the form has the latest quantity value
+            const currentQuantity = input.value;
+            
+            // Find and remove any hidden quantity inputs to avoid conflicts
+            form.querySelectorAll('input[type="hidden"][name="quantity"]').forEach(el => el.remove());
+            
+            // Update data-quantity attribute
+            form.setAttribute('data-quantity', currentQuantity);
+          });
+          
+          return true;
+        }
+        
+        // Handle minus button click
+        minusButton.addEventListener('click', function(event) {
+          event.preventDefault();
+          const previousValue = input.value;
+          
+          input.stepDown();
+          
+          // Only dispatch change event if value actually changed
+          if (previousValue !== input.value) {
+            input.dispatchEvent(changeEvent);
+          }
+          const selectedQuantity = parseInt(input.value);
+          updateCartButtonPrice(selectedQuantity);
+        });
+        
+        // Handle plus button click
+        plusButton.addEventListener('click', function(event) {
+          event.preventDefault();
+          const previousValue = input.value;
+          
+          // Handle minimum value edge case
+          if (parseInt(input.dataset.min) > parseInt(input.step || 1) && input.value == 0) {
+            input.value = input.dataset.min;
+          } else {
+            input.stepUp();
+          }
+          
+          // Only dispatch change event if value actually changed
+          if (previousValue !== input.value) {
+            input.dispatchEvent(changeEvent);
+          }
+          const selectedQuantity = parseInt(input.value);
+          updateCartButtonPrice(selectedQuantity);
+        });
+        
+        
+        // Initialize
+        setupFormSync();
+        validateQtyRules();
+      });
+    });
+
+  });
+</script>

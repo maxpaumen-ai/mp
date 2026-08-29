@@ -1,0 +1,409 @@
+{%- liquid
+    assign block_id = block.id
+    assign section_id = section.id
+    assign unique_id = section_id | append: '-' | append: block_id
+  -%}
+  
+  <div 
+    id="deal-timer-{{ unique_id }}" 
+    class="deal-timer-block deal-timer-{{ unique_id }}"
+    style="
+      margin-top: {{ block.settings.margin_top }}px;
+      margin-bottom: {{ block.settings.margin_bottom }}px;
+      {% if block.settings.background_type == 'solid' %}
+        background-color: {{ block.settings.background_color }};
+      {% else %}
+        background: {{ block.settings.background_gradient }};
+      {% endif %}
+      border-radius: {{ block.settings.block_border_radius }}px;
+      {% if block.settings.enable_block_border %}
+        border: {{ block.settings.block_border_width | default: 1 }}px {{ block.settings.block_border_style | default: 'solid' }} {{ block.settings.block_border_color | default: '#000000' }};
+      {% endif %}
+    "
+    {{ block.shopify_attributes }}
+  >
+    <div class="deal-timer-container-{{ unique_id }}">
+      <div class="deal-timer-content-{{ unique_id }}">
+        
+        {%- if block.settings.show_deal_text -%}
+          <div class="deal-timer-text-section-{{ unique_id }}">
+            <h2 
+              class="deal-timer-title-{{ unique_id }}"
+              style="
+                color: {{ block.settings.title_color }} !important;
+                font-size: {{ block.settings.title_size }}px;
+                font-weight: 700;
+                margin: {{ block.settings.title_margin }}px 0;
+              "
+            >
+              {{ block.settings.deal_title }}
+            </h2>
+            
+            {%- if block.settings.show_subtitle -%}
+              <p 
+                class="deal-timer-subtitle-{{ unique_id }}"
+                style="
+                  color: {{ block.settings.subtitle_color }} !important;
+                  font-size: {{ block.settings.subtitle_size }}px;
+                  font-weight: 400;
+                  margin: 0;
+                "
+              >
+                {{ block.settings.deal_subtitle }}
+              </p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+  
+        {%- if block.settings.show_separator -%}
+          <div class="deal-timer-separator-{{ unique_id }}" 
+              style="
+                  display:block;
+                  border-right:{{  block.settings.line_width }}px dashed {{  block.settings.line_color }};
+                  margin:0 -15px;
+                  height:calc({{ block.settings.timer_number_size }}px + {{ block.settings.timer_label_size }}px + {{ block.settings.timer_unit_gap }}px + 8px);
+                  "></div>
+        {%- endif -%}
+  
+        {%- if block.settings.show_countdown -%}
+          <div class="deal-timer-countdown-{{ unique_id }}">
+            <div class="deal-timer-time-unit-{{ unique_id }}">
+              <span 
+                class="deal-timer-number-{{ unique_id }}" 
+                id="days-{{ unique_id }}"
+                style="
+                  color: {{ block.settings.timer_number_color }} !important;
+                  font-size: {{ block.settings.timer_number_size }}px;
+                  font-weight: 700;
+                "
+              >00</span>
+              <span 
+                class="deal-timer-label-{{ unique_id }}"
+                style="
+                  color: {{ block.settings.timer_label_color }} !important;
+                  font-size: {{ block.settings.timer_label_size }}px;
+                  font-weight: 400;
+                "
+              >{{ block.settings.label_days }}</span>
+            </div>
+            
+            <div class="deal-timer-time-unit-{{ unique_id }}">
+              <span 
+                class="deal-timer-number-{{ unique_id }}" 
+                id="hours-{{ unique_id }}"
+                style="
+                  color: {{ block.settings.timer_number_color }} !important;
+                  font-size: {{ block.settings.timer_number_size }}px;
+                  font-weight: 700;
+                "
+              >00</span>
+              <span 
+                class="deal-timer-label-{{ unique_id }}"
+                style="
+                  color: {{ block.settings.timer_label_color }} !important;
+                  font-size: {{ block.settings.timer_label_size }}px;
+                  font-weight: 400;
+                "
+              >{{ block.settings.label_hours }}</span>
+            </div>
+            
+            <div class="deal-timer-time-unit-{{ unique_id }}">
+              <span 
+                class="deal-timer-number-{{ unique_id }}" 
+                id="minutes-{{ unique_id }}"
+                style="
+                  color: {{ block.settings.timer_number_color }} !important;
+                  font-size: {{ block.settings.timer_number_size }}px;
+                  font-weight: 700;
+                "
+              >00</span>
+              <span 
+                class="deal-timer-label-{{ unique_id }}"
+                style="
+                  color: {{ block.settings.timer_label_color }} !important;
+                  font-size: {{ block.settings.timer_label_size }}px;
+                  font-weight: 400;
+                "
+              >{{ block.settings.label_minutes }}</span>
+            </div>
+            
+            <div class="deal-timer-time-unit-{{ unique_id }}">
+              <span 
+                class="deal-timer-number-{{ unique_id }}" 
+                id="seconds-{{ unique_id }}"
+                style="
+                  color: {{ block.settings.timer_number_color }} !important;
+                  font-size: {{ block.settings.timer_number_size }}px;
+                  font-weight: 700;
+                "
+              >00</span>
+              <span 
+                class="deal-timer-label-{{ unique_id }}"
+                style="
+                  color: {{ block.settings.timer_label_color }} !important;
+                  font-size: {{ block.settings.timer_label_size }}px;
+                  font-weight: 400;
+                "
+              >{{ block.settings.label_seconds }}</span>
+            </div>
+          </div>
+        {%- endif -%}
+  
+        {%- if block.settings.show_discount_code -%}
+          <div class="deal-timer-code-section-{{ unique_id }}">
+            <button 
+              class="deal-timer-code-button-{{ unique_id }}" 
+              id="copy-button-{{ unique_id }}"
+              onclick="copyDiscountCode{{ unique_id | replace: '-', '_' }}()"
+              style="
+                background-color: {{ block.settings.button_bg_color }};
+                color: {{ block.settings.button_text_color }};
+                font-size: {{ block.settings.button_text_size }}px;
+                font-weight: 700;
+                border-radius: {{ block.settings.button_border_radius }}px;
+                padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+                border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0;
+              "
+            >
+              <span id="check-icon-{{ unique_id }}" class="check-icon-{{ unique_id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </span>
+              <span id="code-text-{{ unique_id }}" class="code-text-{{ unique_id }}">{{ block.settings.button_text }}</span>
+            </button>
+          </div>
+        {%- endif -%}
+  
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    /* Scoped styles for deal-timer-{{ unique_id }} */
+    #deal-timer-{{ unique_id }} {
+      width: 100%;
+      overflow: hidden;
+    }
+  
+    .deal-timer-container-{{ unique_id }} {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: {{ block.settings.ver_block_padding }}px {{ block.settings.hor_block_padding }}px;
+    }
+  
+    .deal-timer-content-{{ unique_id }} {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0;
+    }
+    
+  
+  
+    .deal-timer-text-section-{{ unique_id }} {
+      flex-shrink: 0;
+    }
+  
+    .deal-timer-title-{{ unique_id }} {
+      line-height: 1;
+    }
+  
+    .deal-timer-subtitle-{{ unique_id }} {
+      line-height: 1;
+    }
+  
+    .deal-timer-countdown-{{ unique_id }} {
+      display: flex;
+      align-items: center;
+      gap: {{ block.settings.timer_gap }}px;
+      flex-wrap: wrap;
+    }
+  
+    .deal-timer-time-unit-{{ unique_id }} {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: {{ block.settings.timer_unit_gap }}px;
+    }
+  
+    .deal-timer-number-{{ unique_id }} {
+      line-height: 1;
+      display: block;
+    }
+  
+    .deal-timer-label-{{ unique_id }} {
+      line-height: 1;
+      display: block;
+      text-transform: uppercase;
+      margin-bottom:2px;
+    }
+  
+    .deal-timer-code-section-{{ unique_id }} {
+      flex-shrink: 0;
+    }
+  
+    .deal-timer-code-button-{{ unique_id }} {
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease, gap 0.25s ease;
+      border-style: solid;
+      font-family: inherit;
+      white-space: nowrap;
+      box-shadow: inset 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+
+    .deal-timer-code-button-{{ unique_id }}:active {
+      transform: scale(0.97);
+    }
+
+    .deal-timer-code-button-{{ unique_id }}.copied {
+      box-shadow: inset 0 0 6px 0px rgba(34, 197, 94, 0.4);
+      gap: 5px;
+    }
+
+    .check-icon-{{ unique_id }} {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      opacity: 0;
+      transform: scale(0.5);
+      width: 0;
+      overflow: hidden;
+      transition: opacity 0.25s ease, transform 0.25s ease, width 0.25s ease;
+    }
+
+    .check-icon-{{ unique_id }}.visible {
+      opacity: 1;
+      transform: scale(1);
+      width: 12px;
+      margin-right: 2px;
+    }
+
+    .code-text-{{ unique_id }} {
+      transition: color 0.25s ease;
+    }
+  
+    /* Responsive adjustments - Keep everything in one row on mobile */
+    @media (max-width: 768px) {
+      .deal-timer-container-{{ unique_id }} {
+        padding: {{ block.settings.ver_block_padding | times: 0.7 | round }}px {{ block.settings.hor_block_padding | times: 0.6 | round }}px;
+      }
+
+      .deal-timer-content-{{ unique_id }} {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .deal-timer-title-{{ unique_id }} {
+        font-size: {{ block.settings.title_size_mobile | default: 16 }}px !important;
+        margin: {{ block.settings.title_margin | times: 0.5 | round }}px 0 !important;
+      }
+
+      .deal-timer-subtitle-{{ unique_id }} {
+        font-size: {{ block.settings.subtitle_size_mobile | default: 10 }}px !important;
+      }
+
+      .deal-timer-separator-{{ unique_id }} {
+        margin: 0 -8px !important;
+        height: calc({{ block.settings.timer_number_size_mobile | default: 14 }}px + {{ block.settings.timer_label_size_mobile | default: 8 }}px + 4px) !important;
+      }
+
+      .deal-timer-countdown-{{ unique_id }} {
+        gap: {{ block.settings.timer_gap | times: 0.5 | round }}px;
+        flex-wrap: nowrap;
+      }
+
+      .deal-timer-time-unit-{{ unique_id }} {
+        gap: {{ block.settings.timer_unit_gap | times: 0.5 | round }}px;
+      }
+
+      .deal-timer-number-{{ unique_id }} {
+        font-size: {{ block.settings.timer_number_size_mobile | default: 14 }}px !important;
+      }
+
+      .deal-timer-label-{{ unique_id }} {
+        font-size: {{ block.settings.timer_label_size_mobile | default: 8 }}px !important;
+        margin-bottom: 0;
+      }
+
+      .deal-timer-code-button-{{ unique_id }} {
+        font-size: {{ block.settings.button_text_size_mobile | default: 12 }}px !important;
+        padding: {{ block.settings.button_padding_vertical | times: 0.6 | round }}px {{ block.settings.button_padding_horizontal | times: 0.5 | round }}px !important;
+      }
+    }
+  </style>
+  
+  <script>
+    (function() {
+      const uniqueId = '{{ unique_id }}';
+      const endDate = new Date('{{ block.settings.end_date }}').getTime();
+      
+      function updateCountdown{{ unique_id | replace: '-', '_' }}() {
+        const now = new Date().getTime();
+        const distance = endDate - now;
+  
+        if (distance < 0) {
+          document.getElementById('days-' + uniqueId).textContent = '00';
+          document.getElementById('hours-' + uniqueId).textContent = '00';
+          document.getElementById('minutes-' + uniqueId).textContent = '00';
+          document.getElementById('seconds-' + uniqueId).textContent = '00';
+          return;
+        }
+  
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  
+        document.getElementById('days-' + uniqueId).textContent = String(days).padStart(2, '0');
+        document.getElementById('hours-' + uniqueId).textContent = String(hours).padStart(2, '0');
+        document.getElementById('minutes-' + uniqueId).textContent = String(minutes).padStart(2, '0');
+        document.getElementById('seconds-' + uniqueId).textContent = String(seconds).padStart(2, '0');
+      }
+  
+      // Update countdown every second
+      {% if block.settings.show_countdown %}
+        updateCountdown{{ unique_id | replace: '-', '_' }}();
+        setInterval(updateCountdown{{ unique_id | replace: '-', '_' }}, 1000);
+      {% endif %}
+    })();
+  
+    function copyDiscountCode{{ unique_id | replace: '-', '_' }}() {
+      const uniqueId = '{{ unique_id }}';
+      const discountCode = '{{ block.settings.discount_code }}';
+      const codeText = document.getElementById('code-text-' + uniqueId);
+      const checkIcon = document.getElementById('check-icon-' + uniqueId);
+      const copyButton = document.getElementById('copy-button-' + uniqueId);
+      const originalText = '{{ block.settings.button_text }}';
+
+      // Copy to clipboard
+      navigator.clipboard.writeText(discountCode).then(function() {
+        // Show check icon and "COPIED" text with smooth transition
+        checkIcon.classList.add('visible');
+        copyButton.classList.add('copied');
+        codeText.textContent = 'COPIED';
+        codeText.style.color = '#22c55e';
+        copyButton.style.backgroundColor = '{{ block.settings.button_copied_bg_color }}';
+        
+        // Revert back after 2 seconds
+        setTimeout(function() {
+          checkIcon.classList.remove('visible');
+          copyButton.classList.remove('copied');
+          codeText.textContent = originalText;
+          codeText.style.color = '';
+          copyButton.style.backgroundColor = '{{ block.settings.button_bg_color }}';
+        }, 2000);
+      }).catch(function(err) {
+        console.error('Failed to copy: ', err);
+      });
+    }
+  </script>
+  

@@ -1,0 +1,218 @@
+{% comment %}
+  Instagram Comment Block
+  Displays an authentic-looking Instagram comment with customizable content and styling.
+{% endcomment %}
+
+<div
+  class="instagram-comment-block"
+  id="block-{{ block.id }}"
+  {{ block.shopify_attributes }}
+  style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px; width: 100%;"
+>
+  <div
+    class="instagram-comment"
+    style="
+      background: {{ block.settings.background_color }};
+      border-radius: {{ block.settings.border_radius }}px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: none;
+      padding: {{ block.settings.block_padding }}px;
+      overflow: hidden;
+    "
+  >
+    <div
+      class="comment-container"
+      style="
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      "
+    >
+      {% if block.settings.profile_image != blank %}
+        <div
+          class="profile-picture"
+          style="
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+          "
+        >
+          <img
+            src="{{ block.settings.profile_image | image_url }}"
+            alt="Profile picture"
+            style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"
+            width=""
+            height=""
+          >
+        </div>
+      {% else %}
+        <div
+          class="profile-picture"
+          style="
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ddd;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+          "
+        ></div>
+      {% endif %}
+
+      <div class="comment-content" style="flex: 1;">
+        <div
+          class="comment-header"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 2px;
+          "
+        >
+          <span
+            class="username"
+            style="
+              font-weight: var(--font-weight-bold) !important;
+              letter-spacing: var(--letter-spacing-body);
+              font-size: {{ block.settings.username_font_size }}px;
+              color: {{ block.settings.username_color }};
+            "
+          >
+            {{- block.settings.username -}}
+          </span>
+
+          <span
+            class="timestamp"
+            style="
+              font-size: {{ block.settings.timestamp_font_size }}px;
+              color: {{ block.settings.timestamp_color }};
+            "
+          >
+            {{- block.settings.timestamp -}}
+          </span>
+
+          {% if block.settings.show_author_heart %}
+            <svg
+              class="author-heart"
+              viewBox="0 0 32 32"
+              style="
+                width: 16px;
+                height: 16px;
+                fill: {{ block.settings.author_heart_color }};
+              "
+            >
+              <path d="M26.996 12.898c-.064-2.207-1.084-4.021-2.527-5.13-1.856-1.428-4.415-1.69-6.542-.132-.702.516-1.359 1.23-1.927 2.168-.568-.938-1.224-1.652-1.927-2.167-2.127-1.559-4.685-1.297-6.542.132-1.444 1.109-2.463 2.923-2.527 5.13-.035 1.172.145 2.48.788 3.803 1.01 2.077 5.755 6.695 10.171 10.683l.035.038.002-.002.002.002.036-.038c4.415-3.987 9.159-8.605 10.17-10.683.644-1.323.822-2.632.788-3.804z"/>
+            </svg>
+
+            <span
+              class="author-label"
+              style="
+                font-size: {{ block.settings.author_label_font_size }}px;
+                color: {{ block.settings.author_label_color }};
+                font-weight: 400;
+              "
+            >
+              {{- block.settings.author_label_text -}}
+            </span>
+          {% endif %}
+        </div>
+
+        <div
+          class="comment-text"
+          style="
+            color: {{ block.settings.comment_text_color }};
+            font-size: {{ block.settings.comment_text_font_size }}px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+          "
+        >
+          {{ block.settings.comment_text }}
+        </div>
+
+        <div
+          class="comment-actions"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: {{ block.settings.actions_font_size }}px;
+            color: {{ block.settings.actions_color }};
+          "
+        >
+          <span
+            class="action-item"
+            style="
+              cursor: pointer;
+              font-weight: var(--font-weight-semibold);
+            "
+          >
+            {{- block.settings.like_count -}}
+          </span>
+
+          <span
+            class="action-item"
+            style="
+              cursor: pointer;
+              font-weight: var(--font-weight-semibold);
+            "
+            >Reply</span
+          >
+        </div>
+      </div>
+
+      {% if block.settings.show_like_button %}
+        <div
+          class="like-button"
+          style="
+            cursor: pointer;
+            padding: 4px;
+          "
+        >
+          <svg
+            class="heart-icon"
+            viewBox="0 0 32 32"
+            style="
+              width: 16px;
+              height: 16px;
+              fill: none;
+              stroke: {{ block.settings.like_heart_color }};
+              stroke-width: 2;
+              transition: stroke 0.2s ease;
+            "
+          >
+            <path d="M26.996 12.898c-.064-2.207-1.084-4.021-2.527-5.13-1.856-1.428-4.415-1.69-6.542-.132-.702.516-1.359 1.23-1.927 2.168-.568-.938-1.224-1.652-1.927-2.167-2.127-1.559-4.685-1.297-6.542.132-1.444 1.109-2.463 2.923-2.527 5.13-.035 1.172.145 2.48.788 3.803 1.01 2.077 5.755 6.695 10.171 10.683l.035.038.002-.002.002.002.036-.038c4.415-3.987 9.159-8.605 10.17-10.683.644-1.323.822-2.632.788-3.804z"/>
+          </svg>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .instagram-comment-block .action-item:hover {
+    color: #262626;
+  }
+
+  .instagram-comment-block .heart-icon:hover {
+    stroke: #ed4956 !important;
+  }
+
+  @media (max-width: 450px) {
+    .instagram-comment-block .instagram-comment {
+      margin: 0;
+      border-radius: 0;
+      box-shadow: none;
+      width: 100%;
+      max-width: none;
+    }
+
+    .instagram-comment-block .comment-actions {
+      gap: 12px;
+    }
+  }
+</style>

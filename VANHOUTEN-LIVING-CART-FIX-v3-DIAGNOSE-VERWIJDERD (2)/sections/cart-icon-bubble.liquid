@@ -1,0 +1,89 @@
+{%- comment -%}
+  This section is rendered via JS when cart updates.
+  We render all icon variants and use CSS classes to show/hide the appropriate one.
+  JavaScript will toggle classes based on the data-cart-icon-type attribute.
+{%- endcomment -%}
+<span class="svg-wrapper">
+  {%- comment -%} Bag icon {%- endcomment -%}
+  <span class="cart-icon-bag" style="display: none;">
+    <svg
+      class="cart-bag-icon"
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="rgb(var(--color-drawer-text))"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <path d="M16 10a4 4 0 0 1-8 0"></path>
+    </svg>
+  </span>
+  
+  {%- comment -%} Cart icon (full) {%- endcomment -%}
+  <span class="cart-icon-cart" style="display: none;">
+    {{ 'icon-cart.svg' | inline_asset_content }}
+  </span>
+  
+  {%- comment -%} Cart icon (empty) {%- endcomment -%}
+  <span class="cart-icon-cart-empty" style="display: none;">
+    {{ 'icon-cart-empty.svg' | inline_asset_content }}
+  </span>
+</span>
+
+<span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
+{%- if cart != empty -%}
+  <div class="cart-count-bubble">
+    {%- if cart.item_count < 100 -%}
+      <span aria-hidden="true">{{ cart.item_count }}</span>
+    {%- endif -%}
+    <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
+  </div>
+{%- endif -%}
+
+<style>
+  /* Icon wrapper visibility - JS will toggle these */
+  .cart-icon-bag,
+  .cart-icon-cart,
+  .cart-icon-cart-empty {
+    display: none;
+  }
+  
+  /* Specific styling for cart bag icon */
+  .cart-bag-icon {
+    fill: none !important;
+    height: 27px !important;
+    width: 27px !important;
+    stroke: rgb(var(--color-drawer-text)) !important;
+  }
+
+  .cart-bag-icon path,
+  .cart-bag-icon line {
+    fill: none !important;
+    stroke: rgb(var(--color-drawer-text)) !important;
+  }
+
+  /* Override any icon classes that might interfere */
+  svg.cart-bag-icon.icon,
+  svg.cart-bag-icon.icon-cart-empty,
+  svg.cart-bag-icon.icon-cart-empty-custom {
+    fill: none !important;
+    height: 27px !important;
+    width: 27px !important;
+    stroke: rgb(var(--color-drawer-text)) !important;
+  }
+
+  svg.cart-bag-icon.icon path,
+  svg.cart-bag-icon.icon-cart-empty path,
+  svg.cart-bag-icon.icon-cart-empty-custom path,
+  svg.cart-bag-icon.icon line,
+  svg.cart-bag-icon.icon-cart-empty line,
+  svg.cart-bag-icon.icon-cart-empty-custom line {
+    fill: none !important;
+    stroke: rgb(var(--color-drawer-text)) !important;
+  }
+</style>

@@ -1,0 +1,948 @@
+{% liquid
+  assign image_size = section.settings.cart_image_size | default: 120 | times: 1
+  assign enable_subscribe_cta = section.settings.enable_subscribe_cta | default: false
+  assign subscribe_cta_text = section.settings.subscribe_cta_text | default: 'Subscribe & Save'
+  assign subscribe_cta_text_color = section.settings.subscribe_cta_text_color | default: '#ffffff'
+  assign subscribe_cta_background_color = section.settings.subscribe_cta_background_color | default: '#000000'
+  assign subscribe_cta_border_color = section.settings.subscribe_cta_border_color | default: '#000000'
+  assign subscribe_cta_frequency_label = section.settings.subscribe_cta_frequency_label | default: 'Delivers every'
+  assign subscribe_cta_frequency_label_color = section.settings.subscribe_cta_frequency_label_color | default: '#6e6e6e'
+  assign subscribe_cta_frequency_select_color = section.settings.subscribe_cta_frequency_select_color | default: '#000000'
+%}
+{% style %}
+  {% if enable_subscribe_cta %}
+    p.product-option {
+      margin-bottom: 5px;
+    }
+    .cart-item__subscription-name {
+      letter-spacing: var(--letter-spacing-body) !important;
+      font-size: 10px;
+    }
+    .cart-item__subscribe-button-wrapper {
+      margin-top: 0.75rem;
+      padding: 0 0.5rem;
+    }
+
+    .cart-item__subscribe-button {
+      width: 75%;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: {{ subscribe_cta_text_color }};
+      background-color: {{ subscribe_cta_background_color }};
+      border: 1px solid {{ subscribe_cta_border_color }};
+      border-radius: 100px !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+
+    .cart-item__subscribe-button-text {
+    }
+
+    .cart-item__subscribe-button-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: {{ subscribe_cta_text_color }};
+      flex-shrink: 0;
+    }
+
+    .cart-item__subscribe-button-icon svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    .cart-item__subscribe-button:hover {
+      opacity: 0.9;
+    }
+
+    .cart-item__subscribe-button:after {
+      display: none !important;
+    }
+
+    .cart-item__subscribe-options {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      padding: 0 0.5rem;
+      padding-left: 0;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      max-width: 90%;
+    }
+
+    .cart-item__subscribe-frequency-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      white-space: nowrap;
+      color: {{ subscribe_cta_frequency_label_color }};
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cart-item__subscribe-frequency-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: inherit;
+    }
+
+    .cart-item__subscribe-frequency-icon svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    .cart-item__subscribe-frequency-select {
+      flex: 1;
+      padding: 0.5rem 0.25rem;
+      font-weight: bold; !important;
+      border: none;
+      border-radius: 4px;
+      background-color: #ffffff;
+      cursor: pointer;
+      min-width: 0;
+      max-width: fit-content;
+      color: {{ subscribe_cta_frequency_select_color }};
+    }
+
+    .cart-item__subscribe-frequency-select:hover {
+      border-color: #a0a0a0;
+    }
+
+    .cart-item__subscribe-frequency-select:focus {
+      outline: none;
+      border-color: {{ subscribe_cta_border_color }};
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+    }
+  {% endif %}
+
+  .cart-items .cartitem-free-product-label {
+      font-size: {{ section.settings.cart_drawer_free_product_label_font_size | default: 13 }}px;
+  }
+  .cartitem-free-product-label {
+    background-color: {{ section.settings.cart_drawer_free_product_label_bg | default: '#f4f4f4' }};
+    padding: {{ section.settings.cart_drawer_free_product_label_padding_y | default: 2 }}px {{ block.settings.cart_drawer_free_product_label_padding_x | default: 8 }}px;
+    color: {{ section.settings.cart_drawer_free_product_label_text | default: '#ffffff' }} !important;
+    border-radius: {{ section.settings.cart_drawer_free_product_label_border_radius | default: 50 }}px;
+    font-size: {{ section.settings.cart_drawer_free_product_label_font_size | default: 13 }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cartitem-free-product-label svg {
+    stroke: {{ section.settings.cart_drawer_free_product_label_text | default: '#ffffff' }} !important;
+    fill: none !important;
+    width: {{ section.settings.cart_drawer_free_product_label_font_size | default: 13 }}px !important;
+    height: {{ section.settings.cart_drawer_free_product_label_font_size | default: 13 }}px !important;
+    margin-right: {{ section.settings.cart_drawer_free_product_label_padding_x | divided_by: 2 | default: 4 }}px !important;
+  }
+
+  .gb-cart-drawer-lb td.cart-item__details a.cart-item__name
+  {
+    font-size: {{ section.settings.cart_title_font_size | append: "px" }};
+    line-height: {{ section.settings.cart_title_line_height_desktop | default: 1.4 }};
+  }
+
+  /* Product Option Font Size */
+  .cart-drawer .product-option,
+  .cart-drawer .product-option dt,
+  .cart-drawer .product-option dd,
+  {
+    font-size: {{ section.settings.cart_title_font_size | minus: 6 | append: "px" }};
+  }
+
+  .cart-drawer .cart-item__subscribe-frequency-label
+  {
+    font-size: {{ section.settings.cart_title_font_size | minus: 6 | append: "px" }};
+  }
+
+  .cart-item__subscribe-frequency-select,
+  .cart-item__subscribe-frequency-select option,
+  .cart-item__subscribe-button {
+    font-weight: bold; !important;
+    font-size: {{ section.settings.cart_title_font_size | minus: 6 | append: "px" }};
+  }
+
+  .gb-cart-drawer-lb .gb-price-drawer
+  {
+    margin-bottom: {{ section.settings.price_drawer_margin_bottom | default: 4 }}px;
+  }
+
+  .gb-cart-drawer-lb .gb-price-drawer s.cart-item__old-price,
+  .gb-cart-drawer-lb .gb-price-drawer strong.cart-item__final-price
+  {
+    font-size: {{ section.settings.cart_items_price_font_price | append: "px" }} !important
+  }
+
+  .gb-cart-drawer-lb div.gb-price-drawer-saving
+  {
+    font-size: {{ section.settings.cart_items_price_font_price | minus: 2 | append: "px" }} !important
+  }
+
+  /* Match totals value font size with cart item prices */
+  .cart-drawer .totals__total-value {
+    font-size: {{ section.settings.cart_items_price_font_price | append: "px" }} !important;
+  }
+
+  /* Cart items count font size */
+  .cart-drawer .totals.gb-discounts-cart-values .total_count {
+    font-size: {{ section.settings.cart_items_count_font_size_desktop | default: 14 }}px !important;
+  }
+
+  /* Ensure price elements don't inherit product-option font size */
+  .cart-drawer .cart-item__price-wrapper,
+  .cart-drawer .cart-item__price-wrapper *:not(.gb-price-drawer-saving),
+  .gb-cart-drawer-lb .cart-item__price-wrapper,
+  .gb-cart-drawer-lb .cart-item__price-wrapper *:not(.gb-price-drawer-saving) {
+    font-size: {{ section.settings.cart_items_price_font_price | append: "px" }} !important;
+  }
+
+  .gb-cart-drawer-lb div.gb-price-drawer-saving
+  {
+    padding: {{ section.settings.price_saving_padding_y | default: 2 }}px {{ section.settings.price_saving_padding_x | default: 6 }}px;
+  }
+
+  .gb-cart-drawer-lb .drawer__cart-items-wrapper .product-option.cart-item__subscription-name {
+    letter-spacing: var(--letter-spacing-body) !important;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Cart Image Size Control */
+  .cart-drawer .cart-item__media {
+    width: {{ image_size }}px !important;
+    height: {{ image_size }}px !important;
+    min-width: {{ image_size }}px !important;
+    min-height: {{ image_size }}px !important;
+    max-width: {{ image_size }}px !important;
+    max-height: {{ image_size }}px !important;
+  }
+
+  .cart-drawer .cart-item__image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    min-width: auto;
+    min-height: auto;
+  }
+
+  .cart-item__discount-allocations {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  .cart-item__discount-allocations .discount-tag {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: {{ section.settings.discount_tag_font_size }}px;
+    padding: 5px 7px;
+    border-radius: {{ section.settings.discount_tag_border_radius }}px;
+    background: {{ section.settings.discount_tag_bg_color }};
+    color: {{ section.settings.discount_tag_text_color }};
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .cart-item__discount-allocations .discount-tag span {
+    color: {{ section.settings.discount_tag_text_color }};
+  }
+
+  .cart-item__discount-allocations .discount-tag svg {
+    border-radius: 0 !important;
+    width: {{ section.settings.discount_tag_icon_size }}px;
+    height: auto;
+    transform: rotate(90deg);
+  }
+
+  @media only screen and (max-width: 767px)
+  {
+    .gb-cart-drawer-lb td.cart-item__details a.cart-item__name {
+      font-size: {{ section.settings.cart_title_font_size_mobile | append: "px" }};
+      line-height: {{ section.settings.cart_title_line_height_mobile | default: 1.3 }};
+      max-width: 200px;
+    }
+
+    /* Product Option Font Size - Mobile */
+    .cart-drawer .product-option,
+    .cart-drawer .product-option dt,
+    .cart-drawer .product-option dd
+    {
+      font-size: {{ section.settings.cart_title_font_size_mobile | minus: 6 | append: "px" }};
+    }
+
+    .gb-cart-drawer-lb .gb-price-drawer s.cart-item__old-price,
+    .gb-cart-drawer-lb .gb-price-drawer strong.cart-item__final-price
+    {
+      font-size: {{ section.settings.cart_items_price_font_price_mobile | append: "px" }} !important
+    }
+
+    .gb-cart-drawer-lb div.gb-price-drawer-saving
+    {
+      font-size: {{ section.settings.cart_items_price_font_price_mobile | minus: 2 | append: "px" }} !important
+    }
+
+    /* Match totals value font size with cart item prices - Mobile */
+    .cart-drawer .totals__total-value {
+      font-size: {{ section.settings.cart_items_price_font_price_mobile | append: "px" }} !important;
+    }
+
+    /* Cart items count font size - Mobile */
+    .cart-drawer .totals.gb-discounts-cart-values .total_count {
+      font-size: {{ section.settings.cart_items_count_font_size_mobile | default: 14 }}px !important;
+    }
+
+    /* Ensure price elements don't inherit product-option font size - Mobile */
+    .cart-drawer .cart-item__price-wrapper,
+    .cart-drawer .cart-item__price-wrapper *:not(.gb-price-drawer-saving),
+    .gb-cart-drawer-lb .cart-item__price-wrapper,
+    .gb-cart-drawer-lb .cart-item__price-wrapper *:not(.gb-price-drawer-saving) {
+      font-size: {{ section.settings.cart_items_price_font_price_mobile | append: "px" }} !important;
+    }
+
+    /* Cart Image Size Control - Mobile */
+    .cart-drawer .cart-item__media {
+      width: {{ image_size }}px !important;
+      height: {{ image_size }}px !important;
+      min-width: {{ image_size }}px !important;
+      min-height: {{ image_size }}px !important;
+      max-width: {{ image_size }}px !important;
+      max-height: {{ image_size }}px !important;
+    }
+
+    .cart-drawer .cart-item__image {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      min-width: auto;
+      min-height: auto;
+    }
+  }
+{% endstyle %}
+<div class="drawer__cart-items-wrapper">
+  <table class="cart-items" role="table">
+    <tbody role="rowgroup">
+      {%- for item in cart.items -%}
+        {%- liquid
+          assign has_selling_plans = false
+          if item.product.selling_plan_groups.size > 0
+            assign has_selling_plans = true
+          endif
+        -%}
+        <tr
+          {% if item.id == shipping_protection_id %}
+            style="display:none;"
+          {% endif %}
+          id="CartDrawer-Item-{{ item.index | plus: 1 }}"
+          class="cart-item {% if item.id == progress_bar_free_id %} gb-find-remove-product{% endif %}"
+          role="row"
+          data-has-selling-plans="{{ has_selling_plans }}"
+          data-variant-id="{{ item.variant.id }}"
+        >
+          <td class="cart-item__media" role="cell" headers="CartDrawer-ColumnProductImage">
+            {% if item.image %}
+              {% comment %} Leave empty space due to a:empty CSS display: none rule {% endcomment %}
+              <a href="{{ item.url }}" class="cart-item__link" tabindex="-1" aria-hidden="true"> </a>
+              <img
+                class="cart-item__image"
+                src="{{ item.image | image_url: width: 300 }}"
+                alt="{{ item.image.alt | escape }}"
+                loading="lazy"
+              >
+            {% endif %}
+          </td>
+
+          {% if item.variant.compare_at_price > item.variant.price %}
+            {% assign saving = item.variant.compare_at_price | minus: item.variant.price | times: item.quantity %}
+            {% assign total_saving = saving | plus: total_saving %}
+          {% endif %}
+
+          <td class="cart-item__details" role="cell" headers="CartDrawer-ColumnProduct">
+            {%- if settings.show_vendor -%}
+              <p class="caption-with-letter-spacing light">{{ item.product.vendor }}</p>
+            {%- endif -%}
+            <div class="cart-details-wrapper">
+              <div class="cart-items-wrapper">
+                <a href="{{ item.url }}" class="cart-item__name h4 break">
+                  {% if item.id == progress_bar_free_id %}
+                    {{- progress_bar_free_title | default: item.product.title -}}
+                  {% else %}
+                    {{- item.product.title | escape -}}
+                  {% endif %}
+                </a>
+
+                {%- if item.product.has_only_default_variant == false
+                  or item.properties.size != 0
+                  or item.selling_plan_allocation != blank
+                -%}
+                  <dl>
+                    {%- if item.product.has_only_default_variant == false -%}
+                      {%- for option in item.options_with_values -%}
+                        <div class="product-option">
+                          <dt>{{ option.name }}:</dt>
+                          <dd>
+                            {{ option.value -}}
+                            {%- unless forloop.last %}, {% endunless %}
+                          </dd>
+                        </div>
+                      {%- endfor -%}
+                    {%- endif -%}
+
+                    {%- for property in item.properties -%}
+                      {%- assign property_first_char = property.first | slice: 0 -%}
+                      {%- if property.last != blank and property_first_char != '_' -%}
+                        <div class="product-option">
+                          <dt>{{ property.first }}:</dt>
+                          <dd>
+                            {%- if property.last contains '/uploads/' -%}
+                              <a
+                                href="{{ property.last }}"
+                                class="link"
+                                target="_blank"
+                                aria-describedby="a11y-new-window-message"
+                              >
+                                {{ property.last | split: '/' | last }}
+                              </a>
+                            {%- else -%}
+                              {{ property.last }}
+                            {%- endif -%}
+                          </dd>
+                        </div>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </dl>
+
+                  {%- comment -%} Calculate subscription options count for conditional display {%- endcomment -%}
+                  {%- if enable_subscribe_cta and item.selling_plan_allocation != blank -%}
+                    {%- liquid
+                      assign total_subscription_options_for_display = 0
+                      if item.product.selling_plan_groups.size > 0
+                        for group in item.product.selling_plan_groups
+                          for plan in group.selling_plans
+                            if plan.options.size > 0
+                              for option in plan.options
+                                assign total_subscription_options_for_display = total_subscription_options_for_display | plus: 1
+                              endfor
+                            endif
+                          endfor
+                        endfor
+                      endif
+                    -%}
+                  {%- endif -%}
+
+                  {%- comment -%} Product option text - shown when 1 subscription option OR when dropdown is hidden {%- endcomment -%}
+                  {% if item.selling_plan_allocation != blank %}
+                    <p
+                      class="product-option cart-item__subscription-name"
+                      style="{% if enable_subscribe_cta and total_subscription_options_for_display > 1 %}display: none;{% endif %}"
+                    >
+                      {{ item.selling_plan_allocation.selling_plan.name }}
+                    </p>
+                  {% endif %}
+                {%- endif -%}
+              </div>
+              <div class="cart-item__pricing-info">
+                <div class="cart-item__price-wrapper">
+                  {% if item.variant.compare_at_price > item.variant.price %}
+                    <div class="gb-price-drawer">
+                      <s class="cart-item__old-price">
+                        {{- item.variant.compare_at_price | times: item.quantity | money -}}
+                      </s>
+                      <strong class="cart-item__final-price">
+                        {% if item.final_line_price == 0 %}
+                          {{ 'general.cart.free' | t }}
+                        {% else %}
+                          {{ item.final_line_price | money }}
+                        {% endif %}
+                      </strong>
+                    </div>
+                    {% assign total_saving = item.variant.compare_at_price
+                      | minus: item.final_price
+                      | times: item.quantity
+                    %}
+                  {% else %}
+                    <div class="gb-price-drawer">
+                      {% if item.original_line_price != item.final_line_price %}
+                        <s class="cart-item__old-price">
+                          {{- item.original_line_price | money -}}
+                        </s>
+                        <strong class="cart-item__final-price">
+                          {% if item.final_line_price == 0 %}
+                            {{ 'general.cart.free' | t }}
+                          {% else %}
+                            {{ item.final_line_price | money }}
+                          {% endif %}
+                        </strong>
+                      {% else %}
+                        {{ item.final_line_price | money }}
+                      {% endif %}
+                    </div>
+                    {% assign total_saving = item.original_line_price | minus: item.final_line_price %}
+                  {% endif %}
+                  {% if total_saving != 0 %}
+                    <div class="gb-price-drawer-saving">
+                      Bespaar {{ total_saving | abs | money_without_trailing_zeros }}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            {%- comment -%} Subscription dropdown row - outside cart-details-wrapper but inside cart-item__details {%- endcomment -%}
+            {% if enable_subscribe_cta and item.product.selling_plan_groups.size > 0 %}
+              {%- liquid
+                assign has_active_subscription = false
+                if item.selling_plan_allocation != blank
+                  assign has_active_subscription = true
+                endif
+
+                assign total_subscription_options_dropdown = 0
+                assign first_plan_id_dropdown = ''
+                assign first_frequency_value_dropdown = ''
+                assign first_option_found_dropdown = false
+
+                for group in item.product.selling_plan_groups
+                  for plan in group.selling_plans
+                    if plan.options.size > 0
+                      for option in plan.options
+                        assign total_subscription_options_dropdown = total_subscription_options_dropdown | plus: 1
+
+                        if first_option_found_dropdown == false
+                          assign first_plan_id_dropdown = plan.id
+                          if option.value != blank
+                            assign first_frequency_value_dropdown = option.value
+                          elsif option.name != blank
+                            assign first_frequency_value_dropdown = option.name
+                          else
+                            assign first_frequency_value_dropdown = option
+                          endif
+                          assign first_option_found_dropdown = true
+                        endif
+                      endfor
+                    endif
+                  endfor
+                endfor
+              -%}
+              <div
+                class="cart-item__subscribe-options"
+                style="display: {% if has_active_subscription and total_subscription_options_dropdown > 1 %}flex{% else %}none{% endif %};"
+                data-variant-id="{{ item.variant.id }}"
+                data-has-subscription="{{ has_active_subscription }}"
+                data-total-options="{{ total_subscription_options_dropdown }}"
+              >
+                {% if total_subscription_options_dropdown > 1 %}
+                  <label
+                    for="cart-item-subscribe-frequency-{{ item.variant.id }}"
+                    class="cart-item__subscribe-frequency-label"
+                  >
+                    <span class="cart-item__subscribe-frequency-icon">
+                      <svg
+                        aria-hidden="true"
+                        focusable="false"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 3.75C10.3683 3.75 8.77326 4.23385 7.41655 5.14038C6.05984 6.0469 5.00242 7.33537 4.378 8.84286C3.75358 10.3504 3.5902 12.0092 3.90853 13.6095C4.22685 15.2098 5.01259 16.6798 6.16637 17.8336C7.32016 18.9874 8.79017 19.7732 10.3905 20.0915C11.9909 20.4098 13.6497 20.2464 15.1571 19.622C16.6646 18.9976 17.9531 17.9402 18.8596 16.5835C19.7661 15.2267 20.25 13.6317 20.25 12C20.25 11.5858 20.5858 11.25 21 11.25C21.4142 11.25 21.75 11.5858 21.75 12C21.75 13.9284 21.1782 15.8134 20.1068 17.4168C19.0355 19.0202 17.5127 20.2699 15.7312 21.0078C13.9496 21.7458 11.9892 21.9389 10.0979 21.5627C8.20656 21.1865 6.46927 20.2579 5.10571 18.8943C3.74215 17.5307 2.81355 15.7934 2.43735 13.9021C2.06114 12.0108 2.25422 10.0504 2.99218 8.26884C3.73013 6.48726 4.97982 4.96452 6.58319 3.89317C8.18657 2.82183 10.0716 2.25 12 2.25C14.7193 2.25 17.3141 3.32891 19.2598 5.19932L19.2703 5.20967L20.25 6.18934V3C20.25 2.58579 20.5858 2.25 21 2.25C21.4142 2.25 21.75 2.58579 21.75 3V8C21.75 8.41421 21.4142 8.75 21 8.75H16C15.5858 8.75 15.25 8.41421 15.25 8C15.25 7.58579 15.5858 7.25 16 7.25H19.1893L18.215 6.27566C16.5413 4.66918 14.3182 3.75 12 3.75Z" fill="currentColor"></path>
+                      </svg>
+                    </span>
+                    {{ subscribe_cta_frequency_label }}
+                  </label>
+                  <select
+                    id="cart-item-subscribe-frequency-{{ item.variant.id }}"
+                    class="cart-item__subscribe-frequency-select"
+                    data-variant-id="{{ item.variant.id }}"
+                    data-line-item-key="{{ item.key }}"
+                    data-item-id="{{ item.id }}"
+                  >
+                    {%- liquid
+                      assign first_option_set = false
+                    -%}
+                    {% for group in item.product.selling_plan_groups %}
+                      {% for plan in group.selling_plans %}
+                        {% if plan.options.size > 0 %}
+                          {% for option in plan.options %}
+                            {%- liquid
+                              assign option_value = ''
+                              assign option_text = ''
+
+                              if option.value != blank
+                                assign option_value = option.value
+                                assign option_text = option.value
+                              elsif option.name != blank
+                                assign option_value = option.name
+                                assign option_text = option.name
+                              else
+                                assign option_value = option
+                                assign option_text = option
+                              endif
+                            -%}
+                            <option
+                              value="{{ plan.id }}-{{ option_value }}"
+                              data-plan-id="{{ plan.id }}"
+                              data-frequency-value="{{ option_value }}"
+                              {% unless first_option_set %}
+                                selected
+                                assign first_option_set="true"
+                              {% endunless %}
+                            >
+                              {{ option_text }}
+                            </option>
+                          {% endfor %}
+                        {% endif %}
+                      {% endfor %}
+                    {% endfor %}
+                    <option value="unsubscribe" data-plan-id="">Unsubscribe</option>
+                  </select>
+                {% endif %}
+              </div>
+            {% endif %}
+
+            {%- liquid
+              assign has_qty_rules = false
+              if item.variant.quantity_rule.increment > 1 or item.variant.quantity_rule.min > 1 or item.variant.quantity_rule.max != null
+                assign has_qty_rules = true
+              endif
+
+              assign has_vol_pricing = false
+              if item.variant.quantity_price_breaks.size > 0
+                assign has_vol_pricing = true
+              endif
+            -%}
+            <div
+              class="cart-item__quantity {% if has_qty_rules or has_vol_pricing %} cart-item__quantity--info{% endif %}"
+              role="cell"
+              headers="CartDrawer-ColumnQuantity"
+            >
+              <quantity-popover>
+                <div class="cart-item__quantity-wrapper quantity-popover-wrapper">
+                  <div
+                    {% if item.id == progress_bar_free_id or item.final_line_price == 0 %}
+                      style="display:none;"
+                    {% endif %}
+                    class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}"
+                  >
+                    <quantity-input class="quantity cart-quantity">
+                      <button class="quantity__button" name="minus" type="button">
+                        <span class="visually-hidden">
+                          {{- 'products.product.quantity.decrease' | t: product: item.product.title | escape -}}
+                        </span>
+                        <span class="svg-wrapper content">
+                          {{- 'icon-minus.svg' | inline_asset_content -}}
+                        </span>
+                        <div class="spin-animation">
+                          <span></span>
+                        </div>
+                      </button>
+                      <input
+                        class="quantity__input"
+                        type="number"
+                        data-quantity-variant-id="{{ item.variant.id }}"
+                        name="updates[]"
+                        value="{{ item.quantity }}"
+                        {% # theme-check-disable %}
+                        data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
+                        min="1"
+                        data-min="{{ item.variant.quantity_rule.min }}"
+                        {% if item.variant.quantity_rule.max != null %}
+                          max="{{ item.variant.quantity_rule.max }}"
+                        {% endif %}
+                        step="{{ item.variant.quantity_rule.increment }}"
+                        {% # theme-check-enable %}
+                        aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+                        id="Drawer-quantity-{{ item.index | plus: 1 }}"
+                        data-index="{{ item.index | plus: 1 }}"
+                      >
+                      <button class="quantity__button" name="plus" type="button">
+                        <span class="visually-hidden">
+                          {{- 'products.product.quantity.increase' | t: product: item.product.title | escape -}}
+                        </span>
+                        <span class="svg-wrapper content">
+                          {{- 'icon-plus.svg' | inline_asset_content -}}
+                        </span>
+                        <div class="spin-animation">
+                          <span></span>
+                        </div>
+                      </button>
+                    </quantity-input>
+                    <cart-remove-button
+                      id="CartDrawer-Remove-{{ item.index | plus: 1 }}"
+                      data-index="{{ item.index | plus: 1 }}"
+                      data-id="{{ item.id }}"
+                    >
+                      <button
+                        type="button"
+                        class="button button--tertiary cart-remove-button {% if item.id == progress_bar_free_id %} gb-remove-product{% endif %}  {% if item.id == settings.product_shipping_protection.selected_or_first_available_variant.id %}  gb-remove-product-shipping-protection {% endif %}"
+                        aria-label="{{ 'sections.cart.remove_title' | t: title: item.title | escape }}"
+                        data-variant-id="{{ item.variant.id }}"
+                      >
+                        <span class="svg-wrapper gb-cart-del-img content">
+                          {% comment %} {{- 'delete-icon.png' | inline_asset_content -}}{% endcomment %}
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M8 1.5V2.5H3C2.44772 2.5 2 2.94772 2 3.5V4.5C2 5.05228 2.44772 5.5 3 5.5H21C21.5523 5.5 22 5.05228 22 4.5V3.5C22 2.94772 21.5523 2.5 21 2.5H16V1.5C16 0.947715 15.5523 0.5 15 0.5H9C8.44772 0.5 8 0.947715 8 1.5Z" fill="currentColor"/>
+                            <path d="M3.9231 7.5H20.0767L19.1344 20.2216C19.0183 21.7882 17.7135 23 16.1426 23H7.85724C6.28636 23 4.98148 21.7882 4.86544 20.2216L3.9231 7.5Z" fill="currentColor"/>
+                          </svg>
+                        </span>
+                        <div class="spin-animation">
+                          <span></span>
+                        </div>
+                      </button>
+                    </cart-remove-button>
+                  </div>
+                  {% if item.id == progress_bar_free_id or item.final_line_price == 0 %}
+                    <span class="cartitem-free-product-label">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        style="margin-right: 4px; vertical-align: middle;"
+                      >
+                        <path d="M12 7V20M12 7H8.46429C7.94332 7 7.4437 6.78929 7.07533 6.41421C6.70695 6.03914 6.5 5.53043 6.5 5C6.5 4.46957 6.70695 3.96086 7.07533 3.58579C7.4437 3.21071 7.94332 3 8.46429 3C11.2143 3 12 7 12 7ZM12 7H15.5357C16.0567 7 16.5563 6.78929 16.9247 6.41421C17.293 6.03914 17.5 5.53043 17.5 5C17.5 4.46957 17.293 3.96086 16.9247 3.58579C16.5563 3.21071 16.0567 3 15.5357 3C12.7857 3 12 7 12 7ZM5 12H19V17.8C19 18.9201 19 19.4802 18.782 19.908C18.5903 20.2843 18.2843 20.5903 17.908 20.782C17.4802 21 16.9201 21 15.8 21H8.2C7.07989 21 6.51984 21 6.09202 20.782C5.71569 20.5903 5.40973 20.2843 5.21799 19.908C5 19.4802 5 18.9201 5 17.8V12ZM4.6 12H19.4C19.9601 12 20.2401 12 20.454 11.891C20.6422 11.7951 20.7951 11.6422 20.891 11.454C21 11.2401 21 10.9601 21 10.4V8.6C21 8.03995 21 7.75992 20.891 7.54601C20.7951 7.35785 20.6422 7.20487 20.454 7.10899C20.2401 7 19.9601 7 19.4 7H4.6C4.03995 7 3.75992 7 3.54601 7.10899C3.35785 7.20487 3.20487 7.35785 3.10899 7.54601C3 7.75992 3 8.03995 3 8.6V10.4C3 10.9601 3 11.2401 3.10899 11.454C3.20487 11.6422 3.35785 11.7951 3.54601 11.891C3.75992 12 4.03995 12 4.6 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      {{ 'general.cart.free_gift' | t: count: item.quantity }}
+                    </span>
+                  {% endif %}
+
+                </div>
+                {%- if has_qty_rules or has_vol_pricing -%}
+                  <button
+                    type="button"
+                    class="quantity-popover__info-button quantity-popover__info-button--icon-with-label button button--tertiary"
+                    aria-expanded="false"
+                  >
+                    <span class="svg-wrapper">
+                      {{- 'icon-info.svg' | inline_asset_content -}}
+                    </span>
+                    <span>
+                      {%- if has_vol_pricing -%}
+                        {{ 'products.product.volume_pricing.note' | t }}
+                      {%- elsif has_qty_rules -%}
+                        {{ 'products.product.quantity.note' | t }}
+                      {%- endif -%}
+                    </span>
+                  </button>
+                {%- endif -%}
+                {%- if has_vol_pricing or has_qty_rules -%}
+                  <div
+                    class="cart-items__info global-settings-popup quantity-popover__info"
+                    tabindex="-1"
+                    hidden
+                  >
+                    {%- if has_qty_rules == false -%}
+                      <span class="volume-pricing-label caption">
+                        {{- 'products.product.volume_pricing.title' | t -}}
+                      </span>
+                    {%- endif -%}
+                    <div class="quantity__rules caption">
+                      {%- if item.variant.quantity_rule.increment > 1 -%}
+                        <span class="divider">
+                          {{-
+                            'products.product.quantity.multiples_of'
+                            | t: quantity: item.variant.quantity_rule.increment
+                          -}}
+                        </span>
+                      {%- endif -%}
+                      {%- if item.variant.quantity_rule.min > 1 -%}
+                        <span class="divider">
+                          {{- 'products.product.quantity.min_of' | t: quantity: item.variant.quantity_rule.min -}}
+                        </span>
+                      {%- endif -%}
+                      {%- if item.variant.quantity_rule.max != null -%}
+                        <span class="divider">
+                          {{- 'products.product.quantity.max_of' | t: quantity: item.variant.quantity_rule.max -}}
+                        </span>
+                      {%- endif -%}
+                    </div>
+                    <button
+                      class="button-close button button--tertiary"
+                      type="button"
+                      aria-label="{{ 'accessibility.close' | t }}"
+                    >
+                      <span class="svg-wrapper">
+                        {{- 'icon-close.svg' | inline_asset_content -}}
+                      </span>
+                    </button>
+                    {%- if item.variant.quantity_price_breaks.size > 0 -%}
+                      <volume-pricing class="parent-display">
+                        <ul class="list-unstyled">
+                          <li>
+                            <span>{{ item.variant.quantity_rule.min }}+</span>
+                            <span>{{ item.variant.price | money_with_currency }}/ea</span>
+                          </li>
+                          {%- for price_break in item.variant.quantity_price_breaks -%}
+                            <li>
+                              <span>
+                                {{- price_break.minimum_quantity -}}
+                                <span aria-hidden="true">+</span></span
+                              >
+                              <span>{{ price_break.price | money_with_currency }}/ea</span>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </volume-pricing>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+
+                <div
+                  id="CartDrawer-LineItemError-{{ item.index | plus: 1 }}"
+                  class="cart-item__error"
+                  role="alert"
+                  {% unless item.line_level_error %}
+                    style="display: none;"
+                  {% endunless %}
+                >
+                  <small class="cart-item__error-text">
+                    {{ item.line_level_error }}
+                  </small>
+                  <span class="svg-wrapper">
+                    {{- 'icon-error.svg' | inline_asset_content -}}
+                  </span>
+                </div>
+              </quantity-popover>
+              {%- if item.discount_allocations.size > 0 -%}
+                {%- assign vhl_has_real_line_discount = false -%}
+                {%- for discount in item.discount_allocations -%}
+                  {%- if discount.amount > 0 -%}
+                    {%- assign vhl_has_real_line_discount = true -%}
+                    {%- break -%}
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- if vhl_has_real_line_discount -%}
+                  <div class="cart-item__discount-allocations">
+                    {%- for discount in item.discount_allocations -%}
+                      {%- if discount.amount > 0 -%}
+                        <div class="discount-tag">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-tag-icon lucide-tag"
+                          >
+                            <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>
+                          </svg>
+                          <span class="discount-label">{{ discount.discount_application.title }}</span>
+                        </div>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                {%- endif -%}
+              {%- endif -%}
+            </div>
+
+            {%- comment -%} Subscribe & Save button - shown conditionally via JS and theme setting {%- endcomment -%}
+            {% if enable_subscribe_cta %}
+              {%- liquid
+                assign has_active_subscription = false
+                if item.selling_plan_allocation != blank
+                  assign has_active_subscription = true
+                endif
+
+                comment
+                  Count total subscription options across all plans
+                endcomment
+                assign total_subscription_options = 0
+                assign first_plan_id = ''
+                assign first_frequency_value = ''
+                assign first_option_found = false
+
+                if item.product.selling_plan_groups.size > 0
+                  for group in item.product.selling_plan_groups
+                    for plan in group.selling_plans
+                      if plan.options.size > 0
+                        for option in plan.options
+                          assign total_subscription_options = total_subscription_options | plus: 1
+
+                          if first_option_found == false
+                            assign first_plan_id = plan.id
+                            if option.value != blank
+                              assign first_frequency_value = option.value
+                            elsif option.name != blank
+                              assign first_frequency_value = option.name
+                            else
+                              assign first_frequency_value = option
+                            endif
+                            assign first_option_found = true
+                          endif
+                        endfor
+                      endif
+                    endfor
+                  endfor
+                endif
+              -%}
+
+              {%- comment -%} Subscribe button - only shown when NO active subscription {%- endcomment -%}
+              <div
+                class="cart-item__subscribe-button-wrapper"
+                style="display: none;"
+                data-has-subscription="{{ has_active_subscription }}"
+              >
+                <button
+                  type="button"
+                  class="cart-item__subscribe-button"
+                  data-variant-id="{{ item.variant.id }}"
+                  data-line-item-key="{{ item.key }}"
+                  data-item-id="{{ item.id }}"
+                  data-total-options="{{ total_subscription_options }}"
+                  data-first-plan-id="{{ first_plan_id }}"
+                  data-first-frequency="{{ first_frequency_value }}"
+                >
+                  <span class="cart-item__subscribe-button-text">{{ subscribe_cta_text }}</span>
+                  <span class="cart-item__subscribe-button-icon">
+                    <svg
+                      aria-hidden="true"
+                      focusable="false"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M6.30025 7.05028C6.30025 6.63607 6.63603 6.30028 7.05025 6.30028L16.9497 6.30028C17.364 6.30028 17.6997 6.63607 17.6997 7.05028L17.6997 16.9498C17.6997 17.364 17.364 17.6998 16.9497 17.6998C16.5355 17.6998 16.1997 17.364 16.1997 16.9498L16.1997 8.86094L7.58058 17.4801C7.28769 17.773 6.81281 17.773 6.51992 17.4801C6.22702 17.1872 6.22702 16.7123 6.51992 16.4194L15.1391 7.80028L7.05025 7.80028C6.63603 7.80028 6.30025 7.4645 6.30025 7.05028Z" fill="currentColor"></path>
+                    </svg>
+                  </span>
+                </button>
+              </div>
+            {% endif %}
+          </td>
+        </tr>
+
+        {% unless forloop.last %}
+        {% endunless %}
+      {%- endfor -%}
+    </tbody>
+  </table>
+</div>

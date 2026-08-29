@@ -1,0 +1,194 @@
+/* Contained Sections System
+   Create visually contained sections with customizable styling
+   Apply to any section with .contained-section class
+*/
+
+/* Base contained section styling */
+.contained-section {
+  --local-background: var(--contained-section-background);
+  --local-overlay-background: var(--contained-section-overlay-background);
+  --local-border-width: var(--contained-section-border-width);
+  --local-border-color: var(--contained-section-border-color);
+  --local-border-radius: var(--contained-section-border-radius);
+  --local-padding: var(--contained-section-padding);
+  --local-margin: var(--contained-section-margin);
+  --local-gradient: var(--contained-section-gradient);
+  --local-shadow: var(--contained-section-shadow);
+}
+
+/* Section wrapper - provides the background/overlay */
+.contained-section {
+  background: var(--local-overlay-background);
+  padding: var(--local-margin);
+  position: relative;
+}
+
+/* Container - the main content area */
+.contained-section > .shopify-section,
+.contained-section > .section-container,
+.contained-section > .container,
+.contained-section > .page-width,
+.contained-section > * {
+  background: var(--local-gradient);
+  border: var(--local-border-width) solid var(--local-border-color);
+  border-radius: var(--local-border-radius);
+  padding: var(--local-padding);
+  box-shadow: var(--local-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Direct child targeting for better control */
+.contained-section > div:first-child {
+  background: var(--local-gradient);
+  border: var(--local-border-width) solid var(--local-border-color);
+  border-radius: var(--local-border-radius);
+  padding: var(--local-padding);
+  box-shadow: var(--local-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Utility classes for different container sizes */
+.contained-section--compact {
+  --local-padding: calc(var(--contained-section-padding) * 0.6);
+  --local-margin: calc(var(--contained-section-margin) * 0.6);
+}
+
+.contained-section--spacious {
+  --local-padding: calc(var(--contained-section-padding) * 1.4);
+  --local-margin: calc(var(--contained-section-margin) * 1.4);
+}
+
+.contained-section--full-width {
+  --local-margin: 0px;
+}
+
+/* Color variants */
+.contained-section--light {
+  --local-background: #ffffff;
+  --local-overlay-background: #f8f9fa;
+  --local-border-color: #e9ecef;
+}
+
+.contained-section--dark {
+  --local-background: #2c3e50;
+  --local-overlay-background: #34495e;
+  --local-border-color: #4a6741;
+  color: #ffffff;
+}
+
+.contained-section--accent {
+  --local-background: var(--global-section-accent-1-color, #007bff);
+  --local-overlay-background: var(--global-section-accent-1-color, #007bff);
+  --local-border-color: var(--global-section-accent-1-color, #007bff);
+  color: #ffffff;
+}
+
+/* Border variants */
+.contained-section--no-border {
+  --local-border-width: 0px;
+}
+
+.contained-section--thick-border {
+  --local-border-width: calc(var(--contained-section-border-width) * 2);
+}
+
+.contained-section--dashed-border {
+  border-style: dashed !important;
+}
+
+/* Shadow variants */
+.contained-section--no-shadow {
+  --local-shadow: none;
+}
+
+.contained-section--heavy-shadow {
+  --local-shadow: 0 calc(var(--contained-section-shadow-y-offset) * 2) calc(var(--contained-section-shadow-blur) * 1.5)
+    rgba(0, 0, 0, calc(var(--contained-section-shadow-opacity) * 2));
+}
+
+/* Radius variants */
+.contained-section--sharp {
+  --local-border-radius: 0px;
+}
+
+.contained-section--rounded {
+  --local-border-radius: calc(var(--contained-section-border-radius) * 1.5);
+}
+
+.contained-section--pill {
+  --local-border-radius: 50px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 749px) {
+  .contained-section {
+    --local-padding: calc(var(--contained-section-padding) * 0.7);
+    --local-margin: calc(var(--contained-section-margin) * 0.7);
+  }
+
+  .contained-section--compact {
+    --local-padding: calc(var(--contained-section-padding) * 0.4);
+    --local-margin: calc(var(--contained-section-margin) * 0.4);
+  }
+
+  .contained-section--spacious {
+    --local-padding: calc(var(--contained-section-padding) * 1);
+    --local-margin: calc(var(--contained-section-margin) * 1);
+  }
+}
+
+/* Integration with existing theme systems */
+.contained-section .shopify-section {
+  margin: 0;
+}
+
+.contained-section .section {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Override any conflicting styles */
+.contained-section > * {
+  max-width: none;
+  width: 100%;
+}
+
+/* Ensure content flows properly */
+.contained-section .page-width,
+.contained-section .container {
+  margin: 0 auto;
+  max-width: var(--page-width);
+}
+
+/* Animation support */
+.contained-section {
+  transition: all 0.3s ease;
+}
+
+.contained-section:hover {
+  transform: translateY(-2px);
+}
+
+.contained-section--no-hover:hover {
+  transform: none;
+}
+
+/* Accessibility improvements */
+.contained-section:focus-within {
+  outline: 2px solid var(--global-section-accent-1-color, #007bff);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .contained-section {
+    --local-shadow: none;
+    --local-border-width: 1px;
+    --local-border-color: #000000;
+    background: #ffffff !important;
+    --local-background: #ffffff;
+    --local-overlay-background: #ffffff;
+  }
+}

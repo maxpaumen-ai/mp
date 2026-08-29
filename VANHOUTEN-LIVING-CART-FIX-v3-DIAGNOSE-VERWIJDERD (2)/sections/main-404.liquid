@@ -1,0 +1,59 @@
+<style type="text/css">
+  .template-404 {
+    font-family: var(--font-body-family-override);
+    /* Attempt to use your global section colors.
+       Ensure settings.global_section_background_color and
+       settings.global_section_text_color are defined in your theme settings. */
+    {% if settings.global_section_background_color %}
+      background-color: {{ settings.global_section_background_color }};
+    {% endif %}
+    {% if settings.global_section_text_color %}
+      color: {{ settings.global_section_text_color }};
+    {% else %}
+      /* Fallback text color if global_section_text_color is not set */
+      color: #121212; /* Consider changing to your theme's default text color variable */
+    {% endif %}
+  }
+
+  .template-404 p {
+    /* font-family is inherited from .template-404. */
+    /* For font-weight, if you have a var(--font-weight-regular), you can apply it:
+       font-weight: var(--font-weight-regular);
+    */
+    line-height: 1.5; /* Added for better readability */
+    margin-bottom: 1rem;
+  }
+
+  .template-404 .title { /* This is the H1 */
+    /* font-family is inherited. */
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-heading);
+    /* Color is inherited. If a specific global heading color variable exists, use it here.
+       Example: color: var(--global-heading-color);
+    */
+    margin-top: 0;
+    margin-bottom: 2rem;
+  }
+
+  /* Responsive adjustments for spacing */
+  @media screen and (min-width: 750px) {
+    .template-404 p {
+      margin-bottom: 1.5rem;
+    }
+    .template-404 .title {
+      margin-bottom: 2.5rem;
+    }
+  }
+</style>
+
+<div class="template-404 page-width page-margin center">
+  <p>
+    {{ 'templates.404.subtext' | t }}
+  </p>
+  <h1 class="title">
+    {{ 'templates.404.title' | t }}
+  </h1>
+  <a href="{{ routes.all_products_collection_url }}" class="button">
+    {{ 'general.continue_shopping' | t }}
+  </a>
+</div>

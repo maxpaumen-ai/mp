@@ -1,0 +1,302 @@
+<style>
+  /* Global Button Styling Overrides */
+  /* Define CSS variables for global button colors */
+  /* CSS variables are now defined in layout/theme.liquid */
+
+  /* Primary buttons - apply global styling */
+  .button,
+  .btn,
+  button[type="submit"],
+  input[type="submit"],
+  .shopify-payment-button__button,
+  .product-form__submit,
+  .shop-add-to-cart-button,
+  .claim-button,
+  .cart__checkout-button,
+  .contact-button,
+  .button--primary,
+  .rich-text-button,
+  .theme-button,
+  .sticky-add-to-cart__button {
+    border-radius: var(--global-button-radius) !important;
+    font-family: var(--font-body-family-override) !important;
+    transition: all 0.3s ease;
+    {% if settings.enable_button_gradient %}
+    background: linear-gradient({{ settings.button_gradient_direction }}, {{ settings.button_gradient_start }}, {{ settings.button_gradient_end }}) !important;
+    {% else %}
+    background-color: var(--global-button-bg-color) !important;
+    {% endif %}
+    color: var(--global-button-text-color) !important;
+    border-left: var(--global-button-border-width) solid var(--global-button-border-color) !important;
+    border-right: var(--global-button-border-width) solid var(--global-button-border-color) !important;
+    border-top: var(--global-button-border-width) solid var(--global-button-border-color) !important;
+    border-bottom: var(--global-button-bottom-border-width) solid var(--global-button-bottom-border-color) !important;
+    border-bottom-style: solid !important;
+    box-shadow: none !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    font-weight: bold !important;
+  }
+
+  /* Hover, focus, and active states for buttons */
+  .button:hover,
+  .btn:hover,
+  button[type="submit"]:hover,
+  input[type="submit"]:hover,
+  .shopify-payment-button__button:hover,
+  .product-form__submit:hover,
+  .shop-add-to-cart-button:hover,
+  .claim-button:hover,
+  button[class*="add-to-cart"]:hover,
+  button[class*="add_to_cart"]:hover,
+  a[class*="add-to-cart"]:hover,
+  a[class*="add_to_cart"]:hover,
+  input[class*="add-to-cart"]:hover,
+  input[class*="add_to_cart"]:hover,
+  .cart__checkout-button:hover,
+  .contact-button:hover,
+  .button--primary:hover,
+  .rich-text-button:hover,
+  .theme-button:hover,
+  .sticky-add-to-cart__button:hover,
+  .button:focus,
+  .button:focus-visible,
+  .btn:focus,
+  .btn:focus-visible,
+  button[type="submit"]:focus,
+  button[type="submit"]:focus-visible,
+  input[type="submit"]:focus,
+  input[type="submit"]:focus-visible,
+  .shopify-payment-button__button:focus,
+  .shopify-payment-button__button:focus-visible,
+  .product-form__submit:focus,
+  .product-form__submit:focus-visible,
+  .shop-add-to-cart-button:focus,
+  .shop-add-to-cart-button:focus-visible,
+  .claim-button:focus,
+  .claim-button:focus-visible,
+  button[class*="add-to-cart"]:focus,
+  button[class*="add_to_cart"]:focus,
+  a[class*="add-to-cart"]:focus,
+  a[class*="add_to_cart"]:focus,
+  input[class*="add-to-cart"]:focus,
+  input[class*="add_to_cart"]:focus,
+  .cart__checkout-button:focus,
+  .cart__checkout-button:focus-visible,
+  .contact-button:focus,
+  .contact-button:focus-visible,
+  .button--primary:focus,
+  .button--primary:focus-visible,
+  .theme-button:focus,
+  .theme-button:focus-visible,
+  .sticky-add-to-cart__button:focus,
+  .sticky-add-to-cart__button:focus-visible,
+  .shopify-payment-button [role='button']:focus,
+  .shopify-payment-button [role='button']:focus-visible {
+    {% if settings.enable_button_gradient %}
+    background: linear-gradient({{ settings.button_gradient_direction }}, {{ settings.button_gradient_hover_start }}, {{ settings.button_gradient_hover_end }}) !important;
+    {% else %}
+    background-color: var(--global-button-hover-bg-color) !important;
+    {% endif %}
+    border-left: var(--global-button-border-width) solid var(--global-button-border-color) !important;
+    border-right: var(--global-button-border-width) solid var(--global-button-border-color) !important;
+    border-top: var(--global-button-border-width) solid var(--global-button-border-color) !important;
+    border-bottom: var(--global-button-bottom-border-width) solid var(--global-button-bottom-border-color) !important;
+    border-bottom-style: solid !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  /* Exclude non-button elements from hover effects */
+  div[class*="add-to-cart"]:hover,
+  div[class*="add_to_cart"]:hover,
+  span[class*="add-to-cart"]:hover,
+  span[class*="add_to_cart"]:hover,
+  p[class*="add-to-cart"]:hover,
+  p[class*="add_to_cart"]:hover,
+  section[class*="add-to-cart"]:hover,
+  section[class*="add_to_cart"]:hover,
+  article[class*="add-to-cart"]:hover,
+  article[class*="add_to_cart"]:hover,
+  div[class*="add-to-cart"]:focus,
+  div[class*="add_to_cart"]:focus,
+  span[class*="add-to-cart"]:focus,
+  span[class*="add_to_cart"]:focus,
+  p[class*="add-to-cart"]:focus,
+  p[class*="add_to_cart"]:focus,
+  section[class*="add-to-cart"]:focus,
+  section[class*="add_to_cart"]:focus,
+  article[class*="add-to-cart"]:focus,
+  article[class*="add_to_cart"]:focus {
+    background-color: inherit !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  /* Sticky add to cart elements - prevent hover styling for non-button elements */
+  .sticky-add-to-cart:hover,
+  .sticky-add-to-cart:focus,
+  .sticky-add-to-cart *:not(button):not(input[type="submit"]):not(.button):not(.btn):hover,
+  .sticky-add-to-cart *:not(button):not(input[type="submit"]):not(.button):not(.btn):focus,
+  [class*="sticky-add-to-cart"]:not(button):not(input[type="submit"]):not(.button):not(.btn):hover,
+  [class*="sticky-add-to-cart"]:not(button):not(input[type="submit"]):not(.button):not(.btn):focus {
+    background-color: inherit !important;
+    box-shadow: inherit !important;
+  }
+
+  /* Remove any box shadows from pseudo-elements */
+  .button:before,
+  .button:after,
+  .btn:before,
+  .btn:after,
+  button[type="submit"]:before,
+  button[type="submit"]:after,
+  input[type="submit"]:before,
+  input[type="submit"]:after,
+  .shopify-payment-button__button:before,
+  .shopify-payment-button__button:after,
+  .product-form__submit:before,
+  .product-form__submit:after,
+  .shop-add-to-cart-button:before,
+  .shop-add-to-cart-button:after,
+  .claim-button:before,
+  .claim-button:after,
+  [class*="add-to-cart"]:before,
+  [class*="add-to-cart"]:after,
+  [class*="add_to_cart"]:before,
+  [class*="add_to_cart"]:after,
+  .cart__checkout-button:before,
+  .cart__checkout-button:after,
+  .contact-button:before,
+  .contact-button:after,
+  .button--primary:before,
+  .button--primary:after,
+  .theme-button:before,
+  .theme-button:after,
+  .sticky-add-to-cart__button:before,
+  .sticky-add-to-cart__button:after {
+    box-shadow: none !important;
+  }
+
+  /* Shopify accelerated checkout buttons */
+  .shopify-payment-button .shopify-payment-button__button,
+  .shopify-payment-button .shopify-payment-button__button--unbranded,
+  .shopify-payment-button .shopify-payment-button__more-options,
+  .shopify-payment-button__button--branded,
+  .shopify-payment-button__button--unbranded,
+  .shopify-payment-button .shopify-payment-button__button:hover,
+  .shopify-payment-button .shopify-payment-button__button--unbranded:hover,
+  .shopify-payment-button .shopify-payment-button__more-options:hover,
+  .shopify-payment-button__button--branded:hover,
+  .shopify-payment-button__button--unbranded:hover {
+    box-shadow: none !important;
+  }
+
+  {% if settings.apply_button_radius_to_all %}
+    /* Apply button radius to other elements */
+    button:not([class^="shopify"]),
+    .secondary-button,
+    .link-styled-button,
+    [class*="button"],
+    [class*="btn-"],
+    .card__badge,
+    .badge,
+    .tag,
+    .spr-button,
+    .pagination__item,
+    input[type="button"],
+    select,
+    .select__select,
+    .disclosure__button,
+    .filter-group,
+    .facet-checkbox,
+    .variant-input,
+    .color-swatch,
+    .swatch {
+      border-radius: var(--global-button-radius);
+    }
+
+    /* Special elements with different radius */
+    .pagination__item,
+    .card__badge {
+      border-radius: calc(var(--global-button-radius) * 0.75) !important;
+    }
+
+    /* Pill-shaped elements */
+    .pill:not(.pill-item),
+    .tag-label,
+    [class*="pill"]:not(.pill-item),
+    [class*="tag-"] {
+      border-radius: 50px !important;
+    }
+  {% endif %}
+
+  /* SPECIFIC BUTTON AND ELEMENT EXCEPTIONS */
+
+  /* Cart drawer elements - ensure proper colors */.cart-drawer td.cart-item__details dl,
+  .cart-drawer .discounts__discount,
+  .totals.gb-discounts-cart-values,
+  .totals.gb-discounts-cart-values h2,
+  .totals.gb-discounts-cart-values .totals__total-value,
+  .gb-shipping-protection-icontext p {
+    color: {{ settings.global_section_text_color }}
+     !important;
+  }
+
+  /* Cart drawer product price */
+  .cart-drawer .cart-item__final-price.product-option {
+    color: {{ settings.global_section_accent_1_color }}
+     !important;
+  }
+
+  /* Remove background from cart remove buttons */
+  cart-remove-button .button,
+  .cart-remove-button,
+  [id^="CartDrawer-Remove"] {
+    background-color: transparent !important;
+    border: none !important;
+  }
+
+  /* Shipping protection toggle */
+  .gb-shipping-protection-button input:checked + .slider {
+    background-color: {{ settings.global_section_accent_1_color }}
+     !important;
+  }
+
+  /* Cart total item - inverted colors */
+  span.gb-cart-total-item {
+    background-color: {{ settings.global_section_text_color }}
+     !important;
+    color: {{ settings.global_section_background_color }}
+     !important;
+  }
+
+  /* Social proof bar - accent background with inverted text */
+  .social-proof-bar {
+    background-color: {{ settings.global_section_accent_1_color }}
+     !important;
+  }
+
+  .social-proof-bar .social-proof-content,
+  .social-proof-bar .social-proof-content *,
+  .social-proof-bar svg,
+  .social-proof-bar i,
+  .social-proof-bar img,
+  .social-proof-bar__text {
+    color: {{ settings.global_section_background_color }}
+     !important;
+    fill: {{ settings.global_section_background_color }}
+     !important;
+  }
+
+  /* Accent colored text elements */
+  .accent-title,
+  [class*="accent-title"],
+  .accent-heading,
+  [class*="accent-heading"] {
+    color: {{ settings.global_section_accent_1_color }}
+     !important;
+  }
+</style>

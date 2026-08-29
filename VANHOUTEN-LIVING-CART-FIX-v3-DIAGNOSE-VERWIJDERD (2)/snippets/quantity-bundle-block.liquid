@@ -1,0 +1,2002 @@
+{%- comment -%}
+  Quantity Bundle Block
+  Similar styling to variant bundle but for quantity selection
+  Parameters from block settings:
+  - All color and styling parameters
+  - quantity_options: Array of quantities to display
+  - pricing_options: Pricing for each quantity
+{%- endcomment -%}
+
+{%- liquid
+  assign current_product = product | default: product
+  assign current_variant = current_product.selected_or_first_available_variant | default: current_product.variants.first
+  assign base_price = current_variant.price | default: current_product.price
+  assign base_compare_price = current_variant.compare_at_price | default: current_product.compare_at_price
+  assign unique_id = block.id | default: 'default'
+-%}
+
+{%- liquid
+  assign layout_type = block.settings.layout_type | default: 'horizontal'
+
+  # Determine which bundle should be preselected (setting depends on layout)
+  if layout_type == 'grid_2x2'
+    assign preselected_bundle = block.settings.preselected_bundle_4 | default: 'first_visible'
+  else
+    assign preselected_bundle = block.settings.preselected_bundle_3 | default: 'first_visible'
+  endif
+  assign first_visible_bundle = 0
+
+  if preselected_bundle and preselected_bundle != 'first_visible'
+    case preselected_bundle
+      when 'bundle_1'
+        assign first_visible_bundle = 1
+      when 'bundle_2'
+        assign first_visible_bundle = 2
+      when 'bundle_3'
+        assign first_visible_bundle = 3
+      when 'bundle_4'
+        assign first_visible_bundle = 4
+    endcase
+  endif
+
+  # Fallback: if nothing resolved, default to first bundle
+  if first_visible_bundle == 0
+    assign first_visible_bundle = 1
+  endif
+-%}
+
+<div
+  x-data="quantityBundleComponent()"
+  x-init="init()"
+  class="quantity-bundle-selector{% if layout_type == 'grid_2x2' %} layout-grid-2x2{% endif %}{% if layout_type == 'grid_2x2' and block.settings.grid_show_images == false %} no-grid-images{% endif %}"
+  data-custom-price="{{ enable_custom_pricing }}"
+  data-hide-compare="{{ block.settings.hide_compare_price }}"
+  data-layout-type="{{ layout_type }}"
+  style="
+    {% if block.settings.card_background %}--card-background: {{ block.settings.card_background }};{% endif %}
+    --card-padding: {{ block.settings.card_padding | default: 12 }}px;
+    --card-border-width: {{ block.settings.card_border_width | default: 2 }}px;
+    --selected-card-border-width: {{ block.settings.selected_card_border_width | default: 2 }}px;
+    {% if block.settings.card_border_color %}--card-border-color: {{ block.settings.card_border_color }};{% endif %}
+    {% if block.settings.selected_card_border_color %}--card-selected-border-color: {{ block.settings.selected_card_border_color }};{% endif %}
+    {% if block.settings.selected_card_background %}--card-selected-bg-color: {{ block.settings.selected_card_background }};{% endif %}
+    {% if block.settings.badge_background_color %}--badge-bg-color: {{ block.settings.badge_background_color }};{% endif %}
+    {% if block.settings.badge_text_color %}--badge-text-color: {{ block.settings.badge_text_color }};{% endif %}
+    --title-color: {{ block.settings.title_color | default: '#333333' }};
+    --title-font-size: {{ block.settings.title_font_size | default: 14 }}px;
+    --title-font-size-mobile: {{ block.settings.title_font_size_mobile | default: 12 }}px;
+    {% if block.settings.description_color %}--description-color: {{ block.settings.description_color }};{% endif %}
+    --description-font-size: {{ block.settings.description_font_size | default: 11 }}px;
+    --description-font-size-mobile: {{ block.settings.description_font_size_mobile | default: 10 }}px;
+    {% if block.settings.current_price_color %}--current-price-color: {{ block.settings.current_price_color }};{% endif %}
+    --current-price-font-size: {{ block.settings.current_price_font_size | default: 16 }}px;
+    --current-price-font-size-mobile: {{ block.settings.current_price_font_size_mobile | default: 14 }}px;
+    {% if block.settings.original_price_color %}--original-price-color: {{ block.settings.original_price_color }};{% endif %}
+    --original-price-font-size: {{ block.settings.original_price_font_size | default: 11 }}px;
+    --original-price-font-size-mobile: {{ block.settings.original_price_font_size_mobile | default: 10 }}px;
+    --per-item-font-size: {{ block.settings.per_item_price_font_size | default: 14 }}px;
+    --per-item-font-size-mobile: {{ block.settings.per_item_price_font_size_mobile | default: 12 }}px;
+    --card-gap: {{ block.settings.card_gap | default: 8 }}px;
+    --border-radius: {{ block.settings.border_radius | default: 8 }}px;
+    --no-image-content-gap: {{ block.settings.no_image_content_gap | default: 12 }}px;
+    margin-top: {{ block.settings.margin_top | default: 0 }}px;
+    margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;
+  "
+  {{ block.shopify_attributes }}
+>
+  <div class="quantity-bundle-container">
+    {%- liquid
+      assign quantity_1 = block.settings.quantity_1 | default: 1
+      assign quantity_2 = block.settings.quantity_2 | default: 2
+      assign quantity_3 = block.settings.quantity_3 | default: 3
+      assign quantity_4 = block.settings.quantity_4 | default: 4
+
+      # Custom Pricing Settings
+      if block.settings.enable_custom_pricing == false or block.settings.enable_custom_pricing == 'false'
+        assign enable_custom_pricing = false
+      else
+        assign enable_custom_pricing = block.settings.enable_custom_pricing | default: false
+      endif
+      assign selected_custom_price_format = block.settings.selected_custom_price_format | default: 'amount'
+
+      # Initialize prices with base calculations
+      assign price_1 = base_price | times: quantity_1
+      assign price_2 = base_price | times: quantity_2
+      assign price_3 = base_price | times: quantity_3
+      assign price_4 = base_price | times: quantity_4
+
+      assign uses_variant_price_1 = true
+      assign uses_variant_price_2 = true
+      assign uses_variant_price_3 = true
+      assign uses_variant_price_4 = true
+
+      # Initialize compare prices with base compare price
+      assign compare_price_1 = 0
+      assign compare_price_2 = 0
+      assign compare_price_3 = 0
+      assign compare_price_4 = 0
+
+      assign uses_variant_compare_1 = false
+      assign uses_variant_compare_2 = false
+      assign uses_variant_compare_3 = false
+      assign uses_variant_compare_4 = false
+
+      if base_compare_price and base_compare_price > 0
+        assign compare_price_1 = base_compare_price | times: quantity_1
+        assign compare_price_2 = base_compare_price | times: quantity_2
+        assign compare_price_3 = base_compare_price | times: quantity_3
+        assign compare_price_4 = base_compare_price | times: quantity_4
+        assign uses_variant_compare_1 = true
+        assign uses_variant_compare_2 = true
+        assign uses_variant_compare_3 = true
+        assign uses_variant_compare_4 = true
+      endif
+
+      # Custom Pricing Logic for Bundle Options
+      # Bundle Option 1
+      if enable_custom_pricing and block.settings.enable_bundle_1_custom_price
+        assign bundle_1_custom_price_percentage = block.settings.bundle_1_custom_price_percentage
+        assign bundle_1_custom_price_amount = block.settings.bundle_1_custom_price_amount
+        assign bundle_1_bogo_multiplier = block.settings.bundle_1_bogo_multiplier
+        assign bundle_1_compare_at_price = block.settings.bundle_1_compare_at_price
+
+        case selected_custom_price_format
+          when 'percentage'
+            if bundle_1_custom_price_percentage != blank and bundle_1_custom_price_percentage != ''
+              assign discount_percent = bundle_1_custom_price_percentage | plus: 0
+              if discount_percent > 0 and discount_percent <= 100
+                assign discount_amount = base_price | times: discount_percent | divided_by: 100
+                assign discounted_price = base_price | minus: discount_amount
+                assign price_1 = discounted_price | times: quantity_1
+                assign uses_variant_price_1 = false
+              endif
+            endif
+          when 'amount'
+            if bundle_1_custom_price_amount != blank and bundle_1_custom_price_amount != ''
+              assign price_amount_num = bundle_1_custom_price_amount | plus: 0
+              assign price_1 = price_amount_num | times: 100 | times: quantity_1 | round
+              assign uses_variant_price_1 = false
+            endif
+          when 'bogo'
+            if bundle_1_bogo_multiplier != blank and bundle_1_bogo_multiplier != '' and bundle_1_bogo_multiplier > 0
+              assign multiplier_num = bundle_1_bogo_multiplier | plus: 0
+              assign variant_price = current_product.price
+              assign price_1 = variant_price | times: multiplier_num
+              assign uses_variant_price_1 = false
+            endif
+        endcase
+
+        if bundle_1_compare_at_price != blank and bundle_1_compare_at_price != ''
+          assign compare_amount_num = bundle_1_compare_at_price | plus: 0
+          assign compare_price_1 = compare_amount_num | times: 100 | times: quantity_1 | round
+          assign uses_variant_compare_1 = false
+        endif
+      endif
+
+      # Bundle Option 2
+      if enable_custom_pricing and block.settings.enable_bundle_2_custom_price
+        assign bundle_2_custom_price_percentage = block.settings.bundle_2_custom_price_percentage
+        assign bundle_2_custom_price_amount = block.settings.bundle_2_custom_price_amount
+        assign bundle_2_bogo_multiplier = block.settings.bundle_2_bogo_multiplier
+        assign bundle_2_compare_at_price = block.settings.bundle_2_compare_at_price
+
+        case selected_custom_price_format
+          when 'percentage'
+            if bundle_2_custom_price_percentage != blank and bundle_2_custom_price_percentage != ''
+              assign discount_percent = bundle_2_custom_price_percentage | plus: 0
+              if discount_percent > 0 and discount_percent <= 100
+                assign discount_amount = base_price | times: discount_percent | divided_by: 100
+                assign discounted_price = base_price | minus: discount_amount
+                assign price_2 = discounted_price | times: quantity_2
+                assign uses_variant_price_2 = false
+              endif
+            endif
+          when 'amount'
+            if bundle_2_custom_price_amount != blank and bundle_2_custom_price_amount != ''
+              assign price_amount_num = bundle_2_custom_price_amount | plus: 0
+              assign price_2 = price_amount_num | times: 100 | times: quantity_2 | round
+              assign uses_variant_price_2 = false
+            endif
+          when 'bogo'
+            if bundle_2_bogo_multiplier != blank and bundle_2_bogo_multiplier != '' and bundle_2_bogo_multiplier > 0
+              assign multiplier_num = bundle_2_bogo_multiplier | plus: 0
+              assign variant_price = current_product.price
+              assign price_2 = variant_price | times: multiplier_num
+              assign uses_variant_price_2 = false
+            endif
+        endcase
+
+        if bundle_2_compare_at_price != blank and bundle_2_compare_at_price != ''
+          assign compare_amount_num = bundle_2_compare_at_price | plus: 0
+          assign compare_price_2 = compare_amount_num | times: 100 | times: quantity_2 | round
+          assign uses_variant_compare_2 = false
+        endif
+      endif
+
+      # Bundle Option 3
+      if enable_custom_pricing and block.settings.enable_bundle_3_custom_price
+        assign bundle_3_custom_price_percentage = block.settings.bundle_3_custom_price_percentage
+        assign bundle_3_custom_price_amount = block.settings.bundle_3_custom_price_amount
+        assign bundle_3_bogo_multiplier = block.settings.bundle_3_bogo_multiplier
+        assign bundle_3_compare_at_price = block.settings.bundle_3_compare_at_price
+
+        case selected_custom_price_format
+          when 'percentage'
+            if bundle_3_custom_price_percentage != blank and bundle_3_custom_price_percentage != ''
+              assign discount_percent = bundle_3_custom_price_percentage | plus: 0
+              if discount_percent > 0 and discount_percent <= 100
+                assign discount_amount = base_price | times: discount_percent | divided_by: 100
+                assign discounted_price = base_price | minus: discount_amount
+                assign price_3 = discounted_price | times: quantity_3
+                assign uses_variant_price_3 = false
+              endif
+            endif
+          when 'amount'
+            if bundle_3_custom_price_amount != blank and bundle_3_custom_price_amount != ''
+              assign price_amount_num = bundle_3_custom_price_amount | plus: 0
+              assign price_3 = price_amount_num | times: 100 | times: quantity_3 | round
+              assign uses_variant_price_3 = false
+            endif
+          when 'bogo'
+            if bundle_3_bogo_multiplier != blank and bundle_3_bogo_multiplier != '' and bundle_3_bogo_multiplier > 0
+              assign multiplier_num = bundle_3_bogo_multiplier | plus: 0
+              assign variant_price = current_product.price
+              assign price_3 = variant_price | times: multiplier_num
+              assign uses_variant_price_3 = false
+            endif
+        endcase
+
+        if bundle_3_compare_at_price != blank and bundle_3_compare_at_price != ''
+          assign compare_amount_num = bundle_3_compare_at_price | plus: 0
+          assign compare_price_3 = compare_amount_num | times: 100 | times: quantity_3 | round
+          assign uses_variant_compare_3 = false
+        endif
+      endif
+
+      # Bundle Option 4
+      if enable_custom_pricing and block.settings.enable_bundle_4_custom_price
+        assign bundle_4_custom_price_percentage = block.settings.bundle_4_custom_price_percentage
+        assign bundle_4_custom_price_amount = block.settings.bundle_4_custom_price_amount
+        assign bundle_4_bogo_multiplier = block.settings.bundle_4_bogo_multiplier
+        assign bundle_4_compare_at_price = block.settings.bundle_4_compare_at_price
+
+        case selected_custom_price_format
+          when 'percentage'
+            if bundle_4_custom_price_percentage != blank and bundle_4_custom_price_percentage != ''
+              assign discount_percent = bundle_4_custom_price_percentage | plus: 0
+              if discount_percent > 0 and discount_percent <= 100
+                assign discount_amount = base_price | times: discount_percent | divided_by: 100
+                assign discounted_price = base_price | minus: discount_amount
+                assign price_4 = discounted_price | times: quantity_4
+                assign uses_variant_price_4 = false
+              endif
+            endif
+          when 'amount'
+            if bundle_4_custom_price_amount != blank and bundle_4_custom_price_amount != ''
+              assign price_amount_num = bundle_4_custom_price_amount | plus: 0
+              assign price_4 = price_amount_num | times: 100 | times: quantity_4 | round
+              assign uses_variant_price_4 = false
+            endif
+          when 'bogo'
+            if bundle_4_bogo_multiplier != blank and bundle_4_bogo_multiplier != '' and bundle_4_bogo_multiplier > 0
+              assign multiplier_num = bundle_4_bogo_multiplier | plus: 0
+              assign variant_price = current_product.price
+              assign price_4 = variant_price | times: multiplier_num
+              assign uses_variant_price_4 = false
+            endif
+        endcase
+
+        if bundle_4_compare_at_price != blank and bundle_4_compare_at_price != ''
+          assign compare_amount_num = bundle_4_compare_at_price | plus: 0
+          assign compare_price_4 = compare_amount_num | times: 100 | times: quantity_4 | round
+          assign uses_variant_compare_4 = false
+        endif
+      endif
+
+      assign title_1 = block.settings.title_1 | default: 'Single'
+      assign title_2 = block.settings.title_2 | default: 'Bundle of 2'
+      assign title_3 = block.settings.title_3 | default: 'Bundle of 3'
+      assign title_4 = block.settings.title_4 | default: 'Bundle of 4'
+
+      assign description_1 = block.settings.description_1
+      assign description_2 = block.settings.description_2
+      assign description_3 = block.settings.description_3
+      assign description_4 = block.settings.description_4
+
+      assign image_1 = block.settings.image_1
+      assign image_2 = block.settings.image_2
+      assign image_3 = block.settings.image_3
+      assign image_4 = block.settings.image_4
+
+      assign custom_text_1_opt1 = block.settings.custom_text_1
+      assign custom_text_2_opt1 = block.settings.custom_text_2
+      assign custom_text_1_opt2 = block.settings.custom_text_1_opt2
+      assign custom_text_2_opt2 = block.settings.custom_text_2_opt2
+      assign custom_text_1_opt3 = block.settings.custom_text_1_opt3
+      assign custom_text_2_opt3 = block.settings.custom_text_2_opt3
+
+      assign badge_1 = block.settings.badge_1
+      assign badge_2 = block.settings.badge_2 | default: 'POPULAR'
+      assign badge_3 = block.settings.badge_3 | default: 'BEST VALUE'
+      assign badge_4 = block.settings.badge_4 | default: 'BEST VALUE'
+
+      assign show_badge_1 = block.settings.show_badge_1
+      assign show_badge_2 = block.settings.show_badge_2
+      assign show_badge_3 = block.settings.show_badge_3
+      assign show_badge_4 = block.settings.show_badge_4
+
+      assign custom_save_badge_text_1 = block.settings.custom_save_badge_text_1 | default: 'SAVE NOW'
+      assign custom_save_badge_text_2 = block.settings.custom_save_badge_text_2 | default: 'BEST VALUE'
+      assign custom_save_badge_text_3 = block.settings.custom_save_badge_text_3 | default: 'BULK SAVE'
+      assign custom_save_badge_text_4 = block.settings.custom_save_badge_text_4 | default: 'MEGA SAVE'
+
+      assign badge_1_bg_color = block.settings.badge_1_bg_color | default: '#22c55e'
+      assign badge_2_bg_color = block.settings.badge_2_bg_color | default: '#3b82f6'
+      assign badge_3_bg_color = block.settings.badge_3_bg_color | default: '#dc2626'
+      assign badge_4_bg_color = block.settings.badge_4_bg_color | default: '#f59e0b'
+
+      assign badge_1_text_color = block.settings.badge_1_text_color | default: '#ffffff'
+      assign badge_2_text_color = block.settings.badge_2_text_color | default: '#ffffff'
+      assign badge_3_text_color = block.settings.badge_3_text_color | default: '#ffffff'
+      assign badge_4_text_color = block.settings.badge_4_text_color | default: '#ffffff'
+
+      assign badge_1_border_color = block.settings.badge_1_border_color | default: '#16a34a'
+      assign badge_2_border_color = block.settings.badge_2_border_color | default: '#2563eb'
+      assign badge_3_border_color = block.settings.badge_3_border_color | default: '#b91c1c'
+      assign badge_4_border_color = block.settings.badge_4_border_color | default: '#d97706'
+
+      assign badge_1_use_gradient = block.settings.badge_1_use_gradient
+      assign badge_2_use_gradient = block.settings.badge_2_use_gradient
+      assign badge_3_use_gradient = block.settings.badge_3_use_gradient
+      assign badge_4_use_gradient = block.settings.badge_4_use_gradient
+
+      assign badge_1_gradient_start = block.settings.badge_1_gradient_start | default: '#22c55e'
+      assign badge_2_gradient_start = block.settings.badge_2_gradient_start | default: '#3b82f6'
+      assign badge_3_gradient_start = block.settings.badge_3_gradient_start | default: '#dc2626'
+      assign badge_4_gradient_start = block.settings.badge_4_gradient_start | default: '#f59e0b'
+
+      assign badge_1_gradient_end = block.settings.badge_1_gradient_end | default: '#16a34a'
+      assign badge_2_gradient_end = block.settings.badge_2_gradient_end | default: '#2563eb'
+      assign badge_3_gradient_end = block.settings.badge_3_gradient_end | default: '#b91c1c'
+      assign badge_4_gradient_end = block.settings.badge_4_gradient_end | default: '#d97706'
+
+      assign badge_1_enable_border = block.settings.badge_1_enable_border
+      assign badge_2_enable_border = block.settings.badge_2_enable_border
+      assign badge_3_enable_border = block.settings.badge_3_enable_border
+      assign badge_4_enable_border = block.settings.badge_4_enable_border
+
+      assign badge_1_border_width = block.settings.badge_1_border_width | default: 2
+      assign badge_2_border_width = block.settings.badge_2_border_width | default: 2
+      assign badge_3_border_width = block.settings.badge_3_border_width | default: 2
+      assign badge_4_border_width = block.settings.badge_4_border_width | default: 2
+
+      assign badge_1_enable_shadow = block.settings.badge_1_enable_shadow
+      assign badge_2_enable_shadow = block.settings.badge_2_enable_shadow
+      assign badge_3_enable_shadow = block.settings.badge_3_enable_shadow
+      assign badge_4_enable_shadow = block.settings.badge_4_enable_shadow
+
+      assign badge_1_shadow_blur = block.settings.badge_1_shadow_blur | default: 6
+      assign badge_2_shadow_blur = block.settings.badge_2_shadow_blur | default: 6
+      assign badge_3_shadow_blur = block.settings.badge_3_shadow_blur | default: 6
+      assign badge_4_shadow_blur = block.settings.badge_4_shadow_blur | default: 6
+
+      assign badge_1_shadow_offset = block.settings.badge_1_shadow_offset | default: 2
+      assign badge_2_shadow_offset = block.settings.badge_2_shadow_offset | default: 2
+      assign badge_3_shadow_offset = block.settings.badge_3_shadow_offset | default: 2
+      assign badge_4_shadow_offset = block.settings.badge_4_shadow_offset | default: 2
+
+      assign badge_1_shadow_opacity = block.settings.badge_1_shadow_opacity | default: 0.6
+      assign badge_2_shadow_opacity = block.settings.badge_2_shadow_opacity | default: 0.6
+      assign badge_3_shadow_opacity = block.settings.badge_3_shadow_opacity | default: 0.6
+      assign badge_4_shadow_opacity = block.settings.badge_4_shadow_opacity | default: 0.6
+
+      assign badge_1_border_radius = block.settings.badge_1_border_radius | default: 12
+      assign badge_2_border_radius = block.settings.badge_2_border_radius | default: 12
+      assign badge_3_border_radius = block.settings.badge_3_border_radius | default: 12
+      assign badge_4_border_radius = block.settings.badge_4_border_radius | default: 12
+
+      if layout_type == 'grid_2x2'
+        assign quantities = quantity_1 | append: ',' | append: quantity_2 | append: ',' | append: quantity_3 | append: ',' | append: quantity_4 | split: ','
+        assign prices = price_1 | append: ',' | append: price_2 | append: ',' | append: price_3 | append: ',' | append: price_4 | split: ','
+        assign compare_prices = compare_price_1 | append: ',' | append: compare_price_2 | append: ',' | append: compare_price_3 | append: ',' | append: compare_price_4 | split: ','
+        assign titles = title_1 | append: '|' | append: title_2 | append: '|' | append: title_3 | append: '|' | append: title_4 | split: '|'
+        assign descriptions = description_1 | append: '|' | append: description_2 | append: '|' | append: description_3 | append: '|' | append: description_4 | split: '|'
+        assign custom_texts_1 = custom_text_1_opt1 | append: '|' | append: custom_text_1_opt2 | append: '|' | append: custom_text_1_opt3 | append: '|' | append: '' | split: '|'
+        assign custom_texts_2 = custom_text_2_opt1 | append: '|' | append: custom_text_2_opt2 | append: '|' | append: custom_text_2_opt3 | append: '|' | append: '' | split: '|'
+        assign badges = badge_1 | append: '|' | append: badge_2 | append: '|' | append: badge_3 | append: '|' | append: badge_4 | split: '|'
+        assign show_badges = show_badge_1 | append: ',' | append: show_badge_2 | append: ',' | append: show_badge_3 | append: ',' | append: show_badge_4 | split: ','
+        assign badge_bg_colors = badge_1_bg_color | append: '|' | append: badge_2_bg_color | append: '|' | append: badge_3_bg_color | append: '|' | append: badge_4_bg_color | split: '|'
+        assign badge_text_colors = badge_1_text_color | append: '|' | append: badge_2_text_color | append: '|' | append: badge_3_text_color | append: '|' | append: badge_4_text_color | split: '|'
+        assign badge_border_colors = badge_1_border_color | append: '|' | append: badge_2_border_color | append: '|' | append: badge_3_border_color | append: '|' | append: badge_4_border_color | split: '|'
+        assign badge_use_gradients = badge_1_use_gradient | append: ',' | append: badge_2_use_gradient | append: ',' | append: badge_3_use_gradient | append: ',' | append: badge_4_use_gradient | split: ','
+        assign badge_gradient_starts = badge_1_gradient_start | append: '|' | append: badge_2_gradient_start | append: '|' | append: badge_3_gradient_start | append: '|' | append: badge_4_gradient_start | split: '|'
+        assign badge_gradient_ends = badge_1_gradient_end | append: '|' | append: badge_2_gradient_end | append: '|' | append: badge_3_gradient_end | append: '|' | append: badge_4_gradient_end | split: '|'
+        assign badge_enable_borders = badge_1_enable_border | append: ',' | append: badge_2_enable_border | append: ',' | append: badge_3_enable_border | append: ',' | append: badge_4_enable_border | split: ','
+        assign badge_border_widths = badge_1_border_width | append: ',' | append: badge_2_border_width | append: ',' | append: badge_3_border_width | append: ',' | append: badge_4_border_width | split: ','
+        assign badge_enable_shadows = badge_1_enable_shadow | append: ',' | append: badge_2_enable_shadow | append: ',' | append: badge_3_enable_shadow | append: ',' | append: badge_4_enable_shadow | split: ','
+        assign badge_shadow_blurs = badge_1_shadow_blur | append: ',' | append: badge_2_shadow_blur | append: ',' | append: badge_3_shadow_blur | append: ',' | append: badge_4_shadow_blur | split: ','
+        assign badge_shadow_offsets = badge_1_shadow_offset | append: ',' | append: badge_2_shadow_offset | append: ',' | append: badge_3_shadow_offset | append: ',' | append: badge_4_shadow_offset | split: ','
+        assign badge_shadow_opacities = badge_1_shadow_opacity | append: ',' | append: badge_2_shadow_opacity | append: ',' | append: badge_3_shadow_opacity | append: ',' | append: badge_4_shadow_opacity | split: ','
+        assign badge_border_radiuses = badge_1_border_radius | append: ',' | append: badge_2_border_radius | append: ',' | append: badge_3_border_radius | append: ',' | append: badge_4_border_radius | split: ','
+        assign custom_save_badge_texts = custom_save_badge_text_1 | append: '|' | append: custom_save_badge_text_2 | append: '|' | append: custom_save_badge_text_3 | append: '|' | append: custom_save_badge_text_4 | split: '|'
+        assign loop_limit = 4
+      else
+        assign quantities = quantity_1 | append: ',' | append: quantity_2 | append: ',' | append: quantity_3 | split: ','
+        assign prices = price_1 | append: ',' | append: price_2 | append: ',' | append: price_3 | split: ','
+        assign compare_prices = compare_price_1 | append: ',' | append: compare_price_2 | append: ',' | append: compare_price_3 | split: ','
+        assign titles = title_1 | append: '|' | append: title_2 | append: '|' | append: title_3 | split: '|'
+        assign descriptions = description_1 | append: '|' | append: description_2 | append: '|' | append: description_3 | split: '|'
+        assign custom_texts_1 = custom_text_1_opt1 | append: '|' | append: custom_text_1_opt2 | append: '|' | append: custom_text_1_opt3 | split: '|'
+        assign custom_texts_2 = custom_text_2_opt1 | append: '|' | append: custom_text_2_opt2 | append: '|' | append: custom_text_2_opt3 | split: '|'
+        assign badges = badge_1 | append: '|' | append: badge_2 | append: '|' | append: badge_3 | split: '|'
+        assign show_badges = show_badge_1 | append: ',' | append: show_badge_2 | append: ',' | append: show_badge_3 | split: ','
+        assign badge_bg_colors = badge_1_bg_color | append: '|' | append: badge_2_bg_color | append: '|' | append: badge_3_bg_color | split: '|'
+        assign badge_text_colors = badge_1_text_color | append: '|' | append: badge_2_text_color | append: '|' | append: badge_3_text_color | split: '|'
+        assign badge_border_colors = badge_1_border_color | append: '|' | append: badge_2_border_color | append: '|' | append: badge_3_border_color | split: '|'
+        assign badge_use_gradients = badge_1_use_gradient | append: ',' | append: badge_2_use_gradient | append: ',' | append: badge_3_use_gradient | split: ','
+        assign badge_gradient_starts = badge_1_gradient_start | append: '|' | append: badge_2_gradient_start | append: '|' | append: badge_3_gradient_start | split: '|'
+        assign badge_gradient_ends = badge_1_gradient_end | append: '|' | append: badge_2_gradient_end | append: '|' | append: badge_3_gradient_end | split: '|'
+        assign badge_enable_borders = badge_1_enable_border | append: ',' | append: badge_2_enable_border | append: ',' | append: badge_3_enable_border | split: ','
+        assign badge_border_widths = badge_1_border_width | append: ',' | append: badge_2_border_width | append: ',' | append: badge_3_border_width | split: ','
+        assign badge_enable_shadows = badge_1_enable_shadow | append: ',' | append: badge_2_enable_shadow | append: ',' | append: badge_3_enable_shadow | split: ','
+        assign badge_shadow_blurs = badge_1_shadow_blur | append: ',' | append: badge_2_shadow_blur | append: ',' | append: badge_3_shadow_blur | split: ','
+        assign badge_shadow_offsets = badge_1_shadow_offset | append: ',' | append: badge_2_shadow_offset | append: ',' | append: badge_3_shadow_offset | split: ','
+        assign badge_shadow_opacities = badge_1_shadow_opacity | append: ',' | append: badge_2_shadow_opacity | append: ',' | append: badge_3_shadow_opacity | split: ','
+        assign badge_border_radiuses = badge_1_border_radius | append: ',' | append: badge_2_border_radius | append: ',' | append: badge_3_border_radius | split: ','
+        assign custom_save_badge_texts = custom_save_badge_text_1 | append: '|' | append: custom_save_badge_text_2 | append: '|' | append: custom_save_badge_text_3 | split: '|'
+        assign loop_limit = 3
+      endif
+    -%}
+
+    {% for quantity in quantities limit: loop_limit %}
+      {%- liquid
+        assign current_quantity = quantity | times: 1
+        assign current_price = prices[forloop.index0] | times: 1
+        assign current_compare_price = compare_prices[forloop.index0] | times: 1
+        assign current_title = titles[forloop.index0]
+        assign current_description = descriptions[forloop.index0]
+        assign current_custom_text_1 = custom_texts_1[forloop.index0]
+        assign current_custom_text_2 = custom_texts_2[forloop.index0]
+        assign current_badge = badges[forloop.index0]
+        assign current_show_badge = show_badges[forloop.index0]
+        assign current_badge_bg_color = badge_bg_colors[forloop.index0]
+        assign current_badge_text_color = badge_text_colors[forloop.index0]
+        assign current_badge_border_color = badge_border_colors[forloop.index0]
+        assign current_badge_use_gradient = badge_use_gradients[forloop.index0]
+        assign current_badge_gradient_start = badge_gradient_starts[forloop.index0]
+        assign current_badge_gradient_end = badge_gradient_ends[forloop.index0]
+        assign current_badge_enable_border = badge_enable_borders[forloop.index0]
+        assign current_badge_border_width = badge_border_widths[forloop.index0]
+        assign current_badge_enable_shadow = badge_enable_shadows[forloop.index0]
+        assign current_badge_shadow_blur = badge_shadow_blurs[forloop.index0]
+        assign current_badge_shadow_offset = badge_shadow_offsets[forloop.index0]
+        assign current_badge_shadow_opacity = badge_shadow_opacities[forloop.index0]
+        assign current_badge_border_radius = badge_border_radiuses[forloop.index0]
+        assign current_custom_save_badge_text = custom_save_badge_texts[forloop.index0]
+
+        case forloop.index
+          when 1
+            assign current_image = image_1
+          when 2
+            assign current_image = image_2
+          when 3
+            assign current_image = image_3
+          when 4
+            assign current_image = image_4
+        endcase
+      -%}
+
+      <div
+        class="quantity-bundle-card"
+        data-quantity="{{ current_quantity }}"
+        data-price="{{ current_price }}"
+        data-compare-price="{{ current_compare_price }}"
+        data-title="{{ current_title | escape }}"
+        {% if forloop.index == first_visible_bundle %}
+          data-selected="true"
+        {% endif %}
+        {% if forloop.index == 1 %}
+          data-uses-variant-price="{{ uses_variant_price_1 | json }}"
+          data-uses-variant-compare="{{ uses_variant_compare_1 | json }}"
+          data-enable-custom-pricing="{% if enable_custom_pricing and block.settings.enable_bundle_1_custom_price %}true{% else %}false{% endif %}"
+          data-custom-price-format="{{ selected_custom_price_format }}"
+          data-custom-price-percentage="{{ block.settings.bundle_1_custom_price_percentage }}"
+          data-custom-price-amount="{{ block.settings.bundle_1_custom_price_amount }}"
+          data-bogo-multiplier="{{ block.settings.bundle_1_bogo_multiplier }}"
+          data-custom-compare-at-price="{{ block.settings.bundle_1_compare_at_price }}"
+        {% elsif forloop.index == 2 %}
+          data-uses-variant-price="{{ uses_variant_price_2 | json }}"
+          data-uses-variant-compare="{{ uses_variant_compare_2 | json }}"
+          data-enable-custom-pricing="{% if enable_custom_pricing and block.settings.enable_bundle_2_custom_price %}true{% else %}false{% endif %}"
+          data-custom-price-format="{{ selected_custom_price_format }}"
+          data-custom-price-percentage="{{ block.settings.bundle_2_custom_price_percentage }}"
+          data-custom-price-amount="{{ block.settings.bundle_2_custom_price_amount }}"
+          data-bogo-multiplier="{{ block.settings.bundle_2_bogo_multiplier }}"
+          data-custom-compare-at-price="{{ block.settings.bundle_2_compare_at_price }}"
+        {% elsif forloop.index == 3 %}
+          data-uses-variant-price="{{ uses_variant_price_3 | json }}"
+          data-uses-variant-compare="{{ uses_variant_compare_3 | json }}"
+          data-enable-custom-pricing="{% if enable_custom_pricing and block.settings.enable_bundle_3_custom_price %}true{% else %}false{% endif %}"
+          data-custom-price-format="{{ selected_custom_price_format }}"
+          data-custom-price-percentage="{{ block.settings.bundle_3_custom_price_percentage }}"
+          data-custom-price-amount="{{ block.settings.bundle_3_custom_price_amount }}"
+          data-bogo-multiplier="{{ block.settings.bundle_3_bogo_multiplier }}"
+          data-custom-compare-at-price="{{ block.settings.bundle_3_compare_at_price }}"
+        {% elsif forloop.index == 4 %}
+          data-uses-variant-price="{{ uses_variant_price_4 | json }}"
+          data-uses-variant-compare="{{ uses_variant_compare_4 | json }}"
+          data-enable-custom-pricing="{% if enable_custom_pricing and block.settings.enable_bundle_4_custom_price %}true{% else %}false{% endif %}"
+          data-custom-price-format="{{ selected_custom_price_format }}"
+          data-custom-price-percentage="{{ block.settings.bundle_4_custom_price_percentage }}"
+          data-custom-price-amount="{{ block.settings.bundle_4_custom_price_amount }}"
+          data-bogo-multiplier="{{ block.settings.bundle_4_bogo_multiplier }}"
+          data-custom-compare-at-price="{{ block.settings.bundle_4_compare_at_price }}"
+        {% endif %}
+      >
+        {% if current_show_badge == 'true' and current_badge != blank %}
+          <div
+            class="quantity-bundle-badge"
+            style="
+              {% if current_badge_use_gradient == 'true' %}
+                background: linear-gradient(135deg, {{ current_badge_gradient_start }}, {{ current_badge_gradient_end }}) !important;
+              {% else %}
+                background: {{ current_badge_bg_color }} !important;
+              {% endif %}
+              color: {{ current_badge_text_color }} !important;
+              {% if current_badge_enable_border == 'true' %}
+                border: {{ current_badge_border_width }}px solid {{ current_badge_border_color }} !important;
+              {% else %}
+                border: none;
+              {% endif %}
+              border-radius: {{ current_badge_border_radius }}px;
+              {% if current_badge_enable_shadow == 'true' %}
+                {%- liquid
+                  if current_badge_use_gradient == 'true'
+                    assign shadow_color = current_badge_gradient_start
+                  else
+                    assign shadow_color = current_badge_bg_color
+                  endif
+                -%}
+                box-shadow: 0 {{ current_badge_shadow_offset }}px {{ current_badge_shadow_blur }}px rgba({{ shadow_color | color_to_rgb | replace: 'rgb(', '' | replace: ')', '' }}, {{ current_badge_shadow_opacity }}),
+                            0 0 {{ current_badge_shadow_blur | times: 2 }}px rgba({{ shadow_color | color_to_rgb | replace: 'rgb(', '' | replace: ')', '' }}, {{ current_badge_shadow_opacity | times: 0.67 }}) !important;
+              {% endif %}
+            "
+          >
+            {{ current_badge }}
+          </div>
+        {% endif %}
+
+        {% if layout_type == 'grid_2x2' %}
+          <!-- 2x2 Grid Layout: Text left, Image right -->
+          <div class="quantity-bundle-grid-inner">
+            <div class="quantity-bundle-grid-text">
+              {% if block.settings.show_title != false and current_title != blank %}
+                <h3 class="quantity-bundle-title" style="color: var(--title-color) !important;">{{ current_title }}</h3>
+              {% endif %}
+              {% if block.settings.show_description != false and current_description != blank %}
+                <p class="quantity-bundle-description">{{ current_description }}</p>
+              {% endif %}
+              {% if block.settings.show_per_item_price != false %}
+                {%- assign unit_price = current_price | divided_by: current_quantity -%}
+                <span class="quantity-bundle-grid-per-item">
+                  <span class="price-amount">{{ unit_price | money }}</span><span class="price-suffix">{{ block.settings.per_item_price_suffix | default: '/each' }}</span>
+                </span>
+              {% endif %}
+            </div>
+            {% if block.settings.grid_show_images and current_image != blank %}
+              <div class="quantity-bundle-grid-image">
+                <img src="{{ current_image | image_url: width: 200 }}" alt="{{ current_title | escape }}" width="200" height="200" loading="lazy">
+              </div>
+            {% endif %}
+          </div>
+        {% else %}
+          <!-- Horizontal Layout -->
+          {% if block.settings.horizontal_show_images and current_image != blank %}
+            <!-- Horizontal Layout with Images (Image on top) -->
+            <div class="quantity-bundle-horizontal-inner">
+              <div class="quantity-bundle-horizontal-image">
+                <img src="{{ current_image | image_url: width: 200 }}" alt="{{ current_title | escape }}" width="200" height="200" loading="lazy">
+              </div>
+              <div class="quantity-bundle-horizontal-text">
+          {% endif %}
+
+          <div class="quantity-bundle-content{% if block.settings.hide_images %} no-image-layout{% endif %}{% if block.settings.content_below_container %} content-below-layout{% endif %}{% if block.settings.horizontal_show_images %} has-horizontal-image{% endif %}">
+          {% if block.settings.hide_images %}
+            <!-- No Image Layout: Title, description, price (per-item always below) -->
+            {%- liquid
+              assign pricing_mode = block.settings.pricing_display_mode | default: 'price_and_compare'
+              assign unit_price = current_price | divided_by: current_quantity
+            -%}
+
+            <!-- Simple 2-element display: Title, Price -->
+
+            <!-- 1. Title -->
+            {% if block.settings.show_title != false and current_title != blank %}
+              <h3 class="quantity-bundle-title" style="color: var(--title-color) !important;">{{ current_title }}</h3>
+            {% endif %}
+
+            <!-- 2. Custom Description Text (Serving Size) -->
+            {% if block.settings.show_description != false and current_description != blank %}
+              <p class="quantity-bundle-description">{{ current_description }}</p>
+            {% endif %}
+
+            <!-- 3. Main Price (per-item price is ALWAYS below container) -->
+            <div class="quantity-bundle-pricing pricing-middle">
+              {% case pricing_mode %}
+                {% when 'price_and_compare' %}
+                  <div class="quantity-price-row">
+                    {% if block.settings.show_current_price != false %}
+                      <span class="quantity-current-price">{{ current_price | money }}</span>
+                    {% endif %}
+                    {% if current_compare_price > 0 and block.settings.show_original_price != false %}
+                      <span class="quantity-original-price">{{ current_compare_price | money }}</span>
+                    {% endif %}
+                  </div>
+                {% when 'custom_price' %}
+                  <div class="quantity-price-row">
+                    {% if block.settings.show_current_price != false %}
+                      <span class="quantity-current-price">{{ current_price | money }}</span>
+                    {% endif %}
+                  </div>
+                {% when 'price_compare_and_per' %}
+                  <div class="quantity-price-row">
+                    {% if block.settings.show_current_price != false %}
+                      <span class="quantity-current-price">{{ current_price | money }}</span>
+                    {% endif %}
+                    {% if current_compare_price > 0 and block.settings.show_original_price != false %}
+                      <span class="quantity-original-price">{{ current_compare_price | money }}</span>
+                    {% endif %}
+                  </div>
+                {% when 'custom_price_and_per' %}
+                  <div class="quantity-price-row">
+                    {% if block.settings.show_current_price != false %}
+                      <span class="quantity-current-price">{{ current_price | money }}</span>
+                    {% endif %}
+                  </div>
+                {% when 'per_item_only' %}
+                  <!-- No price inside, only per-item below -->
+                {% else %}
+                  <!-- Fallback for old pricing modes -->
+                  <div class="quantity-price-row">
+                    {% if block.settings.show_current_price != false %}
+                      <span class="quantity-current-price">{{ current_price | money }}</span>
+                    {% endif %}
+                    {% if current_compare_price > 0 and block.settings.show_original_price != false %}
+                      <span class="quantity-original-price">{{ current_compare_price | money }}</span>
+                    {% endif %}
+                  </div>
+              {% endcase %}
+            </div>
+
+            <!-- Custom Save Badge at Bottom -->
+            {% if block.settings.show_custom_save_badge == true and current_custom_save_badge_text != blank %}
+              <div class="quantity-bundle-custom-save-badge">
+                {{ current_custom_save_badge_text }}
+              </div>
+            {% endif %}
+
+          {% else %}
+            <!-- Standard Layout with Images -->
+            {% if block.settings.show_title != false and current_title != blank %}
+              <h3 class="quantity-bundle-title" style="color: var(--title-color) !important;">{{ current_title }}</h3>
+            {% endif %}
+
+            {% if block.settings.show_description != false and current_description != blank %}
+              <p class="quantity-bundle-description">{{ current_description }}</p>
+            {% endif %}
+
+            <div class="quantity-bundle-pricing">
+              {%- liquid
+                assign pricing_mode = block.settings.pricing_display_mode | default: 'price_and_compare'
+                assign unit_price = current_price | divided_by: current_quantity
+              -%}
+
+              {% case pricing_mode %}
+                {% when 'price_and_compare' %}
+                  <div class="quantity-price-row">
+                    {% if block.settings.show_current_price != false %}
+                      <span class="quantity-current-price">{{ current_price | money }}</span>
+                    {% endif %}
+                    {% if current_compare_price > 0 and block.settings.show_original_price != false %}
+                      <span class="quantity-original-price">{{ current_compare_price | money }}</span>
+                    {% endif %}
+                  </div>
+                {% when 'custom_price' %}
+                  <div class="quantity-price-row">
+                    {% if block.settings.show_current_price != false %}
+                      <span class="quantity-current-price">{{ current_price | money }}</span>
+                    {% endif %}
+                  </div>
+                {% when 'price_compare_and_per' %}
+                  <div class="quantity-price-row">
+                    {% if block.settings.show_current_price != false %}
+                      <span class="quantity-current-price">{{ current_price | money }}</span>
+                    {% endif %}
+                    {% if current_compare_price > 0 and block.settings.show_original_price != false %}
+                      <span class="quantity-original-price">{{ current_compare_price | money }}</span>
+                    {% endif %}
+                  </div>
+                {% when 'custom_price_and_per' %}
+                  <div class="quantity-price-row">
+                    {% if block.settings.show_current_price != false %}
+                      <span class="quantity-current-price">{{ current_price | money }}</span>
+                    {% endif %}
+                  </div>
+                {% when 'per_item_only' %}
+                  <!-- No price inside, only per-item below -->
+                {% else %}
+                  <!-- Fallback for old pricing modes -->
+                  <div class="quantity-price-row">
+                    {% if block.settings.show_current_price != false %}
+                      <span class="quantity-current-price">{{ current_price | money }}</span>
+                    {% endif %}
+                    {% if current_compare_price > 0 and block.settings.show_original_price != false %}
+                      <span class="quantity-original-price">{{ current_compare_price | money }}</span>
+                    {% endif %}
+                  </div>
+              {% endcase %}
+            </div>
+          {% endif %}
+        </div>
+
+          {% if block.settings.horizontal_show_images and current_image != blank %}
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+
+        <!-- Per Item Price Below Container (Amount Per Serving) -->
+        {% if block.settings.show_per_item_price != false %}
+          {%- liquid
+            assign unit_price = current_price | divided_by: current_quantity
+          -%}
+          <div class="quantity-bundle-per-item-below">
+            <span
+              class="quantity-per-item-price"
+              style="font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;"
+            >
+              <span
+                class="price-amount"
+                style="font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;"
+              >
+                {{- unit_price | money -}}</span
+              ><span
+                class="price-suffix"
+                style="font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;"
+              >
+                {{- block.settings.per_item_price_suffix | default: '/each' -}}
+              </span>
+            </span>
+          </div>
+        {% endif %}
+
+        <input
+          type="radio"
+          name="quantity-bundle-{{ unique_id }}"
+          value="{{ current_quantity }}"
+          class="quantity-bundle-radio"
+          {% if forloop.index == 1 %}
+            checked
+          {% endif %}
+          data-price="{{ current_price }}"
+        >
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+    .quantity-bundle-selector {
+      width: 100%;
+      font-family: var(--font-body-family);
+    }
+
+  .quantity-bundle-container {
+    display: flex;
+    gap: var(--card-gap);
+    flex-wrap: nowrap;
+    width: 100%;
+    margin: 0;
+    padding-top: 15px;
+    justify-content: flex-start;
+  }
+
+  /* 2x2 Grid Layout */
+  .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--card-gap);
+    flex-wrap: unset;
+    justify-content: unset;
+  }
+
+  .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-card {
+    flex: unset;
+    min-width: unset;
+    max-width: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    padding: 0 10px !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* 2x2 Grid inner layout: text left, image right */
+  .quantity-bundle-grid-inner {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+  }
+
+  .quantity-bundle-grid-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    text-align: left;
+    gap: 4px;
+  }
+
+  .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-title {
+    text-align: left;
+    margin: 0;
+  }
+
+  .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-description {
+    text-align: left;
+    margin: 0;
+  }
+
+  .quantity-bundle-grid-per-item {
+    font-size: var(--description-font-size);
+    color: {{ block.settings.per_item_price_color | default: '#666666' }};
+    font-weight: {{ block.settings.per_item_price_weight | default: '500' }};
+    text-align: left;
+    margin: 0;
+    {% if block.settings.per_item_enable_container %}
+      background: {{ block.settings.per_item_container_bg | default: '#f5f5f5' }};
+      border-radius: {{ block.settings.per_item_container_border_radius | default: 4 }}px;
+      padding: {{ block.settings.per_item_container_padding_vertical | default: 4 }}px {{ block.settings.per_item_container_padding_horizontal | default: 8 }}px;
+      display: inline-block;
+    {% endif %}
+  }
+
+  .quantity-bundle-grid-per-item .price-amount,
+  .quantity-bundle-grid-per-item .price-suffix {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+  }
+
+  /* Hide the per-item below container in grid layout since it's inside */
+  .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-per-item-below {
+    display: none !important;
+  }
+
+  .quantity-bundle-grid-image {
+    flex-shrink: 0;
+    width: {{ block.settings.grid_image_width_desktop | default: 90 }}px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+  }
+
+  .quantity-bundle-grid-image img {
+    max-width: 100%;
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+
+  /* 2x2 Grid without images - centered content */
+  .quantity-bundle-selector.layout-grid-2x2.no-grid-images .quantity-bundle-grid-inner {
+    justify-content: center;
+  }
+
+  .quantity-bundle-selector.layout-grid-2x2.no-grid-images .quantity-bundle-grid-text {
+    align-items: center;
+    text-align: center;
+  }
+
+  .quantity-bundle-selector.layout-grid-2x2.no-grid-images .quantity-bundle-title,
+  .quantity-bundle-selector.layout-grid-2x2.no-grid-images .quantity-bundle-description,
+  .quantity-bundle-selector.layout-grid-2x2.no-grid-images .quantity-bundle-grid-per-item {
+    text-align: center;
+  }
+
+  /* Horizontal Layout with Images */
+  .quantity-bundle-horizontal-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+  }
+
+  .quantity-bundle-horizontal-text {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .quantity-bundle-horizontal-text .quantity-bundle-content {
+    width: 100%;
+    text-align: center;
+  }
+
+  .quantity-bundle-horizontal-text .quantity-bundle-title,
+  .quantity-bundle-horizontal-text .quantity-bundle-description,
+  .quantity-bundle-horizontal-text .quantity-bundle-pricing {
+    text-align: center;
+  }
+
+  .quantity-bundle-horizontal-image {
+    flex-shrink: 0;
+    height: {{ block.settings.horizontal_image_height_desktop | default: 60 }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .quantity-bundle-horizontal-image img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+
+    /* Keep horizontal layout on all screen sizes */
+
+  .quantity-bundle-card {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: {{ block.settings.card_width_desktop | default: 180 }}px;
+    min-height: {{ block.settings.card_min_height_desktop | default: 200 }}px;
+    height: auto;
+    {% if block.settings.remove_image_padding %}
+      padding: 0;
+    {% else %}
+      padding: var(--card-padding);
+    {% endif %}
+    border: var(--card-border-width) solid var(--card-border-color, #e5e5e5);
+    border-radius: var(--border-radius) !important;
+    background: var(--card-background, #ffffff);
+    cursor: pointer;
+    transition: all 0.3s ease, border-color 0.2s ease, border-width 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: {{ block.settings.card_margin_bottom | default: 40 }}px;
+  }
+
+  .quantity-bundle-card > *:not(.quantity-bundle-badge):not(.quantity-bundle-per-item-below) {
+    overflow: hidden;
+  }
+
+  .quantity-bundle-card:hover {
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .quantity-bundle-card[data-selected="true"] {
+    border-color: var(--card-selected-border-color, #007acc);
+    border-width: var(--selected-card-border-width);
+    background: var(--card-selected-bg-color, #f8f9ff);
+    transform: scale(1.03);
+    {% if block.settings.selected_card_inner_shadow %}
+      box-shadow: inset 0 4px 12px rgba({{ block.settings.selected_card_inner_shadow_color | color_to_rgb | replace: 'rgb(', '' | replace: ')', '' }}, 0.3),
+                  inset 0 2px 6px rgba({{ block.settings.selected_card_inner_shadow_color | color_to_rgb | replace: 'rgb(', '' | replace: ')', '' }}, 0.2);
+    {% endif %}
+  }
+
+  .quantity-bundle-card[data-selected="true"]:hover {
+    transform: translateY(-1px) scale(1.03);
+    {% if block.settings.selected_card_inner_shadow %}
+      box-shadow: inset 0 4px 12px rgba({{ block.settings.selected_card_inner_shadow_color | color_to_rgb | replace: 'rgb(', '' | replace: ')', '' }}, 0.3),
+                  inset 0 2px 6px rgba({{ block.settings.selected_card_inner_shadow_color | color_to_rgb | replace: 'rgb(', '' | replace: ')', '' }}, 0.2);
+    {% endif %}
+  }
+
+  .quantity-bundle-badge {
+    position: absolute;
+    top: -10px;
+    padding: 3px 8px;
+    font-size: {{ block.settings.bundle_badge_font_size | default: 10 }}px;
+    font-weight: var(--font-weight-bold) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    z-index: 2;
+    display: inline-block;
+    {% if block.settings.badge_min_width > 0 %}
+      min-width: {{ block.settings.badge_min_width }}px;
+      text-align: center;
+    {% endif %}
+  }
+
+  /* Horizontal Layout Badge Position */
+  .quantity-bundle-selector:not(.layout-grid-2x2) .quantity-bundle-badge {
+    {% case block.settings.badge_position_horizontal %}
+      {% when 'top-center' %}
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+      {% when 'top-left' %}
+        left: 8px !important;
+        right: auto !important;
+        transform: none !important;
+      {% when 'top-right' %}
+        right: 8px !important;
+        left: auto !important;
+        transform: none !important;
+      {% else %}
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+    {% endcase %}
+  }
+
+  /* 2x2 Grid Layout Badge Position */
+  .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-badge {
+    {% case block.settings.badge_position_grid %}
+      {% when 'top-center' %}
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+      {% when 'top-left' %}
+        left: 8px !important;
+        right: auto !important;
+        transform: none !important;
+      {% when 'top-right' %}
+        right: 8px !important;
+        left: auto !important;
+        transform: none !important;
+      {% else %}
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+    {% endcase %}
+  }
+
+
+  .quantity-bundle-image {
+    width: 100%;
+    {% if block.settings.image_aspect_ratio == 'auto' %}
+      height: auto;
+    {% else %}
+      height: 0;
+      {% case block.settings.image_aspect_ratio %}
+        {% when '1/1' %}
+          padding-bottom: 100%;
+        {% when '4/3' %}
+          padding-bottom: 75%;
+        {% when '3/4' %}
+          padding-bottom: 133.33%;
+        {% when '16/9' %}
+          padding-bottom: 56.25%;
+        {% else %}
+          padding-bottom: 100%;
+      {% endcase %}
+    {% endif %}
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .quantity-bundle-visual {
+    {% if block.settings.image_aspect_ratio == 'auto' %}
+      position: relative;
+      width: 100%;
+      height: auto;
+    {% else %}
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    {% endif %}
+    background-size: cover;
+    background-position: center;
+    {% if block.settings.remove_image_padding %}
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    {% else %}
+      border-radius: 4px;
+    {% endif %}
+    overflow: hidden;
+  }
+
+
+  .quantity-bundle-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: inherit;
+    overflow: hidden;
+    {% if block.settings.remove_image_padding %}
+      padding: var(--card-padding);
+    {% endif %}
+  }
+
+  .quantity-bundle-content.content-below-layout {
+    /* Hide content when it's being displayed below */
+    padding: 0;
+    min-height: 0;
+  }
+
+  .quantity-bundle-content-below {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .quantity-bundle-selector .quantity-bundle-content-below .quantity-bundle-title,
+  .quantity-bundle-selector .quantity-bundle-content-below .quantity-bundle-custom-title {
+    font-size: var(--title-font-size);
+    color: var(--title-color) !important;
+    margin: 0;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .quantity-bundle-content-below .quantity-bundle-custom-serving {
+    font-size: calc(var(--description-font-size) * 0.95);
+    color: var(--description-color);
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .quantity-bundle-content-below .quantity-bundle-description {
+    font-size: var(--description-font-size);
+    color: var(--description-color);
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .quantity-bundle-content-below .quantity-bundle-pricing {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Hide pricing in below layout when empty */
+  .quantity-bundle-content-below .quantity-bundle-pricing:empty,
+  .quantity-bundle-content-below .quantity-bundle-pricing:not(:has(.quantity-current-price, .quantity-original-price)) {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .quantity-bundle-content-below .quantity-price-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .quantity-bundle-content-below .quantity-current-price {
+    font-size: calc(var(--current-price-font-size) * 1.2);
+    font-weight: var(--font-weight-bold);
+    color: var(--current-price-color);
+  }
+
+  .quantity-bundle-content-below .quantity-original-price {
+    font-size: var(--original-price-font-size);
+    color: var(--original-price-color);
+    text-decoration: line-through;
+  }
+
+  .quantity-bundle-content-below .quantity-bundle-per-unit-text {
+    font-size: calc(var(--description-font-size) * 0.9);
+    color: var(--description-color);
+    font-weight: 400;
+    margin-top: -2px;
+  }
+
+  /* No Image Layout Styles */
+  .quantity-bundle-content.no-image-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    gap: var(--no-image-content-gap, {{ block.settings.no_image_content_gap | default: 12 }}px) !important;
+    row-gap: var(--no-image-content-gap, {{ block.settings.no_image_content_gap | default: 12 }}px) !important;
+    height: 100%;
+    padding: {{ block.settings.no_image_content_padding | default: 12 }}px;
+    overflow: hidden;
+  }
+
+  /* Remove all margins from child elements to let gap control spacing */
+  .quantity-bundle-content.no-image-layout > * {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Ensure specific elements have no margins in no-image layout */
+  .quantity-bundle-selector .quantity-bundle-content.no-image-layout .quantity-bundle-title,
+  .quantity-bundle-selector .quantity-bundle-content.no-image-layout .quantity-bundle-description,
+  .quantity-bundle-selector .quantity-bundle-content.no-image-layout .quantity-bundle-pricing,
+  .quantity-bundle-selector .quantity-bundle-content.no-image-layout .quantity-bundle-custom-save-badge {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .quantity-bundle-selector .quantity-bundle-content.no-image-layout .quantity-bundle-title,
+  .quantity-bundle-selector h3.quantity-bundle-title {
+    color: var(--title-color) !important;
+  }
+
+  {% if block.settings.no_image_element_order == 'price_first' %}
+    /* Price First Order: Price → Title → Description → Per-Item → Badge */
+    .quantity-bundle-content.no-image-layout .pricing-middle {
+      order: 1;
+    }
+
+    .quantity-bundle-selector .quantity-bundle-content.no-image-layout .quantity-bundle-title {
+      order: 2;
+      font-size: var(--title-font-size);
+      color: var(--title-color) !important;
+    }
+
+    .quantity-bundle-content.no-image-layout .quantity-bundle-description {
+      order: 3;
+    }
+
+    .quantity-bundle-content.no-image-layout .quantity-bundle-per-item {
+      order: 4;
+    }
+
+    .quantity-bundle-content.no-image-layout .quantity-bundle-custom-save-badge {
+      order: 5;
+      align-self: center;
+    }
+  {% else %}
+    /* Title First Order: Title → Description → Price → Per-Item → Badge */
+    .quantity-bundle-selector .quantity-bundle-content.no-image-layout .quantity-bundle-title {
+      order: 1;
+      font-size: var(--title-font-size);
+      color: var(--title-color) !important;
+    }
+
+    .quantity-bundle-content.no-image-layout .quantity-bundle-description {
+      order: 2;
+    }
+
+    .quantity-bundle-content.no-image-layout .pricing-middle {
+      order: 3;
+    }
+
+    .quantity-bundle-content.no-image-layout .quantity-bundle-per-item {
+      order: 4;
+    }
+
+    .quantity-bundle-content.no-image-layout .quantity-bundle-custom-save-badge {
+      order: 5;
+      align-self: center;
+    }
+  {% endif %}
+
+  .quantity-bundle-per-item {
+    {% if block.settings.per_item_enable_container %}
+      background: {{ block.settings.per_item_container_bg | default: '#f5f5f5' }};
+      border-radius: {{ block.settings.per_item_container_border_radius | default: 4 }}px;
+      padding: {{ block.settings.per_item_container_padding_vertical | default: 4 }}px {{ block.settings.per_item_container_padding_horizontal | default: 8 }}px;
+      display: inline-block;
+    {% endif %}
+  }
+
+  .quantity-bundle-selector .quantity-bundle-per-item .quantity-per-item-price {
+    font-size: {{ block.settings.per_item_price_font_size | default: 14 }}px;
+    color: {{ block.settings.per_item_price_color | default: '#666666' }};
+    font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;
+    opacity: {{ block.settings.per_item_price_opacity | default: 1.0 }};
+  }
+
+  .quantity-bundle-selector .quantity-bundle-per-item .quantity-per-item-price *,
+  .quantity-bundle-selector .quantity-bundle-per-item .quantity-per-item-price span {
+    font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;
+  }
+
+  .quantity-bundle-selector .quantity-bundle-per-item .quantity-per-item-price .price-amount,
+  .quantity-bundle-selector .quantity-bundle-per-item .quantity-per-item-price .price-amount *,
+  .quantity-bundle-selector .quantity-bundle-per-item .quantity-per-item-price span.price-amount {
+    font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;
+  }
+
+  .quantity-bundle-selector .quantity-bundle-per-item .quantity-per-item-price .price-suffix,
+  .quantity-bundle-selector .quantity-bundle-per-item .quantity-per-item-price .price-suffix *,
+  .quantity-bundle-selector .quantity-bundle-per-item .quantity-per-item-price span.price-suffix {
+    font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;
+  }
+
+  /* Per-unit text below container styling (ALWAYS present for main pricing modes) */
+  .quantity-bundle-per-item-below {
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    width: 100%;
+    z-index: 1;
+  }
+
+  /* Add space to card for per-item price below */
+  .quantity-bundle-card {
+    {% if block.settings.show_per_item_price != false %}
+      margin-bottom: {{ block.settings.card_margin_bottom | default: 40 }}px !important;
+    {% else %}
+      margin-bottom: var(--card-gap) !important;
+    {% endif %}
+  }
+
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price {
+    font-size: {{ block.settings.per_item_price_font_size | default: 14 }}px;
+    color: {{ block.settings.per_item_price_color | default: '#666666' }};
+    font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;
+    opacity: {{ block.settings.per_item_price_opacity | default: 1.0 }};
+    {% if block.settings.per_item_enable_container %}
+      background: {{ block.settings.per_item_container_bg | default: '#f5f5f5' }};
+      border-radius: {{ block.settings.per_item_container_border_radius | default: 4 }}px;
+      padding: {{ block.settings.per_item_container_padding_vertical | default: 4 }}px {{ block.settings.per_item_container_padding_horizontal | default: 8 }}px;
+      display: inline-block;
+    {% endif %}
+  }
+
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price *,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price span {
+    font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;
+  }
+
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price .price-amount,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price .price-amount *,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price span.price-amount {
+    font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;
+  }
+
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price .price-suffix,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price .price-suffix *,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price span.price-suffix {
+    font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;
+  }
+
+  .quantity-bundle-custom-save-badge {
+    background: {{ block.settings.custom_save_badge_bg | default: '#ff4444' }};
+    color: {{ block.settings.custom_save_badge_text_color | default: '#ffffff' }};
+    font-size: {{ block.settings.custom_save_badge_font_size | default: 10 }}px;
+    font-weight: var(--font-weight-bold) !important;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: {{ block.settings.custom_save_badge_border_radius | default: 4 }}px;
+    display: inline-block;
+    letter-spacing: 0.5px;
+    width: fit-content;
+    max-width: 100%;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  .quantity-bundle-selector .quantity-bundle-title,
+  .quantity-bundle-selector h3.quantity-bundle-title {
+    font-size: var(--title-font-size);
+    color: var(--title-color) !important;
+    font-weight: var(--font-weight-bold);
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+  }
+
+  .quantity-bundle-description {
+    font-size: var(--description-font-size);
+    color: var(--description-color, #666666);
+    margin: 0;
+    line-height: 1.3;
+    opacity: 0.8;
+  }
+
+  .quantity-bundle-pricing {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* Hide pricing container when empty or has no visible children */
+  .quantity-bundle-pricing:empty,
+  .quantity-bundle-pricing:not(:has(.quantity-current-price, .quantity-original-price)) {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    height: 0 !important;
+  }
+
+  .quantity-price-row {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    justify-content: center;
+  }
+
+  /* Hide price row when empty */
+  .quantity-price-row:empty {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .quantity-price-row .quantity-current-price {
+    order: 1;
+  }
+
+  .quantity-price-row .quantity-original-price {
+    order: 2;
+  }
+
+  .quantity-current-price {
+    font-size: var(--current-price-font-size);
+    color: var(--current-price-color, #333333);
+    font-weight: 700;
+  }
+
+    .quantity-original-price {
+      font-size: var(--original-price-font-size);
+      color: var(--original-price-color, #999999);
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+
+  .quantity-per-unit-price {
+    font-size: 10px;
+    color: #666666;
+    font-weight: 500;
+    opacity: 0.8;
+  }
+
+  .quantity-per-unit-container {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 2px;
+  }
+
+    .quantity-bundle-radio {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Always maintain vertical layout */
+    .quantity-bundle-card {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .quantity-bundle-image {
+      align-self: center;
+    }
+
+    .quantity-bundle-content {
+      text-align: center;
+    }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .quantity-bundle-container {
+      gap: calc(var(--card-gap) / 2);
+      width: 100%;
+      flex-wrap: nowrap;
+      padding-top: 10px;
+    }
+
+    /* Mobile font sizes */
+    .quantity-bundle-title {
+      font-size: var(--title-font-size-mobile) !important;
+    }
+
+    .quantity-bundle-description {
+      font-size: var(--description-font-size-mobile) !important;
+    }
+
+    .quantity-current-price {
+      font-size: var(--current-price-font-size-mobile) !important;
+    }
+
+    .quantity-original-price {
+      font-size: var(--original-price-font-size-mobile) !important;
+    }
+
+    .quantity-per-item-price,
+    .quantity-bundle-per-item,
+    .quantity-bundle-grid-per-item {
+      font-size: var(--per-item-font-size-mobile) !important;
+    }
+
+    /* 2x2 Grid mobile */
+    .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: calc(var(--card-gap) / 2);
+    }
+
+    .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-card {
+      flex: unset;
+      min-width: unset;
+      max-width: 100%;
+      width: 100%;
+      padding: 0 8px !important;
+      margin-bottom: 0 !important;
+    }
+
+    .quantity-bundle-grid-inner {
+      gap: 8px;
+    }
+
+    .quantity-bundle-grid-image {
+      width: {{ block.settings.grid_image_width_mobile | default: 60 }}px;
+    }
+
+    .quantity-bundle-horizontal-image {
+      height: {{ block.settings.horizontal_image_height_mobile | default: 45 }}px;
+    }
+
+    .quantity-bundle-horizontal-inner {
+      gap: 6px;
+    }
+
+    .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-title {
+      font-size: calc(var(--title-font-size) * 0.9);
+    }
+
+    .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-description {
+      font-size: calc(var(--description-font-size) * 0.9);
+    }
+
+    .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-grid-per-item {
+      font-size: calc(var(--description-font-size) * 0.9);
+    }
+
+    .quantity-bundle-card {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: {{ block.settings.card_min_height_mobile | default: 160 }}px;
+      height: auto;
+      {% if block.settings.remove_image_padding %}
+        padding: 0;
+      {% else %}
+        padding: calc(var(--card-padding) * 0.8);
+      {% endif %}
+      margin-bottom: {{ block.settings.card_margin_bottom | default: 40 | times: 0.8 }}px;
+    }
+
+    {% if block.settings.remove_image_padding %}
+      .quantity-bundle-content {
+        padding: calc(var(--card-padding) * 0.8);
+      }
+    {% endif %}
+
+    .quantity-bundle-image {
+      margin-bottom: 8px;
+    }
+
+    .quantity-bundle-selector .quantity-bundle-title {
+      font-size: calc(var(--title-font-size) * 0.9);
+      color: var(--title-color) !important;
+    }
+
+    .quantity-current-price {
+      font-size: calc(var(--current-price-font-size) * 0.9);
+    }
+  }
+
+  /* Mobile screens - additional styles */
+  @media (max-width: 768px) {
+    .quantity-bundle-card {
+      /* Width and height already set above */
+    }
+
+    .quantity-bundle-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    .quantity-bundle-content.no-image-layout {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center;
+      padding: {{ block.settings.no_image_content_padding | default: 12 }}px;
+      gap: calc(var(--no-image-content-gap, {{ block.settings.no_image_content_gap | default: 12 }}px) * 0.6) !important;
+      row-gap: calc(var(--no-image-content-gap, {{ block.settings.no_image_content_gap | default: 12 }}px) * 0.6) !important;
+      overflow: hidden;
+      justify-content: center !important;
+    }
+
+    .quantity-bundle-content.no-image-layout > * {
+      margin: 0 !important;
+    }
+
+    .quantity-bundle-image {
+      margin-bottom: 8px;
+    }
+
+    .quantity-bundle-pricing {
+      margin-top: auto;
+    }
+
+    /* Ensure hidden pricing takes no space on mobile */
+    .quantity-bundle-pricing:empty,
+    .quantity-bundle-pricing:not(:has(.quantity-current-price, .quantity-original-price)) {
+      margin-top: 0 !important;
+    }
+  }
+
+  /* Very small screens */
+  @media (max-width: 480px) {
+    .quantity-bundle-card {
+      /* Width and height already set in mobile styles above */
+    }
+
+    /* 2x2 Grid very small screens - maintain 2 columns */
+    .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-container {
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-card {
+      min-height: {{ block.settings.card_min_height_mobile | default: 50 | times: 0.85 }}px;
+      padding: 0 6px !important;
+      margin-bottom: 0 !important;
+    }
+
+    .quantity-bundle-grid-inner {
+      gap: 6px;
+    }
+
+
+    .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-title {
+      font-size: calc(var(--title-font-size) * 0.8);
+    }
+
+    .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-description {
+      font-size: calc(var(--description-font-size) * 0.85);
+    }
+
+    .quantity-bundle-selector.layout-grid-2x2 .quantity-bundle-grid-per-item {
+      font-size: calc(var(--description-font-size) * 0.85);
+    }
+
+    .quantity-bundle-content {
+      padding: 6px;
+    }
+
+    .quantity-bundle-content.no-image-layout {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center;
+      padding: {{ block.settings.no_image_content_padding | default: 12 | times: 0.8 }}px;
+      gap: calc(var(--no-image-content-gap, {{ block.settings.no_image_content_gap | default: 12 }}px) * 0.4) !important;
+      row-gap: calc(var(--no-image-content-gap, {{ block.settings.no_image_content_gap | default: 12 }}px) * 0.4) !important;
+      overflow: hidden;
+    }
+  }
+
+  /* Force per-item price font-weight to use parameter value - must be last to override all other rules */
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price *,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price span,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price .price-amount,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price .price-amount *,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price span.price-amount,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price .price-suffix,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price .price-suffix *,
+  .quantity-bundle-selector .quantity-bundle-per-item-below .quantity-per-item-price span.price-suffix {
+    font-weight: {{ block.settings.per_item_price_weight | default: '500' }} !important;
+  }
+</style>
+
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('quantityBundleComponent', () => ({
+      moneyFormat: "{{ shop.money_format | escape }}",
+      variants: {{ product.variants | json }},
+      selectedVariantId: '{{ current_variant.id }}',
+      cards: [],
+      quantityInput: null,
+      productForm: null,
+      enableCustomPricing: false,
+      originalPrices: {}, // Store original prices for subscription discount calculation
+      init() {
+        if (typeof Elixir_ProductFormExists !== 'function' || !Elixir_ProductFormExists()) return;
+        this.enableCustomPricing = this.$root.dataset.customPrice === 'true';
+        
+        this.cards = [...this.$root.querySelectorAll('.quantity-bundle-card')].map(card => {
+          const price = Number(card.dataset.price) || 0;
+          return {
+            el: card,
+            quantity: Number(card.dataset.quantity) || 1,
+            price: price,
+            compare: Number(card.dataset.comparePrice) || 0,
+            usesVariantPrice: card.dataset.usesVariantPrice === 'true',
+            usesVariantCompare: card.dataset.usesVariantCompare === 'true',
+            originalPrice: price // Store original price for subscription calculations
+          };
+        });
+
+        // Store original prices
+        this.cards.forEach(card => {
+          this.originalPrices[card.quantity] = card.originalPrice;
+        });
+
+        this.productForm = (typeof Elixir_GetProductForm === 'function' && Elixir_GetProductForm()) || document.querySelector('.shop-add-to-cart-wrapper form[action="/cart/add"]');
+        this.quantityInput = this.productForm ? this.productForm.querySelector('input[name="quantity"]') : null;
+        if (!this.quantityInput) this.quantityInput = document.querySelector('input[name="quantity"]');
+
+        this.refreshQuantityBundleDisplay();
+
+        const initiallySelectedCard = this.cards.find(card => {
+          const isSelected = card.el.getAttribute('data-selected') === 'true';
+          const radio = card.el.querySelector('.quantity-bundle-radio');
+          const isRadioChecked = radio && radio.checked;
+          return isSelected || isRadioChecked;
+        });
+        if (initiallySelectedCard) {
+          this.updateQuantityInput(initiallySelectedCard.quantity);
+        }
+        
+        this.bindCardClicks();
+        this.bindSellingPlanListeners();
+        this.watchVariantChanges();
+        this.bindExternalVariantEvents();
+        this.bindSubscriptionContextListener();
+      },
+      getVariantInput() {
+        return document.querySelector('.shop-add-to-cart-wrapper input[name="id"], .shop-add-to-cart-wrapper input[name="product-id"]');
+      },
+      updateSelectedVariantFromInput() {
+        if (typeof Elixir_GetProductFormVariantId === 'function') {
+          const id = Elixir_GetProductFormVariantId();
+          if (id != null) this.selectedVariantId = String(id);
+          return;
+        }
+        const variantInput = this.getVariantInput();
+        if (variantInput?.value) this.selectedVariantId = variantInput.value;
+      },
+      getCurrentVariant() {
+        return this.variants.find(v => v.id.toString() === this.selectedVariantId?.toString()) || null;
+      },
+      getSubscriptionPrice(basePrice) {
+        const sealElement = document.querySelector('.sealsubs-target-element');
+        if (!sealElement) {
+          return basePrice;
+        }
+
+        try {
+          const sealData = JSON.parse(sealElement.getAttribute('data-product') || '{}');
+          const adjustment = sealData?.selling_plan_groups?.[0]?.selling_plans?.[0]?.price_adjustments?.[0];
+          if (!adjustment) {
+            return basePrice;
+          }
+
+          const { value_type: type, value } = adjustment;
+          const numericValue = parseFloat(value);
+          let finalPrice = basePrice;
+
+          switch (type) {
+            case 'percentage':
+              finalPrice = basePrice * (1 - numericValue / 100);
+              break;
+            case 'fixed_amount':
+              finalPrice = basePrice - numericValue;
+              break;
+            default:
+              return basePrice;
+          }
+
+          return parseFloat(finalPrice.toFixed(2));
+        } catch (error) {
+          console.error('[Seal] Failed to parse Seal data:', error);
+          return basePrice;
+        }
+      },
+      /**
+       * Single source for bundle card prices: uses Elixir_GetDisplayPrice so prices
+       * respect subscription and stay in sync with variant/quantity. Always multiplies by quantity.
+       */
+      refreshQuantityBundleDisplay() {
+        if (typeof Elixir_GetDisplayPrice !== 'function' || typeof Elixir_FormatMoney !== 'function') return;
+        this.updateSelectedVariantFromInput();
+        const variant = this.getCurrentVariant();
+        const basePrice = variant && (typeof variant.price === 'number' || typeof variant.price === 'string') ? Number(variant.price) : null;
+        const baseCompare = variant && (variant.compare_at_price != null) ? Number(variant.compare_at_price) || 0 : 0;
+
+        this.cards.forEach(card => {
+          let priceCents = Number(card.el.dataset.price) || 0;
+          let compareCents = Number(card.el.dataset.comparePrice) || 0;
+          if (card.usesVariantPrice && basePrice != null) {
+            priceCents = basePrice * card.quantity;
+            compareCents = baseCompare * card.quantity;
+          }
+          const perUnitPrice = card.quantity > 0 ? Math.round(priceCents / card.quantity) : priceCents;
+          const perUnitCompare = card.quantity > 0 ? Math.round(compareCents / card.quantity) : compareCents;
+          const result = Elixir_GetDisplayPrice({
+            price: perUnitPrice,
+            compareAtPrice: perUnitCompare,
+            quantity: card.quantity,
+            multiplyByQuantity: true,
+            applySubscriptionDiscount: true
+          });
+          card.price = result.price;
+          card.compare = result.compareAtPrice;
+          card.el.dataset.price = result.price;
+          const radio = card.el.querySelector('.quantity-bundle-radio');
+          if (radio) radio.dataset.price = result.price;
+          this.updateCardDisplay(card);
+        });
+
+        this.updateCheckoutPricingForSelected();
+      },
+      updateCardDisplay(card) {
+        const formattedPrice = typeof Elixir_FormatMoney === 'function' ? Elixir_FormatMoney(card.price, this.moneyFormat) : String(card.price / 100);
+        const currentPriceEls = card.el.querySelectorAll('.quantity-current-price');
+        currentPriceEls.forEach(el => {
+          el.textContent = formattedPrice;
+        });
+
+        const comparePriceEls = card.el.querySelectorAll('.quantity-original-price');
+        comparePriceEls.forEach(comparePriceEl => {
+          if (card.compare > 0 && this.$root.dataset.hideCompare !== 'true') {
+            comparePriceEl.textContent = Elixir_FormatMoney(card.compare, this.moneyFormat);
+            comparePriceEl.style.display = '';
+          } else {
+            comparePriceEl.style.display = 'none';
+          }
+        });
+
+        const perItemPrice = card.quantity > 0 ? card.price / card.quantity : card.price;
+        const perItemFormatted = Elixir_FormatMoney(perItemPrice, this.moneyFormat);
+        const perItemAmountEls = card.el.querySelectorAll('.quantity-per-item-price .price-amount, .quantity-bundle-per-item .price-amount, .quantity-bundle-grid-per-item .price-amount');
+        perItemAmountEls.forEach(el => {
+          el.textContent = perItemFormatted;
+        });
+      },
+      bindCardClicks() {
+        this.cards.forEach(card => {
+          card.el.addEventListener('click', () => {
+            console.log('[Quantity Bundle] Card clicked, quantity:', card.quantity);
+            this.cards.forEach(c => {
+              c.el.setAttribute('data-selected', 'false');
+              c.el.querySelector('.quantity-bundle-radio')?.classList.remove('checked');
+              const radio = c.el.querySelector('.quantity-bundle-radio');
+              if (radio) radio.checked = false;
+            });
+
+            card.el.setAttribute('data-selected', 'true');
+            const radio = card.el.querySelector('.quantity-bundle-radio');
+            if (radio) radio.checked = true;
+
+            this.updateQuantityInput(card.quantity);
+            this.updateCheckoutPricing(card);
+          });
+        });
+      },
+      updateQuantityInput(quantity) {
+        if (!this.quantityInput && this.productForm) {
+          this.quantityInput = document.createElement('input');
+          this.quantityInput.type = 'hidden';
+          this.quantityInput.name = 'quantity';
+          this.productForm.appendChild(this.quantityInput);
+          console.log('[Quantity Bundle] Created quantity input in form');
+        }
+
+        if (this.quantityInput) {
+          this.quantityInput.value = quantity;
+          this.quantityInput.dispatchEvent(new Event('change', { bubbles: true }));
+          document.dispatchEvent(new CustomEvent('quantity:changed', { bubbles: true, detail: { quantity: quantity } }));
+          console.log('[Quantity Bundle] Set quantity to', quantity, ', dispatched quantity:changed. Input in form?', this.productForm && this.productForm.contains(this.quantityInput));
+        } else {
+          console.warn('[Quantity Bundle] No quantity input available, cannot set quantity', quantity);
+        }
+      },
+      updateCheckoutPricing(card) {
+        const formattedPrice = typeof Elixir_FormatMoney === 'function' ? Elixir_FormatMoney(card.price, this.moneyFormat) : (card.price / 100).toFixed(2);
+        const formattedCompare = card.compare > card.price && typeof Elixir_FormatMoney === 'function' ? Elixir_FormatMoney(card.compare, this.moneyFormat) : '';
+        this.updateBuyNowButtonText(card.price, formattedCompare);
+      },
+      updateBuyNowButtonText(priceCents, formattedCompare = '') {
+        const buyNowTextButton = document.querySelector('.shop-add-to-cart-wrapper .shop-add-to-cart-button .button-text');
+        if (!buyNowTextButton) return;
+        const formatted = typeof Elixir_FormatMoney === 'function' ? Elixir_FormatMoney(priceCents, this.moneyFormat) : (priceCents / 100).toFixed(2);
+        const baseText = `Buy Now - ${formatted}`;
+        if (formattedCompare) {
+          buyNowTextButton.innerHTML = `${baseText} <span class="compare-price">(${formattedCompare})</span>`;
+        } else {
+          buyNowTextButton.textContent = baseText;
+        }
+      },
+      bindSellingPlanListeners() {
+        const bindClick = container => {
+          container.addEventListener('click', () => {
+            const selectedCard = this.cards.find(c => c.el.getAttribute('data-selected') === 'true');
+            if (selectedCard) {
+              this.updateBuyNowButtonText(selectedCard.price);
+            }
+          });
+        };
+
+        document.querySelectorAll('.sls-option-container').forEach(bindClick);
+
+        const observer = new MutationObserver(mutationsList => {
+          for (const mutation of mutationsList) {
+            mutation.addedNodes.forEach(node => {
+              if (!(node instanceof HTMLElement)) return;
+              if (node.matches && node.matches('.sls-option-container')) {
+                bindClick(node);
+              } else {
+                node.querySelectorAll?.('.sls-option-container').forEach(bindClick);
+              }
+            });
+          }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+      },
+      watchVariantChanges() {
+        const variantInput = this.getVariantInput();
+        if (!variantInput) return;
+        const handleVariantChange = () => {
+          this.updateSelectedVariantFromInput();
+          this.refreshQuantityBundleDisplay();
+        };
+        variantInput.addEventListener('change', handleVariantChange);
+        new MutationObserver(handleVariantChange).observe(variantInput, { attributes: true, attributeFilter: ['value'] });
+      },
+      bindExternalVariantEvents() {
+        if (this.externalVariantHandler) {
+          document.removeEventListener('simple-variant-picker:variantChange', this.externalVariantHandler);
+          document.removeEventListener('quantity:changed', this.externalVariantHandler);
+          document.removeEventListener('quantity_break:changed', this.externalVariantHandler);
+        }
+        this.externalVariantHandler = () => {
+          this.refreshQuantityBundleDisplay();
+        };
+        document.addEventListener('simple-variant-picker:variantChange', this.externalVariantHandler);
+        document.addEventListener('quantity:changed', this.externalVariantHandler);
+        document.addEventListener('quantity_break:changed', this.externalVariantHandler);
+      },
+      updateCheckoutPricingForSelected() {
+        const selected = this.cards.find(card => card.el.getAttribute('data-selected') === 'true');
+        if (selected) {
+          this.updateCheckoutPricing(selected);
+        }
+      },
+      bindSubscriptionContextListener() {
+        document.addEventListener('subscriptionContext:updated', () => {
+          this.refreshQuantityBundleDisplay();
+        });
+        setTimeout(() => this.refreshQuantityBundleDisplay(), 100);
+      }
+    }));
+  });
+</script>

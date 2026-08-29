@@ -1,0 +1,219 @@
+/* 
+ * Component: As Seen In Logos Section
+ * Description: Logo showcase section with responsive design and customizable styling
+ */
+
+.as-seen-in-section {
+  /* CSS Custom Properties - populated by Liquid */
+  --desktop-heading-size: 25px;
+  --mobile-heading-size: 16px;
+  --mobile-heading-margin: 15px;
+  --desktop-logo-max-width: 150px;
+  --mobile-logo-max-width: 100px;
+  --desktop-logo-height: 80px;
+  --mobile-logo-height: 40px;
+  --desktop-gap: 20px;
+  --mobile-gap: 15px;
+  --logo-padding: 10px;
+
+  /* Base styles */
+  padding: 0;
+  min-height: 150px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+[dir="rtl"] .as-seen-in-section h2 {
+  text-align: center;
+}
+
+/* Title */
+.as-seen-in-title {
+  font-size: var(--desktop-heading-size);
+  margin: 25px 0 var(--mobile-heading-margin);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-heading);
+  text-align: center;
+  margin-bottom: 30px;
+  color: inherit !important;
+}
+
+/* Logo container */
+.logo-container {
+  display: flex;
+  align-items: center;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto 25px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 0 20px;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--desktop-gap);
+}
+
+.logo-container::-webkit-scrollbar {
+  height: 3px;
+}
+
+.logo-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+/* Individual logo styling */
+.brand-logo {
+  min-width: auto;
+  width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  transition: transform 0.3s ease;
+  height: auto;
+  box-sizing: border-box;
+  padding: var(--logo-padding);
+  max-width: var(--desktop-logo-max-width);
+  min-height: var(--desktop-logo-height);
+}
+
+.brand-logo:hover {
+  transform: translateY(-2px);
+}
+
+.logo-image-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  min-width: 80px;
+  min-height: 40px;
+}
+
+.brand-logo img.logo-image {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  transform-origin: center center;
+  display: block;
+  margin: 0 auto;
+  max-height: var(--desktop-logo-height);
+}
+
+/* SVG-specific styling to ensure all SVG files display correctly */
+.brand-logo img.logo-image[src$=".svg"],
+.brand-logo img.logo-image[src*=".svg?"],
+.brand-logo img.logo-image[src*="/svg/"],
+.brand-logo img.logo-image--svg {
+  min-width: 80px !important;
+  min-height: 40px !important;
+  width: 120px !important;
+  height: 60px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+  object-fit: contain !important;
+  max-width: var(--desktop-logo-max-width) !important;
+  max-height: var(--desktop-logo-height) !important;
+}
+
+/* Force SVG wrapper to have dimensions */
+.brand-logo:has(img.logo-image--svg) .logo-image-wrapper,
+.brand-logo:has(img[src*=".svg"]) .logo-image-wrapper {
+  min-width: 100px !important;
+  min-height: 50px !important;
+}
+
+/* Desktop responsive styles */
+@media (min-width: 769px) {
+  .logo-container {
+    overflow-x: visible;
+  }
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .as-seen-in-section {
+    overflow-x: hidden;
+  }
+
+  .as-seen-in-title {
+    font-size: var(--mobile-heading-size);
+    margin-bottom: var(--mobile-heading-margin);
+  }
+
+  .logo-container {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-x: visible;
+    padding: 0 15px;
+    margin-bottom: 25px;
+    width: 100%;
+    box-sizing: border-box;
+    gap: var(--mobile-gap);
+  }
+
+  .brand-logo {
+    padding: 5px;
+    min-width: auto;
+    width: auto;
+    margin: 0;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    overflow: visible;
+    max-width: var(--mobile-logo-max-width);
+    min-height: var(--mobile-logo-height);
+  }
+
+  .logo-image-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .brand-logo img.logo-image {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block;
+    margin: 0 auto;
+    transform-origin: center center;
+    max-height: var(--mobile-logo-height);
+  }
+  
+  /* SVG-specific styling for mobile */
+  .brand-logo img.logo-image[src$=".svg"],
+  .brand-logo img.logo-image[src*=".svg?"],
+  .brand-logo img.logo-image[src*="/svg/"],
+  .brand-logo img.logo-image--svg {
+    min-width: 60px !important;
+    min-height: 30px !important;
+    width: 80px !important;
+    height: 40px !important;
+    max-width: var(--mobile-logo-max-width) !important;
+    max-height: var(--mobile-logo-height) !important;
+  }
+  
+  /* Force SVG wrapper to have dimensions on mobile */
+  .brand-logo:has(img.logo-image--svg) .logo-image-wrapper,
+  .brand-logo:has(img[src*=".svg"]) .logo-image-wrapper {
+    min-width: 70px !important;
+    min-height: 35px !important;
+  }
+}

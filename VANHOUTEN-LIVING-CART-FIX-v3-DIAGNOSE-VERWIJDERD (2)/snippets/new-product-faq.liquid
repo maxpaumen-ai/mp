@@ -1,0 +1,440 @@
+{%- liquid
+	assign margin_top = margin_top | default: block.settings.margin_top
+	assign margin_bottom = margin_bottom | default: block.settings.margin_bottom
+	assign border_radius = border_radius | default: block.settings.faq_border_radius
+	assign border_color = border_color | default: block.settings.border_color
+	assign border_style = border_style | default: block.settings.border_style
+	assign image_size = image_size | default: block.settings.image_size
+	assign text_size = text_size | default: block.settings.text_size | default: 16
+	assign answer_text_size = answer_text_size | default: block.settings.answer_text_size | default: 14
+	assign item_padding = item_padding | default: block.settings.item_padding
+	assign question_padding = question_padding | default: block.settings.question_padding
+	assign image_border_radius = image_border_radius | default: block.settings.image_border_radius
+	assign image_fit = image_fit | default: block.settings.image_fit
+	assign items_limit = items_limit | default: block.settings.items_limit
+	assign accordion_mode = accordion_mode | default: block.settings.accordion_mode
+	assign use_theme_colors = use_theme_colors | default: block.settings.use_theme_colors
+	assign section_use_theme_colors = section_use_theme_colors | default: false
+	assign toggle_icon_image = toggle_icon_image | default: block.settings.toggle_icon_image
+-%}
+
+<div class="new-product-faq" {{ block.shopify_attributes }}>
+	<div class="new-faq-container{% if border_style == 'bottom_only' %} border-bottom-only{% endif %}">
+		{% for i in (1..items_limit) %}
+			{%- liquid
+				case i
+					when 1
+						assign question = block.settings.question_1
+						assign answer = block.settings.answer_1
+						assign question_image = block.settings.question_1_image
+					when 2
+						assign question = block.settings.question_2
+						assign answer = block.settings.answer_2
+						assign question_image = block.settings.question_2_image
+					when 3
+						assign question = block.settings.question_3
+						assign answer = block.settings.answer_3
+						assign question_image = block.settings.question_3_image
+					when 4
+						assign question = block.settings.question_4
+						assign answer = block.settings.answer_4
+						assign question_image = block.settings.question_4_image
+					when 5
+						assign question = block.settings.question_5
+						assign answer = block.settings.answer_5
+						assign question_image = block.settings.question_5_image
+					when 6
+						assign question = block.settings.question_6
+						assign answer = block.settings.answer_6
+						assign question_image = block.settings.question_6_image
+					when 7
+						assign question = block.settings.question_7
+						assign answer = block.settings.answer_7
+						assign question_image = block.settings.question_7_image
+					when 8
+						assign question = block.settings.question_8
+						assign answer = block.settings.answer_8
+						assign question_image = block.settings.question_8_image
+					when 9
+						assign question = block.settings.question_9
+						assign answer = block.settings.answer_9
+						assign question_image = block.settings.question_9_image
+					when 10
+						assign question = block.settings.question_10
+						assign answer = block.settings.answer_10
+						assign question_image = block.settings.question_10_image
+				endcase
+
+        if question.value != blank
+          assign question = question.value
+        endif
+        
+        if answer.value != blank
+          assign answer = answer.value
+        endif
+			-%}
+			{% if question != blank %}
+				<div class="faq-item {% if i == 1 and block.settings.question_1_open_by_default %}active{% endif %}" data-faq-index="{{ i }}">
+					<button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-answer-{{ i }}">
+						{% if question_image %}
+							<div class="faq-question-image" style="width: {{ image_size | default: 40 }}px; height: {{ image_size | default: 40 }}px;">
+								{{ question_image | image_url: width: image_size | default: 40 | image_tag: loading: 'lazy', alt: question }}
+							</div>
+						{% endif %}
+						<span class="faq-question-text">{{ question }}</span>
+						<span class="faq-toggle{% if toggle_icon_image %} faq-toggle--custom{% endif %}" aria-hidden="true">
+							{% if toggle_icon_image %}
+								{{ toggle_icon_image | image_url: width: 64 | image_tag: loading: 'lazy', alt: 'Toggle icon', class: 'faq-toggle-icon-image' }}
+							{% else %}
+								<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+									<rect x="8" y="3" width="2" height="12" rx="1" fill="currentColor"/>
+									<rect x="3" y="8" width="12" height="2" rx="1" fill="currentColor"/>
+								</svg>
+							{% endif %}
+						</span>
+					</button>
+					<div class="faq-answer" id="faq-answer-{{ i }}" aria-hidden="true">
+						<div class="faq-answer-inner">
+              {% if i == 1 and block.settings.use_product_description_for_question_1 %}
+                {{ product.description | default: "No Product Description" }}
+              {% else %}
+							  {{ answer }}
+              {% endif %}
+						</div>
+					</div>
+				</div>
+			{% endif %}
+		{% endfor %}
+	</div>
+</div>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const faqItems = document.querySelectorAll('.faq-item');
+		const accordionMode = {{ accordion_mode | json }};
+    
+		faqItems.forEach((item) => {
+			const questionBtn = item.querySelector('.faq-question');
+			const answer = item.querySelector('.faq-answer');
+			if (questionBtn && answer) {
+				questionBtn.addEventListener('click', function () {
+					const isOpen = item.classList.contains('active');
+					if (accordionMode) {
+						faqItems.forEach((other) => {
+							if (other !== item) {
+								other.classList.remove('active');
+								const otherBtn = other.querySelector('.faq-question');
+								const otherAnswer = other.querySelector('.faq-answer');
+								if (otherBtn) {
+									otherBtn.setAttribute('aria-expanded', 'false');
+								}
+								if (otherAnswer) {
+									otherAnswer.setAttribute('aria-hidden', 'true');
+									otherAnswer.style.maxHeight = null;
+								}
+							}
+						});
+					}
+					if (!isOpen) {
+						item.classList.add('active');
+						questionBtn.setAttribute('aria-expanded', 'true');
+						answer.setAttribute('aria-hidden', 'false');
+						const answerInner = answer.querySelector('.faq-answer-inner');
+						if (answerInner) {
+							answer.style.maxHeight = (answerInner.scrollHeight + {{ item_padding | default: 12 }}) + "px";
+						}
+					} else {
+						item.classList.remove('active');
+						questionBtn.setAttribute('aria-expanded', 'false');
+						answer.setAttribute('aria-hidden', 'true');
+						answer.style.maxHeight = null;
+					}
+				});
+			}
+		});
+		// On load, set maxHeight for open items (if any)
+		faqItems.forEach((item) => {
+			if (item.classList.contains('active')) {
+				const answer = item.querySelector('.faq-answer');
+				const answerInner = answer ? answer.querySelector('.faq-answer-inner') : null;
+				if (answer && answerInner) {
+					answer.style.maxHeight = (answerInner.scrollHeight + {{ item_padding | default: 12 }}) + "px";
+				}
+			}
+		});
+	});
+</script>
+
+<style>
+	.new-product-faq {
+		width: 100%;
+		margin: {{ margin_top | default: 20 }}px auto {{ margin_bottom | default: 20 }}px;
+		font-size: 95%;
+	}
+
+	.new-faq-container {
+		border-radius: {{ border_radius | default: 8 }}px;
+		overflow: hidden;
+		border: 1px solid {{ border_color | default: '#e0e0e0' }};
+		background-color: transparent;
+	}
+
+	.new-faq-container.border-bottom-only {
+		border: none;
+	}
+	.new-faq-container.border-bottom-only .faq-question {
+		padding-right: 0;
+		padding-left: 0;
+	}
+	.new-faq-container.border-bottom-only .faq-answer {
+		padding-right: 0;
+		padding-left: 0;
+	}
+
+	.faq-item {
+		border-bottom: 1px solid {{ border_color | default: '#e0e0e0' }};
+		padding: 0;
+	}
+	.faq-item:last-child {
+		border-bottom: none;
+	}
+
+	.faq-question {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
+		padding: {{ question_padding | default: 12 }}px 16px;
+		cursor: pointer;
+		font-weight: var(--font-weight-regular);
+		position: relative;
+		color: {% if use_theme_colors or section_use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ question_color | default: '#111111' }}{% endif %};
+		background-color: {% if use_theme_colors or section_use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ question_bg_color | default: '#FFFFFF' }}{% endif %};
+		font-size: {{ text_size | default: 15 }}px;
+		line-height: 1.3;
+		border: none;
+		outline: none;
+		transition: background-color 0.3s, color 0.3s;
+		text-align: left;
+    border-radius: {{ border_radius | default: 8 }}px !important;
+	}
+
+	.faq-question-image,
+	.faq-question-svg {
+		margin-right: 12px;
+		flex-shrink: 0;
+		width: {{ image_size | default: 40 }}px;
+		height: {{ image_size | default: 40 }}px;
+		border-radius: {{ image_border_radius | default: 4 }}px;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.faq-question-image img {
+		width: 100%;
+		height: 100%;
+		object-fit: {{ image_fit | default: 'cover' }};
+	}
+
+	.faq-question-svg svg {
+		width: 100%;
+		height: 100%;
+		max-width: 100%;
+		max-height: 100%;
+		display: block;
+	}
+
+	.faq-question-svg {
+		background-color: transparent;
+	}
+
+	.faq-question-text {
+		flex: 1;
+	}
+
+	.faq-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 18px;
+		margin-left: 10px;
+		transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+		color: {{ settings.global_section_text_color | default: '#111111' }};
+		width: 18px;
+		height: 18px;
+		flex-shrink: 0;
+	}
+
+	.faq-toggle svg,
+	.faq-toggle img {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	.faq-toggle img {
+		object-fit: contain;
+	}
+
+	.faq-toggle--custom {
+		transform: none;
+	}
+
+	.faq-item.active .faq-toggle {
+		transform: rotate(45deg);
+	}
+
+	.faq-item.active .faq-toggle--custom {
+		transform: none;
+	}
+
+	.faq-answer {
+		padding: 0 16px 0 0;
+		max-height: 0;
+		overflow: hidden;
+		transition: max-height 0.5s cubic-bezier(.4,0,.2,1), padding 0.3s;
+		color: {{ answer_color | default: '#555555' }};
+		background-color: {{ answer_bg_color | default: '#ffffff' }};
+		font-size: {{ answer_text_size | default: 14 }}px;
+		line-height: 1.4;
+		opacity: 0;
+		will-change: max-height, opacity;
+	}
+
+	.faq-item.active .faq-answer {
+		opacity: 1;
+		padding: 0 16px {{ item_padding | default: 12 }}px 0;
+	}
+
+  .faq-answer-inner {
+    padding-top: {{ item_padding | default: 12 }}px;
+  }
+
+  .faq-answer p {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+  }
+
+  .faq-answer p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Ensure lists display properly inside FAQ answers */
+  .faq-answer ul,
+  .faq-answer ol {
+    list-style-position: outside;
+    margin: 0.5em 0;
+    padding-left: 1.5em;
+  }
+
+  .faq-answer ul {
+    list-style-type: disc;
+  }
+
+  .faq-answer ol {
+    list-style-type: decimal;
+  }
+
+  .faq-answer ul li,
+  .faq-answer ol li {
+    margin-bottom: 0.25em;
+    display: list-item;
+  }
+
+  .faq-answer ul li:last-child,
+  .faq-answer ol li:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Images in FAQ answers (from product description) */
+  .faq-answer img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0.5em 0;
+  }
+
+	/* Custom scrollbar styling for FAQ answers */
+	.faq-answer::-webkit-scrollbar {
+		width: 6px;
+	}
+	.faq-answer::-webkit-scrollbar-track {
+		background: rgba(0, 0, 0, 0.1);
+		border-radius: 3px;
+	}
+	.faq-answer::-webkit-scrollbar-thumb {
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 3px;
+	}
+	.faq-answer::-webkit-scrollbar-thumb:hover {
+		background: rgba(0, 0, 0, 0.5);
+	}
+
+	@media screen and (max-width: 768px) {
+		.product-faq {
+			font-size: 90%;
+			width: 100%;
+		}
+		.faq-question {
+			padding: {{ question_padding | default: 10 }}px 14px;
+			font-size: {{ text_size | default: 14 }}px;
+		}
+		.faq-question-image,
+		.faq-question-svg {
+			width: {{ image_size | default: 40 | times: 0.875 }}px;
+			height: {{ image_size | default: 40 | times: 0.875 }}px;
+			margin-right: 10px;
+		}
+		.faq-toggle {
+			font-size: 16px;
+			width: 16px;
+			height: 16px;
+		}
+		.faq-answer {
+			padding: 0 14px 0 0;
+			font-size: {{ answer_text_size | default: 14 }}px;
+		}
+		.faq-item.active .faq-answer {
+			padding: 0 14px {{ item_padding | default: 10 }}px 0;
+		}
+		.faq-answer::-webkit-scrollbar {
+			width: 4px;
+		}
+	}
+
+	@media screen and (max-width: 480px) {
+		.product-faq {
+			font-size: 85%;
+			width: 100%;
+			margin: {{ margin_top | default: 20 | times: 0.8 }}px auto {{ margin_bottom | default: 20 | times: 0.8 }}px;
+		}
+		.faq-question {
+			padding: {{ question_padding | default: 8 }}px 12px;
+			font-size: {{ text_size | default: 14 }}px;
+		}
+		.faq-question-image,
+		.faq-question-svg {
+			width: {{ image_size | default: 40 | times: 0.75 }}px;
+			height: {{ image_size | default: 40 | times: 0.75 }}px;
+			margin-right: 8px;
+		}
+		.faq-toggle {
+			font-size: 14px;
+			width: 14px;
+			height: 14px;
+		}
+		.faq-answer {
+			padding: 0 12px 0 0;
+			font-size: {{ answer_text_size | default: 14 }}px;
+			line-height: 1.3;
+		}
+		.faq-item.active .faq-answer {
+			padding: 0 12px {{ item_padding | default: 8 }}px 0;
+		}
+		.faq-answer::-webkit-scrollbar {
+			width: 3px;
+		}
+	}
+</style>

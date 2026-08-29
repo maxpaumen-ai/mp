@@ -1,0 +1,2382 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Elixir",
+    "theme_version": "1.6.2",
+    "theme_author": "Elixir",
+    "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
+    "theme_support_url": "https://support.shopify.com/"
+  },
+  {
+    "name": "t:settings_schema.license.name",
+    "settings": [
+      {
+        "type": "text",
+        "id": "license_key",
+        "label": "t:settings_schema.license.settings.key.label",
+        "info": "Enter your license key here. Getting issues, contact us in the Discord."
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.logo.name",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "t:settings_schema.logo.settings.logo_image.label"
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 50,
+        "max": 300,
+        "step": 10,
+        "default": 100,
+        "unit": "px",
+        "label": "t:settings_schema.logo.settings.logo_width.label"
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "t:settings_schema.logo.settings.favicon.label",
+        "info": "t:settings_schema.logo.settings.favicon.info"
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.colors.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Core Section Colors"
+      },
+      {
+        "type": "paragraph",
+        "content": "These are your primary colors used throughout sections. Start here for the foundation of your store's look."
+      },
+      {
+        "type": "color",
+        "id": "global_section_background_color",
+        "label": "Background Color",
+        "default": "#FFFFFF",
+        "info": "Main background color for sections"
+      },
+      {
+        "type": "color",
+        "id": "global_section_text_color",
+        "label": "Text Color",
+        "default": "#111111",
+        "info": "Primary text color for section content"
+      },
+      {
+        "type": "checkbox",
+        "id": "global_section_use_gradient_background",
+        "label": "Enable Gradient Background",
+        "default": false,
+        "info": "Replace solid background with gradient for sections using theme colors"
+      },
+      {
+        "type": "color_background",
+        "id": "global_section_gradient_background",
+        "label": "Background Gradient",
+        "default": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        "info": "Gradient background (requires 'Enable Gradient Background' to be on)"
+      },
+      {
+        "type": "header",
+        "content": "Accent Colors"
+      },
+      {
+        "type": "paragraph",
+        "content": "Accent colors add visual interest and highlight important elements throughout your sections."
+      },
+      {
+        "type": "color",
+        "id": "global_section_accent_1_color",
+        "label": "Primary Accent Color",
+        "default": "#007BFF",
+        "info": "Used for backgrounds, borders, icons, and dark accent elements"
+      },
+      {
+        "type": "color",
+        "id": "global_section_accent_2_color",
+        "label": "Secondary Accent Color",
+        "default": "#FFC107",
+        "info": "Used for buttons, links, highlights, and light contrast elements"
+      },
+      {
+        "type": "color_background",
+        "id": "global_accent_text_gradient_light",
+        "label": "Accent Text Gradient (Light Backgrounds)",
+        "default": "linear-gradient(45deg, #FF6B9D, #FFC107)",
+        "info": "Gradient for accent text on light backgrounds when gradient text is enabled"
+      },
+      {
+        "type": "color_background",
+        "id": "global_accent_text_gradient_dark",
+        "label": "Accent Text Gradient (Dark Backgrounds)",
+        "default": "linear-gradient(45deg, #007BFF, #6A4C93)",
+        "info": "Gradient for accent text on dark backgrounds when gradient text is enabled"
+      },
+      {
+        "type": "header",
+        "content": "Button Colors"
+      },
+      {
+        "type": "paragraph",
+        "content": "Customize your button appearance separately from accent colors."
+      },
+      {
+        "type": "checkbox",
+        "id": "use_dedicated_button_colors",
+        "label": "Use Custom Button Colors",
+        "default": true,
+        "info": "When off, buttons inherit Primary Accent Color"
+      },
+      {
+        "type": "color",
+        "id": "global_section_button_color",
+        "label": "Button Background",
+        "default": "#EF4A65",
+        "info": "Background color for buttons (when custom colors enabled)"
+      },
+      {
+        "type": "color",
+        "id": "global_section_button_text_color",
+        "label": "Button Text",
+        "default": "#FFFFFF",
+        "info": "Text color for buttons (when custom colors enabled)"
+      },
+      {
+        "type": "header",
+        "content": "Navigation Colors"
+      },
+      {
+        "type": "paragraph",
+        "content": "Colors for your header, footer, and navigation elements."
+      },
+      {
+        "type": "color",
+        "id": "global_header_color",
+        "label": "Header Background",
+        "default": "#fff",
+        "info": "Background color for the header area"
+      },
+      {
+        "type": "color",
+        "id": "header_border_color",
+        "label": "Header Border Color",
+        "default": "#e5e5e5",
+        "info": "Color of the border at the bottom of the header"
+      },
+      {
+        "type": "range",
+        "id": "header_border_thickness",
+        "min": 0,
+        "max": 5,
+        "step": 1,
+        "unit": "px",
+        "label": "Header Border Thickness",
+        "default": 1,
+        "info": "Thickness of the header bottom border (0 = no border)"
+      },
+      {
+        "type": "color",
+        "id": "global_footer_color",
+        "label": "Footer Background",
+        "default": "#fff",
+        "info": "Background color for the footer area"
+      },
+      {
+        "type": "header",
+        "content": "Menu & Dropdowns"
+      },
+      {
+        "type": "paragraph",
+        "content": "Colors for mobile menu drawer and dropdown menus."
+      },
+      {
+        "type": "color",
+        "id": "global_drawer_color",
+        "label": "Mobile Menu Background",
+        "default": "#fff",
+        "info": "Background color for the mobile navigation drawer"
+      },
+      {
+        "type": "color",
+        "id": "global_drawer_text_color",
+        "label": "Mobile Menu Text",
+        "default": "#111111",
+        "info": "Text color for mobile menu navigation items"
+      },
+      {
+        "type": "color",
+        "id": "global_dropdown_color",
+        "label": "Dropdown Background",
+        "default": "#fff",
+        "info": "Background color for dropdown menus"
+      },
+      {
+        "type": "paragraph",
+        "content": "Color swatches for variant options - Picker"
+      },
+      {
+        "type": "color",
+        "id": "helper_color_1",
+        "label": "Pick a color to get its hex code",
+        "default": "#FFC0CB"
+      },
+      {
+        "type": "textarea",
+        "id": "color_swatch_mappings",
+        "label": "Color Swatch Mappings",
+        "info": "Format: ColorName: #HEX (one per line)",
+        "default": "Pink: #FFC0CB\nNavy: #000080\nBlack: #000000\nWhite: #FFFFFF\nGray: #808080"
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.typography.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:settings_schema.typography.settings.header__1.content"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_header_font",
+        "default": "assistant_n4",
+        "label": "t:settings_schema.typography.settings.type_header_font.label"
+      },
+      {
+        "type": "range",
+        "id": "heading_scale",
+        "min": 100,
+        "max": 150,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.typography.settings.heading_scale.label",
+        "default": 100
+      },
+      {
+        "type": "range",
+        "id": "heading_letter_spacing",
+        "min": -2,
+        "max": 5,
+        "step": 0.1,
+        "unit": "px",
+        "label": "Heading Letter Spacing",
+        "default": -0.3
+      },
+      {
+        "type": "select",
+        "id": "heading_text_transform",
+        "label": "Heading Text Transform",
+        "options": [
+          {
+            "value": "none",
+            "label": "None"
+          },
+          {
+            "value": "uppercase",
+            "label": "UPPERCASE"
+          },
+          {
+            "value": "lowercase",
+            "label": "lowercase"
+          },
+          {
+            "value": "capitalize",
+            "label": "Capitalize Each Word"
+          }
+        ],
+        "default": "none",
+        "info": "Apply text transformation to all headings globally"
+      },
+      {
+        "type": "header",
+        "content": "Font Weights"
+      },
+      {
+        "type": "range",
+        "id": "font_weight_regular",
+        "min": 300,
+        "max": 500,
+        "step": 100,
+        "default": 400,
+        "label": "Regular Font Weight"
+      },
+      {
+        "type": "range",
+        "id": "font_weight_semibold",
+        "min": 500,
+        "max": 600,
+        "step": 50,
+        "default": 600,
+        "label": "Semi-Bold Font Weight"
+      },
+      {
+        "type": "range",
+        "id": "font_weight_bold",
+        "min": 400,
+        "max": 800,
+        "step": 100,
+        "default": 700,
+        "label": "Bold Font Weight"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.typography.settings.header__2.content"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_body_font",
+        "default": "assistant_n4",
+        "label": "t:settings_schema.typography.settings.type_body_font.label"
+      },
+      {
+        "type": "range",
+        "id": "body_scale",
+        "min": 100,
+        "max": 130,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.typography.settings.body_scale.label",
+        "default": 100
+      },
+      {
+        "type": "range",
+        "id": "body_letter_spacing",
+        "min": -2,
+        "max": 5,
+        "step": 0.1,
+        "unit": "px",
+        "label": "Body Text Letter Spacing",
+        "default": -0.3
+      },
+      {
+        "type": "header",
+        "content": "Custom Font Sizes"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_custom_typography",
+        "label": "Enable custom typography"
+      },
+      {
+        "type": "range",
+        "id": "h1_font_size",
+        "label": "H1 font size",
+        "min": 20,
+        "max": 80,
+        "step": 1,
+        "unit": "px",
+        "default": 48
+      },
+      {
+        "type": "range",
+        "id": "h2_font_size",
+        "label": "H2 font size",
+        "min": 18,
+        "max": 60,
+        "step": 1,
+        "unit": "px",
+        "default": 36
+      },
+      {
+        "type": "range",
+        "id": "h3_font_size",
+        "label": "H3 font size",
+        "min": 16,
+        "max": 48,
+        "step": 1,
+        "unit": "px",
+        "default": 28
+      },
+      {
+        "type": "range",
+        "id": "h4_font_size",
+        "label": "H4 font size",
+        "min": 14,
+        "max": 36,
+        "step": 1,
+        "unit": "px",
+        "default": 22
+      },
+      {
+        "type": "range",
+        "id": "h5_font_size",
+        "label": "H5 font size",
+        "min": 12,
+        "max": 28,
+        "step": 1,
+        "unit": "px",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "body_font_size",
+        "label": "Body font size",
+        "min": 12,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "subtitle_font_size",
+        "label": "Subtitle font size",
+        "min": 12,
+        "max": 30,
+        "step": 1,
+        "unit": "px",
+        "default": 18
+      },
+      {
+        "type": "header",
+        "content": "Accent Typography"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_accent_font",
+        "label": "Accent Font",
+        "default": "assistant_n4",
+        "info": "Special font for accents, highlights, and decorative text elements. Choose from Shopify's hosted font library for optimal performance."
+      },
+      {
+        "type": "range",
+        "id": "accent_letter_spacing",
+        "min": -2,
+        "max": 8,
+        "step": 0.1,
+        "unit": "px",
+        "label": "Accent Letter Spacing",
+        "default": 0,
+        "info": "Letter spacing for accent font elements"
+      },
+      {
+        "type": "select",
+        "id": "accent_font_weight",
+        "label": "Accent Font Weight",
+        "options": [
+          {
+            "value": "300",
+            "label": "Light (300)"
+          },
+          {
+            "value": "400",
+            "label": "Regular (400)"
+          },
+          {
+            "value": "500",
+            "label": "Medium (500)"
+          },
+          {
+            "value": "600",
+            "label": "Semi-Bold (600)"
+          },
+          {
+            "value": "700",
+            "label": "Bold (700)"
+          },
+          {
+            "value": "800",
+            "label": "Extra Bold (800)"
+          }
+        ],
+        "default": "400",
+        "info": "Default font weight for accent typography"
+      },
+      {
+        "type": "select",
+        "id": "accent_text_transform",
+        "label": "Accent Text Transform",
+        "options": [
+          {
+            "value": "none",
+            "label": "None"
+          },
+          {
+            "value": "uppercase",
+            "label": "UPPERCASE"
+          },
+          {
+            "value": "lowercase",
+            "label": "lowercase"
+          },
+          {
+            "value": "capitalize",
+            "label": "Capitalize"
+          }
+        ],
+        "default": "none",
+        "info": "Choose text transformation for accent typography"
+      },
+      {
+        "type": "checkbox",
+        "id": "accent_font_style_italic",
+        "label": "Use Italic Style",
+        "default": false,
+        "info": "When enabled, accent typography will be italicized."
+      },
+      {
+        "type": "header",
+        "content": "Third-Party Apps Typography"
+      },
+      {
+        "type": "range",
+        "id": "app_letter_spacing",
+        "min": -2,
+        "max": 5,
+        "step": 0.1,
+        "unit": "px",
+        "label": "App Elements Letter Spacing",
+        "default": -0.3,
+        "info": "Controls letter spacing for third-party app elements"
+      },
+      {
+        "type": "header",
+        "content": "Heading Font Application"
+      },
+      {
+        "type": "paragraph",
+        "content": "Choose which heading levels should use the heading font. Unchecked headings will use the body font instead. This gives you precise control over your typography hierarchy."
+      },
+      {
+        "type": "checkbox",
+        "id": "h1_use_heading_font",
+        "label": "H1 - Use Heading Font",
+        "default": true,
+        "info": "Apply heading font to all h1 elements and .h1 classes"
+      },
+      {
+        "type": "checkbox",
+        "id": "h2_use_heading_font",
+        "label": "H2 - Use Heading Font",
+        "default": true,
+        "info": "Apply heading font to all h2 elements and .h2 classes"
+      },
+      {
+        "type": "checkbox",
+        "id": "h3_use_heading_font",
+        "label": "H3 - Use Heading Font",
+        "default": false,
+        "info": "Apply heading font to all h3 elements and .h3 classes (includes card titles, product titles, etc.)"
+      },
+      {
+        "type": "checkbox",
+        "id": "h4_use_heading_font",
+        "label": "H4 - Use Heading Font",
+        "default": false,
+        "info": "Apply heading font to all h4 elements and .h4 classes"
+      },
+      {
+        "type": "checkbox",
+        "id": "h5_use_heading_font",
+        "label": "H5 - Use Heading Font",
+        "default": false,
+        "info": "Apply heading font to all h5 elements and .h5 classes"
+      },
+      {
+        "type": "checkbox",
+        "id": "h6_use_heading_font",
+        "label": "H6 - Use Heading Font",
+        "default": false,
+        "info": "Apply heading font to all h6 elements and .h6 classes"
+      },
+      {
+        "type": "header",
+        "content": "Language Direction"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_rtl_support",
+        "label": "Enable Right-to-Left (RTL) Support",
+        "default": false,
+        "info": "Automatically enables RTL layout for Arabic, Hebrew, and other RTL languages. When enabled, the theme will detect the locale and apply RTL styles accordingly."
+      },
+      {
+        "type": "header",
+        "content": "Button Text"
+      }
+    ]
+  },
+  {
+    "name": "Button Styling",
+    "settings": [
+      {
+        "type": "header",
+        "content": "General Button Styles"
+      },
+      {
+        "type": "range",
+        "id": "global_button_padding_y",
+        "min": 5,
+        "max": 30,
+        "step": 1,
+        "unit": "px",
+        "label": "Vertical Padding",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "global_button_font_size",
+        "min": 10,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "label": "Font Size",
+        "default": 14
+      },
+      {
+        "type": "select",
+        "id": "global_button_font_weight",
+        "label": "Font Weight",
+        "options": [
+          {
+            "value": "400",
+            "label": "Regular"
+          },
+          {
+            "value": "500",
+            "label": "Medium"
+          },
+          {
+            "value": "600",
+            "label": "Semi-bold"
+          },
+          {
+            "value": "700",
+            "label": "Bold"
+          },
+          {
+            "value": "800",
+            "label": "Extra-bold"
+          },
+          {
+            "value": "900",
+            "label": "Black"
+          }
+        ],
+        "default": "700"
+      },
+      {
+        "type": "checkbox",
+        "id": "disable_button_font_weight_override",
+        "label": "Disable Global Font Weight for Add to Cart Buttons",
+        "default": false,
+        "info": "When enabled, add to cart buttons will not use the global font weight, allowing price elements to keep their individual font weights"
+      },
+      {
+        "type": "range",
+        "id": "global_button_letter_spacing",
+        "min": -2,
+        "max": 5,
+        "step": 0.1,
+        "unit": "px",
+        "label": "Letter Spacing",
+        "default": 1
+      },
+      {
+        "type": "select",
+        "id": "global_button_text_transform",
+        "label": "Text Transform",
+        "options": [
+          {
+            "value": "none",
+            "label": "None"
+          },
+          {
+            "value": "uppercase",
+            "label": "UPPERCASE"
+          },
+          {
+            "value": "lowercase",
+            "label": "lowercase"
+          },
+          {
+            "value": "capitalize",
+            "label": "Capitalize"
+          }
+        ],
+        "default": "none",
+        "info": "Transform button text case"
+      },
+      {
+        "type": "header",
+        "content": "Border & Radius"
+      },
+      {
+        "type": "range",
+        "id": "global_button_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "Corner radius",
+        "default": 8
+      },
+      {
+        "type": "checkbox",
+        "id": "apply_button_radius_to_all",
+        "label": "Apply corner radius to all button elements",
+        "default": true,
+        "info": "If unchecked, radius will only apply to primary buttons"
+      },
+      {
+        "type": "header",
+        "content": "Button Color Options"
+      },
+      {
+        "type": "color",
+        "id": "global_button_background_color",
+        "label": "Button Background Color",
+        "default": "#EF4A65",
+        "info": "Primary background color for all buttons using global styling"
+      },
+      {
+        "type": "color",
+        "id": "global_button_text_color_primary",
+        "label": "Button Text Color",
+        "default": "#FFFFFF",
+        "info": "Text color for buttons using global styling"
+      },
+      {
+        "type": "color",
+        "id": "global_button_border_color",
+        "label": "Button Border Color",
+        "default": "#EF4A65",
+        "info": "Border color for buttons (when borders are enabled)"
+      },
+      {
+        "type": "range",
+        "id": "global_button_border_width",
+        "min": 0,
+        "max": 5,
+        "step": 1,
+        "unit": "px",
+        "label": "Button Border Width",
+        "default": 0,
+        "info": "Border thickness for buttons"
+      },
+      {
+        "type": "range",
+        "id": "global_button_bottom_border_width",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "unit": "px",
+        "label": "Button 3D Bottom Border Width",
+        "default": 0,
+        "info": "Creates a 3D effect with a bottom border (shadow-like effect)"
+      },
+      {
+        "type": "color",
+        "id": "global_button_bottom_border_color",
+        "label": "Button 3D Bottom Border Color",
+        "default": "#000000",
+        "info": "Color for the 3D bottom border effect"
+      },
+      {
+        "type": "header",
+        "content": "Hover & Focus Effects"
+      },
+      {
+        "type": "color",
+        "id": "global_button_hover_bg_color",
+        "label": "Hover Background Color",
+        "default": "#D63953",
+        "info": "Background color when hovering over buttons"
+      },
+      {
+        "type": "color",
+        "id": "global_button_hover_text_color",
+        "label": "Hover Text Color",
+        "default": "#FFFFFF",
+        "info": "Text color when hovering over buttons"
+      },
+      {
+        "type": "range",
+        "id": "global_button_hover_brightness",
+        "min": 80,
+        "max": 120,
+        "step": 5,
+        "unit": "%",
+        "label": "Hover Brightness Adjustment",
+        "default": 90,
+        "info": "Automatically adjust brightness on hover (90% = darker, 110% = lighter)"
+      },
+      {
+        "type": "header",
+        "content": "Button Box Shadow"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_button_box_shadow",
+        "label": "Enable Button Box Shadow",
+        "default": false,
+        "info": "Adds a simple box shadow to make buttons stand out"
+      },
+      {
+        "type": "range",
+        "id": "button_shadow_intensity",
+        "min": 1,
+        "max": 5,
+        "step": 1,
+        "label": "Shadow Intensity",
+        "default": 2,
+        "info": "Controls how prominent the shadow appears (1 = subtle, 5 = strong)"
+      },
+      {
+        "type": "header",
+        "content": "Gradient Effects"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_button_gradient",
+        "label": "Enable Gradient Background",
+        "default": false,
+        "info": "Use gradient colors instead of solid background color"
+      },
+      {
+        "type": "color",
+        "id": "button_gradient_start",
+        "label": "Gradient Start Color",
+        "default": "#EF4A65",
+        "info": "Starting color of the gradient"
+      },
+      {
+        "type": "color",
+        "id": "button_gradient_end",
+        "label": "Gradient End Color",
+        "default": "#D63953",
+        "info": "Ending color of the gradient"
+      },
+      {
+        "type": "select",
+        "id": "button_gradient_direction",
+        "label": "Gradient Direction",
+        "options": [
+          {
+            "value": "to bottom",
+            "label": "Top to Bottom"
+          },
+          {
+            "value": "to top",
+            "label": "Bottom to Top"
+          },
+          {
+            "value": "to right",
+            "label": "Left to Right"
+          },
+          {
+            "value": "to left",
+            "label": "Right to Left"
+          },
+          {
+            "value": "45deg",
+            "label": "Diagonal (Top-Left to Bottom-Right)"
+          },
+          {
+            "value": "-45deg",
+            "label": "Diagonal (Top-Right to Bottom-Left)"
+          },
+          {
+            "value": "135deg",
+            "label": "Diagonal (Bottom-Left to Top-Right)"
+          },
+          {
+            "value": "225deg",
+            "label": "Diagonal (Bottom-Right to Top-Left)"
+          }
+        ],
+        "default": "to bottom",
+        "info": "Direction of the gradient effect"
+      },
+      {
+        "type": "color",
+        "id": "button_gradient_hover_start",
+        "label": "Hover Gradient Start Color",
+        "default": "#D63953",
+        "info": "Starting color of the gradient on hover"
+      },
+      {
+        "type": "color",
+        "id": "button_gradient_hover_end",
+        "label": "Hover Gradient End Color",
+        "default": "#B8314A",
+        "info": "Ending color of the gradient on hover"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_gradient_shine",
+        "label": "Enable Gradient Shine Effect",
+        "default": true,
+        "info": "Show a subtle shine animation when hovering over gradient buttons"
+      },
+      {
+        "type": "header",
+        "content": "Global Button System"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_global_button_styling",
+        "label": "Enable Global Button Styling for Sections",
+        "default": true,
+        "info": "When enabled, sections use global button colors and styling. When disabled, sections use custom colors but maintain global spacing and letter spacing for consistency."
+      },
+      {
+        "type": "paragraph",
+        "content": "Preview your button styles in the theme customizer after saving changes. Use the button preview section to test different combinations."
+      }
+    ]
+  },
+  {
+    "name": "Navigation Buttons",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Global Navigation Button Styling"
+      },
+      {
+        "type": "paragraph",
+        "content": "Customize the appearance of navigation arrows used in carousels and sliders throughout your theme."
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_global_nav_buttons",
+        "label": "Enable Global Navigation Button Styling",
+        "default": false,
+        "info": "When enabled, all navigation buttons will use these global settings"
+      },
+      {
+        "type": "header",
+        "content": "Button Colors"
+      },
+      {
+        "type": "color",
+        "id": "nav_button_background",
+        "label": "Background Color",
+        "default": "#ffffff",
+        "info": "Background color for navigation buttons"
+      },
+      {
+        "type": "color",
+        "id": "nav_button_background_hover",
+        "label": "Background Color (Hover)",
+        "default": "#f5f5f5",
+        "info": "Background color when hovering over navigation buttons"
+      },
+      {
+        "type": "color",
+        "id": "nav_button_icon_color",
+        "label": "Icon Color",
+        "default": "#000000",
+        "info": "Color of the arrow icon"
+      },
+      {
+        "type": "color",
+        "id": "nav_button_icon_color_hover",
+        "label": "Icon Color (Hover)",
+        "default": "#000000",
+        "info": "Icon color when hovering"
+      },
+      {
+        "type": "header",
+        "content": "Button Border"
+      },
+      {
+        "type": "checkbox",
+        "id": "nav_button_enable_border",
+        "label": "Enable Border",
+        "default": true,
+        "info": "Show border around navigation buttons"
+      },
+      {
+        "type": "color",
+        "id": "nav_button_border_color",
+        "label": "Border Color",
+        "default": "#e0e0e0",
+        "info": "Border color for navigation buttons"
+      },
+      {
+        "type": "color",
+        "id": "nav_button_border_color_hover",
+        "label": "Border Color (Hover)",
+        "default": "#cccccc",
+        "info": "Border color when hovering"
+      },
+      {
+        "type": "range",
+        "id": "nav_button_border_width",
+        "min": 0,
+        "max": 5,
+        "step": 1,
+        "unit": "px",
+        "label": "Border Width",
+        "default": 1,
+        "info": "Thickness of the border"
+      },
+      {
+        "type": "header",
+        "content": "Button Shape & Size"
+      },
+      {
+        "type": "range",
+        "id": "nav_button_border_radius",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Border Radius",
+        "default": 50,
+        "info": "Roundness of button corners (50px = circle)"
+      },
+      {
+        "type": "range",
+        "id": "nav_button_size",
+        "min": 30,
+        "max": 60,
+        "step": 2,
+        "unit": "px",
+        "label": "Button Size",
+        "default": 40,
+        "info": "Width and height of navigation buttons"
+      },
+      {
+        "type": "header",
+        "content": "Arrow Icon"
+      },
+      {
+        "type": "select",
+        "id": "nav_button_arrow_style",
+        "label": "Arrow Style",
+        "options": [
+          {
+            "value": "chevron",
+            "label": "Chevron (Default)"
+          },
+          {
+            "value": "arrow",
+            "label": "Arrow"
+          },
+          {
+            "value": "caret",
+            "label": "Caret"
+          }
+        ],
+        "default": "chevron",
+        "info": "Choose the style of arrow icon"
+      },
+      {
+        "type": "range",
+        "id": "nav_button_icon_size",
+        "min": 16,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "label": "Icon Size",
+        "default": 24,
+        "info": "Size of the arrow icon"
+      },
+      {
+        "type": "range",
+        "id": "nav_button_icon_stroke_width",
+        "min": 1,
+        "max": 4,
+        "step": 0.5,
+        "unit": "px",
+        "label": "Icon Stroke Width",
+        "default": 2,
+        "info": "Thickness of the arrow lines"
+      },
+      {
+        "type": "header",
+        "content": "Button Effects"
+      },
+      {
+        "type": "checkbox",
+        "id": "nav_button_enable_shadow",
+        "label": "Enable Shadow",
+        "default": false,
+        "info": "Add a subtle shadow to navigation buttons"
+      },
+      {
+        "type": "checkbox",
+        "id": "nav_button_enable_hover_transform",
+        "label": "Enable Hover Transform",
+        "default": true,
+        "info": "Slight upward movement on hover"
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.layout.name",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "min": 1000,
+        "max": 1600,
+        "step": 100,
+        "default": 1200,
+        "unit": "px",
+        "label": "t:settings_schema.layout.settings.page_width.label"
+      },
+      {
+        "type": "range",
+        "id": "page_desktop_horizontal_padding",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:settings_schema.layout.settings.page_desktop_horizontal_padding.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "sections_desktop_horizontal_padding",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:settings_schema.layout.settings.sections_desktop_horizontal_padding.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "sections_desktop_vertical_padding",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:settings_schema.layout.settings.sections_desktop_vertical_padding.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "sections_mobile_horizontal_padding",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.layout.settings.sections_mobile_horizontal_padding.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "sections_mobile_vertical_padding",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.layout.settings.sections_mobile_vertical_padding.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "spacing_sections",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:settings_schema.layout.settings.spacing_sections.label",
+        "info": "t:settings_schema.layout.settings.spacing_sections.info",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.animations.name",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "animations_reveal_on_scroll",
+        "label": "t:settings_schema.animations.settings.animations_reveal_on_scroll.label",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "animations_hover_elements",
+        "default": true,
+        "label": "t:settings_schema.animations.settings.animations_hover_elements.label",
+        "info": "t:settings_schema.animations.settings.animations_hover_elements.info"
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.variant_pills.name",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "t:settings_schema.variant_pills.paragraph"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__border.content"
+      },
+      {
+        "type": "range",
+        "id": "variant_pills_border_thickness",
+        "min": 0,
+        "max": 12,
+        "step": 1,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.thickness.label",
+        "default": 1
+      },
+      {
+        "type": "range",
+        "id": "variant_pills_border_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 55
+      },
+      {
+        "type": "range",
+        "id": "variant_pills_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.corner_radius.label",
+        "default": 40
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__shadow.content"
+      },
+      {
+        "type": "range",
+        "id": "variant_pills_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "variant_pills_shadow_horizontal_offset",
+        "min": -12,
+        "max": 12,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.horizontal_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "variant_pills_shadow_vertical_offset",
+        "min": -12,
+        "max": 12,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.vertical_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "variant_pills_shadow_blur",
+        "min": 0,
+        "max": 20,
+        "step": 5,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.blur.label",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.inputs.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__border.content"
+      },
+      {
+        "type": "range",
+        "id": "inputs_border_thickness",
+        "min": 0,
+        "max": 12,
+        "step": 1,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.thickness.label",
+        "default": 1
+      },
+      {
+        "type": "range",
+        "id": "inputs_border_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 55
+      },
+      {
+        "type": "range",
+        "id": "inputs_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.corner_radius.label",
+        "default": 16
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__shadow.content"
+      },
+      {
+        "type": "range",
+        "id": "inputs_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "inputs_shadow_horizontal_offset",
+        "min": -12,
+        "max": 12,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.horizontal_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "inputs_shadow_vertical_offset",
+        "min": -12,
+        "max": 12,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.vertical_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "inputs_shadow_blur",
+        "min": 0,
+        "max": 20,
+        "step": 5,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.blur.label",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.cards.name",
+    "settings": [
+      {
+        "type": "select",
+        "id": "card_style",
+        "options": [
+          {
+            "value": "standard",
+            "label": "t:settings_schema.cards.settings.style.options__1.label"
+          },
+          {
+            "value": "card",
+            "label": "t:settings_schema.cards.settings.style.options__2.label"
+          }
+        ],
+        "default": "standard",
+        "label": "t:settings_schema.cards.settings.style.label"
+      },
+      {
+        "type": "range",
+        "id": "card_image_padding",
+        "min": 0,
+        "max": 20,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.image_padding.label",
+        "default": 0
+      },
+      {
+        "type": "select",
+        "id": "card_text_alignment",
+        "options": [
+          {
+            "value": "left",
+            "label": "t:settings_schema.global.settings.text_alignment.options__1.label"
+          },
+          {
+            "value": "center",
+            "label": "t:settings_schema.global.settings.text_alignment.options__2.label"
+          },
+          {
+            "value": "right",
+            "label": "t:settings_schema.global.settings.text_alignment.options__3.label"
+          }
+        ],
+        "default": "left",
+        "label": "t:settings_schema.global.settings.text_alignment.label"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__border.content"
+      },
+      {
+        "type": "range",
+        "id": "card_border_thickness",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.thickness.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "card_border_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "card_corner_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.corner_radius.label",
+        "default": 0
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__shadow.content"
+      },
+      {
+        "type": "range",
+        "id": "card_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 10
+      },
+      {
+        "type": "range",
+        "id": "card_shadow_horizontal_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.horizontal_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "card_shadow_vertical_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.vertical_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "card_shadow_blur",
+        "min": 0,
+        "max": 40,
+        "step": 5,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.blur.label",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.collection_cards.name",
+    "settings": [
+      {
+        "type": "select",
+        "id": "collection_card_style",
+        "options": [
+          {
+            "value": "standard",
+            "label": "t:settings_schema.collection_cards.settings.style.options__1.label"
+          },
+          {
+            "value": "card",
+            "label": "t:settings_schema.collection_cards.settings.style.options__2.label"
+          }
+        ],
+        "default": "standard",
+        "label": "t:settings_schema.collection_cards.settings.style.label"
+      },
+      {
+        "type": "range",
+        "id": "collection_card_image_padding",
+        "min": 0,
+        "max": 20,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.image_padding.label",
+        "default": 0
+      },
+      {
+        "type": "select",
+        "id": "collection_card_text_alignment",
+        "options": [
+          {
+            "value": "left",
+            "label": "t:settings_schema.global.settings.text_alignment.options__1.label"
+          },
+          {
+            "value": "center",
+            "label": "t:settings_schema.global.settings.text_alignment.options__2.label"
+          },
+          {
+            "value": "right",
+            "label": "t:settings_schema.global.settings.text_alignment.options__3.label"
+          }
+        ],
+        "default": "left",
+        "label": "t:settings_schema.global.settings.text_alignment.label"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__border.content"
+      },
+      {
+        "type": "range",
+        "id": "collection_card_border_thickness",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.thickness.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "collection_card_border_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "collection_card_corner_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.corner_radius.label",
+        "default": 0
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__shadow.content"
+      },
+      {
+        "type": "range",
+        "id": "collection_card_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 10
+      },
+      {
+        "type": "range",
+        "id": "collection_card_shadow_horizontal_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.horizontal_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "collection_card_shadow_vertical_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.vertical_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "collection_card_shadow_blur",
+        "min": 0,
+        "max": 40,
+        "step": 5,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.blur.label",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.blog_cards.name",
+    "settings": [
+      {
+        "type": "select",
+        "id": "blog_card_style",
+        "options": [
+          {
+            "value": "standard",
+            "label": "t:settings_schema.blog_cards.settings.style.options__1.label"
+          },
+          {
+            "value": "card",
+            "label": "t:settings_schema.blog_cards.settings.style.options__2.label"
+          }
+        ],
+        "default": "standard",
+        "label": "t:settings_schema.blog_cards.settings.style.label"
+      },
+      {
+        "type": "range",
+        "id": "blog_card_image_padding",
+        "min": 0,
+        "max": 20,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.image_padding.label",
+        "default": 0
+      },
+      {
+        "type": "select",
+        "id": "blog_card_text_alignment",
+        "options": [
+          {
+            "value": "left",
+            "label": "t:settings_schema.global.settings.text_alignment.options__1.label"
+          },
+          {
+            "value": "center",
+            "label": "t:settings_schema.global.settings.text_alignment.options__2.label"
+          },
+          {
+            "value": "right",
+            "label": "t:settings_schema.global.settings.text_alignment.options__3.label"
+          }
+        ],
+        "default": "left",
+        "label": "t:settings_schema.global.settings.text_alignment.label"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__border.content"
+      },
+      {
+        "type": "range",
+        "id": "blog_card_border_thickness",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.thickness.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "blog_card_border_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "blog_card_corner_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.corner_radius.label",
+        "default": 0
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__shadow.content"
+      },
+      {
+        "type": "range",
+        "id": "blog_card_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 10
+      },
+      {
+        "type": "range",
+        "id": "blog_card_shadow_horizontal_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.horizontal_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "blog_card_shadow_vertical_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.vertical_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "blog_card_shadow_blur",
+        "min": 0,
+        "max": 40,
+        "step": 5,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.blur.label",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.content_containers.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__border.content"
+      },
+      {
+        "type": "range",
+        "id": "text_boxes_border_thickness",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.thickness.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "text_boxes_border_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "text_boxes_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.corner_radius.label",
+        "default": 0
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__shadow.content"
+      },
+      {
+        "type": "range",
+        "id": "text_boxes_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "text_boxes_shadow_horizontal_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.horizontal_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "text_boxes_shadow_vertical_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.vertical_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "text_boxes_shadow_blur",
+        "min": 0,
+        "max": 40,
+        "step": 5,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.blur.label",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.media.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__border.content"
+      },
+      {
+        "type": "range",
+        "id": "media_border_thickness",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.thickness.label",
+        "default": 1
+      },
+      {
+        "type": "range",
+        "id": "media_border_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 5
+      },
+      {
+        "type": "range",
+        "id": "media_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.corner_radius.label",
+        "default": 0
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__shadow.content"
+      },
+      {
+        "type": "range",
+        "id": "media_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "media_shadow_horizontal_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.horizontal_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "media_shadow_vertical_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.vertical_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "media_shadow_blur",
+        "min": 0,
+        "max": 40,
+        "step": 5,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.blur.label",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.popups.name",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "t:settings_schema.popups.paragraph"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__border.content"
+      },
+      {
+        "type": "range",
+        "id": "popup_border_thickness",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.thickness.label",
+        "default": 1
+      },
+      {
+        "type": "range",
+        "id": "popup_border_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 10
+      },
+      {
+        "type": "range",
+        "id": "popup_corner_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.corner_radius.label",
+        "default": 0
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__shadow.content"
+      },
+      {
+        "type": "range",
+        "id": "popup_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "popup_shadow_horizontal_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.horizontal_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "popup_shadow_vertical_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.vertical_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "popup_shadow_blur",
+        "min": 0,
+        "max": 40,
+        "step": 5,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.blur.label",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.drawers.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__border.content"
+      },
+      {
+        "type": "range",
+        "id": "drawer_border_thickness",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.thickness.label",
+        "default": 1
+      },
+      {
+        "type": "range",
+        "id": "drawer_border_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 10
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.global.settings.header__shadow.content"
+      },
+      {
+        "type": "range",
+        "id": "drawer_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.global.settings.opacity.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "drawer_shadow_horizontal_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.horizontal_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "drawer_shadow_vertical_offset",
+        "min": -40,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.vertical_offset.label",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "drawer_shadow_blur",
+        "min": 0,
+        "max": 40,
+        "step": 5,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.blur.label",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.badges.name",
+    "settings": [
+      {
+        "type": "select",
+        "id": "badge_position",
+        "options": [
+          {
+            "value": "bottom left",
+            "label": "t:settings_schema.badges.settings.position.options__1.label"
+          },
+          {
+            "value": "bottom right",
+            "label": "t:settings_schema.badges.settings.position.options__2.label"
+          },
+          {
+            "value": "top left",
+            "label": "t:settings_schema.badges.settings.position.options__3.label"
+          },
+          {
+            "value": "top right",
+            "label": "t:settings_schema.badges.settings.position.options__4.label"
+          }
+        ],
+        "default": "bottom left",
+        "label": "t:settings_schema.badges.settings.position.label"
+      },
+      {
+        "type": "range",
+        "id": "badge_corner_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "label": "t:settings_schema.global.settings.corner_radius.label",
+        "default": 40
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.brand_information.name",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "t:settings_schema.brand_information.settings.paragraph.content"
+      },
+      {
+        "type": "inline_richtext",
+        "id": "brand_headline",
+        "label": "t:settings_schema.brand_information.settings.brand_headline.label"
+      },
+      {
+        "type": "richtext",
+        "id": "brand_description",
+        "label": "t:settings_schema.brand_information.settings.brand_description.label"
+      },
+      {
+        "type": "image_picker",
+        "id": "brand_image",
+        "label": "t:settings_schema.brand_information.settings.brand_image.label"
+      },
+      {
+        "type": "range",
+        "id": "brand_image_width",
+        "min": 50,
+        "max": 550,
+        "step": 5,
+        "default": 100,
+        "unit": "px",
+        "label": "t:settings_schema.brand_information.settings.brand_image_width.label"
+      }
+    ]
+  },
+  {
+    "name": "Social Media",
+    "settings": [
+      {
+        "type": "text",
+        "id": "social_facebook_link",
+        "label": "Facebook",
+        "placeholder": "https://facebook.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_instagram_link",
+        "label": "Instagram",
+        "placeholder": "https://instagram.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_youtube_link",
+        "label": "YouTube",
+        "placeholder": "https://youtube.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_tiktok_link",
+        "label": "TikTok",
+        "placeholder": "https://tiktok.com/@shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_twitter_link",
+        "label": "Twitter",
+        "placeholder": "https://twitter.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_snapchat_link",
+        "label": "Snapchat",
+        "placeholder": "https://snapchat.com/add/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_pinterest_link",
+        "label": "Pinterest",
+        "placeholder": "https://pinterest.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_tumblr_link",
+        "label": "Tumblr",
+        "placeholder": "https://shopify.tumblr.com"
+      },
+      {
+        "type": "text",
+        "id": "social_vimeo_link",
+        "label": "Vimeo",
+        "placeholder": "https://vimeo.com/shopify"
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.search_input.name",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "enable_header_search",
+        "default": false,
+        "label": "Show search in header",
+        "info": "Enable or disable the search bar in the header"
+      },
+      {
+        "type": "checkbox",
+        "id": "predictive_search_enabled",
+        "default": true,
+        "label": "t:settings_schema.search_input.settings.predictive_search_enabled.label"
+      },
+      {
+        "type": "checkbox",
+        "id": "predictive_search_show_vendor",
+        "default": false,
+        "label": "t:settings_schema.search_input.settings.predictive_search_show_vendor.label",
+        "info": "t:settings_schema.search_input.settings.predictive_search_show_vendor.info"
+      },
+      {
+        "type": "checkbox",
+        "id": "predictive_search_show_price",
+        "default": false,
+        "label": "t:settings_schema.search_input.settings.predictive_search_show_price.label",
+        "info": "t:settings_schema.search_input.settings.predictive_search_show_price.info"
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.currency_format.name",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "t:settings_schema.currency_format.settings.paragraph"
+      },
+      {
+        "type": "checkbox",
+        "id": "currency_code_enabled",
+        "label": "t:settings_schema.currency_format.settings.currency_code_enabled.label",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "free_shipping_notice_date_format",
+        "label": "Free Shipping Notice Date Format",
+        "info": "Customize the date format using standard codes (e.g., %d/%m/%Y for DD/MM/YYYY, %m-%d-%y for MM-DD-YY). Leave blank for default (Month Day with suffix). [Learn more](https://shopify.dev/api/liquid/filters/date#format-options)"
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.cart.name",
+    "settings": [
+      {
+        "type": "select",
+        "id": "cart_type",
+        "options": [
+          {
+            "value": "drawer",
+            "label": "t:settings_schema.cart.settings.cart_type.drawer.label"
+          },
+          {
+            "value": "page",
+            "label": "t:settings_schema.cart.settings.cart_type.page.label"
+          },
+          {
+            "value": "notification",
+            "label": "t:settings_schema.cart.settings.cart_type.notification.label"
+          }
+        ],
+        "default": "notification",
+        "label": "t:settings_schema.cart.settings.cart_type.label"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_vendor",
+        "label": "t:settings_schema.cart.settings.show_vendor.label",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "show_cart_note",
+        "label": "t:settings_schema.cart.settings.show_cart_note.label",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Text Settings"
+      },
+      {
+        "type": "text",
+        "id": "save_text",
+        "label": "Save Text",
+        "default": "SAVE",
+        "info": "Text displayed for discount/save amounts (e.g., 'SAVE 20%')"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.cart.settings.cart_drawer.header"
+      },
+      {
+        "type": "collection",
+        "id": "cart_drawer_collection",
+        "label": "t:settings_schema.cart.settings.cart_drawer.collection.label",
+        "info": "t:settings_schema.cart.settings.cart_drawer.collection.info"
+      }
+    ]
+  },
+  {
+    "name": "Content Protection",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Content Protection Settings"
+      },
+      {
+        "type": "paragraph",
+        "content": "Enable protection to prevent easy copying of your store content. This disables right-click, text selection, and common keyboard shortcuts. Note: This provides basic protection only - advanced users can still bypass these restrictions."
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_content_protection",
+        "label": "Enable Content Protection",
+        "default": false,
+        "info": "Disable right-click, text selection, and copy shortcuts (Ctrl+C, Ctrl+U, Ctrl+S, F12)"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_image_protection",
+        "label": "Enable Image Drag Protection",
+        "default": false,
+        "info": "Prevent users from dragging and dropping images"
+      }
+    ]
+  },
+  {
+    "name": "Advertorial and Listicle Setting",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Header & Footer Control"
+      },
+      {
+        "type": "paragraph",
+        "content": "Control the visibility of header and footer sections on specific pages. Perfect for creating advertorial pages or landing pages without navigation."
+      },
+      {
+        "type": "textarea",
+        "id": "pages_without_header_footer",
+        "label": "Pages without header & footer",
+        "info": "Enter page handles (one per line) where you want to hide the header and footer. Example: advertorial-page",
+        "placeholder": "advertorial-page\nlanding-page\nspecial-offer"
+      }
+    ]
+  }
+]

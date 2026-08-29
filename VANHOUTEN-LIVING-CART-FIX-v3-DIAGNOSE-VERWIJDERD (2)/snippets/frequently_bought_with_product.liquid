@@ -1,0 +1,612 @@
+{% if settings.product_1 != blank
+  or settings.product_2 != blank
+  or settings.product_3 != blank
+  or settings.product_4 != blank
+  or settings.product_5 != blank
+%}
+  <div class="gbfrequently-bought-with-main-whole">
+    <h2 class="frequently-bought-with-main-title">Frequently bought with:</h2>
+
+    <style>
+      .gb-main-freq-bg-color .product__info-wrapper {
+        min-height: 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .gb-main-freq-bg-color .product__info-wrapper variant-radios,
+      .gb-main-freq-bg-color .product__info-wrapper variant-selects {
+        margin-top: auto;
+      }
+    </style>
+
+    <div class="gbfrequently-bought-with-main-whole-slider">
+      {% if settings.product_1 != blank %}
+        {%- liquid
+          assign product = settings.product_1
+          if product == null
+            assign placeholder = true
+          endif
+        -%}
+
+        <product-info
+          class="gb-main-freq-bg-color"
+          data-section="{{ product.id }}"
+          data-product-id="{{ product.id }}"
+          data-update-url="false"
+          data-url="{{ product.url }}"
+          {% if section.settings.image_zoom == 'hover' %}
+            data-zoom-on-hover
+          {% endif %}
+        >
+          {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+          {%- if first_3d_model -%}
+            {{ 'component-product-model.css' | asset_url | stylesheet_tag }}
+            <link
+              id="ModelViewerStyle"
+              rel="stylesheet"
+              href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+              media="print"
+              onload="this.media='all'"
+            >
+            <link
+              id="ModelViewerOverride"
+              rel="stylesheet"
+              href="{{ 'component-model-viewer-ui.css' | asset_url }}"
+              media="print"
+              onload="this.media='all'"
+            >
+          {%- endif -%}
+
+          {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
+
+          <section class="gb-get-main-freq-pro ">
+            <div class="page-width section-{{ section.id }}-padding{% if section.settings.secondary_background %} isolate{% endif %}">
+              <div class="featured-product product product--{{ section.settings.media_size }} grid grid--1-col  product--{{ section.settings.media_position }}{% if section.settings.secondary_background == false %} isolate{% endif %} {% if product.media.size > 0 or section.settings.product == blank %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+                <div class="grid__item product__media-wrapper">
+                  <img
+                    class="gb-master-media-cart"
+                    src="{{ product.featured_media | img_url : '800x' }}"
+                    width=""
+                    height=""
+                  >
+                </div>
+                <div class="product__info-wrapper grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+                  <section
+                    id="ProductInfo-{{ product.id }}"
+                    class="product__info-container"
+                    data-section="{{ product.id }}"
+                    data-url="{{ product.url }}"
+                  >
+                    {%- assign product_form_id2 = 'product-form-' | append: product.id -%}
+
+                    <div class="gb-cart-price-add">
+                      <h2 class="product__title {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                        {%- unless placeholder -%}
+                          {{ product.title | escape }}
+                        {%- else -%}
+                          {{ 'onboarding.product_title' | t }}
+                        {%- endunless -%}
+                      </h2>
+                      {%- render 'buy-buttons-cart-drawer',
+                        product: product,
+                        product_form_id: product_form_id2,
+                        section_id: product.id
+                      -%}
+                    </div>
+
+                    <div id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
+                      {%- render 'price2',
+                        product: product,
+                        placeholder: placeholder,
+                        use_variant: true,
+                        show_badges: true,
+                        price_class: 'price--large'
+                      -%}
+                    </div>
+
+                    {% render 'product-variant-picker-freq', product: product, product_form_id: product_form_id2 %}
+                  </section>
+                </div>
+              </div>
+            </div>
+          </section>
+        </product-info>
+      {% endif %}
+
+      {% if settings.product_2 != blank %}
+        {%- liquid
+          assign product = settings.product_2
+          if product == null
+            assign placeholder = true
+          endif
+        -%}
+
+        <product-info
+          class="gb-main-freq-bg-color"
+          data-section="{{ product.id }}"
+          data-product-id="{{ product.id }}"
+          data-update-url="false"
+          data-url="{{ product.url }}"
+          {% if section.settings.image_zoom == 'hover' %}
+            data-zoom-on-hover
+          {% endif %}
+        >
+          {% comment %} TODO: assign `product.selected_or_first_available_variant` to variable and replace usage to reduce verbosity {% endcomment %}
+
+          {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+          {%- if first_3d_model -%}
+            {{ 'component-product-model.css' | asset_url | stylesheet_tag }}
+            <link
+              id="ModelViewerStyle"
+              rel="stylesheet"
+              href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+              media="print"
+              onload="this.media='all'"
+            >
+            <link
+              id="ModelViewerOverride"
+              rel="stylesheet"
+              href="{{ 'component-model-viewer-ui.css' | asset_url }}"
+              media="print"
+              onload="this.media='all'"
+            >
+          {%- endif -%}
+
+          {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
+
+          <section class="gb-get-main-freq-pro ">
+            <div class="page-width section-{{ section.id }}-padding{% if section.settings.secondary_background %} isolate{% endif %}">
+              <div class="featured-product product product--{{ section.settings.media_size }} grid grid--1-col  product--{{ section.settings.media_position }}{% if section.settings.secondary_background == false %} isolate{% endif %} {% if product.media.size > 0 or section.settings.product == blank %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+                <div class="grid__item product__media-wrapper">
+                  <img
+                    class="gb-master-media-cart"
+                    src="{{ product.featured_media | img_url : '800x' }}"
+                    width=""
+                    height=""
+                  >
+                </div>
+                <div class="product__info-wrapper grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+                  <section
+                    id="ProductInfo-{{ product.id }}"
+                    class="product__info-container"
+                    data-section="{{ product.id }}"
+                    data-url="{{ product.url }}"
+                  >
+                    {%- assign product_form_id2 = 'product-form-' | append: product.id -%}
+
+                    <div class="gb-cart-price-add">
+                      <h2 class="product__title {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                        {%- unless placeholder -%}
+                          {{ product.title | escape }}
+                        {%- else -%}
+                          {{ 'onboarding.product_title' | t }}
+                        {%- endunless -%}
+                      </h2>
+                      {%- render 'buy-buttons-cart-drawer',
+                        product: product,
+                        product_form_id: product_form_id2,
+                        section_id: product.id
+                      -%}
+                    </div>
+
+                    <div id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
+                      {%- render 'price2',
+                        product: product,
+                        placeholder: placeholder,
+                        use_variant: true,
+                        show_badges: true,
+                        price_class: 'price--large'
+                      -%}
+                    </div>
+
+                    {% render 'product-variant-picker-freq', product: product, product_form_id: product_form_id2 %}
+                  </section>
+                </div>
+              </div>
+            </div>
+          </section>
+        </product-info>
+      {% endif %}
+
+      {% if settings.product_3 != blank %}
+        {%- liquid
+          assign product = settings.product_3
+          if product == null
+            assign placeholder = true
+          endif
+        -%}
+
+        <product-info
+          class="gb-main-freq-bg-color"
+          data-section="{{ product.id }}"
+          data-product-id="{{ product.id }}"
+          data-update-url="false"
+          data-url="{{ product.url }}"
+          {% if section.settings.image_zoom == 'hover' %}
+            data-zoom-on-hover
+          {% endif %}
+        >
+          {% comment %} TODO: assign `product.selected_or_first_available_variant` to variable and replace usage to reduce verbosity {% endcomment %}
+
+          {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+          {%- if first_3d_model -%}
+            {{ 'component-product-model.css' | asset_url | stylesheet_tag }}
+            <link
+              id="ModelViewerStyle"
+              rel="stylesheet"
+              href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+              media="print"
+              onload="this.media='all'"
+            >
+            <link
+              id="ModelViewerOverride"
+              rel="stylesheet"
+              href="{{ 'component-model-viewer-ui.css' | asset_url }}"
+              media="print"
+              onload="this.media='all'"
+            >
+          {%- endif -%}
+
+          {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
+
+          <section class="gb-get-main-freq-pro ">
+            <div class="page-width section-{{ section.id }}-padding{% if section.settings.secondary_background %} isolate{% endif %}">
+              <div class="featured-product product product--{{ section.settings.media_size }} grid grid--1-col  product--{{ section.settings.media_position }}{% if section.settings.secondary_background == false %} isolate{% endif %} {% if product.media.size > 0 or section.settings.product == blank %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+                <div class="grid__item product__media-wrapper">
+                  <img
+                    class="gb-master-media-cart"
+                    src="{{ product.featured_media | img_url : '800x' }}"
+                    width=""
+                    height=""
+                  >
+                </div>
+                <div class="product__info-wrapper grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+                  <section
+                    id="ProductInfo-{{ product.id }}"
+                    class="product__info-container"
+                    data-section="{{ product.id }}"
+                    data-url="{{ product.url }}"
+                  >
+                    {%- assign product_form_id2 = 'product-form-' | append: product.id -%}
+
+                    <div class="gb-cart-price-add">
+                      <h2 class="product__title {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                        {%- unless placeholder -%}
+                          {{ product.title | escape }}
+                        {%- else -%}
+                          {{ 'onboarding.product_title' | t }}
+                        {%- endunless -%}
+                      </h2>
+                      {%- render 'buy-buttons-cart-drawer',
+                        product: product,
+                        product_form_id: product_form_id2,
+                        section_id: product.id
+                      -%}
+                    </div>
+
+                    <div id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
+                      {%- render 'price2',
+                        product: product,
+                        placeholder: placeholder,
+                        use_variant: true,
+                        show_badges: true,
+                        price_class: 'price--large'
+                      -%}
+                    </div>
+
+                    {% render 'product-variant-picker-freq', product: product, product_form_id: product_form_id2 %}
+                  </section>
+                </div>
+              </div>
+            </div>
+          </section>
+        </product-info>
+      {% endif %}
+
+      {% if settings.product_4 != blank %}
+        {%- liquid
+          assign product = settings.product_4
+          if product == null
+            assign placeholder = true
+          endif
+        -%}
+
+        <product-info
+          class="gb-main-freq-bg-color"
+          data-section="{{ product.id }}"
+          data-product-id="{{ product.id }}"
+          data-update-url="false"
+          data-url="{{ product.url }}"
+          {% if section.settings.image_zoom == 'hover' %}
+            data-zoom-on-hover
+          {% endif %}
+        >
+          {% comment %} TODO: assign `product.selected_or_first_available_variant` to variable and replace usage to reduce verbosity {% endcomment %}
+
+          {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+          {%- if first_3d_model -%}
+            {{ 'component-product-model.css' | asset_url | stylesheet_tag }}
+            <link
+              id="ModelViewerStyle"
+              rel="stylesheet"
+              href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+              media="print"
+              onload="this.media='all'"
+            >
+            <link
+              id="ModelViewerOverride"
+              rel="stylesheet"
+              href="{{ 'component-model-viewer-ui.css' | asset_url }}"
+              media="print"
+              onload="this.media='all'"
+            >
+          {%- endif -%}
+
+          {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
+
+          <section class="gb-get-main-freq-pro ">
+            <div class="page-width section-{{ section.id }}-padding{% if section.settings.secondary_background %} isolate{% endif %}">
+              <div class="featured-product product product--{{ section.settings.media_size }} grid grid--1-col  product--{{ section.settings.media_position }}{% if section.settings.secondary_background == false %} isolate{% endif %} {% if product.media.size > 0 or section.settings.product == blank %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+                <div class="grid__item product__media-wrapper">
+                  <img
+                    class="gb-master-media-cart"
+                    src="{{ product.featured_media | img_url : '800x' }}"
+                    width=""
+                    height=""
+                  >
+                </div>
+                <div class="product__info-wrapper grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+                  <section
+                    id="ProductInfo-{{ product.id }}"
+                    class="product__info-container"
+                    data-section="{{ product.id }}"
+                    data-url="{{ product.url }}"
+                  >
+                    {%- assign product_form_id2 = 'product-form-' | append: product.id -%}
+
+                    <div class="gb-cart-price-add">
+                      <h2 class="product__title {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                        {%- unless placeholder -%}
+                          {{ product.title | escape }}
+                        {%- else -%}
+                          {{ 'onboarding.product_title' | t }}
+                        {%- endunless -%}
+                      </h2>
+                      {%- render 'buy-buttons-cart-drawer',
+                        product: product,
+                        product_form_id: product_form_id2,
+                        section_id: product.id
+                      -%}
+                    </div>
+
+                    <div id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
+                      {%- render 'price2',
+                        product: product,
+                        placeholder: placeholder,
+                        use_variant: true,
+                        show_badges: true,
+                        price_class: 'price--large'
+                      -%}
+                    </div>
+
+                    {% render 'product-variant-picker-freq', product: product, product_form_id: product_form_id2 %}
+                  </section>
+                </div>
+              </div>
+            </div>
+          </section>
+        </product-info>
+      {% endif %}
+
+      {% if settings.product_5 != blank %}
+        {%- liquid
+          assign product = settings.product_5
+          if product == null
+            assign placeholder = true
+          endif
+        -%}
+
+        <product-info
+          class="gb-main-freq-bg-color"
+          data-section="{{ product.id }}"
+          data-product-id="{{ product.id }}"
+          data-update-url="false"
+          data-url="{{ product.url }}"
+          {% if section.settings.image_zoom == 'hover' %}
+            data-zoom-on-hover
+          {% endif %}
+        >
+          {% comment %} TODO: assign `product.selected_or_first_available_variant` to variable and replace usage to reduce verbosity {% endcomment %}
+
+          {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+          {%- if first_3d_model -%}
+            {{ 'component-product-model.css' | asset_url | stylesheet_tag }}
+            <link
+              id="ModelViewerStyle"
+              rel="stylesheet"
+              href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+              media="print"
+              onload="this.media='all'"
+            >
+            <link
+              id="ModelViewerOverride"
+              rel="stylesheet"
+              href="{{ 'component-model-viewer-ui.css' | asset_url }}"
+              media="print"
+              onload="this.media='all'"
+            >
+          {%- endif -%}
+
+          {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
+
+          <section class="gb-get-main-freq-pro ">
+            <div class="page-width section-{{ section.id }}-padding{% if section.settings.secondary_background %} isolate{% endif %}">
+              <div class="featured-product product product--{{ section.settings.media_size }} grid grid--1-col  product--{{ section.settings.media_position }}{% if section.settings.secondary_background == false %} isolate{% endif %} {% if product.media.size > 0 or section.settings.product == blank %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+                <div class="grid__item product__media-wrapper">
+                  <img
+                    class="gb-master-media-cart"
+                    src="{{ product.featured_media | img_url : '800x' }}"
+                    width=""
+                    height=""
+                  >
+                </div>
+                <div class="product__info-wrapper grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+                  <section
+                    id="ProductInfo-{{ product.id }}"
+                    class="product__info-container"
+                    data-section="{{ product.id }}"
+                    data-url="{{ product.url }}"
+                  >
+                    {%- assign product_form_id2 = 'product-form-' | append: product.id -%}
+
+                    <div class="gb-cart-price-add">
+                      <h2 class="product__title {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                        {%- unless placeholder -%}
+                          {{ product.title | escape }}
+                        {%- else -%}
+                          {{ 'onboarding.product_title' | t }}
+                        {%- endunless -%}
+                      </h2>
+                      {%- render 'buy-buttons-cart-drawer',
+                        product: product,
+                        product_form_id: product_form_id2,
+                        section_id: product.id
+                      -%}
+                    </div>
+
+                    <div id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
+                      {%- render 'price2',
+                        product: product,
+                        placeholder: placeholder,
+                        use_variant: true,
+                        show_badges: true,
+                        price_class: 'price--large'
+                      -%}
+                    </div>
+
+                    {% render 'product-variant-picker-freq', product: product, product_form_id: product_form_id2 %}
+                  </section>
+                </div>
+              </div>
+            </div>
+          </section>
+        </product-info>
+      {% endif %}
+
+      {% if settings.product_6 != blank %}
+        {%- liquid
+          assign product = settings.product_6
+          if product == null
+            assign placeholder = true
+          endif
+        -%}
+
+        <product-info
+          class="gb-main-freq-bg-color"
+          data-section="{{ product.id }}"
+          data-product-id="{{ product.id }}"
+          data-update-url="false"
+          data-url="{{ product.url }}"
+          {% if section.settings.image_zoom == 'hover' %}
+            data-zoom-on-hover
+          {% endif %}
+        >
+          {% comment %} TODO: assign `product.selected_or_first_available_variant` to variable and replace usage to reduce verbosity {% endcomment %}
+
+          {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+          {%- if first_3d_model -%}
+            {{ 'component-product-model.css' | asset_url | stylesheet_tag }}
+            <link
+              id="ModelViewerStyle"
+              rel="stylesheet"
+              href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+              media="print"
+              onload="this.media='all'"
+            >
+            <link
+              id="ModelViewerOverride"
+              rel="stylesheet"
+              href="{{ 'component-model-viewer-ui.css' | asset_url }}"
+              media="print"
+              onload="this.media='all'"
+            >
+          {%- endif -%}
+
+          {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
+
+          <section class="gb-get-main-freq-pro ">
+            <div class="page-width section-{{ section.id }}-padding{% if section.settings.secondary_background %} isolate{% endif %}">
+              <div class="featured-product product product--{{ section.settings.media_size }} grid grid--1-col  product--{{ section.settings.media_position }}{% if section.settings.secondary_background == false %} isolate{% endif %} {% if product.media.size > 0 or section.settings.product == blank %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+                <div class="grid__item product__media-wrapper">
+                  <img class="gb-master-media-cart" src="{{ product.featured_media | img_url : 'master' }}">
+                </div>
+                <div class="product__info-wrapper grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+                  <section
+                    id="ProductInfo-{{ product.id }}"
+                    class="product__info-container"
+                    data-section="{{ product.id }}"
+                    data-url="{{ product.url }}"
+                  >
+                    {%- assign product_form_id2 = 'product-form-' | append: product.id -%}
+
+                    <div class="gb-cart-price-add">
+                      <h2 class="product__title {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                        {%- unless placeholder -%}
+                          {{ product.title | escape }}
+                        {%- else -%}
+                          {{ 'onboarding.product_title' | t }}
+                        {%- endunless -%}
+                      </h2>
+                      {%- render 'buy-buttons-cart-drawer',
+                        product: product,
+                        product_form_id: product_form_id2,
+                        section_id: product.id
+                      -%}
+                    </div>
+
+                    <div id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
+                      {%- render 'price2',
+                        product: product,
+                        placeholder: placeholder,
+                        use_variant: true,
+                        show_badges: true,
+                        price_class: 'price--large'
+                      -%}
+                    </div>
+
+                    {% render 'product-variant-picker-freq', product: product, product_form_id: product_form_id2 %}
+                  </section>
+                </div>
+              </div>
+            </div>
+          </section>
+        </product-info>
+      {% endif %}
+    </div>
+
+    <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+    {%- if section.settings.image_zoom == 'hover' -%}
+      <script id="EnableZoomOnHover-featured" src="{{ 'magnify.js' | asset_url }}" defer="defer"></script>
+    {%- endif %}
+    {%- if request.design_mode -%}
+      <script src="{{ 'theme-editor.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+
+    {%- if first_3d_model -%}
+      <script type="application/json" id="ProductJSON-{{ product.id }}">
+        {{ product.media | where: 'media_type', 'model' | json }}
+      </script>
+      <script src="{{ 'product-model.js' | asset_url }}" defer></script>
+    {%- endif -%}
+
+    {%- liquid
+      if product.selected_or_first_available_variant.featured_media
+        assign seo_media = product.selected_or_first_available_variant.featured_media
+      else
+        assign seo_media = product.featured_media
+      endif
+    -%}
+  </div>
+{% endif %}

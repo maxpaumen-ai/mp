@@ -1,0 +1,68 @@
+{% comment %}
+  Component: Media Grid
+  
+  Usage: 
+  {% render 'component-media-grid', 
+     items: section.blocks,
+     heading: 'Featured Products',
+     subtitle: 'Discover our collection',
+     accent_text: 'amazing',
+     columns: 4,
+     show_divider: false %}
+  
+  Parameters:
+  - items: array of media item blocks (required)
+  - heading: string (optional)
+  - subtitle: string (optional)
+  - accent_text: string (optional)
+  - columns: number 1-6 (default: 4)
+  - show_divider: boolean (default: false)
+  - section_id: string for unique styling (optional)
+{% endcomment %}
+
+{{ 'component-media-grid.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign items_count = items.size
+  assign section_id = section_id | default: 'media'
+  assign columns = columns | default: 4
+  assign show_divider = show_divider | default: false
+-%}
+
+<section class="media-grid {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}" 
+         data-component="media-grid" 
+         data-columns="{{ columns }}"
+         id="media-{{ section_id }}">
+  <div class="media-grid__container">
+    
+    <!-- Header -->
+    {% if heading != blank or subtitle != blank %}
+      <div class="media-grid__header">
+        
+        {% if heading != blank %}
+          <h2 class="media-grid__heading">
+            {{ heading }}
+            {% if accent_text != blank %}
+              <span class="media-grid__accent">{{ accent_text }}</span>
+            {% endif %}
+          </h2>
+        {% endif %}
+        
+        {% if subtitle != blank %}
+          <p class="media-grid__subtitle">{{ subtitle }}</p>
+        {% endif %}
+        
+      </div>
+    {% endif %}
+
+    <!-- Media Grid -->
+    <div class="media-grid__items" data-columns="{{ columns }}">
+      {% for item in items %}
+        {% render 'component-media-item', 
+           item: item, 
+           show_divider: show_divider,
+           index: forloop.index %}
+      {% endfor %}
+    </div>
+  </div>
+</section>

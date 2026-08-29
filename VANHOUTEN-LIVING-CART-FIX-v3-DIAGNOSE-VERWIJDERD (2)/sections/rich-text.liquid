@@ -1,0 +1,1017 @@
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    {% if section.settings.enable_top_border %}
+      border-top: {{ section.settings.top_border_width }}px {{ section.settings.top_border_style }} {{ section.settings.top_border_color }} !important;
+    {% endif %}
+    {% if section.settings.enable_bottom_border %}
+      border-bottom: {{ section.settings.bottom_border_width }}px {{ section.settings.bottom_border_style }} {{ section.settings.bottom_border_color }} !important;
+    {% endif %}
+  }
+
+  .rich-text-section-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    padding-left: {{ section.settings.padding_horizontal }}px;
+    padding-right: {{ section.settings.padding_horizontal }}px;
+    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.section_bg_color }}{% endif %};
+    {% if section.settings.section_border_radius > 0 %}
+      border-radius: {{ section.settings.section_border_radius }}px;
+    {% endif %}
+  }
+
+  .rich-text-section-{{ section.id }} .rich-text-title {
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_color }}{% endif %} !important;
+    font-family: var(--font-heading-family) !important;
+    font-weight: var(--font-weight-bold) !important;
+    letter-spacing: var(--letter-spacing-heading) !important;
+    font-size: {{ section.settings.title_font_size }}px;
+    line-height: {{ section.settings.title_line_height }};
+    margin-bottom: {{ section.settings.title_margin_bottom }}px;
+  }
+
+  .rich-text-section-{{ section.id }} .rich-text-title .accent {
+    {% if section.settings.use_accent_gradient %}
+      background: linear-gradient({{ section.settings.accent_gradient_angle }}deg, {{ section.settings.accent_gradient_start }}, {{ section.settings.accent_gradient_end }});
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-fill-color: transparent;
+    {% elsif section.settings.use_theme_colors %}
+      color: {{ settings.global_section_accent_1_color | default: '#ef4a65' }} !important;
+    {% else %}
+      color: {{ section.settings.accent_color | default: '#ef4a65' }} !important;
+    {% endif %}
+    display: inline-block;
+  }
+
+  .rich-text-section-{{ section.id }} .rich-text-subtitle {
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subtitle_color }}{% endif %} !important;
+    font-size: {{ section.settings.subtitle_font_size }}px;
+    line-height: {{ section.settings.subtitle_line_height }};
+    letter-spacing: var(--letter-spacing-body);
+    margin-bottom: {{ section.settings.subtitle_margin_bottom }}px;
+    max-width: {{ section.settings.subtitle_max_width }}px;
+    {% if section.settings.text_alignment == 'center' %}
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    {% elsif section.settings.text_alignment == 'right' %}
+      margin-left: auto;
+      margin-right: 0;
+      text-align: right;
+    {% else %}
+      margin-left: 0;
+      margin-right: auto;
+      text-align: left;
+    {% endif %}
+  }
+
+  .rich-text-section-{{ section.id }} .rich-text-subtitle p {
+    margin: 0 0 1rem 0;
+    color: inherit !important;
+  }
+
+  .rich-text-section-{{ section.id }} .rich-text-subtitle p:last-child {
+    margin-bottom: 0;
+    color: inherit !important;
+  }
+
+  /* Bold text styling */
+  .rich-text-section-{{ section.id }} .rich-text-subtitle strong,
+  .rich-text-section-{{ section.id }} .rich-text-subtitle b,
+  .rich-text-section-{{ section.id }} .rte strong,
+  .rich-text-section-{{ section.id }} .rte b {
+    font-weight: {{ section.settings.bold_font_weight | default: 700 }} !important;
+  }
+
+  /* Remove default page-width padding - use only section padding */
+  .rich-text-section-{{ section.id }} .page-width {
+    padding: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  {% for block in section.blocks %}
+    {% if block.type == 'button' %}
+      .rich-text-section-{{ section.id }} .rich-text-button-wrapper[data-block-id="{{ block.id }}"] .rich-text-button,
+      .rich-text-section-{{ section.id }} .rich-text-button-wrapper[data-block-id="{{ block.id }}"] .rich-text-button.button-gradient-effect,
+      .rich-text-section-{{ section.id }} .rich-text-button-wrapper[data-block-id="{{ block.id }}"] .rich-text-button.gradient-shine-enabled {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        text-align: center;
+        margin-top: 24px;
+
+        {% if section.settings.use_global_button_styling %}
+          /* Use Global Button Styling System */
+          padding: var(--global-button-padding-y, 12px) 20px !important;
+          font-size: {{ section.settings.button_font_size | default: 16 }}px !important;
+          font-weight: var(--global-button-font-weight, 700) !important;
+          letter-spacing: var(--global-button-letter-spacing, 1px) !important;
+          text-transform: var(--global-button-text-transform, none) !important;
+          {% if settings.enable_button_gradient %}
+            background: linear-gradient({{ settings.button_gradient_direction }}, {{ settings.button_gradient_start }}, {{ settings.button_gradient_end }}) !important;
+          {% else %}
+            background-color: var(--global-button-bg-color) !important;
+          {% endif %}
+          color: var(--global-button-text-color) !important;
+          border-radius: var(--global-button-radius, 4px) !important;
+          min-width: 120px;
+          /* Border styles are applied by global-button-fix.liquid */
+        {% else %}
+          /* Use Simple Default Styling */
+          padding: 12px 24px !important;
+          background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.button_bg_color }}{% endif %} !important;
+          background: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.button_bg_color }}{% endif %} !important;
+          background-image: none !important;
+          color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}#ffffff{% endif %} !important;
+          font-weight: var(--font-weight-bold) !important;
+          letter-spacing: var(--letter-spacing-body) !important;
+          text-transform: none !important;
+          min-width: 120px !important;
+          font-size: {{ section.settings.button_font_size | default: 16 }}px !important;
+          border-radius: 4px !important;
+          border: none !important;
+        {% endif %}
+      }
+    {% endif %}
+  {% endfor %}
+
+  {% for block in section.blocks %}
+    {% if block.type == 'button' %}
+      .rich-text-section-{{ section.id }} .rich-text-button-wrapper[data-block-id="{{ block.id }}"] .rich-text-button:hover,
+      .rich-text-section-{{ section.id }} .rich-text-button-wrapper[data-block-id="{{ block.id }}"] .rich-text-button.button-gradient-effect:hover,
+      .rich-text-section-{{ section.id }} .rich-text-button-wrapper[data-block-id="{{ block.id }}"] .rich-text-button.gradient-shine-enabled:hover {
+        {% if section.settings.use_global_button_styling %}
+          /* Use Global Button Hover Styling */
+          {% if settings.enable_button_gradient %}
+            background: linear-gradient({{ settings.button_gradient_direction }}, {{ settings.button_gradient_hover_start }}, {{ settings.button_gradient_hover_end }}) !important;
+          {% else %}
+            background-color: var(--global-button-hover-bg-color) !important;
+          {% endif %}
+          color: var(--global-button-hover-text-color) !important;
+          /* Border styles are applied by global-button-fix.liquid */
+        {% else %}
+          /* Use Simple Default Hover Styling */
+          {% if section.settings.use_theme_colors %}
+            background-color: {{ settings.global_section_accent_1_color | color_darken: 10 }} !important;
+            background: {{ settings.global_section_accent_1_color | color_darken: 10 }} !important;
+          {% else %}
+            background-color: #333333 !important;
+            background: #333333 !important;
+          {% endif %}
+          background-image: none !important;
+        {% endif %}
+        transform: translateY(-2px);
+      }
+    {% endif %}
+  {% endfor %}
+
+  /* Image Block Styling */
+  {% for block in section.blocks %}
+    {% if block.type == 'image' %}
+      .rich-text-section-{{ section.id }} .rich-text-image-wrapper[data-block-id="{{ block.id }}"] {
+        margin: {{ block.settings.image_margin_top }}px auto {{ block.settings.image_margin_bottom }}px auto;
+        text-align: {{ section.settings.text_alignment }};
+        max-width: {{ block.settings.image_max_width }}px;
+      }
+
+      .rich-text-section-{{ section.id }} .rich-text-image-wrapper[data-block-id="{{ block.id }}"] img {
+        width: 100%;
+        height: auto;
+        border-radius: {{ block.settings.image_border_radius }}px;
+        {% if block.settings.image_border_width > 0 %}
+          border: {{ block.settings.image_border_width }}px solid {{ block.settings.image_border_color }};
+        {% endif %}
+        transition: transform 0.3s ease;
+      }
+
+      {% if block.settings.enable_image_hover %}
+        .rich-text-section-{{ section.id }} .rich-text-image-wrapper[data-block-id="{{ block.id }}"] img:hover {
+          transform: scale({{ block.settings.image_hover_scale }});
+        }
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  /* Mobile Responsive */
+  @media screen and (max-width: 768px) {
+    .rich-text-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+    }
+
+    .rich-text-section-{{ section.id }} .rich-text-title {
+      font-size: {{ section.settings.title_font_size_mobile }}px;
+      margin-bottom: {{ section.settings.title_margin_bottom | times: 0.75 | round: 0 }}px;
+    }
+
+    .rich-text-section-{{ section.id }} .rich-text-subtitle {
+      font-size: {{ section.settings.subtitle_font_size_mobile }}px;
+      margin-bottom: {{ section.settings.subtitle_margin_bottom | times: 0.75 | round: 0 }}px;
+      max-width: 100%;
+      {% if section.settings.mobile_text_alignment == 'center' %}
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+      {% elsif section.settings.mobile_text_alignment == 'right' %}
+        margin-left: auto;
+        margin-right: 0;
+        text-align: right;
+      {% else %}
+        margin-left: 0;
+        margin-right: auto;
+        text-align: left;
+      {% endif %}
+    }
+
+    .rich-text-section-{{ section.id }} .rich-text-button {
+      margin-top: 18px;
+      /* Mobile font size always uses section setting */
+      font-size: {{ section.settings.button_font_size_mobile | default: 14 }}px !important;
+    }
+    
+    /* Only apply custom padding when NOT using global button styling */
+    {% unless section.settings.use_global_button_styling %}
+    .rich-text-section-{{ section.id }} .rich-text-button {
+      padding: 10px 20px;
+    }
+    {% endunless %}
+
+    /* Mobile Image Styling */
+    {% for block in section.blocks %}
+      {% if block.type == 'image' %}
+        .rich-text-section-{{ section.id }} .rich-text-image-wrapper[data-block-id="{{ block.id }}"] {
+          text-align: {{ section.settings.mobile_text_alignment }};
+          max-width: {{ block.settings.image_max_width_mobile }}px;
+          margin: {{ block.settings.image_margin_top | times: 0.75 | round: 0 }}px auto {{ block.settings.image_margin_bottom | times: 0.75 | round: 0 }}px auto;
+        }
+      {% endif %}
+    {% endfor %}
+  }
+{%- endstyle -%}
+
+<div class="rich-text-section-{{ section.id }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  {% assign text_alignment = section.settings.text_alignment %}
+  {% assign mobile_text_alignment = section.settings.mobile_text_alignment %}
+
+  <div
+    class="
+      page-width flex flex-col text-{{ mobile_text_alignment }} md:text-{{ text_alignment }}
+      {% case mobile_text_alignment %}
+       {% when 'left' %}
+         items-start
+       {% when 'center' %}
+         items-center
+       {% when 'right' %}
+         items-end
+      {% endcase %}
+      {% case text_alignment %}
+       {% when 'left' %}
+         md:items-start
+       {% when 'center' %}
+         md:items-center
+       {% when 'right' %}
+         md:items-end
+      {% endcase %}
+    "
+  >
+    {% for block in section.blocks %}
+      {% case block.type %}
+        {% when 'title' %}
+          <h2 class="rich-text-title" {{ block.shopify_attributes }}>
+            {% if block.settings.title != blank %}{{ block.settings.title }}{% endif %}
+            {% if block.settings.accent_text != blank %}
+              <span class="accent">{{ block.settings.accent_text }}</span>
+            {% endif %}
+          </h2>
+
+        {% when 'subtitle' %}
+          <div class="rich-text-subtitle rte" {{ block.shopify_attributes }}>
+            {{ block.settings.subtitle }}
+          </div>
+
+        {% when 'button' %}
+          {% if block.settings.button_text != blank %}
+            <div class="rich-text-button-wrapper" data-block-id="{{ block.id }}" {{ block.shopify_attributes }}>
+              <a
+                href="{{ block.settings.button_link | default: '#' }}"
+                class="rich-text-button"
+                {% if block.settings.button_open_new_tab %}
+                  target="_blank" rel="noopener"
+                {% endif %}
+              >
+                {{ block.settings.button_text }}
+              </a>
+            </div>
+          {% endif %}
+
+        {% when 'image' %}
+          {% if block.settings.image != blank %}
+            <div class="rich-text-image-wrapper" data-block-id="{{ block.id }}" {{ block.shopify_attributes }}>
+              {% if block.settings.image_link != blank %}
+                <a href="{{ block.settings.image_link }}" 
+                   {% if block.settings.image_open_new_tab %}target="_blank" rel="noopener"{% endif %}>
+                  {{ block.settings.image | image_url: width: block.settings.image_max_width | image_tag: 
+                     alt: block.settings.image_alt_text, 
+                     loading: 'lazy' }}
+                </a>
+              {% else %}
+                {{ block.settings.image | image_url: width: block.settings.image_max_width | image_tag: 
+                   alt: block.settings.image_alt_text, 
+                   loading: 'lazy' }}
+              {% endif %}
+            </div>
+          {% endif %}
+      {% endcase %}
+    {% endfor %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Rich Text",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "Apply the global theme colors to this section"
+    },
+
+    {
+      "type": "header",
+      "content": "Layout & Spacing"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Desktop Text Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "mobile_text_alignment",
+      "label": "Mobile Text Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Horizontal Padding",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Title Styling"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 16,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Desktop Title Size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "title_font_size_mobile",
+      "min": 14,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile Title Size",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "title_line_height",
+      "min": 0.8,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "Title Line Height",
+      "default": 1.3
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Title Bottom Margin",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#000000",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Gradient for Accent Text",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#ef4a65",
+      "info": "Only applies when gradient is disabled and 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "accent_gradient_start",
+      "label": "Gradient Start Color",
+      "default": "#ef4a65",
+      "info": "Only applies when gradient is enabled"
+    },
+    {
+      "type": "color",
+      "id": "accent_gradient_end",
+      "label": "Gradient End Color",
+      "default": "#ff6b35",
+      "info": "Only applies when gradient is enabled"
+    },
+    {
+      "type": "range",
+      "id": "accent_gradient_angle",
+      "min": 0,
+      "max": 360,
+      "step": 15,
+      "unit": "deg",
+      "label": "Gradient Angle",
+      "default": 45,
+      "info": "Only applies when gradient is enabled"
+    },
+    {
+      "type": "header",
+      "content": "Subtitle Styling"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_font_size",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop Subtitle Size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "subtitle_font_size_mobile",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile Subtitle Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "subtitle_line_height",
+      "min": 1.0,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "Subtitle Line Height",
+      "default": 1.6
+    },
+    {
+      "type": "range",
+      "id": "subtitle_margin_bottom",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Subtitle Bottom Margin",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "subtitle_max_width",
+      "min": 400,
+      "max": 1000,
+      "step": 50,
+      "unit": "px",
+      "label": "Subtitle Max Width",
+      "default": 700,
+      "info": "Maximum width for subtitle text (auto-centered)"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle Color",
+      "default": "#666666",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "select",
+      "id": "bold_font_weight",
+      "label": "Bold Text Font Weight",
+      "options": [
+        { "value": "600", "label": "Semi-Bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra Bold (800)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "700",
+      "info": "Font weight for bold text in rich text content"
+    },
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_global_button_styling",
+      "label": "Use Global Button Styling",
+      "default": true,
+      "info": "Requires Use Theme Colors to be enabled. When enabled, button will use theme's global button styling. When disabled, use custom settings below."
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop Button Font Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_font_size_mobile",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile Button Font Size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Vertical Padding",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "min": 16,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Button Horizontal Padding",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Border Radius",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Border Width",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Button Top Margin",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button Background Color",
+      "default": "#000000",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#ffffff",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Button Border Color",
+      "default": "#000000",
+      "info": "Only applies when border width > 0 and 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Button Hover Background",
+      "default": "#333333",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Button Hover Text Color",
+      "default": "#ffffff",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "header",
+      "content": "Section Background"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Section Background Color",
+      "default": "#ffffff",
+      "info": "Only applies when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "range",
+      "id": "section_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Border Radius",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Section Borders"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_top_border",
+      "label": "Enable Top Border",
+      "default": false,
+      "info": "Add a customizable border to the top of the section"
+    },
+    {
+      "type": "range",
+      "id": "top_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Border Width",
+      "default": 1,
+      "info": "Only used when 'Enable Top Border' is checked"
+    },
+    {
+      "type": "select",
+      "id": "top_border_style",
+      "label": "Top Border Style",
+      "options": [
+        {"value": "solid", "label": "Solid"},
+        {"value": "dashed", "label": "Dashed"},
+        {"value": "dotted", "label": "Dotted"},
+        {"value": "double", "label": "Double"}
+      ],
+      "default": "solid",
+      "info": "Only used when 'Enable Top Border' is checked"
+    },
+    {
+      "type": "color",
+      "id": "top_border_color",
+      "label": "Top Border Color",
+      "default": "#e0e0e0",
+      "info": "Only used when 'Enable Top Border' is checked"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bottom_border",
+      "label": "Enable Bottom Border",
+      "default": false,
+      "info": "Add a customizable border to the bottom of the section"
+    },
+    {
+      "type": "range",
+      "id": "bottom_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Border Width",
+      "default": 1,
+      "info": "Only used when 'Enable Bottom Border' is checked"
+    },
+    {
+      "type": "select",
+      "id": "bottom_border_style",
+      "label": "Bottom Border Style",
+      "options": [
+        {"value": "solid", "label": "Solid"},
+        {"value": "dashed", "label": "Dashed"},
+        {"value": "dotted", "label": "Dotted"},
+        {"value": "double", "label": "Double"}
+      ],
+      "default": "solid",
+      "info": "Only used when 'Enable Bottom Border' is checked"
+    },
+    {
+      "type": "color",
+      "id": "bottom_border_color",
+      "label": "Bottom Border Color",
+      "default": "#e0e0e0",
+      "info": "Only used when 'Enable Bottom Border' is checked"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "title",
+      "name": "Title",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Rich Text Section"
+        },
+        {
+          "type": "text",
+          "id": "accent_text",
+          "label": "Accent Text",
+          "info": "Optional accent text that will be styled differently"
+        }
+      ]
+    },
+    {
+      "type": "subtitle",
+      "name": "Subtitle",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "<p>Add your rich text content here. You can use <strong>bold</strong>, <em>italic</em>, and other formatting.</p>"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "Learn More"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "checkbox",
+          "id": "button_open_new_tab",
+          "label": "Open link in new tab",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Upload an image to display in the rich text section"
+        },
+        {
+          "type": "text",
+          "id": "image_alt_text",
+          "label": "Image Alt Text",
+          "info": "Describe the image for accessibility and SEO"
+        },
+        {
+          "type": "header",
+          "content": "Image Link"
+        },
+        {
+          "type": "url",
+          "id": "image_link",
+          "label": "Image Link",
+          "info": "Optional: Make the image clickable"
+        },
+        {
+          "type": "checkbox",
+          "id": "image_open_new_tab",
+          "label": "Open link in new tab",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Image Sizing"
+        },
+        {
+          "type": "range",
+          "id": "image_max_width",
+          "min": 10,
+          "max": 800,
+          "step": 10,
+          "unit": "px",
+          "label": "Desktop Max Width",
+          "default": 400,
+          "info": "Maximum width of the image on desktop"
+        },
+        {
+          "type": "range",
+          "id": "image_max_width_mobile",
+          "min": 10,
+          "max": 400,
+          "step": 10,
+          "unit": "px",
+          "label": "Mobile Max Width",
+          "default": 300,
+          "info": "Maximum width of the image on mobile"
+        },
+        {
+          "type": "header",
+          "content": "Image Spacing"
+        },
+        {
+          "type": "range",
+          "id": "image_margin_top",
+          "min": 0,
+          "max": 80,
+          "step": 4,
+          "unit": "px",
+          "label": "Top Margin",
+          "default": 20,
+          "info": "Space above the image"
+        },
+        {
+          "type": "range",
+          "id": "image_margin_bottom",
+          "min": 0,
+          "max": 80,
+          "step": 4,
+          "unit": "px",
+          "label": "Bottom Margin",
+          "default": 20,
+          "info": "Space below the image"
+        },
+        {
+          "type": "header",
+          "content": "Image Styling"
+        },
+        {
+          "type": "range",
+          "id": "image_border_radius",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Border Radius",
+          "default": 8,
+          "info": "Roundness of image corners"
+        },
+        {
+          "type": "range",
+          "id": "image_border_width",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "label": "Border Width",
+          "default": 0,
+          "info": "Width of border around image"
+        },
+        {
+          "type": "color",
+          "id": "image_border_color",
+          "label": "Border Color",
+          "default": "#e0e0e0",
+          "info": "Color of border around image"
+        },
+        {
+          "type": "header",
+          "content": "Image Effects"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_image_hover",
+          "label": "Enable Hover Effect",
+          "default": false,
+          "info": "Add a subtle scale effect on hover"
+        },
+        {
+          "type": "range",
+          "id": "image_hover_scale",
+          "min": 1.0,
+          "max": 1.2,
+          "step": 0.1,
+          "label": "Hover Scale",
+          "default": 1.1,
+          "info": "How much to scale the image on hover"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Rich Text",
+      "blocks": [
+        {
+          "type": "title"
+        },
+        {
+          "type": "subtitle"
+        },
+        {
+          "type": "button"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

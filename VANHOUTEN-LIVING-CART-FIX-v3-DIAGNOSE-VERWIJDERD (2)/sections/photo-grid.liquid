@@ -1,0 +1,1333 @@
+{% comment %}
+  Added image block limit of 30 to maintain layout
+  Fixed image position functionality to work with both block and section settings
+  Fixed image links not working by adding proper CSS and accessibility attributes
+  Fixed caption display with proper CSS and hover functionality
+  Removed duplicate background color schema setting
+  Moved Google Fonts to CSS imports for better performance
+  Consolidated all styles into single style block
+  Added lazy loading to all images
+  Fixed CSS color value missing # prefix
+  Removed duplicate text-fill-color property
+  Added proper CSS for caption and link elements
+  Improved accessibility with proper alt text and aria-labels
+{% endcomment %}
+
+{%- style -%}
+  /* Google Fonts for accent text customization */
+  {% unless section.settings.use_global_accent_typography %}
+    {% if section.settings.accent_font_family != 'inherit' and section.settings.accent_font_family != 'serif' %}
+      @import url('https://fonts.googleapis.com/css2?family=
+      {%- case section.settings.accent_font_family -%}
+        {%- when 'Georgia Pro' -%}Georgia+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700
+        {%- when 'Bodoni Moda' -%}Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800
+        {%- when 'Instrument Serif' -%}Instrument+Serif:ital@0;1
+        {%- when 'DM Serif Text' -%}DM+Serif+Text:ital@0;1
+        {%- when 'Nothing You Could Do' -%}Nothing+You+Could+Do
+      {%- endcase -%}
+      &display=swap');
+    {% endif %}
+  {% endunless %}
+
+  .photo-grid-section {
+    text-align: {{ section.settings.text_alignment }} !important;
+    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.section_bg_color }}{% endif %};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    padding-left: {{ section.settings.padding_horizontal }}px;
+    padding-right: {{ section.settings.padding_horizontal }}px;
+    border-radius: {{ section.settings.section_border_radius | default: 0 }}px;
+  }
+
+  .photo-grid-section .title,
+  .photo-grid-section .title .primary {
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_primary_color }}{% endif %};
+    font-family: var(--font-heading-family) !important;
+    font-weight: var(--font-weight-bold) !important;
+    letter-spacing: var(--letter-spacing-heading) !important;
+    font-size: {{ section.settings.title_font_size }}px;
+    margin-bottom: {{ section.settings.title_margin_bottom }}px;
+  }
+
+  .photo-grid-section .title .accent {
+    {% if section.settings.use_global_accent_typography %}
+      /* Use Global Accent Typography */
+      font-family: var(--font-accent-family) !important;
+      font-style: var(--font-accent-style) !important;
+      font-weight: var(--font-accent-weight) !important;
+      letter-spacing: var(--font-accent-letter-spacing) !important;
+      text-transform: var(--font-accent-text-transform) !important;
+    {% else %}
+      /* Use Section-Specific Accent Typography */
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %}
+            font-family: serif !important;
+          {% when 'Georgia Pro' %}
+            font-family: 'Georgia Pro', Georgia, serif !important;
+          {% when 'Bodoni Moda' %}
+            font-family: 'Bodoni Moda', Georgia, serif !important;
+          {% when 'Instrument Serif' %}
+            font-family: 'Instrument Serif', Georgia, serif !important;
+          {% when 'DM Serif Text' %}
+            font-family: 'DM Serif Text', Georgia, serif !important;
+          {% when 'Nothing You Could Do' %}
+            font-family: 'Nothing You Could Do', cursive !important;
+        {% endcase %}
+      {% endif %}
+      {% if section.settings.accent_font_style != 'normal' %}
+        font-style: {{ section.settings.accent_font_style }} !important;
+      {% endif %}
+      {% if section.settings.accent_font_weight != 'inherit' %}
+        font-weight: {{ section.settings.accent_font_weight }} !important;
+      {% endif %}
+    {% endif %}
+
+    /* Color and Gradient Application */
+    {%- if section.settings.use_global_accent_typography -%}
+      {%- comment -%} When using global accent typography, also use global accent color {%- endcomment -%}
+      color: {{ settings.global_section_accent_1_color }} !important;
+    {%- elsif section.settings.use_accent_gradient and section.settings.accent_text_gradient != blank -%}
+      background: {{ section.settings.accent_text_gradient }};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+    {%- elsif section.settings.use_theme_colors -%}
+      color: {{ settings.global_section_accent_1_color | default: '#ef4a65' }};
+    {%- else -%}
+      color: {{ section.settings.title_accent_color | default: '#ef4a65' }};
+    {%- endif -%}
+
+    padding-right: 4px !important;
+    display: inline-block !important;
+  }
+
+  .photo-grid-section .subtitle {
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_primary_color }}{% endif %};
+    font-weight: var(--font-weight-regular);
+    letter-spacing: var(--letter-spacing-body);
+    font-size: {{ section.settings.subtitle_font_size }}px !important;
+    margin-bottom: {{ section.settings.subtitle_margin_bottom }}px;
+  }
+
+  .photo-grid {
+    grid-template-columns: repeat({{ section.settings.columns_mobile }}, 1fr);
+    gap: {{ section.settings.grid_gap }}px !important;
+  }
+
+  @media only screen and (min-width: 769px) {
+    .photo-grid {
+      grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
+      max-width: {% if section.settings.columns_desktop == '3' %}600px{% elsif section.settings.columns_desktop == '4' %}800px{% else %}1000px{% endif %};
+    }
+  }
+
+  .photo-item {
+    {% if section.settings.use_gradient_border_photos %}
+      border: {{ section.settings.border_width }}px solid transparent !important;
+      position: relative !important;
+    {% else %}
+      border: {{ section.settings.border_width }}px solid {{ section.settings.border_color }};
+    {% endif %}
+    border-radius: {{ section.settings.border_radius }}px;
+  }
+
+  {% if section.settings.use_gradient_border_photos %}
+    .photo-item::before {
+      content: '' !important;
+      position: absolute !important;
+      top: -{{ section.settings.border_width }}px !important;
+      right: -{{ section.settings.border_width }}px !important;
+      bottom: -{{ section.settings.border_width }}px !important;
+      left: -{{ section.settings.border_width }}px !important;
+      z-index: -1 !important;
+      border-radius: {{ section.settings.border_radius }}px !important;
+      {% if section.settings.social_badge_type == 'tiktok' %}
+        background: linear-gradient(45deg, #00f2ea, #ff0050) !important;
+      {% elsif section.settings.social_badge_type == 'facebook' %}
+        background: linear-gradient(45deg, #1877F2, #4267B2) !important;
+      {% elsif section.settings.social_badge_type == 'instagram' %}
+        background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045) !important;
+      {% else %}
+        background: {{ section.settings.border_color }} !important;
+      {% endif %}
+    }
+  {% endif %}
+
+  /* Social badge background and border styling */
+  .photo-grid-social-badge {
+    color: {{ section.settings.badge_text_color | default: '#262626' }} !important;
+    border-radius: {{ section.settings.badge_border_radius | default: 999 }}px !important;
+    {% unless section.settings.use_gradient_border %}
+      border: {{ section.settings.badge_border_width | default: 1 }}px solid {{ section.settings.badge_border_color | default: '#000000' }} !important;
+    {% endunless %}
+  }
+
+  /* Ensure text elements inherit the badge color when gradient is not used */
+  {% unless section.settings.use_gradient_text %}
+    .photo-grid-social-text,
+    .photo-grid-social-counter {
+      color: {{ section.settings.badge_text_color | default: '#262626' }} !important;
+    }
+  {% endunless %}
+
+  .photo-grid-social-badge::before {
+    border-radius: {{ section.settings.badge_border_radius | default: 999 }}px !important;
+  }
+
+  .photo-grid-social-badge::after {
+    background-color: {{ section.settings.badge_background_color | default: '#f8f9fa' }} !important;
+    border-radius: {{ section.settings.badge_border_radius | default: 999 }}px !important;
+  }
+
+  {% if section.settings.use_gradient_border %}
+    .photo-grid-social-badge::before {
+      {% if section.settings.social_badge_type == 'tiktok' %}
+        background: linear-gradient(45deg, {{ section.settings.tiktok_gradient_color_1 | default: '#00f2ea' }}, {{ section.settings.tiktok_gradient_color_2 | default: '#ff0050' }}) !important;
+      {% elsif section.settings.social_badge_type == 'facebook' %}
+        background: linear-gradient(45deg, {{ section.settings.facebook_gradient_color_1 | default: '#1877F2' }}, {{ section.settings.facebook_gradient_color_2 | default: '#4267B2' }}) !important;
+      {% elsif section.settings.social_badge_type == 'instagram' %}
+        background: linear-gradient(45deg, {{ section.settings.instagram_gradient_color_1 | default: '#833ab4' }}, {{ section.settings.instagram_gradient_color_2 | default: '#fd1d1d' }}, {{ section.settings.instagram_gradient_color_3 | default: '#fcb045' }}) !important;
+      {% endif %}
+    }
+  {% else %}
+    .photo-grid-social-badge::before {
+      display: none !important;
+    }
+  {% endif %}
+
+  .photo-grid-section .tiktok-views-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 1.7px 10px !important;
+    background-color: #f8f9fa !important;
+    border-radius: 999px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 8.6px !important;
+    color: #262626 !important;
+    position: relative !important;
+    border: 1px solid transparent !important;
+    background-clip: padding-box !important;
+    margin-bottom: 10px;
+  }
+
+  .photo-grid-section .tiktok-views-badge::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    left: -1px !important;
+    z-index: -1 !important;
+    border-radius: 999px !important;
+    background: linear-gradient(45deg, #00f2ea, #ff0050) !important;
+  }
+
+  .photo-grid-section .tiktok-icon {
+    width: 9.8px !important;
+    height: 9.8px !important;
+    margin-right: 7px !important;
+  }
+
+  .photo-grid-section .tiktok-text {
+    letter-spacing: -0.3px !important;
+    font-weight: 500 !important;
+  }
+
+  .photo-grid-section .instagram-views-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 1.7px 10px !important;
+    background-color: #f8f9fa !important;
+    margin-bottom: 10px !important;
+    border-radius: 999px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 11px !important;
+    color: #262626 !important;
+    position: relative !important;
+    border: 1px solid transparent !important;
+    background-clip: padding-box !important;
+  }
+
+  .photo-grid-section .instagram-views-badge::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    left: -1px !important;
+    z-index: -1 !important;
+    border-radius: 999px !important;
+    background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045) !important;
+  }
+
+  .photo-grid-section .instagram-icon {
+    width: 9.8px !important;
+    height: 9.8px !important;
+    margin-right: 7px !important;
+  }
+
+  .photo-grid-section [dir="rtl"] .instagram-icon {
+    margin-left: 7px;
+  }
+
+  .photo-grid-section .instagram-text {
+    letter-spacing: -0.3px !important;
+    font-weight: 500 !important;
+  }
+
+  .photo-grid-section .facebook-views-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 1.7px 10px !important;
+    background-color: #f8f9fa !important;
+    border-radius: 999px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 8.6px !important;
+    color: 262626 !important;
+    position: relative !important;
+    border: 1px solid transparent !important;
+    background-clip: padding-box !important;
+    margin-bottom: 10px;
+  }
+
+  .photo-grid-section .facebook-views-badge::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    left: -1px !important;
+    z-index: -1 !important;
+    border-radius: 999px !important;
+    background: #1877F2 !important;
+  }
+
+  .photo-grid-section .facebook-icon {
+    width: 9.8px !important;
+    height: 9.8px !important;
+    margin-right: 7px !important;
+  }
+
+  .photo-grid-section .facebook-text {
+    letter-spacing: -0.3px !important;
+    font-weight: 500 !important;
+  }
+
+  @media (max-width: 768px) {
+    .photo-grid-section .tiktok-views-badge,
+    .photo-grid-section .instagram-views-badge,
+    .photo-grid-section .facebook-views-badge {
+      font-size: 11px !important;
+      padding: 1.7px 12px !important;
+    }
+
+    .photo-grid-section .tiktok-icon,
+    .photo-grid-section .instagram-icon,
+    .photo-grid-section .facebook-icon {
+      width: 11.7px !important;
+      height: 11.7px !important;
+      margin-right: 7.5px !important;
+    }
+
+    .photo-grid-section .title,
+    .photo-grid-section .title .primary {
+      font-size: {{ section.settings.title_font_size_mobile }}px !important;
+    }
+
+    .photo-grid-section .subtitle {
+      font-size: {{ section.settings.subtitle_font_size_mobile }}px !important;
+    }
+  }
+
+  {% if section.settings.use_gradient_text %}
+    .photo-grid-social-text,
+    .photo-grid-social-counter {
+      {% if section.settings.social_badge_type == 'tiktok' %}
+        background: linear-gradient(45deg, {{ section.settings.tiktok_gradient_color_1 | default: '#00f2ea' }}, {{ section.settings.tiktok_gradient_color_2 | default: '#ff0050' }}) !important;
+      {% elsif section.settings.social_badge_type == 'facebook' %}
+        background: linear-gradient(45deg, {{ section.settings.facebook_gradient_color_1 | default: '#1877F2' }}, {{ section.settings.facebook_gradient_color_2 | default: '#4267B2' }}) !important;
+      {% elsif section.settings.social_badge_type == 'instagram' %}
+        background: linear-gradient(45deg, {{ section.settings.instagram_gradient_color_1 | default: '#833ab4' }}, {{ section.settings.instagram_gradient_color_2 | default: '#fd1d1d' }}, {{ section.settings.instagram_gradient_color_3 | default: '#fcb045' }}) !important;
+      {% endif %}
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+    }
+  {% endif %}
+
+  .photo-grid-social-counter {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  /* Enhanced accent text styling for additional classes */
+  .photo-grid-section .global-accent-text,
+  .photo-grid-section .custom-accent-text {
+    {% if section.settings.use_global_accent_typography %}
+      /* Use Global Accent Typography */
+      font-family: var(--font-accent-family) !important;
+      font-style: var(--font-accent-style) !important;
+      font-weight: var(--font-accent-weight) !important;
+      letter-spacing: var(--font-accent-letter-spacing) !important;
+      text-transform: var(--font-accent-text-transform) !important;
+    {% else %}
+      /* Use Section-Specific Accent Typography */
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %}
+            font-family: serif !important;
+          {% when 'Georgia Pro' %}
+            font-family: 'Georgia Pro', Georgia, serif !important;
+          {% when 'Bodoni Moda' %}
+            font-family: 'Bodoni Moda', Georgia, serif !important;
+          {% when 'Instrument Serif' %}
+            font-family: 'Instrument Serif', Georgia, serif !important;
+          {% when 'DM Serif Text' %}
+            font-family: 'DM Serif Text', Georgia, serif !important;
+          {% when 'Nothing You Could Do' %}
+            font-family: 'Nothing You Could Do', cursive !important;
+        {% endcase %}
+      {% endif %}
+      {% if section.settings.accent_font_style != 'normal' %}
+        font-style: {{ section.settings.accent_font_style }} !important;
+      {% endif %}
+      {% if section.settings.accent_font_weight != 'inherit' %}
+        font-weight: {{ section.settings.accent_font_weight }} !important;
+      {% endif %}
+    {% endif %}
+
+    /* Color and Gradient Application */
+    {%- if section.settings.use_global_accent_typography -%}
+      {%- comment -%} When using global accent typography, also use global accent color {%- endcomment -%}
+      color: {{ settings.global_section_accent_1_color }} !important;
+    {%- elsif section.settings.use_accent_gradient and section.settings.accent_text_gradient != blank -%}
+      background: {{ section.settings.accent_text_gradient }};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    {%- elsif section.settings.use_theme_colors -%}
+      color: {{ settings.global_section_accent_1_color | default: '#ef4a65' }} !important;
+    {%- else -%}
+      color: {{ section.settings.title_accent_color | default: '#ef4a65' }} !important;
+    {%- endif -%}
+
+    padding-right: 4px !important;
+    display: inline-block !important;
+  }
+
+  /* Photo caption styling */
+  .photo-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 12px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    text-align: center;
+  }
+
+  .photo-item:hover .photo-caption {
+    opacity: 1;
+  }
+
+  /* Photo link styling */
+  .photo-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+  }
+{%- endstyle -%}
+
+{{ 'photo-grid-section.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  /* Override external CSS - must come after photo-grid-section.css */
+  .photo-grid-social-badge {
+    border-radius: {{ section.settings.badge_border_radius | default: 999 }}px !important;
+    {% unless section.settings.use_gradient_border %}
+      border: {{ section.settings.badge_border_width | default: 1 }}px solid {{ section.settings.badge_border_color | default: '#000000' }} !important;
+    {% else %}
+      border: 1px solid transparent !important;
+    {% endunless %}
+  }
+  
+  .photo-grid-social-badge::before {
+    border-radius: {{ section.settings.badge_border_radius | default: 999 }}px !important;
+  }
+  
+  .photo-grid-social-badge::after {
+    border-radius: {{ section.settings.badge_border_radius | default: 999 }}px !important;
+  }
+
+  /* Ensure image fit is correctly applied */
+  {% unless section.settings.natural_aspect_ratio %}
+    .photo-image {
+      object-fit: cover !important;
+    }
+  {% endunless %}
+{%- endstyle -%}
+
+<script src="{{ 'photo-grid-counter.js' | asset_url }}" defer></script>
+
+<div
+  class="photo-grid-section {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}"
+  {% if section.settings.natural_aspect_ratio %}
+    data-natural-aspect-ratio="true"
+  {% endif %}
+>
+  {% if section.settings.title_primary != blank or section.settings.title_accent != blank %}
+    <h2 class="title">
+      <span class="primary">{{ section.settings.title_primary }}</span>
+      <span class="accent">{{ section.settings.title_accent }}</span>
+    </h2>
+  {% elsif section.settings.title != blank %}
+    <h2 class="title">{{ section.settings.title }}</h2>
+  {% endif %}
+
+  {% if section.settings.subtitle != blank %}
+    <h3 class="subtitle">{{ section.settings.subtitle }}</h3>
+  {% endif %}
+
+  {% if section.settings.social_badge_type != 'none' %}
+    {% if section.settings.social_badge_type == 'tiktok' %}
+      <div class="photo-grid-social-badge photo-grid-tiktok-badge">
+        <img
+          class="photo-grid-social-icon"
+          src="https://cdn4.iconfinder.com/data/icons/social-media-flat-7/64/Social-media_Tiktok-512.png"
+          width="11.56"
+          height="11.56"
+          alt="TikTok"
+          loading="lazy"
+        >
+        <span class="photo-grid-social-text">
+          {{- section.settings.badge_text | default: 'Over ' }}&nbsp;<span
+            id="photo-grid-social-counter"
+            class="photo-grid-social-counter"
+          >
+            {{- section.settings.view_count -}}
+          </span>
+          {{- section.settings.badge_suffix | default: 'M Views On TikTok' -}}
+        </span>
+      </div>
+    {% elsif section.settings.social_badge_type == 'facebook' %}
+      <div class="photo-grid-social-badge photo-grid-facebook-badge">
+        <svg
+          class="photo-grid-social-icon"
+          width="11.56"
+          height="11.56"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
+        </svg>
+        <span class="photo-grid-social-text">
+          {{- section.settings.badge_text | default: 'Over ' }}&nbsp;<span
+            id="photo-grid-social-counter"
+            class="photo-grid-social-counter"
+          >
+            {{- section.settings.view_count -}}
+          </span>
+          {{- section.settings.badge_suffix | default: 'M Views On Facebook' -}}
+        </span>
+      </div>
+    {% elsif section.settings.social_badge_type == 'instagram' %}
+      <div class="photo-grid-social-badge photo-grid-instagram-badge">
+        <svg
+          class="photo-grid-social-icon"
+          width="11.56"
+          height="11.56"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <linearGradient id="instagramGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#833ab4" />
+              <stop offset="50%" stop-color="#fd1d1d" />
+              <stop offset="100%" stop-color="#fcb045" />
+            </linearGradient>
+          </defs>
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" fill="url(#instagramGradient)"/>
+        </svg>
+        <span class="photo-grid-social-text">
+          {{- section.settings.badge_text | default: 'Over ' }}&nbsp;<span
+            id="photo-grid-social-counter"
+            class="photo-grid-social-counter"
+          >
+            {{- section.settings.view_count -}}
+          </span>
+          {{- section.settings.badge_suffix | default: 'M Views On Instagram' -}}
+        </span>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  <div class="photo-grid">
+    {% for block in section.blocks %}
+      {% if block.type == 'image_item' %}
+        <div class="photo-item" {{ block.shopify_attributes }}>
+          {% if block.settings.image != blank %}
+            {% assign img_url = block.settings.image | image_url: width: 800 %}
+            {% assign image_position = block.settings.custom_position %}
+            {% if image_position == blank or image_position == "center center" %}
+              {% assign image_position = section.settings.image_position %}
+            {% endif %}
+            <img
+              src="{{ img_url }}"
+              alt="{{ block.settings.image.alt | escape }}"
+              loading="lazy"
+              class="photo-image"
+              width=""
+              height=""
+              style="object-position: {{ image_position }} !important;"
+            >
+          {% else %}
+            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+          {% endif %}
+
+          {% if block.settings.link != blank %}
+            <a href="{{ block.settings.link }}" class="photo-link" aria-label="View image details"></a>
+          {% endif %}
+
+          {% if block.settings.caption != blank and section.settings.show_image_caption %}
+            <div class="photo-caption">{{ block.settings.caption }}</div>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    {% if section.blocks.size == 0 %}
+      {% for i in (1..9) %}
+        <div class="photo-item placeholder">
+          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Photo Grid",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "Apply the global theme colors to this section - background, title text and accent colors"
+    },
+    {
+      "type": "header",
+      "content": "General Settings"
+    },
+    {
+      "type": "text",
+      "id": "title_primary",
+      "label": "Title (Primary Part)",
+      "default": "Loved By"
+    },
+    {
+      "type": "text",
+      "id": "title_accent",
+      "label": "Title (Accent Part)",
+      "default": "5,000+"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "A showcase of images"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 16,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Desktop Title Size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "title_font_size_mobile",
+      "min": 14,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile Title Size",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "subtitle_font_size",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop Subtitle Size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "subtitle_font_size_mobile",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile Subtitle Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Title Bottom Margin",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "subtitle_margin_bottom",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Subtitle Bottom Margin",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "title_primary_color",
+      "label": "Primary Title Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "title_accent_color",
+      "label": "Accent Title Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_global_accent_typography",
+      "label": "Use Global Accent Typography",
+      "default": false,
+      "info": "When enabled, the accent text will use the global accent typography settings from Theme Settings > Typography > Accent Typography. When disabled, the section-specific settings below will be used."
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text. This will override the solid accent color."
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)"
+    },
+    {
+      "type": "header",
+      "content": "Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Accent Text Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Global Accent Typography is disabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text (only used when Global Accent Typography is disabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text (only used when Global Accent Typography is disabled)"
+    },
+    {
+      "type": "header",
+      "content": "Social Media Badge"
+    },
+    {
+      "type": "select",
+      "id": "social_badge_type",
+      "label": "Social media badge",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "tiktok",
+          "label": "TikTok"
+        },
+        {
+          "value": "facebook",
+          "label": "Facebook"
+        },
+        {
+          "value": "instagram",
+          "label": "Instagram"
+        }
+      ],
+      "default": "instagram",
+      "info": "When a badge is selected, it will replace the subtitle"
+    },
+    {
+      "type": "text",
+      "id": "view_count",
+      "label": "View count (in millions)",
+      "default": "5.6"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge prefix text",
+      "default": "Over ",
+      "info": "Text that appears before the view count"
+    },
+    {
+      "type": "text",
+      "id": "badge_suffix",
+      "label": "Badge suffix text",
+      "default": "M Views On TikTok",
+      "info": "Text that appears after the view count"
+    },
+    {
+      "type": "header",
+      "content": "Badge Styling"
+    },
+    {
+      "type": "color",
+      "id": "badge_background_color",
+      "label": "Badge Background Color",
+      "default": "#f8f9fa"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Badge Text Color",
+      "default": "#262626"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_text",
+      "label": "Use Platform Gradient Text",
+      "info": "Apply platform-specific gradient colors to badge text",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_border",
+      "label": "Use Gradient Border for Badge",
+      "info": "Apply platform-specific gradient border to the social media badge",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "badge_border_width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Border Width",
+      "default": 1,
+      "info": "Only applies when gradient border is disabled"
+    },
+    {
+      "type": "color",
+      "id": "badge_border_color",
+      "label": "Badge Border Color",
+      "default": "#000000",
+      "info": "Only applies when gradient border is disabled"
+    },
+    {
+      "type": "range",
+      "id": "badge_border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Border Radius",
+      "default": 50,
+      "info": "Controls the roundness of the badge corners (999px = fully rounded)"
+    },
+    {
+      "type": "header",
+      "content": "Platform Gradient Colors"
+    },
+    {
+      "type": "color",
+      "id": "tiktok_gradient_color_1",
+      "label": "TikTok Gradient Color 1",
+      "default": "#00f2ea"
+    },
+    {
+      "type": "color",
+      "id": "tiktok_gradient_color_2",
+      "label": "TikTok Gradient Color 2",
+      "default": "#ff0050"
+    },
+    {
+      "type": "color",
+      "id": "facebook_gradient_color_1",
+      "label": "Facebook Gradient Color 1",
+      "default": "#1877F2"
+    },
+    {
+      "type": "color",
+      "id": "facebook_gradient_color_2",
+      "label": "Facebook Gradient Color 2",
+      "default": "#4267B2"
+    },
+    {
+      "type": "color",
+      "id": "instagram_gradient_color_1",
+      "label": "Instagram Gradient Color 1",
+      "default": "#833ab4"
+    },
+    {
+      "type": "color",
+      "id": "instagram_gradient_color_2",
+      "label": "Instagram Gradient Color 2",
+      "default": "#fd1d1d"
+    },
+    {
+      "type": "color",
+      "id": "instagram_gradient_color_3",
+      "label": "Instagram Gradient Color 3",
+      "default": "#fcb045"
+    },
+    {
+      "type": "header",
+      "content": "Grid Layout"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Gap between images",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Number of columns on mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 column"
+        },
+        {
+          "value": "2",
+          "label": "2 columns"
+        },
+        {
+          "value": "3",
+          "label": "3 columns"
+        }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "Number of columns on desktop",
+      "options": [
+        {
+          "value": "3",
+          "label": "3 columns"
+        },
+        {
+          "value": "4",
+          "label": "4 columns"
+        },
+        {
+          "value": "5",
+          "label": "5 columns"
+        }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "natural_aspect_ratio",
+      "label": "Natural Image Aspect Ratio",
+      "default": false,
+      "info": "When enabled, images with taller dimensions (like 3:2 or 4:3) will show at their natural aspect ratio instead of being cropped to squares. This allows you to see the full image without cropping. Works best when most images have similar aspect ratios."
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Default image position",
+      "options": [
+        {
+          "value": "center center",
+          "label": "Center"
+        },
+        {
+          "value": "top center",
+          "label": "Top"
+        },
+        {
+          "value": "bottom center",
+          "label": "Bottom"
+        },
+        {
+          "value": "left center",
+          "label": "Left"
+        },
+        {
+          "value": "right center",
+          "label": "Right"
+        }
+      ],
+      "default": "center center",
+      "info": "Sets the default focal point when using 'cover' fit"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image_caption",
+      "label": "Show image captions",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Image Border Styling"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#dddddd"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_border_photos",
+      "label": "Use gradient border for photos",
+      "default": false,
+      "info": "Apply gradient borders matching the selected social media platform colors"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Horizontal Padding",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "section_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Section Border Radius",
+      "default": 0,
+      "info": "Adds rounded corners to the entire section"
+    },
+    {
+      "type": "header",
+      "content": "Section Background"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image_item",
+      "name": "Image",
+      "limit": 30,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Image Content"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "select",
+          "id": "custom_position",
+          "label": "Image position",
+          "options": [
+            {
+              "value": "",
+              "label": "Use section default"
+            },
+            {
+              "value": "center center",
+              "label": "Center"
+            },
+            {
+              "value": "top center",
+              "label": "Top"
+            },
+            {
+              "value": "bottom center",
+              "label": "Bottom"
+            },
+            {
+              "value": "left center",
+              "label": "Left"
+            },
+            {
+              "value": "right center",
+              "label": "Right"
+            },
+            {
+              "value": "top left",
+              "label": "Top left"
+            },
+            {
+              "value": "top right",
+              "label": "Top right"
+            },
+            {
+              "value": "bottom left",
+              "label": "Bottom left"
+            },
+            {
+              "value": "bottom right",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "",
+          "info": "Controls which part of the image is visible. Leave as default to use section setting."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link (Optional)"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption (Optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Photo Grid",
+      "blocks": [
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

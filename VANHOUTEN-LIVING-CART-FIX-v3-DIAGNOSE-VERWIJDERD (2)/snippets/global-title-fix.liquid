@@ -1,0 +1,86 @@
+<style>
+  /* Global Title/Heading Color Overrides */
+  /* Apply consistent text colors based on theme settings */
+
+  h1, h2, h3, h4, h5, h6,
+  .title, .heading,
+  [class*="title"], [class*="heading"],
+  .collection-hero__title,
+  .main-collection-title,
+  .page-title,
+  .section-header__title,
+  .section-title,
+  .product-title,
+  .collection-title,
+  .blog-title,
+  .card__heading,
+  .headline,
+  .subtitle,
+  .caption-with-letter-spacing,
+  .h1, .h2, .h3, .h4, .h5, .h6,
+  .comparison-heading,
+  .comparison-product-title,
+  .statistics-section-title,
+  .statistic-title,
+  .alt-feat-section-title,
+  .alt-feat-title,
+  .as-seen-in-title,
+  .custom-hero__title,
+  .custom-main-heading,
+  .reviews-subtitle {
+    color: {{ settings.global_section_text_color }} !important;
+  }
+
+  /* Specific title classes that might be in sections using theme colors */
+  .section[data-use-theme-colors="true"] .title,
+  .section[data-use-theme-colors="true"] [class*="title"],
+  .section[data-use-theme-colors="true"] h1,
+  .section[data-use-theme-colors="true"] h2,
+  .section[data-use-theme-colors="true"] h3,
+  .section[data-use-theme-colors="true"] h4,
+  .section[data-use-theme-colors="true"] h5,
+  .section[data-use-theme-colors="true"] h6,
+  .section[data-use-theme-colors="true"] .heading,
+
+  div[class*="section"][data-use-theme-colors="true"] .title,
+  div[class*="section"][data-use-theme-colors="true"] [class*="title"],
+  div[class*="section"][data-use-theme-colors="true"] h1,
+  div[class*="section"][data-use-theme-colors="true"] h2,
+  div[class*="section"][data-use-theme-colors="true"] h3,
+  div[class*="section"][data-use-theme-colors="true"] h4,
+  div[class*="section"][data-use-theme-colors="true"] h5,
+  div[class*="section"][data-use-theme-colors="true"] h6,
+  div[class*="section"][data-use-theme-colors="true"] .heading,
+
+  *[data-use-theme-colors="true"] .title,
+  *[data-use-theme-colors="true"] [class*="title"],
+  *[data-use-theme-colors="true"] h1,
+  *[data-use-theme-colors="true"] h2,
+  *[data-use-theme-colors="true"] h3,
+  *[data-use-theme-colors="true"] h4,
+  *[data-use-theme-colors="true"] h5,
+  *[data-use-theme-colors="true"] h6,
+  *[data-use-theme-colors="true"] .heading {
+    color: {{ settings.global_section_text_color }} !important;
+  }
+
+  /* Specific shop product heading/title elements */
+  .shop-product-title,
+  .shop-product-section .title,
+  .shop-product-section h1,
+  .shop-product-section h2,
+  .shop-product-section h3,
+  .shop-product-section h4,
+  .shop-product-section h5,
+  .shop-product-section h6 {
+    color: {% if settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}inherit{% endif %} !important;
+  }
+
+  /* Specific exceptions where accent color might be needed instead of text color */
+  .accent-title,
+  [class*="accent-title"],
+  .accent-heading,
+  [class*="accent-heading"] {
+    color: {{ settings.global_section_accent_1_color }} !important;
+  }
+</style>

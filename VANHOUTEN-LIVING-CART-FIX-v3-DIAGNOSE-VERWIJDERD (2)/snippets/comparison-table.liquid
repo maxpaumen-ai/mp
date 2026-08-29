@@ -1,0 +1,224 @@
+{% assign gen_id = block.id | replace: '_', '' | downcase %}
+
+<style>
+  .comparison-table-{{ gen_id }} {
+    margin: 0;
+  }
+
+  .comparison-table__container-{{ gen_id }} {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .comparison-table__table-wrapper-{{ gen_id }} {
+    overflow-x: auto;
+    width: 100%;
+    {% if block.settings.enable_outer_border %}
+      border: {{ block.settings.outer_border_width | default: 1 }}px {{ block.settings.outer_border_style | default: 'solid' }} {{ block.settings.outer_border_color | default: '#e0e0e0' }};
+      border-radius: {{ block.settings.outer_border_radius | default: 8 }}px;
+    {% else %}
+      border: none;
+      border-radius: 0;
+    {% endif %}
+  }
+
+  .comparison-table__table-{{ gen_id }} {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    border: none;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .comparison-table__row-{{ gen_id }} {
+    {% if block.settings.enable_inner_borders %}
+      border-bottom: {{ block.settings.inner_border_width | default: 1 }}px {{ block.settings.table_border_style | default: 'solid' }} {{ block.settings.table_border_color | default: '#e0e0e0' }};
+    {% endif %}
+    display: grid;
+    grid-template-columns: 2.5fr 4fr 2.5fr;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* First row (header with images) */
+  .comparison-table__row-{{ gen_id }}:first-child {
+    max-height: 120px;
+  }
+
+  .comparison-table__row-{{ gen_id }}:last-child {
+    border-bottom: none;
+  }
+
+  {% if block.settings.enable_alternating_rows %}
+    .comparison-table__row-{{ gen_id }}:nth-child(even) {
+      background-color: {{ block.settings.table_row_alt_background }};
+    }
+  {% endif %}
+
+  .comparison-table__cell-{{ gen_id }} {
+    padding: 0;
+    letter-spacing: var(--letter-spacing-body);
+    vertical-align: middle;
+    font-family: {{ block.settings.table_font.family }}, {{ block.settings.table_font.fallback_families }};
+    font-weight: {{ block.settings.table_font.weight }};
+    font-size: {{ block.settings.table_font_size }}px;
+    color: {{ block.settings.table_text_color }};
+  }
+
+  .comparison-table__cell--product-{{ gen_id }} {
+    text-align: center;
+    background-color: {{ block.settings.product_column_background }};
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .comparison-table__cell--feature-{{ gen_id }} {
+    background-color: {{ block.settings.feature_column_background }};
+    font-weight: bold;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .comparison-table__cell--competitor-{{ gen_id }} {
+    text-align: center;
+    background-color: {{ block.settings.competitor_column_background }};
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .comparison-table__product-image-{{ gen_id }} {
+    width: 65px;
+    height: 65px;
+    max-width: 65px;
+    margin: 0 auto;
+    object-fit: cover;
+    aspect-ratio: 1/1;
+    display: block;
+  }
+
+  .comparison-table__product-placeholder-{{ gen_id }} {
+    width: 100%;
+    max-width: 200px;
+    height: 200px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .comparison-table__product-placeholder-{{ gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.5;
+  }
+
+  .comparison-table__icon-{{ gen_id }} {
+    font-size: {{ block.settings.icon_size | default: 17 }}px;
+    font-weight: bold;
+  }
+
+  .comparison-table__icon--check-{{ gen_id }} {
+    color: {{ block.settings.check_icon_color | default: '#00aa00' }};
+  }
+
+  .comparison-table__icon--cross-{{ gen_id }} {
+    color: {{ block.settings.cross_icon_color | default: '#cc0000' }};
+  }
+
+  @media screen and (max-width: 768px) {
+    .comparison-table__table-{{ gen_id }} {
+      font-size: 14px;
+    }
+
+    .comparison-table__cell--product-{{ gen_id }},
+    .comparison-table__cell--feature-{{ gen_id }},
+    .comparison-table__cell--competitor-{{ gen_id }} {
+      padding: 12px 8px;
+    }
+  }
+
+  @media screen and (max-width: 576px) {
+    .comparison-table__cell-{{ gen_id }} {
+      font-size: 14px;
+    }
+  }
+</style>
+
+<div class="comparison-table-{{ gen_id }}" {{ block.shopify_attributes }}>
+  <div class="comparison-table__container-{{ gen_id }}">
+    <div class="comparison-table__table-wrapper-{{ gen_id }}">
+      <table class="comparison-table__table-{{ gen_id }}">
+        <tbody>
+          <tr class="comparison-table__row-{{ gen_id }}">
+            <td class="comparison-table__cell-{{ gen_id }} comparison-table__cell--product-{{ gen_id }}">
+              {% if block.settings.product_image %}
+                <img
+                  src="{{ block.settings.product_image | image_url: width: 400 }}"
+                  alt="{{ block.settings.product_image.alt | escape }}"
+                  class="comparison-table__product-image-{{ gen_id }}"
+                  loading="lazy"
+                  width="{{ block.settings.product_image.width }}"
+                  height="{{ block.settings.product_image.height }}"
+                >
+              {% else %}
+                <div class="comparison-table__product-placeholder-{{ gen_id }}">
+                  {{ 'product-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </td>
+            <td class="comparison-table__cell-{{ gen_id }} comparison-table__cell--feature-{{ gen_id }}">
+              <span>Feature</span>
+            </td>
+            <td class="comparison-table__cell-{{ gen_id }} comparison-table__cell--competitor-{{ gen_id }}">
+              <span>Other Brands</span>
+            </td>
+          </tr>
+
+          {% for i in (1..8) %}
+            {% assign feature_key = 'feature_' | append: i %}
+            {% assign competitor_key = 'competitor_' | append: i %}
+            {% assign feature_text = block.settings[feature_key] %}
+            {% assign competitor_value = block.settings[competitor_key] %}
+
+            {% if feature_text != blank %}
+              <tr class="comparison-table__row-{{ gen_id }}">
+                <td class="comparison-table__cell-{{ gen_id }} comparison-table__cell--product-{{ gen_id }}">
+                  <span class="comparison-table__icon-{{ gen_id }} comparison-table__icon--check-{{ gen_id }}">✓</span>
+                </td>
+                <td class="comparison-table__cell-{{ gen_id }} comparison-table__cell--feature-{{ gen_id }}">
+                  {{ feature_text }}
+                </td>
+                <td class="comparison-table__cell-{{ gen_id }} comparison-table__cell--competitor-{{ gen_id }}">
+                  {% if competitor_value == 'check' %}
+                    <span class="comparison-table__icon-{{ gen_id }} comparison-table__icon--check-{{ gen_id }}"
+                      >✓</span
+                    >
+                  {% else %}
+                    <span class="comparison-table__icon-{{ gen_id }} comparison-table__icon--cross-{{ gen_id }}"
+                      >✗</span
+                    >
+                  {% endif %}
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

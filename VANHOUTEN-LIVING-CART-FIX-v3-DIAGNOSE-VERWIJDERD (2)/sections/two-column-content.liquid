@@ -1,0 +1,2573 @@
+
+
+
+{%- style -%}
+  {% if section.settings.override_global_accent %}
+    {{ section.settings.accent_font_family | font_face: font_display: 'swap' }}
+  {% endif %}
+
+  #two-column-{{ section.id }} {
+    {% if section.settings.use_theme_colors %}
+      background-color: {{ settings.global_section_background_color }};
+      color: {{ settings.global_section_text_color }};
+    {% else %}
+      background-color: {{ section.settings.background_color }};
+      color: {{ section.settings.text_color }};
+    {% endif %}
+    padding-top: {{ section.settings.padding_top_mobile }}px;
+    padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+    padding-left: {{ section.settings.padding_horizontal_mobile }}px;
+    padding-right: {{ section.settings.padding_horizontal_mobile }}px;
+  }
+
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top_desktop }}px;
+      padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+      padding-left: {{ section.settings.padding_horizontal_desktop }}px;
+      padding-right: {{ section.settings.padding_horizontal_desktop }}px;
+    }
+  }
+
+  #two-column-{{ section.id }} .two-column__container {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+  }
+
+  #two-column-{{ section.id }} .two-column__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: {{ section.settings.column_gap_mobile }}px;
+  }
+
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} .two-column__wrapper {
+      flex-direction: {% if section.settings.column_order == 'right_first' %}row-reverse{% else %}row{% endif %};
+      gap: {{ section.settings.column_gap_desktop }}px;
+      align-items: {{ section.settings.vertical_alignment }};
+    }
+  }
+
+  #two-column-{{ section.id }} .two-column__column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} .two-column__column--left {
+      flex: 0 0 {{ section.settings.left_column_width }}%;
+      max-width: {{ section.settings.left_column_width }}%;
+      text-align: {{ section.settings.left_column_text_align }};
+      padding: {{ section.settings.left_column_padding }}px;
+      {% if section.settings.left_column_text_align == 'center' %}
+        align-items: center;
+      {% elsif section.settings.left_column_text_align == 'right' %}
+        align-items: flex-end;
+      {% else %}
+        align-items: flex-start;
+      {% endif %}
+    }
+
+    #two-column-{{ section.id }} .two-column__column--right {
+      flex: 0 0 {{ section.settings.right_column_width }}%;
+      max-width: {{ section.settings.right_column_width }}%;
+      text-align: {{ section.settings.right_column_text_align }};
+      padding: {{ section.settings.right_column_padding }}px;
+      {% if section.settings.right_column_text_align == 'center' %}
+        align-items: center;
+      {% elsif section.settings.right_column_text_align == 'right' %}
+        align-items: flex-end;
+      {% else %}
+        align-items: flex-start;
+      {% endif %}
+    }
+  }
+
+  /* Column Divider - Default is hidden */
+  #two-column-{{ section.id }} .two-column__divider {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-shrink: 0;
+    padding: 10px 0;
+  }
+
+  #two-column-{{ section.id }} .two-column__divider::before {
+    content: '';
+    display: block;
+    width: {{ section.settings.divider_height }}%;
+    height: {{ section.settings.divider_width }}px;
+    background-color: {{ section.settings.divider_color }};
+    min-height: 1px;
+  }
+
+  /* Mobile: Show horizontal divider between stacked rows */
+  @media screen and (max-width: 767px) {
+    {% if section.settings.show_divider_mobile %}
+      #two-column-{{ section.id }} .two-column__divider {
+        display: flex;
+      }
+    {% endif %}
+  }
+
+  /* Desktop: Show vertical divider between columns */
+  @media screen and (min-width: 768px) {
+    {% if section.settings.show_column_divider %}
+      #two-column-{{ section.id }} .two-column__divider {
+        display: flex;
+        width: auto;
+        align-self: stretch;
+        padding: 0 10px;
+      }
+
+      #two-column-{{ section.id }} .two-column__divider::before {
+        width: {{ section.settings.divider_width }}px;
+        height: {{ section.settings.divider_height }}%;
+        min-width: 1px;
+      }
+    {% endif %}
+  }
+
+  /* Block Styles */
+  #two-column-{{ section.id }} .block-heading {
+    font-size: var(--heading-size-mobile, 2rem);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.2;
+    letter-spacing: var(--letter-spacing-heading);
+    margin: 0 0 16px 0;
+    {% if section.settings.use_theme_colors %}
+      color: {{ settings.global_section_text_color }};
+    {% else %}
+      color: {{ section.settings.heading_color }};
+    {% endif %}
+  }
+
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} .block-heading {
+      font-size: var(--heading-size-desktop, 3rem);
+    }
+  }
+
+  #two-column-{{ section.id }} .block-heading .accent-text {
+    display: inline-block;
+    padding: 2px 4px;
+    margin: -2px -4px;
+    margin-left: {{ section.settings.accent_text_margin_left | default: 0 }}px;
+    
+    {% comment %} Gradient or solid color {% endcomment %}
+    {% if section.settings.use_theme_colors and settings.global_use_accent_text_gradient %}
+      {% comment %} Use global gradient when theme colors enabled and global gradient is on {% endcomment %}
+      background: {{ settings.global_accent_text_gradient_dark }};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    {% elsif section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    {% else %}
+      {% if section.settings.use_theme_colors %}
+        color: {{ settings.global_section_accent_1_color }};
+      {% else %}
+        color: {{ section.settings.accent_color }};
+      {% endif %}
+    {% endif %}
+    
+    {% comment %} Typography - global or section override {% endcomment %}
+    {% if section.settings.override_global_accent %}
+      {% comment %} Section-specific font styling using font_picker {% endcomment %}
+      font-family: {{ section.settings.accent_font_family.family }}, {{ section.settings.accent_font_family.fallback_families }};
+      
+      {% if section.settings.accent_font_style != 'inherit' %}
+        font-style: {{ section.settings.accent_font_style }};
+      {% else %}
+        font-style: {{ section.settings.accent_font_family.style }};
+      {% endif %}
+      
+      {% if section.settings.accent_font_weight != 'inherit' %}
+        font-weight: {{ section.settings.accent_font_weight }};
+      {% else %}
+        font-weight: {{ section.settings.accent_font_family.weight }};
+      {% endif %}
+    {% else %}
+      {% comment %} Use global accent typography settings {% endcomment %}
+      font-family: {{ settings.accent_text_font.family }}, {{ settings.accent_text_font.fallback_families }};
+      font-weight: {{ settings.accent_text_weight }};
+      font-style: {{ settings.accent_text_style }};
+    {% endif %}
+  }
+
+  #two-column-{{ section.id }} .block-subtitle {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    letter-spacing: var(--letter-spacing-body);
+    margin: 0 0 12px 0;
+    opacity: 0.85;
+  }
+
+  #two-column-{{ section.id }} .block-paragraph {
+    font-size: var(--paragraph-font-size-mobile, 16px);
+    line-height: 1.6;
+    letter-spacing: var(--letter-spacing-body);
+    margin: 0 0 16px 0;
+  }
+
+  #two-column-{{ section.id }} .block-paragraph p {
+    margin: 0;
+  }
+
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} .block-paragraph {
+      font-size: var(--paragraph-font-size-desktop, 16px);
+    }
+  }
+
+  #two-column-{{ section.id }} .block-button {
+    display: inline-block;
+    padding: {{ section.settings.button_padding_vertical }}px {{ section.settings.button_padding_horizontal }}px;
+    border-radius: {{ section.settings.button_border_radius }}px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-body);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin: 8px 0;
+    {% if section.settings.use_theme_colors %}
+      background-color: {{ settings.global_button_background_color | default: settings.global_section_accent_1_color }};
+      color: {{ settings.global_button_text_color | default: '#ffffff' }};
+    {% else %}
+      background-color: {{ section.settings.button_bg_color }};
+      color: {{ section.settings.button_text_color }};
+    {% endif %}
+  }
+
+  #two-column-{{ section.id }} .block-button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+
+  #two-column-{{ section.id }} .block-button--secondary {
+    background: transparent;
+    border: 2px solid currentColor;
+    {% if section.settings.use_theme_colors %}
+      color: {{ settings.global_section_text_color }};
+    {% else %}
+      color: {{ section.settings.text_color }};
+    {% endif %}
+  }
+
+  #two-column-{{ section.id }} .block-divider {
+    width: 100%;
+    height: 1px;
+    background-color: currentColor;
+    opacity: 0.2;
+    margin: 16px 0;
+  }
+
+  #two-column-{{ section.id }} .block-image {
+    display: block;
+    border-radius: {{ section.settings.image_border_radius }}px;
+    margin: 8px 0;
+    /* Default: left aligned */
+    margin-left: 0;
+    margin-right: auto;
+    /* Width uses CSS custom properties set inline on each image */
+    width: var(--img-width-mobile, 100%) !important;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Desktop width for images */
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} .block-image {
+      width: var(--img-width-desktop, 100%) !important;
+    }
+  }
+  
+  /* Mobile image alignment - must come before desktop to be overridden */
+  @media screen and (max-width: 767px) {
+    #two-column-{{ section.id }} .two-column__column--left .block-image,
+    #two-column-{{ section.id }} .two-column__column--right .block-image {
+      {% if section.settings.mobile_text_align == 'center' %}
+        margin-left: auto !important;
+        margin-right: auto !important;
+      {% elsif section.settings.mobile_text_align == 'right' %}
+        margin-left: auto !important;
+        margin-right: 0 !important;
+      {% else %}
+        margin-left: 0 !important;
+        margin-right: auto !important;
+      {% endif %}
+    }
+  }
+  
+  /* Desktop image alignment based on column text-align */
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} .two-column__column--left .block-image {
+      {% if section.settings.left_column_text_align == 'center' %}
+        margin-left: auto;
+        margin-right: auto;
+      {% elsif section.settings.left_column_text_align == 'right' %}
+        margin-left: auto;
+        margin-right: 0;
+      {% else %}
+        margin-left: 0;
+        margin-right: auto;
+      {% endif %}
+    }
+    
+    #two-column-{{ section.id }} .two-column__column--right .block-image {
+      {% if section.settings.right_column_text_align == 'center' %}
+        margin-left: auto;
+        margin-right: auto;
+      {% elsif section.settings.right_column_text_align == 'right' %}
+        margin-left: auto;
+        margin-right: 0;
+      {% else %}
+        margin-left: 0;
+        margin-right: auto;
+      {% endif %}
+    }
+  }
+
+  #two-column-{{ section.id }} .block-bullet-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+  }
+
+  #two-column-{{ section.id }} .block-bullet-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  #two-column-{{ section.id }} .block-bullet-list .bullet-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #two-column-{{ section.id }} .block-bullet-list .bullet-icon svg {
+    width: 100%;
+    height: 100%;
+    {% if section.settings.use_theme_colors %}
+      fill: {{ settings.global_section_accent_1_color }};
+    {% else %}
+      fill: {{ section.settings.accent_color }};
+    {% endif %}
+  }
+
+  /* Accordion Styles */
+  #two-column-{{ section.id }} .block-accordion {
+    width: 100%;
+  }
+
+  #two-column-{{ section.id }} .accordion-item {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  #two-column-{{ section.id }} .accordion-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-body);
+    transition: background-color 0.2s ease;
+    {% if section.settings.use_theme_colors %}
+      background-color: {{ settings.global_section_background_color }};
+    {% else %}
+      background-color: {{ section.settings.background_color }};
+    {% endif %}
+  }
+
+  #two-column-{{ section.id }} .accordion-header:hover {
+    opacity: 0.9;
+  }
+
+  #two-column-{{ section.id }} .accordion-header-icon {
+    flex-shrink: 0;
+    width: var(--accordion-icon-size-mobile, 32px);
+    height: var(--accordion-icon-size-mobile, 32px);
+    overflow: hidden;
+  }
+
+  #two-column-{{ section.id }} .accordion-header-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+  }
+
+  #two-column-{{ section.id }} .accordion-svg-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #two-column-{{ section.id }} .accordion-svg-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  #two-column-{{ section.id }} .accordion-header-text {
+    flex: 1;
+  }
+
+  #two-column-{{ section.id }} .accordion-toggle {
+    flex-shrink: 0;
+    font-size: 24px;
+    font-weight: 300;
+    transition: transform 0.3s ease;
+    line-height: 1;
+  }
+
+  #two-column-{{ section.id }} .accordion-item.is-open .accordion-toggle {
+    transform: rotate(45deg);
+  }
+
+  #two-column-{{ section.id }} .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 20px;
+    {% if section.settings.use_theme_colors %}
+      background-color: {{ settings.global_section_background_color }};
+    {% else %}
+      background-color: {{ section.settings.background_color }};
+    {% endif %}
+  }
+
+  #two-column-{{ section.id }} .accordion-item.is-open .accordion-content {
+    max-height: 500px;
+    padding: 0 20px 20px 20px;
+  }
+
+  #two-column-{{ section.id }} .accordion-content-inner {
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} .accordion-header-icon {
+      width: var(--accordion-icon-size-desktop, 40px);
+      height: var(--accordion-icon-size-desktop, 40px);
+    }
+  }
+
+  /* Mobile column order */
+  @media screen and (max-width: 767px) {
+    #two-column-{{ section.id }} .two-column__column--left {
+      {% if section.settings.show_divider_mobile %}
+        order: {% if section.settings.mobile_column_order == 'right_first' %}3{% else %}0{% endif %};
+      {% else %}
+        order: {% if section.settings.mobile_column_order == 'right_first' %}2{% else %}1{% endif %};
+      {% endif %}
+      text-align: {{ section.settings.mobile_text_align }};
+      {% if section.settings.mobile_text_align == 'center' %}
+        align-items: center;
+      {% elsif section.settings.mobile_text_align == 'right' %}
+        align-items: flex-end;
+      {% else %}
+        align-items: flex-start;
+      {% endif %}
+    }
+    #two-column-{{ section.id }} .two-column__column--right {
+      {% if section.settings.show_divider_mobile %}
+        order: {% if section.settings.mobile_column_order == 'right_first' %}0{% else %}3{% endif %};
+      {% else %}
+        order: {% if section.settings.mobile_column_order == 'right_first' %}1{% else %}2{% endif %};
+      {% endif %}
+      text-align: {{ section.settings.mobile_text_align }};
+      {% if section.settings.mobile_text_align == 'center' %}
+        align-items: center;
+      {% elsif section.settings.mobile_text_align == 'right' %}
+        align-items: flex-end;
+      {% else %}
+        align-items: flex-start;
+      {% endif %}
+    }
+    #two-column-{{ section.id }} .two-column__divider {
+      order: {% if section.settings.mobile_column_order == 'right_first' %}2{% else %}1{% endif %};
+    }
+  }
+
+  /* Section Header (outside columns) */
+  #two-column-{{ section.id }} .two-column__section-header {
+    text-align: {{ section.settings.section_header_align }};
+    margin-bottom: {{ section.settings.section_header_margin_bottom_mobile }}px;
+  }
+
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} .two-column__section-header {
+      margin-bottom: {{ section.settings.section_header_margin_bottom_desktop }}px;
+    }
+  }
+
+  #two-column-{{ section.id }} .two-column__section-heading {
+    font-size: {{ section.settings.section_heading_size_mobile }}rem;
+    font-weight: var(--font-weight-bold);
+    line-height: {{ section.settings.section_heading_line_height }};
+    margin: 0 0 {{ section.settings.section_heading_margin_bottom }}px 0;
+    {% if section.settings.use_theme_colors %}
+      color: {{ settings.global_section_text_color }};
+    {% else %}
+      color: {{ section.settings.section_heading_color }};
+    {% endif %}
+  }
+
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} .two-column__section-heading {
+      font-size: {{ section.settings.section_heading_size_desktop }}rem;
+    }
+  }
+
+  #two-column-{{ section.id }} .two-column__section-heading .accent-text {
+    {% if section.settings.use_theme_colors and settings.global_use_accent_text_gradient %}
+      background: {{ settings.global_accent_text_gradient_dark }};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    {% elsif section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }};
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    {% else %}
+      {% if section.settings.use_theme_colors %}
+        color: {{ settings.global_section_accent_1_color }};
+      {% else %}
+        color: {{ section.settings.accent_color }};
+      {% endif %}
+    {% endif %}
+    {% if section.settings.override_global_accent %}
+      font-family: {{ section.settings.accent_font_family.family }}, {{ section.settings.accent_font_family.fallback_families }};
+      {% if section.settings.accent_font_style != 'inherit' %}
+        font-style: {{ section.settings.accent_font_style }};
+      {% endif %}
+      {% if section.settings.accent_font_weight != 'inherit' %}
+        font-weight: {{ section.settings.accent_font_weight }};
+      {% endif %}
+    {% else %}
+      font-family: {{ settings.accent_text_font.family }}, {{ settings.accent_text_font.fallback_families }};
+      font-weight: {{ settings.accent_text_weight }};
+      font-style: {{ settings.accent_text_style }};
+    {% endif %}
+  }
+
+  #two-column-{{ section.id }} .two-column__section-subheading {
+    font-size: {{ section.settings.section_subheading_size_mobile }}rem;
+    line-height: 1.5;
+    margin: 0;
+    {% if section.settings.use_theme_colors %}
+      color: {{ settings.global_section_text_color }};
+      opacity: 0.85;
+    {% else %}
+      color: {{ section.settings.section_subheading_color }};
+    {% endif %}
+  }
+
+  @media screen and (min-width: 768px) {
+    #two-column-{{ section.id }} .two-column__section-subheading {
+      font-size: {{ section.settings.section_subheading_size_desktop }}rem;
+    }
+  }
+{%- endstyle -%}
+
+<section id="two-column-{{ section.id }}" class="two-column-section {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  <div class="two-column__container">
+    
+    {%- comment -%} Section Header (outside columns) {%- endcomment -%}
+    {%- if section.settings.show_section_header -%}
+      <div class="two-column__section-header">
+        {%- if section.settings.section_heading != blank -%}
+          <{{ section.settings.section_heading_tag }} class="two-column__section-heading">
+            {{ section.settings.section_heading }}
+            {%- if section.settings.section_heading_accent != blank -%}
+              <span class="accent-text">{{ section.settings.section_heading_accent }}</span>
+            {%- endif -%}
+          </{{ section.settings.section_heading_tag }}>
+        {%- endif -%}
+        {%- if section.settings.section_subheading != blank -%}
+          <p class="two-column__section-subheading">{{ section.settings.section_subheading }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="two-column__wrapper">
+      
+      {%- comment -%} Left Column {%- endcomment -%}
+      <div class="two-column__column two-column__column--left">
+        {%- for block in section.blocks -%}
+          {%- if block.settings.column == 'left' -%}
+            {%- case block.type -%}
+              
+              {%- when 'heading' -%}
+                <{{ block.settings.heading_tag | default: 'h2' }} 
+                  class="block-heading" 
+                  style="--heading-size-mobile: {{ block.settings.font_size_mobile }}rem; --heading-size-desktop: {{ block.settings.font_size_desktop }}rem; line-height: {{ block.settings.line_height | default: 1.2 }}; margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;{% if block.settings.use_custom_color %} color: {{ block.settings.heading_color }};{% endif %}{% if block.settings.text_align != 'inherit' %} text-align: {{ block.settings.text_align }};{% endif %}"
+                  {{ block.shopify_attributes }}>
+                  {{ block.settings.heading_text }}
+                  {%- if block.settings.heading_accent != blank -%}
+                    <span class="accent-text{% unless section.settings.override_global_accent %} global-accent-text{% endunless %}">{{ block.settings.heading_accent }}</span>
+                  {%- endif -%}
+                </{{ block.settings.heading_tag | default: 'h2' }}>
+
+              {%- when 'subtitle' -%}
+                <p class="block-subtitle" 
+                   style="font-size: {{ block.settings.font_size }}rem; margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px; font-weight: {{ block.settings.font_weight | default: '400' }};{% if block.settings.use_custom_color %} color: {{ block.settings.text_color }}; opacity: 1;{% endif %}"
+                   {{ block.shopify_attributes }}>
+                  {{ block.settings.subtitle_text }}
+                </p>
+
+              {%- when 'paragraph' -%}
+                <div class="block-paragraph" 
+                     style="--paragraph-font-size-mobile: {{ block.settings.font_size_mobile | default: 16 }}px; --paragraph-font-size-desktop: {{ block.settings.font_size_desktop | default: 16 }}px; margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px; line-height: {{ block.settings.line_height | default: 1.6 }};{% if block.settings.use_custom_color %} color: {{ block.settings.text_color }};{% endif %}{% if block.settings.text_align != 'inherit' %} text-align: {{ block.settings.text_align }};{% endif %}"
+                     {{ block.shopify_attributes }}>
+                  {{ block.settings.paragraph_text }}
+                </div>
+
+              {%- when 'button' -%}
+                <div style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;{% if block.settings.button_align != 'inherit' %} text-align: {{ block.settings.button_align }};{% endif %}" {{ block.shopify_attributes }}>
+                  <a href="{{ block.settings.button_link }}" 
+                     class="block-button{% if block.settings.button_style == 'secondary' %} block-button--secondary{% endif %}"
+                     style="font-size: {{ block.settings.font_size | default: 16 }}px;{% if block.settings.use_custom_colors %} background-color: {{ block.settings.background_color }}; color: {{ block.settings.text_color }};{% endif %}">
+                    {{ block.settings.button_text }}
+                  </a>
+                </div>
+
+              {%- when 'divider' -%}
+                <div class="block-divider" 
+                     style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px; height: {{ block.settings.thickness }}px; opacity: {{ block.settings.opacity }}; width: {{ block.settings.width | default: 100 }}%;{% if block.settings.use_custom_color %} background-color: {{ block.settings.divider_color }};{% endif %}"
+                     {{ block.shopify_attributes }}></div>
+
+              {%- when 'image' -%}
+                {%- if block.settings.image != blank -%}
+                  <img src="{{ block.settings.image | image_url: width: 800 }}" 
+                       alt="{{ block.settings.image.alt | escape }}"
+                       class="block-image"
+                       style="--img-width-desktop: {{ block.settings.max_width_desktop | default: 100 }}%; --img-width-mobile: {{ block.settings.max_width_mobile | default: 100 }}%; margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;"
+                       loading="lazy"
+                       width="{{ block.settings.image.width }}"
+                       height="{{ block.settings.image.height }}"
+                       {{ block.shopify_attributes }}>
+                {%- endif -%}
+
+              {%- when 'bullet_list' -%}
+                <ul class="block-bullet-list" 
+                    style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px; font-size: {{ block.settings.font_size | default: 16 }}px;{% if block.settings.use_custom_color %} color: {{ block.settings.text_color }};{% endif %}"
+                    {{ block.shopify_attributes }}>
+                  {%- assign items = block.settings.list_items | split: '|' -%}
+                  {%- for item in items -%}
+                    {%- if item != blank -%}
+                      <li style="margin-bottom: {{ block.settings.item_spacing | default: 10 }}px;">
+                        <span class="bullet-icon" style="width: {{ block.settings.icon_size | default: 20 }}px; height: {{ block.settings.icon_size | default: 20 }}px;">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="{% if block.settings.use_custom_color %}fill: {{ block.settings.icon_color }};{% endif %}"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        </span>
+                        <span>{{ item | strip }}</span>
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+
+              {%- when 'accordion' -%}
+                <div class="block-accordion" 
+                     style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;
+                            --accordion-icon-size-desktop: {{ block.settings.icon_size_desktop }}px;
+                            --accordion-icon-size-mobile: {{ block.settings.icon_size_mobile }}px;"
+                     data-accordion-mode="{{ block.settings.accordion_mode }}"
+                     {{ block.shopify_attributes }}>
+                  {%- for i in (1..6) -%}
+                    {%- assign title_key = 'item_' | append: i | append: '_title' -%}
+                    {%- assign content_key = 'item_' | append: i | append: '_content' -%}
+                    {%- assign image_key = 'item_' | append: i | append: '_image' -%}
+                    {%- assign svg_key = 'item_' | append: i | append: '_svg' -%}
+                    {%- assign item_title = block.settings[title_key] -%}
+                    {%- assign item_content = block.settings[content_key] -%}
+                    {%- assign item_image = block.settings[image_key] -%}
+                    {%- assign item_svg = block.settings[svg_key] -%}
+                    {%- if item_title != blank -%}
+                      <div class="accordion-item" style="border-radius: {{ block.settings.border_radius }}px; margin-bottom: {{ block.settings.item_spacing }}px;{% if block.settings.use_custom_colors %} border-color: {{ block.settings.border_color }};{% endif %}">
+                        <div class="accordion-header" style="font-size: {{ block.settings.header_font_size | default: 16 }}px;{% if block.settings.use_custom_colors %} background-color: {{ block.settings.header_background }}; color: {{ block.settings.header_text_color }};{% endif %}">
+                          {%- if item_image != blank or item_svg != blank -%}
+                            <div class="accordion-header-icon" style="border-radius: {{ block.settings.icon_border_radius }}px;">
+                              {%- if item_image != blank -%}
+                                <img src="{{ item_image | image_url: width: 160 }}" 
+                                     alt="{{ item_title | escape }}"
+                                     loading="lazy"
+                                     width="{{ item_image.width }}"
+                                     height="{{ item_image.height }}">
+                              {%- elsif item_svg != blank -%}
+                                <div class="accordion-svg-icon">{{ item_svg }}</div>
+                              {%- endif -%}
+                            </div>
+                          {%- endif -%}
+                          <span class="accordion-header-text">{{ item_title }}</span>
+                          <span class="accordion-toggle">+</span>
+                        </div>
+                        <div class="accordion-content" style="font-size: {{ block.settings.content_font_size | default: 14 }}px;{% if block.settings.use_custom_colors %} background-color: {{ block.settings.content_background }}; color: {{ block.settings.content_text_color }};{% endif %}">
+                          <div class="accordion-content-inner">
+                            {{ item_content }}
+                          </div>
+                        </div>
+                      </div>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </div>
+
+              {%- when 'custom_html' -%}
+                <div style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;" {{ block.shopify_attributes }}>
+                  {{ block.settings.html_content }}
+                </div>
+
+            {%- endcase -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      {%- comment -%} Column Divider {%- endcomment -%}
+      {%- if section.settings.show_column_divider or section.settings.show_divider_mobile -%}
+        <div class="two-column__divider" aria-hidden="true"></div>
+      {%- endif -%}
+
+      {%- comment -%} Right Column {%- endcomment -%}
+      <div class="two-column__column two-column__column--right">
+        {%- for block in section.blocks -%}
+          {%- if block.settings.column == 'right' -%}
+            {%- case block.type -%}
+              
+              {%- when 'heading' -%}
+                <{{ block.settings.heading_tag | default: 'h2' }} 
+                  class="block-heading" 
+                  style="--heading-size-mobile: {{ block.settings.font_size_mobile }}rem; --heading-size-desktop: {{ block.settings.font_size_desktop }}rem; line-height: {{ block.settings.line_height | default: 1.2 }}; margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;{% if block.settings.use_custom_color %} color: {{ block.settings.heading_color }};{% endif %}{% if block.settings.text_align != 'inherit' %} text-align: {{ block.settings.text_align }};{% endif %}"
+                  {{ block.shopify_attributes }}>
+                  {{ block.settings.heading_text }}
+                  {%- if block.settings.heading_accent != blank -%}
+                    <span class="accent-text{% unless section.settings.override_global_accent %} global-accent-text{% endunless %}">{{ block.settings.heading_accent }}</span>
+                  {%- endif -%}
+                </{{ block.settings.heading_tag | default: 'h2' }}>
+
+              {%- when 'subtitle' -%}
+                <p class="block-subtitle" 
+                   style="font-size: {{ block.settings.font_size }}rem; margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px; font-weight: {{ block.settings.font_weight | default: '400' }};{% if block.settings.use_custom_color %} color: {{ block.settings.text_color }}; opacity: 1;{% endif %}"
+                   {{ block.shopify_attributes }}>
+                  {{ block.settings.subtitle_text }}
+                </p>
+
+              {%- when 'paragraph' -%}
+                <div class="block-paragraph" 
+                     style="--paragraph-font-size-mobile: {{ block.settings.font_size_mobile | default: 16 }}px; --paragraph-font-size-desktop: {{ block.settings.font_size_desktop | default: 16 }}px; margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px; line-height: {{ block.settings.line_height | default: 1.6 }};{% if block.settings.use_custom_color %} color: {{ block.settings.text_color }};{% endif %}{% if block.settings.text_align != 'inherit' %} text-align: {{ block.settings.text_align }};{% endif %}"
+                     {{ block.shopify_attributes }}>
+                  {{ block.settings.paragraph_text }}
+                </div>
+
+              {%- when 'button' -%}
+                <div style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;{% if block.settings.button_align != 'inherit' %} text-align: {{ block.settings.button_align }};{% endif %}" {{ block.shopify_attributes }}>
+                  <a href="{{ block.settings.button_link }}" 
+                     class="block-button{% if block.settings.button_style == 'secondary' %} block-button--secondary{% endif %}"
+                     style="font-size: {{ block.settings.font_size | default: 16 }}px;{% if block.settings.use_custom_colors %} background-color: {{ block.settings.background_color }}; color: {{ block.settings.text_color }};{% endif %}">
+                    {{ block.settings.button_text }}
+                  </a>
+                </div>
+
+              {%- when 'divider' -%}
+                <div class="block-divider" 
+                     style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px; height: {{ block.settings.thickness }}px; opacity: {{ block.settings.opacity }}; width: {{ block.settings.width | default: 100 }}%;{% if block.settings.use_custom_color %} background-color: {{ block.settings.divider_color }};{% endif %}"
+                     {{ block.shopify_attributes }}></div>
+
+              {%- when 'image' -%}
+                {%- if block.settings.image != blank -%}
+                  <img src="{{ block.settings.image | image_url: width: 800 }}" 
+                       alt="{{ block.settings.image.alt | escape }}"
+                       class="block-image"
+                       style="--img-width-desktop: {{ block.settings.max_width_desktop | default: 100 }}%; --img-width-mobile: {{ block.settings.max_width_mobile | default: 100 }}%; margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;"
+                       loading="lazy"
+                       width="{{ block.settings.image.width }}"
+                       height="{{ block.settings.image.height }}"
+                       {{ block.shopify_attributes }}>
+                {%- endif -%}
+
+              {%- when 'bullet_list' -%}
+                <ul class="block-bullet-list" 
+                    style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px; font-size: {{ block.settings.font_size | default: 16 }}px;{% if block.settings.use_custom_color %} color: {{ block.settings.text_color }};{% endif %}"
+                    {{ block.shopify_attributes }}>
+                  {%- assign items = block.settings.list_items | split: '|' -%}
+                  {%- for item in items -%}
+                    {%- if item != blank -%}
+                      <li style="margin-bottom: {{ block.settings.item_spacing | default: 10 }}px;">
+                        <span class="bullet-icon" style="width: {{ block.settings.icon_size | default: 20 }}px; height: {{ block.settings.icon_size | default: 20 }}px;">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="{% if block.settings.use_custom_color %}fill: {{ block.settings.icon_color }};{% endif %}"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        </span>
+                        <span>{{ item | strip }}</span>
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+
+              {%- when 'accordion' -%}
+                <div class="block-accordion" 
+                     style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;
+                            --accordion-icon-size-desktop: {{ block.settings.icon_size_desktop }}px;
+                            --accordion-icon-size-mobile: {{ block.settings.icon_size_mobile }}px;"
+                     data-accordion-mode="{{ block.settings.accordion_mode }}"
+                     {{ block.shopify_attributes }}>
+                  {%- for i in (1..6) -%}
+                    {%- assign title_key = 'item_' | append: i | append: '_title' -%}
+                    {%- assign content_key = 'item_' | append: i | append: '_content' -%}
+                    {%- assign image_key = 'item_' | append: i | append: '_image' -%}
+                    {%- assign svg_key = 'item_' | append: i | append: '_svg' -%}
+                    {%- assign item_title = block.settings[title_key] -%}
+                    {%- assign item_content = block.settings[content_key] -%}
+                    {%- assign item_image = block.settings[image_key] -%}
+                    {%- assign item_svg = block.settings[svg_key] -%}
+                    {%- if item_title != blank -%}
+                      <div class="accordion-item" style="border-radius: {{ block.settings.border_radius }}px; margin-bottom: {{ block.settings.item_spacing }}px;{% if block.settings.use_custom_colors %} border-color: {{ block.settings.border_color }};{% endif %}">
+                        <div class="accordion-header" style="font-size: {{ block.settings.header_font_size | default: 16 }}px;{% if block.settings.use_custom_colors %} background-color: {{ block.settings.header_background }}; color: {{ block.settings.header_text_color }};{% endif %}">
+                          {%- if item_image != blank or item_svg != blank -%}
+                            <div class="accordion-header-icon" style="border-radius: {{ block.settings.icon_border_radius }}px;">
+                              {%- if item_image != blank -%}
+                                <img src="{{ item_image | image_url: width: 160 }}" 
+                                     alt="{{ item_title | escape }}"
+                                     loading="lazy"
+                                     width="{{ item_image.width }}"
+                                     height="{{ item_image.height }}">
+                              {%- elsif item_svg != blank -%}
+                                <div class="accordion-svg-icon">{{ item_svg }}</div>
+                              {%- endif -%}
+                            </div>
+                          {%- endif -%}
+                          <span class="accordion-header-text">{{ item_title }}</span>
+                          <span class="accordion-toggle">+</span>
+                        </div>
+                        <div class="accordion-content" style="font-size: {{ block.settings.content_font_size | default: 14 }}px;{% if block.settings.use_custom_colors %} background-color: {{ block.settings.content_background }}; color: {{ block.settings.content_text_color }};{% endif %}">
+                          <div class="accordion-content-inner">
+                            {{ item_content }}
+                          </div>
+                        </div>
+                      </div>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </div>
+
+              {%- when 'custom_html' -%}
+                <div style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px;" {{ block.shopify_attributes }}>
+                  {{ block.settings.html_content }}
+                </div>
+
+            {%- endcase -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const section = document.getElementById('two-column-{{ section.id }}');
+    if (!section) return;
+
+    const accordions = section.querySelectorAll('.block-accordion');
+    
+    accordions.forEach(function(accordion) {
+      const isSingleMode = accordion.dataset.accordionMode === 'true';
+      const headers = accordion.querySelectorAll('.accordion-header');
+      
+      headers.forEach(function(header) {
+        header.addEventListener('click', function() {
+          const item = this.closest('.accordion-item');
+          const isOpen = item.classList.contains('is-open');
+          
+          // If single mode, close all other items first
+          if (isSingleMode && !isOpen) {
+            accordion.querySelectorAll('.accordion-item.is-open').forEach(function(openItem) {
+              openItem.classList.remove('is-open');
+            });
+          }
+          
+          // Toggle the clicked item
+          item.classList.toggle('is-open');
+        });
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Two Column Content",
+  "tag": "section",
+  "class": "section",
+  "max_blocks": 20,
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Header (Above Columns)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_section_header",
+      "label": "Show Section Header",
+      "default": false,
+      "info": "Display a heading and subheading above the two columns"
+    },
+    {
+      "type": "text",
+      "id": "section_heading",
+      "label": "Section Heading",
+      "default": "Section Title"
+    },
+    {
+      "type": "text",
+      "id": "section_heading_accent",
+      "label": "Heading Accent Text",
+      "info": "Optional accent text that appears after the main heading"
+    },
+    {
+      "type": "select",
+      "id": "section_heading_tag",
+      "label": "Heading Tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h6", "label": "H6" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "range",
+      "id": "section_heading_size_desktop",
+      "min": 1.5,
+      "max": 7,
+      "step": 0.1,
+      "unit": "rem",
+      "label": "Heading Size (Desktop)",
+      "default": 2.5
+    },
+    {
+      "type": "range",
+      "id": "section_heading_size_mobile",
+      "min": 1,
+      "max": 6,
+      "step": 0.1,
+      "unit": "rem",
+      "label": "Heading Size (Mobile)",
+      "default": 1.8
+    },
+    {
+      "type": "range",
+      "id": "section_heading_line_height",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "label": "Heading Line Height",
+      "default": 1.2
+    },
+    {
+      "type": "color",
+      "id": "section_heading_color",
+      "label": "Heading Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "section_heading_margin_bottom",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "label": "Space Below Heading",
+      "default": 12
+    },
+    {
+      "type": "textarea",
+      "id": "section_subheading",
+      "label": "Section Subheading",
+      "info": "Optional subheading below the main heading"
+    },
+    {
+      "type": "range",
+      "id": "section_subheading_size_desktop",
+      "min": 0.9,
+      "max": 2,
+      "step": 0.1,
+      "unit": "rem",
+      "label": "Subheading Size (Desktop)",
+      "default": 1.1
+    },
+    {
+      "type": "range",
+      "id": "section_subheading_size_mobile",
+      "min": 0.9,
+      "max": 1.5,
+      "step": 0.1,
+      "unit": "rem",
+      "label": "Subheading Size (Mobile)",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "section_subheading_color",
+      "label": "Subheading Color",
+      "default": "#666666"
+    },
+    {
+      "type": "select",
+      "id": "section_header_align",
+      "label": "Header Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "section_header_margin_bottom_desktop",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Space Below Header (Desktop)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "section_header_margin_bottom_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Space Below Header (Mobile)",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#e63946"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Customization"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use global accent typography."
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Only applies when 'Use Accent Gradient' is enabled"
+    },
+    {
+      "type": "font_picker",
+      "id": "accent_font_family",
+      "label": "Accent Font Family",
+      "default": "assistant_n4",
+      "info": "Only applies when 'Override Global Accent' is enabled"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Font Style",
+      "options": [
+        { "value": "inherit", "label": "Default (Inherit)" },
+        { "value": "normal", "label": "Normal" },
+        { "value": "italic", "label": "Italic" }
+      ],
+      "default": "italic",
+      "info": "Only applies when 'Override Global Accent' is enabled"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Font Weight",
+      "options": [
+        { "value": "inherit", "label": "Default (Inherit)" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semibold (600)" },
+        { "value": "700", "label": "Bold (700)" }
+      ],
+      "default": "inherit",
+      "info": "Only applies when 'Override Global Accent' is enabled"
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin_left",
+      "min": -10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 0,
+      "info": "Adjust horizontal spacing before accent text"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 800,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "label": "Max Width",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "left_column_width",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "label": "Left Column Width (Desktop)",
+      "default": 50,
+      "info": "Right column will take the remaining space"
+    },
+    {
+      "type": "range",
+      "id": "right_column_width",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "label": "Right Column Width (Desktop)",
+      "default": 50
+    },
+    {
+      "type": "select",
+      "id": "column_order",
+      "label": "Column Order (Desktop)",
+      "options": [
+        { "value": "left_first", "label": "Left First" },
+        { "value": "right_first", "label": "Right First" }
+      ],
+      "default": "left_first"
+    },
+    {
+      "type": "select",
+      "id": "mobile_column_order",
+      "label": "Column Order (Mobile)",
+      "options": [
+        { "value": "left_first", "label": "Left Column First" },
+        { "value": "right_first", "label": "Right Column First" }
+      ],
+      "default": "left_first"
+    },
+    {
+      "type": "select",
+      "id": "vertical_alignment",
+      "label": "Vertical Alignment (Desktop)",
+      "options": [
+        { "value": "flex-start", "label": "Top" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-end", "label": "Bottom" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "column_gap_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Column Gap (Desktop)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Column Gap (Mobile)",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Column Divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_column_divider",
+      "label": "Show Column Divider",
+      "default": false,
+      "info": "Add a vertical divider line between the two columns"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider Color",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Divider Width",
+      "default": 1,
+      "info": "Thickness of the divider line"
+    },
+    {
+      "type": "range",
+      "id": "divider_height",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Divider Height",
+      "default": 60,
+      "info": "Height of the divider as a percentage of the column height"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider_mobile",
+      "label": "Show Divider on Mobile",
+      "default": false,
+      "info": "On mobile, the divider will appear as a horizontal line between stacked columns"
+    },
+    {
+      "type": "header",
+      "content": "Text Alignment"
+    },
+    {
+      "type": "select",
+      "id": "left_column_text_align",
+      "label": "Left Column Text Align (Desktop)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "right_column_text_align",
+      "label": "Right Column Text Align (Desktop)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "mobile_text_align",
+      "label": "Text Align (Mobile)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Column Padding (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "left_column_padding",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Left Column Padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "right_column_padding",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Right Column Padding",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Section Padding - Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Horizontal",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Section Padding - Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Horizontal",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Vertical Padding",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "min": 16,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Button Horizontal Padding",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Border Radius",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Image Styling"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Image Border Radius",
+      "default": 8
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "text",
+          "id": "heading_text",
+          "label": "Heading Text",
+          "default": "Your Heading"
+        },
+        {
+          "type": "text",
+          "id": "heading_accent",
+          "label": "Accent Text (optional)",
+          "info": "Styled text that appears after the main heading"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading Tag",
+          "options": [
+            { "value": "h1", "label": "H1" },
+            { "value": "h2", "label": "H2" },
+            { "value": "h3", "label": "H3" },
+            { "value": "h4", "label": "H4" }
+          ],
+          "default": "h2"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "select",
+          "id": "text_align",
+          "label": "Text Alignment",
+          "options": [
+            { "value": "inherit", "label": "Inherit from Column" },
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "range",
+          "id": "font_size_mobile",
+          "min": 1.5,
+          "max": 4,
+          "step": 0.1,
+          "unit": "rem",
+          "label": "Font Size (Mobile)",
+          "default": 2
+        },
+        {
+          "type": "range",
+          "id": "font_size_desktop",
+          "min": 2,
+          "max": 5,
+          "step": 0.1,
+          "unit": "rem",
+          "label": "Font Size (Desktop)",
+          "default": 3
+        },
+        {
+          "type": "range",
+          "id": "line_height",
+          "min": 1,
+          "max": 1.8,
+          "step": 0.1,
+          "label": "Line Height",
+          "default": 1.2
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_color",
+          "label": "Use Custom Color",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "heading_color",
+          "label": "Heading Color",
+          "default": "#000000"
+        },
+        {
+          "type": "header",
+          "content": "Spacing"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": 0,
+          "max": 60,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Top",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 60,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Bottom",
+          "default": 15
+        }
+      ]
+    },
+    {
+      "type": "subtitle",
+      "name": "Subtitle",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "text",
+          "id": "subtitle_text",
+          "label": "Subtitle Text",
+          "default": "Add a subtitle here"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "range",
+          "id": "font_size",
+          "min": 0.9,
+          "max": 2,
+          "step": 0.1,
+          "unit": "rem",
+          "label": "Font Size",
+          "default": 1.1
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "label": "Font Weight",
+          "options": [
+            { "value": "300", "label": "Light" },
+            { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" },
+            { "value": "600", "label": "Semibold" },
+            { "value": "700", "label": "Bold" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_color",
+          "label": "Use Custom Color",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#666666"
+        },
+        {
+          "type": "header",
+          "content": "Spacing"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Top",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Bottom",
+          "default": 10
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "name": "Paragraph",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "richtext",
+          "id": "paragraph_text",
+          "label": "Paragraph Text",
+          "default": "<p>Add your paragraph text here. You can use rich text formatting.</p>"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "select",
+          "id": "text_align",
+          "label": "Text Alignment",
+          "options": [
+            { "value": "inherit", "label": "Inherit from Column" },
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "range",
+          "id": "font_size_mobile",
+          "min": 12,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "label": "Font Size (Mobile)",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "font_size_desktop",
+          "min": 14,
+          "max": 28,
+          "step": 1,
+          "unit": "px",
+          "label": "Font Size (Desktop)",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "line_height",
+          "min": 1.2,
+          "max": 2,
+          "step": 0.1,
+          "label": "Line Height",
+          "default": 1.6
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_color",
+          "label": "Use Custom Color",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#666666"
+        },
+        {
+          "type": "header",
+          "content": "Spacing"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Top",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Bottom",
+          "default": 15
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "Learn More"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button Style",
+          "options": [
+            { "value": "primary", "label": "Primary (Filled)" },
+            { "value": "secondary", "label": "Secondary (Outline)" }
+          ],
+          "default": "primary"
+        },
+        {
+          "type": "select",
+          "id": "button_align",
+          "label": "Button Alignment",
+          "options": [
+            { "value": "inherit", "label": "Inherit from Column" },
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "range",
+          "id": "font_size",
+          "min": 12,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "label": "Font Size",
+          "default": 16
+        },
+        {
+          "type": "header",
+          "content": "Colors (Custom)"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_colors",
+          "label": "Use Custom Colors",
+          "default": false,
+          "info": "Override section button colors"
+        },
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": "Background Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "header",
+          "content": "Spacing"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Top",
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Bottom",
+          "default": 10
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "name": "Divider",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "thickness",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "unit": "px",
+          "label": "Thickness",
+          "default": 1
+        },
+        {
+          "type": "range",
+          "id": "width",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Width",
+          "default": 100
+        },
+        {
+          "type": "range",
+          "id": "opacity",
+          "min": 0.1,
+          "max": 1,
+          "step": 0.1,
+          "label": "Opacity",
+          "default": 0.2
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_color",
+          "label": "Use Custom Color",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "divider_color",
+          "label": "Divider Color",
+          "default": "#000000"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Top",
+          "default": 15
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Bottom",
+          "default": 15
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "right"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "range",
+          "id": "max_width_desktop",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Width (Desktop)",
+          "default": 100
+        },
+        {
+          "type": "range",
+          "id": "max_width_mobile",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Width (Mobile)",
+          "default": 100
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Top",
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Bottom",
+          "default": 10
+        }
+      ]
+    },
+    {
+      "type": "bullet_list",
+      "name": "Bullet List",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "textarea",
+          "id": "list_items",
+          "label": "List Items",
+          "default": "First item|Second item|Third item",
+          "info": "Separate items with | (pipe character)"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "range",
+          "id": "font_size",
+          "min": 12,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "label": "Font Size",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "min": 14,
+          "max": 32,
+          "step": 2,
+          "unit": "px",
+          "label": "Icon Size",
+          "default": 20
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_color",
+          "label": "Use Custom Colors",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#333333"
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": "Icon Color",
+          "default": "#e63946"
+        },
+        {
+          "type": "header",
+          "content": "Spacing"
+        },
+        {
+          "type": "range",
+          "id": "item_spacing",
+          "min": 4,
+          "max": 24,
+          "step": 2,
+          "unit": "px",
+          "label": "Item Spacing",
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Top",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Bottom",
+          "default": 15
+        }
+      ]
+    },
+    {
+      "type": "accordion",
+      "name": "Accordion",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "checkbox",
+          "id": "accordion_mode",
+          "label": "Single Open Mode",
+          "default": true,
+          "info": "Only one item can be open at a time"
+        },
+        {
+          "type": "header",
+          "content": "Icon Settings"
+        },
+        {
+          "type": "range",
+          "id": "icon_size_desktop",
+          "min": 20,
+          "max": 80,
+          "step": 2,
+          "unit": "px",
+          "label": "Icon Size (Desktop)",
+          "default": 40
+        },
+        {
+          "type": "range",
+          "id": "icon_size_mobile",
+          "min": 16,
+          "max": 60,
+          "step": 2,
+          "unit": "px",
+          "label": "Icon Size (Mobile)",
+          "default": 32
+        },
+        {
+          "type": "range",
+          "id": "icon_border_radius",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Icon Border Radius",
+          "default": 4
+        },
+        {
+          "type": "header",
+          "content": "Item 1"
+        },
+        {
+          "type": "text",
+          "id": "item_1_title",
+          "label": "Title",
+          "default": "First Question"
+        },
+        {
+          "type": "image_picker",
+          "id": "item_1_image",
+          "label": "Image (Optional)"
+        },
+        {
+          "type": "textarea",
+          "id": "item_1_svg",
+          "label": "SVG Icon (Optional)",
+          "info": "Paste SVG code here. Used if no image is uploaded."
+        },
+        {
+          "type": "richtext",
+          "id": "item_1_content",
+          "label": "Content",
+          "default": "<p>Answer to the first question goes here.</p>"
+        },
+        {
+          "type": "header",
+          "content": "Item 2"
+        },
+        {
+          "type": "text",
+          "id": "item_2_title",
+          "label": "Title",
+          "default": "Second Question"
+        },
+        {
+          "type": "image_picker",
+          "id": "item_2_image",
+          "label": "Image (Optional)"
+        },
+        {
+          "type": "textarea",
+          "id": "item_2_svg",
+          "label": "SVG Icon (Optional)",
+          "info": "Paste SVG code here. Used if no image is uploaded."
+        },
+        {
+          "type": "richtext",
+          "id": "item_2_content",
+          "label": "Content",
+          "default": "<p>Answer to the second question goes here.</p>"
+        },
+        {
+          "type": "header",
+          "content": "Item 3"
+        },
+        {
+          "type": "text",
+          "id": "item_3_title",
+          "label": "Title"
+        },
+        {
+          "type": "image_picker",
+          "id": "item_3_image",
+          "label": "Image (Optional)"
+        },
+        {
+          "type": "textarea",
+          "id": "item_3_svg",
+          "label": "SVG Icon (Optional)",
+          "info": "Paste SVG code here. Used if no image is uploaded."
+        },
+        {
+          "type": "richtext",
+          "id": "item_3_content",
+          "label": "Content"
+        },
+        {
+          "type": "header",
+          "content": "Item 4"
+        },
+        {
+          "type": "text",
+          "id": "item_4_title",
+          "label": "Title"
+        },
+        {
+          "type": "image_picker",
+          "id": "item_4_image",
+          "label": "Image (Optional)"
+        },
+        {
+          "type": "textarea",
+          "id": "item_4_svg",
+          "label": "SVG Icon (Optional)",
+          "info": "Paste SVG code here. Used if no image is uploaded."
+        },
+        {
+          "type": "richtext",
+          "id": "item_4_content",
+          "label": "Content"
+        },
+        {
+          "type": "header",
+          "content": "Item 5"
+        },
+        {
+          "type": "text",
+          "id": "item_5_title",
+          "label": "Title"
+        },
+        {
+          "type": "image_picker",
+          "id": "item_5_image",
+          "label": "Image (Optional)"
+        },
+        {
+          "type": "textarea",
+          "id": "item_5_svg",
+          "label": "SVG Icon (Optional)",
+          "info": "Paste SVG code here. Used if no image is uploaded."
+        },
+        {
+          "type": "richtext",
+          "id": "item_5_content",
+          "label": "Content"
+        },
+        {
+          "type": "header",
+          "content": "Item 6"
+        },
+        {
+          "type": "text",
+          "id": "item_6_title",
+          "label": "Title"
+        },
+        {
+          "type": "image_picker",
+          "id": "item_6_image",
+          "label": "Image (Optional)"
+        },
+        {
+          "type": "textarea",
+          "id": "item_6_svg",
+          "label": "SVG Icon (Optional)",
+          "info": "Paste SVG code here. Used if no image is uploaded."
+        },
+        {
+          "type": "richtext",
+          "id": "item_6_content",
+          "label": "Content"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "range",
+          "id": "header_font_size",
+          "min": 14,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "label": "Header Font Size",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "content_font_size",
+          "min": 12,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "label": "Content Font Size",
+          "default": 14
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_colors",
+          "label": "Use Custom Colors",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "header_background",
+          "label": "Header Background",
+          "default": "#f8f9fa"
+        },
+        {
+          "type": "color",
+          "id": "header_text_color",
+          "label": "Header Text Color",
+          "default": "#333333"
+        },
+        {
+          "type": "color",
+          "id": "content_background",
+          "label": "Content Background",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "content_text_color",
+          "label": "Content Text Color",
+          "default": "#666666"
+        },
+        {
+          "type": "color",
+          "id": "border_color",
+          "label": "Border Color",
+          "default": "#e0e0e0"
+        },
+        {
+          "type": "header",
+          "content": "Styling"
+        },
+        {
+          "type": "range",
+          "id": "border_radius",
+          "min": 0,
+          "max": 20,
+          "step": 2,
+          "unit": "px",
+          "label": "Border Radius",
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "item_spacing",
+          "min": 0,
+          "max": 20,
+          "step": 2,
+          "unit": "px",
+          "label": "Item Spacing",
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Top",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Bottom",
+          "default": 15
+        }
+      ]
+    },
+    {
+      "type": "custom_html",
+      "name": "Custom HTML",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "html",
+          "id": "html_content",
+          "label": "HTML Content"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Top",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 40,
+          "step": 5,
+          "unit": "px",
+          "label": "Margin Bottom",
+          "default": 15
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Two Column Content",
+      "blocks": [
+        {
+          "type": "heading",
+          "settings": {
+            "column": "left",
+            "heading_text": "Left Column",
+            "heading_accent": "Heading"
+          }
+        },
+        {
+          "type": "paragraph",
+          "settings": {
+            "column": "left",
+            "paragraph_text": "<p>Add your content here. This text will appear in the left column.</p>"
+          }
+        },
+        {
+          "type": "button",
+          "settings": {
+            "column": "left",
+            "button_text": "Learn More"
+          }
+        },
+        {
+          "type": "heading",
+          "settings": {
+            "column": "right",
+            "heading_text": "Right Column",
+            "heading_accent": "Heading"
+          }
+        },
+        {
+          "type": "bullet_list",
+          "settings": {
+            "column": "right",
+            "list_items": "Feature one|Feature two|Feature three"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+

@@ -1,0 +1,376 @@
+{% comment %}
+  Product Bullet List Snippet
+
+  Parameters:
+  - bullet_1: First bullet point text
+  - bullet_2: Second bullet point text
+  - bullet_3: Third bullet point text
+  - bullet_4: Fourth bullet point text
+  - bullet_5: Fifth bullet point text
+  - bullet_6: Sixth bullet point text
+  - use_custom_icon_1: Boolean to use custom icon for first bullet (default: false)
+  - use_custom_icon_2: Boolean to use custom icon for second bullet (default: false)
+  - use_custom_icon_3: Boolean to use custom icon for third bullet (default: false)
+  - use_custom_icon_4: Boolean to use custom icon for fourth bullet (default: false)
+  - use_custom_icon_5: Boolean to use custom icon for fifth bullet (default: false)
+  - use_custom_icon_6: Boolean to use custom icon for sixth bullet (default: false)
+  - custom_icon_1: Custom SVG code for first bullet
+  - custom_icon_2: Custom SVG code for second bullet
+  - custom_icon_3: Custom SVG code for third bullet
+  - custom_icon_4: Custom SVG code for fourth bullet
+  - custom_icon_5: Custom SVG code for fifth bullet
+  - custom_icon_6: Custom SVG code for sixth bullet
+  - custom_image_1: Custom image for first bullet (takes priority over SVG)
+  - custom_image_2: Custom image for second bullet (takes priority over SVG)
+  - custom_image_3: Custom image for third bullet (takes priority over SVG)
+  - custom_image_4: Custom image for fourth bullet (takes priority over SVG)
+  - custom_image_5: Custom image for fifth bullet (takes priority over SVG)
+  - custom_image_6: Custom image for sixth bullet (takes priority over SVG)
+  - layout_style: Layout style - 'vertical' or 'horizontal' (default: vertical)
+  - row_gap: Gap between items in horizontal layout (default: 15)
+  - icon_color: Color for the default icons (default: #1C274C)
+  - text_color: Color for the bullet text (default: #333333)
+  - icon_size: Size of the icon in pixels (default: 16)
+  - text_size: Size of the text in pixels (default: 12)
+  - spacing: Spacing between bullets in pixels (default: 12)
+  - icon_text_gap: Gap between icon and text within each item (default: 10)
+  - margin_top: Top margin in pixels
+  - margin_bottom: Bottom margin in pixels
+  - show_bg: Enable background color (default: false)
+  - bg_color: Background color for items (default: #f5f5f5)
+  - border_radius: Border radius in pixels (default: 4)
+  - block: Block object for Shopify block attributes
+{% endcomment %}
+
+{% assign bullet_1 = bullet_1 | default: block.settings.bullet_1 %}
+{% assign bullet_2 = bullet_2 | default: block.settings.bullet_2 %}
+{% assign bullet_3 = bullet_3 | default: block.settings.bullet_3 %}
+{% assign bullet_4 = bullet_4 | default: block.settings.bullet_4 %}
+{% assign bullet_5 = bullet_5 | default: block.settings.bullet_5 %}
+{% assign bullet_6 = bullet_6 | default: block.settings.bullet_6 %}
+{% assign use_custom_icon_1 = use_custom_icon_1 | default: block.settings.use_custom_icon_1 %}
+{% assign use_custom_icon_2 = use_custom_icon_2 | default: block.settings.use_custom_icon_2 %}
+{% assign use_custom_icon_3 = use_custom_icon_3 | default: block.settings.use_custom_icon_3 %}
+{% assign use_custom_icon_4 = use_custom_icon_4 | default: block.settings.use_custom_icon_4 %}
+{% assign use_custom_icon_5 = use_custom_icon_5 | default: block.settings.use_custom_icon_5 %}
+{% assign use_custom_icon_6 = use_custom_icon_6 | default: block.settings.use_custom_icon_6 %}
+{% assign custom_icon_1 = custom_icon_1 | default: block.settings.custom_icon_1 %}
+{% assign custom_icon_2 = custom_icon_2 | default: block.settings.custom_icon_2 %}
+{% assign custom_icon_3 = custom_icon_3 | default: block.settings.custom_icon_3 %}
+{% assign custom_icon_4 = custom_icon_4 | default: block.settings.custom_icon_4 %}
+{% assign custom_icon_5 = custom_icon_5 | default: block.settings.custom_icon_5 %}
+{% assign custom_icon_6 = custom_icon_6 | default: block.settings.custom_icon_6 %}
+{% assign custom_image_1 = custom_image_1 | default: block.settings.custom_image_1 %}
+{% assign custom_image_2 = custom_image_2 | default: block.settings.custom_image_2 %}
+{% assign custom_image_3 = custom_image_3 | default: block.settings.custom_image_3 %}
+{% assign custom_image_4 = custom_image_4 | default: block.settings.custom_image_4 %}
+{% assign custom_image_5 = custom_image_5 | default: block.settings.custom_image_5 %}
+{% assign custom_image_6 = custom_image_6 | default: block.settings.custom_image_6 %}
+{% assign layout_style = layout_style | default: block.settings.layout_style | default: 'vertical' %}
+{% assign row_gap = row_gap | default: block.settings.row_gap | default: 15 | plus: 0 %}
+{% assign icon_color = icon_color | default: block.settings.icon_color | default: '#1C274C' %}
+{% assign text_color = text_color | default: block.settings.text_color | default: '#333333' %}
+{% assign icon_size = icon_size | default: block.settings.icon_size | default: 16 | plus: 0 %}
+{% assign text_size = text_size | default: block.settings.text_size | default: 12 | plus: 0 %}
+{% assign spacing = spacing | default: block.settings.spacing | default: 12 | plus: 0 %}
+{% assign icon_text_gap = icon_text_gap | default: block.settings.icon_text_gap | default: 10 | plus: 0 %}
+{% assign margin_top = margin_top | default: block.settings.margin_top | default: 0 | plus: 0 %}
+{% assign margin_bottom = margin_bottom | default: block.settings.margin_bottom | default: 0 | plus: 0 %}
+{% assign show_bg = show_bg | default: block.settings.show_bg | default: false %}
+{% assign bg_color = bg_color | default: block.settings.bg_color | default: '#f5f5f5' %}
+{% assign border_radius = border_radius | default: block.settings.border_radius | default: 4 | plus: 0 %}
+{% assign icon_image_width = icon_size | times: 2 %}
+
+{% capture default_icon %}
+<svg width="{{ icon_size }}" height="{{ icon_size }}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M9.5924 3.20027C9.34888 3.4078 9.22711 3.51158 9.09706 3.59874C8.79896 3.79854 8.46417 3.93721 8.1121 4.00672C7.95851 4.03705 7.79903 4.04977 7.48008 4.07522C6.6787 4.13918 6.278 4.17115 5.94371 4.28923C5.17051 4.56233 4.56233 5.17051 4.28923 5.94371C4.17115 6.278 4.13918 6.6787 4.07522 7.48008C4.04977 7.79903 4.03705 7.95851 4.00672 8.1121C3.93721 8.46417 3.79854 8.79896 3.59874 9.09706C3.51158 9.22711 3.40781 9.34887 3.20027 9.5924C2.67883 10.2043 2.4181 10.5102 2.26522 10.8301C1.91159 11.57 1.91159 12.43 2.26522 13.1699C2.41811 13.4898 2.67883 13.7957 3.20027 14.4076C3.40778 14.6511 3.51158 14.7729 3.59874 14.9029C3.79854 15.201 3.93721 15.5358 4.00672 15.8879C4.03705 16.0415 4.04977 16.201 4.07522 16.5199C4.13918 17.3213 4.17115 17.722 4.28923 18.0563C4.56233 18.8295 5.17051 19.4377 5.94371 19.7108C6.278 19.8288 6.6787 19.8608 7.48008 19.9248C7.79903 19.9502 7.95851 19.963 8.1121 19.9933C8.46417 20.0628 8.79896 20.2015 9.09706 20.4013C9.22711 20.4884 9.34887 20.5922 9.5924 20.7997C10.2043 21.3212 10.5102 21.5819 10.8301 21.7348C11.57 22.0884 12.43 22.0884 13.1699 21.7348C13.4898 21.5819 13.7957 21.3212 14.4076 20.7997C14.6511 20.5922 14.7729 20.4884 14.9029 20.4013C15.201 20.2015 15.5358 20.0628 15.8879 19.9933C16.0415 19.963 16.201 19.9502 16.5199 19.9248C17.3213 19.8608 17.722 19.8288 18.0563 19.7108C18.8295 19.4377 19.4377 18.8295 19.7108 18.0563C19.8288 17.722 19.8608 17.3213 19.9248 16.5199C19.9502 16.201 19.963 16.0415 19.9933 15.8879C20.0628 15.5358 20.2015 15.201 20.4013 14.9029C20.4884 14.7729 20.5922 14.6511 20.7997 14.4076C21.3212 13.7957 21.5819 13.4898 21.7348 13.1699C22.0884 12.43 22.0884 11.57 21.7348 10.8301C21.5819 10.5102 21.3212 10.2043 20.7997 9.5924C20.5922 9.34887 20.4884 9.22711 20.4013 9.09706C20.2015 8.79896 20.0628 8.46417 19.9933 8.1121C19.963 7.95851 19.9502 7.79903 19.9248 7.48008C19.8608 6.6787 19.8288 6.278 19.7108 5.94371C19.4377 5.17051 18.8295 4.56233 18.0563 4.28923C17.722 4.17115 17.3213 4.13918 16.5199 4.07522C16.201 4.04977 16.0415 4.03705 15.8879 4.00672C15.5358 3.93721 15.201 3.79854 14.9029 3.59874C14.7729 3.51158 14.6511 3.40781 14.4076 3.20027C13.7957 2.67883 13.4898 2.41811 13.1699 2.26522C12.43 1.91159 11.57 1.91159 10.8301 2.26522C10.5102 2.4181 10.2043 2.67883 9.5924 3.20027ZM16.3735 9.86314C16.6913 9.5453 16.6913 9.03 16.3735 8.71216C16.0557 8.39433 15.5403 8.39433 15.2225 8.71216L10.3723 13.5624L8.77746 11.9676C8.45963 11.6498 7.94432 11.6498 7.62649 11.9676C7.30866 12.2854 7.30866 12.8007 7.62649 13.1186L9.79678 15.2889C10.1146 15.6067 10.6299 15.6067 10.9478 15.2889L16.3735 9.86314Z" fill="{{ icon_color }}"/>
+</svg>
+{% endcapture %}
+
+<div
+  class="product-bullet-list product-bullet-list-{{ block.id }}"
+  id="product-bullet-list-{{ block.id }}"
+  {{ block.shopify_attributes }}
+  style="margin-top: {{ margin_top }}px; margin-bottom: {{ margin_bottom }}px;"
+>
+  <ul
+    class="product-bullet-items layout-{{ layout_style }}"
+    style="{% if layout_style == 'vertical' %}gap: {{ spacing }}px;{% else %}gap: {{ row_gap }}px;{% endif %}"
+  >
+    {% if bullet_1 != blank %}
+      <li
+        class="product-bullet-item{% if show_bg %} has-bg{% endif %}"
+        style="gap: {{ icon_text_gap }}px;{% if show_bg %} background-color: {{ bg_color }}; border-radius: {{ border_radius }}px;{% endif %}"
+      >
+        <div class="product-bullet-icon">
+          {% if custom_image_1 != blank %}
+            <img
+              src="{{ custom_image_1 | image_url: width: icon_image_width }}"
+              alt="{{ bullet_1 | escape }}"
+              width="{{ icon_size }}"
+              height="{{ icon_size }}"
+              style="width: {{ icon_size }}px; height: {{ icon_size }}px; object-fit: contain;"
+              loading="lazy"
+            >
+          {% elsif use_custom_icon_1 and custom_icon_1 != blank %}
+            {{ custom_icon_1 }}
+          {% else %}
+            {{ default_icon }}
+          {% endif %}
+        </div>
+        <span
+          class="product-bullet-text"
+          style="color: {{ text_color }}; font-size: {{ text_size }}px;"
+        >
+          {{- bullet_1 -}}
+        </span>
+      </li>
+    {% endif %}
+
+    {% if bullet_2 != blank %}
+      <li
+        class="product-bullet-item{% if show_bg %} has-bg{% endif %}"
+        style="gap: {{ icon_text_gap }}px;{% if show_bg %} background-color: {{ bg_color }}; border-radius: {{ border_radius }}px;{% endif %}"
+      >
+        <div class="product-bullet-icon">
+          {% if custom_image_2 != blank %}
+            <img
+              src="{{ custom_image_2 | image_url: width: icon_image_width }}"
+              alt="{{ bullet_2 | escape }}"
+              width="{{ icon_size }}"
+              height="{{ icon_size }}"
+              style="width: {{ icon_size }}px; height: {{ icon_size }}px; object-fit: contain;"
+              loading="lazy"
+            >
+          {% elsif use_custom_icon_2 and custom_icon_2 != blank %}
+            {{ custom_icon_2 }}
+          {% else %}
+            {{ default_icon }}
+          {% endif %}
+        </div>
+        <span
+          class="product-bullet-text"
+          style="color: {{ text_color }}; font-size: {{ text_size }}px;"
+        >
+          {{- bullet_2 -}}
+        </span>
+      </li>
+    {% endif %}
+
+    {% if bullet_3 != blank %}
+      <li
+        class="product-bullet-item{% if show_bg %} has-bg{% endif %}"
+        style="gap: {{ icon_text_gap }}px;{% if show_bg %} background-color: {{ bg_color }}; border-radius: {{ border_radius }}px;{% endif %}"
+      >
+        <div class="product-bullet-icon">
+          {% if custom_image_3 != blank %}
+            <img
+              src="{{ custom_image_3 | image_url: width: icon_image_width }}"
+              alt="{{ bullet_3 | escape }}"
+              width="{{ icon_size }}"
+              height="{{ icon_size }}"
+              style="width: {{ icon_size }}px; height: {{ icon_size }}px; object-fit: contain;"
+              loading="lazy"
+            >
+          {% elsif use_custom_icon_3 and custom_icon_3 != blank %}
+            {{ custom_icon_3 }}
+          {% else %}
+            {{ default_icon }}
+          {% endif %}
+        </div>
+        <span
+          class="product-bullet-text"
+          style="color: {{ text_color }}; font-size: {{ text_size }}px;"
+        >
+          {{- bullet_3 -}}
+        </span>
+      </li>
+    {% endif %}
+
+    {% if bullet_4 != blank %}
+      <li
+        class="product-bullet-item{% if show_bg %} has-bg{% endif %}"
+        style="gap: {{ icon_text_gap }}px;{% if show_bg %} background-color: {{ bg_color }}; border-radius: {{ border_radius }}px;{% endif %}"
+      >
+        <div class="product-bullet-icon">
+          {% if custom_image_4 != blank %}
+            <img
+              src="{{ custom_image_4 | image_url: width: icon_image_width }}"
+              alt="{{ bullet_4 | escape }}"
+              width="{{ icon_size }}"
+              height="{{ icon_size }}"
+              style="width: {{ icon_size }}px; height: {{ icon_size }}px; object-fit: contain;"
+              loading="lazy"
+            >
+          {% elsif use_custom_icon_4 and custom_icon_4 != blank %}
+            {{ custom_icon_4 }}
+          {% else %}
+            {{ default_icon }}
+          {% endif %}
+        </div>
+        <span
+          class="product-bullet-text"
+          style="color: {{ text_color }}; font-size: {{ text_size }}px;"
+        >
+          {{- bullet_4 -}}
+        </span>
+      </li>
+    {% endif %}
+
+    {% if bullet_5 != blank %}
+      <li
+        class="product-bullet-item{% if show_bg %} has-bg{% endif %}"
+        style="gap: {{ icon_text_gap }}px;{% if show_bg %} background-color: {{ bg_color }}; border-radius: {{ border_radius }}px;{% endif %}"
+      >
+        <div class="product-bullet-icon">
+          {% if custom_image_5 != blank %}
+            <img
+              src="{{ custom_image_5 | image_url: width: icon_image_width }}"
+              alt="{{ bullet_5 | escape }}"
+              width="{{ icon_size }}"
+              height="{{ icon_size }}"
+              style="width: {{ icon_size }}px; height: {{ icon_size }}px; object-fit: contain;"
+              loading="lazy"
+            >
+          {% elsif use_custom_icon_5 and custom_icon_5 != blank %}
+            {{ custom_icon_5 }}
+          {% else %}
+            {{ default_icon }}
+          {% endif %}
+        </div>
+        <span
+          class="product-bullet-text"
+          style="color: {{ text_color }}; font-size: {{ text_size }}px;"
+        >
+          {{- bullet_5 -}}
+        </span>
+      </li>
+    {% endif %}
+
+    {% if bullet_6 != blank %}
+      <li
+        class="product-bullet-item{% if show_bg %} has-bg{% endif %}"
+        style="gap: {{ icon_text_gap }}px;{% if show_bg %} background-color: {{ bg_color }}; border-radius: {{ border_radius }}px;{% endif %}"
+      >
+        <div class="product-bullet-icon">
+          {% if custom_image_6 != blank %}
+            <img
+              src="{{ custom_image_6 | image_url: width: icon_image_width }}"
+              alt="{{ bullet_6 | escape }}"
+              width="{{ icon_size }}"
+              height="{{ icon_size }}"
+              style="width: {{ icon_size }}px; height: {{ icon_size }}px; object-fit: contain;"
+              loading="lazy"
+            >
+          {% elsif use_custom_icon_6 and custom_icon_6 != blank %}
+            {{ custom_icon_6 }}
+          {% else %}
+            {{ default_icon }}
+          {% endif %}
+        </div>
+        <span
+          class="product-bullet-text"
+          style="color: {{ text_color }}; font-size: {{ text_size }}px;"
+        >
+          {{- bullet_6 -}}
+        </span>
+      </li>
+    {% endif %}
+  </ul>
+</div>
+
+<style>
+  .product-bullet-list {
+    width: 100%;
+    font-family: var(--font-body-family-override, sans-serif);
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .product-bullet-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-bullet-items.layout-horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .product-bullet-item {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .layout-horizontal .product-bullet-item {
+    flex: 0 0 auto;
+  }
+
+  .product-bullet-item.has-bg {
+    padding: 5px 8px;
+  }
+
+  .product-bullet-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .product-bullet-text {
+    line-height: 1.4;
+  }
+
+  /* Icon sizing for all SVG icons (desktop) */
+  .product-bullet-icon svg {
+    width: {{ icon_size }}px;
+    height: {{ icon_size }}px;
+  }
+
+  /* Force color on all SVG elements - maximum specificity using block ID */
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg,
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg *,
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg path,
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg circle,
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg rect,
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg polygon,
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg polyline,
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg line,
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg ellipse,
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg g,
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg g * {
+    fill: {{ icon_color }} !important;
+    color: {{ icon_color }} !important;
+  }
+
+  /* Exception: preserve fill="none" for stroke-only icons */
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg path[fill="none"],
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg circle[fill="none"],
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg rect[fill="none"],
+  #product-bullet-list-{{ block.id }} .product-bullet-icon svg ellipse[fill="none"] {
+    fill: none !important;
+    stroke: {{ icon_color }} !important;
+  }
+
+  /* Mobile styling */
+  @media screen and (max-width: 767px) {
+    .product-bullet-text {
+      font-size: calc({{ text_size }}px * 0.9) !important;
+    }
+
+    .product-bullet-icon svg {
+      width: calc({{ icon_size }}px * 0.9);
+      height: calc({{ icon_size }}px * 0.9);
+    }
+
+    /* Stack horizontally laid out items vertically on mobile */
+    .product-bullet-items.layout-horizontal {
+      flex-direction: row;
+    }
+  }
+</style>

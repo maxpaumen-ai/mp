@@ -1,0 +1,296 @@
+{{ 'premium-attachment-kit.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign free_gift_product_ids = ''
+  assign product_items = item_1_product | append: ',' | append: item_2_product | append: ',' | append: item_3_product | append: ',' | append: item_4_product | append: ',' | append: item_5_product | append: ',' | append: item_6_product | append: ',' | append: item_7_product | append: ',' | append: item_8_product | append: ',' | append: item_9_product | append: ',' | append: item_10_product
+  assign product_items_array = product_items | split: ','
+
+  for current_product_id in product_items_array
+    if current_product_id != blank
+      assign product_obj = all_products[current_product_id]
+      if product_obj != blank
+        assign variant_id = product_obj.selected_or_first_available_variant.id
+        if free_gift_product_ids != blank
+          assign free_gift_product_ids = free_gift_product_ids | append: ','
+        endif
+        assign free_gift_product_ids = free_gift_product_ids | append: variant_id
+      endif
+    endif
+  endfor
+
+  assign rely_on_product_id = ''
+  if rely_on_product != blank
+    assign rely_product_obj = all_products[rely_on_product]
+    if rely_product_obj != blank
+      assign rely_on_product_id = rely_product_obj.id
+    endif
+  endif
+
+  assign has_free_gifts = false
+  if free_gift_product_ids != blank
+    assign has_free_gifts = true
+  endif
+
+  assign has_visible_items = false
+  if item_1_name != blank or item_2_name != blank or item_3_name != blank or item_4_name != blank or item_5_name != blank or item_6_name != blank or item_7_name != blank or item_8_name != blank or item_9_name != blank or item_10_name != blank
+    assign has_visible_items = true
+  endif
+
+  assign should_display = true
+  if apply_to_product != blank
+    assign target_product = all_products[apply_to_product]
+    if target_product != blank and target_product.id != product.id
+      assign should_display = false
+    endif
+  endif
+
+  comment
+    If apply_to_product is not set, the block will display on ALL products
+    If apply_to_product is set, the block will ONLY display on that specific product
+    To use block-specific free gifts, BOTH apply_to_product AND item_X_product must be configured
+  endcomment
+-%}
+
+{% if has_free_gifts and should_display %}
+  <div
+    class="premium-attachment-kit"
+    data-free-gift-product-ids="{{ free_gift_product_ids }}"
+    data-rely-on-product-id="{{ rely_on_product_id }}"
+    data-main-product-id="{{ product.id }}"
+    style="
+      --kit-bg-color: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ background_color | default: '#fef7f7' }}{% endif %};
+      --kit-border-color: {% if use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ border_color | default: '#f87171' }}{% endif %};
+      --kit-text-color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_color | default: '#374151' }}{% endif %};
+      --kit-header-color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ header_color | default: '#111827' }}{% endif %};
+      --kit-free-bg: {% if use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ free_badge_bg | default: '#dc2626' }}{% endif %};
+      --kit-free-text: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ free_badge_text_color | default: '#ffffff' }}{% endif %};
+      --kit-item-bg: {% if use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ item_background_color | default: '#ffffff' }}{% endif %};
+      --kit-item-count-color: {% if use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 30 }}{% else %}{{ item_count_color | default: '#6b7280' }}{% endif %};
+      --kit-item-radius: {{ item_border_radius | default: 6 }}px;
+      --kit-container-radius: {{ container_border_radius | default: 8 }}px;
+      --kit-badge-icon-size: {{ badge_icon_size | default: 12 }}px;
+      --kit-original-price-color: {% if use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 40 }}{% else %}#9ca3af{% endif %};
+      --kit-compare-price-color: {% if use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 40 }}{% else %}#9ca3af{% endif %};
+      --kit-item-border-color: {% if use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 70 }}{% else %}rgba(243, 244, 246, 0.8){% endif %};
+      margin-top: {{ margin_top | default: 20 }}px;
+      margin-bottom: {{ margin_bottom | default: 20 }}px;
+    "
+    {{ block.shopify_attributes }}
+  >
+    <!-- Header -->
+    <div class="kit-header">
+      <div class="kit-header-left">
+        {%- if title != blank -%}
+          <div class="kit-title-row">
+            <h3
+              class="kit-title"
+              style="color: {% if use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ header_color | default: '#111827' }}{% endif %} !important;"
+            >
+              {{ title }}
+            </h3>
+            {%- if show_item_count -%}
+              {%- assign item_count = 0 -%}
+              {%- for i in (1..10) -%}
+                {%- assign item_name_var = 'item_' | append: i | append: '_name' -%}
+                {%- if item_name_var != blank -%}
+                  {%- case i -%}
+                    {%- when 1 -%}
+                      {%- if item_1_name != blank -%}{%- assign item_count = item_count | plus: 1 -%}{%- endif -%}
+                    {%- when 2 -%}
+                      {%- if item_2_name != blank -%}{%- assign item_count = item_count | plus: 1 -%}{%- endif -%}
+                    {%- when 3 -%}
+                      {%- if item_3_name != blank -%}{%- assign item_count = item_count | plus: 1 -%}{%- endif -%}
+                    {%- when 4 -%}
+                      {%- if item_4_name != blank -%}{%- assign item_count = item_count | plus: 1 -%}{%- endif -%}
+                    {%- when 5 -%}
+                      {%- if item_5_name != blank -%}{%- assign item_count = item_count | plus: 1 -%}{%- endif -%}
+                    {%- when 6 -%}
+                      {%- if item_6_name != blank -%}{%- assign item_count = item_count | plus: 1 -%}{%- endif -%}
+                    {%- when 7 -%}
+                      {%- if item_7_name != blank -%}{%- assign item_count = item_count | plus: 1 -%}{%- endif -%}
+                    {%- when 8 -%}
+                      {%- if item_8_name != blank -%}{%- assign item_count = item_count | plus: 1 -%}{%- endif -%}
+                    {%- when 9 -%}
+                      {%- if item_9_name != blank -%}{%- assign item_count = item_count | plus: 1 -%}{%- endif -%}
+                    {%- when 10 -%}
+                      {%- if item_10_name != blank -%}{%- assign item_count = item_count | plus: 1 -%}{%- endif -%}
+                  {%- endcase -%}
+                {%- endif -%}
+              {%- endfor -%}
+              <span class="kit-item-count">
+                {%- if item_count == 1 -%}
+                  ({{ item_count }}
+                  {{ 'products.product.item' | t }})
+                {%- else -%}
+                  ({{ item_count }}
+                  {{ 'products.product.items' | t }})
+                {%- endif -%}
+              </span>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="kit-price">
+        {%- if original_price != blank -%}
+          {%- assign original_price_cents = original_price | times: 100 | round -%}
+          <span class="original-price">
+            {{ original_price_cents | money }}
+          </span>
+        {%- endif -%}
+
+        {% if free_badge_text != blank %}
+          <span class="free-badge">
+            {% if show_badge_icon %}
+              {% case badge_icon_type %}
+                {% when 'gift' %}
+                  <svg
+                    class="gift-icon"
+                    viewBox="0 0 32 32"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M5 11c0-1 1-2 2-2h18c1 0 2 1 2 2v4h-2v10c0 1-1 2-2 2H9c-1 0-2-1-2-2V15H5v-4z"/>
+                    <path d="M7 15h18M16 9v18M16 9c-1.333-2.833-4.1-7.4-6.5-5-2.4 2.4 3 5 6.5 5zM16 9c0-4.5 4.5-7.5 6.5-5.5C25 6 20 9 16 9z"/>
+                  </svg>
+                {% when 'custom_svg' %}
+                  {% if custom_badge_svg != blank %}
+                    <div class="custom-icon">{{ custom_badge_svg }}</div>
+                  {% endif %}
+                {% when 'custom_image' %}
+                  {% if custom_badge_image != blank %}
+                    <img
+                      class="custom-icon"
+                      src="{{ custom_badge_image | image_url: width: 60 }}"
+                      alt="Badge icon"
+                      loading="lazy"
+                      width=""
+                      height=""
+                    >
+                  {% endif %}
+              {% endcase %}
+            {% endif %}
+            {{ free_badge_text }}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Items List -->
+    <ul class="kit-items">
+      {%- for i in (1..10) -%}
+        {%- case i -%}
+          {%- when 1 -%}
+            {%- assign current_name = item_1_name -%}
+            {%- assign current_price = item_1_price -%}
+            {%- assign current_compare_price = item_1_compare_price -%}
+            {%- assign current_icon = item_1_icon -%}
+            {%- assign current_product = item_1_product -%}
+          {%- when 2 -%}
+            {%- assign current_name = item_2_name -%}
+            {%- assign current_price = item_2_price -%}
+            {%- assign current_compare_price = item_2_compare_price -%}
+            {%- assign current_icon = item_2_icon -%}
+            {%- assign current_product = item_2_product -%}
+          {%- when 3 -%}
+            {%- assign current_name = item_3_name -%}
+            {%- assign current_price = item_3_price -%}
+            {%- assign current_compare_price = item_3_compare_price -%}
+            {%- assign current_icon = item_3_icon -%}
+            {%- assign current_product = item_3_product -%}
+          {%- when 4 -%}
+            {%- assign current_name = item_4_name -%}
+            {%- assign current_price = item_4_price -%}
+            {%- assign current_compare_price = item_4_compare_price -%}
+            {%- assign current_icon = item_4_icon -%}
+            {%- assign current_product = item_4_product -%}
+          {%- when 5 -%}
+            {%- assign current_name = item_5_name -%}
+            {%- assign current_price = item_5_price -%}
+            {%- assign current_compare_price = item_5_compare_price -%}
+            {%- assign current_icon = item_5_icon -%}
+            {%- assign current_product = item_5_product -%}
+          {%- when 6 -%}
+            {%- assign current_name = item_6_name -%}
+            {%- assign current_price = item_6_price -%}
+            {%- assign current_compare_price = item_6_compare_price -%}
+            {%- assign current_icon = item_6_icon -%}
+            {%- assign current_product = item_6_product -%}
+          {%- when 7 -%}
+            {%- assign current_name = item_7_name -%}
+            {%- assign current_price = item_7_price -%}
+            {%- assign current_compare_price = item_7_compare_price -%}
+            {%- assign current_icon = item_7_icon -%}
+            {%- assign current_product = item_7_product -%}
+          {%- when 8 -%}
+            {%- assign current_name = item_8_name -%}
+            {%- assign current_price = item_8_price -%}
+            {%- assign current_compare_price = item_8_compare_price -%}
+            {%- assign current_icon = item_8_icon -%}
+            {%- assign current_product = item_8_product -%}
+          {%- when 9 -%}
+            {%- assign current_name = item_9_name -%}
+            {%- assign current_price = item_9_price -%}
+            {%- assign current_compare_price = item_9_compare_price -%}
+            {%- assign current_icon = item_9_icon -%}
+            {%- assign current_product = item_9_product -%}
+          {%- when 10 -%}
+            {%- assign current_name = item_10_name -%}
+            {%- assign current_price = item_10_price -%}
+            {%- assign current_compare_price = item_10_compare_price -%}
+            {%- assign current_icon = item_10_icon -%}
+            {%- assign current_product = item_10_product -%}
+        {%- endcase -%}
+        {%- if current_product != blank -%}
+          {%- assign current_product = all_products[current_product] -%}
+        {%- endif -%}
+        {%- comment -%}
+          IMPORTANT: Check if product exists (not current_name)
+          This ensures all configured free gift products are added to cart,
+          even if display name/price/icon are not filled
+        {%- endcomment -%}
+        {%- if current_product.id -%}
+          <li
+            class="kit-item"
+            data-product-id="{{ current_product.selected_or_first_available_variant.id }}"
+            data-available="{% if current_product.selected_or_first_available_variant.available %}true{% else %}false{% endif %}"
+          >
+            <div class="item-icon">
+              {%- if current_icon != blank -%}
+                <img
+                  src="{{ current_icon | image_url: width: 84 }}"
+                  alt="{{ current_name | default: current_product.title }}"
+                  width="32"
+                  height="32"
+                >
+              {%- else -%}
+                <div class="placeholder-icon">{{ i }}</div>
+              {%- endif -%}
+            </div>
+            <div class="item-details">
+              <p class="item-name">{{ current_name | default: current_product.title }}</p>
+              <div class="item-pricing">
+                {%- if current_compare_price != blank -%}
+                  {%- assign item_compare_price_cents = current_compare_price | times: 100 | round -%}
+                  <span class="item-compare-price">
+                    {{ item_compare_price_cents | money }}
+                  </span>
+                {%- endif -%}
+                {%- if current_price != blank -%}
+                  {%- assign item_price_cents = current_price | times: 100 | round -%}
+                  <span class="item-price">
+                    {{ item_price_cents | money }}
+                  </span>
+                {%- endif -%}
+              </div>
+            </div>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+  {% comment %} Script logic is handled by assets/premium-attachment-kit.js {% endcomment %}
+{% endif %}

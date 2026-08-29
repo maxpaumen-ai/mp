@@ -1,0 +1,433 @@
+{% comment %}
+  VANHOUTEN LIVING — Automatische collectie-upsells V1.5
+
+  Functionaliteit:
+  - Automatische upsells op basis van collectie-koppeling.
+  - Maximaal section.settings.auto_upsell_limit producten (standaard 5).
+  - Producten die al in de winkelmand zitten worden overgeslagen.
+  - Horizontale swipe / scroll.
+  - Pijlen links en rechts over de productcarrousel.
+  - Vooraf zichtbare 10% combinatievoordeel-melding.
+  - De daadwerkelijke korting wordt door Shopify toegepast.
+{% endcomment %}
+
+{%- liquid
+  assign matched_target_collection = blank
+  assign matched_rule_id = blank
+
+  if cart != empty
+    for rule in section.blocks
+      if rule.type == 'auto_upsell_rule'
+        assign source_collection = rule.settings.source_collection
+        assign target_collection = rule.settings.target_collection
+        assign rule_matches = false
+
+        if source_collection != blank and target_collection != blank
+          for cart_item in cart.items
+            for product_collection in cart_item.product.collections
+              if product_collection.id == source_collection.id
+                assign rule_matches = true
+                break
+              endif
+            endfor
+
+            if rule_matches
+              break
+            endif
+          endfor
+        endif
+
+        if rule_matches
+          assign matched_target_collection = target_collection
+          assign matched_rule_id = rule.id
+          break
+        endif
+      endif
+    endfor
+  endif
+-%}
+
+{%- if matched_target_collection != blank -%}
+
+  {%- assign eligible_count = 0 -%}
+
+  {%- for candidate in matched_target_collection.products limit: 30 -%}
+    {%- assign candidate_in_cart = cart.items | where: 'product_id', candidate.id | first -%}
+
+    {%- if candidate.available and candidate_in_cart == blank -%}
+      {%- assign eligible_count = eligible_count | plus: 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- if eligible_count > 0 -%}
+
+    <div
+      class="vhl-auto-upsells"
+      data-vhl-auto-upsell-rule="{{ matched_rule_id }}"
+    >
+
+      <div class="vhl-auto-upsells__heading-row">
+        <div class="vhl-auto-upsells__heading">
+          {{ section.settings.auto_upsell_heading | default: 'Maak je badkamer compleet' }}
+        </div>
+
+        <div class="vhl-auto-upsells__discount-pill">
+          Mix & ontvang 10% korting
+        </div>
+      </div>
+
+      <div class="vhl-auto-upsells__slider">
+
+        {%- if eligible_count > 1 -%}
+          <button
+            type="button"
+            class="vhl-auto-upsells__arrow vhl-auto-upsells__arrow--prev"
+            aria-label="Vorige producten"
+            data-vhl-auto-prev
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M15 18l-6-6 6-6"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        {%- endif -%}
+
+        <div
+          class="vhl-auto-upsells__track"
+          role="region"
+          aria-label="Aanbevolen producten met 10% combinatievoordeel"
+          tabindex="0"
+        >
+
+          {%- assign rendered_count = 0 -%}
+          {%- assign max_items = section.settings.auto_upsell_limit | default: 5 -%}
+
+          {%- for upsell_product in matched_target_collection.products limit: 30 -%}
+
+            {%- if rendered_count >= max_items -%}
+              {%- break -%}
+            {%- endif -%}
+
+            {%- assign product_in_cart = cart.items | where: 'product_id', upsell_product.id | first -%}
+
+            {%- if upsell_product.available and product_in_cart == blank -%}
+
+              {%- assign auto_block_id = 'auto-' | append: matched_rule_id | append: '-' | append: upsell_product.id -%}
+              {%- assign auto_form_id = 'cart-auto-upsell-form-' | append: upsell_product.id -%}
+
+              <div class="vhl-auto-upsells__slide">
+                {%- render 'cart-drawer-upsell',
+                  block_id: auto_block_id,
+                  product_form_id: auto_form_id,
+                  upsell_product: upsell_product,
+                  show_description: false,
+                  description_text: '',
+                  upsell_button_text: 'Toevoegen +',
+                  button_text_color: '#FFFFFF',
+                  upsell_custom_bestseller_svg: '',
+                  title_color: '#292824',
+                  description_color: '#77736C',
+                  show_best_seller_tag: false,
+                  best_seller_text: '',
+                  best_seller_tag_color: '#2C2B28',
+                  best_seller_tag_text_color: '#FFFFFF',
+                  show_price: false,
+                  card_bg_color: '#F7F5F1',
+                  card_border_radius: 10,
+                  border_width: 1,
+                  border_style: 'solid',
+                  border_color: '#E7E3DC',
+                  price_color: '#292824',
+                  variant_border_color: '#DED9D1',
+                  variant_border_radius: 8,
+                  variant_bg_color: '#FFFFFF',
+                  variant_text_color: '#292824',
+                  button_bg_color: '#2C2B28',
+                  button_border_radius: 8,
+                  button_text_color: '#FFFFFF',
+                  upsell_show_price: false,
+                  remove_container_border: false,
+                  image_border_radius: 8,
+                  product_image_bg_color: '#F2EFEA',
+                  title_font_size: 15,
+                  description_font_size: 11,
+                  price_font_size: 13,
+                  variant_font_size: 11,
+                  button_font_size: 12,
+                  tag_font_size: 11,
+                  top_margin: 0,
+                  bottom_margin: 0,
+                  force_custom_colors: true
+                -%}
+              </div>
+
+              {%- assign rendered_count = rendered_count | plus: 1 -%}
+
+            {%- endif -%}
+          {%- endfor -%}
+
+        </div>
+
+        {%- if eligible_count > 1 -%}
+          <button
+            type="button"
+            class="vhl-auto-upsells__arrow vhl-auto-upsells__arrow--next"
+            aria-label="Volgende producten"
+            data-vhl-auto-next
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M9 18l6-6-6-6"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        {%- endif -%}
+
+      </div>
+    </div>
+
+    <style>
+      .cart-drawer .vhl-auto-upsells {
+        width: 100%;
+        padding-left: 13px;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .cart-drawer .vhl-auto-upsells__heading-row {
+        margin: 22px 13px 10px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+
+      .cart-drawer .vhl-auto-upsells__heading {
+        color: #292824;
+        font-size: 17px;
+        line-height: 1.2;
+        font-weight: 700;
+        letter-spacing: -0.018em;
+      }
+
+      .cart-drawer .vhl-auto-upsells__discount-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 0;
+        border-radius: 0;
+        background: transparent;
+        color: #4c4b47;
+        font-size: 14px;
+        line-height: 1.25;
+        font-weight: 600;
+        letter-spacing: 0;
+        white-space: normal;
+      }
+
+      .cart-drawer .vhl-auto-upsells__discount-pill::before {
+        content: '';
+        width: 7px;
+        height: 7px;
+        margin-right: 7px;
+        border-radius: 50%;
+        background: #8e887e;
+        flex: 0 0 7px;
+      }
+
+      .cart-drawer .vhl-auto-upsells__slider {
+        position: relative;
+        width: 100%;
+      }
+
+      .cart-drawer .vhl-auto-upsells__track {
+        width: 100%;
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0 13px 9px 0;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+        box-sizing: border-box;
+      }
+
+      .cart-drawer .vhl-auto-upsells__track::-webkit-scrollbar {
+        display: none;
+      }
+
+      .cart-drawer .vhl-auto-upsells__slide {
+        flex: 0 0 84%;
+        min-width: 0;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        box-sizing: border-box;
+      }
+
+      .cart-drawer .vhl-auto-upsells__slide .upsell-product-container {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+      }
+
+      .cart-drawer .vhl-auto-upsells__arrow {
+        position: absolute;
+        top: 50%;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translateY(-50%);
+        border: 1px solid #DED9D1;
+        border-radius: 50%;
+        background: rgba(255,255,255,.96);
+        color: #292824;
+        cursor: pointer;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      }
+
+      .cart-drawer .vhl-auto-upsells__arrow--prev {
+        left: 7px;
+      }
+
+      .cart-drawer .vhl-auto-upsells__arrow--next {
+        right: 18px;
+      }
+
+      .cart-drawer .vhl-auto-upsells__arrow:active {
+        transform: translateY(-50%) scale(.94);
+      }
+
+      .cart-drawer .vhl-auto-upsells__arrow svg {
+        pointer-events: none;
+      }
+
+      @media screen and (min-width: 750px) {
+        .cart-drawer .vhl-auto-upsells__slide {
+          flex-basis: 72%;
+        }
+      }
+
+      @media screen and (max-width: 749px) {
+        .cart-drawer .vhl-auto-upsells {
+          padding-left: 12px;
+        }
+
+        .cart-drawer .vhl-auto-upsells__heading-row,
+
+        .cart-drawer .vhl-auto-upsells__track {
+          gap: 9px;
+          padding-right: 12px;
+        }
+
+        .cart-drawer .vhl-auto-upsells__slide {
+          flex-basis: 85%;
+        }
+
+        .cart-drawer .vhl-auto-upsells__arrow {
+          width: 32px;
+          height: 32px;
+        }
+
+        .cart-drawer .vhl-auto-upsells__arrow--prev {
+          left: 5px;
+        }
+
+        .cart-drawer .vhl-auto-upsells__arrow--next {
+          right: 15px;
+        }
+      }
+
+      @media screen and (max-width: 390px) {
+        .cart-drawer .vhl-auto-upsells__heading {
+          font-size: 15px;
+        }
+
+        .cart-drawer .vhl-auto-upsells__slide {
+          flex-basis: 87%;
+        }
+      }
+    </style>
+
+    <script>
+      (function() {
+        function initVhlAutoUpsellArrows(scope) {
+          const roots = (scope || document).querySelectorAll('.vhl-auto-upsells');
+
+          roots.forEach(function(root) {
+            if (root.dataset.vhlArrowsInitialized === 'true') return;
+
+            const track = root.querySelector('.vhl-auto-upsells__track');
+            const prevButton = root.querySelector('[data-vhl-auto-prev]');
+            const nextButton = root.querySelector('[data-vhl-auto-next]');
+
+            if (!track) return;
+
+            function getScrollDistance() {
+              const slide = track.querySelector('.vhl-auto-upsells__slide');
+              if (!slide) return track.clientWidth * 0.8;
+
+              const trackStyle = window.getComputedStyle(track);
+              const gap = parseFloat(trackStyle.columnGap || trackStyle.gap || 0);
+
+              return slide.getBoundingClientRect().width + gap;
+            }
+
+            if (prevButton) {
+              prevButton.addEventListener('click', function() {
+                track.scrollBy({
+                  left: -getScrollDistance(),
+                  behavior: 'smooth'
+                });
+              });
+            }
+
+            if (nextButton) {
+              nextButton.addEventListener('click', function() {
+                track.scrollBy({
+                  left: getScrollDistance(),
+                  behavior: 'smooth'
+                });
+              });
+            }
+
+            root.dataset.vhlArrowsInitialized = 'true';
+          });
+        }
+
+        initVhlAutoUpsellArrows(document);
+
+        document.addEventListener('shopify:section:load', function(event) {
+          initVhlAutoUpsellArrows(event.target);
+        });
+
+        const observer = new MutationObserver(function(mutations) {
+          if (mutations.some(function(mutation) { return mutation.addedNodes.length > 0; })) {
+            initVhlAutoUpsellArrows(document);
+          }
+        });
+
+        observer.observe(document.documentElement, {
+          childList: true,
+          subtree: true
+        });
+      })();
+    </script>
+
+  {%- endif -%}
+{%- endif -%}

@@ -1,0 +1,391 @@
+{% comment %}
+  Renders a header search modal. Should be used with 'header.liquid'
+
+  Accepts:
+  - input_id: {String} Id for the search input element (required)
+
+  Usage:
+  {% render 'header-search', input_id: 'My-Id'%}
+{% endcomment %}
+
+<style>
+  /* Search Modal - Fix field display issues */
+  .search-modal .field {
+    position: relative !important;
+    display: flex !important;
+    width: 100% !important;
+    min-height: 4.5rem !important;
+    overflow: visible !important;
+  }
+
+  /* Prevent field pseudo-elements from hiding the border */
+  .search-modal .field::before,
+  .search-modal .field::after,
+  .search-modal .search.search-modal__form .field::before,
+  .search-modal .search.search-modal__form .field::after {
+    display: none !important;
+    content: none !important;
+    box-shadow: none !important;
+  }
+
+  .search-modal .field:focus-within,
+  .search-modal .field:hover,
+  .search-modal .search.search-modal__form .field:focus-within,
+  .search-modal .search.search-modal__form .field:hover {
+    box-shadow: none !important;
+  }
+
+  /* Override any base.css rules that might remove the border */
+  .search-modal .field:focus-within .field__input,
+  .search-modal .field:hover .field__input {
+    border: 1px solid rgba(var(--color-drawer-text), 0.5) !important;
+  }
+
+  .search-modal .field__input,
+  .search-modal .search__input.field__input {
+    width: 100% !important;
+    height: 4.5rem !important;
+    min-height: 4.5rem !important;
+    padding: 1rem 9.8rem 1rem 1.5rem !important;
+    border-radius: var(--inputs-radius, 4px) !important;
+    border: 1px solid rgba(var(--color-drawer-text), 0.3) !important;
+    background-color: rgb(var(--color-background)) !important;
+    color: rgb(var(--color-drawer-text)) !important;
+    font-size: 1.4rem !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+  }
+
+  .search-modal .field__input:focus,
+  .search-modal .field__input:focus-visible,
+  .search-modal .field__input:active,
+  .search-modal .search__input.field__input:focus,
+  .search-modal .search__input.field__input:focus-visible,
+  .search-modal .search__input.field__input:active {
+    outline: none !important;
+    border: 1px solid rgba(var(--color-drawer-text), 0.5) !important;
+    box-shadow: 0 0 0 1px rgba(var(--color-foreground), 0.2) !important;
+    background-color: rgb(var(--color-background)) !important;
+  }
+
+  /* Force border to stay visible */
+  .search-modal .field__input:-webkit-autofill,
+  .search-modal .search__input.field__input:-webkit-autofill {
+    border: 1px solid rgba(var(--color-drawer-text), 0.3) !important;
+  }
+
+  .search-modal .field__label {
+    position: absolute !important;
+    left: 1.5rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    pointer-events: none !important;
+    transition: all 0.2s ease !important;
+    color: rgba(var(--color-drawer-text), 0.6) !important;
+    font-size: 1.4rem !important;
+  }
+
+  .search-modal .field__input:focus ~ .field__label,
+  .search-modal .field__input:not(:placeholder-shown) ~ .field__label {
+    opacity: 0 !important;
+  }
+
+  /* Search Modal Close Button - Reset all global button styling */
+  .search-modal__close-button {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+margin-left: 1rem !important;
+    cursor: pointer !important;
+    color: inherit !important;
+    font: inherit !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: none !important;
+    outline: none !important;
+    min-height: auto !important;
+    min-width: auto !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: normal !important;
+    font-size: inherit !important;
+    line-height: normal !important;
+  }
+
+  .search-modal__close-button:hover,
+  .search-modal__close-button:focus,
+  .search-modal__close-button:active {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    color: inherit !important;
+  }
+
+  /* Search Button - Override global button styling but keep intended design */
+  .search-modal .search__button.field__button {
+    position: absolute !important;
+    right: 1px !important;
+    top: 2px !important;
+    width: 4.4rem !important;
+    background: var(--gradient-base-background-1, rgb(var(--color-button))) !important;
+    color: rgb(var(--color-background)) !important;
+    border: none !important;
+    border-radius: 0 var(--inputs-radius, 4px) var(--inputs-radius, 4px) 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: box-shadow var(--duration-short) ease !important;
+    text-decoration: none !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: normal !important;
+    font-size: inherit !important;
+    line-height: normal !important;
+    min-height: auto !important;
+    min-width: auto !important;
+    z-index: 2 !important;
+  }
+
+  /* Search Button Icon Color */
+  .search-modal .search__button .icon,
+  .search-modal .search__button .svg-wrapper,
+  .search-modal .search__button svg {
+    color: rgb(var(--color-background)) !important;
+    fill: rgb(var(--color-background)) !important;
+    stroke: rgb(var(--color-background)) !important;
+  }
+
+  /* Reset Button - Complete override to prevent global styling */
+  .search-modal .reset__button.field__button {
+    position: absolute !important;
+    right: 4.6rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    color: inherit !important;
+    font: inherit !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: none !important;
+    outline: none !important;
+    min-height: auto !important;
+    min-width: auto !important;
+    width: 4rem !important;
+    height: 4rem !important;
+    border-radius: 0 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: normal !important;
+    font-size: inherit !important;
+    line-height: normal !important;
+    z-index: 2 !important;
+  }
+
+  .search-modal .reset__button.field__button:hover,
+  .search-modal .reset__button.field__button:focus,
+  .search-modal .reset__button.field__button:focus-visible,
+  .search-modal .reset__button.field__button:active {
+    position: absolute !important;
+    right: 4.6rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: inherit !important;
+    outline: none !important;
+  }
+
+  /* Search Modal Content Background */
+  .search-modal__content {
+    background-color: rgb(var(--color-background)) !important;
+    min-height: 6rem !important;
+    padding: 1rem 5rem 1rem 1rem !important;
+  }
+
+  .search-modal__content.search-modal__content-bottom {
+    background-color: rgb(var(--color-background)) !important;
+  }
+
+  /* Fix search modal height */
+  .search-modal {
+    min-height: auto !important;
+    height: auto !important;
+  }
+
+  /* Mobile specific overrides */
+  @media screen and (max-width: 749px) {
+    .search-modal .field {
+      min-height: 4rem !important;
+    }
+
+    .search-modal .field__input {
+      height: 4rem !important;
+      min-height: 4rem !important;
+      padding: 0.8rem 8rem 0.8rem 1rem !important;
+      font-size: 1.6rem !important;
+    }
+
+    .search-modal .search__button.field__button {
+      width: 4rem !important;
+    }
+
+    .search-modal .reset__button.field__button {
+      position: absolute !important;
+      right: 4.2rem !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      width: 3.5rem !important;
+      height: 3.5rem !important;
+    }
+
+    .search-modal .reset__button.field__button:hover,
+    .search-modal .reset__button.field__button:focus,
+    .search-modal .reset__button.field__button:active {
+      position: absolute !important;
+      right: 4.2rem !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+    }
+
+    .search-modal__content {
+      padding: 0.8rem 4rem 0.8rem 0.8rem !important;
+    }
+
+    .search-modal .search__button.field__button,
+    .search-modal .reset__button.field__button,
+    .search-modal__close-button {
+      /* Force reset all possible global button properties on mobile */
+      background-image: none !important;
+      border-image: none !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+      filter: none !important;
+      transition: box-shadow var(--duration-short) ease !important;
+    }
+
+    .search-modal .search__button.field__button {
+      background-color: rgb(var(--color-button)) !important;
+    }
+
+    .search-modal .reset__button.field__button,
+    .search-modal__close-button {
+      background-color: transparent !important;
+    }
+  }
+</style>
+
+<details-modal class="header__search">
+  <details>
+    <summary
+      class="header__icon header__icon--search header__icon--summary link focus-inset modal__toggle"
+      aria-haspopup="dialog"
+      aria-label="{{ 'general.search.search' | t }}"
+    >
+      <span>
+        <span class="svg-wrapper">
+          {{- 'icon-search.svg' | inline_asset_content -}}
+        </span>
+      </span>
+    </summary>
+    <div
+      class="search-modal modal__content gradient"
+      role="dialog"
+      aria-modal="true"
+      aria-label="{{ 'general.search.search' | t }}"
+    >
+      <div class="modal-overlay"></div>
+      <div
+        class="search-modal__content{% if settings.inputs_shadow_vertical_offset != 0 and settings.inputs_shadow_vertical_offset < 0 %} search-modal__content-top{% else %} search-modal__content-bottom{% endif %}"
+        tabindex="-1"
+      >
+        {%- if settings.predictive_search_enabled -%}
+          <predictive-search class="search-modal__form" data-loading-text="{{ 'accessibility.loading' | t }}">
+        {%- else -%}
+          <search-form class="search-modal__form">
+        {%- endif -%}
+        <form action="{{ routes.search_url }}" method="get" role="search" class="search search-modal__form">
+          <div class="field">
+            <input
+              class="search__input field__input"
+              id="{{ input_id }}"
+              type="search"
+              name="q"
+              value="{{ search.terms | escape }}"
+              placeholder="{{ 'general.search.search' | t }}"
+              {%- if settings.predictive_search_enabled -%}
+                role="combobox"
+                aria-expanded="false"
+                aria-owns="predictive-search-results"
+                aria-controls="predictive-search-results"
+                aria-haspopup="listbox"
+                aria-autocomplete="list"
+                autocorrect="off"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+              {%- endif -%}
+            >
+            <label class="field__label" for="{{ input_id }}">{{ 'general.search.search' | t }}</label>
+            <input type="hidden" name="options[prefix]" value="last">
+            <button
+              type="reset"
+              class="reset__button field__button no-enhanced-effects{% if search.terms == blank %} hidden{% endif %}"
+              aria-label="{{ 'general.search.reset' | t }}"
+            >
+              <span class="svg-wrapper">
+                {{- 'icon-reset.svg' | inline_asset_content -}}
+              </span>
+            </button>
+            <button
+              class="search__button field__button button-box-shadow intensity-5 button-gradient-effect gradient-shine-enabled"
+              aria-label="{{ 'general.search.search' | t }}"
+            >
+              <span class="svg-wrapper">
+                {{- 'icon-search.svg' | inline_asset_content -}}
+              </span>
+            </button>
+          </div>
+
+          {%- if settings.predictive_search_enabled -%}
+            <div class="predictive-search predictive-search--header" tabindex="-1" data-predictive-search>
+              {%- render 'loading-spinner', class: 'predictive-search__loading-state' -%}
+            </div>
+
+            <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
+          {%- endif -%}
+        </form>
+        {%- if settings.predictive_search_enabled -%}
+          </predictive-search>
+        {%- else -%}
+          </search-form>
+        {%- endif -%}
+        <button
+          type="button"
+          class="search-modal__close-button focus-inset"
+          aria-label="{{ 'accessibility.close' | t }}"
+        >
+          <span class="svg-wrapper">
+            {{- 'icon-close.svg' | inline_asset_content -}}
+          </span>
+        </button>
+      </div>
+    </div>
+  </details>
+</details-modal>

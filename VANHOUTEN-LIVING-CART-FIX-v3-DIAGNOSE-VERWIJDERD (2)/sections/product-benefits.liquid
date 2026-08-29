@@ -1,0 +1,1633 @@
+{{ 'product-benefits.css' | asset_url | stylesheet_tag }}
+
+
+{% comment %} Google Fonts for accent text customization {% endcomment %}
+{% if section.settings.override_global_accent %}
+  {% if section.settings.accent_font_family != 'inherit' and section.settings.accent_font_family != 'serif' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% case section.settings.accent_font_family %}
+      {% when 'Georgia Pro' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Georgia+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Bodoni Moda' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Instrument Serif' %}
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'DM Serif Text' %}
+        <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'Nothing You Could Do' %}
+        <link href="https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+    {% endcase %}
+  {% endif %}
+{% endif %}
+
+<div class="custom-benefits-section-wrapper {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  <div class="custom-benefits-section">
+    <div class="custom-benefits-container">
+      <div class="custom-header-section">
+        {% if section.settings.heading_accent != blank or section.settings.heading_regular != blank %}
+          <div class="custom-section-header">
+            <h2 class="product-benefits-heading">
+              {{ section.settings.heading_regular }}
+              {% if section.settings.heading_accent != blank %}
+                <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+                  {{ section.settings.heading_accent }}
+                </span>
+              {% endif %}
+            </h2>
+            {% if section.settings.subtitle != blank %}
+              <div class="custom-subtitle">{{ section.settings.subtitle }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="custom-content-column">
+        <div class="custom-section-header desktop-header">
+          <h2 class="product-benefits-heading">
+            {{ section.settings.heading_regular }}
+            {% if section.settings.heading_accent != blank %}
+              <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+                {{ section.settings.heading_accent }}
+              </span>
+            {% endif %}
+          </h2>
+          {% if section.settings.subtitle != blank %}
+            <div class="custom-subtitle">{{ section.settings.subtitle }}</div>
+          {% endif %}
+        </div>
+
+        <div class="custom-benefits-list">
+          {% for block in section.blocks %}
+            {% if block.type == 'benefit' %}
+              <div class="custom-benefit-item" {{ block.shopify_attributes }}>
+                <div class="custom-benefit-header">
+                  <div
+                    class="custom-benefit-icon benefit-icon-{{ block.id }}"
+                    style="
+                      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ block.settings.benefit_color | default: section.settings.accent_color }}{% endif %};
+                      width: {{ block.settings.icon_size | default: 24 }}px;
+                      height: {{ block.settings.icon_size | default: 24 }}px;
+                    "
+                  >
+                    {% if block.settings.use_image and block.settings.icon_image != blank %}
+                      {% liquid
+                        assign icon_size_setting = block.settings.icon_size | default: 24
+                        assign icon_size_2x = icon_size_setting | times: 2
+                        assign icon_size_3x = icon_size_setting | times: 3
+                      %}
+                      <img
+                        src="{{ block.settings.icon_image | image_url: width: icon_size_2x }}"
+                        srcset="{{ block.settings.icon_image | image_url: width: icon_size_2x }} 1x,
+                                {{ block.settings.icon_image | image_url: width: icon_size_3x }} 2x"
+                        alt="{{ block.settings.title | escape }}"
+                        class="custom-icon-image"
+                        width="{{ icon_size_setting }}"
+                        height="{{ icon_size_setting }}"
+                        loading="lazy"
+                        style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"
+                      >
+                    {% elsif block.settings.use_custom_icon and block.settings.custom_icon_svg != blank %}
+                      {{ block.settings.custom_icon_svg }}
+                    {% else %}
+                      {% case block.settings.preset_icon %}
+                        {% when 'check' %}
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                          </svg>
+                        {% when 'clock' %}
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                            <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                          </svg>
+                        {% when 'sparkle' %}
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 1L9 9l-8 3 8 3 3 8 3-8 8-3-8-3-3-8z"/>
+                          </svg>
+                        {% when 'heart' %}
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                          </svg>
+                      {% endcase %}
+                    {% endif %}
+                  </div>
+                  <h3
+                    class="custom-benefit-title"
+                    style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ block.settings.benefit_color | default: section.settings.accent_color }}{% endif %};"
+                  >
+                    {{ block.settings.title }}
+                  </h3>
+                </div>
+                <div class="custom-benefit-description-container">
+                  <p
+                    class="custom-benefit-description"
+                    style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ block.settings.benefit_description_color | default: section.settings.description_color }}{% endif %};"
+                  >
+                    {{ block.settings.description }}
+                  </p>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      
+      <div class="custom-image-column">
+        {% if section.settings.show_image %}
+          <div class="custom-section-image-container">
+            {% if section.settings.media_type == 'video' and section.settings.feature_video != blank %}
+              <div class="custom-feature-video">
+                {{
+                  section.settings.feature_video
+                  | video_tag:
+                    autoplay: section.settings.video_autoplay,
+                    muted: section.settings.video_muted,
+                    loop: section.settings.video_loop,
+                    controls: section.settings.video_controls,
+                    playsinline: true,
+                    preload: 'metadata',
+                    class: 'custom-video-element',
+                    loading: 'lazy',
+                    poster: section.settings.video_poster,
+                    alt: section.settings.image_alt
+                }}
+              </div>
+            {% elsif section.settings.feature_image != blank %}
+              <div class="custom-feature-image">
+                <img
+                  src="{{ section.settings.feature_image | img_url: '580x' }}"
+                  srcset="
+                    {{ section.settings.feature_image | img_url: '580x' }} 1x,
+                    {{ section.settings.feature_image | img_url: '1160x' }} 2x
+                  "
+                  alt="{{ section.settings.image_alt | escape }}"
+                  width=""
+                  height=""
+                  loading="lazy"
+                >
+              </div>
+            {% else %}
+              <div class="custom-placeholder-image">
+                {{ 'image' | placeholder_svg_tag: 'custom-placeholder-svg' }}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Dynamic styles that use Liquid variables */
+  .custom-benefits-section-wrapper {
+    {% unless section.settings.use_background_image and section.settings.background_image != blank %}
+      {% comment %} Just gradient/color (applies to all screen sizes) {% endcomment %}
+      {% if section.settings.use_theme_colors %}
+        {% if settings.global_section_use_gradient_background %}
+          background: var(--gradient-background) !important;
+        {% else %}
+          background-color: {{ settings.global_section_background_color }} !important;
+        {% endif %}
+      {% else %}
+        background: {{ section.settings.section_background | default: '#FFFFFF' }} !important;
+      {% endif %}
+    {% endunless %}
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    padding-left: {{ section.settings.padding_left }}px;
+    padding-right: {{ section.settings.padding_right }}px;
+    {% if section.settings.enable_top_border %}
+      border-top: {{ section.settings.top_border_width | default: 1 }}px {{ section.settings.top_border_style | default: 'solid' }} {{ section.settings.top_border_color | default: '#e5e5e5' }};
+    {% endif %}
+    {% if section.settings.enable_bottom_border %}
+      border-bottom: {{ section.settings.bottom_border_width | default: 1 }}px {{ section.settings.bottom_border_style | default: 'solid' }} {{ section.settings.bottom_border_color | default: '#e5e5e5' }};
+    {% endif %}
+  }
+
+  /* Desktop background image - only applies on screens wider than 767px */
+  @media screen and (min-width: 768px) {
+    .custom-benefits-section-wrapper {
+    {% if section.settings.use_background_image and section.settings.background_image != blank %}
+      {% comment %} Image + Gradient together {% endcomment %}
+      {% if section.settings.use_theme_colors %}
+        {% if settings.global_section_use_gradient_background %}
+          background-image: url('{{ section.settings.background_image | image_url: width: 2560 }}'), var(--gradient-background) !important;
+        {% else %}
+          background-image: url('{{ section.settings.background_image | image_url: width: 2560 }}') !important;
+          background-color: {{ settings.global_section_background_color }} !important;
+        {% endif %}
+      {% else %}
+        background-image: url('{{ section.settings.background_image | image_url: width: 2560 }}'), {{ section.settings.section_background | default: '#FFFFFF' }} !important;
+      {% endif %}
+      background-size: {{ section.settings.background_image_size | default: 'cover' }}, cover !important;
+      background-position: {% if section.settings.background_image_position_mode == 'custom' %}{{ section.settings.background_focal_point_x | default: 50 }}% {{ section.settings.background_focal_point_y | default: 50 }}%{% else %}{{ section.settings.background_image_position | default: 'center center' }}{% endif %}, center !important;
+      background-repeat: no-repeat, no-repeat !important;
+      background-attachment: {{ section.settings.background_image_attachment | default: 'scroll' }}, scroll !important;
+      {% if section.settings.background_overlay_enable %}
+        position: relative;
+      {% endif %}
+    {% endif %}
+    }
+  }
+
+  /* Background overlay */
+  {% if section.settings.use_background_image and section.settings.background_image != blank and section.settings.background_overlay_enable %}
+  .custom-benefits-section-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: {{ section.settings.background_overlay_color | default: 'rgba(0,0,0,0.3)' }};
+    opacity: {{ section.settings.background_overlay_opacity | default: 30 | divided_by: 100.0 }};
+    z-index: 1;
+  }
+
+  .custom-benefits-section {
+    position: relative;
+    z-index: 1;
+  }
+  {% endif %}
+
+  /* Mobile background image */
+  @media screen and (max-width: 767px) {
+    .custom-benefits-section-wrapper {
+      {% if section.settings.use_background_image and section.settings.background_image != blank %}
+        {% if section.settings.mobile_background_image != blank %}
+          {% comment %} Mobile-specific image provided {% endcomment %}
+          {% if section.settings.use_theme_colors %}
+            {% if settings.global_section_use_gradient_background %}
+              background-image: url('{{ section.settings.mobile_background_image | image_url: width: 1024 }}'), var(--gradient-background) !important;
+            {% else %}
+              background-image: url('{{ section.settings.mobile_background_image | image_url: width: 1024 }}') !important;
+              background-color: {{ settings.global_section_background_color }} !important;
+            {% endif %}
+          {% else %}
+            background-image: url('{{ section.settings.mobile_background_image | image_url: width: 1024 }}'), {{ section.settings.section_background | default: '#FFFFFF' }} !important;
+          {% endif %}
+          background-size: {{ section.settings.background_image_size | default: 'cover' }} !important;
+          background-position: {% if section.settings.background_image_position_mode == 'custom' %}{{ section.settings.background_focal_point_x | default: 50 }}% {{ section.settings.background_focal_point_y | default: 50 }}%{% else %}{{ section.settings.background_image_position | default: 'center center' }}{% endif %} !important;
+          background-repeat: no-repeat !important;
+          {% if section.settings.background_overlay_enable %}
+            position: relative;
+          {% endif %}
+        {% else %}
+          {% comment %} No mobile image provided - show background color only {% endcomment %}
+          background-image: none !important;
+          {% if section.settings.use_theme_colors %}
+            {% if settings.global_section_use_gradient_background %}
+              background: var(--gradient-background) !important;
+            {% else %}
+              background-color: {{ settings.global_section_background_color }} !important;
+            {% endif %}
+          {% else %}
+            background: {{ section.settings.section_background | default: '#FFFFFF' }} !important;
+          {% endif %}
+        {% endif %}
+      {% endif %}
+    }
+  }
+
+  /* Content column positioning for overlay effect */
+  .custom-content-column {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Desktop Layout Options */
+  @media screen and (min-width: 768px) {
+    .custom-benefits-container {
+      flex-direction: row !important;
+      {% if section.settings.image_column_full_height %}
+        align-items: stretch !important;
+      {% else %}
+      align-items: center !important;
+      {% endif %}
+      gap: 40px !important;
+    }
+
+    .custom-header-section {
+      display: none !important;
+    }
+
+    .custom-content-column,
+    .custom-image-column {
+      flex: 1 !important;
+      order: 0 !important;
+    }
+
+    {% if section.settings.image_column_full_height %}
+      .custom-image-column {
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .custom-section-image-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .custom-feature-image,
+      .custom-feature-video,
+      .custom-placeholder-image {
+        flex: 1;
+        height: 100%;
+      }
+
+      .custom-feature-image img,
+      .custom-placeholder-image svg {
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center !important;
+      }
+
+      .custom-video-element {
+        height: 100% !important;
+        object-fit: cover !important;
+      }
+    {% endif %}
+
+    .custom-section-header.desktop-header {
+      display: block !important;
+      text-align: center !important;
+      margin-bottom: 30px !important;
+    }
+
+    {% if section.settings.hide_media_on_desktop %}
+      .custom-section-image-container {
+        visibility: hidden;
+      }
+      
+      .custom-feature-image,
+      .custom-feature-video,
+      .custom-placeholder-image {
+        visibility: hidden;
+      }
+    {% endif %}
+
+    {% if section.settings.image_position_desktop == 'left' %}
+      .custom-content-column {
+        order: 2 !important;
+        position: relative;
+        z-index: 1;
+      }
+
+      .custom-image-column {
+        order: 1 !important;
+        position: relative;
+        z-index: 1;
+      }
+    {% else %}
+      .custom-image-column {
+        position: relative;
+        z-index: 1;
+      }
+    {% endif %}
+  }
+
+  /* Enhanced accent text styling with global and local customization options */
+  .custom-benefits-section .global-accent-text,
+  .custom-benefits-section-wrapper .global-accent-text,
+  .custom-benefits-section .custom-accent-text,
+  .custom-benefits-section-wrapper .custom-accent-text {
+    {% comment %} Always apply core accent text styling {% endcomment %}
+    padding: 2px 4px !important;
+    margin: -2px -4px !important;
+    display: inline-block !important;
+    margin-left: {{ section.settings.accent_text_margin_left }}px !important;
+
+    {% comment %} Check for gradient first - it works regardless of global/local settings {% endcomment %}
+    {% if section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+      line-height: 1.3 !important;
+    {% else %}
+      {% comment %} Apply solid color based on global or local settings {% endcomment %}
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.accent_color }}{% endif %} !important;
+    {% endif %}
+
+    {% if section.settings.override_global_accent %}
+      {% comment %} Use section-specific typography settings when override is enabled {% endcomment %}
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %}
+            font-family: serif !important;
+          {% when 'Georgia Pro' %}
+            font-family: 'Georgia Pro', Georgia, serif !important;
+          {% when 'Bodoni Moda' %}
+            font-family: 'Bodoni Moda', Georgia, serif !important;
+          {% when 'Instrument Serif' %}
+            font-family: 'Instrument Serif', Georgia, serif !important;
+          {% when 'DM Serif Text' %}
+            font-family: 'DM Serif Text', Georgia, serif !important;
+          {% when 'Nothing You Could Do' %}
+            font-family: 'Nothing You Could Do', cursive !important;
+        {% endcase %}
+      {% else %}
+        font-family: var(--font-accent-family, var(--font-body-family)) !important;
+      {% endif %}
+
+      font-style: {{ section.settings.accent_font_style | default: 'normal' }} !important;
+      font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+
+    {% else %}
+      {% comment %} Use global accent typography system {% endcomment %}
+      font-family: var(--font-accent-family, var(--font-body-family)) !important;
+      font-style: var(--font-accent-style, normal) !important;
+      font-weight: var(--font-accent-weight, inherit) !important;
+      letter-spacing: var(--font-accent-letter-spacing, inherit) !important;
+      text-transform: var(--font-accent-text-transform, none) !important;
+    {% endif %}
+  }
+
+  /* Enhanced specificity for heading */
+  .custom-benefits-section .product-benefits-heading,
+  .custom-benefits-section-wrapper .product-benefits-heading,
+  .custom-benefits-section-wrapper h2.product-benefits-heading {
+    font-size: {{ section.settings.heading_size_mobile }}px !important;
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.heading_color }}{% endif %} !important;
+    letter-spacing: var(--letter-spacing-heading) !important;
+    line-height: {{ section.settings.heading_line_height_mobile }} !important;
+    font-weight: var(--font-weight-bold) !important;
+    margin-top: 0px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* Enhanced specificity for subtitle */
+  .custom-benefits-section .custom-subtitle,
+  .custom-benefits-section-wrapper .custom-subtitle {
+    font-size: {{ section.settings.subtitle_size_mobile }}px !important;
+    letter-spacing: var(--letter-spacing-body);
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subtitle_color }}{% endif %} !important;
+  }
+
+  /* Enhanced specificity for benefit titles */
+  .custom-benefits-section .custom-benefit-title,
+  .custom-benefits-section-wrapper .custom-benefit-title,
+  .custom-benefits-section-wrapper h3.custom-benefit-title {
+    font-size: {{ section.settings.benefit_title_size_mobile }}px !important;
+    letter-spacing: var(--letter-spacing-body) !important;
+    margin-bottom: 0px !important;
+    font-weight: var(--font-weight-bold) !important;
+  }
+
+  /* Force benefit title colors to override inline styles */
+  {% unless section.settings.use_theme_colors %}
+    {% for block in section.blocks %}
+      {% if block.type == 'benefit' %}
+        .custom-benefits-section [data-block-id="{{ block.id }}"] .custom-benefit-title,
+        .custom-benefits-section-wrapper [data-block-id="{{ block.id }}"] .custom-benefit-title,
+        .custom-benefits-section-wrapper [data-block-id="{{ block.id }}"] h3.custom-benefit-title {
+          color: {{ block.settings.benefit_color | default: section.settings.accent_color }} !important;
+        }
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    .custom-benefits-section .custom-benefit-title,
+    .custom-benefits-section-wrapper .custom-benefit-title,
+    .custom-benefits-section-wrapper h3.custom-benefit-title {
+      color: {{ settings.global_section_background_color }} !important;
+    }
+  {% endunless %}
+
+  /* Universal benefit title color overrides */
+  {% unless section.settings.use_theme_colors %}
+    html body .custom-benefits-section .custom-benefit-title,
+    html body .custom-benefits-section-wrapper .custom-benefit-title,
+    html body .custom-benefits-section-wrapper h3.custom-benefit-title,
+    html body .custom-benefits-section .custom-benefit-item .custom-benefit-title,
+    html body .custom-benefits-section-wrapper .custom-benefit-item .custom-benefit-title {
+      color: {{ section.settings.accent_color }} !important;
+    }
+
+    /* Individual benefit color overrides */
+    {% for block in section.blocks %}
+      {% if block.type == 'benefit' and block.settings.benefit_color != blank %}
+        html body .custom-benefits-section .custom-benefit-item:nth-child({{ forloop.index }}) .custom-benefit-title,
+        html body .custom-benefits-section-wrapper .custom-benefit-item:nth-child({{ forloop.index }}) .custom-benefit-title {
+          color: {{ block.settings.benefit_color }} !important;
+        }
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    html body .custom-benefits-section .custom-benefit-title,
+    html body .custom-benefits-section-wrapper .custom-benefit-title,
+    html body .custom-benefits-section-wrapper h3.custom-benefit-title,
+    html body .custom-benefits-section .custom-benefit-item .custom-benefit-title,
+    html body .custom-benefits-section-wrapper .custom-benefit-item .custom-benefit-title {
+      color: {{ settings.global_section_background_color }} !important;
+    }
+  {% endunless %}
+
+  /* Enhanced specificity for benefit descriptions */
+  .custom-benefits-section .custom-benefit-description,
+  .custom-benefits-section-wrapper .custom-benefit-description {
+    font-size: {{ section.settings.benefit_description_size_mobile }}px !important;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  /* Title below icon layout */
+  {% if section.settings.title_below_icon %}
+    .custom-benefit-header {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      margin-bottom: 8px !important;
+    }
+    
+    .custom-benefit-icon {
+      margin-right: 0 !important;
+      margin-bottom: 8px !important;
+    }
+    
+    .custom-benefit-title {
+      text-align: left !important;
+      width: 100% !important;
+      margin: 0 !important;
+    }
+    
+    .custom-benefit-description-container {
+      width: 100% !important;
+    }
+  {% endif %}
+
+  /* Enhanced specificity for benefits list */
+  .custom-benefits-section .custom-benefits-list,
+  .custom-benefits-section-wrapper .custom-benefits-list {
+    {% if section.settings.use_theme_colors %}
+      background: {{ settings.global_accent_text_gradient_dark }} !important;
+    {% else %}
+      background: {{ section.settings.list_background | default: '#FFFFFF' }} !important;
+    {% endif %}
+    border-radius: {{ section.settings.list_border_radius }}px !important;
+    padding: 20px !important;
+    max-width: {{ section.settings.benefits_list_max_width | default: 450 }}px !important;
+    margin: 0 auto !important;
+    border: 1px solid {{ section.settings.border_color }} !important;
+    position: static !important;
+    z-index: auto !important;
+  }
+
+  @media screen and (min-width: 768px) {
+    .custom-benefits-section .product-benefits-heading,
+    .custom-benefits-section-wrapper .product-benefits-heading,
+    .custom-benefits-section-wrapper h2.product-benefits-heading {
+      font-size: {{ section.settings.heading_size_desktop }}px !important;
+      letter-spacing: var(--letter-spacing-heading) !important;
+      line-height: {{ section.settings.heading_line_height_desktop }} !important;
+    }
+
+    .custom-benefits-section .custom-subtitle,
+    .custom-benefits-section-wrapper .custom-subtitle {
+      font-size: {{ section.settings.subtitle_size_desktop }}px !important;
+    }
+
+    .custom-benefits-section .custom-benefit-title,
+    .custom-benefits-section-wrapper .custom-benefit-title,
+    .custom-benefits-section-wrapper h3.custom-benefit-title {
+      font-size: {{ section.settings.benefit_title_size_desktop }}px !important;
+    }
+
+    .custom-benefits-section .custom-benefit-description,
+    .custom-benefits-section-wrapper .custom-benefit-description {
+      font-size: {{ section.settings.benefit_description_size_desktop }}px !important;
+    }
+  }
+
+  /* Video styling for feature video */
+  .custom-feature-video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    margin-top: {{ section.settings.image_margin_top | default: 0 }}px;
+    margin-bottom: {{ section.settings.image_margin_bottom | default: 20 }}px;
+  }
+
+
+  .custom-video-element {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    border-radius: 8px !important;
+    background: #000 !important;
+  }
+
+  /* Image styling with margins */
+  .custom-section-image-container {
+    margin-top: {{ section.settings.image_margin_top | default: 0 }}px;
+    margin-bottom: {{ section.settings.image_margin_bottom | default: 20 }}px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Image border */
+  {% if section.settings.enable_image_border %}
+    .custom-feature-image img,
+    .custom-feature-video,
+    .custom-video-element,
+    .custom-placeholder-image svg {
+      border: {{ section.settings.image_border_width | default: 1 }}px {{ section.settings.image_border_style | default: 'solid' }} {{ section.settings.image_border_color | default: '#000000' }} !important;
+    }
+  {% endif %}
+  .custom-feature-image img,
+  .custom-feature-video,
+  .custom-video-element,
+  .custom-placeholder-image svg {
+    border-radius: {{ section.settings.image_border_radius | default: 8 }}px !important;
+  }
+
+  /* Mobile full-width image styling */
+  @media screen and (max-width: 767px) {
+    {% if section.settings.mobile_image_full_width %}
+    .custom-section-image-container {
+      width: 100vw;
+      position: relative;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
+      margin-top: {{ section.settings.image_margin_top | default: 0 }}px;
+      margin-bottom: {{ section.settings.image_margin_bottom | default: 20 }}px;
+      z-index: 0; /* Lower z-index to prevent overlap with benefits list */
+    }
+
+    .custom-feature-image,
+    .custom-feature-video,
+    .custom-placeholder-image {
+      border-radius: 0;
+    }
+    {% endif %}
+
+    /* Ensure benefits list appears above image on mobile */
+    .custom-benefits-section .custom-benefits-list,
+    .custom-benefits-section-wrapper .custom-benefits-list {
+      position: relative !important;
+      z-index: 2 !important;
+    }
+
+    /* Ensure content column has proper stacking on mobile */
+    .custom-content-column {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Product Benefits",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Left Padding",
+      "default": 25,
+      "info": "Horizontal padding on the left side of the section"
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Right Padding",
+      "default": 25,
+      "info": "Horizontal padding on the right side of the section"
+    },
+    {
+      "type": "header",
+      "content": "Desktop Layout"
+    },
+    {
+      "type": "select",
+      "id": "image_position_desktop",
+      "label": "Media Position on Desktop",
+      "options": [
+        {
+          "value": "right",
+          "label": "Right of content"
+        },
+        {
+          "value": "left",
+          "label": "Left of content"
+        }
+      ],
+      "default": "right",
+      "info": "Choose whether the media (image/video) appears on the left or right side of the content"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 24,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading Size (Mobile)",
+      "default": 34
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "min": 28,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading Size (Desktop)",
+      "default": 35
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height_mobile",
+      "min": 0.4,
+      "max": 2,
+      "step": 0.1,
+      "label": "Heading Line Height (Mobile)",
+      "default": 1.1
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height_desktop",
+      "min": 0.4,
+      "max": 2,
+      "step": 0.1,
+      "label": "Heading Line Height (Desktop)",
+      "default": 1.1
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size_mobile",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Subtitle Size (Mobile)",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size_desktop",
+      "min": 13,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Subtitle Size (Desktop)",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "benefit_title_size_mobile",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Benefit Title Size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "benefit_title_size_desktop",
+      "min": 13,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Benefit Title Size (Desktop)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "benefit_description_size_mobile",
+      "min": 11,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Benefit Description Size (Mobile)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "benefit_description_size_desktop",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "label": "Benefit Description Size (Desktop)",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Default Accent Color",
+      "default": "#EF4A65",
+      "info": "Default color for benefit icons and titles if not set individually."
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Apply Theme Colors",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout Options"
+    },
+    {
+      "type": "checkbox",
+      "id": "title_below_icon",
+      "label": "Move Title Below Icon",
+      "default": false,
+      "info": "Position the benefit title below the icon, left-aligned above the description"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "header",
+      "content": "Section-Specific Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Section Accent Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin_left",
+      "min": -10,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 0
+    },
+    {
+      "type": "color_background",
+      "id": "list_background",
+      "label": "Benefits List Background",
+      "default": "linear-gradient(to bottom, #FFFFFF, #F0F0F0)"
+    },
+    {
+      "type": "range",
+      "id": "list_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Benefits List Border Radius",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "benefits_list_max_width",
+      "min": 300,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "label": "Benefits List Max Width",
+      "default": 450,
+      "info": "Maximum width of the benefits list container"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heading Accent Text",
+      "default": "Premium"
+    },
+    {
+      "type": "text",
+      "id": "heading_regular",
+      "label": "Heading Regular Text",
+      "default": "Product Features"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Discover the outstanding features that make our product stand out from the competition."
+    },
+          {
+        "type": "checkbox",
+        "id": "show_image",
+        "label": "Show Media",
+        "default": true,
+        "info": "Enable to show image or video in the section"
+      },
+      {
+        "type": "header",
+        "content": "Media Settings"
+      },
+      {
+        "type": "select",
+        "id": "media_type",
+        "label": "Media Type",
+        "options": [
+          {
+            "value": "image",
+            "label": "Image"
+          },
+          {
+            "value": "video",
+            "label": "Video"
+          }
+        ],
+        "default": "image",
+        "info": "Choose whether to display an image or video"
+      },
+      {
+        "type": "image_picker",
+        "id": "feature_image",
+        "label": "Feature Image",
+        "info": "Used when Media Type is set to Image"
+      },
+      {
+        "type": "text",
+        "id": "image_alt",
+        "label": "Image Alt Text",
+        "default": "Feature product image"
+      },
+      {
+        "type": "header",
+        "content": "Video Settings"
+      },
+      {
+        "type": "video",
+        "id": "feature_video",
+        "label": "Feature Video",
+        "info": "Upload a video file. Supports MP4, MOV, and other formats. Used when Media Type is set to Video"
+      },
+      {
+        "type": "image_picker",
+        "id": "video_poster",
+        "label": "Video Poster Image",
+        "info": "Optional: Image to show before video plays"
+      },
+      {
+        "type": "checkbox",
+        "id": "video_autoplay",
+        "label": "Autoplay Video",
+        "default": true,
+        "info": "Video will start playing automatically (muted for browser compatibility)"
+      },
+      {
+        "type": "checkbox",
+        "id": "video_muted",
+        "label": "Mute Video",
+        "default": true,
+        "info": "Video will be muted by default (required for autoplay)"
+      },
+      {
+        "type": "checkbox",
+        "id": "video_loop",
+        "label": "Loop Video",
+        "default": true,
+        "info": "Video will restart when it reaches the end"
+      },
+          {
+            "type": "checkbox",
+            "id": "video_controls",
+            "label": "Show Video Controls",
+            "default": false,
+            "info": "Display play/pause and volume controls"
+          },
+          {
+            "type": "header",
+            "content": "Mobile Image Settings"
+          },
+          {
+            "type": "checkbox",
+            "id": "mobile_image_full_width",
+            "label": "Full Width Image on Mobile",
+            "default": false,
+            "info": "Make the image span the full width of the screen on mobile devices"
+          },
+          {
+            "type": "checkbox",
+            "id": "hide_media_on_desktop",
+            "label": "Hide Media Image on Desktop",
+            "default": false,
+            "info": "Hide the media image on desktop (useful when using background image on desktop and media image on mobile)"
+          },
+          {
+            "type": "header",
+            "content": "Desktop Image Settings"
+          },
+          {
+            "type": "checkbox",
+            "id": "image_column_full_height",
+            "label": "Full Height Image on Desktop",
+            "default": false,
+            "info": "Make the image column span the full height of the section on desktop"
+          },
+          {
+            "type": "range",
+            "id": "image_margin_top",
+            "min": -50,
+            "max": 100,
+            "step": 5,
+            "unit": "px",
+            "label": "Image Top Margin",
+            "default": 0,
+            "info": "Space above the image"
+          },
+          {
+            "type": "range",
+            "id": "image_margin_bottom",
+            "min": -50,
+            "max": 100,
+            "step": 5,
+            "unit": "px",
+            "label": "Image Bottom Margin",
+            "default": 20,
+            "info": "Space below the image"
+          },
+          {
+            "type": "header",
+            "content": "Image Border"
+          },
+          {
+            "type": "checkbox",
+            "id": "enable_image_border",
+            "label": "Enable Image Border",
+            "default": false
+          },
+          {
+            "type": "range",
+            "id": "image_border_width",
+            "min": 1,
+            "max": 10,
+            "step": 1,
+            "unit": "px",
+            "label": "Border Width",
+            "default": 1
+          },
+          {
+            "type": "select",
+            "id": "image_border_style",
+            "label": "Border Style",
+            "options": [
+              { "value": "solid", "label": "Solid" },
+              { "value": "dashed", "label": "Dashed" },
+              { "value": "dotted", "label": "Dotted" }
+            ],
+            "default": "solid"
+          },
+          {
+            "type": "color",
+            "id": "image_border_color",
+            "label": "Border Color",
+            "default": "#000000"
+          },
+          {
+            "type": "range",
+            "id": "image_border_radius",
+            "min": 0,
+            "max": 50,
+            "step": 1,
+            "unit": "px",
+            "label": "Image Border Radius",
+            "default": 8
+          },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Default Description Color",
+      "default": "#000000",
+      "info": "Default color for benefit descriptions if not set individually."
+    },
+    {
+      "type": "color_background",
+      "id": "section_background",
+      "label": "Section Background",
+      "default": "linear-gradient(to right, #FFFFFF, #F8F8F8)"
+    },
+    {
+      "type": "header",
+      "content": "Background Image"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_background_image",
+      "label": "Use Background Image Instead",
+      "default": false,
+      "info": "Toggle to use a full-width background image instead of section background color"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image",
+      "info": "Full-width background image for the section"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_background_image",
+      "label": "Mobile Background Image",
+      "info": "Optional different background image for mobile devices"
+    },
+    {
+      "type": "select",
+      "id": "background_image_size",
+      "label": "Background Image Size",
+      "options": [
+        {"value": "cover", "label": "Cover"},
+        {"value": "contain", "label": "Contain"},
+        {"value": "auto", "label": "Auto"},
+        {"value": "100% 100%", "label": "Stretch"}
+      ],
+      "default": "cover",
+      "info": "How the background image should be sized"
+    },
+    {
+      "type": "select",
+      "id": "background_image_position_mode",
+      "label": "Position Mode",
+      "options": [
+        {"value": "preset", "label": "Preset Positions"},
+        {"value": "custom", "label": "Custom Focal Point"}
+      ],
+      "default": "preset",
+      "info": "Choose between preset positions or custom focal point control"
+    },
+    {
+      "type": "select",
+      "id": "background_image_position",
+      "label": "Background Image Position",
+      "options": [
+        {"value": "center center", "label": "Center Center"},
+        {"value": "center top", "label": "Center Top"},
+        {"value": "center bottom", "label": "Center Bottom"},
+        {"value": "left center", "label": "Left Center"},
+        {"value": "right center", "label": "Right Center"},
+        {"value": "left top", "label": "Left Top"},
+        {"value": "right top", "label": "Right Top"},
+        {"value": "left bottom", "label": "Left Bottom"},
+        {"value": "right bottom", "label": "Right Bottom"}
+      ],
+      "default": "center center",
+      "info": "Only used when Position Mode is set to 'Preset Positions'"
+    },
+    {
+      "type": "range",
+      "id": "background_focal_point_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal Focal Point",
+      "default": 50,
+      "info": "0% = left edge, 50% = center, 100% = right edge. Only used when Position Mode is set to 'Custom Focal Point'"
+    },
+    {
+      "type": "range",
+      "id": "background_focal_point_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical Focal Point",
+      "default": 50,
+      "info": "0% = top edge, 50% = center, 100% = bottom edge. Only used when Position Mode is set to 'Custom Focal Point'"
+    },
+    {
+      "type": "select",
+      "id": "background_image_attachment",
+      "label": "Background Image Attachment",
+      "options": [
+        {"value": "scroll", "label": "Scroll"},
+        {"value": "fixed", "label": "Fixed (Parallax)"}
+      ],
+      "default": "scroll",
+      "info": "Fixed creates a parallax effect but may not work on mobile devices"
+    },
+    {
+      "type": "checkbox",
+      "id": "background_overlay_enable",
+      "label": "Enable Background Overlay",
+      "default": false,
+      "info": "Add a color overlay on top of the background image"
+    },
+    {
+      "type": "color",
+      "id": "background_overlay_color",
+      "label": "Overlay Color",
+      "default": "rgba(0,0,0,0.3)",
+      "info": "Color of the overlay (supports transparency)"
+    },
+    {
+      "type": "range",
+      "id": "background_overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Overlay Opacity",
+      "default": 30,
+      "info": "Opacity of the background overlay"
+    },
+    {
+      "type": "header",
+      "content": "Section Borders"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_top_border",
+      "label": "Enable Top Border",
+      "default": false,
+      "info": "Add a border to the top of the section"
+    },
+    {
+      "type": "range",
+      "id": "top_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Border Width",
+      "default": 1,
+      "info": "Width of the top border in pixels"
+    },
+    {
+      "type": "select",
+      "id": "top_border_style",
+      "label": "Top Border Style",
+      "options": [
+        {"value": "solid", "label": "Solid"},
+        {"value": "dashed", "label": "Dashed"},
+        {"value": "dotted", "label": "Dotted"},
+        {"value": "double", "label": "Double"}
+      ],
+      "default": "solid",
+      "info": "Style of the top border"
+    },
+    {
+      "type": "color",
+      "id": "top_border_color",
+      "label": "Top Border Color",
+      "default": "#e5e5e5",
+      "info": "Color of the top border"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bottom_border",
+      "label": "Enable Bottom Border",
+      "default": false,
+      "info": "Add a border to the bottom of the section"
+    },
+    {
+      "type": "range",
+      "id": "bottom_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Border Width",
+      "default": 1,
+      "info": "Width of the bottom border in pixels"
+    },
+    {
+      "type": "select",
+      "id": "bottom_border_style",
+      "label": "Bottom Border Style",
+      "options": [
+        {"value": "solid", "label": "Solid"},
+        {"value": "dashed", "label": "Dashed"},
+        {"value": "dotted", "label": "Dotted"},
+        {"value": "double", "label": "Double"}
+      ],
+      "default": "solid",
+      "info": "Style of the bottom border"
+    },
+    {
+      "type": "color",
+      "id": "bottom_border_color",
+      "label": "Bottom Border Color",
+      "default": "#e5e5e5",
+      "info": "Color of the bottom border"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Product Feature"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Describe how this feature benefits your customers and makes your product stand out."
+        },
+        {
+          "type": "color",
+          "id": "benefit_color",
+          "label": "Benefit Title & Icon Color",
+          "info": "Overrides the default accent color for this specific benefit."
+        },
+        {
+          "type": "color",
+          "id": "benefit_description_color",
+          "label": "Benefit Description Color",
+          "info": "Overrides the default description color for this specific benefit."
+        },
+        {
+          "type": "header",
+          "content": "Icon Settings"
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "label": "Icon Size (px)",
+          "min": 16,
+          "max": 60,
+          "step": 2,
+          "unit": "px",
+          "default": 24,
+          "info": "Size of the icon"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_image",
+          "label": "Use Image Icon",
+          "default": false,
+          "info": "Enable to use an uploaded image as icon (highest priority)"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Icon Image"
+        },
+        {
+          "type": "select",
+          "id": "preset_icon",
+          "label": "Preset Icon",
+          "options": [
+            {
+              "value": "check",
+              "label": "Check Mark"
+            },
+            {
+              "value": "clock",
+              "label": "Clock"
+            },
+            {
+              "value": "sparkle",
+              "label": "Sparkle"
+            },
+            {
+              "value": "heart",
+              "label": "Heart"
+            }
+          ],
+          "default": "check",
+          "info": "This icon will be used when custom icon is disabled"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_icon",
+          "label": "Use Custom Icon",
+          "default": false,
+          "info": "Enable to use your own SVG icon (used if image icon is disabled)"
+        },
+        {
+          "type": "textarea",
+          "id": "custom_icon_svg",
+          "label": "Custom SVG Icon",
+          "default": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z\"/></svg>",
+          "info": "Paste your custom SVG code here. For best results, use an SVG with viewBox attribute and currentColor fill."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Benefits",
+      "settings": {
+        "accent_color": "#EF4A65",
+        "section_background": "linear-gradient(to right, #FFFFFF, #F8F8F8)",
+        "list_background": "linear-gradient(to bottom, #FFFFFF, #F0F0F0)",
+        "accent_text_gradient": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+        "heading_accent": "Premium",
+        "heading_regular": "Product Features",
+        "subtitle": "Discover the outstanding features that make our product stand out from the competition."
+      },
+      "blocks": [
+        {
+          "type": "benefit",
+          "settings": {
+            "title": "High Quality Materials",
+            "description": "Made with premium materials that are built to last and deliver exceptional performance.",
+            "preset_icon": "check"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "title": "Easy to Use Design",
+            "description": "Intuitive design makes this product simple to use, saving you valuable time and effort.",
+            "preset_icon": "clock"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "title": "Multiple Configuration Options",
+            "description": "Customize your experience with various settings to meet your specific needs.",
+            "preset_icon": "sparkle"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "title": "Long-Term Value",
+            "description": "A smart investment that pays for itself over time with its durability and efficiency.",
+            "preset_icon": "heart"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

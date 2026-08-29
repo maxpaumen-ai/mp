@@ -1,0 +1,1531 @@
+{{ 'satisfaction-guarantee.css' | asset_url | stylesheet_tag }}
+
+{% unless section.settings.use_global_accent_typography %}
+  {% if section.settings.accent_font_family != 'inherit' and section.settings.accent_font_family != 'serif' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% case section.settings.accent_font_family %}
+      {% when 'Georgia Pro' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Georgia+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Bodoni Moda' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Instrument Serif' %}
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'DM Serif Text' %}
+        <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'Nothing You Could Do' %}
+        <link href="https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+    {% endcase %}
+  {% endif %}
+{% endunless %}
+
+<script src="{{ 'satisfaction-guarantee.js' | asset_url }}" defer></script>
+
+{% render 'satisfaction-guarantee_style' %}
+
+<div class="guarantee-section__wrapper {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  <div class="guarantee-section__container">
+    <!-- Mobile View -->
+    <div class="guarantee-section__mobile {% if section.settings.show_photos == false %}no-photos{% endif %}">
+      <!-- Polaroid Photos moved above content -->
+      {% if section.settings.show_photos %}
+        <div class="guarantee-section__photos-mobile">
+          {% if section.settings.image_1 != blank %}
+            <div class="polaroid-photo polaroid-photo-1">
+              <img
+                src="{{ section.settings.image_1 | image_url: width: 300, height: 300, crop: 'center' }}"
+                alt="{{ section.settings.product_name }}"
+                loading="lazy"
+                width="300"
+                height="300"
+              >
+            </div>
+          {% endif %}
+
+          {% if section.settings.image_2 != blank %}
+            <div class="polaroid-photo polaroid-photo-2">
+              <img
+                src="{{ section.settings.image_2 | image_url: width: 300, height: 300, crop: 'center' }}"
+                alt="{{ section.settings.product_name }}"
+                loading="lazy"
+                width="300"
+                height="300"
+              >
+            </div>
+          {% endif %}
+
+          {% if section.settings.image_3 != blank %}
+            <div class="polaroid-photo polaroid-photo-3">
+              <img
+                src="{{ section.settings.image_3 | image_url: width: 300, height: 300, crop: 'center' }}"
+                alt="{{ section.settings.product_name }}"
+                loading="lazy"
+                height="300"
+                width="300"
+              >
+            </div>
+          {% endif %}
+
+          {% if section.settings.image_4 != blank %}
+            <div class="polaroid-photo polaroid-photo-4">
+              <img
+                src="{{ section.settings.image_4 | image_url: width: 300, height: 300, crop: 'center' }}"
+                alt="{{ section.settings.product_name }}"
+                loading="lazy"
+                width="300"
+                height="300"
+              >
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <div class="guarantee-section__content">
+        <div class="shield-icon">
+          {% case section.settings.icon_style %}
+            {% when 'filled' %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80" fill="none">
+                <path d="M12 22c-1.148 0-3.418-1.362-5.13-3.34C4.44 15.854 3 11.967 3 7a1 1 0 0 1 .629-.929c3.274-1.31 5.88-2.613 7.816-3.903a1 1 0 0 1 1.11 0c1.935 1.29 4.543 2.594 7.816 3.903A1 1 0 0 1 21 7c0 4.968-1.44 8.855-3.87 11.66C15.419 20.637 13.149 22 12 22z" fill="currentColor"/>
+              </svg>
+            {% when 'outline' %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80" fill="none">
+                <path d="M20 6C20 6 19.1843 6 19.0001 6C16.2681 6 13.8871 4.93485 11.9999 3C10.1128 4.93478 7.73199 6 5.00009 6C4.81589 6 4.00009 6 4.00009 6C4.00009 6 4 8 4 9.16611C4 14.8596 7.3994 19.6436 12 21C16.6006 19.6436 20 14.8596 20 9.16611C20 8 20 6 20 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            {% when 'detailed' %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80" fill="none">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.1548 3.74068C9.13306 4.24326 7.70274 4.75901 5.07021 4.93689C4.43314 4.97993 4.01738 5.47217 4.03533 5.965C4.13502 8.70059 4.45127 11.4217 5.0553 13.6538C5.67349 15.9383 6.53465 17.4879 7.55469 18.1679C9.1615 19.2392 10.4837 20.1681 11.3705 20.8038C11.7447 21.072 12.2553 21.072 12.6294 20.8038C13.5162 20.1681 14.8385 19.2392 16.4453 18.1679C17.4653 17.4879 18.3265 15.9383 18.9447 13.6539C19.5487 11.4218 19.865 8.70066 19.9646 5.965C19.9826 5.47217 19.5668 4.97993 18.9298 4.93689C16.2972 4.75901 14.8669 4.24326 13.8452 3.74068C13.5533 3.5971 13.3276 3.47746 13.1423 3.37923C12.6352 3.11045 12.4305 3.00195 12 3.00195C11.5694 3.00195 11.3647 3.11045 10.8577 3.37923C10.6724 3.47746 10.4467 3.5971 10.1548 3.74068ZM9.68627 1.72824C10.3021 1.39456 11.0268 1.00195 12 1.00195C12.9732 1.00195 13.6978 1.39456 14.3137 1.72825C14.4571 1.80594 14.5946 1.88044 14.728 1.94605C15.503 2.32729 16.6774 2.78014 19.0646 2.94144C20.6316 3.04732 22.0258 4.32298 21.9633 6.03782C21.8605 8.8586 21.5333 11.7445 20.8752 14.1763C20.2313 16.5559 19.2117 18.7274 17.5547 19.8321C15.97 20.8885 14.6667 21.8042 13.7947 22.4293C12.724 23.1969 11.276 23.1969 10.2053 22.4293C9.33329 21.8042 8.02992 20.8885 6.44528 19.8321C4.78826 18.7274 3.76867 16.5559 3.12474 14.1763C2.46666 11.7444 2.13944 8.85853 2.03666 6.03783C1.97417 4.32298 3.36833 3.04732 4.93538 2.94144C7.32256 2.78014 8.49696 2.32729 9.27198 1.94605C9.40536 1.88044 9.54287 1.80594 9.68627 1.72824Z" fill="currentColor"/>
+              </svg>
+            {% when 'custom' %}
+              {% if section.settings.custom_icon_image != blank %}
+                <img 
+                  src="{{ section.settings.custom_icon_image | image_url: width: 160 }}" 
+                  srcset="{{ section.settings.custom_icon_image | image_url: width: 80 }} 1x,
+                          {{ section.settings.custom_icon_image | image_url: width: 160 }} 2x,
+                          {{ section.settings.custom_icon_image | image_url: width: 240 }} 3x"
+                  alt="Custom shield icon" 
+                  width="80" 
+                  height="80" 
+                  loading="lazy"
+                  style="display: block; width: 80px; height: auto; max-height: 80px; object-fit: contain;"
+                >
+              {% elsif section.settings.custom_svg_code != blank %}
+                {{ section.settings.custom_svg_code }}
+              {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="80" height="80">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M8 16L4.35009 13.3929C2.24773 11.8912 1 9.46667 1 6.88306V3L8 0L15 3V6.88306C15 9.46667 13.7523 11.8912 11.6499 13.3929L8 16ZM12.2071 5.70711L10.7929 4.29289L7 8.08579L5.20711 6.29289L3.79289 7.70711L7 10.9142L12.2071 5.70711Z" fill="currentColor"/>
+                </svg>
+              {% endif %}
+            {% else %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="80" height="80">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M8 16L4.35009 13.3929C2.24773 11.8912 1 9.46667 1 6.88306V3L8 0L15 3V6.88306C15 9.46667 13.7523 11.8912 11.6499 13.3929L8 16ZM12.2071 5.70711L10.7929 4.29289L7 8.08579L5.20711 6.29289L3.79289 7.70711L7 10.9142L12.2071 5.70711Z" fill="currentColor"/>
+              </svg>
+          {% endcase %}
+        </div>
+
+        <h2 class="guarantee-section__heading heading-text">
+          <span class="accent-text">{{ section.settings.accent_text }}</span>
+          {{ section.settings.heading_text }}
+        </h2>
+
+        <p class="guarantee-section__description">
+          {{ section.settings.description_text | replace: 'Premium Product', section.settings.product_name }}
+        </p>
+
+        {% assign button_href = '#' %}
+        {% assign button_data_attrs = '' %}
+
+        {% case section.settings.button_action_type %}
+          {% when 'product' %}
+            {% if section.settings.redirect_product != blank %}
+              {% assign button_href = section.settings.redirect_product.url %}
+            {% endif %}
+          {% when 'scroll' %}
+            {% assign button_href = '#' %}
+            {% assign button_data_attrs = 'data-scroll-to-first-section="true"' %}
+          {% when 'url' %}
+            {% if section.settings.custom_url != blank %}
+              {% assign button_href = section.settings.custom_url %}
+            {% endif %}
+        {% endcase %}
+
+        <a href="{{ button_href }}" class="guarantee-section__cta{% unless section.settings.use_global_button_style %} disable-global-button-styling{% endunless %}" {{ button_data_attrs }}>
+          {{ section.settings.button_text }}
+        </a>
+
+        <div class="guarantee-section__benefits">
+          {% if section.settings.benefit_1 != blank %}
+            <div class="benefit">
+              <svg class="checkmark-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+              </svg>
+              {{ section.settings.benefit_1 }}
+            </div>
+          {% endif %}
+          {% if section.settings.benefit_2 != blank %}
+            <div class="benefit">
+              <svg class="checkmark-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+              </svg>
+              {{ section.settings.benefit_2 }}
+            </div>
+          {% endif %}
+          {% if section.settings.benefit_3 != blank %}
+            <div class="benefit">
+              <svg class="checkmark-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+              </svg>
+              {{ section.settings.benefit_3 }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop View -->
+    <div class="guarantee-section__desktop {% if section.settings.show_photos == false %}no-photos{% endif %}">
+      {% if section.settings.show_photos %}
+        <div class="guarantee-section__photos-left">
+          {% if section.settings.image_1 != blank %}
+            <div class="polaroid-photo polaroid-photo-1">
+              <img
+                src="{{ section.settings.image_1 | image_url: width: 300, height: 300, crop: 'center' }}"
+                alt="{{ section.settings.product_name }}"
+                loading="lazy"
+                width="300"
+                height="300"
+              >
+            </div>
+          {% endif %}
+
+          {% if section.settings.image_2 != blank %}
+            <div class="polaroid-photo polaroid-photo-2">
+              <img
+                src="{{ section.settings.image_2 | image_url: width: 300, height: 300, crop: 'center' }}"
+                alt="{{ section.settings.product_name }}"
+                loading="lazy"
+                width="300"
+                height="300"
+              >
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <div class="guarantee-section__content">
+        <div class="shield-icon">
+          {% case section.settings.icon_style %}
+            {% when 'filled' %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80" fill="none">
+                <path d="M12 22c-1.148 0-3.418-1.362-5.13-3.34C4.44 15.854 3 11.967 3 7a1 1 0 0 1 .629-.929c3.274-1.31 5.88-2.613 7.816-3.903a1 1 0 0 1 1.11 0c1.935 1.29 4.543 2.594 7.816 3.903A1 1 0 0 1 21 7c0 4.968-1.44 8.855-3.87 11.66C15.419 20.637 13.149 22 12 22z" fill="currentColor"/>
+              </svg>
+            {% when 'outline' %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80" fill="none">
+                <path d="M20 6C20 6 19.1843 6 19.0001 6C16.2681 6 13.8871 4.93485 11.9999 3C10.1128 4.93478 7.73199 6 5.00009 6C4.81589 6 4.00009 6 4.00009 6C4.00009 6 4 8 4 9.16611C4 14.8596 7.3994 19.6436 12 21C16.6006 19.6436 20 14.8596 20 9.16611C20 8 20 6 20 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            {% when 'detailed' %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80" fill="none">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.1548 3.74068C9.13306 4.24326 7.70274 4.75901 5.07021 4.93689C4.43314 4.97993 4.01738 5.47217 4.03533 5.965C4.13502 8.70059 4.45127 11.4217 5.0553 13.6538C5.67349 15.9383 6.53465 17.4879 7.55469 18.1679C9.1615 19.2392 10.4837 20.1681 11.3705 20.8038C11.7447 21.072 12.2553 21.072 12.6294 20.8038C13.5162 20.1681 14.8385 19.2392 16.4453 18.1679C17.4653 17.4879 18.3265 15.9383 18.9447 13.6539C19.5487 11.4218 19.865 8.70066 19.9646 5.965C19.9826 5.47217 19.5668 4.97993 18.9298 4.93689C16.2972 4.75901 14.8669 4.24326 13.8452 3.74068C13.5533 3.5971 13.3276 3.47746 13.1423 3.37923C12.6352 3.11045 12.4305 3.00195 12 3.00195C11.5694 3.00195 11.3647 3.11045 10.8577 3.37923C10.6724 3.47746 10.4467 3.5971 10.1548 3.74068ZM9.68627 1.72824C10.3021 1.39456 11.0268 1.00195 12 1.00195C12.9732 1.00195 13.6978 1.39456 14.3137 1.72825C14.4571 1.80594 14.5946 1.88044 14.728 1.94605C15.503 2.32729 16.6774 2.78014 19.0646 2.94144C20.6316 3.04732 22.0258 4.32298 21.9633 6.03782C21.8605 8.8586 21.5333 11.7445 20.8752 14.1763C20.2313 16.5559 19.2117 18.7274 17.5547 19.8321C15.97 20.8885 14.6667 21.8042 13.7947 22.4293C12.724 23.1969 11.276 23.1969 10.2053 22.4293C9.33329 21.8042 8.02992 20.8885 6.44528 19.8321C4.78826 18.7274 3.76867 16.5559 3.12474 14.1763C2.46666 11.7444 2.13944 8.85853 2.03666 6.03783C1.97417 4.32298 3.36833 3.04732 4.93538 2.94144C7.32256 2.78014 8.49696 2.32729 9.27198 1.94605C9.40536 1.88044 9.54287 1.80594 9.68627 1.72824Z" fill="currentColor"/>
+              </svg>
+            {% when 'custom' %}
+              {% if section.settings.custom_icon_image != blank %}
+                <img 
+                  src="{{ section.settings.custom_icon_image | image_url: width: 160 }}" 
+                  srcset="{{ section.settings.custom_icon_image | image_url: width: 80 }} 1x,
+                          {{ section.settings.custom_icon_image | image_url: width: 160 }} 2x,
+                          {{ section.settings.custom_icon_image | image_url: width: 240 }} 3x"
+                  alt="Custom shield icon" 
+                  width="80" 
+                  height="80" 
+                  loading="lazy"
+                  style="display: block; width: 80px; height: auto; max-height: 80px; object-fit: contain;"
+                >
+              {% elsif section.settings.custom_svg_code != blank %}
+                {{ section.settings.custom_svg_code }}
+              {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="80" height="80">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M8 16L4.35009 13.3929C2.24773 11.8912 1 9.46667 1 6.88306V3L8 0L15 3V6.88306C15 9.46667 13.7523 11.8912 11.6499 13.3929L8 16ZM12.2071 5.70711L10.7929 4.29289L7 8.08579L5.20711 6.29289L3.79289 7.70711L7 10.9142L12.2071 5.70711Z" fill="currentColor"/>
+                </svg>
+              {% endif %}
+            {% else %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="80" height="80">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M8 16L4.35009 13.3929C2.24773 11.8912 1 9.46667 1 6.88306V3L8 0L15 3V6.88306C15 9.46667 13.7523 11.8912 11.6499 13.3929L8 16ZM12.2071 5.70711L10.7929 4.29289L7 8.08579L5.20711 6.29289L3.79289 7.70711L7 10.9142L12.2071 5.70711Z" fill="currentColor"/>
+              </svg>
+          {% endcase %}
+        </div>
+
+        <h2 class="guarantee-section__heading heading-text">
+          <span class="accent-text">{{ section.settings.accent_text }}</span>
+          {{ section.settings.heading_text }}
+        </h2>
+
+        <p class="guarantee-section__description">
+          {{ section.settings.description_text | replace: 'Premium Product', section.settings.product_name }}
+        </p>
+
+        <a href="{{ button_href }}" class="guarantee-section__cta{% unless section.settings.use_global_button_style %} disable-global-button-styling{% endunless %}" {{ button_data_attrs }}>
+          {{ section.settings.button_text }}
+        </a>
+
+        <div class="guarantee-section__benefits">
+          {% if section.settings.benefit_1 != blank %}
+            <div class="benefit">
+              <svg class="checkmark-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+              </svg>
+              {{ section.settings.benefit_1 }}
+            </div>
+          {% endif %}
+          {% if section.settings.benefit_2 != blank %}
+            <div class="benefit">
+              <svg class="checkmark-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+              </svg>
+              {{ section.settings.benefit_2 }}
+            </div>
+          {% endif %}
+          {% if section.settings.benefit_3 != blank %}
+            <div class="benefit">
+              <svg class="checkmark-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+              </svg>
+              {{ section.settings.benefit_3 }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if section.settings.show_photos %}
+        <div class="guarantee-section__photos-right">
+          {% if section.settings.image_3 != blank %}
+            <div class="polaroid-photo polaroid-photo-1">
+              <img
+                src="{{ section.settings.image_3 | image_url: width: 300, height: 300, crop: 'center' }}"
+                alt="{{ section.settings.product_name }}"
+                loading="lazy"
+                width="300"
+                height="300"
+              >
+            </div>
+          {% endif %}
+
+          {% if section.settings.image_4 != blank %}
+            <div class="polaroid-photo polaroid-photo-2">
+              <img
+                src="{{ section.settings.image_4 | image_url: width: 300, height: 300, crop: 'center' }}"
+                alt="{{ section.settings.product_name }}"
+                loading="lazy"
+                width="300"
+                height="300"
+              >
+            </div>
+          {% endif %}
+
+          {% if section.settings.image_5 != blank %}
+            <div class="polaroid-photo polaroid-photo-3">
+              <img
+                src="{{ section.settings.image_5 | image_url: width: 300, height: 300, crop: 'center' }}"
+                alt="{{ section.settings.product_name }}"
+                loading="lazy"
+                width="300"
+                height="300"
+              >
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Handle scroll-to-first-section functionality
+    const guaranteeButtons = document.querySelectorAll('.guarantee-section__cta[data-scroll-to-first-section]');
+
+    guaranteeButtons.forEach((button) => {
+      button.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        console.log('🎯 Scrolling to first section...');
+
+        // Find the product details section or first section on the page (excluding header/navigation)
+        const selectors = [
+          // Product details section (highest priority)
+          '[data-section-type="product"]',
+          '.shopify-section[data-section-type="product"]',
+          '.product-section',
+          '.shop-product-section',
+          '.product-details',
+          '.product-template',
+          '#ProductSection',
+          '#shopify-section-product-template',
+
+          // Most common first section patterns
+          'main section:first-of-type',
+          '.main-content section:first-of-type',
+          '.page-content section:first-of-type',
+
+          // Shopify section patterns
+          '.shopify-section:not([data-section-type="header"]):not([data-section-type="announcement-bar"])',
+          'section.shopify-section:not([data-section-type="header"])',
+
+          // General section patterns
+          'main > *:first-child',
+          '.content section:first-of-type',
+          'section:not(header):not([role="banner"])',
+
+          // Fallback to any section
+          'section:first-of-type',
+          '[data-section-type]:not([data-section-type="header"])',
+
+          // Last resort - any content element
+          'main > div:first-child',
+          '.main > *:first-child',
+        ];
+
+        let targetElement = null;
+        let usedSelector = '';
+
+        for (let selector of selectors) {
+          try {
+            const elements = document.querySelectorAll(selector);
+            if (elements.length > 0) {
+              // Get the first element that's not a header/nav
+              for (let element of elements) {
+                const tagName = element.tagName.toLowerCase();
+                const sectionType = element.getAttribute('data-section-type');
+
+                // Skip header/navigation elements
+                if (
+                  tagName === 'header' ||
+                  tagName === 'nav' ||
+                  sectionType === 'header' ||
+                  sectionType === 'announcement-bar' ||
+                  element.getAttribute('role') === 'banner'
+                ) {
+                  continue;
+                }
+
+                targetElement = element;
+                usedSelector = selector;
+                break;
+              }
+
+              if (targetElement) {
+                console.log(`✅ Found first section with selector: ${selector}`);
+                break;
+              }
+            }
+          } catch (e) {
+            // Skip invalid selectors
+            continue;
+          }
+        }
+
+        if (targetElement) {
+          // Calculate offset for fixed headers
+          const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+          const stickyHeader =
+            document.querySelector('.sticky-header, .header-sticky, [style*="position: fixed"]')?.offsetHeight || 0;
+          const adminBarHeight = document.querySelector('#admin_bar_iframe, .admin-bar')?.offsetHeight || 0;
+          const announcementBar = document.querySelector('.announcement-bar, .promo-bar')?.offsetHeight || 0;
+
+          const offset = Math.max(headerHeight, stickyHeader) + adminBarHeight + announcementBar + 20;
+
+          const elementPosition = targetElement.offsetTop;
+          const offsetPosition = elementPosition - offset;
+
+          window.scrollTo({
+            top: Math.max(0, offsetPosition),
+            behavior: 'smooth',
+          });
+
+          console.log(`✅ Scrolled to first section using selector: ${usedSelector}`);
+
+          // Optional: Add visual highlight to show successful targeting
+          targetElement.style.transition = 'all 0.3s ease';
+          targetElement.style.transform = 'scale(1.01)';
+          setTimeout(() => {
+            targetElement.style.transform = 'scale(1)';
+          }, 300);
+        } else {
+          console.warn('❌ Could not find any suitable first section to scroll to');
+          console.log('🔍 Available sections on page:');
+
+          // Debug: Show available sections
+          const allSections = document.querySelectorAll('section, .shopify-section, main > *, .main > *');
+          allSections.forEach((section, index) => {
+            const tagName = section.tagName.toLowerCase();
+            const id = section.id || 'no-id';
+            const sectionType = section.getAttribute('data-section-type') || 'no-section-type';
+            const className = section.className || 'no-class';
+
+            console.log(
+              `   ${index + 1}. <${tagName}> id="${id}" data-section-type="${sectionType}" class="${className}"`
+            );
+          });
+        }
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Satisfaction Guarantee",
+  "tag": "section",
+  "class": "guarantee-section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": false,
+      "info": "Apply the global theme colors to this section. When OFF, use custom color settings below."
+    },
+    {
+      "type": "header",
+      "content": "General Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_photos",
+      "label": "Show Photos",
+      "default": true,
+      "info": "When disabled, photos will be hidden from the section"
+    },
+    {
+      "type": "checkbox",
+      "id": "allow_overflow",
+      "label": "Allow Content Overflow",
+      "default": false,
+      "info": "When enabled, polaroid images can extend beyond section boundaries (prevents cutoff)"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "select",
+      "id": "icon_style",
+      "label": "Shield Icon Style",
+      "options": [
+        {
+          "value": "original",
+          "label": "Original Shield"
+        },
+        {
+          "value": "filled",
+          "label": "Filled Shield"
+        },
+        {
+          "value": "outline",
+          "label": "Outline Shield"
+        },
+        {
+          "value": "detailed",
+          "label": "Detailed Shield"
+        },
+        {
+          "value": "custom",
+          "label": "Custom SVG"
+        }
+      ],
+      "default": "original"
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_icon_image",
+      "label": "Custom Icon Image",
+      "info": "Upload a custom image to use as the shield icon. Will only be used when 'Custom SVG' is selected. If no image is uploaded, custom SVG code will be used instead."
+    },
+    {
+      "type": "textarea",
+      "id": "custom_svg_code",
+      "label": "Custom SVG Code",
+      "info": "Paste your SVG code here. Will only be used when 'Custom SVG' is selected and no custom icon image is uploaded."
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Shield Icon Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "icon_margin_bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Shield Icon Margin Bottom",
+      "default": 10
+    },
+    {
+      "type": "text",
+      "id": "accent_text",
+      "label": "Accent Text (Part 1)",
+      "default": "Money-Back"
+    },
+    {
+      "type": "text",
+      "id": "heading_text",
+      "label": "Heading Text (Part 2)",
+      "default": "Guarantee"
+    },
+    {
+      "type": "textarea",
+      "id": "description_text",
+      "label": "Description Text",
+      "default": "We're so confident in the quality of our product that we offer a satisfaction guarantee. If you're not completely satisfied with your purchase, simply return the item within 30 days for a full refund."
+    },
+    {
+      "type": "text",
+      "id": "product_name",
+      "label": "Product Name",
+      "default": "Premium Product"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "color",
+      "id": "heading_text_color",
+      "label": "Heading Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description Text Color",
+      "default": "#4A4A4A"
+    },
+    {
+      "type": "color",
+      "id": "benefit_text_color",
+      "label": "Benefit Text Color",
+      "default": "#4A4A4A"
+    },
+    {
+      "type": "color",
+      "id": "checkmark_icon_color",
+      "label": "Checkmark Icon Color",
+      "default": "#EF4A65",
+      "info": "Color for the checkmark icons next to benefits"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "min": 18,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading Size (Desktop)",
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 16,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading Size (Mobile)",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "min": 0.5,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "Heading Line Height",
+      "default": 1.3,
+      "info": "Controls the spacing between lines in the heading text"
+    },
+    {
+      "type": "range",
+      "id": "description_size_desktop",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Text Size (Desktop)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "description_size_mobile",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Text Size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "benefit_size_desktop",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Benefit Text Size (Desktop)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "benefit_size_mobile",
+      "min": 9,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Benefit Text Size (Mobile)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "description_line_height",
+      "min": 1.0,
+      "max": 2.0,
+      "step": 0.1,
+      "unit": "x",
+      "label": "Description Line Height",
+      "default": 1.5,
+      "info": "Controls the spacing between lines in the description text"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Text Color",
+      "info": "Leave blank to use the theme's accent text color"
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin_left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 5,
+      "info": "Adjust the spacing between the accent text and the regular text"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_global_accent_typography",
+      "label": "Use Global Accent Typography",
+      "default": false,
+      "info": "When enabled, the accent text will use the global accent typography settings from Theme Settings > Typography > Accent Typography. When disabled, the section-specific settings below will be used."
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text. This will override the solid accent color."
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "info": "Choose a gradient for the accent text using Shopify's gradient editor."
+    },
+    {
+      "type": "header",
+      "content": "Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Accent Text Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Global Accent Typography is disabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text (only used when Global Accent Typography is disabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text (only used when Global Accent Typography is disabled)"
+    },
+    {
+      "type": "header",
+      "content": "Button Settings"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "ADD TO CART"
+    },
+    {
+      "type": "select",
+      "id": "button_action_type",
+      "label": "Button Action",
+      "options": [
+        {
+          "value": "product",
+          "label": "Redirect to Product Page"
+        },
+        {
+          "value": "scroll",
+          "label": "Scroll to Section"
+        },
+        {
+          "value": "url",
+          "label": "Custom URL"
+        }
+      ],
+      "default": "product",
+      "info": "Choose what happens when the button is clicked"
+    },
+    {
+      "type": "product",
+      "id": "redirect_product",
+      "label": "Product to Redirect To",
+      "info": "Select the product page to redirect to (only used when 'Redirect to Product Page' is selected)"
+    },
+    {
+      "type": "url",
+      "id": "custom_url",
+      "label": "Custom URL",
+      "info": "Enter a custom URL to redirect to (only used when 'Custom URL' is selected)"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_global_button_style",
+      "label": "Use Global Button Style",
+      "default": true,
+      "info": "When enabled, uses theme's global button styling. Only works if 'Enable Global Button Styling for Sections' is turned on in Theme Settings > Button Styling."
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button Background Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Font Size",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "button_font_weight",
+      "label": "Button Font Weight",
+      "options": [
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semibold (600)" },
+        { "value": "700", "label": "Bold (700)" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Border Radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Padding (Vertical)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Padding (Horizontal)",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Benefits"
+    },
+    {
+      "type": "text",
+      "id": "benefit_1",
+      "label": "Benefit 1",
+      "default": "100% Satisfaction"
+    },
+    {
+      "type": "text",
+      "id": "benefit_2",
+      "label": "Benefit 2",
+      "default": "Fast Shipping"
+    },
+    {
+      "type": "text",
+      "id": "benefit_3",
+      "label": "Benefit 3",
+      "default": "Easy Returns"
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_4",
+      "label": "Image 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_5",
+      "label": "Image 5"
+    },
+    {
+      "type": "header",
+      "content": "Photo Sizing"
+    },
+    {
+      "type": "range",
+      "id": "polaroid_size_desktop",
+      "min": 120,
+      "max": 250,
+      "step": 10,
+      "unit": "px",
+      "label": "Polaroid Size (Desktop)",
+      "default": 180,
+      "info": "Width of the polaroid photos (height scales proportionally)"
+    },
+    {
+      "type": "range",
+      "id": "polaroid_size_mobile",
+      "min": 80,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Polaroid Size (Mobile)",
+      "default": 100,
+      "info": "Width of the polaroid photos (height scales proportionally)"
+    },
+    {
+      "type": "header",
+      "content": "Image Positioning"
+    },
+    {
+      "type": "range",
+      "id": "image_extension",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Image Extension Into Padding",
+      "default": 80,
+      "info": "Controls how far images extend into the padding space (100% = aligned with section edge)"
+    },
+    {
+      "type": "range",
+      "id": "image_vertical_offset",
+      "min": -50,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Additional Vertical Offset",
+      "default": 0,
+      "info": "Adjust images up or down from their calculated position"
+    },
+    {
+      "type": "header",
+      "content": "Content Layout"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Content Padding (Mobile)",
+      "default": 15,
+      "info": "Horizontal padding on mobile devices"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Content Padding (Desktop)",
+      "default": 70,
+      "info": "Horizontal padding around content on desktop"
+    },
+    {
+      "type": "range",
+      "id": "content_width_with_photos",
+      "min": 30,
+      "max": 70,
+      "step": 5,
+      "unit": "%",
+      "label": "Content Width (With Photos)",
+      "default": 50,
+      "info": "Width of content area when photos are shown"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width_with_photos",
+      "min": 400,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "Content Max Width (With Photos)",
+      "default": 600,
+      "info": "Maximum width of content when photos are shown"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width_no_photos",
+      "min": 300,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "Content Max Width (No Photos)",
+      "default": 450,
+      "info": "Maximum width of content when photos are hidden"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Padding (Desktop)",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Padding (Desktop)",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding (Mobile)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding (Mobile)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_no_photos_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "label": "Additional Top Padding When Photos Hidden (Mobile)",
+      "default": 15,
+      "info": "Extra internal top padding when 'Show Photos' is disabled on mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_no_photos_desktop",
+      "min": 0,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "label": "Additional Top Padding When Photos Hidden (Desktop)",
+      "default": 15,
+      "info": "Extra internal top padding when 'Show Photos' is disabled on desktop"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_vertical",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Section Vertical Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_horizontal",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Section Horizontal Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "section_padding_vertical_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Section Vertical Padding (Mobile)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "section_padding_horizontal_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Section Horizontal Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Section Borders"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_top_border",
+      "label": "Enable Top Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "top_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Border Width",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "top_border_color",
+      "label": "Top Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bottom_border",
+      "label": "Enable Bottom Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "bottom_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Border Width",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "bottom_border_color",
+      "label": "Bottom Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Section Background"
+    },
+    {
+      "type": "color_background",
+      "id": "section_background",
+      "label": "Section Background",
+      "default": "linear-gradient(to right, #FFE8EC, #FFF9F0)"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image (Desktop)"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Background Image (Mobile)",
+      "info": "Optional separate image for mobile devices. If not set, desktop image will be used."
+    },
+    {
+      "type": "select",
+      "id": "background_image_position",
+      "label": "Background Image Position",
+      "options": [
+        {
+          "value": "center center",
+          "label": "Center"
+        },
+        {
+          "value": "left center",
+          "label": "Left"
+        },
+        {
+          "value": "right center",
+          "label": "Right"
+        },
+        {
+          "value": "center top",
+          "label": "Top"
+        },
+        {
+          "value": "center bottom",
+          "label": "Bottom"
+        }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "background_image_size",
+      "label": "Background Image Size",
+      "options": [
+        {
+          "value": "cover",
+          "label": "Cover"
+        },
+        {
+          "value": "contain",
+          "label": "Contain"
+        },
+        {
+          "value": "auto",
+          "label": "Auto"
+        }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "background_image_repeat",
+      "label": "Background Image Repeat",
+      "options": [
+        {
+          "value": "no-repeat",
+          "label": "No Repeat"
+        },
+        {
+          "value": "repeat",
+          "label": "Repeat"
+        },
+        {
+          "value": "repeat-x",
+          "label": "Repeat Horizontally"
+        },
+        {
+          "value": "repeat-y",
+          "label": "Repeat Vertically"
+        }
+      ],
+      "default": "no-repeat"
+    },
+    {
+      "type": "header",
+      "content": "Container Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "contain_section",
+      "label": "Contain Section",
+      "default": false,
+      "info": "Add padding and border around the section content"
+    },
+    {
+      "type": "range",
+      "id": "container_padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Container Padding",
+      "default": 40
+    },
+    {
+      "type": "color_background",
+      "id": "container_background",
+      "label": "Container Background",
+      "default": "linear-gradient(to right, #FFFFFF, #F8F8F8)"
+    },
+    {
+      "type": "header",
+      "content": "Container Background Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "container_bg_image",
+      "label": "Container Background Image (Desktop)",
+      "info": "Background image for the container when Contain Section is enabled"
+    },
+    {
+      "type": "image_picker",
+      "id": "container_bg_image_mobile",
+      "label": "Container Background Image (Mobile)",
+      "info": "Mobile background image. If not set, desktop image will be used."
+    },
+    {
+      "type": "select",
+      "id": "container_bg_size",
+      "label": "Background Size",
+      "options": [
+        { "value": "cover", "label": "Cover" },
+        { "value": "contain", "label": "Contain" },
+        { "value": "auto", "label": "Auto" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "container_bg_position",
+      "label": "Background Position",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "top center", "label": "Top Center" },
+        { "value": "bottom center", "label": "Bottom Center" },
+        { "value": "left center", "label": "Left Center" },
+        { "value": "right center", "label": "Right Center" },
+        { "value": "top left", "label": "Top Left" },
+        { "value": "top right", "label": "Top Right" },
+        { "value": "bottom left", "label": "Bottom Left" },
+        { "value": "bottom right", "label": "Bottom Right" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_container_bg_overlay",
+      "label": "Enable Background Image Overlay",
+      "default": false,
+      "info": "Add an overlay over the background image for better text readability"
+    },
+    {
+      "type": "color",
+      "id": "container_bg_overlay_color",
+      "label": "Background Overlay Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "container_bg_overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Background Overlay Opacity",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Container Border & Effects"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_border",
+      "label": "Enable Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "border_style",
+      "label": "Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#E5E7EB"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Radius",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_shadow",
+      "label": "Enable Shadow",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Satisfaction Guarantee",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}

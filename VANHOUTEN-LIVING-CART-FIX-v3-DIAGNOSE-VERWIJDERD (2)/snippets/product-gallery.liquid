@@ -1,0 +1,807 @@
+{% liquid
+  if product.variants.first.featured_image == blank
+    assign novariant_matches = true
+  else
+    assign novariant_matches = false
+  endif
+
+  if show_product_variants != false and current_variant != false
+    assign current_variant_id = current_variant.id
+    assign current_variant_media_id = current_variant.featured_media.id
+    assign unmatched_variant_media = product.variants | reject: "id", current_variant_id | map: "featured_media" | compact | map: "id" | join: ","
+  endif
+
+  assign enable_autoplay_video = section.settings.enable_autoplay_video
+  assign enable_video_loop = section.settings.enable_video_loop
+  assign hide_video_controls = section.settings.hide_video_controls
+  assign enable_custom_video_controls = section.settings.enable_custom_video_controls
+  assign enable_image_zoom = enable_image_zoom | default: false
+
+  
+%}
+<div class="shop-carousel-container {% if section.settings.thumbnails_left_column_desktop %} thumbnails-left-column{% endif %} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}" style="animation-delay: 0.1s;">
+  <div class="shop-product-carousel product-gallery">
+    {% if section.settings.thumbnails_left_column_desktop %}
+      <div class="shop-main-image-wrapper shop-image-thumbnails-row">
+        <!-- Thumbnails first in left column layout -->
+        <div class="shop-thumbnails-outer{% if section.settings.hide_thumbnails_mobile %} hide-mobile{% endif %}">
+          <div class="shop-thumbnails-wrapper shop-match-image-width{% if section.settings.show_mobile_arrows and section.settings.mobile_arrow_placement == 'below' and product.media.size > 1 and section.settings.hide_thumbnails == false %} has-mobile-arrows{% endif %} left-column-layout">
+            <!-- Mobile arrows at start of thumbnails (when placement is below and thumbnails are visible) -->
+            {% if section.settings.show_mobile_arrows and section.settings.mobile_arrow_placement == 'below' and product.media.size > 1 and section.settings.hide_thumbnails == false %}
+              <button class="shop-mobile-arrow shop-mobile-arrow-in-thumbnails shop-mobile-prev-arrow" aria-label="Previous image" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 6L9 12L15 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </button>
+            {% endif %}
+
+            <div class="shop-thumbnails {% if show_product_variants != false and current_variant != false %}toggle-product-variants{% endif %}{% if section.settings.mobile_thumbnails_2x2_grid and section.settings.show_mobile_arrows == false %} mobile-2x2-grid{% endif %}" id="thumbnail-container">
+              {% for media in product.media %}
+                <div
+                  class="shop-thumbnail page-fade-in {% if forloop.first %}active{% endif %} {% if show_product_variants != false and current_variant != false and unmatched_variant_media contains media.id %}visually-hidden{% endif %} {% if current_variant_media_id == media.id %}current-variant-media{% endif %}"
+                  style="animation-delay: {{ forloop.index0 | times: 0.1 }}s;"
+                  data-target="shop-image{{ forloop.index }}"
+                  data-index="{{ forloop.index0 }}"
+                  data-media-id="{{ media.id }}"
+                >
+                  <div class="thumb-square">
+                    <img
+                      src="{{ media | img_url: '200x', scale: 2 }}"
+                      alt="{{ media.alt | escape }}"
+                      loading="lazy"
+                      draggable="false"
+                      data-media-id="{{ media.id }}" width="" height=""
+                    >
+
+                    {% if media.media_type == 'video' or media.media_type == 'external_video' %}
+                      <span class="thumbnail-video-icon" aria-hidden="true">
+                        {{- 'icon-play.svg' | inline_asset_content -}}
+                      </span>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <!-- Mobile arrows at end of thumbnails (when placement is below and thumbnails are visible) -->
+            {% if section.settings.show_mobile_arrows and section.settings.mobile_arrow_placement == 'below' and product.media.size > 1 and section.settings.hide_thumbnails == false %}
+              <button class="shop-mobile-arrow shop-mobile-arrow-in-thumbnails shop-mobile-next-arrow" aria-label="Next image" tabindex="0">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 6L15 12L9 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </button>
+            {% endif %}
+          </div>
+
+          <div class="shop-thumbnail-indicators" id="thumbnail-indicators"></div>
+        </div>
+        
+        <!-- Product Benefits (Left Position) -->
+        {% for block in section.blocks %}
+          {% if block.type == "product_benefits" and block.settings.benefits_position == "left" %}
+            <div class="shop-main-benefits benefits-left">
+              {% for i in (1..3) %}
+                {% capture text_key %}benefit_{{ i }}-text{% endcapture %}
+                {% capture svg_key %}benefit_{{ i }}-svg{% endcapture %}
+                {% capture image_key %}benefit_{{ i }}-Image{% endcapture %}
+                {% assign benefit_text = block.settings[text_key] %}
+                {% assign benefit_svg = block.settings[svg_key] %}
+                {% assign benefit_image = block.settings[image_key] %}
+
+                <div class="shop-benefit-item">
+                  {% if benefit_image != blank %}
+                    <img 
+                      src="{{ benefit_image | img_url: '160x160' }}" 
+                      srcset="{{ benefit_image | img_url: '80x80' }} 1x,
+                              {{ benefit_image | img_url: '160x160' }} 2x,
+                              {{ benefit_image | img_url: '240x240' }} 3x"
+                      alt="{{ benefit_text | escape }}" 
+                      class="benefit-image"
+                      loading="lazy"
+                    >
+                  {% elsif benefit_svg != blank %}
+                    <div class="benefit-icon">{{ benefit_svg }}</div>
+                  {% endif %}
+                  <p class="benefit-text">{{ benefit_text }}</p>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+        
+        <!-- Main image container -->
+        <div class="shop-image-container shop-square-container{% if section.settings.main_image_portrait_adaptation %} portrait-adapted{% endif %}">
+    {% else %}
+      <div class="shop-main-image-wrapper">
+        
+        <!-- Product Benefits (Left Position) -->
+        {% for block in section.blocks %}
+          {% if block.type == "product_benefits" and block.settings.benefits_position == "left" %}
+            <div class="shop-main-benefits benefits-left">
+              {% for i in (1..3) %}
+                {% capture text_key %}benefit_{{ i }}-text{% endcapture %}
+                {% capture svg_key %}benefit_{{ i }}-svg{% endcapture %}
+                {% capture image_key %}benefit_{{ i }}-Image{% endcapture %}
+                {% assign benefit_text = block.settings[text_key] %}
+                {% assign benefit_svg = block.settings[svg_key] %}
+                {% assign benefit_image = block.settings[image_key] %}
+
+                <div class="shop-benefit-item">
+                  {% if benefit_image != blank %}
+                    <img 
+                      src="{{ benefit_image | img_url: '160x160' }}" 
+                      srcset="{{ benefit_image | img_url: '80x80' }} 1x,
+                              {{ benefit_image | img_url: '160x160' }} 2x,
+                              {{ benefit_image | img_url: '240x240' }} 3x"
+                      alt="{{ benefit_text | escape }}" 
+                      class="benefit-image"
+                      loading="lazy"
+                    >
+                  {% elsif benefit_svg != blank %}
+                    <div class="benefit-icon">{{ benefit_svg }}</div>
+                  {% endif %}
+                  <p class="benefit-text">{{ benefit_text }}</p>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+       
+        <div class="shop-image-container shop-square-container{% if section.settings.main_image_portrait_adaptation %} portrait-adapted{% endif %}">
+          
+          {% endif %}
+          {% for media in product.media %}
+            {% case media.media_type %}
+              {% when 'image' %}
+                <div class="shop-image-zoom-wrapper {% if enable_image_zoom %}image-zoom-enabled{% endif %}{% if forloop.first and novariant_matches %} active{% endif %}" data-media-id="{{ media.id }}" data-image-gallery-type="product">
+                  <img
+                    class="shop-main-image {% if forloop.first and novariant_matches %}active{% endif %}"
+                    src="{{ media | img_url: '530x' }}"
+                    srcset="
+                      {{ media | img_url: '530x' }} 1x,
+                      {{ media | img_url: '1060x' }} 2x"
+                    data-srcset="
+                      {{ media | img_url: '530x' }} 1x,
+                      {{ media | img_url: '1060x' }} 2x"
+                    alt="{{ media.alt | escape }}"
+                    loading="lazy"
+                    data-src="{{ media | img_url: '530x' }}"
+                    data-zoom-src="{{ media | img_url: '1200x' }}"
+                    data-media-id="{{ media.id }}"
+                    data-image-gallery-type="product"
+                    width="" height=""
+                  >
+                  {% if enable_image_zoom %}
+                    <div class="image-zoom-overlay"></div>
+                  {% endif %}
+                </div>
+              {% when 'video' %}
+                <div
+                  class="shop-main-image {% if forloop.first and novariant_matches %}active{% endif %}"
+                  id="shop-image{{ forloop.index }}"
+                  data-media-id="{{ media.id }}"
+                  data-position="{{ forloop.index0 }}"
+                  data-video-type="local"
+                  data-image-gallery-type="product"
+                >
+                  {% liquid
+                    assign show_controls = true
+                    if hide_video_controls
+                      assign show_controls = false
+                    endif
+                    
+                    if enable_autoplay_video
+                      if enable_video_loop
+                        echo media | video_tag: controls: show_controls, autoplay: true, muted: true, playsinline: true, loop: true, class: 'shop-video'
+                      else
+                        echo media | video_tag: controls: show_controls, autoplay: true, muted: true, playsinline: true, class: 'shop-video'
+                      endif
+                    else
+                      if enable_video_loop
+                        echo media | video_tag: controls: show_controls, loop: true, class: 'shop-video'
+                      else
+                        echo media | video_tag: controls: show_controls, class: 'shop-video'
+                      endif
+                    endif
+                  %}
+                </div>
+              {% when 'external_video' %}
+                <div
+                  class="shop-main-image {% if forloop.first and novariant_matches %}active{% endif %}"
+                  id="shop-image{{ forloop.index }}"
+                  data-media-id="{{ media.id }}"
+                  data-position="{{ forloop.index0 }}"
+                  data-video-type="external"
+                  data-image-gallery-type="product"
+                >
+                  {% liquid
+                    assign youtube_controls = 1
+                    assign vimeo_controls = true
+                    if hide_video_controls
+                      assign youtube_controls = 0
+                      assign vimeo_controls = false
+                    endif
+                    
+                    assign loop_value = 0
+                    if enable_video_loop
+                      assign loop_value = 1
+                    endif
+                    
+                    if enable_autoplay_video
+                      if media.host == 'youtube'
+                        echo media | external_video_url: autoplay: 1, mute: 1, loop: loop_value, controls: youtube_controls, color: 'white' | external_video_tag: class: 'shop-video'
+                      elsif media.host == 'vimeo'
+                        echo media | external_video_url: autoplay: 1, muted: 1, loop: enable_video_loop, background: 1, controls: vimeo_controls, color: 'white' | external_video_tag: class: 'shop-video'
+                      else
+                        echo media | external_video_url: color: 'white' | external_video_tag: class: 'shop-video'
+                      endif
+                    else
+                      if media.host == 'youtube'
+                        echo media | external_video_url: loop: loop_value, controls: youtube_controls, color: 'white' | external_video_tag: class: 'shop-video'
+                      elsif media.host == 'vimeo'
+                        echo media | external_video_url: loop: enable_video_loop, controls: vimeo_controls, color: 'white' | external_video_tag: class: 'shop-video'
+                      else
+                        echo media | external_video_url: color: 'white' | external_video_tag: class: 'shop-video'
+                      endif
+                    endif
+                  %}
+                </div>
+              {% else %}
+                <!-- fallback for unsupported media -->
+                <div
+                  class="shop-main-image {% if forloop.first and novariant_matches %}active{% endif %}"
+                  id="shop-image{{ forloop.index }}"
+                  data-media-id="{{ media.id }}"
+                  data-position="{{ forloop.index0 }}"
+                  data-image-gallery-type="product"
+                >
+                  <img src="{{ media | img_url: '530x' }}" alt="{{ media.alt | escape }}" width="" height="">
+                </div>
+            {% endcase %}
+          {% endfor %}
+
+        <!-- Mobile navigation arrows (overlaid on image) -->
+        {% comment %} Mobile arrows show when mobile arrows are enabled AND placement is NOT below AND there are multiple media items {% endcomment %}
+        {% if section.settings.show_mobile_arrows and section.settings.mobile_arrow_placement != 'below' and product.media.size > 1 %}
+          <div class="shop-mobile-arrows">
+            <button class="shop-mobile-arrow shop-mobile-prev-arrow" aria-label="Previous image" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 6L9 12L15 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+            <button class="shop-mobile-arrow shop-mobile-next-arrow" aria-label="Next image" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 6L15 12L9 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </div>
+        {% endif %}
+
+        
+        <!-- Desktop navigation arrows (overlaid on image) -->
+        {% comment %} Desktop arrows show when desktop arrows are enabled AND placement is overlaid AND there are multiple media items {% endcomment %}
+        {% if section.settings.show_desktop_arrows and section.settings.desktop_arrow_placement == 'overlaid' and product.media.size > 1 %}
+          <div class="shop-desktop-arrows shop-desktop-arrows-overlaid">
+            <button class="shop-desktop-arrow shop-desktop-prev-arrow" aria-label="Previous image" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 6L9 12L15 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+            <button class="shop-desktop-arrow shop-desktop-next-arrow" aria-label="Next image" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 6L15 12L9 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </div>
+        {% endif %}
+      </div>
+      {% for block in section.blocks %}
+         {% if block.type == "product_benefits" and block.settings.benefits_position != "left" %}
+            <div class="shop-main-benefits benefits-right">
+              {% for i in (1..3) %}
+                {% capture text_key %}benefit_{{ i }}-text{% endcapture %}
+                {% capture svg_key %}benefit_{{ i }}-svg{% endcapture %}
+                {% capture image_key %}benefit_{{ i }}-Image{% endcapture %}
+                {% assign benefit_text = block.settings[text_key] %}
+                {% assign benefit_svg = block.settings[svg_key] %}
+                {% assign benefit_image = block.settings[image_key] %}
+
+                    <div class="shop-benefit-item">
+                      {% if benefit_image != blank %}
+                        <img 
+                          src="{{ benefit_image | img_url: '160x160' }}" 
+                          srcset="{{ benefit_image | img_url: '80x80' }} 1x,
+                                  {{ benefit_image | img_url: '160x160' }} 2x,
+                                  {{ benefit_image | img_url: '240x240' }} 3x"
+                          alt="{{ benefit_text | escape }}" 
+                          class="benefit-image"
+                          loading="lazy"
+                        >
+                      {% elsif benefit_svg != blank %}
+                        <div class="benefit-icon">{{ benefit_svg }}</div>
+                      {% endif %}
+                      {% if benefit_text != blank %}
+                        <div class="benefit-text">{{ benefit_text }}</div>
+                      {% endif %}
+                    </div>
+              {% endfor %}
+            </div>
+      {% endif %}
+    {% endfor %}
+    </div>
+
+    
+
+    {% unless section.settings.thumbnails_left_column_desktop %}
+      <div class="shop-thumbnails-outer{% if section.settings.hide_thumbnails_mobile %} hide-mobile{% endif %}">
+        <div class="shop-thumbnails-wrapper shop-match-image-width{% if section.settings.show_mobile_arrows and section.settings.mobile_arrow_placement == 'below' and product.media.size > 1 and section.settings.hide_thumbnails == false %} has-mobile-arrows{% endif %}">
+          <!-- Mobile arrows at start of thumbnails (when placement is below and thumbnails are visible) -->
+          {% if section.settings.show_mobile_arrows and section.settings.mobile_arrow_placement == 'below' and product.media.size > 1 and section.settings.hide_thumbnails == false %}
+            <button class="shop-mobile-arrow shop-mobile-arrow-in-thumbnails shop-mobile-prev-arrow" aria-label="Previous image" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 6L9 12L15 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          {% endif %}
+
+          <div class="shop-thumbnails {% if show_product_variants != false and current_variant != false %}toggle-product-variants{% endif %}{% if section.settings.mobile_thumbnails_2x2_grid and section.settings.show_mobile_arrows == false %} mobile-2x2-grid{% endif %}" id="thumbnail-container">
+            {% for media in product.media %}
+              <div
+                class="shop-thumbnail page-fade-in {% if forloop.first %}active{% endif %} {% if show_product_variants != false and current_variant != false and unmatched_variant_media contains media.id %}visually-hidden{% endif %} {% if current_variant_media_id == media.id %}current-variant-media{% endif %}"
+                style="animation-delay: {{ forloop.index0 | times: 0.1 | plus: 0.3 }}s;"
+                data-target="shop-image{{ forloop.index }}"
+                data-index="{{ forloop.index0 }}"
+                data-media-id="{{ media.id }}"
+              >
+                <div class="thumb-square">
+                  <img
+                    src="{{ media | img_url: '200x', scale: 2 }}"
+                    alt="{{ media.alt | escape }}"
+                    loading="lazy"
+                    draggable="false"
+                    data-media-id="{{ media.id }}" width="" height=""
+                  >
+
+                  {% if media.media_type == 'video' or media.media_type == 'external_video' %}
+                    <span class="thumbnail-video-icon" aria-hidden="true">
+                      {{- 'icon-play.svg' | inline_asset_content -}}
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Mobile arrows at end of thumbnails (when placement is below and thumbnails are visible) -->
+          {% if section.settings.show_mobile_arrows and section.settings.mobile_arrow_placement == 'below' and product.media.size > 1 and section.settings.hide_thumbnails == false %}
+            <button class="shop-mobile-arrow shop-mobile-arrow-in-thumbnails shop-mobile-next-arrow" aria-label="Next image" tabindex="0">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 6L15 12L9 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            </button>
+          {% endif %}
+        </div>
+
+        <div class="shop-thumbnail-indicators" id="thumbnail-indicators"></div>
+      </div>
+    {% endunless %}
+
+    <!-- Navigation dots (shown when thumbnails are hidden) -->
+    {% if section.settings.hide_thumbnails and product.media.size > 1 %}
+      <div class="shop-dots-navigation">
+        {% for media in product.media %}
+          <span class="shop-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.index0 }}" tabindex="0" role="button" aria-label="View image {{ forloop.index }}"></span>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Navigation dots for mobile when thumbnails are hidden on mobile -->
+    {% if section.settings.hide_thumbnails_mobile and product.media.size > 1 %}
+      <div class="shop-dots-navigation mobile-only-dots">
+        {% for media in product.media %}
+          <span class="shop-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.index0 }}" tabindex="0" role="button" aria-label="View image {{ forloop.index }}"></span>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Mobile navigation arrows (below dots when thumbnails are hidden) -->
+    {% comment %} Mobile arrows show when mobile arrows are enabled AND placement is below AND thumbnails are hidden AND there are multiple media items {% endcomment %}
+    {% assign thumbnails_hidden = false %}
+    {% if section.settings.hide_thumbnails or section.settings.hide_thumbnails_mobile %}
+      {% assign thumbnails_hidden = true %}
+    {% endif %}
+    {% if section.settings.show_mobile_arrows and section.settings.mobile_arrow_placement == 'below' and thumbnails_hidden and product.media.size > 1 %}
+      <div class="shop-mobile-arrows shop-mobile-arrows-below">
+        <button class="shop-mobile-arrow shop-mobile-prev-arrow" aria-label="Previous image" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 6L9 12L15 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <button class="shop-mobile-arrow shop-mobile-next-arrow" aria-label="Next image" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 6L15 12L9 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+    {% endif %}
+
+    <!-- Desktop navigation arrows (below image) - LEGACY FALLBACK -->
+    {% comment %} Show desktop arrows when enabled, placement is NOT overlaid or below, and there are multiple images (fallback for undefined placement) {% endcomment %}
+    {% if section.settings.show_desktop_arrows and section.settings.desktop_arrow_placement != 'overlaid' and section.settings.desktop_arrow_placement != 'below' and product.media.size > 1 %}
+      <div class="shop-desktop-arrows">
+        <button class="shop-desktop-arrow shop-desktop-prev-arrow" aria-label="Previous image" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 6L9 12L15 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <button class="shop-desktop-arrow shop-desktop-next-arrow" aria-label="Next image" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 6L15 12L9 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+    {% endif %}
+
+    <!-- Desktop navigation arrows (below thumbnails/dots) -->
+    {% comment %} Desktop arrows show when desktop arrows are enabled AND placement is below AND there are multiple media items {% endcomment %}
+    {% if section.settings.show_desktop_arrows and section.settings.desktop_arrow_placement == 'below' and product.media.size > 1 %}
+      <div class="shop-desktop-arrows shop-desktop-arrows-below">
+        <button class="shop-desktop-arrow shop-desktop-prev-arrow" aria-label="Previous image" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 6L9 12L15 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <button class="shop-desktop-arrow shop-desktop-next-arrow" aria-label="Next image" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 6L15 12L9 18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<style>
+  /* Main product image border radius */
+  .shop-main-image,
+  .shop-main-image img,
+  .shop-image-zoom-wrapper,
+  .shop-video {
+    border-radius: {{ section.settings.main_image_border_radius | default: 0 }}px !important;
+  }
+
+  /* Thumbnail border radius */
+  .shop-thumbnail,
+  .shop-thumbnail img,
+  .shop-thumbnail .thumb-square {
+    border-radius: {{ section.settings.thumbnail_border_radius | default: 0 }}px !important;
+  }
+
+  {% for block in section.blocks %}
+  {% if block.type == "product_benefits"  %}
+  
+  /* Remove horizontal padding from gallery wrapper when product benefits block is added */
+  .shop-carousel-container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .shop-product-carousel {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Adjust section padding - using double selector for higher specificity */
+  .shop-product-section.shop-product-section {
+    padding: 10px 2px !important;
+  }
+
+  /* Add horizontal padding to product info section (below gallery) */
+  .shop-product-info {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  @media (max-width: 767px) {
+    .shop-carousel-container {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .shop-product-section.shop-product-section {
+      padding: 10px 2px !important;
+    }
+    
+    .shop-product-info {
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+    }
+  }
+
+  .shop-main-image-wrapper {
+    display: grid;
+    {% if block.settings.benefits_position == "left" %}
+    grid-template-columns: 25% 1fr; /* Benefits left + image right */
+    {% else %}
+    grid-template-columns: 1fr 25%; /* Image left + benefits right */
+    {% endif %}
+    gap: 3px;
+    align-items: stretch;
+  }
+
+  {% if block.settings.benefits_position == "left" %}
+  .shop-main-benefits.benefits-left {
+    order: 1;
+  }
+  .shop-image-container {
+    order: 2;
+  }
+  {% else %}
+  .shop-image-container {
+    order: 1;
+  }
+  .shop-main-benefits.benefits-right {
+    order: 2;
+  }
+  {% endif %}
+
+  .shop-main-benefits {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 3px;
+    height: 100%;
+    align-self: stretch;
+  }
+
+  /* Ensure grid layout is maintained on mobile */
+  @media screen and (max-width: 768px) {
+    .shop-main-image-wrapper {
+      display: grid !important;
+      {% if block.settings.benefits_position == "left" %}
+      grid-template-columns: 25% 1fr;
+      {% else %}
+      grid-template-columns: 1fr 25%;
+      {% endif %}
+      gap: 3px;
+      padding: 0 0px;
+      align-items: stretch;
+    }
+
+    .shop-main-benefits {
+      height: 100%;
+      min-height: 100%;
+    }
+
+    .shop-image-container {
+      height: 100%;
+      min-height: 100%;
+    }
+  }
+
+  .shop-benefit-item {
+    background: {{  block.settings.benefits_background_color }};
+    border-radius: {{  block.settings.benefits_border_radius | append: "px" }};
+    flex: 1 1 0;
+    min-height: 0;
+    padding: {{ block.settings.benefit_padding_desktop | default: 10 }}px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: solid {{ block.settings.benefits_border_length | append: "px" }} {{ block.settings.benefits_border_color}};
+  }
+
+  @media screen and (max-width: 768px) {
+    .shop-benefit-item {
+      padding: {{ block.settings.benefit_padding_mobile | default: 8 }}px;
+    }
+  }
+
+  .shop-benefit-item svg {
+  width: {{ block.settings.icon_size_desktop | default: 48 }}px;
+  height: {{ block.settings.icon_size_desktop | default: 48 }}px;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  shape-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Version mobile */
+@media screen and (max-width: 768px) {
+  .shop-benefit-item svg {
+    width: {{ block.settings.icon_size_mobile | default: 32 }}px;
+    height: {{ block.settings.icon_size_mobile | default: 32 }}px;
+  }
+}
+
+  .benefit-icon {
+    font-size: {{ block.settings.icon_size_desktop | default: 48 }}px;
+    margin-bottom: 8px;
+  }
+
+  @media screen and (max-width: 768px) {
+    .benefit-icon {
+      font-size: {{ block.settings.icon_size_mobile | default: 32 }}px;
+    }
+  }
+
+  .benefit-text {
+    font-size: {{ block.settings.text_size_desktop | default: 14 }}px;
+    line-height: {{ block.settings.text_line_height_desktop | default: 1.4 }};
+    font-weight: 500;
+    color: {{  block.settings.benefits-color_text }};
+  }
+
+  @media screen and (max-width: 768px) {
+    .benefit-text {
+      font-size: {{ block.settings.text_size_mobile | default: 12 }}px;
+      line-height: {{ block.settings.text_line_height_mobile | default: 1.3 }};
+    }
+  }
+  
+  .benefit-image {
+    width: {{ block.settings.icon_size_desktop | default: 48 }}px;
+    height: {{ block.settings.icon_size_desktop | default: 48 }}px;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  @media screen and (max-width: 768px) {
+    .benefit-image {
+      width: {{ block.settings.icon_size_mobile | default: 32 }}px;
+      height: {{ block.settings.icon_size_mobile | default: 32 }}px;
+    }
+  }
+{% endif %}
+{% endfor %}
+    
+    
+  }
+  {% if hide_video_controls %}
+  .shop-video:not([controls]) {
+    cursor: pointer;
+  }
+  
+  .shop-video:not([controls])::-webkit-media-controls-panel {
+    display: none !important;
+    -webkit-appearance: none;
+  }
+  
+  .shop-video:not([controls])::-webkit-media-controls-play-button {
+    display: none !important;
+    -webkit-appearance: none;
+  }
+  
+  .shop-video:not([controls])::-webkit-media-controls-start-playback-button {
+    display: none !important;
+    -webkit-appearance: none;
+  }
+  
+  /* Hide YouTube controls via iframe parameters */
+  iframe.shop-video {
+    pointer-events: {% if hide_video_controls %}none{% else %}auto{% endif %};
+  }
+  {% endif %}
+
+  /* Load-in Animation */
+  .page-fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+{% if enable_image_zoom %}
+<style>
+  .shop-image-zoom-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    cursor: zoom-in;
+    opacity: 0;
+    pointer-events: none;
+    border-radius: var(--product-image-border-radius) !important;
+  }
+
+  .shop-image-zoom-wrapper.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .image-zoom-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: var(--zoom-bg-image);
+    background-repeat: no-repeat;
+    background-size: 250%;
+    background-position: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+  }
+
+  .image-zoom-enabled:hover .image-zoom-overlay {
+    opacity: 1;
+  }
+
+  .image-zoom-enabled:hover .shop-main-image {
+    opacity: 0;
+  }
+
+  .shop-main-image {
+    transition: opacity 0.3s ease;
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: var(--product-image-border-radius) !important;
+  }
+
+  
+
+</style>
+
+<script>
+window.enableAutoplay = {{ enable_autoplay_video | json }};
+
+{% if enable_image_zoom %}
+document.addEventListener('DOMContentLoaded', function() {
+  const zoomWrappers = document.querySelectorAll('.image-zoom-enabled');
+  
+  zoomWrappers.forEach(function(wrapper) {
+    const img = wrapper.querySelector('.shop-main-image');
+    const overlay = wrapper.querySelector('.image-zoom-overlay');
+    
+    if (!img || !overlay) return;
+    
+    // Set the zoom background image
+    const zoomSrc = img.getAttribute('data-zoom-src') || img.src;
+    overlay.style.setProperty('--zoom-bg-image', `url(${zoomSrc})`);
+    
+    wrapper.addEventListener('mousemove', function(e) {
+      const rect = wrapper.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // Calculate percentages
+      const xPercent = (x / rect.width) * 100;
+      const yPercent = (y / rect.height) * 100;
+      
+      // Set background position to follow mouse
+      overlay.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
+    });
+    
+    wrapper.addEventListener('mouseleave', function() {
+      // Reset position when mouse leaves
+      overlay.style.backgroundPosition = 'center';
+    });
+  });
+});
+{% endif %}
+</script>
+{% endif %}

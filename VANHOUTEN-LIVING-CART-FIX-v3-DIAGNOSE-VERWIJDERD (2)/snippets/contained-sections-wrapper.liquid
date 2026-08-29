@@ -1,0 +1,75 @@
+{% comment %}
+  Contained Sections Wrapper
+
+  Usage in sections:
+  {% render 'contained-sections-wrapper', section: section %}
+    <!-- Your section content here -->
+  {% endrender %}
+
+  Or for opening/closing separately:
+  {% render 'contained-sections-wrapper', section: section, action: 'open' %}
+  <!-- Your section content here -->
+  {% render 'contained-sections-wrapper', action: 'close' %}
+{% endcomment %}
+
+{% liquid
+  assign use_contained = false
+  assign container_classes = ''
+
+  if settings.enable_contained_sections and section.settings.use_contained_section
+    assign use_contained = true
+    assign container_classes = 'contained-section'
+
+    # Add size variant class
+    if section.settings.contained_section_size != 'default' and section.settings.contained_section_size != blank
+      assign container_classes = container_classes | append: ' contained-section--' | append: section.settings.contained_section_size
+    endif
+
+    # Add style variant class
+    if section.settings.contained_section_style != 'default' and section.settings.contained_section_style != blank
+      assign container_classes = container_classes | append: ' contained-section--' | append: section.settings.contained_section_style
+    endif
+
+    # Add border variant class
+    if section.settings.contained_section_border != 'default' and section.settings.contained_section_border != blank
+      assign container_classes = container_classes | append: ' contained-section--' | append: section.settings.contained_section_border
+    endif
+
+    # Add shadow variant class
+    if section.settings.contained_section_shadow != 'default' and section.settings.contained_section_shadow != blank
+      assign container_classes = container_classes | append: ' contained-section--' | append: section.settings.contained_section_shadow
+    endif
+
+    # Add radius variant class
+    if section.settings.contained_section_radius != 'default' and section.settings.contained_section_radius != blank
+      assign container_classes = container_classes | append: ' contained-section--' | append: section.settings.contained_section_radius
+    endif
+
+    # Add no-hover class if hover is disabled
+    if section.settings.contained_section_disable_hover
+      assign container_classes = container_classes | append: ' contained-section--no-hover'
+    endif
+  endif
+%}
+
+{% if action == 'open' or action == blank %}
+  {% if use_contained %}
+    <div class="{{ container_classes }}">
+  {% endif %}
+{% endif %}
+
+{% if action == 'close' %}
+  {% if use_contained %}
+    </div>
+  {% endif %}
+{% endif %}
+
+{% unless action %}
+  {% if use_contained %}
+    <div class="{{ container_classes }}">
+      {{ content }}
+    </div>
+  {% else %}
+    {{ content }}
+  {% endif %}
+{% endunless %}

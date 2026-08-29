@@ -1,0 +1,2713 @@
+{%- liquid 
+	assign path = request.path
+	assign is_product_page = false
+	assign title = ''
+
+	if path contains 'pages'
+		assign path = path | replace: '/pages', ''
+		assign title = page.title
+	endif
+
+	if path contains 'products'
+		assign is_product_page = true
+		assign product_collection = product.collections.first
+		assign title = product.title
+	endif
+-%}
+
+{%- style -%}
+	#shopify-section-{{ section.id }} {
+		padding-top: 50px;
+		padding-bottom: 50px;
+		background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.section_background_color }}{% endif %};
+	}
+
+	/* Global Button Color Override */
+	{%- liquid
+		if section.settings.use_theme_colors
+			assign button_color = settings.global_section_accent_1_color
+		else
+			assign button_color = section.settings.global_button_color
+		endif
+		assign darker_color = button_color | color_darken: 15
+	-%}
+	{%- if button_color != "#19bdff" -%}
+		#shopify-section-{{ section.id }} .sidebar-product-link,
+		#shopify-section-{{ section.id }} .content-button {
+			background-color: {{ button_color }} !important;
+			border-bottom-color: {{ darker_color }} !important;
+		}
+	{%- endif -%}
+
+	#shopify-section-{{ section.id }} .heading-block h1,
+	#shopify-section-{{ section.id }} .heading-block h2,
+	#shopify-section-{{ section.id }} .heading-block h3,
+	#shopify-section-{{ section.id }} .heading-block h4,
+	#shopify-section-{{ section.id }} .heading-block h5,
+	#shopify-section-{{ section.id }} .heading-block h6 {
+		margin: 0;
+		letter-spacing: var(--letter-spacing-heading);
+	}
+
+	#shopify-section-{{ section.id }} .breadcrumbs {
+		margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+		color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.breadcrumb_color }}{% endif %};
+		letter-spacing: var(--letter-spacing-body);
+	}
+
+	#shopify-section-{{ section.id }} .breadcrumbs a {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	#shopify-section-{{ section.id }} .section-main {
+		display: grid;
+		grid-template-columns: minmax(0, calc(100% - var(--side-bar-width) - 125px)) minmax(0, calc(var(--side-bar-width) + 25px));
+		gap: 10px;
+		max-width: calc(100% - 50px);
+		margin: 0 auto;
+	}
+
+	#shopify-section-{{ section.id }} .section-main:not([style*="--side-bar-width"]) {
+		grid-template-columns: 1fr;
+		max-width: calc(100% - 100px);
+	}
+
+	#shopify-section-{{ section.id }} .section-content {
+		width: 100%;
+	}
+
+	#shopify-section-{{ section.id }} .section-sidebar {
+		background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.sidebar_background_color }}{% endif %};
+		padding: 20px;
+		border-radius: 8px;
+		position: sticky;
+		top: 20px;
+		align-self: flex-start;
+		max-height: calc(100vh - 40px);
+		overflow-y: auto;
+	}
+
+	#shopify-section-{{ section.id }} .sidebar-featured-product {
+		margin-bottom: 30px;
+	}
+
+	#shopify-section-{{ section.id }} .sidebar-featured-product h3 {
+		font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    margin-bottom: 10px;
+		letter-spacing: var(--letter-spacing-heading);
+	}
+
+	#shopify-section-{{ section.id }} .sidebar-featured-product .image-container {
+		margin-bottom: 15px;
+	}
+
+	  #shopify-section-{{ section.id }} .sidebar-product-link {
+    display: block;
+    text-align: center;
+    padding: 10px 20px;
+    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.sidebar_button_bg_color }}{% endif %};
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.sidebar_button_text_color }}{% endif %};
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 19px;
+    font-weight: 700;
+    border-bottom: 4px solid #0b94cb;
+		letter-spacing: var(--letter-spacing-body);
+	}
+
+	#shopify-section-{{ section.id }} .sidebar-rating {
+		background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.rating_background_color }}{% endif %};
+	}
+
+	#shopify-section-{{ section.id }} .sidebar-rating h4 {
+		padding: 12px 0;
+    text-align: center;
+    margin: 0;
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.sidebar_title_color }}{% endif %};
+    border-bottom: 1px solid #dfdfdf;
+    font-size: 20px;
+		letter-spacing: var(--letter-spacing-heading);
+	}
+
+	#shopify-section-{{ section.id }} .ratings-by-star {
+		padding: 10px;
+    margin-bottom: 20px;
+	}
+
+	#shopify-section-{{ section.id }} .total-rating {
+		display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 17px;
+    padding: 12px 0;
+		letter-spacing: var(--letter-spacing-body);
+	}
+
+	#shopify-section-{{ section.id }} .ratings-by-star .stars-wrapper {
+		display: flex;
+    gap: 3px;
+	}
+
+	#shopify-section-{{ section.id }} .ratings-by-star .stars-wrapper > svg {
+		width: 16px;
+    height: auto;
+	}
+
+	#shopify-section-{{ section.id }} .ratings-by-star .ratings {
+		display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+	}
+
+	#shopify-section-{{ section.id }} .star-bar {
+		display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr) minmax(0, 35px);
+    gap: 5px;
+    justify-content: space-between;
+		letter-spacing: var(--letter-spacing-body);
+	}
+
+	#shopify-section-{{ section.id }} .star-bar > div:last-child {
+		font-weight: 700 !important;
+	}
+
+	#shopify-section-{{ section.id }} .review-rating-text {
+		font-weight: 700 !important;
+	}
+
+	#shopify-section-{{ section.id }} .rating-bar {
+		position: relative;
+    flex: 1;
+    height: 25px;
+    border: 1px solid #dedede;
+	}
+
+	#shopify-section-{{ section.id }} .rating-progress {
+		display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.rating_bar_color }}{% endif %};
+    width: var(--bar-progress);
+	}
+
+	#shopify-section-{{ section.id }} .features {
+		display: flex;
+    flex-direction: column;
+    gap: 0;
+		padding: 15px;
+		border: 1px solid #e0e0e0;
+		border-radius: 0px;
+		background-color: {{ section.settings.rating_background_color }};
+	}
+
+	#shopify-section-{{ section.id }} .feature {
+		display: flex;
+		align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+		letter-spacing: var(--letter-spacing-body);
+		padding: 12px 0;
+		border-bottom: 1px solid #f0f0f0;
+	}
+
+	#shopify-section-{{ section.id }} .feature:last-child {
+		border-bottom: none;
+	}
+
+	#shopify-section-{{ section.id }} .feature-title {
+		font-weight: var(--font-weight-semibold);
+		letter-spacing: var(--letter-spacing-body);
+	}
+
+	#shopify-section-{{ section.id }} .feature-rating {
+		display: flex;
+    align-items: center;
+    gap: 10px;
+	}
+
+	#shopify-section-{{ section.id }} .feature-rating .stars-wrapper {
+		display: flex;
+		gap: 3px;
+	}
+
+	#shopify-section-{{ section.id }} .feature-rating .stars-wrapper > svg {
+		width: 16px;
+		height: auto;
+	}
+
+	#shopify-section-{{ section.id }} .section-block {
+		margin-bottom: 20px;
+	}
+
+	#shopify-section-{{ section.id }} .section-block:last-child {
+		margin-bottom: 0;
+	}
+
+	#shopify-section-{{ section.id }} .text-block {
+		letter-spacing: var(--letter-spacing-body);
+	}
+
+	#shopify-section-{{ section.id }} .text-block > *:first-child {
+		margin-top: 0;
+	}
+
+	#shopify-section-{{ section.id }} .text-block > *:last-child {
+		margin-bottom: 0;
+	}
+
+	#shopify-section-{{ section.id }} .rating-block {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	#shopify-section-{{ section.id }} .rating-block .stars-wrapper {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+	}
+
+	#shopify-section-{{ section.id }} .image-block {
+		display: flex;
+	}
+
+	#shopify-section-{{ section.id }} .image-container {
+		display: flex;
+	}
+
+	#shopify-section-{{ section.id }} .image-container img {
+		width: 100%;
+		height: auto;
+	}
+
+	.author-block {
+		display: flex;
+    align-items: center;
+    gap: 10px;
+		letter-spacing: var(--letter-spacing-body);
+	}
+
+	.author-image-container {
+		display: flex;
+    border-radius: 99999px;
+    overflow: hidden;
+    width: 50px;
+    height: 50px;
+	}
+
+	.author-image-container img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.author-meta {
+		display: flex;
+    flex-direction: column;
+    gap: 5px;
+	}
+
+	.author-info {
+		display: flex;
+    align-items: center;
+	}
+
+	.author-date-container {
+		padding-top: 3px;
+		border-top: 1px solid #e0e0e0;
+	}
+
+	.author-name {
+		display: flex;
+    align-items: center;
+    white-space: nowrap;
+    gap: 7px;
+	}
+
+	.author-name > svg {
+		width: 16px;
+	}
+
+	#shopify-section-{{ section.id }} .basic-text-block {
+		width: 100%;
+	}
+
+	#shopify-section-{{ section.id }} .basic-text-content {
+		letter-spacing: var(--letter-spacing-body);
+	}
+
+	#shopify-section-{{ section.id }} .basic-text-content h1,
+	#shopify-section-{{ section.id }} .basic-text-content h2,
+	#shopify-section-{{ section.id }} .basic-text-content h3,
+	#shopify-section-{{ section.id }} .basic-text-content h4,
+	#shopify-section-{{ section.id }} .basic-text-content h5,
+	#shopify-section-{{ section.id }} .basic-text-content h6 {
+		letter-spacing: var(--letter-spacing-heading);
+	}
+
+	#shopify-section-{{ section.id }} .basic-text-img {
+		width: 100%;
+		height: auto;
+		border-radius: 8px;
+	}
+
+	#shopify-section-{{ section.id }} .basic-text-image {
+		text-align: center;
+	}
+
+	#shopify-section-{{ section.id }} .button-block {
+		display: flex;
+		width: 100%;
+	}
+
+	#shopify-section-{{ section.id }} .content-button-link {
+		display: block;
+    text-align: center;
+    padding: 10px 20px;
+    background-color: {{ section.settings.sidebar_button_bg_color }};
+    color: {{ section.settings.sidebar_button_text_color }};
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 19px;
+    font-weight: 700;
+    border-bottom: 4px solid #0b94cb;
+		letter-spacing: var(--letter-spacing-body);
+		transition: all 0.3s ease;
+	}
+
+	#shopify-section-{{ section.id }} .content-button-link:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+	}
+
+	#shopify-section-{{ section.id }} .button-block-full-width {
+		display: block;
+		width: 100%;
+	}
+
+	#shopify-section-{{ section.id }} .content-button-full-width {
+		width: 100%;
+		display: block;
+	}
+
+	@media screen and (max-width: 1105px) {
+		#shopify-section-{{ section.id }} .section-main {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 30px;
+		}
+
+		#shopify-section-{{ section.id }} .section-sidebar {
+			position: static;
+			max-height: none;
+			overflow-y: visible;
+		}
+	}
+
+	@media screen and (max-width: 768px) {
+		#shopify-section-{{ section.id }} .section-main {
+			max-width: none;
+		}
+		
+		{% if section.settings.hide_sidebar_mobile %}
+		/* Hide sidebar on mobile when setting is enabled */
+		#shopify-section-{{ section.id }} .section-sidebar {
+			display: none !important;
+		}
+		
+		/* Make content full width when sidebar is hidden */
+		#shopify-section-{{ section.id }} .section-main {
+			grid-template-columns: 1fr !important;
+		}
+		{% endif %}
+		
+		/* Responsive text sizing for fixed elements */
+		#shopify-section-{{ section.id }} .sidebar-featured-product h3 {
+			font-size: 18px;
+		}
+		
+		#shopify-section-{{ section.id }} .sidebar-product-link {
+			font-size: 17px;
+		}
+		
+		#shopify-section-{{ section.id }} .sidebar-rating h4 {
+			font-size: 18px;
+		}
+		
+		#shopify-section-{{ section.id }} .star-bar {
+			font-size: 15px;
+		}
+				
+		#shopify-section-{{ section.id }} .content-button {
+			font-size: 17px;
+		}
+	}
+
+	/* Sidebar Color Customization */
+	{%- assign sidebar_block = section.blocks | where: 'type', 'sidebar' | first -%}
+	{%- if sidebar_block -%}
+		{%- liquid
+			assign has_custom_colors = false
+			if sidebar_block.settings.sidebar_background_color != "#ffffff" or sidebar_block.settings.sidebar_text_color != "#000000" or sidebar_block.settings.sidebar_title_color != "#000000" or sidebar_block.settings.rating_bar_color != "#19bdff" or sidebar_block.settings.rating_bar_background != "#f0f0f0" or sidebar_block.settings.feature_border_color != "#f0f0f0" or sidebar_block.settings.use_progress_gradient or sidebar_block.settings.rating_star_color != "#F1C40F" or sidebar_block.settings.rating_empty_star_color != "#e0e0e0" or sidebar_block.settings.feature_star_color != "#F1C40F"
+				assign has_custom_colors = true
+			endif
+		-%}
+		
+		{%- if has_custom_colors -%}
+			#sidebar-{{ sidebar_block.id }} {
+				{%- if sidebar_block.settings.sidebar_background_color != "#ffffff" -%}
+					background-color: {{ sidebar_block.settings.sidebar_background_color }};
+				{%- endif -%}
+				{%- if sidebar_block.settings.sidebar_text_color != "#000000" -%}
+					color: {{ sidebar_block.settings.sidebar_text_color }};
+				{%- endif -%}
+			}
+			
+			{%- if sidebar_block.settings.sidebar_title_color != "#000000" -%}
+				#sidebar-{{ sidebar_block.id }} .sidebar-rating h4 {
+					color: {{ sidebar_block.settings.sidebar_title_color }};
+				}
+			{%- endif -%}
+			
+			{%- if sidebar_block.settings.use_progress_gradient -%}
+				#sidebar-{{ sidebar_block.id }} .rating-progress {
+					background: linear-gradient(90deg, {{ sidebar_block.settings.progress_gradient_start }} 0%, {{ sidebar_block.settings.progress_gradient_end }} 100%);
+				}
+			{%- elsif sidebar_block.settings.rating_bar_color != "#19bdff" -%}
+				#sidebar-{{ sidebar_block.id }} .rating-progress {
+					background-color: {{ sidebar_block.settings.rating_bar_color }};
+				}
+			{%- endif -%}
+			
+			{%- if sidebar_block.settings.rating_bar_background != "#f0f0f0" -%}
+				#sidebar-{{ sidebar_block.id }} .rating-bar {
+					background-color: {{ sidebar_block.settings.rating_bar_background }};
+				}
+			{%- endif -%}
+			
+
+			
+			{%- if sidebar_block.settings.feature_border_color != "#f0f0f0" -%}
+				#sidebar-{{ sidebar_block.id }} .features {
+					border-color: {{ sidebar_block.settings.feature_border_color }};
+				}
+				#sidebar-{{ sidebar_block.id }} .feature {
+					border-bottom-color: {{ sidebar_block.settings.feature_border_color }};
+				}
+			{%- endif -%}
+		{%- endif -%}
+	{%- endif -%}
+{%- endstyle -%}
+
+<div class="inner-con page-width">
+	{%- assign has_sidebar = section.blocks | where: 'type', 'sidebar' | first -%}
+	<div class="section-main" {% if has_sidebar %}style="--side-bar-width: {{ section.settings.sidebar_width }}%;"{% endif %} >
+		<div class="section-content">
+			{%- if section.settings.show_breadcrumb -%}
+				<div class="breadcrumbs">
+					<a href="{{ routes.root_url }}" class="breadcrumb-link">
+						{{ section.settings.breadcrumb_home_text }}
+					</a>
+					
+					{%- if section.settings.breadcrumb_second_text != blank -%}
+						<span class="breadcrumb-separator">{{ section.settings.breadcrumb_separator }}</span>
+						{%- if section.settings.breadcrumb_second_url != blank -%}
+							<a href="{{ section.settings.breadcrumb_second_url }}" class="breadcrumb-link">
+								{{ section.settings.breadcrumb_second_text }}
+							</a>
+						{%- else -%}
+							<span class="breadcrumb-link">{{ section.settings.breadcrumb_second_text }}</span>
+						{%- endif -%}
+					{%- endif -%}
+					
+					{%- if section.settings.breadcrumb_current_text != blank -%}
+						<span class="breadcrumb-separator">{{ section.settings.breadcrumb_separator }}</span>
+						<span class="breadcrumb-link last-link">{{ section.settings.breadcrumb_current_text }}</span>
+					{%- endif -%}
+				</div>
+		{%- endif -%}
+		
+		{%- if section.blocks.size == 0 -%}
+			<div style="padding: 60px 20px; text-align: center; background: #f9f9f9; border: 2px dashed #ddd; border-radius: 8px; margin: 20px 0;">
+				<p style="font-size: 18px; color: #666; margin: 0 0 10px 0;">👋 This section is empty!</p>
+				<p style="font-size: 14px; color: #999; margin: 0;">Click "Add block" below to add content (headings, text, images, buttons, etc.) to your Content Sidebar section.</p>
+			</div>
+		{%- endif -%}
+		
+		{%- for block in section.blocks -%}
+			{%- liquid
+				assign this = block.settings
+				assign custom_styled = false
+
+				if this.padding_top > 0 or this.padding_bottom > 0 or this.padding_left > 0 or this.padding_right > 0
+					assign custom_styled = true
+				endif
+			-%}
+
+				{%- if custom_styled -%}
+					{%- style -%}
+						#{{ block.id }} {
+							padding: {{ this.padding_top }}px {{ this.padding_right }}px {{ this.padding_bottom }}px {{ this.padding_left }}px;
+						}
+					{%- endstyle -%}
+				{%- endif -%}
+
+				{%- case block.type -%}
+
+					{%- when 'heading' -%}
+						{%- liquid 
+							if this.custom_size or this.text_color != blank
+								assign custom_styled = true
+							endif
+						-%}
+
+						{%- if custom_styled -%}
+							{%- style -%}
+								#{{ block.id }} {{ this.tag }} {
+									{%- if this.custom_size -%}
+										font-size: {{ this.text_size }}px;
+									{%- endif -%}
+									{% if this.text_color != blank %}
+										color: {{ this.text_color }} !important;
+									{% endif %}
+								}
+								{%- if this.custom_size -%}
+									@media screen and (max-width: 768px) {
+										#{{ block.id }} {{ this.tag }} {
+											font-size: {{ this.text_size | times: 0.85 | round }}px;
+										}
+									}
+								{%- endif -%}
+							{%- endstyle -%}
+						{%- endif -%}
+						
+						<div 
+							{% if custom_styled %}id="{{ block.id }}"{% endif %} 
+							class="section-block heading-block" 
+							{{ block.shopify_attributes }}
+						>
+							<{{ this.tag }} class="{{ this.tag }}">
+								{{ this.heading }}
+							</{{ this.tag }}>
+						</div>
+
+					{%- when 'text' -%}
+						{%- liquid 
+							assign text = this.text
+							assign highlighted_texts = this.highlighted_texts | split: '|'
+
+							if this.custom_size or this.text_color != blank or this.highlighted_texts != blank
+								assign custom_styled = true
+							endif
+						-%}
+
+						{%- if this.highlighted_texts != blank -%}
+							{%- for highlighted_text in highlighted_texts -%}
+								{%- assign trimmed_text = highlighted_text | strip -%}
+								{%- if trimmed_text != blank -%}
+									{%- capture highlighted -%}
+										<span class="highlighted-text">{{ trimmed_text }}</span>
+									{%- endcapture -%}
+
+									{%- assign text = text | replace: highlighted_text, highlighted -%}
+								{%- endif -%}
+							{%- endfor -%}
+						{%- endif -%}
+
+						{%- if custom_styled -%}
+							{%- style -%}
+								#{{ block.id }} {
+									{%- if this.custom_size -%}
+										font-size: {{ this.text_size }}px;
+									{%- endif -%}
+									{%- if this.text_color != blank -%}
+										color: {{ this.text_color }} !important;
+									{%- endif -%}
+								}
+								{%- if this.custom_size -%}
+									@media screen and (max-width: 768px) {
+										#{{ block.id }} {
+											font-size: {{ this.text_size | times: 0.9 | round }}px;
+										}
+									}
+								{%- endif -%}
+
+								{%- if this.highlighted_texts != blank -%}
+									#{{ block.id }} .highlighted-text {
+										background-color: {{ this.hightlight_texts_color }};
+									}
+								{%- endif -%}
+							{%- endstyle -%}
+						{%- endif -%}
+						<div 
+							{% if custom_styled %}id="{{ block.id }}"{% endif %} 
+							class="section-block text-block" 
+							{{ block.shopify_attributes }}
+						>
+							{{ text }}
+						</div>
+					
+					{%- when 'rating' -%}
+						{%- liquid 
+							if this.star_size > 0 or this.custom_size or this.text_color != blank or this.star_color != "#F1C40F" or this.empty_star_color != "#e0e0e0"
+								assign custom_styled = true
+							endif
+						-%}
+
+						{%- if custom_styled -%}
+							{%- style -%}
+								#{{ block.id }} .stars-wrapper > svg {
+									width: {{ this.star_size }}px;
+									height: auto;
+								}
+								#{{ block.id }} .rating-block-text {
+									{%- if this.custom_size -%}
+										font-size: {{ this.text_size }}px;
+									{%- endif -%}
+									{%- if this.text_color != blank -%}
+										color: {{ this.text_color }} !important;
+									{%- endif -%}
+								}
+								{%- if this.custom_size -%}
+									@media screen and (max-width: 768px) {
+										#{{ block.id }} .rating-block-text {
+											font-size: {{ this.text_size | times: 0.9 | round }}px;
+											letter-spacing: var(--letter-spacing-body);
+										}
+									}
+								{%- endif -%}
+								{%- if this.star_color != "#F1C40F" -%}
+									#{{ block.id }} .stars-wrapper svg g rect {
+										fill: {{ this.star_color }};
+									}
+								{%- endif -%}
+								{%- if this.empty_star_color != "#e0e0e0" -%}
+									#{{ block.id }} .stars-wrapper svg path[stroke] {
+										stroke: {{ this.empty_star_color }};
+									}
+								{%- endif -%}
+							{%- endstyle -%}
+						{%- endif -%}
+
+						<div 
+							{% if custom_styled %}id="{{ block.id }}"{% endif %} 
+							class="section-block rating-block" 
+							{{ block.shopify_attributes }}
+						>
+							<div class="stars-wrapper">
+								{%- for i in (1..5) -%}
+									{%- liquid 
+										assign star_width = '100%'
+										assign modulo = this.rating | modulo: 1
+										assign target_index = this.rating | ceil
+										
+										if modulo > 0 and forloop.index == target_index
+											assign star_width = modulo | split: '.' | last | times: 10 | append: '%'
+										endif
+
+										if forloop.index > target_index
+											assign star_width = '0%'
+										endif
+									-%}
+									<svg width="{{ this.star_size }}" height="{{ this.star_size }}" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+										<defs>
+											<mask id="{{ block.id }}_mask0_306_6_{{ forloop.index }}" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1920">
+												<path d="M1915.918 737.475c-10.955-33.543-42.014-56.131-77.364-56.131h-612.029l-189.063-582.1v-.112C1026.394 65.588 995.335 43 959.984 43c-35.237 0-66.41 22.588-77.365 56.245L693.443 681.344H81.415c-35.35 0-66.41 22.588-77.365 56.131-10.955 33.544.79 70.137 29.478 91.03l495.247 359.831-189.177 582.212c-10.955 33.657 1.13 70.25 29.817 90.918 14.23 10.278 30.946 15.487 47.66 15.487 16.716 0 33.432-5.21 47.775-15.6l495.134-359.718 495.021 359.718c28.574 20.781 67.087 20.781 95.662.113 28.687-20.668 40.658-57.261 29.703-91.03l-189.176-582.1 495.36-359.83c28.574-20.894 40.433-57.487 29.364-91.03" fill="#F1C40F" fill-rule="evenodd"/>
+											</mask>
+										</defs>
+										<path d="M1915.918 737.475c-10.955-33.543-42.014-56.131-77.364-56.131h-612.029l-189.063-582.1v-.112C1026.394 65.588 995.335 43 959.984 43c-35.237 0-66.41 22.588-77.365 56.245L693.443 681.344H81.415c-35.35 0-66.41 22.588-77.365 56.131-10.955 33.544.79 70.137 29.478 91.03l495.247 359.831-189.177 582.212c-10.955 33.657 1.13 70.25 29.817 90.918 14.23 10.278 30.946 15.487 47.66 15.487 16.716 0 33.432-5.21 47.775-15.6l495.134-359.718 495.021 359.718c28.574 20.781 67.087 20.781 95.662.113 28.687-20.668 40.658-57.261 29.703-91.03l-189.176-582.1 495.36-359.83c28.574-20.894 40.433-57.487 29.364-91.03" stroke="{{ this.empty_star_color }}" stroke-width="10" fill="none" fill-rule="evenodd"/>
+										<g mask="url(#{{ block.id }}_mask0_306_6_{{ forloop.index }})">
+											<rect width="1920" height="1920" fill="{{ this.star_color }}" style="width: {{ star_width }};" />
+										</g>
+									</svg>
+								{%- endfor -%}
+							</div>
+							<div class="rating-block-text">
+								{{ this.text }}
+							</div>
+						</div>
+
+					{%- when 'image' -%}
+
+						{%- style -%}
+							#{{ block.id }} {
+								justify-content: {{ this.image_alignment }};
+							}
+
+							#{{ block.id }} .image-container {
+								{%- if this.image_width == 'custom' -%}
+									width: {{ this.custom_image_width }}%;
+								{%- endif -%}
+								{%- if this.custom_height -%}
+									height: {{ this.image_height }}px;
+								{%- endif -%}
+								{%- if this.image_radius -%}
+									border-radius: {{ this.image_radius }}px;
+								{%- endif -%}
+								overflow: hidden;
+								position: relative;
+							}
+
+							#{{ block.id }} .image-container img,
+							#{{ block.id }} .image-container video {
+								{%- if this.custom_height -%}
+									height: 100%;
+									object-fit: {{ this.image_size }};
+								{%- endif -%}
+								width: 100%;
+								display: block;
+							}
+
+							#{{ block.id }} .image-container video {
+								background-color: #000;
+							}
+						{%- endstyle -%}
+
+						<div 
+							id="{{ block.id }}" 
+							class="section-block image-block" 
+							{{ block.shopify_attributes }}
+						>
+							<div class="image-container">
+								{%- if this.content_type == 'video' and this.video -%}
+									{%- liquid
+										assign video_attributes = ''
+										if this.video_autoplay
+											assign video_attributes = video_attributes | append: ' autoplay muted'
+										endif
+										if this.video_loop
+											assign video_attributes = video_attributes | append: ' loop'
+										endif
+										if this.video_controls
+											assign video_attributes = video_attributes | append: ' controls'
+										endif
+									-%}
+									<video 
+										class="block-video" 
+										width="100%" 
+										height="auto"
+										preload="metadata"
+										playsinline
+										{{ video_attributes }}
+									>
+										{%- for source in this.video.sources -%}
+											<source src="{{ source.url }}" type="{{ source.mime_type }}">
+										{%- endfor -%}
+										<p>Your browser doesn't support HTML5 video. <a href="{{ this.video.sources[0].url }}">Download the video</a> instead.</p>
+									</video>
+								{%- elsif this.content_type == 'image' and this.image -%}
+									{{ this.image | image_url: width: 1200 | image_tag: class: 'block-image' }}
+								{%- elsif this.content_type == 'video' -%}
+									<div class="video-placeholder" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; min-height: 200px; color: #666;">
+										<p>Video placeholder - Upload a video file</p>
+									</div>
+								{%- else -%}
+									<img src="https://placehold.co/1200x628" width="1200" height="628" alt="image block placeholder" class="block-image" />
+								{%- endif -%}
+							</div>
+						</div>
+
+					{%- when 'video' -%}
+						{%- liquid
+							assign this = block.settings
+							assign custom_styled = false
+							if this.padding_top != 0 or this.padding_bottom != 0 or this.padding_left != 0 or this.padding_right != 0 or this.custom_height or this.video_radius != 0
+								assign custom_styled = true
+							endif
+						-%}
+
+						{%- if custom_styled -%}
+							{%- style -%}
+								#{{ block.id }} .video-block-wrapper {
+									padding-top: {{ this.padding_top }}px;
+									padding-bottom: {{ this.padding_bottom }}px;
+									padding-left: {{ this.padding_left }}px;
+									padding-right: {{ this.padding_right }}px;
+								}
+								#{{ block.id }} .video-container {
+									border-radius: {{ this.video_radius }}px;
+									overflow: hidden;
+									{% if this.custom_height %}
+										height: {{ this.video_height }}px;
+									{% else %}
+										height: auto;
+									{% endif %}
+								}
+								#{{ block.id }} .video-container video {
+									width: 100%;
+									{% if this.custom_height %}
+										height: {{ this.video_height }}px;
+										object-fit: {{ this.video_fit }};
+									{% else %}
+										height: auto;
+									{% endif %}
+									display: block;
+								}
+							{%- endstyle -%}
+						{%- endif -%}
+
+						<div
+							class="content-block video-block-wrapper"
+							{{ block.shopify_attributes }}
+							id="{{ block.id }}"
+						>
+						<div class="video-container">
+							{%- if this.video_shopify -%}
+								{%- liquid
+									comment
+										Sort sources by quality (highest to lowest) so browser picks best quality first
+										Shopify provides sources in order, but we'll ensure HD/high quality is prioritized
+									endcomment
+									assign sorted_sources = this.video_shopify.sources
+								-%}
+								<video
+									class="block-video"
+									{% if this.autoplay %}autoplay muted playsinline{% endif %}
+									{% if this.loop %}loop{% endif %}
+									{% if this.show_controls %}controls{% endif %}
+									preload="auto"
+									style="width: 100%; height: 100%; display: block;"
+								>
+									{%- comment -%}
+										List sources in order of quality preference
+										Browsers will select the first compatible source
+									{%- endcomment -%}
+									{%- for source in sorted_sources -%}
+										{%- liquid
+											comment
+												Only include sources based on quality preference
+												auto = all sources (browser picks best)
+												high = exclude low quality
+												medium = exclude extremes
+												low = prefer smaller files
+											endcomment
+											assign include_source = true
+											if this.video_quality == 'high'
+												if source.width < 1280
+													assign include_source = false
+												endif
+											elsif this.video_quality == 'medium'
+												if source.width < 854 or source.width > 1920
+													assign include_source = false
+												endif
+											elsif this.video_quality == 'low'
+												if source.width > 854
+													assign include_source = false
+												endif
+											endif
+										-%}
+										{%- if include_source -%}
+											<source src="{{ source.url }}" type="{{ source.mime_type }}">
+										{%- endif -%}
+									{%- endfor -%}
+									Your browser does not support the video tag.
+								</video>
+							{%- else -%}
+								<div class="video-placeholder" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; min-height: 200px; color: #666; border-radius: {{ this.video_radius }}px;">
+									<p>Upload a Shopify hosted video</p>
+								</div>
+							{%- endif -%}
+						</div>
+						</div>
+
+					{%- when 'author' -%}
+						{%- liquid 
+							assign custom_styled = false
+							if this.text_size != 16 or this.star_color != "#F1C40F" or this.empty_star_color != "#e0e0e0" or this.badge_color != "#19bdff"
+								assign custom_styled = true
+							endif
+						-%}
+
+						{%- if custom_styled -%}
+							{%- style -%}
+								#{{ block.id }} .author-name,
+								#{{ block.id }} .date {
+									font-size: {{ this.text_size }}px;
+								}
+								@media screen and (max-width: 768px) {
+									#{{ block.id }} .author-name,
+									#{{ block.id }} .date {
+										font-size: {{ this.text_size | times: 0.9 | round }}px;
+									}
+								}
+								#{{ block.id }} .author-name .name {
+									font-weight: 600 !important;
+								}
+								{%- if this.star_color != "#F1C40F" -%}
+									#{{ block.id }} .author-rating .stars-wrapper svg path {
+										fill: {{ this.star_color }};
+									}
+								{%- endif -%}
+								{%- if this.empty_star_color != "#e0e0e0" -%}
+									#{{ block.id }} .author-rating .stars-wrapper svg path[stroke] {
+										stroke: {{ this.empty_star_color }};
+									}
+								{%- endif -%}
+								{%- if this.badge_color != "#19bdff" -%}
+									#{{ block.id }} .author-badge svg path {
+										fill: {{ this.badge_color }};
+									}
+								{%- endif -%}
+							{%- endstyle -%}
+						{%- else -%}
+							{%- style -%}
+								#{{ block.id }} .author-name .name {
+									font-weight: 600 !important;
+								}
+							{%- endstyle -%}
+						{%- endif -%}
+
+						<div
+							id="{{ block.id }}"
+							class="section-block author-block"
+							{{ block.shopify_attributes }}
+						>
+							<div class="author-image-container">
+								{%- if this.author_image -%}
+									{{ this.author_image | image_url: width: 200 | image_tag: class: 'author-image' }}
+								{%- else -%}
+									<img src="https://placehold.co/50" width="100" height="100" alt="author image placeholder" class="author-image" />
+								{%- endif -%}
+							</div>
+							<div class="author-meta">
+								<div class="author-info">
+									<div class="author-name">
+										<span class="name">{{ this.author_name }}</span>
+										{%- if this.badge -%}
+											{%- if this.custom_badge -%}
+												{{ this.custom_badge | image_url: width: 200 | image_tag: class: "author-badge" }}
+											{%- else -%}
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" class="author-badge">
+													<path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z" fill="#19BDFF"/>
+												</svg>
+											{%- endif -%}
+										{%- endif -%}
+									</div>
+								</div>
+								<div class="author-date-container">
+									<div class="date">
+										{{ this.date }}
+									</div>
+								</div>
+							</div>
+						</div>
+
+					{%- when 'basic_text' -%}
+						{%- liquid 
+							assign content = this.content
+							assign highlighted_texts = this.highlighted_texts | split: '|'
+							assign custom_styled = false
+
+							if this.padding_top > 0 or this.padding_bottom > 0 or this.padding_left > 0 or this.padding_right > 0 or this.highlighted_texts != blank
+								assign custom_styled = true
+							endif
+						-%}
+
+						{%- if this.highlighted_texts != blank -%}
+							{%- for highlighted_text in highlighted_texts -%}
+								{%- assign trimmed_text = highlighted_text | strip -%}
+								{%- if trimmed_text != blank -%}
+									{%- capture highlighted -%}
+										<span class="highlighted-text">{{ trimmed_text }}</span>
+									{%- endcapture -%}
+
+									{%- assign content = content | replace: highlighted_text, highlighted -%}
+								{%- endif -%}
+							{%- endfor -%}
+						{%- endif -%}
+
+						{%- if custom_styled -%}
+							{%- style -%}
+								#{{ block.id }} {
+									padding: {{ this.padding_top }}px {{ this.padding_right }}px {{ this.padding_bottom }}px {{ this.padding_left }}px;
+								}
+
+								{%- if this.highlighted_texts != blank -%}
+									#{{ block.id }} .highlighted-text {
+										background-color: {{ this.highlight_texts_color }};
+									}
+								{%- endif -%}
+							{%- endstyle -%}
+						{%- endif -%}
+
+						<div 
+							{% if custom_styled %}id="{{ block.id }}"{% endif %} 
+							class="section-block basic-text-block" 
+							{{ block.shopify_attributes }}
+						>
+							{%- if this.image and this.image_position == 'above' -%}
+								<div class="basic-text-image" style="width: {{ this.image_width }}%; margin: 0 auto 20px;">
+									{{ this.image | image_url: width: 800 | image_tag: class: 'basic-text-img' }}
+								</div>
+							{%- endif -%}
+							
+							<div class="basic-text-content">
+								{{ content }}
+							</div>
+							
+							{%- if this.image and this.image_position == 'below' -%}
+								<div class="basic-text-image" style="width: {{ this.image_width }}%; margin: 20px auto 0;">
+									{{ this.image | image_url: width: 800 | image_tag: class: 'basic-text-img' }}
+								</div>
+							{%- endif -%}
+						</div>
+
+					{%- when 'button' -%}
+						{%- liquid 
+							assign custom_styled = false
+
+							if this.padding_top > 0 or this.padding_bottom > 0 or this.padding_left > 0 or this.padding_right > 0 or this.border_radius != 10 or this.button_icon != blank or this.button_vertical_padding != 10 or this.button_border_color != "#0b94cb" or this.use_global_button_style
+								assign custom_styled = true
+							endif
+						-%}
+
+						{%- if custom_styled -%}
+							{%- style -%}
+								#{{ block.id }} {
+									padding: {{ this.padding_top }}px {{ this.padding_right }}px {{ this.padding_bottom }}px {{ this.padding_left }}px;
+								}
+								{%- if this.border_radius != 10 -%}
+									#{{ block.id }} .content-button-link {
+										border-radius: {{ this.border_radius }}px;
+									}
+								{%- endif -%}
+								{%- if this.button_vertical_padding != 10 -%}
+									#{{ block.id }} .content-button-link {
+										padding-top: {{ this.button_vertical_padding }}px;
+										padding-bottom: {{ this.button_vertical_padding }}px;
+									}
+								{%- endif -%}
+								{%- if this.button_border_color != "#0b94cb" -%}
+									#{{ block.id }} .content-button-link {
+										border-bottom-color: {{ this.button_border_color }};
+									}
+								{%- endif -%}
+								{%- if this.button_icon != blank -%}
+									#{{ block.id }} .button-icon {
+										width: {{ this.icon_size }}px;
+										height: {{ this.icon_size }}px;
+										display: inline-block;
+										vertical-align: middle;
+									}
+									#{{ block.id }} .button-icon svg {
+										width: 100%;
+										height: 100%;
+									}
+									#{{ block.id }} .button-content {
+										display: flex;
+										align-items: center;
+										justify-content: center;
+										gap: 8px;
+									}
+								{%- endif -%}
+								
+								/* Global Button Style Override */
+								{%- if this.use_global_button_style -%}
+									#{{ block.id }} .content-button-link {
+										background-color: var(--global-button-bg-color, {{ settings.global_section_accent_1_color }}) !important;
+										color: var(--global-button-text-color, {{ settings.global_section_background_color }}) !important;
+										border-bottom-color: var(--global-button-border-color, {{ settings.global_section_accent_1_color | color_darken: 15 }}) !important;
+										border-radius: var(--global-button-radius, 8px) !important;
+										font-size: var(--global-button-font-size, 14px) !important;
+										font-weight: var(--global-button-font-weight, 700) !important;
+										letter-spacing: var(--global-button-letter-spacing, 1px) !important;
+										text-transform: var(--global-button-text-transform, none) !important;
+										padding: var(--global-button-padding-y, 12px) 20px !important;
+									}
+								{%- endif -%}
+							{%- endstyle -%}
+						{%- endif -%}
+
+						<div 
+							{% if custom_styled %}id="{{ block.id }}"{% endif %} 
+							class="section-block button-block{% if this.full_width %} button-block-full-width{% endif %}" 
+							{{ block.shopify_attributes }}
+							{% unless this.full_width %}style="justify-content: {{ this.button_alignment }};"{% endunless %}
+						>
+						{%- if this.button_text != blank -%}
+							{%- liquid
+								assign button_href = this.button_url
+								if this.button_action == 'cart'
+									assign button_href = '/cart'
+								elsif this.button_url == blank
+									assign button_href = '#'
+								endif
+							-%}
+							<a href="{{ button_href }}" class="content-button-link{% if this.full_width %} content-button-full-width{% endif %}">
+									{%- if this.button_icon != blank -%}
+										<div class="button-content">
+											{%- if this.icon_position == 'left' -%}
+												<span class="button-icon">{{ this.button_icon }}</span>
+												<span>{{ this.button_text }}</span>
+											{%- else -%}
+												<span>{{ this.button_text }}</span>
+												<span class="button-icon">{{ this.button_icon }}</span>
+											{%- endif -%}
+										</div>
+									{%- else -%}
+										{{ this.button_text }}
+									{%- endif -%}
+								</a>
+							{%- endif -%}
+						</div>
+
+				{%- when 'sidebar' -%}
+					{%- comment -%} Sidebar content will be rendered separately {%- endcomment -%}
+
+				{%- when 'sticky_add_to_cart' -%}
+					<div {{ block.shopify_attributes }}>
+						{% render 'listicle-sticky-add-to-cart', block: block %}
+					</div>
+
+			{%- endcase -%}
+			{%- endfor -%}
+		</div>
+
+		{%- assign sidebar_block = section.blocks | where: 'type', 'sidebar' | first -%}
+		{%- if sidebar_block -%}
+			<aside class="section-sidebar reviews-sidebar" id="sidebar-{{ sidebar_block.id }}">
+				{%- if sidebar_block.settings.show_featured_product and sidebar_block.settings.sidebar_product -%}
+					{%- assign sidebar_product = sidebar_block.settings.sidebar_product -%}
+
+					<div class="sidebar-featured-product">
+						<h3 class="h3">{{ sidebar_product.title }}</h3>
+						<div class="image-container">
+							{%- if sidebar_product.featured_image -%}
+								{{ sidebar_product.featured_image | image_url: width: 640 | image_tag: class: 'sidebar-product-image' }}
+							{%- else -%}
+								<img src="https://placehold.co/200" width="200" height="200" alt="sidebar image placeholder" class="sidebar-product-image placeholder" />
+							{%- endif -%}
+						</div>
+						<a href="{{ sidebar_product.url }}" class="sidebar-product-link">
+							{{ sidebar_block.settings.sidebar_product_btn }}
+						</a>
+					</div>
+				{%- endif -%}
+				
+				{%- if sidebar_block.settings.show_rating_section -%}
+					<div class="sidebar-rating">
+					<h4 class="h4">{{ sidebar_block.settings.sidebar_title }}</h4>
+					<div class="ratings-by-star">
+						<div class="total-rating">
+							{%- liquid 
+								assign five_star_rating = 5 | times: sidebar_block.settings.five_star_bar
+								assign four_star_rating = 4 | times: sidebar_block.settings.four_star_bar
+								assign three_star_rating = 3 | times: sidebar_block.settings.three_star_bar
+								assign two_star_rating = 2 | times: sidebar_block.settings.two_star_bar
+								assign one_star_rating = 1 | times: sidebar_block.settings.one_star_bar
+								assign review_rating_total = five_star_rating | plus: four_star_rating | plus: three_star_rating | plus: two_star_rating | plus: one_star_rating
+
+								assign average_rating = review_rating_total | times: 1.0 | divided_by: 100
+								assign truncated_rating = average_rating | times: 10 | floor | divided_by: 10.0
+							-%}
+							<div class="stars-wrapper">
+								{%- for i in (1..5) -%}
+									{%- liquid 
+										assign star_width = '100%'
+										assign modulo = average_rating | modulo: 1
+										assign target_index = average_rating | ceil
+										
+										if modulo > 0 and forloop.index == target_index
+											assign star_width = modulo | split: '.' | last | times: 10 | append: '%'
+										endif
+
+										if forloop.index > target_index
+											assign star_width = '0%'
+										endif
+									-%}
+									<svg width="{{ sidebar_block.settings.rating_star_size }}" height="{{ sidebar_block.settings.rating_star_size }}" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+										<defs>
+											<mask id="reviews-sidebar_mask0_306_6_{{ forloop.index }}" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1920">
+												<path d="M1915.918 737.475c-10.955-33.543-42.014-56.131-77.364-56.131h-612.029l-189.063-582.1v-.112C1026.394 65.588 995.335 43 959.984 43c-35.237 0-66.41 22.588-77.365 56.245L693.443 681.344H81.415c-35.35 0-66.41 22.588-77.365 56.131-10.955 33.544.79 70.137 29.478 91.03l495.247 359.831-189.177 582.212c-10.955 33.657 1.13 70.25 29.817 90.918 14.23 10.278 30.946 15.487 47.66 15.487 16.716 0 33.432-5.21 47.775-15.6l495.134-359.718 495.021 359.718c28.574 20.781 67.087 20.781 95.662.113 28.687-20.668 40.658-57.261 29.703-91.03l-189.176-582.1 495.36-359.83c28.574-20.894 40.433-57.487 29.364-91.03" fill="{{ sidebar_block.settings.rating_star_color }}" fill-rule="evenodd"/>
+											</mask>
+										</defs>
+										<path d="M1915.918 737.475c-10.955-33.543-42.014-56.131-77.364-56.131h-612.029l-189.063-582.1v-.112C1026.394 65.588 995.335 43 959.984 43c-35.237 0-66.41 22.588-77.365 56.245L693.443 681.344H81.415c-35.35 0-66.41 22.588-77.365 56.131-10.955 33.544.79 70.137 29.478 91.03l495.247 359.831-189.177 582.212c-10.955 33.657 1.13 70.25 29.817 90.918 14.23 10.278 30.946 15.487 47.66 15.487 16.716 0 33.432-5.21 47.775-15.6l495.134-359.718 495.021 359.718c28.574 20.781 67.087 20.781 95.662.113 28.687-20.668 40.658-57.261 29.703-91.03l-189.176-582.1 495.36-359.83c28.574-20.894 40.433-57.487 29.364-91.03" stroke="{{ sidebar_block.settings.rating_empty_star_color }}" stroke-width="10" fill="none" fill-rule="evenodd"/>
+										<g mask="url(#reviews-sidebar_mask0_306_6_{{ forloop.index }})">
+											<rect width="1920" height="1920" fill="{{ sidebar_block.settings.rating_star_color }}" style="width: {{ star_width }};" />
+										</g>
+									</svg>
+								{%- endfor -%}
+							</div>
+							<div class="review-rating-text">
+								{{ truncated_rating }} out of 5
+							</div>
+						</div>
+						<div class="ratings">
+							{%- for i in (1..5) -%}
+								{%- liquid 
+									case forloop.index
+										when 5
+											assign index_string = 'five'
+											assign bar_value = sidebar_block.settings.five_star_bar
+										when 4
+											assign index_string = 'four'
+											assign bar_value = sidebar_block.settings.four_star_bar
+										when 3
+											assign index_string = 'three'
+											assign bar_value = sidebar_block.settings.three_star_bar
+										when 2
+											assign index_string = 'two'
+											assign bar_value = sidebar_block.settings.two_star_bar
+										when 1
+											assign index_string = 'one'
+											assign bar_value = sidebar_block.settings.one_star_bar
+									endcase
+								-%}
+								<div class="star-bar {{ index_string }}-star-bar">
+									<div>{{ forloop.index }} Star</div>
+									<div class="rating-bar">
+										<div class="rating-progress" style="--bar-progress: {{ bar_value }}%;"></div>
+									</div>
+									<div>{{ bar_value }}%</div>
+								</div>
+							{%- endfor -%}
+						</div>	
+					</div>
+				{%- endif -%}
+				
+				{%- if sidebar_block.settings.show_features -%}
+					<div class="features">
+						{%- for feature in (1..4) -%}
+							{%- liquid 
+								assign title_index = 'feature_title_'	| append: forloop.index
+								assign feature_rating = 'feature_rating_' | append: forloop.index
+							-%}
+							<div class="feature feature-{{ sidebar_block.settings[title_index] | handleize }}">
+								<div class="feature-title">{{ sidebar_block.settings[title_index] }}</div>
+								<div class="feature-rating">
+									<div class="stars-wrapper">
+										{%- for i in (1..5) -%}
+											{%- liquid 
+												assign star_width = '100%'
+												assign modulo = sidebar_block.settings[feature_rating] | modulo: 1
+												assign target_index = sidebar_block.settings[feature_rating] | ceil
+												
+												if modulo > 0 and forloop.index == target_index
+													assign star_width = modulo | split: '.' | last | times: 10 | append: '%'
+												endif
+
+												if forloop.index > target_index
+													assign star_width = '0%'
+												endif
+											-%}
+											<svg width="{{ sidebar_block.settings.feature_star_size }}" height="{{ sidebar_block.settings.feature_star_size }}" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+												<defs>
+													<mask id="feature_mask_{{ forloop.parentloop.index }}_{{ forloop.index }}" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1920">
+														<path d="M1915.918 737.475c-10.955-33.543-42.014-56.131-77.364-56.131h-612.029l-189.063-582.1v-.112C1026.394 65.588 995.335 43 959.984 43c-35.237 0-66.41 22.588-77.365 56.245L693.443 681.344H81.415c-35.35 0-66.41 22.588-77.365 56.131-10.955 33.544.79 70.137 29.478 91.03l495.247 359.831-189.177 582.212c-10.955 33.657 1.13 70.25 29.817 90.918 14.23 10.278 30.946 15.487 47.66 15.487 16.716 0 33.432-5.21 47.775-15.6l495.134-359.718 495.021 359.718c28.574 20.781 67.087 20.781 95.662.113 28.687-20.668 40.658-57.261 29.703-91.03l-189.176-582.1 495.36-359.83c28.574-20.894 40.433-57.487 29.364-91.03" fill="{{ sidebar_block.settings.feature_star_color }}" fill-rule="evenodd"/>
+													</mask>
+												</defs>
+												<path d="M1915.918 737.475c-10.955-33.543-42.014-56.131-77.364-56.131h-612.029l-189.063-582.1v-.112C1026.394 65.588 995.335 43 959.984 43c-35.237 0-66.41 22.588-77.365 56.245L693.443 681.344H81.415c-35.35 0-66.41 22.588-77.365 56.131-10.955 33.544.79 70.137 29.478 91.03l495.247 359.831-189.177 582.212c-10.955 33.657 1.13 70.25 29.817 90.918 14.23 10.278 30.946 15.487 47.66 15.487 16.716 0 33.432-5.21 47.775-15.6l495.134-359.718 495.021 359.718c28.574 20.781 67.087 20.781 95.662.113 28.687-20.668 40.658-57.261 29.703-91.03l-189.176-582.1 495.36-359.83c28.574-20.894 40.433-57.487 29.364-91.03" stroke="#e0e0e0" stroke-width="10" fill="none" fill-rule="evenodd"/>
+												<g mask="url(#feature_mask_{{ forloop.parentloop.index }}_{{ forloop.index }})">
+													<rect width="1920" height="1920" fill="{{ sidebar_block.settings.feature_star_color }}" style="width: {{ star_width }};" />
+												</g>
+											</svg>
+										{%- endfor -%}
+									</div>
+									<div class="review-rating-text">
+										{{ sidebar_block.settings[feature_rating] | times: 1.0 }}
+									</div>
+								</div>
+							</div>
+						{%- endfor -%}
+					</div>
+				{%- endif -%}
+				</div>
+			</aside>
+		{%- endif -%}
+	</div>
+</div>
+
+{%- schema -%}
+	{
+		"name": "Advertorial Section",
+		"tag": "section",
+		"class": "cstm-content-width-sidebar",
+		"settings": [
+			{
+				"type": "checkbox",
+				"id": "use_theme_colors",
+				"label": "Use theme colors",
+				"default": false,
+				"info": "Override custom colors with global theme colors"
+			},
+			{
+				"type": "header",
+				"content": "Color Settings"
+			},
+			{
+				"type": "color",
+				"id": "section_background_color",
+				"label": "Section Background Color",
+				"default": "#ffffff"
+			},
+			{
+				"type": "color",
+				"id": "global_button_color",
+				"label": "Global Button Color",
+				"info": "This color will override all button colors in this section",
+				"default": "#19bdff"
+			},
+			{
+				"type": "color",
+				"id": "breadcrumb_color",
+				"label": "Breadcrumb Color",
+				"default": "#b7b7b7"
+			},
+			{
+				"type": "color",
+				"id": "sidebar_background_color",
+				"label": "Sidebar Background Color",
+				"default": "#ffffff"
+			},
+			{
+				"type": "color",
+				"id": "sidebar_title_color",
+				"label": "Sidebar Title Color",
+				"default": "#000000"
+			},
+			{
+				"type": "color",
+				"id": "sidebar_button_bg_color",
+				"label": "Sidebar Button Background Color",
+				"default": "#19bdff"
+			},
+			{
+				"type": "color",
+				"id": "sidebar_button_text_color",
+				"label": "Sidebar Button Text Color",
+				"default": "#000000"
+			},
+			{
+				"type": "color",
+				"id": "rating_bar_color",
+				"label": "Rating Bar Color",
+				"default": "#19bdff"
+			},
+			{
+				"type": "color",
+				"id": "rating_background_color",
+				"label": "Rating Background Color",
+				"default": "#ffffff"
+			},
+			{
+				"type": "header",
+				"content": "Breadcrumb Settings"
+			},
+			{
+				"type": "checkbox",
+				"id": "show_breadcrumb",
+				"label": "Show breadcrumb",
+				"default": true
+			},
+			{
+				"type": "text",
+				"id": "breadcrumb_home_text",
+				"label": "Home text",
+				"default": "Home"
+			},
+			{
+				"type": "text",
+				"id": "breadcrumb_separator",
+				"label": "Breadcrumb separator",
+				"default": ">"
+			},
+			{
+				"type": "text",
+				"id": "breadcrumb_second_text",
+				"label": "Second breadcrumb text",
+				"default": "Category",
+				"info": "Text for the second breadcrumb level"
+			},
+			{
+				"type": "url",
+				"id": "breadcrumb_second_url",
+				"label": "Second breadcrumb URL",
+				"info": "Link for the second breadcrumb level"
+			},
+			{
+				"type": "text",
+				"id": "breadcrumb_current_text",
+				"label": "Current page text",
+				"default": "Current Page",
+				"info": "Text for the current page (last breadcrumb)"
+			},
+			{
+				"type": "header",
+				"content": "Layout Settings"
+			},
+			{
+				"type": "range",
+				"id": "sidebar_width",
+				"label": "Sidebar width",
+				"default": 35,
+				"min": 0,
+				"max": 100,
+				"step": 1,
+				"unit": "%"
+			},
+			{
+				"type": "checkbox",
+				"id": "hide_sidebar_mobile",
+				"label": "Hide sidebar on mobile",
+				"default": false,
+				"info": "When enabled, the sidebar will be hidden on mobile devices (screens 768px and below)"
+			},
+
+		],
+		"blocks": [
+			{
+				"type": "heading",
+				"name": "Heading",
+				"settings": [
+					{
+						"type": "select",
+						"id": "tag",
+						"label": "Tag",
+						"default": "h2",
+						"options": [
+							{
+								"label": "H1",
+								"value": "h1"
+							},
+							{
+								"label": "H2",
+								"value": "h2"
+							},
+							{
+								"label": "H3",
+								"value": "h3"
+							},
+							{
+								"label": "H4",
+								"value": "h4"
+							},
+							{
+								"label": "H5",
+								"value": "h5"
+							},
+							{
+								"label": "H6",
+								"value": "h6"
+							}
+						]
+					},
+					{
+						"type": "inline_richtext",
+						"id": "heading",
+						"label": "Heading",
+						"default": "Top Orthopedic Surgeon: This Is The Secret Of How I Relived My Daily Knee Pain and Osteoarthritis"
+					},
+					{
+						"type": "checkbox",
+						"id": "custom_size",
+						"label": "Custom text size",
+						"default": false
+					},
+					{
+						"type": "number",
+						"id": "text_size",
+						"label": "Text size",
+						"default": 40
+					},
+					{
+						"type": "color",
+						"id": "text_color",
+						"label": "Text color"
+					},
+					{
+						"type": "header",
+						"content": "Padding"
+					},
+					{
+						"type": "number",
+						"id": "padding_top",
+						"label": "Padding top",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_bottom",
+						"label": "Padding bottom",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_left",
+						"label": "Padding left",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_right",
+						"label": "Padding right",
+						"default": 0
+					}
+				]
+			},
+			{
+				"type": "text",
+				"name": "Text",
+				"settings": [
+					{
+						"type": "richtext",
+						"id": "text",
+						"label": "Text",
+						"default": "<p>If you struggle with knee pain, bone-on-bone arthritis, or discomfort in your knees, read this short article right now before you do anything else</p>"
+					},
+					{
+						"type": "textarea",
+						"id": "highlighted_texts",
+						"label": "Highlightext texts",
+						"default": "If you struggle with knee pain, bone-on-bone arthritis,",
+						"info": "If multiple sentences/words separate them with this vertical bar symbol |"
+					},
+					{
+						"type": "color",
+						"id": "hightlight_texts_color",
+						"label": "Highlight texts color",
+						"default": "#19bdff"
+					},
+					{
+						"type": "checkbox",
+						"id": "custom_size",
+						"label": "Custom text size",
+						"default": false
+					},
+					{
+						"type": "number",
+						"id": "text_size",
+						"label": "Text size",
+						"default": 16
+					},
+					{
+						"type": "color",
+						"id": "text_color",
+						"label": "Text color"
+					},
+					{
+						"type": "header",
+						"content": "Padding"
+					},
+					{
+						"type": "number",
+						"id": "padding_top",
+						"label": "Padding top",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_bottom",
+						"label": "Padding bottom",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_left",
+						"label": "Padding left",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_right",
+						"label": "Padding right",
+						"default": 0
+					}
+				]
+			},
+			{
+				"type": "rating",
+				"name": "Rating",
+				"settings": [
+					{
+						"type": "range",
+						"id": "rating",
+						"label": "Rating",
+						"default": 5,
+						"min": 0,
+						"max": 5,
+						"step": 0.1
+					},
+					{
+						"type": "number",
+						"id": "star_size",
+						"label": "Star size",
+						"default": 20
+					},
+					{
+						"type": "color",
+						"id": "star_color",
+						"label": "Star color",
+						"default": "#19bdff"
+					},
+					{
+						"type": "color",
+						"id": "empty_star_color",
+						"label": "Empty star color",
+						"default": "#e0e0e0"
+					},
+
+					{
+						"type": "inline_richtext",
+						"id": "text",
+						"label": "Text",
+						"default": "3,791 Ratings"
+					},
+					{
+						"type": "checkbox",
+						"id": "custom_size",
+						"label": "Custom text size",
+						"default": false
+					},
+					{
+						"type": "number",
+						"id": "text_size",
+						"label": "Text size",
+						"default": 16
+					},
+					{
+						"type": "color",
+						"id": "text_color",
+						"label": "Text color"
+					},
+					{
+						"type": "header",
+						"content": "Padding"
+					},
+					{
+						"type": "number",
+						"id": "padding_top",
+						"label": "Padding top",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_bottom",
+						"label": "Padding bottom",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_left",
+						"label": "Padding left",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_right",
+						"label": "Padding right",
+						"default": 0
+					}
+				]
+			},
+			{
+				"type": "image",
+				"name": "Image",
+				"settings": [
+					{
+						"type": "select",
+						"id": "content_type",
+						"label": "Content Type",
+						"default": "image",
+						"options": [
+							{
+								"label": "Image",
+								"value": "image"
+							},
+							{
+								"label": "Video",
+								"value": "video"
+							}
+						],
+						"info": "Choose whether to display an image or video"
+					},
+					{
+						"type": "image_picker",
+						"id": "image",
+						"label": "Image",
+						"info": "Used when Content Type is set to Image"
+					},
+					{
+						"type": "video",
+						"id": "video",
+						"label": "Shopify Hosted Video",
+						"info": "Used when Content Type is set to Video. Upload video files to Shopify admin."
+					},
+					{
+						"type": "checkbox",
+						"id": "video_autoplay",
+						"label": "Autoplay Video",
+						"default": false,
+						"info": "Video will play automatically when visible (muted for better performance)"
+					},
+					{
+						"type": "checkbox",
+						"id": "video_loop",
+						"label": "Loop Video",
+						"default": true,
+						"info": "Video will restart when it reaches the end"
+					},
+					{
+						"type": "checkbox",
+						"id": "video_controls",
+						"label": "Show Video Controls",
+						"default": true,
+						"info": "Display play/pause and other video controls"
+					},
+					{
+						"type": "select",
+						"id": "image_alignment",
+						"label": "Content alignment",
+						"default": "flex-start",
+						"options": [
+							{
+								"label": "Left",
+								"value": "flex-start"
+							},
+							{
+								"label": "Center",
+								"value": "center"
+							},
+							{
+								"label": "Right",
+								"value": "flex-end"
+							}
+						],
+						"info": "Alignment for both images and videos"
+					},
+					{
+						"type": "select",
+						"id": "image_width",
+						"label": "Content width",
+						"default": "full",
+						"options": [
+							{
+								"label": "Full",
+								"value": "full"
+							},
+							{
+								"label": "Custom",
+								"value": "custom"
+							}
+						],
+						"info": "Width setting for both images and videos"
+					},
+					{
+						"type": "range",
+						"id": "custom_image_width",
+						"label": "Custom content width",
+						"default": 100,
+						"min": 0,
+						"max": 100,
+						"step": 1,
+						"unit": "%",
+						"info": "This setting applies when Content width is set to Custom"
+					},
+					{
+						"type": "checkbox",
+						"id": "custom_height",
+						"label": "Custom height",
+						"default": false,
+						"info": "Set a fixed height for the content container"
+					},
+					{
+						"type": "number",
+						"id": "image_height",
+						"label": "Content height",
+						"default": 400,
+						"info": "This setting is applied when Custom height setting is checked."
+					},
+					{
+						"type": "select",
+						"id": "image_size",
+						"label": "Content size",
+						"default": "cover",
+						"options": [
+							{
+								"label": "Contain",
+								"value": "contain"
+							},
+							{
+								"label": "Cover",
+								"value": "cover"
+							},
+							{
+								"label": "Fill",
+								"value": "fill"
+							}
+						],
+						"info": "This setting is applied when Custom height setting is checked."
+					},
+					{
+						"type": "number",
+						"id": "image_radius",
+						"label": "Corner radius",
+						"default": 0
+					},
+					{
+						"type": "header",
+						"content": "Padding"
+					},
+					{
+						"type": "number",
+						"id": "padding_top",
+						"label": "Padding top",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_bottom",
+						"label": "Padding bottom",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_left",
+						"label": "Padding left",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_right",
+						"label": "Padding right",
+						"default": 0
+					}
+				]
+			},
+			{
+				"type": "video",
+				"name": "Video",
+				"settings": [
+					{
+						"type": "video",
+						"id": "video_shopify",
+						"label": "Shopify Hosted Video"
+					},
+					{
+						"type": "checkbox",
+						"id": "autoplay",
+						"label": "Autoplay",
+						"default": false,
+						"info": "Video will be muted when autoplaying"
+					},
+					{
+						"type": "checkbox",
+						"id": "loop",
+						"label": "Loop",
+						"default": true
+					},
+				{
+					"type": "checkbox",
+					"id": "show_controls",
+					"label": "Show controls",
+					"default": true
+				},
+				{
+					"type": "select",
+					"id": "video_quality",
+					"label": "Video quality preference",
+					"default": "auto",
+					"options": [
+						{
+							"label": "Auto (Highest Available)",
+							"value": "auto"
+						},
+						{
+							"label": "High Quality",
+							"value": "high"
+						},
+						{
+							"label": "Medium Quality",
+							"value": "medium"
+						},
+						{
+							"label": "Low Quality",
+							"value": "low"
+						}
+					],
+					"info": "Select preferred video quality. 'Auto' will use the highest quality available."
+				},
+					{
+						"type": "checkbox",
+						"id": "custom_height",
+						"label": "Use custom height",
+						"default": false
+					},
+					{
+						"type": "number",
+						"id": "video_height",
+						"label": "Video height (px)",
+						"default": 400,
+						"info": "Only applies when 'Use custom height' is enabled"
+					},
+					{
+						"type": "select",
+						"id": "video_fit",
+						"label": "Video fit",
+						"default": "cover",
+						"options": [
+							{
+								"label": "Contain",
+								"value": "contain"
+							},
+							{
+								"label": "Cover",
+								"value": "cover"
+							},
+							{
+								"label": "Fill",
+								"value": "fill"
+							}
+						]
+					},
+					{
+						"type": "number",
+						"id": "video_radius",
+						"label": "Corner radius",
+						"default": 0
+					},
+					{
+						"type": "header",
+						"content": "Padding"
+					},
+					{
+						"type": "number",
+						"id": "padding_top",
+						"label": "Padding top",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_bottom",
+						"label": "Padding bottom",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_left",
+						"label": "Padding left",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_right",
+						"label": "Padding right",
+						"default": 0
+					}
+				]
+			},
+			{
+				"type": "author",
+				"name": "Author",
+				"settings": [
+					{
+						"type": "image_picker",
+						"id": "author_image",
+						"label": "Author image"
+					},
+					{
+						"type": "inline_richtext",
+						"id": "author_name",
+						"label": "Author name",
+						"default": "By John Doe"
+					},
+					{
+						"type": "checkbox",
+						"id": "badge",
+						"label": "Show badge",
+						"default": true
+					},
+					{
+						"type": "image_picker",
+						"id": "custom_badge",
+						"label": "Custom badge"
+					},
+					{
+						"type": "inline_richtext",
+						"id": "date",
+						"label": "Date",
+						"default": "January 1, 2025"
+					},
+					{
+						"type": "range",
+						"id": "text_size",
+						"label": "Text size",
+						"default": 16,
+						"min": 10,
+						"max": 30,
+						"step": 1,
+						"unit": "px"
+					},
+					{
+						"type": "header",
+						"content": "Colors"
+					},
+					{
+						"type": "color",
+						"id": "star_color",
+						"label": "Star color",
+						"default": "#F1C40F"
+					},
+					{
+						"type": "color",
+						"id": "empty_star_color",
+						"label": "Empty star color",
+						"default": "#e0e0e0"
+					},
+					{
+						"type": "color",
+						"id": "badge_color",
+						"label": "Badge color",
+						"default": "#19bdff"
+					},
+					{
+						"type": "header",
+						"content": "Padding"
+					},
+					{
+						"type": "number",
+						"id": "padding_top",
+						"label": "Padding top",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_bottom",
+						"label": "Padding bottom",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_left",
+						"label": "Padding left",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_right",
+						"label": "Padding right",
+						"default": 0
+					}
+				]
+			},
+			{
+				"type": "basic_text",
+				"name": "Basic Text Block",
+				"settings": [
+					{
+						"type": "richtext",
+						"id": "content",
+						"label": "Content",
+						"default": "<p>Add your text content here. This block spans the full width of the content area.</p>"
+					},
+					{
+						"type": "textarea",
+						"id": "highlighted_texts",
+						"label": "Highlighted texts",
+						"info": "If multiple sentences/words separate them with this vertical bar symbol |"
+					},
+					{
+						"type": "color",
+						"id": "highlight_texts_color",
+						"label": "Highlight texts color",
+						"default": "#19bdff"
+					},
+					{
+						"type": "image_picker",
+						"id": "image",
+						"label": "Optional Image"
+					},
+					{
+						"type": "select",
+						"id": "image_position",
+						"label": "Image Position",
+						"default": "above",
+						"options": [
+							{
+								"label": "Above Text",
+								"value": "above"
+							},
+							{
+								"label": "Below Text",
+								"value": "below"
+							}
+						]
+					},
+					{
+						"type": "range",
+						"id": "image_width",
+						"label": "Image Width",
+						"default": 100,
+						"min": 20,
+						"max": 100,
+						"step": 5,
+						"unit": "%"
+					},
+					{
+						"type": "header",
+						"content": "Padding"
+					},
+					{
+						"type": "number",
+						"id": "padding_top",
+						"label": "Padding top",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_bottom",
+						"label": "Padding bottom",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_left",
+						"label": "Padding left",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_right",
+						"label": "Padding right",
+						"default": 0
+					}
+				]
+			},
+			{
+				"type": "button",
+				"name": "Button",
+				"settings": [
+					{
+						"type": "text",
+						"id": "button_text",
+						"label": "Button Text",
+						"default": "Click Here"
+					},
+				{
+					"type": "select",
+					"id": "button_action",
+					"label": "Button Action",
+					"options": [
+						{
+							"value": "url",
+							"label": "Go to URL"
+						},
+						{
+							"value": "cart",
+							"label": "Go to Cart Page"
+						}
+					],
+					"default": "url",
+					"info": "Choose what happens when button is clicked"
+				},
+				{
+					"type": "url",
+					"id": "button_url",
+					"label": "Button URL",
+					"info": "Used when 'Go to URL' is selected above"
+				},
+				{
+					"type": "select",
+					"id": "button_alignment",
+					"label": "Button Alignment",
+						"default": "center",
+						"options": [
+							{
+								"label": "Left",
+								"value": "flex-start"
+							},
+							{
+								"label": "Center",
+								"value": "center"
+							},
+							{
+								"label": "Right",
+								"value": "flex-end"
+							}
+						]
+					},
+					{
+						"type": "checkbox",
+						"id": "full_width",
+						"label": "Full Width Button",
+						"default": false
+					},
+					{
+						"type": "header",
+						"content": "Button Style"
+					},
+					{
+						"type": "checkbox",
+						"id": "use_global_button_style",
+						"label": "Use Global Button Style",
+						"info": "Match the section's global button color and styling",
+						"default": false
+					},
+					{
+						"type": "range",
+						"id": "border_radius",
+						"label": "Border Radius",
+						"default": 10,
+						"min": 0,
+						"max": 50,
+						"step": 1,
+						"unit": "px"
+					},
+					{
+						"type": "text",
+						"id": "button_icon",
+						"label": "Button Icon (SVG code)",
+						"info": "Paste SVG code for an icon to display in the button"
+					},
+					{
+						"type": "select",
+						"id": "icon_position",
+						"label": "Icon Position",
+						"default": "left",
+						"options": [
+							{
+								"label": "Left",
+								"value": "left"
+							},
+							{
+								"label": "Right",
+								"value": "right"
+							}
+						]
+					},
+					{
+						"type": "range",
+						"id": "icon_size",
+						"label": "Icon Size",
+						"default": 16,
+						"min": 10,
+						"max": 30,
+						"step": 1,
+						"unit": "px"
+					},
+					{
+						"type": "range",
+						"id": "button_vertical_padding",
+						"label": "Button Vertical Padding",
+						"default": 10,
+						"min": 0,
+						"max": 30,
+						"step": 1,
+						"unit": "px",
+						"info": "Controls the top and bottom padding inside the button"
+					},
+					{
+						"type": "color",
+						"id": "button_border_color",
+						"label": "Button Bottom Border Color",
+						"default": "#0b94cb",
+						"info": "Color of the bottom border on the button"
+					},
+					{
+						"type": "header",
+						"content": "Padding"
+					},
+					{
+						"type": "number",
+						"id": "padding_top",
+						"label": "Padding top",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_bottom",
+						"label": "Padding bottom",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_left",
+						"label": "Padding left",
+						"default": 0
+					},
+					{
+						"type": "number",
+						"id": "padding_right",
+						"label": "Padding right",
+						"default": 0
+					}
+				]
+			},
+			{
+				"type": "sidebar",
+				"name": "Sidebar",
+				"limit": 1,
+				"settings": [
+					{
+						"type": "inline_richtext",
+						"id": "sidebar_title",
+						"label": "Sidebar Title",
+						"default": "Customer Reviews"
+					},
+					{
+						"type": "product",
+						"id": "sidebar_product",
+						"label": "Featured product"
+					},
+					{
+						"type": "inline_richtext",
+						"id": "sidebar_product_btn",
+						"label": "Featured product button text",
+						"default": "Get 50% off!"
+					},
+					{
+						"type": "header",
+						"content": "Star rating reviews"
+					},
+					{
+						"type": "range",
+						"id": "five_star_bar",
+						"label": "5 Star Bar",
+						"default": 90,
+						"min": 0,
+						"max": 100,
+						"step": 1,
+						"unit": "%"
+					},
+					{
+						"type": "range",
+						"id": "four_star_bar",
+						"label": "4 Star Bar",
+						"default": 7,
+						"min": 0,
+						"max": 100,
+						"step": 1,
+						"unit": "%"
+					},
+					{
+						"type": "range",
+						"id": "three_star_bar",
+						"label": "3 Star Bar",
+						"default": 2,
+						"min": 0,
+						"max": 100,
+						"step": 1,
+						"unit": "%"
+					},
+					{
+						"type": "range",
+						"id": "two_star_bar",
+						"label": "2 Star Bar",
+						"default": 0,
+						"min": 0,
+						"max": 100,
+						"step": 1,
+						"unit": "%"
+					},
+					{
+						"type": "range",
+						"id": "one_star_bar",
+						"label": "1 Star Bar",
+						"default": 1,
+						"min": 0,
+						"max": 100,
+						"step": 1,
+						"unit": "%"
+					},
+					{
+						"type": "header",
+						"content": "Features"
+					},
+					{
+						"type": "text",
+						"id": "feature_title_1",
+						"label": "Feature 1 Title",
+						"default": "Price"
+					},
+					{
+						"type": "range",
+						"id": "feature_rating_1",
+						"label": "Feature 1 Rating",
+						"default": 5.0,
+						"min": 0,
+						"max": 5,
+						"step": 0.1
+					},
+					{
+						"type": "text",
+						"id": "feature_title_2",
+						"label": "Feature 2 Title",
+						"default": "Effectiveness"
+					},
+					{
+						"type": "range",
+						"id": "feature_rating_2",
+						"label": "Feature 2 Rating",
+						"default": 5.0,
+						"min": 0,
+						"max": 5,
+						"step": 0.1
+					},
+					{
+						"type": "text",
+						"id": "feature_title_3",
+						"label": "Feature 3 Title",
+						"default": "Comfort"
+					},
+					{
+						"type": "range",
+						"id": "feature_rating_3",
+						"label": "Feature 3 Rating",
+						"default": 5.0,
+						"min": 0,
+						"max": 5,
+						"step": 0.1
+					},
+					{
+						"type": "text",
+						"id": "feature_title_4",
+						"label": "Feature 4 Title",
+						"default": "Quality"
+					},
+					{
+						"type": "range",
+						"id": "feature_rating_4",
+						"label": "Feature 4 Rating",
+						"default": 4.8,
+						"min": 0,
+						"max": 5,
+						"step": 0.1
+					},
+					{
+						"type": "header",
+						"content": "Star Settings"
+					},
+					{
+						"type": "range",
+						"id": "rating_star_size",
+						"label": "Rating Star Size",
+						"default": 15,
+						"min": 10,
+						"max": 30,
+						"step": 1,
+						"unit": "px"
+					},
+					{
+						"type": "range",
+						"id": "feature_star_size",
+						"label": "Feature Star Size",
+						"default": 15,
+						"min": 10,
+						"max": 30,
+						"step": 1,
+						"unit": "px"
+					},
+					{
+						"type": "color",
+						"id": "rating_star_color",
+						"label": "Rating Star Color",
+						"default": "#F1C40F"
+					},
+					{
+						"type": "color",
+						"id": "rating_empty_star_color",
+						"label": "Rating Empty Star Color",
+						"default": "#e0e0e0"
+					},
+					{
+						"type": "checkbox",
+						"id": "use_progress_gradient",
+						"label": "Use gradient for rating progress bars",
+						"default": false
+					},
+					{
+						"type": "color",
+						"id": "progress_gradient_start",
+						"label": "Progress bar gradient start color",
+						"default": "#19bdff"
+					},
+					{
+						"type": "color",
+						"id": "progress_gradient_end",
+						"label": "Progress bar gradient end color",
+						"default": "#0b94cb"
+					},
+					{
+						"type": "header",
+						"content": "Visibility Settings"
+					},
+					{
+						"type": "checkbox",
+						"id": "show_featured_product",
+						"label": "Show featured product",
+						"default": true
+					},
+					{
+						"type": "checkbox",
+						"id": "show_rating_section",
+						"label": "Show rating section",
+						"default": true
+					},
+					{
+						"type": "checkbox",
+						"id": "show_features",
+						"label": "Show features",
+						"default": true
+					},
+					{
+						"type": "header",
+						"content": "Color Customization"
+					},
+					{
+						"type": "color",
+						"id": "sidebar_background_color",
+						"label": "Sidebar background color",
+						"default": "#ffffff"
+					},
+					{
+						"type": "color",
+						"id": "sidebar_text_color",
+						"label": "Sidebar text color",
+						"default": "#000000"
+					},
+					{
+						"type": "color",
+						"id": "sidebar_title_color",
+						"label": "Sidebar title color",
+						"default": "#000000"
+					},
+					{
+						"type": "color",
+						"id": "rating_bar_color",
+						"label": "Rating bar color",
+						"default": "#19bdff"
+					},
+					{
+						"type": "color",
+						"id": "rating_bar_background",
+						"label": "Rating bar background",
+						"default": "#f0f0f0"
+					},
+					{
+						"type": "color",
+						"id": "feature_star_color",
+						"label": "Feature star color",
+						"default": "#F1C40F"
+					},
+					{
+						"type": "color",
+						"id": "feature_border_color",
+						"label": "Feature border color",
+						"default": "#f0f0f0"
+					}
+				]
+			},
+			{
+				"type": "sticky_add_to_cart",
+				"name": "Sticky Add to Cart",
+				"settings": [
+					{
+						"type": "text",
+						"id": "button_text",
+						"label": "Button Text",
+						"default": "YES, GET 60% OFF"
+					},
+					{
+						"type": "url",
+						"id": "button_link",
+						"label": "Button Link"
+					},
+					{
+						"type": "text",
+						"id": "verification_text",
+						"label": "Verification Text",
+						"default": "VERIFIED LOWEST PRICE EVER"
+					},
+					{
+						"type": "header",
+						"content": "Button Styling"
+					},
+					{
+						"type": "checkbox",
+						"id": "use_gradient",
+						"label": "Use Gradient Background",
+						"default": false,
+						"info": "Enable gradient background instead of solid color"
+					},
+					{
+						"type": "color",
+						"id": "button_bg_color",
+						"label": "Button Background Color",
+						"default": "#25282A"
+					},
+					{
+						"type": "color_background",
+						"id": "button_gradient",
+						"label": "Button Gradient Background",
+						"default": "linear-gradient(180deg, #25282A 0%, #1a1c1e 100%)",
+						"info": "Only used if 'Use Gradient Background' is enabled"
+					},
+					{
+						"type": "color",
+						"id": "button_text_color",
+						"label": "Button Text Color",
+						"default": "#FFFFFF"
+					},
+					{
+						"type": "color",
+						"id": "button_icon_color",
+						"label": "Button Icon Color",
+						"default": "#FFFFFF",
+						"info": "Color of the arrow icon"
+					},
+					{
+						"type": "range",
+						"id": "button_border_radius",
+						"min": 0,
+						"max": 50,
+						"step": 1,
+						"unit": "px",
+						"label": "Button Border Radius",
+						"default": 8
+					},
+					{
+						"type": "header",
+						"content": "Verification Text Styling"
+					},
+					{
+						"type": "color",
+						"id": "verification_color",
+						"label": "Verification Text Color",
+						"default": "#666666"
+					},
+					{
+						"type": "range",
+						"id": "verification_font_size",
+						"min": 10,
+						"max": 20,
+						"step": 1,
+						"unit": "px",
+						"label": "Verification Font Size",
+						"default": 12
+					}
+				]
+			}
+		],
+		"presets": [
+			{
+				"name": "Advertorial Section",
+				"blocks": [
+					{ "type": "heading" },
+					{ "type": "text" },
+					{ "type": "rating" },
+					{ "type": "image" },
+					{ "type": "author" },
+					{ "type": "basic_text" },
+					{ "type": "button" },
+					{ "type": "sidebar" }
+				]
+			}
+		]
+	}
+{%- endschema -%}

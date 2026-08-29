@@ -1,0 +1,50 @@
+{% comment %}
+  Divider Snippet
+
+  Accepts:
+  - color: Color of the divider line
+  - width: Width of the divider (% or px)
+  - thickness: Thickness of the divider line (px)
+  - style: Line style (solid, dashed, dotted)
+  - margin_top: Top margin in pixels
+  - margin_bottom: Bottom margin in pixels
+  - alignment: Alignment of the divider (left, center, right)
+  - max_width: Maximum width of the divider
+  - block: Block object for Shopify attributes
+{% endcomment %}
+
+<div
+  class="product-divider-container"
+  style="
+    margin-top: {{ margin_top | default: 10 }}px !important;
+    margin-bottom: {{ margin_bottom | default: 10 }}px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    {% if alignment == 'left' %}
+      justify-content: flex-start !important;
+    {% elsif alignment == 'right' %}
+      justify-content: flex-end !important;
+    {% else %}
+      justify-content: center !important;
+    {% endif %}
+    clear: both !important;
+  "
+  {{ block.shopify_attributes }}
+>
+  <hr
+    class="product-divider-line"
+    style="
+      width: {{ width | default: '100%' }} !important;
+      max-width: {{ max_width | default: '100%' }} !important;
+      border: none !important;
+      border-top: {{ thickness | default: 1 }}px {{ style | default: 'solid' }} {{ color | default: '#e0e0e0' }} !important;
+      margin: 0 !important;
+      display: block !important;
+      padding: 0 !important;
+      background: none !important;
+      height: 0 !important;
+      box-sizing: border-box !important;
+    "
+  >
+</div>

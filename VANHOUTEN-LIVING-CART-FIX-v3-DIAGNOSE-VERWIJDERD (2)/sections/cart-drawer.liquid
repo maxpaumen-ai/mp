@@ -1,0 +1,5187 @@
+{% comment %}
+  💡 Cart Drawer Structure & Organization
+
+  ➤ Each part of the cart drawer is rendered via separate snippets.
+    Example:
+      - {% render 'cart-header' %}             → file: snippets/cart-header.liquid
+      - {% render 'cart-items' %}              → file: snippets/cart-items.liquid
+      - {% render 'cart-discount-banner' %}    → file: snippets/cart-discount-banner.liquid
+      - {% render 'cart-social_proof_bar' %}   → file: snippets/cart-social_proof_bar.liquid
+      - {% render 'cart-drawer-upsell' %}      → file: snippets/cart-drawer-upsell.liquid
+
+  ➤ Cart-specific styles are centralized in a dedicated snippet.
+    Example:
+      - {% render 'cart-drawer_css' %} → file: snippets/cart-drawer_css.liquid
+
+    This file defines all dynamic CSS variables (colors, backgrounds, etc.)
+    and is injected inside a <style> tag to allow Liquid variables to be interpreted by Shopify.
+
+
+  ➤ Necessary script rendered via snippets
+      - {% render 'cart-drawer-script' %} → file: snippets/cart-drawer-script.liquid
+
+  🔁 Tip: Use consistent naming like `cart-nameOfBlock` for your snippets
+          to keep your cart components modular and easy to navigate.
+{% endcomment %}
+
+{{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'cart-drawer.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'cart-subscribe-button.js' | asset_url }}" defer="defer"></script>
+
+{% liquid
+  assign enabled_upsell_block = section.settings.use_upsell_block
+  assign upsell_carousel_mode = section.settings.upsell_carousel_mode | default: false
+%}
+
+{% comment %} Calculate progress bar icon positioning variables {% endcomment %}
+{% comment %} Initialize icon position variables BEFORE loop {% endcomment %}
+{% assign shipping_icon_percent = 0 %}
+{% assign shipping_icon_pixel = 0 %}
+{% assign gift_icon_percent = 0 %}
+{% assign gift_icon_pixel = 0 %}
+{% assign shipping_protection_percent = 0 %}
+{% assign shipping_protection_pixel = 0 %}
+
+{% for block in section.blocks %}
+  {% if block.type == 'cart_progress_bar' %}
+    {% assign free_product_price = block.settings.product_free_amount | default: 0 | times: 100 %}
+    {% assign free_shipping_price = block.settings.product_free_shipping | default: 0 | times: 100 %}
+
+    {% assign has_single_goal = false %}
+    {% if free_shipping_price > 0 and free_product_price == 0 %}
+      {% assign has_single_goal = true %}
+    {% elsif free_product_price > 0 and free_shipping_price == 0 %}
+      {% assign has_single_goal = true %}
+    {% endif %}
+
+    {% if has_single_goal %}
+      {% comment %} Single goal: icon is fixed at 100% (end of progress bar) {% endcomment %}
+      {% assign shipping_protection_percent = 100 %}
+      {% assign shipping_protection_pixel = 0 %}
+      {% assign shipping_icon_percent = 100 %}
+      {% assign shipping_icon_pixel = 0 %}
+      {% assign gift_icon_percent = 100 %}
+      {% assign gift_icon_pixel = 0 %}
+    {% else %}
+      {% comment %} Two goals: Calculate positions for both icons {% endcomment %}
+      {% assign first_goal_amount = 100 %}
+      {% assign max_goal_amount = 200 %}
+
+      {% if free_product_price > free_shipping_price and free_shipping_price > 0 %}
+        {% comment %} Product is higher: Shipping is first-gift (fixed at its threshold), Product is second-gift (fixed at 100%) {% endcomment %}
+        {% assign first_goal_amount = free_shipping_price %}
+        {% assign max_goal_amount = free_product_price %}
+
+        {% comment %} Shipping icon is fixed at first goal position (doesn't move) {% endcomment %}
+        {% assign shipping_icon_percent = 100 | times: first_goal_amount | divided_by: max_goal_amount %}
+        {% assign shipping_icon_pixel = 19 | times: shipping_icon_percent | divided_by: 100 %}
+
+        {% comment %} Gift icon is second-gift, fixed at 100% (handled by CSS) {% endcomment %}
+        {% assign gift_icon_percent = 100 %}
+        {% assign gift_icon_pixel = 0 %}
+
+      {% else %}
+        {% comment %} Shipping >= Product: Product is first-gift (fixed at its threshold), Shipping is second-gift (fixed at 100%) {% endcomment %}
+        {% assign first_goal_amount = free_product_price %}
+        {% assign max_goal_amount = free_shipping_price %}
+
+        {% comment %} Product icon is fixed at first goal position (doesn't move) {% endcomment %}
+        {% assign gift_icon_percent = 100 | times: first_goal_amount | divided_by: max_goal_amount %}
+        {% assign gift_icon_pixel = 19 | times: gift_icon_percent | divided_by: 100 %}
+
+        {% comment %} Shipping icon is second-gift, fixed at 100% (handled by CSS) {% endcomment %}
+        {% assign shipping_icon_percent = 100 %}
+        {% assign shipping_icon_pixel = 0 %}
+      {% endif %}
+
+      {% comment %} Keep legacy variable for backward compatibility {% endcomment %}
+      {% assign shipping_protection_percent = shipping_icon_percent %}
+      {% assign shipping_protection_pixel = shipping_icon_pixel %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% if section.settings.cart_customization_mode %}
+  <script src="{{ 'cart_customization_mode.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+
+{% render 'cart-drawer-script' %}
+
+{% comment %}  Load the script to have shippingProtectionId Everywhere {% endcomment %}
+{% for block in section.blocks %}
+  {% if block.type == 'cart_shipping_protection' %}
+    {% assign shipping_protection_id = block.settings.product_shipping_protection.selected_or_first_available_variant.id %}
+    <script>
+      const shippingProductId = '{{ shipping_protection_id }}';
+    </script>
+  {% endif %}
+  {% if block.type == 'cart_progress_bar' %}
+    {% assign progress_bar_free_id = block.settings.progress_bar_free_product.first_available_variant.id %}
+    {% assign progress_bar_free_title = block.settings.product_free_custom_id_title %}
+
+    <script>
+      const progressBarProductId = '{{ block.settings.progress_bar_free_product.first_available_variant.id }}';
+
+      document.addEventListener('DOMContentLoaded', () => {
+        // Check if there's a premium-attachment-kit block with product-specific free gifts
+        const premiumKit = document.querySelector('.premium-attachment-kit');
+        let freeProductId = progressBarProductId;
+
+        if (premiumKit) {
+          const blockFreeGiftIds = premiumKit.getAttribute('data-free-gift-product-ids');
+          if (blockFreeGiftIds && blockFreeGiftIds.trim() !== '') {
+            const freeGiftIds = blockFreeGiftIds.split(',').filter((id) => id.trim() !== '');
+            if (freeGiftIds.length > 0) {
+              freeProductId = freeGiftIds[0];
+              console.log('Using free gift from premium-attachment-kit block:', freeProductId);
+            }
+          }
+        }
+
+        const input = document.querySelector('.free-product-form .product-variant-id');
+        if (input) {
+          input.value = freeProductId;
+          console.log(
+            'Free product form updated with ID:',
+            freeProductId,
+            'from:',
+            premiumKit ? 'block' : 'cart_progress_bar',
+          );
+        }
+      });
+    </script>
+  {% endif %}
+{% endfor %}
+
+<cart-drawer class="drawer{% if cart == empty %} is-empty{% endif %}{% if section.settings.cart_customization_mode %} customization-mode{% endif %}">
+  <div id="CartDrawer" class="gb-cart-drawer-lb cart-drawer">
+    <div id="CartDrawer-Overlay" class="cart-drawer__overlay"></div>
+    <div
+      class="drawer__inner gradient"
+      role="dialog"
+      aria-modal="true"
+      aria-label="{{ 'sections.cart.title' | t }}"
+      tabindex="-1"
+      style="background: var(--cart-drawer-background-gradient); background-color: var(--cart-drawer-primary-background-color); color: var(--cart-drawer-primary-text-color);"
+    >
+      {%- if cart == empty -%}
+        {% render 'cart-empty', empty_cart_redirect_url: section.settings.empty_cart_redirect_url %}
+      {%- else -%}
+        {% render 'cart-header' %}
+      {%- endif -%}
+      <div class="cart-drawer-header-blocks vhl-legacy-cart-promos" aria-hidden="true">
+        {% for block in section.blocks %}
+          {% case block.type %}
+              {% comment %} Discount Banner - Start {% endcomment %}
+            {% when 'cart-discount-banner' %}
+              {% if cart != empty %}
+                <div {{ block.shopify_attributes }}>
+                  {% render 'cart-discount-banner', block: block %}
+                </div>
+              {% endif %}
+
+              {% comment %} Discount Banner - End {% endcomment %}
+            {% when 'cart-social_proof_bar' %}
+              {% if cart != empty %}
+                <div {{ block.shopify_attributes }}>
+                  {% render 'cart-social_proof_bar', block: block %}
+                </div>
+              {% endif %}
+            {% when 'cart_timer_bar' %}
+              <div {{ block.shopify_attributes }}>
+                {% render 'cart-timer-bar', block: block %}
+              </div>
+            {% when 'cart_image_banner' %}
+              {% if cart != empty %}
+                <div {{ block.shopify_attributes }}>
+                  {% render 'cart-image-banner', block: block %}
+                </div>
+              {% endif %}
+            {% when 'cart_promo_banner' %}
+              {% if cart != empty %}
+                <div {{ block.shopify_attributes }}>
+                  {% render 'cart-promo-banner', block: block %}
+                </div>
+              {% endif %}
+          {% endcase %}
+        {% endfor %}
+      </div>
+
+      <cart-drawer-items
+        {% if cart == empty %}
+          class=" is-empty"
+        {% endif %}
+      >
+        <div class="scrollable-contents {% if upsell_carousel_mode %}upsell_slider{% endif %}">
+          <form
+            action="{{ routes.cart_url }}"
+            id="CartDrawer-Form"
+            class="cart__contents cart-drawer__form"
+            method="post"
+          >
+            {% for block in section.blocks %}
+              {% case block.type %}
+                {% when 'cart_progress_bar' %}
+                  <div {{ block.shopify_attributes }}>
+                    {% render 'cart-drawer_pgb_style', block: block %}
+                    {% render 'cart-progress-bar', block: block %}
+                  </div>
+              {% endcase %}
+            {% endfor %}
+            <div id="CartDrawer-CartItems" class="drawer__contents js-contents">
+              {%- if cart != empty -%}
+                {% render 'cart-items',
+                  section: section,
+                  shipping_protection_id: shipping_protection_id,
+                  progress_bar_free_id: progress_bar_free_id,
+                  progress_bar_free_title: progress_bar_free_title
+                %}
+              {%- endif -%}
+
+              <p id="CartDrawer-LiveRegionText" class="visually-hidden" role="status"></p>
+              <p id="CartDrawer-LineItemStatus" class="visually-hidden" aria-hidden="true" role="status">
+                {{ 'accessibility.loading' | t }}
+              </p>
+            </div>
+
+            <div id="CartDrawer-CartErrors" role="alert"></div>
+          </form>
+
+          {%- assign upsell_count = 0 -%}
+
+          {%- if section.settings.auto_upsell_enabled -%}
+            {%- render 'cart-drawer-auto-upsells', section: section, cart: cart -%}
+
+          {%- else -%}
+
+          {%- comment -%} Render upsell header if exists {%- endcomment -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'upsell_header' and cart != empty -%}
+              {%- liquid
+                assign upsell_blocks = section.blocks | where: 'type', 'cart_upsell'
+                assign total_upsell = upsell_blocks.size
+
+                for upsell_block in upsell_blocks
+                  assign this = upsell_block.settings
+                  assign upsell_id = this.upsell_product_1.id
+                  assign is_on_cart = cart.items | where: 'product_id', upsell_id | first
+
+                  if is_on_cart
+                    assign total_upsell = total_upsell | minus: 1
+                  endif
+                endfor
+              -%}
+
+              {%- if total_upsell > 0 -%}
+                <style>
+                  .upsell-header-text strong,
+                  .upsell-header-text b {
+                    font-weight: 700 !important;
+                  }
+                  .upsell-header-text p {
+                    margin: 0;
+                    padding: 0;
+                  }
+
+                  {% if block.settings.show_divider %}
+                  .upsell-header-wrapper-{{ block.id }} .upsell-header-with-divider {
+                    display: flex;
+                    align-items: center;
+                    width: 100%;
+                    gap: {{ block.settings.divider_spacing | default: 12 }}px;
+                    margin-top: {{ block.settings.header_margin_top | default: 8 }}px !important;
+                    margin-bottom: {{ block.settings.header_margin_bottom | default: 8 }}px !important;
+                    padding-left: 13px !important;
+                    padding-right: 13px !important;
+                  }
+
+                  .upsell-header-wrapper-{{ block.id }} .upsell-header-with-divider .upsell-header-text {
+                    flex: 0 0 auto;
+                    width: auto;
+                    max-width: none;
+                  }
+
+                  .upsell-header-wrapper-{{ block.id }} .divider-line {
+                    flex: 1;
+                    height: {{ block.settings.divider_height | default: 1 }}px;
+                    min-height: {{ block.settings.divider_height | default: 1 }}px;
+                    min-width: 20px;
+                    background-color: {{ block.settings.divider_color | default: '#e0e0e0' }};
+                    border: none;
+                    margin: 0;
+                    display: block;
+                    {% if block.settings.divider_style == 'dashed' %}
+                      background-image: repeating-linear-gradient(
+                        to right,
+                        {{ block.settings.divider_color | default: '#e0e0e0' }} 0px,
+                        {{ block.settings.divider_color | default: '#e0e0e0' }} 8px,
+                        transparent 8px,
+                        transparent 16px
+                      );
+                      background-color: transparent;
+                    {% elsif block.settings.divider_style == 'dotted' %}
+                      background-image: repeating-linear-gradient(
+                        to right,
+                        {{ block.settings.divider_color | default: '#e0e0e0' }} 0px,
+                        {{ block.settings.divider_color | default: '#e0e0e0' }} 4px,
+                        transparent 4px,
+                        transparent 8px
+                      );
+                      background-color: transparent;
+                    {% endif %}
+                  }
+                  {% endif %}
+                </style>
+                <div class="upsell-header-wrapper upsell-header-wrapper-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- assign header_alignment = block.settings.header_alignment | default: 'center' -%}
+
+                  {% if block.settings.show_divider %}
+                    <div class="upsell-header-with-divider">
+                      {% if header_alignment == 'right' %}
+                        <div class="divider-line"></div>
+                      {% elsif header_alignment == 'center' %}
+                        <div class="divider-line"></div>
+                      {% endif %}
+
+                      <div
+                        class="upsell-header-text"
+                        style="
+                          color: {{ block.settings.header_text_color | default: '#333' }};
+                          font-size: {{ block.settings.header_font_size | default: 14 }}px;
+                          text-align: {{ header_alignment }};
+                          margin: 0 !important;
+                          padding: 0 !important;
+                          white-space: nowrap;
+                        "
+                      >
+                        {{ block.settings.header_text }}
+                      </div>
+
+                      {% if header_alignment == 'left' or header_alignment == 'center' %}
+                        <div class="divider-line"></div>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    <div
+                      class="upsell-header-text"
+                      style="
+                        color: {{ block.settings.header_text_color | default: '#333' }};
+                        font-size: {{ block.settings.header_font_size | default: 14 }}px;
+                        text-align: {{ header_alignment }};
+                        margin-top: {{ block.settings.header_margin_top | default: 8 }}px !important;
+                        margin-bottom: {{ block.settings.header_margin_bottom | default: 8 }}px !important;
+                        margin-left: 0 !important;
+                        margin-right: 0 !important;
+                        padding: 0 !important;
+                        {% if header_alignment == 'left' %}padding-left: 13px !important; padding-right: 13px !important;{% endif %}
+                      "
+                    >
+                      {{ block.settings.header_text }}
+                    </div>
+                  {% endif %}
+                </div>
+              {%- endif -%}
+
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- if upsell_carousel_mode -%}
+            <div class="upsell_block_container">
+          {%- endif -%}
+
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'cart_upsell' -%}
+              {%- assign upsell_handle = block.settings.upsell_product_1 -%}
+              {%- if upsell_handle != blank -%}
+                {%- assign upsell_product = all_products[upsell_handle] -%}
+                {%- if upsell_product -%}
+                  {%- assign upsell_count = upsell_count | plus: 1 -%}
+                  {% if cart != empty %}
+                    {%- liquid
+                      assign product_form_id = 'cart-upsell-form-' | append: block.id
+                      assign this = block.settings
+                      assign upsell_product_in_cart = false
+                      assign upsell_product_id = this.upsell_product_1.id
+                      assign check_upsell_product_in_cart = cart.items | where: 'product_id', upsell_product_id | first
+
+                      if check_upsell_product_in_cart
+                        assign upsell_product_in_cart = true
+                        assign upsell_count = upsell_count | minus: 1
+                      endif
+                    -%}
+
+                    {%- unless upsell_product_in_cart -%}
+                      {%- render 'cart-drawer-upsell',
+                        block: block,
+                        block_id: block.id,
+                        product_form_id: product_form_id,
+                        upsell_product: upsell_product,
+                        show_description: block.settings.show_upsell_description,
+                        description_text: block.settings.upsell_description_text,
+                        upsell_button_text: block.settings.upsell_button_text,
+                        button_text_color: block.settings.upsell_button_text_color,
+                        upsell_custom_bestseller_svg: block.settings.upsell_custom_bestseller_svg,
+                        title_color: block.settings.upsell_title_color,
+                        description_color: block.settings.upsell_description_color,
+                        show_best_seller_tag: block.settings.show_upsell_best_seller_tag,
+                        best_seller_text: block.settings.upsell_best_seller_text,
+                        best_seller_tag_color: block.settings.upsell_best_seller_tag_color,
+                        best_seller_tag_text_color: block.settings.upsell_best_seller_tag_text_color,
+                        show_price: block.settings.upsell_show_price,
+                        card_bg_color: block.settings.upsell_card_background_color,
+                        card_border_radius: block.settings.upsell_card_border_radius,
+                        border_width: block.settings.upsell_border_width,
+                        border_style: block.settings.upsell_border_style,
+                        border_color: block.settings.upsell_border_color,
+                        price_color: block.settings.upsell_price_color,
+                        variant_border_color: block.settings.upsell_variant_border_color,
+                        variant_border_radius: block.settings.upsell_variant_border_radius,
+                        variant_bg_color: block.settings.upsell_variant_background_color,
+                        variant_text_color: block.settings.upsell_variant_text_color,
+                        button_bg_color: block.settings.upsell_button_bg_color,
+                        button_border_radius: block.settings.upsell_button_border_radius,
+                        button_text_color: block.settings.upsell_button_text_color,
+                        upsell_show_price: block.settings.upsell_show_price,
+                        remove_container_border: block.settings.upsell_remove_container_border,
+                        image_border_radius: block.settings.upsell_image_border_radius,
+                        product_image_bg_color: block.settings.upsell_product_image_background_color,
+                        title_font_size: block.settings.upsell_title_font_size,
+                        description_font_size: block.settings.upsell_description_font_size,
+                        price_font_size: block.settings.upsell_price_font_size,
+                        variant_font_size: block.settings.upsell_variant_font_size,
+                        button_font_size: block.settings.upsell_button_font_size,
+                        tag_font_size: block.settings.upsell_tag_font_size,
+                        top_margin: block.settings.upsell_margin_top,
+                        bottom_margin: block.settings.upsell_margin_bottom
+                      -%}
+                    {%- endunless -%}
+                  {% endif %}
+                {%- endif -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- if upsell_carousel_mode -%}
+            </div>
+            {%- if upsell_count > 1 -%}
+              <div class="dots-and-arrows">
+                <button id="slide-arrow-prev" class="slide-arrow prev" type="button" aria-label="Prev">
+                  <svg viewBox="0 0 20 20">
+                    <path d="M14 5l-5 5 5 5-1 2-7-7 7-7z"/>
+                  </svg>
+                </button>
+
+                {%- for i in (1..upsell_count) -%}
+                  <span
+                    class="slide_item{% if forloop.first %} active{% endif %}"
+                    data-slide="{{ forloop.index }}"
+                  ></span>
+                {%- endfor -%}
+
+                <button id="slide-arrow-next" class="slide-arrow next" type="button" aria-label="Next">
+                  <svg viewBox="0 0 20 20">
+                    <path d="M6 15l5-5-5-5 1-2 7 7-7 7z"/>
+                  </svg>
+                </button>
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+          {%- endif -%}
+
+          {%- if cart != empty -%}
+            <section class="vhl-cart-discount-section" aria-labelledby="vhl-cart-discount-title">
+              <div class="vhl-cart-discount-section__head">
+                <div id="vhl-cart-discount-title" class="vhl-cart-discount-section__title">Kortingscode</div>
+                <div class="vhl-cart-discount-section__caption">Heb je een code uit onze e-mail ontvangen?</div>
+              </div>
+              {% render 'cart-discount-code', block: blank %}
+            </section>
+          {%- endif -%}
+        </div>
+      </cart-drawer-items>
+
+      <div class="drawer__footer">
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'cart_note' %}
+              {%- if block.settings.show_cart_note -%}
+                <details id="Details-CartDrawer" style="padding: 0 15px;" {{ block.shopify_attributes }}>
+                  <summary>
+                    <span class="summary__title">
+                      {{ 'sections.cart.note' | t }}
+                      {{- 'icon-caret.svg' | inline_asset_content -}}
+                    </span>
+                  </summary>
+                  <cart-note class="cart__note field">
+                    <label class="visually-hidden" for="CartDrawer-Note">{{ 'sections.cart.note' | t }}</label>
+                    <textarea
+                      id="CartDrawer-Note"
+                      class="text-area text-area--resize-vertical field__input"
+                      name="note"
+                      placeholder="{{ 'sections.cart.note' | t }}"
+                    >{{ cart.note }}</textarea>
+                  </cart-note>
+                </details>
+              {%- endif -%}
+
+              <!-- Start blocks -->
+              <!-- Discount Code -->
+            {% when 'cart_discount_code' %}
+              {% comment %} VHL: kortingscode staat vast direct onder de upsells. {% endcomment %}
+
+              <!-- Subtotals -->
+            {% when 'cart_subtotals' %}
+              <div class="cart-drawer__footer" style="display:none;" {{ block.shopify_attributes }}>
+                <div>
+                  {%- if cart.cart_level_discount_applications.size > 0 -%}
+                    <ul class="discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
+                      {%- for discount in cart.cart_level_discount_applications -%}
+                        <li class="discounts__discount discounts__discount--end">
+                          {{- 'icon-discount.svg' | inline_asset_content -}}
+                          {{ discount.title | escape }}
+                          (-{{ discount.total_allocated_amount | money }})
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                </div>
+
+                <div class="totals" role="status">
+                  <h2 class="totals__total">
+                    <p class="gb-totals-total-value" style="display:none;">{{ cart.total_price }}</p>
+                    {{ 'sections.cart.estimated_total' | t }}
+                  </h2>
+
+                  <p class="totals__total-value">{{ cart.total_price | money_with_currency }}</p>
+                </div>
+
+                <small class="tax-note caption-large rte">
+                  {%- if cart.duties_included and cart.taxes_included -%}
+                    {%- if shop.shipping_policy.body == blank -%}
+                      {{ 'sections.cart.duties_and_taxes_included_shipping_at_checkout_without_policy' | t }}
+                    {%- else -%}
+                      {{
+                        'sections.cart.duties_and_taxes_included_shipping_at_checkout_with_policy_html'
+                        | t: link: shop.shipping_policy.url
+                      }}
+                    {%- endif -%}
+                  {%- elsif cart.duties_included == false and cart.taxes_included -%}
+                    {%- if shop.shipping_policy.body == blank -%}
+                      {{ 'sections.cart.taxes_included_shipping_at_checkout_without_policy' | t }}
+                    {%- else -%}
+                      {{
+                        'sections.cart.taxes_included_shipping_at_checkout_with_policy_html'
+                        | t: link: shop.shipping_policy.url
+                      }}
+                    {%- endif -%}
+                  {%- elsif cart.duties_included and cart.taxes_included == false -%}
+                    {%- if shop.shipping_policy.body == blank -%}
+                      {{ 'sections.cart.duties_included_taxes_at_checkout_shipping_at_checkout_without_policy' | t }}
+                    {%- else -%}
+                      {{
+                        'sections.cart.duties_included_taxes_at_checkout_shipping_at_checkout_with_policy_html'
+                        | t: link: shop.shipping_policy.url
+                      }}
+                    {%- endif -%}
+                  {%- elsif cart.duties_included == false and cart.taxes_included == false -%}
+                    {%- if shop.shipping_policy.body == blank -%}
+                      {{ 'sections.cart.taxes_at_checkout_shipping_at_checkout_without_policy' | t }}
+                    {%- else -%}
+                      {{
+                        'sections.cart.taxes_at_checkout_shipping_at_checkout_with_policy_html'
+                        | t: link: shop.shipping_policy.url
+                      }}
+                    {%- endif -%}
+                  {%- endif -%}
+                </small>
+              </div>
+            {% when 'cart_shipping_protection' %}
+              {% render 'cart_shipping_protection_style', block: block %}
+              {% capture get_shipping_pro_id %}
+              {% assign found = false %}
+              {%- for item in cart.items -%}
+                {% if item.id == block.settings.product_shipping_protection.selected_or_first_available_variant.id %}
+                  {% assign found = true %}
+                  checked
+                  {% break %}
+                {% endif %}
+              {%- endfor -%}
+              {% if found == false %}
+                unchecked
+              {% endif %}
+            {% endcapture %}
+              <div {{ block.shopify_attributes }}>
+                <product-form
+                  style="display:none;"
+                  class="product-form gb-btn gbgbgb"
+                  data-hide-errors="{{ gift_card_recipient_feature_active }}"
+                  data-section-id="{{ section.id }}"
+                >
+                  <div class="product-form__error-message-wrapper" role="alert" hidden>
+                    <svg
+                      aria-hidden="true"
+                      focusable="false"
+                      class="icon icon-error"
+                      viewBox="0 0 13 13"
+                    >
+                      <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2"/>
+                      <circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7"/>
+                      <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white"/>
+                      <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7">
+                    </svg>
+                    <span class="product-form__error-message"></span>
+                  </div>
+
+                  <form
+                    method="post"
+                    action="{{ routes.cart_add_url }}"
+                    id="product-form-template--shipping-protection__main"
+                    accept-charset="UTF-8"
+                    class="form shipping-protection-form"
+                    enctype="multipart/form-data"
+                    novalidate="novalidate"
+                    data-type="add-to-cart-form"
+                  >
+                    <input
+                      type="hidden"
+                      name="id"
+                      value="{{block.settings.product_shipping_protection.selected_or_first_available_variant.id}}"
+                      class="product-variant-id"
+                    >
+                    <div class="product-form__buttons">
+                      {%- liquid
+                        assign check_against_inventory = true
+                        if block.settings.product_shipping_protection.selected_or_first_available_variant.inventory_management != 'shopify' or block.settings.product_shipping_protection.selected_or_first_available_variant.inventory_policy == 'continue'
+                          assign check_against_inventory = false
+                        endif
+                        if block.settings.product_shipping_protection.selected_or_first_available_variant.quantity_rule.min > block.settings.product_shipping_protection.selected_or_first_available_variant.inventory_quantity and check_against_inventory
+                          assign quantity_rule_soldout = true
+                        endif
+                      -%}
+                      <button
+                        id="ProductSubmitButton-{{ block.id }}"
+                        type="submit"
+                        name="add"
+                        class="gb-product-shipping-protection-product-tirgger product-form__submit button button--full-width {% if show_dynamic_checkout %}button--secondary{% else %}button--primary{% endif %}"
+                        {% if block.settings.product_shipping_protection.selected_or_first_available_variant.available
+                            == false
+                          or quantity_rule_soldout
+                        %}
+                          disabled
+                        {% endif %}
+                      >
+                        <span>
+                          {%- if block.settings.product_shipping_protection.selected_or_first_available_variant.available
+                              == false
+                            or quantity_rule_soldout
+                          -%}
+                            {{ 'products.product.sold_out' | t }}
+                          {%- else -%}
+                            {{ 'products.product.add_to_cart' | t }}
+                          {%- endif -%}
+                        </span>
+                        {%- render 'loading-spinner' -%}
+                      </button>
+                      {%- if show_dynamic_checkout -%}
+                        {{ form | payment_button }}
+                      {%- endif -%}
+                    </div>
+                  </form>
+                </product-form>
+                <div class="gb-shipping-protection">
+                  <div class="gb-shipping-protection-icon">
+                    {% if block.settings.cart_drawer_sp_icon != blank -%}
+                      <img
+                        src="{{ block.settings.cart_drawer_sp_icon | image_url: width: 92 }}"
+                        srcset="{{ block.settings.cart_drawer_sp_icon | image_url: width: 92 }} 1x, {{ block.settings.cart_drawer_sp_icon | image_url: width: 184 }} 2x, {{ block.settings.cart_drawer_sp_icon | image_url: width: 276 }} 3x"
+                        alt="{{ block.settings.cart_drawer_sp_heading | default: 'Shipping Protection' | escape }}"
+                        width="46"
+                        height="46"
+                        loading="lazy"
+                        style="object-fit: contain; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"
+                      >
+                    {% else %}
+                      <svg
+                        width="46"
+                        height="46"
+                        viewBox="0 0 46 46"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink"
+                      >
+                        <rect width="46" height="46" fill="url(#pattern0_1_81)"/>
+                        <defs>
+                        <pattern id="pattern0_1_81" patternContentUnits="objectBoundingBox" width="1" height="1">
+                        <use xlink:href="#image0_1_81" transform="scale(0.00195312)"/>
+                        </pattern>
+                        <image id="image0_1_81" width="512" height="512" preserveAspectRatio="none" xlink:href="data:image/png;base64,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"/>
+                        </defs>
+                      </svg>
+                    {% endif %}
+                  </div>
+                  <div class="gb-shipping-protection-icontext">
+                    <h2>
+                      {{ block.settings.cart_drawer_sp_heading | default: 'Shipping Protection' | escape }}
+                      <span>
+                        {{-
+                          block.settings.product_shipping_protection.selected_or_first_available_variant.price
+                          | money
+                        -}}
+                      </span>
+                    </h2>
+                    <p>
+                      {{
+                        block.settings.cart_drawer_sp_text
+                        | default: 'Protect your order from damage, loss, or theft during shipping'
+                        | escape
+                      }}
+                    </p>
+                  </div>
+                  <div class="gb-shipping-protection-button">
+                    <label class="switch {{ get_shipping_pro_id }}">
+                      <input type="checkbox" {{ get_shipping_pro_id }}>
+                      <span class="slider round"></span>
+                      <div class="spin-animation">
+                        <span></span>
+                      </div>
+                      <div class="complete-check">
+                        <svg fill="#fff" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1743.858 267.012 710.747 1300.124 176.005 765.382 0 941.387l710.747 710.871 1209.24-1209.116z" fill-rule="evenodd"/>
+                        </svg>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CTAs -->
+          {% endcase %}
+        {% endfor %}
+
+        <div class="vhl-order-summary-title">Besteloverzicht</div>
+
+        {%- liquid
+          assign cart_total_compare_at_price = 0
+          for item_loop_var in cart.items
+            assign item_price_for_calc = item_loop_var.variant.price
+            assign item_display_price_before_any_discount = item_price_for_calc
+            if item_loop_var.variant.compare_at_price and item_loop_var.variant.compare_at_price > item_price_for_calc
+              assign item_display_price_before_any_discount = item_loop_var.variant.compare_at_price
+            endif
+            assign line_total_compare_price = item_display_price_before_any_discount | times: item_loop_var.quantity
+            assign cart_total_compare_at_price = cart_total_compare_at_price | plus: line_total_compare_price
+          endfor
+
+          assign cart_total_savings = cart_total_compare_at_price | minus: cart.total_price
+        -%}
+
+        {% if cart_total_savings > 0 %}
+          <div
+            class="totals gb-discounts-cart-values"
+            role="status"
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0px;"
+          >
+            <div class="totals__total">
+              <span> Besparing </span>
+            </div>
+
+            <div class="discount_price-container">
+              <div class="discount_discount-value">
+                <span style="font-weight: var(--font-weight-regular);">-{{ cart_total_savings | money }}</span>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <div
+          class="totals gb-discounts-cart-values"
+          role="status"
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0px;"
+        >
+          <div class="totals__total">
+            <span class="total_count font-bold">
+              Totaal: {{ cart.item_count }} artikelen
+            </span>
+          </div>
+          <div class="discount_price-container">
+            <div style="display: flex; align-items: baseline;">
+              {% if cart_total_compare_at_price > cart.total_price %}
+                <s
+                  class="cart-item__old-price product-option"
+                  style="margin-right: 6px; font-size: 14px; color: currentColor; opacity: 0.7;"
+                >
+                  {{ cart_total_compare_at_price | money }}
+                </s>
+              {% endif %}
+
+              <div class="totals__total-value">
+                {{ cart.total_price | money }}
+              </div>
+            </div>
+          </div>
+          <p class="gb-totals-total-value" style="display:none;">{{ cart.total_price }}</p>
+        </div>
+        <div class="cart__ctas" {{ block.shopify_attributes }}>
+          <button
+            type="submit"
+            id="CartDrawer-Checkout"
+            class="cart__checkout-button button"
+            name="checkout"
+            form="CartDrawer-Form"
+            {% if cart == empty %}
+              disabled
+            {% endif %}
+          >
+            <svg
+              class="icon icon-lock"
+              aria-hidden="true"
+              focusable="false"
+              role="presentation"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span class="button-text">
+              {{- section.settings.cart_drawer_checkout_button_label | default: 'VEILIG AFREKENEN' | escape -}}
+            </span>
+          </button>
+        </div>
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'cart_money_back_guarantee' %}
+              {% if block.settings.show_money_back_guarantee != false %}
+                <div {{ block.shopify_attributes }}>
+                  {% render 'cart-money_back_guarantee', block: block %}
+                </div>
+              {% endif %}
+            {% when 'cart_payment_icon' %}
+              <div class="cart-drawer-payment-icons" {{ block.shopify_attributes }}>
+                {% render 'vhl-cart-payment-icons' %}
+              </div>
+            {% when 'trustpilot_rating' %}
+              <div class="cart-drawer-trustpilot-rating" {{ block.shopify_attributes }}>
+                {% render 'trustpilot-rating-block', block: block %}
+              </div>
+          {% endcase %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</cart-drawer>
+
+
+<style>
+  /* =========================================================
+     VANHOUTEN LIVING — PREMIUM CART DRAWER V1.8
+     Presentatielaag bovenop de bestaande Shopify-cartengine.
+  ========================================================= */
+
+  cart-drawer .drawer__inner {
+    background: #fbfaf8 !important;
+    color: #292824 !important;
+  }
+
+  .cart-drawer .scrollable-contents {
+    padding-bottom: 18px;
+  }
+
+  .cart-drawer .cart-drawer-header-blocks {
+    background: #fbfaf8;
+  }
+
+  .cart-drawer .vhl-cart-discount-section {
+    margin: 20px 16px 8px;
+    padding-top: 18px;
+    border-top: 1px solid #e7e3dc;
+  }
+
+  .cart-drawer .vhl-cart-discount-section__title {
+    margin: 0 0 10px;
+    color: #292824;
+    font-size: 15px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .cart-drawer .drawer__footer {
+    position: relative;
+    z-index: 5;
+    padding: 16px 18px 14px !important;
+    background: #fbfaf8 !important;
+    border-top: 1px solid #e7e3dc !important;
+    box-shadow: 0 -10px 28px rgba(41,40,36,.04);
+  }
+
+  .cart-drawer .vhl-order-summary-title {
+    margin: 0 0 12px;
+    color: #292824;
+    font-size: 15px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .cart-drawer .gb-discounts-cart-values {
+    margin-bottom: 7px !important;
+  }
+
+  .cart-drawer .total_count {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+
+  .cart-drawer .totals__total-value {
+    color: #292824 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+  }
+
+  .cart-drawer .cart__checkout-button {
+    min-height: 52px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: #4c4b47 !important;
+    color: #fff !important;
+    box-shadow: 0 7px 18px rgba(41,40,36,.12) !important;
+  }
+
+  .cart-drawer .cart__checkout-button:hover {
+    background: #3f3e3a !important;
+  }
+
+  .cart-drawer .cart__checkout-button .button-text {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    letter-spacing: .01em !important;
+  }
+
+  .cart-drawer-payment-icons {
+    margin-top: 7px !important;
+  }
+
+  .cart-drawer-payment-icons .payment-icons-wrapper {
+    gap: 8px !important;
+  }
+
+  .cart-drawer .cart-item {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .cart-drawer .cart-item__name {
+    line-height: 1.25 !important;
+    letter-spacing: -0.012em !important;
+  }
+
+  .cart-drawer .cart-item .product-option {
+    line-height: 1.35 !important;
+  }
+
+  @media screen and (max-width: 749px) {
+    .cart-drawer .drawer__footer {
+      padding: 14px 14px 12px !important;
+    }
+
+    .cart-drawer .vhl-cart-discount-section {
+      margin-left: 14px;
+      margin-right: 14px;
+    }
+
+    .cart-drawer .cart__checkout-button {
+      min-height: 50px !important;
+    }
+  }
+
+  /* =========================================================
+     VANHOUTEN LIVING — CART DRAWER V1.9 FULL REBUILD
+  ========================================================= */
+
+  .cart-drawer .vhl-legacy-cart-promos {
+    display: none !important;
+  }
+
+  cart-drawer .drawer__inner {
+    background: #fbfaf8 !important;
+  }
+
+  /* Lege winkelmand blijft dezelfde drawer + header tonen */
+  cart-drawer.is-empty .drawer__header.vhl-cart-header {
+    display: flex !important;
+  }
+
+  cart-drawer.is-empty .drawer__inner {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .cart-drawer cart-drawer-items {
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+  }
+
+  .cart-drawer .scrollable-contents {
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 0 0 18px !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .cart-drawer .scrollable-contents::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Verzendvoortgang boven de producten */
+  .cart-drawer .free-product-progress-bar-main {
+    margin: 0 !important;
+    padding: 15px 16px 14px !important;
+    border-bottom: 1px solid #ece7e0 !important;
+    background: #fff !important;
+  }
+
+  .cart-drawer .free-product-progress-bar-successfull {
+    margin-bottom: 11px !important;
+    color: #292824 !important;
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+  }
+
+  .cart-drawer .free-product-progress-bar progress {
+    height: 4px !important;
+    border-radius: 999px !important;
+    overflow: hidden !important;
+  }
+
+  .cart-drawer .free-product-progress-bar progress::-webkit-progress-bar {
+    background: #e9e5df !important;
+  }
+
+  .cart-drawer .free-product-progress-bar progress::-webkit-progress-value {
+    background: #55534e !important;
+  }
+
+  .cart-drawer .free-product-progress-bar progress::-moz-progress-bar {
+    background: #55534e !important;
+  }
+
+  .cart-drawer .free-shipping-main .reward-name,
+  .cart-drawer .free-gift-main .reward-name {
+    color: #66625c !important;
+    font-size: 9px !important;
+    font-weight: 600 !important;
+  }
+
+  /* Productlijst */
+  .cart-drawer #CartDrawer-CartItems {
+    padding: 0 16px !important;
+  }
+
+  .cart-drawer .cart-item {
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+    border-bottom: 1px solid #ece7e0 !important;
+  }
+
+  .cart-drawer .cart-item:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .cart-drawer .cart-item__media,
+  .cart-drawer .cart-item__image-container {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    background: #f3f0eb !important;
+  }
+
+  .cart-drawer .cart-item__image {
+    object-fit: cover !important;
+  }
+
+  .cart-drawer .cart-item__name {
+    color: #292824 !important;
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  .cart-drawer .product-option,
+  .cart-drawer .cart-item__details dl {
+    color: #77736c !important;
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+  }
+
+  .cart-drawer quantity-input,
+  .cart-drawer .quantity {
+    min-height: 32px !important;
+    border: 1px solid #ded9d1 !important;
+    border-radius: 999px !important;
+    background: #fff !important;
+  }
+
+  /* Upsellsectie duidelijk apart */
+  .cart-drawer .vhl-auto-upsells {
+    margin-top: 4px !important;
+    padding-top: 16px !important;
+    border-top: 8px solid #f2efe9 !important;
+  }
+
+  .cart-drawer .vhl-auto-upsells__heading-row {
+    margin-top: 0 !important;
+  }
+
+  .cart-drawer .vhl-auto-upsells__heading {
+    font-size: 17px !important;
+    font-weight: 700 !important;
+  }
+
+  .cart-drawer .vhl-auto-upsells__discount-pill {
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+    color: #45433f !important;
+  }
+
+  /* Kortingscode is een zelfstandige sectie */
+  .cart-drawer .vhl-cart-discount-section {
+    margin: 16px 0 0 !important;
+    padding: 16px !important;
+    border-top: 8px solid #f2efe9 !important;
+    border-bottom: 1px solid #e8e3dc !important;
+    background: #fbfaf8 !important;
+  }
+
+  .cart-drawer .vhl-cart-discount-section__head {
+    margin-bottom: 10px;
+  }
+
+  .cart-drawer .vhl-cart-discount-section__title {
+    margin: 0 !important;
+    color: #292824 !important;
+    font-size: 15px !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+  }
+
+  .cart-drawer .vhl-cart-discount-section__caption {
+    margin-top: 3px;
+    color: #77736c;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  /* Checkoutzone */
+  .cart-drawer .drawer__footer {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 14px 16px 16px !important;
+    border-top: 1px solid #ded9d1 !important;
+    background: #fff !important;
+    box-shadow: 0 -8px 24px rgba(39, 37, 33, 0.045);
+  }
+
+  .cart-drawer .vhl-order-summary-title {
+    margin: 0 0 10px !important;
+    color: #292824 !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+  }
+
+  .cart-drawer .totals.gb-discounts-cart-values {
+    color: #292824 !important;
+    font-size: 12px !important;
+  }
+
+  .cart-drawer #CartDrawer-Checkout {
+    min-height: 48px !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+    border: 0 !important;
+    border-radius: 7px !important;
+    background: #4c4b47 !important;
+    color: #fff !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: .02em !important;
+    box-shadow: none !important;
+  }
+
+  .cart-drawer #CartDrawer-Checkout:hover {
+    background: #3e3d39 !important;
+  }
+
+  .cart-drawer .cart-drawer-payment-icons {
+    margin-top: 0 !important;
+  }
+
+  /* Mobiel: volledige breedte, referentie-achtige compacte flow */
+  @media screen and (max-width: 749px) {
+    cart-drawer .drawer__inner,
+    cart-drawer.is-empty .drawer__inner {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      border: 0 !important;
+    }
+
+    .cart-drawer .free-product-progress-bar-main {
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+    }
+
+    .cart-drawer #CartDrawer-CartItems {
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+    }
+
+    .cart-drawer .drawer__footer {
+      padding: 13px 14px 14px !important;
+    }
+
+    .cart-drawer .vhl-cart-discount-section {
+      padding: 15px 14px !important;
+    }
+  }
+
+</style>
+{% render 'cart-drawer_style',
+  enabled_upsell_block: enabled_upsell_block,
+  upsell_carousel_mode: upsell_carousel_mode,
+  shipping_protection_percent: shipping_protection_percent,
+  shipping_protection_pixel: shipping_protection_pixel,
+  shipping_icon_percent: shipping_icon_percent,
+  shipping_icon_pixel: shipping_icon_pixel,
+  gift_icon_percent: gift_icon_percent,
+  gift_icon_pixel: gift_icon_pixel
+%}
+
+{% schema %}
+{
+  "name": "Cart Drawer",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "cart_customization_mode",
+      "label": "Cart Customization Mode",
+      "default": false,
+      "info": "When enabled, keeps the cart drawer rendered (visible) for easier customization and theme development. Disable in production."
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors_cart_drawer",
+      "label": "Use Theme Colors for Cart Drawer",
+      "default": true,
+      "info": "When enabled, the cart drawer will use global theme colors. Disable to use specific cart drawer color settings below."
+    },
+    {
+      "type": "header",
+      "content": "Upsell settings",
+      "info": "This settings works with the block 'Upsell' "
+    },
+    {
+      "type": "checkbox",
+      "id": "upsell_carousel_mode",
+      "label": "Display Upsell Block in Carousel",
+      "default": false,
+      "info": "When enabled, the upsell block will be displayed in carousel."
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_upsell_enabled",
+      "label": "Automatische collectie-upsells gebruiken",
+      "default": false,
+      "info": "Toont automatisch producten uit een gekoppelde collectie op basis van producten in de winkelmand."
+    },
+    {
+      "type": "text",
+      "id": "auto_upsell_heading",
+      "label": "Titel automatische upsells",
+      "default": "Maak je badkamer compleet"
+    },
+    {
+      "type": "range",
+      "id": "auto_upsell_limit",
+      "label": "Aantal automatische upsells",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Cart Drawer Heading"
+    },
+    {
+      "type": "range",
+      "id": "drawer_heading_font_size_desktop",
+      "label": "Drawer Heading Font Size (Desktop)",
+      "info": "Font size for the cart drawer heading on desktop",
+      "min": 14,
+      "max": 32,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "drawer_heading_font_size_mobile",
+      "label": "Drawer Heading Font Size (Mobile)",
+      "info": "Font size for the cart drawer heading on mobile",
+      "min": 14,
+      "max": 32,
+      "step": 1,
+      "default": 22
+    },
+    {
+      "type": "header",
+      "content": "Empty Cart Settings"
+    },
+    {
+      "type": "url",
+      "id": "empty_cart_redirect_url",
+      "label": "Continue Shopping Link",
+      "info": "URL for the 'Continue Shopping' button when cart is empty. Leave blank to use the default All Products collection page."
+    },
+    {
+      "type": "header",
+      "content": "Cart Items settings"
+    },
+    {
+      "type": "range",
+      "id": "cart_title_font_size",
+      "label": "Cart item Title Font Fize (Desktop)",
+      "info": "Item Title font size (Desktop)",
+      "min": 0,
+      "max": 24,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "cart_title_font_size_mobile",
+      "label": "Cart item Title Font Fize (Mobile)",
+      "info": "Item Title font size (Mobile)",
+      "min": 0,
+      "max": 24,
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "cart_title_line_height_desktop",
+      "label": "Cart item Title Line Height (Desktop)",
+      "info": "Item Title line height (Desktop)",
+      "min": 1.0,
+      "max": 2.5,
+      "step": 0.1,
+      "default": 1.4
+    },
+    {
+      "type": "range",
+      "id": "cart_title_line_height_mobile",
+      "label": "Cart item Title Line Height (Mobile)",
+      "info": "Item Title line height (Mobile)",
+      "min": 1.0,
+      "max": 2.5,
+      "step": 0.1,
+      "default": 1.3
+    },
+    {
+      "type": "select",
+      "id": "cart_image_size",
+      "label": "Cart Image Size",
+      "info": "Controls width and height of cart item images",
+      "options": [
+        {
+          "label": "70px",
+          "value": "70"
+        },
+        {
+          "label": "80px",
+          "value": "80"
+        },
+        {
+          "label": "90px",
+          "value": "90"
+        },
+        {
+          "label": "120px (Default)",
+          "value": "120"
+        }
+      ],
+      "default": "120"
+    },
+    {
+      "type": "range",
+      "id": "cart_items_price_font_price",
+      "label": "Cart item price Font Size (Desktop)",
+      "info": "Item price font size (Desktop)",
+      "min": 0,
+      "max": 24,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "cart_items_price_font_price_mobile",
+      "label": "Cart item price Font Size (Mobile)",
+      "info": "Item price font size (Mobile)",
+      "min": 0,
+      "max": 24,
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "cart_items_count_font_size_desktop",
+      "label": "Cart Items Count Font Size (Desktop)",
+      "info": "Font size for the 'X items' text (Desktop)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "cart_items_count_font_size_mobile",
+      "label": "Cart Items Count Font Size (Mobile)",
+      "info": "Font size for the 'X items' text (Mobile)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "price_drawer_margin_bottom",
+      "label": "Price Drawer Margin Bottom",
+      "info": "Margin bottom for price container",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "price_saving_padding_y",
+      "label": "Price Saving Padding (Top/Bottom)",
+      "info": "Vertical padding for SAVE label",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "price_saving_padding_x",
+      "label": "Price Saving Padding (Left/Right)",
+      "info": "Horizontal padding for SAVE label",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "Item Discount Tag"
+    },
+    {
+      "type": "color",
+      "id": "discount_tag_bg_color",
+      "label": "Discount tag background color",
+      "alpha": true,
+      "default": "#f1f1f1"
+    },
+    {
+      "type": "color",
+      "id": "discount_tag_text_color",
+      "label": "Discount tag text color",
+      "alpha": true,
+      "default": "#555555"
+    },
+    {
+      "type": "number",
+      "id": "discount_tag_border_radius",
+      "label": "Discount tag border radius",
+      "default": 3
+    },
+    {
+      "type": "number",
+      "id": "discount_tag_font_size",
+      "label": "Discount tag font size",
+      "default": 12
+    },
+    {
+      "type": "number",
+      "id": "discount_tag_icon_size",
+      "label": "Discount tag font size",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Drawer Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "drawer_width_desktop",
+      "label": "Drawer Width (Desktop)",
+      "info": "Width of the cart drawer on desktop (in rem units)",
+      "min": 30,
+      "max": 60,
+      "step": 1,
+      "default": 40,
+      "unit": "rem"
+    },
+    {
+      "type": "header",
+      "content": "Footer Padding"
+    },
+    {
+      "type": "range",
+      "id": "drawer_footer_padding_top",
+      "label": "Footer Padding Top",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 15,
+      "info": "Top padding for the cart drawer footer"
+    },
+    {
+      "type": "range",
+      "id": "drawer_footer_padding_bottom",
+      "label": "Footer Padding Bottom",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 15,
+      "info": "Bottom padding for the cart drawer footer"
+    },
+    {
+      "type": "range",
+      "id": "drawer_footer_padding_horizontal",
+      "label": "Footer Padding Horizontal",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 15,
+      "info": "Left and right padding for the cart drawer footer"
+    },
+    {
+      "type": "header",
+      "content": "Color Settings"
+    },
+
+    {
+      "type": "color",
+      "id": "cart_drawer_primary_background_color",
+      "label": "Primary Background Color",
+      "default": "#FFFFFF",
+      "info": "Main background color for the cart drawer"
+    },
+    {
+      "type": "color_background",
+      "id": "cart_drawer_bg_gradient",
+      "label": "Background Gradient",
+      "default": "linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 100%)",
+      "info": "Background gradient for the cart drawer. Always uses this gradient, independent of theme colors setting."
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_primary_text_color",
+      "label": "Primary Text Color",
+      "default": "#121212",
+      "info": "Main text color for cart drawer"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_header_bg",
+      "label": "Header Background Color",
+      "default": "#F8F8F8",
+      "info": "Background color for the cart drawer header"
+    },
+    {
+      "type": "range",
+      "id": "cart_drawer_header_height",
+      "label": "Header Height",
+      "min": 40,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 70,
+      "info": "Adjust the height of the cart drawer header"
+    },
+    {
+      "type": "range",
+      "id": "drawer_close_button_top",
+      "label": "Close Button Top Position",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 24,
+      "info": "Vertical position of the close button from the top"
+    },
+    {
+      "type": "range",
+      "id": "drawer_contents_padding_top",
+      "label": "Contents Padding Top",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "info": "Top padding for the cart drawer contents area"
+    },
+    {
+      "type": "range",
+      "id": "drawer_contents_padding_bottom",
+      "label": "Contents Padding Bottom",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "info": "Bottom padding for the cart drawer contents area"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_product_bg",
+      "label": "Product Background Color",
+      "default": "#FFFFFF",
+      "info": "Background color for product items in cart"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_footer_bg",
+      "label": "Footer Background Color",
+      "default": "#F8F8F8",
+      "info": "Background color for the cart drawer footer with totals and checkout button"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_secondary_text",
+      "label": "Secondary Text Color",
+      "default": "#707070",
+      "info": "Used for subtitles, prices, and secondary information"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_accent_color",
+      "label": "Accent Color",
+      "default": "#EF4A65",
+      "info": "Used for highlights and special elements"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_divider_color",
+      "label": "Divider Color",
+      "default": "#E5E5E5",
+      "info": "Color for dividers and borders in the cart"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_checkout_button_bg",
+      "label": "Checkout Button Background",
+      "default": "#121212",
+      "info": "Background color for the checkout button"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_checkout_button_text",
+      "label": "Checkout Button Text Color",
+      "default": "#FFFFFF",
+      "info": "Text color for the checkout button"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_item_saving_text",
+      "label": "Item Saving Text Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_item_saving_bg",
+      "label": "Item Saving Background Color",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_free_product_label_bg",
+      "label": "Free Product Label Background",
+      "default": "#f4f4f4",
+      "info": "Background color for the free product label (always uses this color, independent of theme colors setting)"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_free_product_label_text",
+      "label": "Free Product Label Text & Icon",
+      "default": "#ffffff",
+      "info": "Text and icon color for the free product label (always uses this color, independent of theme colors setting)"
+    },
+    {
+      "type": "range",
+      "id": "cart_drawer_free_product_label_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Free Product Label Border Radius",
+      "default": 50,
+      "info": "Controls the roundness of the free product label corners"
+    },
+    {
+      "type": "range",
+      "id": "cart_drawer_free_product_label_font_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Free Product Label Font Size",
+      "default": 13,
+      "info": "Font size for the free product label text"
+    },
+    {
+      "type": "range",
+      "id": "cart_drawer_free_product_label_padding_y",
+      "min": 1,
+      "max": 15,
+      "step": 1,
+      "unit": "px",
+      "label": "Free Product Label Vertical Padding",
+      "default": 2,
+      "info": "Top and bottom padding inside the free product label"
+    },
+    {
+      "type": "range",
+      "id": "cart_drawer_free_product_label_padding_x",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Free Product Label Horizontal Padding",
+      "default": 8,
+      "info": "Left and right padding inside the free product label"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_fs_icon_default_color",
+      "label": "Free Shipping Icon Default Color",
+      "default": "#808080",
+      "info": "When 'Use Theme Colors for Cart Drawer' is enabled, this will use Accent Color 2"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_fs_icon_active_color",
+      "label": "Free Shipping Icon Active Color",
+      "default": "#000000",
+      "info": "When 'Use Theme Colors for Cart Drawer' is enabled, this will use Accent Color 1"
+    },
+    {
+      "type": "range",
+      "id": "cart_drawer_image_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Cart Item Image Border Radius",
+      "default": 8,
+      "info": "Controls the roundness of product images in the cart"
+    },
+    {
+      "type": "header",
+      "content": "Total Discount Tag"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_discount_bg_color",
+      "label": "Discount Tag Background Color",
+      "default": "#000000",
+      "info": "Background color for discount tags in the cart"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_discount_text_color",
+      "label": "Discount Tag Text Color",
+      "default": "#FFFFFF",
+      "info": "Text color for discount tags in the cart"
+    },
+    {
+      "type": "color",
+      "id": "cart_drawer_discount_icon_color",
+      "label": "Discount Tag Icon Color",
+      "default": "#FFFFFF",
+      "info": "Color for the discount tag icon"
+    },
+    {
+      "type": "range",
+      "id": "cart_drawer_discount_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Discount Tag Border Radius",
+      "default": 4,
+      "info": "Controls the roundness of discount tag corners"
+    },
+    {
+      "type": "header",
+      "content": "Checkout Button"
+    },
+    {
+      "type": "text",
+      "id": "cart_drawer_checkout_button_label",
+      "label": "Checkout Button Text"
+    },
+    {
+      "type": "range",
+      "id": "cart_drawer_checkout_button_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Checkout Button Border Radius",
+      "default": 4,
+      "info": "Controls the roundness of checkout button corners"
+    },
+    {
+      "type": "header",
+      "content": "Subscribe & Save CTA"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_subscribe_cta",
+      "label": "Subscribe CTA",
+      "default": false,
+      "info": "Enable the Subscribe & Save button for cart items that have selling plans available but don't currently have a subscription"
+    },
+    {
+      "type": "text",
+      "id": "subscribe_cta_text",
+      "label": "Subscribe CTA Button Text",
+      "default": "Subscribe & Save",
+      "info": "Text displayed on the subscribe button in cart items",
+      "visible_if": "{{ section.settings.enable_subscribe_cta == true }}"
+    },
+    {
+      "type": "text",
+      "id": "subscribe_cta_frequency_label",
+      "label": "Subscribe CTA Frequency Label",
+      "default": "Delivers every",
+      "info": "Text displayed before the frequency dropdown in cart items",
+      "visible_if": "{{ section.settings.enable_subscribe_cta == true }}"
+    },
+    {
+      "type": "color",
+      "id": "subscribe_cta_text_color",
+      "label": "CTA Text Color",
+      "default": "#000000",
+      "info": "Color of the text on the subscribe button",
+      "visible_if": "{{ section.settings.enable_subscribe_cta == true }}"
+    },
+    {
+      "type": "color",
+      "id": "subscribe_cta_background_color",
+      "label": "CTA Background Color",
+      "default": "#ffffff",
+      "info": "Background color of the subscribe button",
+      "visible_if": "{{ section.settings.enable_subscribe_cta == true }}"
+    },
+    {
+      "type": "color",
+      "id": "subscribe_cta_border_color",
+      "label": "CTA Border Color",
+      "default": "#000000",
+      "info": "Color of the subscribe button border",
+      "visible_if": "{{ section.settings.enable_subscribe_cta == true }}"
+    },
+    {
+      "type": "color",
+      "id": "subscribe_cta_frequency_label_color",
+      "label": "Frequency Label Color",
+      "default": "#6e6e6e",
+      "info": "Color of the frequency label",
+      "visible_if": "{{ section.settings.enable_subscribe_cta == true }}"
+    },
+    {
+      "type": "color",
+      "id": "subscribe_cta_frequency_select_color",
+      "label": "Frequency Select Color",
+      "default": "#0374a5",
+      "info": "Color of the frequency select",
+      "visible_if": "{{ section.settings.enable_subscribe_cta == true }}"
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Trustpilot Rating",
+      "type": "trustpilot_rating",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Content Settings"
+        },
+        {
+          "type": "text",
+          "id": "rating_text",
+          "label": "Rating Text",
+          "default": "Excellent"
+        },
+        {
+          "type": "text",
+          "id": "rating_score",
+          "label": "Rating Score",
+          "default": "4.7 sur 5"
+        },
+        {
+          "type": "header",
+          "content": "Style Settings"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "star_color",
+          "label": "Star Color",
+          "default": "#00b67a"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_single_star_after_text",
+          "label": "Show additional single star after text",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "font_size_desktop",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "default": 14,
+          "label": "Desktop Font Size (px)"
+        },
+        {
+          "type": "range",
+          "id": "font_size_tablet",
+          "min": 10,
+          "max": 22,
+          "step": 1,
+          "default": 14,
+          "label": "Tablet Font Size (px)"
+        },
+        {
+          "type": "range",
+          "id": "font_size_mobile",
+          "min": 10,
+          "max": 20,
+          "step": 1,
+          "default": 14,
+          "label": "Mobile Font Size (px)"
+        },
+        {
+          "type": "range",
+          "id": "star_size_desktop",
+          "min": 12,
+          "max": 30,
+          "step": 1,
+          "default": 18,
+          "label": "Desktop Star Size (px)"
+        },
+        {
+          "type": "range",
+          "id": "star_size_tablet",
+          "min": 12,
+          "max": 28,
+          "step": 1,
+          "default": 18,
+          "label": "Tablet Star Size (px)"
+        },
+        {
+          "type": "range",
+          "id": "star_size_mobile",
+          "min": 12,
+          "max": 24,
+          "step": 1,
+          "default": 18,
+          "label": "Mobile Star Size (px)"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": -20,
+          "max": 20,
+          "step": 5,
+          "default": 10,
+          "label": "Top Margin (px)"
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": -20,
+          "max": 20,
+          "step": 5,
+          "default": 10,
+          "label": "Bottom Margin (px)"
+        },
+        {
+          "type": "text",
+          "id": "link",
+          "label": "Reviews anchor",
+          "default": "reviews",
+          "info": "Enter the ID of the reviews section (e.g., \"reviews\")."
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_background",
+          "label": "Enable Background Color",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": "Background Color",
+          "default": "#f8f8f8",
+          "info": "Only applied if 'Enable Background Color' is checked."
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_background_gradient",
+          "label": "Enable Background Gradient",
+          "default": false,
+          "info": "Enable gradient background instead of solid color"
+        },
+        {
+          "type": "color",
+          "id": "background_gradient_start",
+          "label": "Gradient Start Color",
+          "default": "#ffffff",
+          "info": "Starting color of the gradient"
+        },
+        {
+          "type": "color",
+          "id": "background_gradient_end",
+          "label": "Gradient End Color",
+          "default": "#f0f0f0",
+          "info": "Ending color of the gradient"
+        },
+        {
+          "type": "select",
+          "id": "background_gradient_direction",
+          "label": "Gradient Direction",
+          "default": "to right",
+          "options": [
+            {
+              "value": "to right",
+              "label": "Left to Right"
+            },
+            {
+              "value": "to left",
+              "label": "Right to Left"
+            },
+            {
+              "value": "to bottom",
+              "label": "Top to Bottom"
+            },
+            {
+              "value": "to top",
+              "label": "Bottom to Top"
+            },
+            {
+              "value": "to bottom right",
+              "label": "Top Left to Bottom Right"
+            },
+            {
+              "value": "to bottom left",
+              "label": "Top Right to Bottom Left"
+            },
+            {
+              "value": "to top right",
+              "label": "Bottom Left to Top Right"
+            },
+            {
+              "value": "to top left",
+              "label": "Bottom Right to Top Left"
+            },
+            {
+              "value": "45deg",
+              "label": "45° Diagonal"
+            },
+            {
+              "value": "90deg",
+              "label": "90° Vertical"
+            },
+            {
+              "value": "135deg",
+              "label": "135° Diagonal"
+            },
+            {
+              "value": "180deg",
+              "label": "180° Horizontal"
+            }
+          ],
+          "info": "Direction of the gradient"
+        },
+        {
+          "type": "color",
+          "id": "border_color",
+          "label": "Border Color",
+          "default": "#e0e0e0"
+        },
+        {
+          "type": "range",
+          "id": "border_width",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "default": 1,
+          "label": "Border Width (px)"
+        },
+        {
+          "type": "select",
+          "id": "border_style",
+          "label": "Border Style",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "solid", "label": "Solid" },
+            { "value": "dotted", "label": "Dotted" },
+            { "value": "dashed", "label": "Dashed" }
+          ],
+          "default": "dotted"
+        },
+        {
+          "type": "range",
+          "id": "border_radius",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "default": 4,
+          "label": "Border Radius (px)",
+          "info": "Only applied if 'Enable Background Color' is checked."
+        }
+      ]
+    },
+    {
+      "type": "upsell_header",
+      "name": "Upsell Section Header",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "header_text",
+          "label": "Header Text",
+          "default": "<p>Customers also add ...</p>",
+          "info": "Text displayed above all upsell products. Use bold for emphasis."
+        },
+        {
+          "type": "color",
+          "id": "header_text_color",
+          "label": "Header Text Color",
+          "default": "#333333"
+        },
+        {
+          "type": "range",
+          "id": "header_font_size",
+          "min": 12,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "label": "Header Font Size",
+          "default": 14
+        },
+        {
+          "type": "select",
+          "id": "header_alignment",
+          "label": "Header Alignment",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "header_margin_top",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "label": "Header Margin Top",
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "header_margin_bottom",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "label": "Header Margin Bottom",
+          "default": 8
+        },
+        {
+          "type": "header",
+          "content": "Divider Settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_divider",
+          "label": "Show Divider",
+          "default": false,
+          "info": "Shows a divider line next to the text. Left-aligned shows divider on right, center-aligned shows dividers on both sides."
+        },
+        {
+          "type": "color",
+          "id": "divider_color",
+          "label": "Divider Color",
+          "default": "#e0e0e0"
+        },
+        {
+          "type": "range",
+          "id": "divider_height",
+          "label": "Divider Thickness",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "unit": "px",
+          "default": 1
+        },
+        {
+          "type": "range",
+          "id": "divider_spacing",
+          "label": "Divider Spacing",
+          "info": "Space between divider and text",
+          "min": 4,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "default": 12
+        },
+        {
+          "type": "select",
+          "id": "divider_style",
+          "label": "Divider Style",
+          "options": [
+            {
+              "value": "solid",
+              "label": "Solid"
+            },
+            {
+              "value": "dashed",
+              "label": "Dashed"
+            },
+            {
+              "value": "dotted",
+              "label": "Dotted"
+            }
+          ],
+          "default": "solid"
+        }
+      ]
+    },
+    {
+      "type": "cart_timer_bar",
+      "name": "Timer Bar",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Timer Settings"
+        },
+        {
+          "type": "number",
+          "id": "timer_minutes",
+          "label": "Timer Duration (Minutes)",
+          "default": 10,
+          "info": "How many minutes the timer should count down from"
+        },
+        {
+          "type": "text",
+          "id": "timer_text",
+          "label": "Timer Text",
+          "default": "Your order is reserved for {timer} mins!",
+          "info": "Text to display. Use {timer} to show the countdown time"
+        },
+        {
+          "type": "header",
+          "content": "Styling"
+        },
+        {
+          "type": "color",
+          "id": "timer_bg_color",
+          "label": "Background Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "timer_text_color",
+          "label": "Text Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "range",
+          "id": "timer_padding",
+          "label": "Padding",
+          "min": 5,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 8,
+          "info": "Padding around the timer bar"
+        },
+        {
+          "type": "range",
+          "id": "timer_text_size",
+          "label": "Text Size",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 15,
+          "info": "Font size for the timer text"
+        },
+        {
+          "type": "header",
+          "content": "Border Settings"
+        },
+        {
+          "type": "range",
+          "id": "timer_border_width",
+          "label": "Border Width",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "Width of top and bottom borders. Set to 0 to disable."
+        },
+        {
+          "type": "color",
+          "id": "timer_border_color",
+          "label": "Border Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "select",
+          "id": "timer_border_style",
+          "label": "Border Style",
+          "options": [
+            {
+              "value": "solid",
+              "label": "Solid"
+            },
+            {
+              "value": "dashed",
+              "label": "Dashed"
+            },
+            {
+              "value": "dotted",
+              "label": "Dotted"
+            }
+          ],
+          "default": "solid"
+        }
+      ]
+    },
+    {
+      "type": "auto_upsell_rule",
+      "name": "Automatische upsellregel",
+      "limit": 20,
+      "settings": [
+        {
+          "type": "collection",
+          "id": "source_collection",
+          "label": "Als product uit collectie"
+        },
+        {
+          "type": "collection",
+          "id": "target_collection",
+          "label": "Toon producten uit collectie"
+        }
+      ]
+    },
+    {
+      "type": "cart_upsell",
+      "name": "Upsell Product",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Upsell Product Settings"
+        },
+        {
+          "type": "product",
+          "id": "upsell_product_1",
+          "label": "Select Upsell Product"
+        },
+        {
+          "type": "header",
+          "content": "Upsell Description Settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_upsell_description",
+          "label": "Show Description",
+          "default": false
+        },
+        {
+          "type": "textarea",
+          "id": "upsell_description_text",
+          "label": "Description Text",
+          "default": "Short product description here"
+        },
+        {
+          "type": "color",
+          "id": "upsell_description_color",
+          "label": "Description Text Color",
+          "default": "#333333"
+        },
+        {
+          "type": "checkbox",
+          "id": "upsell_show_price",
+          "label": "Show the price inside the button",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "upsell_button_text",
+          "label": "Button Text",
+          "default": "Add +",
+          "info": "Upsell Button Text here"
+        },
+        {
+          "type": "text",
+          "id": "upsell_button_success_text",
+          "label": "Success Button Text",
+          "default": "Added!",
+          "info": "Text to display after the upsell product has been added to cart"
+        },
+        {
+          "type": "header",
+          "content": "Upsell Best Seller Tag"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_upsell_best_seller_tag",
+          "label": "Show 'Best Seller' Tag",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "upsell_best_seller_text",
+          "label": "Tag Text",
+          "default": "BEST SELLER"
+        },
+        {
+          "type": "color",
+          "id": "upsell_best_seller_tag_color",
+          "label": "Tag Background Color",
+          "default": "#e18942"
+        },
+        {
+          "type": "color",
+          "id": "upsell_best_seller_tag_text_color",
+          "label": "Tag Text Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "textarea",
+          "id": "upsell_custom_bestseller_svg",
+          "label": "Custom SVG Icon (Optional)",
+          "info": "Paste custom SVG code to replace the default star icon. Leave empty to use default."
+        },
+        {
+          "type": "header",
+          "content": "Upsell Style Settings"
+        },
+        {
+          "type": "color",
+          "id": "upsell_card_background_color",
+          "label": "Card Background Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "color",
+          "id": "upsell_product_image_background_color",
+          "label": "Product Image Background Color",
+          "default": "#fcf9e6"
+        },
+        {
+          "type": "color",
+          "id": "upsell_title_color",
+          "label": "Title Color",
+          "default": "#111111"
+        },
+        {
+          "type": "color",
+          "id": "upsell_price_color",
+          "label": "Price Color",
+          "default": "#111111",
+          "info": "Color for upsell price text displayed outside the button"
+        },
+        {
+          "type": "color",
+          "id": "upsell_variant_text_color",
+          "label": "Variant Text Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "upsell_variant_background_color",
+          "label": "Variant Background Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "color",
+          "id": "upsell_variant_border_color",
+          "label": "Variant Border Color",
+          "default": "#e0e0e0"
+        },
+        {
+          "type": "range",
+          "id": "upsell_variant_border_radius",
+          "label": "Variant Border Radius",
+          "info": "Border radius for the variant select dropdown",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "default": 3
+        },
+        {
+          "type": "color",
+          "id": "upsell_button_bg_color",
+          "label": "Button Background Color",
+          "default": "#181818",
+          "info": "Custom background color for upsell buttons (only applies when 'Use Theme Colors' is off)"
+        },
+        {
+          "type": "color",
+          "id": "upsell_button_text_color",
+          "label": "Button Text Color",
+          "default": "#ffffff",
+          "info": "Custom text color for upsell buttons (only applies when 'Use Theme Colors' is off)"
+        },
+        {
+          "type": "range",
+          "id": "upsell_button_border_radius",
+          "label": "Button Border Radius",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "default": 2,
+          "info": "Border radius for upsell buttons"
+        },
+        {
+          "type": "header",
+          "content": "Upsell Other Options"
+        },
+        {
+          "type": "range",
+          "id": "upsell_card_border_radius",
+          "label": "Card Border Radius (px)",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "upsell_margin_top",
+          "label": "Top Margin (px)",
+          "min": -20,
+          "max": 20,
+          "step": 1,
+          "default": 4
+        },
+        {
+          "type": "range",
+          "id": "upsell_margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -20,
+          "max": 20,
+          "step": 1,
+          "default": 4
+        },
+        {
+          "type": "select",
+          "id": "upsell_border_style",
+          "label": "Border Style",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "solid",
+              "label": "Solid"
+            },
+            {
+              "value": "dashed",
+              "label": "Dashed"
+            },
+            {
+              "value": "dotted",
+              "label": "Dotted"
+            }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "range",
+          "id": "upsell_border_width",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "label": "Border Width",
+          "default": 0
+        },
+        {
+          "type": "color",
+          "id": "upsell_border_color",
+          "label": "Border Color",
+          "default": "#000000"
+        },
+        {
+          "type": "checkbox",
+          "id": "upsell_remove_container_border",
+          "label": "Remove Container Border & Border Radius",
+          "default": false,
+          "info": "When enabled, removes the border and border radius from the card container and applies border radius to the image only"
+        },
+        {
+          "type": "range",
+          "id": "upsell_image_border_radius",
+          "label": "Image Border Radius (px)",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "default": 4
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "range",
+          "id": "upsell_title_font_size",
+          "label": "Title Font Size",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 15,
+          "info": "Font size for the product title"
+        },
+        {
+          "type": "range",
+          "id": "upsell_description_font_size",
+          "label": "Description Font Size",
+          "min": 8,
+          "max": 18,
+          "step": 1,
+          "unit": "px",
+          "default": 11,
+          "info": "Font size for the product description"
+        },
+        {
+          "type": "range",
+          "id": "upsell_price_font_size",
+          "label": "Price Font Size",
+          "min": 8,
+          "max": 18,
+          "step": 1,
+          "unit": "px",
+          "default": 11,
+          "info": "Font size for the product price"
+        },
+        {
+          "type": "range",
+          "id": "upsell_variant_font_size",
+          "label": "Variant Dropdown Font Size",
+          "min": 8,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "default": 9,
+          "info": "Font size for the variant selector dropdown"
+        },
+        {
+          "type": "range",
+          "id": "upsell_button_font_size",
+          "label": "Button Font Size",
+          "min": 10,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "default": 12,
+          "info": "Font size for the add button"
+        },
+        {
+          "type": "range",
+          "id": "upsell_tag_font_size",
+          "label": "Best Seller Tag Font Size",
+          "min": 8,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "default": 11,
+          "info": "Font size for the best seller tag"
+        }
+      ]
+    },
+    {
+      "type": "cart_progress_bar",
+      "name": "Progress bar",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "product",
+          "id": "progress_bar_free_product",
+          "label": "Free Product"
+        },
+        {
+          "type": "text",
+          "id": "shipping_away_text",
+          "label": "Shipping away text",
+          "default": "Nog [missingAmount] voor gratis verzending",
+          "info": "Type [missingAmount] to display the missing amount"
+        },
+        {
+          "type": "text",
+          "id": "free_product_away_text",
+          "label": "Free product away text",
+          "default": "Nog [missingAmount] voor [freeProduct]",
+          "info": "Type [freeProduct] and [missingAmount] to display the free product name and the missing amount"
+        },
+        {
+          "type": "text",
+          "id": "shipping_earn_text",
+          "label": "Shipping earn text",
+          "default": "Je hebt gratis verzending"
+        },
+        {
+          "type": "text",
+          "id": "free_product_earn_text",
+          "label": "Free product earn text",
+          "default": "Je hebt [freeProduct] verdiend",
+          "info": "Type [freeProduct] to display the free product name"
+        },
+        {
+          "type": "number",
+          "id": "product_free_shipping",
+          "label": "Amount limit for free shipping",
+          "info": "Enter product price. Ex. 40. Leave this field empty to disable. NOTE: You must set up an automatic discount in your Shopify admin for orders over this amount to actually provide free shipping."
+        },
+        {
+          "type": "text",
+          "id": "product_free_custom_id_title",
+          "label": "Custom free product title"
+        },
+
+        {
+          "type": "number",
+          "id": "product_free_amount",
+          "label": "Amount limit for free product",
+          "info": "Enter product price. Ex. 40. Leave this field empty to disable. NOTE: For this to work, you need to add the product and set it as free in your product settings."
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_icons_single_goal",
+          "label": "Hide Icons When Single Goal",
+          "default": false,
+          "info": "When enabled, hides icons and circles when only one goal is configured (either free shipping or free gift). Also reduces padding for a cleaner look."
+        },
+        {
+          "type": "header",
+          "content": "Hide Icons Mode Styling"
+        },
+        {
+          "type": "range",
+          "id": "hide_icons_container_padding",
+          "label": "Container Bottom Padding (When Icons Hidden)",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "default": 12,
+          "info": "Bottom padding for the progress bar container when icons are hidden"
+        },
+        {
+          "type": "range",
+          "id": "hide_icons_text_padding",
+          "label": "Text Bottom Padding (When Icons Hidden)",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "default": 8,
+          "info": "Bottom padding for the success text when icons are hidden"
+        },
+        {
+          "type": "range",
+          "id": "hide_icons_progress_bar_height",
+          "label": "Progress Bar Height (When Icons Hidden)",
+          "min": 4,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "default": 8,
+          "info": "Height of the progress bar when icons are hidden"
+        },
+        {
+          "type": "range",
+          "id": "hide_icons_progress_bar_margin_top",
+          "label": "Progress Bar Top Margin (When Icons Hidden)",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "Top margin for the progress bar when icons are hidden"
+        },
+        {
+          "type": "color",
+          "id": "hide_icons_progress_bar_active_color",
+          "label": "Progress Bar Active Color (When Icons Hidden)",
+          "default": "#000000",
+          "info": "Color of the filled portion of the progress bar when icons are hidden"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_icons_enable_gradient",
+          "label": "Enable Gradient Fill (When Icons Hidden)",
+          "default": false,
+          "info": "Use a gradient instead of solid color for the progress bar fill when icons are hidden"
+        },
+        {
+          "type": "color",
+          "id": "hide_icons_gradient_start_color",
+          "label": "Gradient Start Color (When Icons Hidden)",
+          "default": "#000000",
+          "info": "Starting color of the gradient"
+        },
+        {
+          "type": "color",
+          "id": "hide_icons_gradient_end_color",
+          "label": "Gradient End Color (When Icons Hidden)",
+          "default": "#666666",
+          "info": "Ending color of the gradient"
+        },
+        {
+          "type": "select",
+          "id": "hide_icons_gradient_direction",
+          "label": "Gradient Direction (When Icons Hidden)",
+          "options": [
+            {
+              "value": "to right",
+              "label": "Left to Right"
+            },
+            {
+              "value": "to left",
+              "label": "Right to Left"
+            },
+            {
+              "value": "to bottom",
+              "label": "Top to Bottom"
+            },
+            {
+              "value": "to top",
+              "label": "Bottom to Top"
+            },
+            {
+              "value": "135deg",
+              "label": "Diagonal (Top-Left to Bottom-Right)"
+            },
+            {
+              "value": "45deg",
+              "label": "Diagonal (Bottom-Left to Top-Right)"
+            }
+          ],
+          "default": "to right",
+          "info": "Direction of the gradient flow"
+        },
+        {
+          "type": "color",
+          "id": "hide_icons_progress_bar_inactive_color",
+          "label": "Progress Bar Inactive Color (When Icons Hidden)",
+          "default": "#ECECEC",
+          "info": "Color of the unfilled portion of the progress bar when icons are hidden"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "range",
+          "id": "progress_text_font_size",
+          "label": "Progress Message Font Size",
+          "info": "Font size for the progress bar message text",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 14
+        },
+        {
+          "type": "range",
+          "id": "reward_name_font_size",
+          "label": "Reward Name Font Size",
+          "info": "Font size for the reward names (Free Shipping / Gift name)",
+          "min": 8,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "default": 10
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+
+        {
+          "type": "color",
+          "id": "cart_drawer_progress_active_color",
+          "label": "Progress Bar Active Color",
+          "default": "#000000",
+          "info": "When 'Use Theme Colors for Cart Drawer' is enabled, this will use Accent Color 1"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_progress_bar_gradient",
+          "label": "Enable Gradient Fill",
+          "default": false,
+          "info": "Use a gradient instead of solid color for the progress bar fill"
+        },
+        {
+          "type": "color",
+          "id": "progress_bar_gradient_start_color",
+          "label": "Gradient Start Color",
+          "default": "#000000",
+          "info": "Starting color of the gradient (left side by default)"
+        },
+        {
+          "type": "color",
+          "id": "progress_bar_gradient_end_color",
+          "label": "Gradient End Color",
+          "default": "#666666",
+          "info": "Ending color of the gradient (right side by default)"
+        },
+        {
+          "type": "select",
+          "id": "progress_bar_gradient_direction",
+          "label": "Gradient Direction",
+          "options": [
+            {
+              "value": "to right",
+              "label": "Left to Right"
+            },
+            {
+              "value": "to left",
+              "label": "Right to Left"
+            },
+            {
+              "value": "to bottom",
+              "label": "Top to Bottom"
+            },
+            {
+              "value": "to top",
+              "label": "Bottom to Top"
+            },
+            {
+              "value": "135deg",
+              "label": "Diagonal (Top-Left to Bottom-Right)"
+            },
+            {
+              "value": "45deg",
+              "label": "Diagonal (Bottom-Left to Top-Right)"
+            }
+          ],
+          "default": "to right",
+          "info": "Direction of the gradient flow"
+        },
+        {
+          "type": "color",
+          "id": "cart_drawer_progress_inactive_color",
+          "label": "Progress Bar Inactive Color",
+          "default": "#ECECEC",
+          "info": "When 'Use Theme Colors for Cart Drawer' is enabled, this will use Accent Color 2"
+        },
+        {
+          "type": "color",
+          "id": "cart_drawer_progress_active_icon_fill_color",
+          "label": "Progress Bar Active Icon Fill",
+          "default": "#FFFFFF",
+          "info": "When 'Use Theme Colors for Cart Drawer' is enabled, this will use the background color"
+        },
+        {
+          "type": "header",
+          "content": "Progress Bar Border"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_progress_bar_border",
+          "label": "Enable Progress Bar Border",
+          "default": false,
+          "info": "Add a border around the progress bar line"
+        },
+        {
+          "type": "color",
+          "id": "progress_bar_border_color",
+          "label": "Progress Bar Border Color",
+          "default": "#000000",
+          "info": "Color of the border around the progress bar"
+        },
+        {
+          "type": "range",
+          "id": "progress_bar_border_width",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "unit": "px",
+          "label": "Progress Bar Border Width",
+          "default": 1,
+          "info": "Thickness of the border around the progress bar"
+        },
+        {
+          "type": "range",
+          "id": "progress_bar_border_radius",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "Progress Bar Border Radius",
+          "default": 10,
+          "info": "Roundness of the progress bar corners"
+        },
+        {
+          "type": "header",
+          "content": "Free Shipping Icon Customization"
+        },
+        {
+          "type": "select",
+          "id": "free_shipping_icon_type",
+          "label": "Free Shipping Icon Type",
+          "options": [
+            {
+              "value": "default",
+              "label": "Default Truck Icon"
+            },
+            {
+              "value": "circle",
+              "label": "Circle Icon"
+            },
+            {
+              "value": "custom",
+              "label": "Custom Image"
+            }
+          ],
+          "default": "default",
+          "info": "Choose which icon to display for the free shipping milestone"
+        },
+        {
+          "type": "image_picker",
+          "id": "free_shipping_custom_icon",
+          "label": "Custom Free Shipping Icon",
+          "info": "Upload a custom icon image (requires 'Custom Image' to be selected above)"
+        },
+        {
+          "type": "color",
+          "id": "free_shipping_circle_icon_color",
+          "label": "Circle Icon Color (Free Shipping)",
+          "default": "#000000",
+          "info": "Color of the circle icon when 'Circle Icon' is selected for free shipping"
+        },
+        {
+          "type": "range",
+          "id": "free_shipping_icon_border_radius",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "Free Shipping Icon Container Border Radius",
+          "default": 50,
+          "info": "Roundness of the container behind the free shipping icon (50 = perfect circle)"
+        },
+        {
+          "type": "checkbox",
+          "id": "free_shipping_icon_enable_border",
+          "label": "Enable Icon Border",
+          "default": false,
+          "info": "Add a border around the free shipping icon"
+        },
+        {
+          "type": "range",
+          "id": "free_shipping_icon_border_width",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "label": "Icon Border Width",
+          "default": 2,
+          "info": "Width of the border around the icon"
+        },
+        {
+          "type": "color",
+          "id": "free_shipping_icon_border_color",
+          "label": "Icon Border Color",
+          "default": "#000000",
+          "info": "Color of the border around the icon"
+        },
+        {
+          "type": "select",
+          "id": "free_shipping_icon_border_style",
+          "label": "Icon Border Style",
+          "options": [
+            {
+              "value": "solid",
+              "label": "Solid"
+            },
+            {
+              "value": "dashed",
+              "label": "Dashed"
+            },
+            {
+              "value": "dotted",
+              "label": "Dotted"
+            }
+          ],
+          "default": "solid",
+          "info": "Style of the border around the icon"
+        },
+        {
+          "type": "header",
+          "content": "Free Gift Icon Customization"
+        },
+        {
+          "type": "select",
+          "id": "free_gift_icon_type",
+          "label": "Free Gift Icon Type",
+          "options": [
+            {
+              "value": "default",
+              "label": "Default Gift Icon"
+            },
+            {
+              "value": "circle",
+              "label": "Circle Icon"
+            },
+            {
+              "value": "custom",
+              "label": "Custom Image"
+            }
+          ],
+          "default": "default",
+          "info": "Choose which icon to display for the free gift milestone"
+        },
+        {
+          "type": "image_picker",
+          "id": "free_gift_custom_icon",
+          "label": "Custom Free Gift Icon",
+          "info": "Upload a custom icon image (requires 'Custom Image' to be selected above)"
+        },
+        {
+          "type": "color",
+          "id": "free_gift_circle_icon_color",
+          "label": "Circle Icon Color (Free Gift)",
+          "default": "#000000",
+          "info": "Color of the circle icon when 'Circle Icon' is selected for free gift"
+        },
+        {
+          "type": "range",
+          "id": "free_gift_icon_border_radius",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "Free Gift Icon Container Border Radius",
+          "default": 50,
+          "info": "Roundness of the container behind the free gift icon (50 = perfect circle)"
+        },
+        {
+          "type": "checkbox",
+          "id": "free_gift_icon_enable_border",
+          "label": "Enable Icon Border",
+          "default": false,
+          "info": "Add a border around the free gift icon"
+        },
+        {
+          "type": "range",
+          "id": "free_gift_icon_border_width",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "label": "Icon Border Width",
+          "default": 2,
+          "info": "Width of the border around the icon"
+        },
+        {
+          "type": "color",
+          "id": "free_gift_icon_border_color",
+          "label": "Icon Border Color",
+          "default": "#000000",
+          "info": "Color of the border around the icon"
+        },
+        {
+          "type": "select",
+          "id": "free_gift_icon_border_style",
+          "label": "Icon Border Style",
+          "options": [
+            {
+              "value": "solid",
+              "label": "Solid"
+            },
+            {
+              "value": "dashed",
+              "label": "Dashed"
+            },
+            {
+              "value": "dotted",
+              "label": "Dotted"
+            }
+          ],
+          "default": "solid",
+          "info": "Style of the border around the icon"
+        }
+      ]
+    },
+    {
+      "type": "cart_shipping_protection",
+      "name": "Shipping Protection",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_shipping_protection",
+          "label": "Show Shipping Protection",
+          "default": true,
+          "info": "When disabled, the entire shipping protection container will be hidden in the cart drawer"
+        },
+
+        {
+          "type": "product",
+          "id": "product_shipping_protection",
+          "label": "Shipping Protection product"
+        },
+        {
+          "type": "image_picker",
+          "id": "cart_drawer_sp_icon",
+          "label": "Icon Image",
+          "info": "Upload an image to replace the default shipping protection icon. Leave blank to use the default SVG shield."
+        },
+        {
+          "type": "text",
+          "id": "cart_drawer_sp_heading",
+          "label": "Heading Text",
+          "default": "Shipping Protection",
+          "info": "Customize the main heading for the shipping protection section."
+        },
+        {
+          "type": "textarea",
+          "id": "cart_drawer_sp_text",
+          "label": "Description Text",
+          "default": "Protect your order from damage, loss, or theft during shipping",
+          "info": "Customize the descriptive text below the heading."
+        },
+        {
+          "type": "header",
+          "content": "Color"
+        },
+        {
+          "type": "color",
+          "id": "cart_drawer_shipping_protection_text",
+          "label": "Shipping Protection Text Color",
+          "default": "#121212"
+        },
+        {
+          "type": "color",
+          "id": "cart_drawer_shipping_protection_bg",
+          "label": "Shipping Protection Background",
+          "default": "rgba(0,0,0,0)"
+        },
+        {
+          "type": "color",
+          "id": "cart_drawer_shipping_protection_border",
+          "label": "Shipping Protection Border Color",
+          "default": "#A3A3A3"
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "id": "cart_drawer_shipping_protection_border_size",
+          "label": "Shipping Protection Border Color Size",
+          "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "checkbox",
+          "id": "shipping_protection_heading_bold",
+          "label": "Bold Heading Text",
+          "default": false,
+          "info": "Make the heading text bold (font-weight: 700)"
+        },
+        {
+          "type": "range",
+          "id": "shipping_protection_heading_font_size",
+          "min": 10,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Heading Font Size (Desktop)",
+          "default": 16,
+          "info": "Font size for the shipping protection heading on desktop"
+        },
+        {
+          "type": "range",
+          "id": "shipping_protection_heading_font_size_mobile",
+          "min": 10,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Heading Font Size (Mobile)",
+          "default": 14,
+          "info": "Font size for the shipping protection heading on mobile"
+        },
+        {
+          "type": "range",
+          "id": "shipping_protection_price_font_size",
+          "min": 10,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Price Font Size (Desktop)",
+          "default": 16,
+          "info": "Font size for the price display on desktop"
+        },
+        {
+          "type": "range",
+          "id": "shipping_protection_price_font_size_mobile",
+          "min": 10,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Price Font Size (Mobile)",
+          "default": 14,
+          "info": "Font size for the price display on mobile"
+        },
+        {
+          "type": "range",
+          "id": "shipping_protection_description_font_size",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "label": "Description Font Size (Desktop)",
+          "default": 14,
+          "info": "Font size for the description text on desktop"
+        },
+        {
+          "type": "range",
+          "id": "shipping_protection_description_font_size_mobile",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "label": "Description Font Size (Mobile)",
+          "default": 12,
+          "info": "Font size for the description text on mobile"
+        },
+        {
+          "type": "header",
+          "content": "Padding"
+        },
+        {
+          "type": "range",
+          "id": "shipping_protection_padding_vertical",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "label": "Vertical Padding",
+          "default": 20,
+          "info": "Adjust top and bottom padding around the shipping protection block"
+        },
+        {
+          "type": "range",
+          "id": "shipping_protection_padding_horizontal",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "label": "Horizontal Padding",
+          "default": 20,
+          "info": "Adjust left and right padding around the shipping protection block"
+        }
+      ]
+    },
+    {
+      "type": "cart-social_proof_bar",
+      "name": "Social Proof Bar",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "social_proof_text",
+          "label": "Social Proof Text",
+          "default": "Join 10,000+ happy customers!"
+        },
+        {
+          "type": "select",
+          "id": "social_proof_icon",
+          "label": "Icon",
+          "options": [
+            {
+              "value": "stars",
+              "label": "Stars (Multiple)"
+            },
+            {
+              "value": "star",
+              "label": "Star (Single)"
+            },
+            {
+              "value": "checkmark",
+              "label": "Checkmark"
+            },
+            {
+              "value": "lock",
+              "label": "Lock"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "users",
+              "label": "Users"
+            },
+            {
+              "value": "custom",
+              "label": "Custom Image"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            }
+          ],
+          "default": "stars"
+        },
+        {
+          "type": "image_picker",
+          "id": "social_proof_custom_icon",
+          "label": "Custom Icon Image",
+          "info": "Upload a custom icon image (requires 'Custom Image' to be selected above)"
+        },
+        {
+          "type": "color",
+          "id": "social_proof_bg_color",
+          "label": "Background Color",
+          "default": "#f5f5f5"
+        },
+        {
+          "type": "color",
+          "id": "social_proof_text_color",
+          "label": "Text Color",
+          "default": "#121212"
+        },
+        {
+          "type": "color",
+          "id": "social_proof_icon_color",
+          "label": "Icon Color",
+          "default": "#121212"
+        }
+      ]
+    },
+    {
+      "type": "cart-discount-banner",
+      "name": "Discount Banner",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "discount_banner_prefix",
+          "label": "Banner Text (First Part)",
+          "default": "Congrats!",
+          "info": "First part of text, displayed in bold"
+        },
+        {
+          "type": "text",
+          "id": "discount_banner_middle",
+          "label": "Banner Text (Middle Part)",
+          "default": "You're saving",
+          "info": "Middle part of text, displayed in regular weight"
+        },
+        {
+          "type": "text",
+          "id": "discount_banner_suffix",
+          "label": "Banner Text (Last Part)",
+          "default": "on your first subscription",
+          "info": "Last part of text, displayed in regular weight"
+        },
+        {
+          "type": "text",
+          "id": "discount_banner_default_text",
+          "label": "Default Text (When No Savings)",
+          "default": "today",
+          "info": "Text shown when there are no actual savings to display (replaces the savings amount)"
+        },
+        {
+          "type": "color",
+          "id": "discount_banner_bg_color",
+          "label": "Background Color",
+          "default": "#e6f7ff",
+          "info": "Used when \"Use Theme Colors for Cart Drawer\" is disabled. Otherwise uses Accent Color 2."
+        },
+        {
+          "type": "color",
+          "id": "discount_banner_text_color",
+          "label": "Text Color",
+          "default": "#333333",
+          "info": "Used when \"Use Theme Colors for Cart Drawer\" is disabled. Otherwise uses Accent Color 1."
+        },
+
+        {
+          "type": "header",
+          "content": "Discount Banner Gradient Background"
+        },
+        {
+          "type": "checkbox",
+          "id": "discount_banner_use_gradient",
+          "label": "Use Gradient Background",
+          "default": false,
+          "info": "Enable gradient background for the discount banner (overrides background color)"
+        },
+        {
+          "type": "color",
+          "id": "discount_banner_gradient_start_color",
+          "label": "Gradient Start Color",
+          "default": "#e6f7ff",
+          "info": "Starting color for the gradient background"
+        },
+        {
+          "type": "color",
+          "id": "discount_banner_gradient_end_color",
+          "label": "Gradient End Color",
+          "default": "#b3e5fc",
+          "info": "Ending color for the gradient background"
+        },
+        {
+          "type": "range",
+          "id": "discount_banner_gradient_angle",
+          "min": 0,
+          "max": 360,
+          "step": 10,
+          "unit": "deg",
+          "label": "Gradient Angle",
+          "default": 90,
+          "info": "Direction of the gradient (0° = left to right, 90° = top to bottom)"
+        },
+        {
+          "type": "select",
+          "id": "discount_banner_icon",
+          "label": "Icon",
+          "options": [
+            {
+              "value": "celebration",
+              "label": "Celebration (🎉)"
+            },
+            {
+              "value": "star",
+              "label": "Star (⭐)"
+            },
+            {
+              "value": "gift",
+              "label": "Gift (🎁)"
+            },
+            {
+              "value": "discount",
+              "label": "Discount (💰)"
+            },
+            {
+              "value": "none",
+              "label": "No Icon"
+            }
+          ],
+          "default": "celebration"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "range",
+          "id": "discount_banner_font_size_desktop",
+          "label": "Font Size (Desktop)",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 14,
+          "info": "Font size for desktop devices"
+        },
+        {
+          "type": "range",
+          "id": "discount_banner_font_size_mobile",
+          "label": "Font Size (Mobile)",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 13,
+          "info": "Font size for mobile devices"
+        }
+      ]
+    },
+    {
+      "type": "cart_discount_code",
+      "name": "Discount Code",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Discount Code Settings"
+        },
+        {
+          "type": "text",
+          "id": "placeholder_text",
+          "label": "Placeholder Text",
+          "default": "Enter discount code",
+          "info": "Placeholder text for the discount code input field"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "APPLY",
+          "info": "Text displayed on the apply button"
+        },
+        {
+          "type": "text",
+          "id": "success_message",
+          "label": "Success Message",
+          "default": "Discount code applied successfully",
+          "info": "Message shown when discount code is successfully applied"
+        },
+        {
+          "type": "text",
+          "id": "error_message",
+          "label": "Error Message",
+          "default": "Invalid discount code",
+          "info": "Message shown when discount code is invalid"
+        },
+        {
+          "type": "text",
+          "id": "empty_code_message",
+          "label": "Empty Code Message",
+          "default": "Please enter a discount code",
+          "info": "Message shown when trying to apply an empty code"
+        },
+        {
+          "type": "text",
+          "id": "code_exists_message",
+          "label": "Code Exists Message",
+          "default": "Discount code exists",
+          "info": "Message shown when code is already added"
+        },
+        {
+          "type": "header",
+          "content": "Styling"
+        },
+        {
+          "type": "color",
+          "id": "button_bg_color",
+          "label": "Button Background Color",
+          "default": "#000000",
+          "info": "Background color for the apply button"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": "Button Text Color",
+          "default": "#FFFFFF",
+          "info": "Text color for the apply button"
+        },
+        {
+          "type": "color",
+          "id": "button_border_color",
+          "label": "Button Border Color",
+          "default": "#000000",
+          "info": "Border color for the apply button"
+        },
+        {
+          "type": "color",
+          "id": "placeholder_text_color",
+          "label": "Placeholder Text Color",
+          "default": "#707070",
+          "info": "Color for the placeholder text in the input field"
+        },
+        {
+          "type": "color",
+          "id": "input_border_color",
+          "label": "Input Border Color",
+          "default": "#E5E5E5",
+          "info": "Border color for the discount code input field"
+        },
+        {
+          "type": "color",
+          "id": "input_text_color",
+          "label": "Input Text Color",
+          "default": "#000000",
+          "info": "Text color for the discount code input field"
+        },
+        {
+          "type": "color",
+          "id": "input_bg_color",
+          "label": "Input Background Color",
+          "default": "#FFFFFF",
+          "info": "Background color for the discount code input field"
+        },
+        {
+          "type": "range",
+          "id": "input_border_radius",
+          "label": "Input Border Radius",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "default": 4,
+          "info": "Border radius for the input field"
+        },
+        {
+          "type": "range",
+          "id": "button_border_radius",
+          "label": "Button Border Radius",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "default": 4,
+          "info": "Border radius for the apply button"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "Top margin for the discount code component"
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "Bottom margin for the discount code component"
+        },
+        {
+          "type": "range",
+          "id": "input_wrapper_height",
+          "label": "Input Wrapper Height",
+          "min": 30,
+          "max": 80,
+          "step": 1,
+          "unit": "px",
+          "default": 44,
+          "info": "Height of the discount code input wrapper"
+        }
+      ]
+    },
+    {
+      "type": "cart_money_back_guarantee",
+      "name": "Money Back Guarantee",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_money_back_guarantee",
+          "label": "Show Money Back Guarantee",
+          "default": true,
+          "info": "Display the money back guarantee banner in the cart drawer"
+        },
+        {
+          "type": "text",
+          "id": "money_back_guarantee_text",
+          "label": "Money Back Guarantee Text",
+          "default": "30 dagen geld-terug-garantie",
+          "info": "Complete text for the money back guarantee message"
+        },
+        {
+          "type": "select",
+          "id": "money_back_guarantee_icon",
+          "label": "Guarantee Icon",
+          "options": [
+            {
+              "value": "seal-check",
+              "label": "Seal with Checkmark"
+            },
+            {
+              "value": "checkmark",
+              "label": "Simple Checkmark"
+            },
+            {
+              "value": "shield",
+              "label": "Shield"
+            },
+            {
+              "value": "custom",
+              "label": "Custom Image"
+            },
+            {
+              "value": "none",
+              "label": "No Icon"
+            }
+          ],
+          "default": "seal-check",
+          "info": "Icon to display next to the money back guarantee text"
+        },
+        {
+          "type": "image_picker",
+          "id": "money_back_guarantee_custom_icon",
+          "label": "Custom Icon Image",
+          "info": "Upload a custom icon image (requires 'Custom Image' to be selected above)"
+        },
+        {
+          "type": "color",
+          "id": "money_back_guarantee_color",
+          "label": "Text & Icon Color",
+          "default": "#000000",
+          "info": "Color for the guarantee text and icon. Leave blank to use current text color."
+        }
+      ]
+    },
+    {
+      "type": "cart_payment_icon",
+      "name": "Payment Icons",
+      "settings": [
+        {
+          "type": "text",
+          "id": "custom_payment_icons",
+          "label": "Payment icons",
+          "default": "wero, mastercard, visa, apple_pay",
+          "info": "wero, visa, mastercard, apple_pay, afterpay, american_express, dankort, diners_club, discover, paypal, google_pay, shopify_pay, dwolla, klarna, maestro, sofort, unionpay, ideal"
+        },
+        {
+          "id": "icon_height",
+          "type": "range",
+          "label": "Icon Height",
+          "min": 10,
+          "max": 100,
+          "step": 1,
+          "default": 22,
+          "unit": "px"
+        },
+        {
+          "id": "icon_spacing",
+          "type": "range",
+          "label": "Icon Spacing",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "default": 6,
+          "unit": "px"
+        },
+        {
+          "id": "alignment",
+          "type": "select",
+          "label": "Alignment",
+          "default": "center",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ]
+        },
+        {
+          "id": "margin_top",
+          "type": "range",
+          "label": "Top Margin",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 8,
+          "unit": "px"
+        },
+        {
+          "id": "margin_bottom",
+          "type": "range",
+          "label": "Bottom Margin",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 8,
+          "unit": "px"
+        }
+      ]
+    },
+    {
+      "type": "cart_image_banner",
+      "name": "Image Banner",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "banner_image",
+          "label": "Banner Image",
+          "info": "Upload an image for the banner. Full width display."
+        },
+        {
+          "type": "url",
+          "id": "banner_link",
+          "label": "Banner Link (Optional)",
+          "info": "URL to redirect to when banner is clicked. Leave blank for no link."
+        },
+        {
+          "type": "range",
+          "id": "banner_height",
+          "label": "Banner Height",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "unit": "px",
+          "default": 150,
+          "info": "Height of the banner image"
+        },
+        {
+          "type": "select",
+          "id": "image_fit",
+          "label": "Image Fit",
+          "options": [
+            {
+              "value": "cover",
+              "label": "Cover (Fill)"
+            },
+            {
+              "value": "contain",
+              "label": "Contain (Fit)"
+            },
+            {
+              "value": "fill",
+              "label": "Stretch"
+            }
+          ],
+          "default": "cover"
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin",
+          "min": 0,
+          "max": 30,
+          "step": 2,
+          "unit": "px",
+          "default": 0,
+          "info": "Space below the banner"
+        }
+      ]
+    },
+    {
+      "type": "cart_promo_banner",
+      "name": "Promotional Banner",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_promo_banner",
+          "label": "Show Promotional Banner",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "text",
+          "id": "main_heading",
+          "label": "Main Heading",
+          "default": "BLACK FRIDAY SALE",
+          "info": "Large heading text at the top"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "40% OFF SITEWIDE",
+          "info": "Highlighted promotional text"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_price_badge",
+          "label": "Show Price Badge",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "price_badge_label",
+          "label": "Price Badge Label",
+          "default": "ONLY",
+          "info": "Small text above the price"
+        },
+        {
+          "type": "text",
+          "id": "price_badge_amount",
+          "label": "Price Badge Amount",
+          "default": "$129",
+          "info": "Main price text in the badge"
+        },
+        {
+          "type": "url",
+          "id": "banner_link",
+          "label": "Banner Link (Optional)",
+          "info": "URL to redirect when banner is clicked"
+        },
+        {
+          "type": "select",
+          "id": "link_target",
+          "label": "Link Target",
+          "options": [
+            {
+              "value": "_self",
+              "label": "Same Tab"
+            },
+            {
+              "value": "_blank",
+              "label": "New Tab"
+            }
+          ],
+          "default": "_self"
+        },
+        {
+          "type": "header",
+          "content": "Background"
+        },
+        {
+          "type": "color_background",
+          "id": "banner_background",
+          "label": "Banner Background",
+          "info": "Choose a solid color or create a gradient"
+        },
+        {
+          "type": "header",
+          "content": "Main Heading Styling"
+        },
+        {
+          "type": "color",
+          "id": "main_heading_color",
+          "label": "Main Heading Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "range",
+          "id": "main_heading_font_size",
+          "label": "Font Size",
+          "min": 16,
+          "max": 60,
+          "step": 2,
+          "unit": "px",
+          "default": 24
+        },
+        {
+          "type": "range",
+          "id": "main_heading_font_weight",
+          "label": "Font Weight",
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 700
+        },
+        {
+          "type": "select",
+          "id": "main_heading_text_transform",
+          "label": "Text Transform",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "uppercase",
+              "label": "Uppercase"
+            },
+            {
+              "value": "lowercase",
+              "label": "Lowercase"
+            },
+            {
+              "value": "capitalize",
+              "label": "Capitalize"
+            }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "range",
+          "id": "main_heading_letter_spacing",
+          "label": "Letter Spacing",
+          "min": -2,
+          "max": 10,
+          "step": 0.5,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "heading_spacing",
+          "label": "Spacing Below Heading",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "unit": "px",
+          "default": 8
+        },
+        {
+          "type": "header",
+          "content": "Subheading Styling"
+        },
+        {
+          "type": "color_background",
+          "id": "subheading_background",
+          "label": "Subheading Background",
+          "info": "Choose a solid color or create a gradient"
+        },
+        {
+          "type": "color",
+          "id": "subheading_text_color",
+          "label": "Subheading Text Color",
+          "default": "#000000"
+        },
+        {
+          "type": "paragraph",
+          "content": "Desktop Settings"
+        },
+        {
+          "type": "range",
+          "id": "subheading_font_size_desktop",
+          "label": "Font Size (Desktop)",
+          "min": 14,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "default": 18,
+          "info": "Font is always bold (font-weight: 700)"
+        },
+        {
+          "type": "range",
+          "id": "subheading_vertical_padding_desktop",
+          "label": "Vertical Padding (Desktop)",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "subheading_horizontal_padding_desktop",
+          "label": "Horizontal Padding (Desktop)",
+          "min": 0,
+          "max": 80,
+          "step": 2,
+          "unit": "px",
+          "default": 14
+        },
+        {
+          "type": "range",
+          "id": "subheading_border_radius_desktop",
+          "label": "Border Radius (Desktop)",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "paragraph",
+          "content": "Mobile Settings"
+        },
+        {
+          "type": "range",
+          "id": "subheading_font_size_mobile",
+          "label": "Font Size (Mobile)",
+          "min": 10,
+          "max": 40,
+          "step": 2,
+          "unit": "px",
+          "default": 14,
+          "info": "Font is always bold (font-weight: 700)"
+        },
+        {
+          "type": "range",
+          "id": "subheading_vertical_padding_mobile",
+          "label": "Vertical Padding (Mobile)",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "unit": "px",
+          "default": 6
+        },
+        {
+          "type": "range",
+          "id": "subheading_horizontal_padding_mobile",
+          "label": "Horizontal Padding (Mobile)",
+          "min": 0,
+          "max": 60,
+          "step": 2,
+          "unit": "px",
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "subheading_border_radius_mobile",
+          "label": "Border Radius (Mobile)",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "select",
+          "id": "subheading_text_transform",
+          "label": "Text Transform",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "uppercase",
+              "label": "Uppercase"
+            },
+            {
+              "value": "lowercase",
+              "label": "Lowercase"
+            },
+            {
+              "value": "capitalize",
+              "label": "Capitalize"
+            }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "range",
+          "id": "subheading_letter_spacing",
+          "label": "Letter Spacing",
+          "min": -2,
+          "max": 10,
+          "step": 0.5,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Price Badge Styling"
+        },
+        {
+          "type": "color_background",
+          "id": "price_badge_bg_color",
+          "label": "Badge Background",
+          "info": "Choose a solid color or create a gradient"
+        },
+        {
+          "type": "color",
+          "id": "price_badge_text_color",
+          "label": "Badge Text Color",
+          "default": "#000000"
+        },
+        {
+          "type": "header",
+          "content": "Price Badge - Size Settings"
+        },
+        {
+          "type": "range",
+          "id": "price_badge_size",
+          "label": "Badge Size (Desktop)",
+          "min": 30,
+          "max": 200,
+          "step": 10,
+          "unit": "px",
+          "default": 80,
+          "info": "Size of the circular badge on desktop"
+        },
+        {
+          "type": "range",
+          "id": "price_badge_size_mobile",
+          "label": "Badge Size (Mobile)",
+          "min": 30,
+          "max": 150,
+          "step": 5,
+          "unit": "px",
+          "default": 70,
+          "info": "Size of the circular badge on mobile"
+        },
+        {
+          "type": "header",
+          "content": "Price Badge - Style Settings"
+        },
+        {
+          "type": "range",
+          "id": "price_badge_border_radius",
+          "label": "Badge Border Radius",
+          "min": 0,
+          "max": 50,
+          "step": 5,
+          "unit": "%",
+          "default": 50,
+          "info": "50% = perfect circle"
+        },
+        {
+          "type": "checkbox",
+          "id": "price_badge_enable_border",
+          "label": "Enable Badge Border",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "price_badge_border_color",
+          "label": "Badge Border Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "range",
+          "id": "price_badge_border_width",
+          "label": "Badge Border Width",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "default": 2
+        },
+        {
+          "type": "select",
+          "id": "price_badge_border_style",
+          "label": "Badge Border Style",
+          "options": [
+            {
+              "value": "solid",
+              "label": "Solid"
+            },
+            {
+              "value": "dashed",
+              "label": "Dashed"
+            },
+            {
+              "value": "dotted",
+              "label": "Dotted"
+            }
+          ],
+          "default": "solid"
+        },
+        {
+          "type": "range",
+          "id": "price_badge_label_font_size",
+          "label": "Label Font Size",
+          "min": 10,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "default": 11
+        },
+        {
+          "type": "range",
+          "id": "price_badge_label_font_weight",
+          "label": "Label Font Weight",
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 700
+        },
+        {
+          "type": "select",
+          "id": "price_badge_label_text_transform",
+          "label": "Label Text Transform",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "uppercase",
+              "label": "Uppercase"
+            },
+            {
+              "value": "lowercase",
+              "label": "Lowercase"
+            },
+            {
+              "value": "capitalize",
+              "label": "Capitalize"
+            }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "range",
+          "id": "price_badge_amount_font_size",
+          "label": "Amount Font Size",
+          "min": 16,
+          "max": 60,
+          "step": 2,
+          "unit": "px",
+          "default": 22
+        },
+        {
+          "type": "range",
+          "id": "price_badge_amount_font_weight",
+          "label": "Amount Font Weight",
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 700
+        },
+        {
+          "type": "header",
+          "content": "Banner Dimensions"
+        },
+        {
+          "type": "range",
+          "id": "banner_height",
+          "label": "Banner Height",
+          "min": 40,
+          "max": 220,
+          "step": 10,
+          "unit": "px",
+          "default": 120,
+          "info": "Total height of the banner"
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "unit": "px",
+          "default": 10
+        },
+        {
+          "type": "header",
+          "content": "Text Positioning"
+        },
+        {
+          "type": "range",
+          "id": "text_position_left",
+          "label": "Text - Distance from Left",
+          "min": 0,
+          "max": 200,
+          "step": 5,
+          "unit": "px",
+          "default": 10,
+          "info": "Horizontal position of text from left edge"
+        },
+        {
+          "type": "range",
+          "id": "text_position_top",
+          "label": "Text - Distance from Top",
+          "min": 0,
+          "max": 150,
+          "step": 5,
+          "unit": "px",
+          "default": 20,
+          "info": "Vertical position of text from top edge"
+        },
+        {
+          "type": "range",
+          "id": "text_max_width",
+          "label": "Text - Max Width",
+          "min": 30,
+          "max": 70,
+          "step": 5,
+          "unit": "%",
+          "default": 50,
+          "info": "Maximum width of text section"
+        },
+        {
+          "type": "range",
+          "id": "badge_position_right_desktop",
+          "label": "Badge - Distance from Right (Desktop)",
+          "min": 0,
+          "max": 200,
+          "step": 5,
+          "unit": "px",
+          "default": 10,
+          "info": "Horizontal position of badge from right edge"
+        },
+        {
+          "type": "range",
+          "id": "badge_position_bottom_desktop",
+          "label": "Badge - Distance from Bottom (Desktop)",
+          "min": 0,
+          "max": 150,
+          "step": 5,
+          "unit": "px",
+          "default": 10,
+          "info": "Vertical position of badge from bottom edge"
+        },
+        {
+          "type": "header",
+          "content": "Price Badge - Mobile Settings"
+        },
+        {
+          "type": "range",
+          "id": "badge_position_right_mobile",
+          "label": "Badge - Distance from Right (Mobile)",
+          "min": 0,
+          "max": 150,
+          "step": 5,
+          "unit": "px",
+          "default": 10,
+          "info": "Horizontal position of badge from right edge"
+        },
+        {
+          "type": "range",
+          "id": "badge_position_bottom_mobile",
+          "label": "Badge - Distance from Bottom (Mobile)",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "px",
+          "default": 10,
+          "info": "Vertical position of badge from bottom edge"
+        },
+        {
+          "type": "header",
+          "content": "Product Image (Optional)"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_custom_image",
+          "label": "Show Product Image",
+          "default": false,
+          "info": "Add a product or decorative image to the right side"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_image",
+          "label": "Product Image",
+          "info": "Upload a product photo or decorative image"
+        },
+        {
+          "type": "paragraph",
+          "content": "Desktop Settings"
+        },
+        {
+          "type": "range",
+          "id": "image_width_desktop",
+          "label": "Image Width (Desktop)",
+          "min": 100,
+          "max": 500,
+          "step": 10,
+          "unit": "px",
+          "default": 180
+        },
+        {
+          "type": "range",
+          "id": "image_height_desktop",
+          "label": "Image Height (Desktop)",
+          "min": 80,
+          "max": 400,
+          "step": 10,
+          "unit": "px",
+          "default": 100,
+          "info": "Maximum height for the image"
+        },
+        {
+          "type": "range",
+          "id": "image_position_right_desktop",
+          "label": "Image - Distance from Right (Desktop)",
+          "min": 0,
+          "max": 200,
+          "step": 5,
+          "unit": "px",
+          "default": 35,
+          "info": "Position from right edge (leave space for price badge)"
+        },
+        {
+          "type": "range",
+          "id": "image_position_top_desktop",
+          "label": "Image - Distance from Top (Desktop)",
+          "min": -50,
+          "max": 200,
+          "step": 5,
+          "unit": "px",
+          "default": 30,
+          "info": "Vertical position from top edge (use 50% of banner height for center)"
+        },
+        {
+          "type": "checkbox",
+          "id": "image_center_vertically_desktop",
+          "label": "Center Image Vertically (Desktop)",
+          "default": true,
+          "info": "When enabled, ignores top position and centers the image"
+        },
+        {
+          "type": "paragraph",
+          "content": "Mobile Settings"
+        },
+        {
+          "type": "range",
+          "id": "image_width_mobile",
+          "label": "Image Width (Mobile)",
+          "min": 80,
+          "max": 300,
+          "step": 10,
+          "unit": "px",
+          "default": 130
+        },
+        {
+          "type": "range",
+          "id": "image_height_mobile",
+          "label": "Image Height (Mobile)",
+          "min": 60,
+          "max": 300,
+          "step": 10,
+          "unit": "px",
+          "default": 100,
+          "info": "Maximum height for the image"
+        },
+        {
+          "type": "range",
+          "id": "image_position_right_mobile",
+          "label": "Image - Distance from Right (Mobile)",
+          "min": 0,
+          "max": 150,
+          "step": 5,
+          "unit": "px",
+          "default": 20,
+          "info": "Position from right edge (leave space for price badge)"
+        },
+        {
+          "type": "range",
+          "id": "image_position_top_mobile",
+          "label": "Image - Distance from Top (Mobile)",
+          "min": -50,
+          "max": 150,
+          "step": 5,
+          "unit": "px",
+          "default": 20,
+          "info": "Vertical position from top edge"
+        },
+        {
+          "type": "checkbox",
+          "id": "image_center_vertically_mobile",
+          "label": "Center Image Vertically (Mobile)",
+          "default": true,
+          "info": "When enabled, ignores top position and centers the image"
+        },
+        {
+          "type": "select",
+          "id": "image_object_fit",
+          "label": "Image Fit",
+          "options": [
+            {
+              "value": "cover",
+              "label": "Cover (Fill)"
+            },
+            {
+              "value": "contain",
+              "label": "Contain (Fit)"
+            },
+            {
+              "value": "fill",
+              "label": "Stretch"
+            }
+          ],
+          "default": "contain"
+        },
+        {
+          "type": "range",
+          "id": "image_opacity",
+          "label": "Image Opacity",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 100
+        },
+        {
+          "type": "header",
+          "content": "Top Scrolling Banner"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_top_scrolling_banner",
+          "label": "Enable Top Scrolling Banner",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "top_scrolling_text",
+          "label": "Scrolling Text",
+          "default": "LIMITED TIME OFFER - FREE SHIPPING ON ALL ORDERS"
+        },
+        {
+          "type": "checkbox",
+          "id": "top_scrolling_enable_animation",
+          "label": "Enable Scrolling Animation",
+          "default": true,
+          "info": "Disable to show static text without animation"
+        },
+        {
+          "type": "color_background",
+          "id": "top_scrolling_background",
+          "label": "Background"
+        },
+        {
+          "type": "color",
+          "id": "top_scrolling_text_color",
+          "label": "Text Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "paragraph",
+          "content": "Desktop Settings"
+        },
+        {
+          "type": "range",
+          "id": "top_scrolling_height_desktop",
+          "label": "Banner Height (Desktop)",
+          "min": 20,
+          "max": 80,
+          "step": 5,
+          "unit": "px",
+          "default": 25
+        },
+        {
+          "type": "range",
+          "id": "top_scrolling_font_size_desktop",
+          "label": "Font Size (Desktop)",
+          "min": 10,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "top_scrolling_font_weight_desktop",
+          "label": "Font Weight (Desktop)",
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 700
+        },
+        {
+          "type": "select",
+          "id": "top_scrolling_text_transform_desktop",
+          "label": "Text Transform (Desktop)",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "uppercase",
+              "label": "Uppercase"
+            },
+            {
+              "value": "lowercase",
+              "label": "Lowercase"
+            },
+            {
+              "value": "capitalize",
+              "label": "Capitalize"
+            }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "select",
+          "id": "top_scrolling_direction_desktop",
+          "label": "Scroll Direction (Desktop)",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "top_scrolling_speed_desktop",
+          "label": "Scrolling Speed (Desktop)",
+          "min": 5,
+          "max": 60,
+          "step": 1,
+          "unit": "s",
+          "default": 15,
+          "info": "Lower values = faster scrolling"
+        },
+        {
+          "type": "range",
+          "id": "top_scrolling_spacing_desktop",
+          "label": "Text Spacing (Desktop)",
+          "min": 10,
+          "max": 120,
+          "step": 10,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "paragraph",
+          "content": "Mobile Settings"
+        },
+        {
+          "type": "range",
+          "id": "top_scrolling_height_mobile",
+          "label": "Banner Height (Mobile)",
+          "min": 20,
+          "max": 60,
+          "step": 5,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "top_scrolling_font_size_mobile",
+          "label": "Font Size (Mobile)",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "top_scrolling_font_weight_mobile",
+          "label": "Font Weight (Mobile)",
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 700
+        },
+        {
+          "type": "select",
+          "id": "top_scrolling_text_transform_mobile",
+          "label": "Text Transform (Mobile)",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "uppercase",
+              "label": "Uppercase"
+            },
+            {
+              "value": "lowercase",
+              "label": "Lowercase"
+            },
+            {
+              "value": "capitalize",
+              "label": "Capitalize"
+            }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "select",
+          "id": "top_scrolling_direction_mobile",
+          "label": "Scroll Direction (Mobile)",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "top_scrolling_speed_mobile",
+          "label": "Scrolling Speed (Mobile)",
+          "min": 5,
+          "max": 60,
+          "step": 1,
+          "unit": "s",
+          "default": 15,
+          "info": "Lower values = faster scrolling"
+        },
+        {
+          "type": "range",
+          "id": "top_scrolling_spacing_mobile",
+          "label": "Text Spacing (Mobile)",
+          "min": 10,
+          "max": 100,
+          "step": 10,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "header",
+          "content": "Bottom Scrolling Banner"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_bottom_scrolling_banner",
+          "label": "Enable Bottom Scrolling Banner",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "bottom_scrolling_text",
+          "label": "Scrolling Text",
+          "default": "BLACK FRIDAY SALE - UP TO 70% OFF"
+        },
+        {
+          "type": "checkbox",
+          "id": "bottom_scrolling_enable_animation",
+          "label": "Enable Scrolling Animation",
+          "default": true,
+          "info": "Disable to show static text without animation"
+        },
+        {
+          "type": "color_background",
+          "id": "bottom_scrolling_background",
+          "label": "Background"
+        },
+        {
+          "type": "color",
+          "id": "bottom_scrolling_text_color",
+          "label": "Text Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "paragraph",
+          "content": "Desktop Settings"
+        },
+        {
+          "type": "range",
+          "id": "bottom_scrolling_height_desktop",
+          "label": "Banner Height (Desktop)",
+          "min": 20,
+          "max": 80,
+          "step": 5,
+          "unit": "px",
+          "default": 25
+        },
+        {
+          "type": "range",
+          "id": "bottom_scrolling_font_size_desktop",
+          "label": "Font Size (Desktop)",
+          "min": 10,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "bottom_scrolling_font_weight_desktop",
+          "label": "Font Weight (Desktop)",
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 700
+        },
+        {
+          "type": "select",
+          "id": "bottom_scrolling_text_transform_desktop",
+          "label": "Text Transform (Desktop)",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "uppercase",
+              "label": "Uppercase"
+            },
+            {
+              "value": "lowercase",
+              "label": "Lowercase"
+            },
+            {
+              "value": "capitalize",
+              "label": "Capitalize"
+            }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "select",
+          "id": "bottom_scrolling_direction_desktop",
+          "label": "Scroll Direction (Desktop)",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "bottom_scrolling_speed_desktop",
+          "label": "Scrolling Speed (Desktop)",
+          "min": 5,
+          "max": 60,
+          "step": 1,
+          "unit": "s",
+          "default": 15,
+          "info": "Lower values = faster scrolling"
+        },
+        {
+          "type": "range",
+          "id": "bottom_scrolling_spacing_desktop",
+          "label": "Text Spacing (Desktop)",
+          "min": 10,
+          "max": 120,
+          "step": 10,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "paragraph",
+          "content": "Mobile Settings"
+        },
+        {
+          "type": "range",
+          "id": "bottom_scrolling_height_mobile",
+          "label": "Banner Height (Mobile)",
+          "min": 20,
+          "max": 60,
+          "step": 5,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "bottom_scrolling_font_size_mobile",
+          "label": "Font Size (Mobile)",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "bottom_scrolling_font_weight_mobile",
+          "label": "Font Weight (Mobile)",
+          "min": 100,
+          "max": 900,
+          "step": 100,
+          "default": 700
+        },
+        {
+          "type": "select",
+          "id": "bottom_scrolling_text_transform_mobile",
+          "label": "Text Transform (Mobile)",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "uppercase",
+              "label": "Uppercase"
+            },
+            {
+              "value": "lowercase",
+              "label": "Lowercase"
+            },
+            {
+              "value": "capitalize",
+              "label": "Capitalize"
+            }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "select",
+          "id": "bottom_scrolling_direction_mobile",
+          "label": "Scroll Direction (Mobile)",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "bottom_scrolling_speed_mobile",
+          "label": "Scrolling Speed (Mobile)",
+          "min": 5,
+          "max": 60,
+          "step": 1,
+          "unit": "s",
+          "default": 15,
+          "info": "Lower values = faster scrolling"
+        },
+        {
+          "type": "range",
+          "id": "bottom_scrolling_spacing_mobile",
+          "label": "Text Spacing (Mobile)",
+          "min": 10,
+          "max": 100,
+          "step": 10,
+          "unit": "px",
+          "default": 20
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

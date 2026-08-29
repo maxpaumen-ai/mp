@@ -1,0 +1,156 @@
+{% comment %}
+  Emoji Benefits List
+  A customizable list of product benefits with emoji bullets
+
+  Parameters:
+  - benefit_1 to benefit_6: The benefit text items
+  - emoji_1 to emoji_6: The emoji icons for each benefit
+  - text_size: Font size for the benefit text in pixels
+  - spacing: Space between items in pixels
+  - margin_top: Top margin in pixels
+  - margin_bottom: Bottom margin in pixels
+  - text_color: Color for the benefit text
+  - text_bold: Whether the benefit text should be bold
+  - font_weight: Custom font weight (400, 500, 600, 700)
+  - bg_color: Background color for benefit items
+  - border_radius: Border radius for benefit items
+  - block: Block object for Shopify attributes
+{% endcomment %}
+
+{%- liquid
+  assign benefit_1 = benefit_1 | default: 'Premium quality materials for durability'
+  assign benefit_2 = benefit_2 | default: 'Easy to use with simple instructions'
+  assign benefit_3 = benefit_3 | default: 'Perfect for everyday use'
+  assign benefit_4 = benefit_4 | default: null
+  assign benefit_5 = benefit_5 | default: null
+  assign benefit_6 = benefit_6 | default: null
+
+  assign emoji_1 = emoji_1 | default: '✨'
+  assign emoji_2 = emoji_2 | default: '👍'
+  assign emoji_3 = emoji_3 | default: '🔄'
+  assign emoji_4 = emoji_4 | default: '💯'
+  assign emoji_5 = emoji_5 | default: '⭐'
+  assign emoji_6 = emoji_6 | default: '🎁'
+
+  assign text_size = text_size | default: 14
+  assign spacing = spacing | default: 10
+  assign margin_top = margin_top | default: 0
+  assign margin_bottom = margin_bottom | default: 20
+  assign text_color = text_color | default: '#333333'
+  assign text_bold = text_bold | default: false
+  assign font_weight = font_weight | default: ''
+  assign bg_color = bg_color | default: '#F7F7F7'
+  assign border_radius = border_radius | default: 4
+
+  if font_weight != blank and font_weight != ''
+    assign text_weight = font_weight
+  elsif text_bold
+    assign text_weight = 600
+  else
+    assign text_weight = 400
+  endif
+-%}
+
+<div class="emoji-benefits-container" {{ block.shopify_attributes }}>
+  <ul class="emoji-benefits-list">
+    {% if benefit_1 != blank %}
+      <li class="emoji-benefits-item">
+        <span class="emoji-benefits-emoji">{{ emoji_1 }}</span>
+        <span class="emoji-benefits-text">{{ benefit_1 }}</span>
+      </li>
+    {% endif %}
+
+    {% if benefit_2 != blank %}
+      <li class="emoji-benefits-item">
+        <span class="emoji-benefits-emoji">{{ emoji_2 }}</span>
+        <span class="emoji-benefits-text">{{ benefit_2 }}</span>
+      </li>
+    {% endif %}
+
+    {% if benefit_3 != blank %}
+      <li class="emoji-benefits-item">
+        <span class="emoji-benefits-emoji">{{ emoji_3 }}</span>
+        <span class="emoji-benefits-text">{{ benefit_3 }}</span>
+      </li>
+    {% endif %}
+
+    {% if benefit_4 != blank and benefit_4 != '' %}
+      <li class="emoji-benefits-item">
+        <span class="emoji-benefits-emoji">{{ emoji_4 }}</span>
+        <span class="emoji-benefits-text">{{ benefit_4 }}</span>
+      </li>
+    {% endif %}
+
+    {% if benefit_5 != blank and benefit_5 != '' %}
+      <li class="emoji-benefits-item">
+        <span class="emoji-benefits-emoji">{{ emoji_5 }}</span>
+        <span class="emoji-benefits-text">{{ benefit_5 }}</span>
+      </li>
+    {% endif %}
+
+    {% if benefit_6 != blank and benefit_6 != '' %}
+      <li class="emoji-benefits-item">
+        <span class="emoji-benefits-emoji">{{ emoji_6 }}</span>
+        <span class="emoji-benefits-text">{{ benefit_6 }}</span>
+      </li>
+    {% endif %}
+  </ul>
+</div>
+
+<style>
+  .emoji-benefits-container {
+    width: 100%;
+    margin-top: {{ margin_top }}px;
+    margin-bottom: {{ margin_bottom }}px;
+    font-family: inherit;
+  }
+
+  .emoji-benefits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .emoji-benefits-item {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: {{ spacing }}px;
+    letter-spacing: var(--letter-spacing-body);
+    background-color: {{ bg_color }};
+    border-radius: {{ border_radius }}px;
+    padding: 1px 8px;
+    width: auto;
+  }
+
+  .emoji-benefits-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .emoji-benefits-emoji {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: {{ text_size }}px;
+    margin-right: 6px;
+    min-width: 1.2em;
+    text-align: center;
+  }
+
+  .emoji-benefits-text {
+    font-size: {{ text_size }}px;
+    font-weight: {{ text_weight }};
+    color: {{ text_color }};
+    line-height: 1.4;
+    padding: 3px 0;
+  }
+
+  @media (max-width: 767px) {
+    .emoji-benefits-emoji {
+      font-size: {{ text_size | times: 0.9 | round }}px;
+    }
+
+    .emoji-benefits-text {
+      font-size: {{ text_size | times: 0.9 | round }}px;
+    }
+  }
+</style>

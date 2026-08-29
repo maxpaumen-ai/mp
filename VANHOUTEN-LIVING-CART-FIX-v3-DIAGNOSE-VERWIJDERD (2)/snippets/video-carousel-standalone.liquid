@@ -1,0 +1,598 @@
+{% comment %}
+  Video Carousel Standalone Snippet
+
+  Customization parameters:
+  - heading: Heading text for the carousel (default: "See it in action")
+  - heading_size: Font size for the heading (default: 24)
+  - heading_color: Color of the heading text (default: #333333)
+  - button_color: Background color of the play button (default: #000000, maintains 60% alpha transparency)
+  - show_social_badge: Whether to show the social media badge (default: false)
+  - social_platform: Platform to show badge for ('tiktok' or 'instagram') (default: 'tiktok')
+  - view_count: Number to show in the view counter (default: 5.6)
+  - enable_autoplay: Whether videos should autoplay automatically (default: false)
+  - show_sound_controls_autoplay: Whether to show sound controls when autoplay is enabled (default: false)
+  - hide_scrollbar: Whether to hide the carousel scrollbar (default: false)
+  - container_margin_top: Top margin for the container in pixels (default: 0)
+  - container_margin_bottom: Bottom margin for the container in pixels (default: 0)
+  - margin_top: Top margin for the container in pixels (alternative to container_margin_top) (default: 0)
+  - margin_bottom: Bottom margin for the container in pixels (alternative to container_margin_bottom) (default: 0)
+{% endcomment %}
+
+
+
+{%- liquid
+  if container_margin_top != blank or container_margin_top == 0
+    assign top_margin = container_margin_top | plus: 0
+  elsif margin_top != blank or margin_top == 0
+    assign top_margin = margin_top | plus: 0
+  else
+    assign top_margin = 0
+  endif
+
+  if container_margin_bottom != blank or container_margin_bottom == 0
+    assign bottom_margin = container_margin_bottom | plus: 0
+  elsif margin_bottom != blank or margin_bottom == 0
+    assign bottom_margin = margin_bottom | plus: 0
+  else
+    assign bottom_margin = 0
+  endif
+-%}
+
+<div class="video-carousel-container" data-enable-autoplay="{{ enable_autoplay | default: false }}" data-show-sound-controls="{{ show_sound_controls_autoplay | default: false }}" data-play-button-size="{{ play_button_size | default: 30 }}" data-sound-button-size="{{ sound_button_size | default: 30 }}" data-play-button-bg-color="{{ play_button_bg_color | default: '#000000' }}" data-play-button-bg-opacity="{{ play_button_bg_opacity | default: 35 }}" data-sound-button-bg-color="{{ sound_button_bg_color | default: '#000000' }}" data-sound-button-bg-opacity="{{ sound_button_bg_opacity | default: 35 }}" style="margin-top: {{ top_margin }}px !important; margin-bottom: {{ bottom_margin }}px !important;" {{ block.shopify_attributes }}>
+  {% if heading != blank %}
+    <h2 class="carousel-heading" style="color: {{ heading_color | default: '#333333' }} !important; font-size: {{ heading_size | default: 24 }}px !important; font-weight: {{ heading_font_weight | default: 'var(--font-weight-semibold)' }} !important; letter-spacing: {{ heading_letter_spacing | default: 'var(--letter-spacing-heading)' }} !important;">{{ heading }}</h2>
+  {% endif %}
+  
+  {% if show_social_badge %}
+    {% if remove_badge_background %}
+      <!-- Badge without background -->
+      <div class="social-badge-no-background">
+        {% if show_divider_above_views == true %}
+          <div class="badge-divider" style="
+            width: {{ divider_width | default: 50 }}%;
+            height: {{ divider_thickness | default: 1 }}px;
+            background-color: {{ divider_color | default: '#e0e0e0' }};
+            margin: {{ divider_margin | default: 10 }}px 0;
+          "></div>
+        {% endif %}
+        <div class="badge-content-wrapper">
+          {% if social_platform == 'tiktok' %}
+            <img class="social-icon-no-bg" src="https://cdn4.iconfinder.com/data/icons/social-media-flat-7/64/Social-media_Tiktok-512.png" width="12" height="12" alt="TikTok" />
+          {% elsif social_platform == 'instagram' %}
+            <svg class="social-icon-no-bg" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="instagramGradientNoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#833ab4" />
+                  <stop offset="50%" stop-color="#fd1d1d" />
+                  <stop offset="100%" stop-color="#fcb045" />
+                </linearGradient>
+              </defs>
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" fill="url(#instagramGradientNoBg)"/>
+            </svg>
+          {% elsif social_platform == 'facebook' %}
+            <svg class="social-icon-no-bg" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
+            </svg>
+          {% endif %}
+          {% if custom_badge_text != blank %}
+            <div class="custom-badge-text" style="color: {{ badge_text_color | default: '#262626' }} !important;">
+              {{ custom_badge_text }}
+            </div>
+          {% else %}
+            <div class="default-badge-text" style="color: {{ badge_text_color | default: '#262626' }} !important;">
+              {{ badge_text | default: 'Over ' }} {{ view_count }}{{ badge_suffix | default: 'M Views On TikTok' }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <!-- Original badge with background -->
+      {% if social_platform == 'tiktok' %}
+      <div class="tiktok-views-badge" style="background-color: {{ badge_background_color | default: '#f8f9fa' }} !important;{% unless use_gradient_text %} color: {{ badge_text_color | default: '#262626' }} !important;{% endunless %}">
+        <img class="tiktok-icon" src="https://cdn4.iconfinder.com/data/icons/social-media-flat-7/64/Social-media_Tiktok-512.png" width="9.8" height="9.8" alt="TikTok" />
+        <span class="tiktok-text {% if use_gradient_text %}gradient-text{% endif %}">{{ badge_text | default: 'Over ' }} {{ view_count }}{{ badge_suffix | default: 'M Views On TikTok' }}</span>
+      </div>
+      {% elsif social_platform == 'instagram' %}
+      <div class="instagram-views-badge" style="background-color: {{ badge_background_color | default: '#f8f9fa' }} !important;{% unless use_gradient_text %} color: {{ badge_text_color | default: '#262626' }} !important;{% endunless %}">
+        <svg class="instagram-icon" width="9.8" height="9.8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="instagramGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#833ab4" />
+            <stop offset="50%" stop-color="#fd1d1d" />
+            <stop offset="100%" stop-color="#fcb045" />
+          </linearGradient>
+        </defs>
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" fill="url(#instagramGradient)"/>
+      </svg>
+      <span class="instagram-text {% if use_gradient_text %}gradient-text instagram-gradient{% endif %}">{{ badge_text | default: 'Over ' }} {{ view_count }}{{ badge_suffix | default: 'M Views On Instagram' }}</span>
+    </div>
+    {% elsif social_platform == 'facebook' %}
+    <div class="facebook-views-badge" style="background-color: {{ badge_background_color | default: '#f8f9fa' }} !important;{% unless use_gradient_text %} color: {{ badge_text_color | default: '#262626' }} !important;{% endunless %}">
+      <svg class="facebook-icon" width="9.8" height="9.8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
+      </svg>
+      <span class="facebook-text {% if use_gradient_text %}gradient-text facebook-gradient{% endif %}">{{ badge_text | default: 'Over ' }} {{ view_count }}{{ badge_suffix | default: 'M Views On Facebook' }}</span>
+    </div>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+
+  <div class="video-carousel">
+    {% for video_block in section.blocks %}
+      {% if video_block.type == 'carousel_default_video' %}
+        <div class="video-item" data-video-id="{{ video_block.id }}" {{ video_block.shopify_attributes }}>
+          <div class="video-thumbnail">
+            <div class="gradient-overlay"></div>
+            {% if video_block.settings.video != blank %}
+              {% assign poster_url = video_block.settings.video | img_url: '700x' %}
+              <div class="shopify-video-container">
+                <img
+                  class="carousel-video"
+                  src="{{ poster_url }}"
+                  alt="Video thumbnail"
+                  loading="lazy"
+                  width=""
+                  height=""
+                >
+                <div class="video-type" data-type="shopify" data-video-id="{{ video_block.settings.video.id }}"></div>
+                <div style="display: none;" class="hidden-video-data">
+                  {{
+                    video_block.settings.video
+                    | video_tag: controls: false, autoplay: false, loop: true, muted: true, preload: 'metadata'
+                  }}
+                </div>
+              </div>
+              <div class="video-play-overlay">
+                <button class="testimonial-play-button" aria-label="Play video">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </button>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Video Modal -->
+<div id="videoModal" class="video-modal" style="display: none;">
+  <div class="video-modal-content">
+    <button type="button" class="close-modal" aria-label="Close video">&times;</button>
+    <div class="video-container"></div>
+  </div>
+</div>
+
+{{ 'video-carousel.js' | asset_url | script_tag }}
+
+<style>
+  .video-carousel-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  .carousel-heading {
+    margin-bottom: 5px;
+    margin-top: 0;
+  }
+
+  .video-carousel-container .tiktok-views-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 1.7px 10px !important;
+    background-color: #f8f9fa !important;
+    border-radius: 999px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 11px !important;
+    color: #262626 !important;
+    position: relative !important;
+    border: 1px solid transparent !important;
+    background-clip: padding-box !important;
+    margin-bottom: 10px;
+  }
+
+  .video-carousel-container .tiktok-views-badge::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    left: -1px !important;
+    z-index: -1 !important;
+    border-radius: 999px !important;
+    background: linear-gradient(45deg, #00f2ea, #ff0050) !important;
+  }
+
+  .video-carousel-container .tiktok-icon {
+    width: 9.8px !important;
+    height: 9.8px !important;
+    margin-right: 7px !important;
+  }
+
+  .video-carousel-container .tiktok-text {
+    letter-spacing: -0.3px !important;
+    font-weight: 500 !important;
+  }
+
+  /* Gradient Text Classes */
+  .gradient-text {
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    display: inline-block !important;
+    background-size: 100% 100% !important;
+    background-repeat: no-repeat !important;
+    background-attachment: scroll !important;
+    -webkit-box-decoration-break: clone !important;
+    box-decoration-break: clone !important;
+  }
+  
+  /* Badge without background styles */
+  .social-badge-no-background {
+    text-align: left;
+    margin-bottom: 10px;
+  }
+  
+  .badge-divider {
+    display: block !important;
+    border: none;
+    margin-left: 0;
+    margin-right: auto;
+    min-height: 1px;
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .custom-badge-text,
+  .default-badge-text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    letter-spacing: -0.3px !important;
+    line-height: 1.4;
+  }
+  
+  .custom-badge-text p {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .custom-badge-text strong {
+    font-weight: 700 !important;
+  }
+  
+  .badge-content-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .social-icon-no-bg {
+    width: 12px !important;
+    height: 12px !important;
+    flex-shrink: 0;
+    display: block;
+  }
+  
+  /* TikTok Gradient (default) */
+  .video-carousel-container .tiktok-text.gradient-text {
+    background: linear-gradient(45deg, #00f2ea, #ff0050) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+  }
+
+  /* Instagram Gradient */
+  .video-carousel-container .instagram-text.gradient-text.instagram-gradient {
+    background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+  }
+
+  /* Facebook Gradient */
+  .video-carousel-container .facebook-text.gradient-text.facebook-gradient {
+    background: linear-gradient(45deg, #1877F2, #42a5f5) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+  }
+
+  .video-carousel {
+    display: flex;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 5px 0;
+    padding-bottom: 10px;
+    scroll-behavior: smooth;
+    {% if hide_scrollbar %}
+    -ms-overflow-style: none;
+    scrollbar-width: none !important;
+    {% else %}
+    -ms-overflow-style: none;
+    scrollbar-width: thin !important;
+    scrollbar-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ scrollbar_color | default: "#04C7FF" }}{% endif %} #f0f0f0 !important;
+    {% endif %}
+    position: relative;
+    z-index: 1;
+  }
+
+  {% unless hide_scrollbar %}
+  .video-carousel::-webkit-scrollbar {
+    height: {{ scrollbar_width | default: 9 }}px;
+    background-color: #f0f0f0;
+  }
+
+  .video-carousel::-webkit-scrollbar-track {
+    background: transparent !important;
+    border-radius: 3px !important;
+  }
+
+  .video-carousel::-webkit-scrollbar-thumb {
+    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ scrollbar_color | default: "#04C7FF" }}{% endif %};
+    border-radius: 4px;
+  }
+  {% else %}
+  .video-carousel::-webkit-scrollbar {
+    display: none;
+  }
+  {% endunless %}
+
+  .video-item {
+    flex: 0 0 {{ video_size | default: 130 }}px !important;
+    width: {{ video_size | default: 130 }}px !important;
+    position: relative !important;
+    min-width: {{ video_size | default: 130 }}px !important;
+    max-width: {{ video_size | default: 130 }}px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .video-thumbnail {
+    position: relative !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    height: {{ video_size | default: 130 | times: 1.78 | round }}px !important;
+    background-color: #f0f0f0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Mobile video sizing */
+  @media (max-width: 768px) {
+    .video-item {
+      flex: 0 0 {{ video_size_mobile | default: video_size | default: 120 }}px !important;
+      width: {{ video_size_mobile | default: video_size | default: 120 }}px !important;
+      min-width: {{ video_size_mobile | default: video_size | default: 120 }}px !important;
+      max-width: {{ video_size_mobile | default: video_size | default: 120 }}px !important;
+    }
+
+    .video-thumbnail {
+      height: {{ video_size_mobile | default: video_size | default: 120 | times: 1.78 | round }}px !important;
+    }
+  }
+
+  .gradient-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 70px !important;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%) !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+  }
+
+  .carousel-video {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    object-fit: cover !important;
+    background-color: #f0f0f0 !important;
+  }
+
+  .video-play-overlay {
+    position: absolute !important;
+    bottom: 8px !important;
+    left: 8px !important;
+    width: auto !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    z-index: 10 !important;
+    pointer-events: none !important;
+  }
+
+  .video-carousel-container .testimonial-play-button {
+    width: {{ play_button_size | default: 30 }}px !important;
+    height: {{ play_button_size | default: 30 }}px !important;
+    border-radius: 50% !important;
+    background: rgba({{ play_button_bg_color | default: '#000000' | color_extract: 'red' }}, {{ play_button_bg_color | default: '#000000' | color_extract: 'green' }}, {{ play_button_bg_color | default: '#000000' | color_extract: 'blue' }}, {{ play_button_bg_opacity | default: 35 | divided_by: 100.0 }}) !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease, background 0.2s ease !important;
+    pointer-events: auto !important;
+  }
+
+  .video-carousel-container .testimonial-play-button:hover {
+    transform: scale(1.1) !important;
+    background: rgba({{ play_button_bg_color | default: '#000000' | color_extract: 'red' }}, {{ play_button_bg_color | default: '#000000' | color_extract: 'green' }}, {{ play_button_bg_color | default: '#000000' | color_extract: 'blue' }}, {{ play_button_bg_opacity | default: 35 | plus: 16 | divided_by: 100.0 }}) !important;
+  }
+
+  .video-carousel-container .testimonial-play-button svg {
+    width: {{ play_button_size | default: 30 | times: 0.8 | round }}px !important;
+    height: {{ play_button_size | default: 30 | times: 0.8 | round }}px !important;
+    fill: #ffffff !important;
+    margin-left: 1px !important;
+  }
+
+  /* Inline video styles */
+  .inline-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .inline-video-container iframe,
+  .inline-video-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+
+  .video-carousel-container .video-sound-button {
+    position: absolute !important;
+    bottom: 8px !important;
+    right: 8px !important;
+    width: {{ sound_button_size | default: 30 }}px !important;
+    height: {{ sound_button_size | default: 30 }}px !important;
+    border-radius: 50% !important;
+    background: rgba({{ sound_button_bg_color | default: '#000000' | color_extract: 'red' }}, {{ sound_button_bg_color | default: '#000000' | color_extract: 'green' }}, {{ sound_button_bg_color | default: '#000000' | color_extract: 'blue' }}, {{ sound_button_bg_opacity | default: 35 | divided_by: 100.0 }}) !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    z-index: 20 !important;
+    transition: transform 0.2s ease, background 0.2s ease !important;
+  }
+
+  .video-carousel-container .video-sound-button:hover {
+    transform: scale(1.1) !important;
+    background: rgba({{ sound_button_bg_color | default: '#000000' | color_extract: 'red' }}, {{ sound_button_bg_color | default: '#000000' | color_extract: 'green' }}, {{ sound_button_bg_color | default: '#000000' | color_extract: 'blue' }}, {{ sound_button_bg_opacity | default: 35 | plus: 16 | divided_by: 100.0 }}) !important;
+  }
+
+  .video-carousel-container .video-sound-button svg {
+    width: {{ sound_button_size | default: 30 | times: 0.67 | round }}px !important;
+    height: {{ sound_button_size | default: 30 | times: 0.67 | round }}px !important;
+    fill: white !important;
+  }
+
+  .video-playing .video-play-overlay {
+    display: flex !important;
+  }
+
+  .video-carousel-container[data-enable-autoplay="true"] .video-play-overlay {
+    display: none !important;
+  }
+
+  .video-carousel-container[data-show-sound-controls="false"] .video-sound-button {
+    display: none !important;
+  }
+
+  /* Modal styles - hidden since we're using inline playback */
+  .video-modal {
+    display: none !important;
+  }
+
+  .video-carousel-container .instagram-views-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 1.7px 10px !important;
+    background-color: #f8f9fa !important;
+    margin-bottom: 10px !important;
+    border-radius: 999px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 11px !important;
+    color: #262626 !important;
+    position: relative !important;
+    border: 1px solid transparent !important;
+    background-clip: padding-box !important;
+  }
+
+  .video-carousel-container .instagram-views-badge::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    left: -1px !important;
+    z-index: -1 !important;
+    border-radius: 999px !important;
+    background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045) !important;
+  }
+
+  .video-carousel-container .instagram-icon {
+    width: 9.8px !important;
+    height: 9.8px !important;
+    margin-right: 7px !important;
+  }
+
+  .video-carousel-container .instagram-text {
+    letter-spacing: -0.3px !important;
+    font-weight: 500 !important;
+  }
+
+  .video-carousel-container .facebook-views-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 1.7px 10px !important;
+    background-color: #f8f9fa !important;
+    border-radius: 999px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 11px !important;
+    color: #262626 !important;
+    position: relative !important;
+    border: 1px solid transparent !important;
+    background-clip: padding-box !important;
+    margin-bottom: 10px;
+  }
+
+  .video-carousel-container .facebook-views-badge::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    left: -1px !important;
+    z-index: -1 !important;
+    border-radius: 999px !important;
+    background: #1877F2 !important;
+  }
+
+  .video-carousel-container .facebook-icon {
+    width: 9.8px !important;
+    height: 9.8px !important;
+    margin-right: 7px !important;
+  }
+
+  .video-carousel-container .facebook-text {
+    letter-spacing: -0.3px !important;
+    font-weight: 500 !important;
+  }
+
+  @media (max-width: 768px) {
+    .video-carousel-container .tiktok-views-badge,
+    .video-carousel-container .instagram-views-badge,
+    .video-carousel-container .facebook-views-badge {
+      font-size: 11px !important;
+      padding: 1.7px 12px !important;
+    }
+
+    .video-carousel-container .tiktok-icon,
+    .video-carousel-container .instagram-icon,
+    .video-carousel-container .facebook-icon {
+      width: 11.7px !important;
+      height: 11.7px !important;
+      margin-right: 7.5px !important;
+    }
+  }
+</style>

@@ -1,0 +1,556 @@
+{% comment %}
+  ===============================================
+  ENHANCED BUTTON EFFECTS - BOX SHADOW & GRADIENT
+  ===============================================
+
+  This snippet automatically applies box shadow and gradient effects to buttons
+  based on the global theme settings for enhanced button styling.
+
+  Features:
+  - Box Shadow: Simple, clean shadows with 5 intensity levels
+  - Gradient Background: Linear gradients with optional shine animation
+  - Hover Effects: Enhanced shadows and smooth lift transitions
+  - Mobile Optimized: Reduced effects for better mobile performance
+
+  Usage:
+  {% render 'enhanced-button-effects' %}
+
+  This should be included in the <head> section of theme.liquid
+  ===============================================
+{% endcomment %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Get theme settings
+  const enableBoxShadow = {{ settings.enable_button_box_shadow | json }};
+  const shadowIntensity = {{ settings.button_shadow_intensity | json }};
+  const enableGradient = {{ settings.enable_button_gradient | json }};
+  const enableGradientShine = {{ settings.enable_gradient_shine | json }};
+  
+  // If neither effect is enabled, exit early
+  if (!enableBoxShadow && !enableGradient) {
+    return;
+  }
+  
+  // Debug logging
+  console.log('Enhanced Button Effects:', {
+    enableBoxShadow: enableBoxShadow,
+    shadowIntensity: shadowIntensity,
+    enableGradient: enableGradient,
+    enableGradientShine: enableGradientShine
+  });
+  
+  // Define button selectors that should receive enhanced effects
+  const buttonSelectors = [
+    '.button-global-style',
+    '.use-global-button-styling',
+    '.button',
+    '.btn',
+    'button[type="submit"]',
+    'input[type="submit"]',
+    '.product-form__submit',
+    '.shop-add-to-cart-button',
+    '.cart__checkout-button',
+    '.button--primary',
+    '.claim-button',
+    '.field__button',
+    '.theme-button',
+    '.guarantee-section__cta',
+    '.custom-hero__button',
+    '.rich-text-button'
+  ];
+  
+  // Function to apply effects to buttons
+  function applyButtonEffects() {
+    buttonSelectors.forEach(selector => {
+      const buttons = document.querySelectorAll(selector);
+              buttons.forEach(button => {
+         // Skip buttons that explicitly opt out or cart remove buttons
+         // Cart remove buttons should remain simple and subtle
+          if (button.classList.contains('button-section-override') || 
+             button.classList.contains('no-enhanced-effects') ||
+             button.classList.contains('cart-remove-button') ||
+             button.classList.contains('button--tertiary') ||
+             button.classList.contains('disable-global-button-styling')) {
+            return;
+          }
+        
+        // Apply box shadow effect if enabled
+        if (enableBoxShadow) {
+          button.classList.add('button-box-shadow');
+          button.classList.add(`intensity-${shadowIntensity}`);
+          // console.log('Applied box shadow effect to:', button, 'with intensity:', shadowIntensity);
+        }
+        
+        // Apply gradient effect if enabled
+        if (enableGradient) {
+          button.classList.add('button-gradient-effect');
+          
+          // Apply shine effect conditionally
+          if (enableGradientShine) {
+            button.classList.add('gradient-shine-enabled');
+          } else {
+            button.classList.remove('gradient-shine-enabled');
+          }
+          // console.log('Applied gradient effect to:', button, 'with shine:', enableGradientShine);
+        }
+      });
+    });
+  }
+  
+  // Apply effects immediately
+  applyButtonEffects();
+  
+  // Re-apply effects when new content is loaded (for AJAX/dynamic content)
+  const observer = new MutationObserver(function(mutations) {
+    let shouldReapply = false;
+    mutations.forEach(function(mutation) {
+      mutation.addedNodes.forEach(function(node) {
+        if (node.nodeType === 1) { // Element node
+          // Check if the added node contains buttons
+          if (node.querySelector && buttonSelectors.some(selector => node.querySelector(selector))) {
+            shouldReapply = true;
+          }
+          // Check if the added node itself is a button
+          if (buttonSelectors.some(selector => node.matches && node.matches(selector))) {
+            shouldReapply = true;
+          }
+        }
+      });
+    });
+    
+    if (shouldReapply) {
+      setTimeout(applyButtonEffects, 50); // Small delay to ensure DOM is ready
+    }
+  });
+  
+  // Start observing
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+});
+</script>
+
+<style>
+  /* Enhanced button effect styling variables */
+  :root {
+    {% if settings.enable_3d_button_effect %}
+    --enhanced-3d-enabled: true;
+    {% else %}
+    --enhanced-3d-enabled: false;
+    {% endif %}
+
+    {% if settings.enable_button_gradient %}
+    --enhanced-gradient-enabled: true;
+    {% else %}
+    --enhanced-gradient-enabled: false;
+    {% endif %}
+  }
+
+  /* Critical box shadow effect overrides - must override global button styles */
+  {% if settings.enable_button_box_shadow %}
+  /* Force box-shadow to override global button box-shadow: none */
+  .button-box-shadow,
+  .button.button-box-shadow,
+  .btn.button-box-shadow,
+  button[type="submit"].button-box-shadow,
+  input[type="submit"].button-box-shadow,
+  .product-form__submit.button-box-shadow,
+  .shop-add-to-cart-button.button-box-shadow,
+  .cart__checkout-button.button-box-shadow,
+  .contact-button.button-box-shadow:not(.disable-global-button-styling),
+  .contact__button.button-box-shadow:not(.disable-global-button-styling),
+  .button--primary.button-box-shadow,
+  .claim-button.button-box-shadow,
+  .newsletter-form__button.button-box-shadow:not(.disable-global-button-styling),
+  .field__button.button-box-shadow:not(.disable-global-button-styling),
+  .theme-button.button-box-shadow,
+  .guarantee-section__cta.button-box-shadow,
+  .custom-hero__button.button-box-shadow,
+  .rich-text-button.button-box-shadow {
+    transition: all 0.3s ease !important;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Apply the correct shadow based on intensity */
+  {% for i in (1..5) %}
+  .button-box-shadow.intensity-{{ i }},
+  .button.button-box-shadow.intensity-{{ i }},
+  .btn.button-box-shadow.intensity-{{ i }},
+  button[type="submit"].button-box-shadow.intensity-{{ i }},
+  input[type="submit"].button-box-shadow.intensity-{{ i }},
+  .product-form__submit.button-box-shadow.intensity-{{ i }},
+  .shop-add-to-cart-button.button-box-shadow.intensity-{{ i }},
+  .cart__checkout-button.button-box-shadow.intensity-{{ i }},
+  .contact-button.button-box-shadow.intensity-{{ i }}:not(.disable-global-button-styling),
+  .contact__button.button-box-shadow.intensity-{{ i }}:not(.disable-global-button-styling),
+  .button--primary.button-box-shadow.intensity-{{ i }},
+  .claim-button.button-box-shadow.intensity-{{ i }},
+  .newsletter-form__button.button-box-shadow.intensity-{{ i }}:not(.disable-global-button-styling),
+  .field__button.button-box-shadow.intensity-{{ i }}:not(.disable-global-button-styling),
+  .theme-button.button-box-shadow.intensity-{{ i }},
+  .guarantee-section__cta.button-box-shadow.intensity-{{ i }},
+  .custom-hero__button.button-box-shadow.intensity-{{ i }},
+  .rich-text-button.button-box-shadow.intensity-{{ i }} {
+    {% case i %}
+      {% when 1 %}
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+      {% when 2 %}
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+      {% when 3 %}
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2) !important;
+      {% when 4 %}
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25) !important;
+      {% when 5 %}
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3) !important;
+    {% endcase %}
+  }
+
+  .button-box-shadow.intensity-{{ i }}:hover,
+  .button.button-box-shadow.intensity-{{ i }}:hover,
+  .btn.button-box-shadow.intensity-{{ i }}:hover,
+  button[type="submit"].button-box-shadow.intensity-{{ i }}:hover,
+  input[type="submit"].button-box-shadow.intensity-{{ i }}:hover,
+  .product-form__submit.button-box-shadow.intensity-{{ i }}:hover,
+  .shop-add-to-cart-button.button-box-shadow.intensity-{{ i }}:hover,
+  .cart__checkout-button.button-box-shadow.intensity-{{ i }}:hover,
+  .contact-button.button-box-shadow.intensity-{{ i }}:hover:not(.disable-global-button-styling),
+  .contact__button.button-box-shadow.intensity-{{ i }}:hover:not(.disable-global-button-styling),
+  .button--primary.button-box-shadow.intensity-{{ i }}:hover,
+  .claim-button.button-box-shadow.intensity-{{ i }}:hover,
+  .newsletter-form__button.button-box-shadow.intensity-{{ i }}:not(.disable-global-button-styling):hover,
+  .field__button.button-box-shadow.intensity-{{ i }}:not(.disable-global-button-styling):hover,
+  .theme-button.button-box-shadow.intensity-{{ i }}:hover,
+  .guarantee-section__cta.button-box-shadow.intensity-{{ i }}:hover,
+  .custom-hero__button.button-box-shadow.intensity-{{ i }}:hover,
+  .rich-text-button.button-box-shadow.intensity-{{ i }}:hover {
+    transform: translateY(-2px) !important;
+    {% case i %}
+      {% when 1 %}
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+      {% when 2 %}
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2) !important;
+      {% when 3 %}
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25) !important;
+      {% when 4 %}
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3) !important;
+      {% when 5 %}
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35) !important;
+    {% endcase %}
+  }
+  {% endfor %}
+
+  .button-box-shadow:active,
+  .button.button-box-shadow:active,
+  .btn.button-box-shadow:active,
+  button[type="submit"].button-box-shadow:active,
+  input[type="submit"].button-box-shadow:active,
+  .product-form__submit.button-box-shadow:active,
+  .shop-add-to-cart-button.button-box-shadow:active,
+  .cart__checkout-button.button-box-shadow:active,
+  .contact-button.button-box-shadow:active:not(.disable-global-button-styling),
+  .contact__button.button-box-shadow:active:not(.disable-global-button-styling),
+  .button--primary.button-box-shadow:active,
+  .claim-button.button-box-shadow:active,
+  .newsletter-form__button.button-box-shadow:not(.disable-global-button-styling):active,
+  .field__button.button-box-shadow:not(.disable-global-button-styling):active,
+  .theme-button.button-box-shadow:active,
+  .guarantee-section__cta.button-box-shadow:active,
+  .custom-hero__button.button-box-shadow:active,
+  .rich-text-button.button-box-shadow:active {
+    transform: translateY(0) !important;
+    }
+    {% endif %}
+
+    /* ===================================== */
+  /* GRADIENT BACKGROUND EFFECTS */
+  /* ===================================== */
+
+  {% if settings.enable_button_gradient %}
+  /* Apply gradient background to buttons with gradient effect class */
+  .button-gradient-effect:not(.disable-global-button-styling),
+  .button.button-gradient-effect:not(.disable-global-button-styling),
+  .btn.button-gradient-effect:not(.disable-global-button-styling),
+  button[type="submit"].button-gradient-effect:not(.disable-global-button-styling),
+  input[type="submit"].button-gradient-effect:not(.disable-global-button-styling),
+  .product-form__submit.button-gradient-effect:not(.disable-global-button-styling),
+  .shop-add-to-cart-button.button-gradient-effect:not(.disable-global-button-styling),
+  .cart__checkout-button.button-gradient-effect:not(.disable-global-button-styling),
+  .contact-button.button-gradient-effect:not(.disable-global-button-styling),
+  .contact__button.button-gradient-effect:not(.disable-global-button-styling),
+  .button--primary.button-gradient-effect:not(.disable-global-button-styling),
+  .claim-button.button-gradient-effect:not(.disable-global-button-styling),
+  .newsletter-form__button.button-gradient-effect:not(.disable-global-button-styling),
+  .field__button.button-gradient-effect:not(.disable-global-button-styling),
+  .theme-button.button-gradient-effect:not(.disable-global-button-styling),
+  .guarantee-section__cta.button-gradient-effect:not(.disable-global-button-styling),
+  .custom-hero__button.button-gradient-effect:not(.disable-global-button-styling),
+  .rich-text-button.button-gradient-effect:not(.disable-global-button-styling) {
+    background: linear-gradient({{ settings.button_gradient_direction | default: 'to bottom' }}, {{ settings.button_gradient_start | default: '#EF4A65' }}, {{ settings.button_gradient_end | default: '#D63953' }}) !important;
+    background-color: var(--global-button-bg-color, #EF4A65) !important;
+    transition: all 0.3s ease !important;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Gradient hover state */
+  .button-gradient-effect:not(.disable-global-button-styling):hover,
+  .button.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .btn.button-gradient-effect:not(.disable-global-button-styling):hover,
+  button[type="submit"].button-gradient-effect:not(.disable-global-button-styling):hover,
+  input[type="submit"].button-gradient-effect:not(.disable-global-button-styling):hover,
+  .product-form__submit.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .shop-add-to-cart-button.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .cart__checkout-button.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .contact-button.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .contact__button.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .button--primary.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .claim-button.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .newsletter-form__button.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .field__button.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .theme-button.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .guarantee-section__cta.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .custom-hero__button.button-gradient-effect:not(.disable-global-button-styling):hover,
+  .rich-text-button.button-gradient-effect:not(.disable-global-button-styling):hover {
+    background: linear-gradient({{ settings.button_gradient_direction | default: 'to bottom' }}, {{ settings.button_gradient_hover_start | default: '#D63953' }}, {{ settings.button_gradient_hover_end | default: '#B8314A' }}) !important;
+    background-color: var(--global-button-hover-bg-color, #D63953) !important;
+  }
+
+  /* Gradient shine effect (animated overlay) */
+  {% if settings.enable_gradient_shine %}
+  .button-gradient-effect.gradient-shine-enabled:not(.disable-global-button-styling)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transition: left 0.5s ease;
+    pointer-events: none;
+  }
+
+  .button-gradient-effect.gradient-shine-enabled:not(.disable-global-button-styling):hover::before {
+    left: 100%;
+  }
+  {% endif %}
+  {% endif %}
+
+    /* ===================================== */
+    /* CRITICAL CART REMOVE BUTTON EXCLUSIONS */
+    /* ===================================== */
+
+    /*
+     * Cart remove buttons must NEVER inherit any enhanced effects
+     * These overrides have maximum specificity to ensure they work
+     * even if classes like button-box-shadow, button-gradient-effect are applied
+     */
+    .cart-remove-button,
+    .button--tertiary.cart-remove-button,
+    button.cart-remove-button,
+    .cart-remove-button.button-box-shadow,
+    .cart-remove-button.button-gradient-effect,
+    .cart-remove-button.intensity-1,
+    .cart-remove-button.intensity-2,
+    .cart-remove-button.intensity-3,
+    .cart-remove-button.intensity-4,
+    .cart-remove-button.intensity-5,
+    .button--tertiary.cart-remove-button.button-box-shadow,
+    .button--tertiary.cart-remove-button.button-gradient-effect,
+    .button--tertiary.cart-remove-button.intensity-1,
+    .button--tertiary.cart-remove-button.intensity-2,
+    .button--tertiary.cart-remove-button.intensity-3,
+    .button--tertiary.cart-remove-button.intensity-4,
+    .button--tertiary.cart-remove-button.intensity-5,
+    button.cart-remove-button.button-box-shadow,
+    button.cart-remove-button.button-gradient-effect,
+    button.cart-remove-button.intensity-1,
+    button.cart-remove-button.intensity-2,
+    button.cart-remove-button.intensity-3,
+    button.cart-remove-button.intensity-4,
+    button.cart-remove-button.intensity-5 {
+      /* Reset ALL enhanced effects */
+      box-shadow: none !important;
+      background: var(--button-tertiary-bg, transparent) !important;
+      transform: none !important;
+      position: static !important;
+      transition: opacity 0.2s ease !important;
+      z-index: auto !important;
+    }
+
+    .cart-remove-button:hover,
+    .button--tertiary.cart-remove-button:hover,
+    button.cart-remove-button:hover,
+    .cart-remove-button.button-box-shadow:hover,
+    .cart-remove-button.button-gradient-effect:hover,
+    .cart-remove-button.intensity-1:hover,
+    .cart-remove-button.intensity-2:hover,
+    .cart-remove-button.intensity-3:hover,
+    .cart-remove-button.intensity-4:hover,
+    .cart-remove-button.intensity-5:hover,
+    .button--tertiary.cart-remove-button.button-box-shadow:hover,
+    .button--tertiary.cart-remove-button.button-gradient-effect:hover,
+    .button--tertiary.cart-remove-button.intensity-1:hover,
+    .button--tertiary.cart-remove-button.intensity-2:hover,
+    .button--tertiary.cart-remove-button.intensity-3:hover,
+    .button--tertiary.cart-remove-button.intensity-4:hover,
+    .button--tertiary.cart-remove-button.intensity-5:hover,
+    button.cart-remove-button.button-box-shadow:hover,
+    button.cart-remove-button.button-gradient-effect:hover,
+    button.cart-remove-button.intensity-1:hover,
+    button.cart-remove-button.intensity-2:hover,
+    button.cart-remove-button.intensity-3:hover,
+    button.cart-remove-button.intensity-4:hover,
+    button.cart-remove-button.intensity-5:hover {
+      box-shadow: none !important;
+      transform: none !important;
+      opacity: 0.7 !important;
+    }
+
+    .cart-remove-button:active,
+    .button--tertiary.cart-remove-button:active,
+    button.cart-remove-button:active,
+    .cart-remove-button.button-box-shadow:active,
+    .cart-remove-button.button-gradient-effect:active,
+    .cart-remove-button.intensity-1:active,
+    .cart-remove-button.intensity-2:active,
+    .cart-remove-button.intensity-3:active,
+    .cart-remove-button.intensity-4:active,
+    .cart-remove-button.intensity-5:active,
+    .button--tertiary.cart-remove-button.button-box-shadow:active,
+    .button--tertiary.cart-remove-button.button-gradient-effect:active,
+    .button--tertiary.cart-remove-button.intensity-1:active,
+    .button--tertiary.cart-remove-button.intensity-2:active,
+    .button--tertiary.cart-remove-button.intensity-3:active,
+    .button--tertiary.cart-remove-button.intensity-4:active,
+    .button--tertiary.cart-remove-button.intensity-5:active,
+    button.cart-remove-button.button-box-shadow:active,
+    button.cart-remove-button.button-gradient-effect:active,
+    button.cart-remove-button.intensity-1:active,
+    button.cart-remove-button.intensity-2:active,
+    button.cart-remove-button.intensity-3:active,
+    button.cart-remove-button.intensity-4:active,
+    button.cart-remove-button.intensity-5:active {
+      box-shadow: none !important;
+      transform: none !important;
+      opacity: 0.5 !important;
+    }
+
+    /* Remove any gradient effects that might have been applied */
+    .cart-remove-button::before,
+    .button--tertiary.cart-remove-button::before,
+    button.cart-remove-button::before,
+    .cart-remove-button.button-gradient-effect::before,
+    .cart-remove-button.gradient-shine-enabled::before,
+    .button--tertiary.cart-remove-button.button-gradient-effect::before,
+    .button--tertiary.cart-remove-button.gradient-shine-enabled::before,
+    button.cart-remove-button.button-gradient-effect::before,
+    button.cart-remove-button.gradient-shine-enabled::before {
+      display: none !important;
+      content: none !important;
+      background: none !important;
+    }
+
+    /* Additional mobile optimizations for box shadow effects */
+  @media screen and (max-width: 768px) {
+    .button-box-shadow {
+      /* Reduce transform distance on mobile for better touch experience */
+      transform: none !important;
+    }
+
+    .button-box-shadow:hover,
+    .button-box-shadow:focus {
+      transform: translateY(-1px) !important;
+    }
+  }
+
+  /* Print media - remove box shadow effects for better printing */
+  @media print {
+    .button-box-shadow {
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    .button-gradient-effect::before {
+      display: none !important;
+    }
+  }
+
+  /* Complete override for disable-global-button-styling class */
+  /* These rules ensure that buttons with this class never get enhanced effects */
+  /* EXCEPT cart-discount-code-button which has its own color management */
+  .disable-global-button-styling:not(.cart-discount-code-button),
+  .disable-global-button-styling.button-box-shadow:not(.cart-discount-code-button),
+  .disable-global-button-styling.button-gradient-effect:not(.cart-discount-code-button),
+  .disable-global-button-styling.intensity-1:not(.cart-discount-code-button),
+  .disable-global-button-styling.intensity-2:not(.cart-discount-code-button),
+  .disable-global-button-styling.intensity-3:not(.cart-discount-code-button),
+  .disable-global-button-styling.intensity-4:not(.cart-discount-code-button),
+  .disable-global-button-styling.intensity-5:not(.cart-discount-code-button),
+  .button.disable-global-button-styling.button-box-shadow:not(.cart-discount-code-button),
+  .button.disable-global-button-styling.button-gradient-effect:not(.cart-discount-code-button),
+  .btn.disable-global-button-styling.button-box-shadow:not(.cart-discount-code-button),
+  .btn.disable-global-button-styling.button-gradient-effect:not(.cart-discount-code-button) {
+    /* Reset all enhanced button effects */
+    box-shadow: none !important;
+    background: unset !important;
+    background-image: none !important;
+    background-color: unset !important;
+    transform: none !important;
+    transition: none !important;
+    position: static !important;
+    z-index: auto !important;
+    /* Keep section-specific styles (font-size, border-radius), but reset global font overrides */
+    font-weight: unset !important;
+    letter-spacing: unset !important;
+    text-transform: unset !important;
+    /* Note: border-radius and font-size are preserved from inline styles */
+  }
+
+  /* Reset hover states */
+  /* EXCEPT cart-discount-code-button which has its own color management */
+  .disable-global-button-styling:hover:not(.cart-discount-code-button),
+  .disable-global-button-styling.button-box-shadow:hover:not(.cart-discount-code-button),
+  .disable-global-button-styling.button-gradient-effect:hover:not(.cart-discount-code-button),
+  .disable-global-button-styling.intensity-1:hover:not(.cart-discount-code-button),
+  .disable-global-button-styling.intensity-2:hover:not(.cart-discount-code-button),
+  .disable-global-button-styling.intensity-3:hover:not(.cart-discount-code-button),
+  .disable-global-button-styling.intensity-4:hover:not(.cart-discount-code-button),
+  .disable-global-button-styling.intensity-5:hover:not(.cart-discount-code-button) {
+    box-shadow: none !important;
+    background: unset !important;
+    background-image: none !important;
+    background-color: unset !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Reset active states */
+  /* EXCEPT cart-discount-code-button which has its own color management */
+  .disable-global-button-styling:active:not(.cart-discount-code-button),
+  .disable-global-button-styling.button-box-shadow:active:not(.cart-discount-code-button),
+  .disable-global-button-styling.button-gradient-effect:active:not(.cart-discount-code-button) {
+    box-shadow: none !important;
+    background: unset !important;
+    background-image: none !important;
+    background-color: unset !important;
+    transform: none !important;
+  }
+
+  /* Remove any pseudo-elements (like gradient shine effects) */
+  /* EXCEPT cart-discount-code-button which manages its own pseudo-elements */
+  .disable-global-button-styling:not(.cart-discount-code-button)::before,
+  .disable-global-button-styling:not(.cart-discount-code-button)::after,
+  .disable-global-button-styling.button-gradient-effect:not(.cart-discount-code-button)::before,
+  .disable-global-button-styling.gradient-shine-enabled:not(.cart-discount-code-button)::before {
+    display: none !important;
+    content: none !important;
+  }
+</style>

@@ -1,0 +1,34 @@
+{%- comment -%}
+  Accent Typography Settings Snippet
+
+  Include this snippet in section schemas to add accent typography settings.
+
+  Usage in section schema:
+
+  {
+    "type": "header",
+    "content": "Accent Typography"
+  },
+  {% render 'accent-typography-settings' %}
+{%- endcomment -%}
+
+{ "type": "checkbox", "id": "use_accent_font", "label": "Use Accent Font", "default": false, "info": "Apply the global
+accent typography to specific elements in this section" }, { "type": "select", "id": "accent_font_element", "label":
+"Apply Accent Font To", "options": [ { "value": "heading", "label": "Section Heading" }, { "value": "subheading",
+"label": "Subheading/Caption" }, { "value": "highlights", "label": "Highlighted Text" }, { "value": "buttons", "label":
+"Buttons" }, { "value": "badges", "label": "Badges/Labels" }, { "value": "accent_text", "label": "Accent Text" }, {
+"value": "custom", "label": "Custom Elements" } ], "default": "heading", "info": "Choose which elements should use the
+accent font" }, { "type": "select", "id": "accent_font_size", "label": "Accent Font Size", "options": [ { "value": "xs",
+"label": "Extra Small" }, { "value": "sm", "label": "Small" }, { "value": "base", "label": "Base" }, { "value": "lg",
+"label": "Large" }, { "value": "xl", "label": "Extra Large" }, { "value": "2xl", "label": "2X Large" }, { "value":
+"3xl", "label": "3X Large" }, { "value": "4xl", "label": "4X Large" } ], "default": "base", "info": "Size variant for
+the accent font" }, { "type": "select", "id": "accent_font_weight", "label": "Accent Font Weight", "options": [ {
+"value": "light", "label": "Light" }, { "value": "normal", "label": "Normal" }, { "value": "medium", "label": "Medium"
+}, { "value": "semibold", "label": "Semi Bold" }, { "value": "bold", "label": "Bold" }, { "value": "extrabold", "label":
+"Extra Bold" } ], "default": "normal", "info": "Weight variant for the accent font" }, { "type": "select", "id":
+"accent_text_transform", "label": "Accent Text Transform", "options": [ { "value": "none", "label": "None" }, { "value":
+"uppercase", "label": "UPPERCASE" }, { "value": "lowercase", "label": "lowercase" }, { "value": "capitalize", "label":
+"Capitalize" } ], "default": "none", "info": "Text transformation for accent font elements" }, { "type": "checkbox",
+"id": "accent_font_italic", "label": "Accent Font Italic", "default": false, "info": "Apply italic style to accent font
+elements" }, { "type": "text", "id": "accent_font_selector", "label": "Custom CSS Selector", "info": "CSS selector for
+custom elements (only used when 'Custom Elements' is selected above). Example: '.my-custom-class'" }

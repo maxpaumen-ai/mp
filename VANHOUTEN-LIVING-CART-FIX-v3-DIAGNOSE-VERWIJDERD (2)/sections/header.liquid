@@ -1,0 +1,1422 @@
+{% comment %}
+  VANHOUTEN LIVING — JOSEPH STYLE HEADER V7
+
+  HOMEPAGE:
+  - Announcement bar blijft bovenaan zichtbaar
+  - Header komt DIRECT onder announcement bar
+  - Header ligt transparant over de Video Hero
+  - Video blijft zichtbaar achter logo, menu en iconen
+  - Desktop + mobiel
+  - Announcement bar overlapt header NIET
+  - Search blijft semi-transparant
+
+  ANDERE PAGINA'S:
+  - Normale witte header
+{% endcomment %}
+
+<style>
+
+  /* =========================================================
+     GLOBAL / BASIS
+  ========================================================= */
+
+  #vhliso-{{ section.id }},
+  #vhliso-{{ section.id }} * {
+    box-sizing: border-box;
+  }
+
+  #vhliso-{{ section.id }} {
+    width: 100%;
+    background: #ffffff;
+    color: #444441;
+    font-family: inherit;
+  }
+
+  #vhliso-{{ section.id }} a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+
+  /* =========================================================
+     DESKTOP MAIN HEADER
+  ========================================================= */
+
+  #vhliso-{{ section.id }} .vhliso-main {
+    width: 100%;
+    height: 88px;
+
+    display: grid;
+
+    grid-template-columns:
+      150px
+      minmax(320px, 1fr)
+      185px;
+
+    align-items: center;
+
+    gap: 30px;
+
+    padding: 0 24px;
+
+    border-bottom: 1px solid #f2f2f0;
+  }
+
+
+  /* =========================================================
+     LOGO
+  ========================================================= */
+
+  #vhliso-{{ section.id }} .vhliso-logo {
+    width: 150px;
+
+    display: flex;
+    align-items: center;
+
+    overflow: visible;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-logo img {
+    display: block;
+
+    width: 150px;
+    max-width: 150px;
+    height: auto;
+
+    object-fit: contain;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-logo-fallback {
+    font-size: 14px;
+    letter-spacing: .15em;
+    white-space: nowrap;
+  }
+
+
+  /* =========================================================
+     SEARCH
+  ========================================================= */
+
+  #vhliso-{{ section.id }} .vhliso-search {
+    position: relative;
+
+    width: 100%;
+    max-width: 1280px;
+
+    margin: 0 auto;
+    padding: 0;
+
+    border: 0;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-search-input {
+    appearance: none;
+    -webkit-appearance: none;
+
+    display: block;
+
+    width: 100%;
+    height: 50px;
+
+    margin: 0;
+
+    padding:
+      0
+      58px
+      0
+      25px;
+
+    border: 0;
+    outline: 0;
+
+    border-radius: 999px;
+
+    background: #f5f5f4;
+
+    box-shadow: none;
+
+    color: #444441;
+
+    font: inherit;
+    font-size: 15px;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-search-input::placeholder {
+    color: #777773;
+    opacity: 1;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-search-submit-link {
+    position: absolute;
+
+    z-index: 3;
+
+    right: 12px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    color: #333330;
+
+    background: transparent !important;
+
+    border: 0 !important;
+
+    box-shadow: none !important;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-search-submit-link::before,
+  #vhliso-{{ section.id }} .vhliso-search-submit-link::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-search-submit-link svg {
+    display: block;
+
+    width: 20px;
+    height: 20px;
+
+    fill: none;
+
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+
+    pointer-events: none;
+  }
+
+
+  /* =========================================================
+     ICONS
+  ========================================================= */
+
+  #vhliso-{{ section.id }} .vhliso-actions {
+    width: 185px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 12px;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-icon {
+    position: relative;
+
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #333330;
+
+    transition:
+      background .2s ease,
+      color .2s ease;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-icon:hover {
+    background: #f6f6f4;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-icon svg {
+    display: block;
+
+    width: 24px;
+    height: 24px;
+
+    fill: none;
+
+    stroke: currentColor;
+    stroke-width: 1.45;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+
+  /* =========================================================
+     COUNTERS
+  ========================================================= */
+
+  #vhliso-{{ section.id }} .vhliso-fav-count,
+  #vhliso-{{ section.id }} .vhliso-cart-count {
+    position: absolute;
+
+    top: -1px;
+    right: -3px;
+
+    min-width: 17px;
+    height: 17px;
+
+    padding: 0 4px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 99px;
+
+    font-size: 9px;
+    line-height: 1;
+
+    color: #fff;
+
+    background: #8e9800;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-fav-count:empty {
+    display: none;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-cart-count {
+    background: #333330;
+  }
+
+
+  /* =========================================================
+     DESKTOP NAVIGATION
+  ========================================================= */
+
+  #vhliso-{{ section.id }} .vhliso-nav {
+    height: 54px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 24px;
+
+    border-bottom: 1px solid #efefed;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-nav-list {
+    list-style: none;
+
+    display: flex;
+    align-items: center;
+
+    gap: 38px;
+
+    min-width: max-content;
+
+    padding: 0;
+    margin: 0;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-nav-link {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    height: 54px;
+
+    font-size: 15px;
+    font-weight: 400;
+
+    white-space: nowrap;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-nav-link::after {
+    content: '';
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 1px;
+
+    background: #333330;
+
+    transform: scaleX(0);
+
+    transition: transform .18s ease;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-nav-link:hover::after,
+  #vhliso-{{ section.id }} .vhliso-nav-link[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+
+  /* =========================================================
+     BREADCRUMB
+  ========================================================= */
+
+  #vhliso-{{ section.id }} .vhliso-crumb {
+    min-height: 52px;
+
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    border-bottom: 1px solid #f0f0ee;
+
+    background: #ffffff;
+
+    color: #777773;
+
+    font-size: 13px;
+
+    overflow-x: auto;
+
+    white-space: nowrap;
+
+    scrollbar-width: none;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-crumb::-webkit-scrollbar {
+    display: none;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-crumb-sep {
+    opacity: .55;
+  }
+
+
+  /* =========================================================
+     MOBILE NORMAL
+  ========================================================= */
+
+  #vhliso-{{ section.id }} .vhliso-mobile {
+    display: none;
+  }
+
+  @media (max-width: 989px) {
+
+    #vhliso-{{ section.id }} .vhliso-main,
+    #vhliso-{{ section.id }} .vhliso-nav {
+      display: none;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-mobile {
+      height: 64px;
+
+      padding: 0 14px;
+
+      display: grid;
+
+      grid-template-columns:
+        44px
+        1fr
+        auto;
+
+      align-items: center;
+
+      border-bottom: 1px solid #efefed;
+
+      background: #ffffff;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-mobile-search,
+    #vhliso-{{ section.id }} .vhliso-mobile-icon {
+      width: 40px;
+      height: 40px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-mobile-search svg,
+    #vhliso-{{ section.id }} .vhliso-mobile-icon svg {
+      width: 22px;
+      height: 22px;
+
+      fill: none;
+
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-mobile-logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      min-width: 0;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-mobile-logo img {
+      display: block;
+
+      width: min(170px,48vw);
+
+      height: auto;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-mobile-actions {
+      display: flex;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-crumb {
+      min-height: 42px;
+
+      padding: 0 14px;
+
+      font-size: 11px;
+    }
+  }
+
+
+  /* =========================================================
+     HOMEPAGE
+     ANNOUNCEMENT + TRANSPARENT HEADER
+  ========================================================= */
+
+  {% if request.page_type == 'index' %}
+
+    /*
+      Dit is de BELANGRIJKSTE wijziging.
+
+      Niet alleen de header zelf, maar de Shopify-section
+      wordt uit de flow gehaald.
+
+      JavaScript hieronder meet automatisch de hoogte van
+      de announcement bar en zet de header PRECIES eronder.
+    */
+
+    #shopify-section-{{ section.id }} {
+      position: absolute !important;
+
+      top: var(--vhl-announcement-height, 32px) !important;
+
+      left: 0 !important;
+      right: 0 !important;
+
+      width: 100% !important;
+
+      margin: 0 !important;
+
+      z-index: 50 !important;
+
+      pointer-events: none;
+    }
+
+
+    /*
+      Interactieve header-elementen weer klikbaar.
+    */
+
+    #vhliso-{{ section.id }} {
+      pointer-events: auto;
+    }
+
+
+    /*
+      Hoofdheader transparant.
+    */
+
+    #vhliso-{{ section.id }} {
+      width: 100%;
+
+      background: transparent !important;
+      background-color: transparent !important;
+
+      color: #ffffff !important;
+
+      box-shadow: none !important;
+    }
+
+
+    #vhliso-{{ section.id }} .vhliso-main {
+      background: transparent !important;
+      background-color: transparent !important;
+
+      border-bottom:
+        1px solid
+        rgba(255,255,255,.18) !important;
+
+      box-shadow: none !important;
+    }
+
+
+    /*
+      Nav transparant.
+    */
+
+    #vhliso-{{ section.id }} .vhliso-nav {
+      background: transparent !important;
+      background-color: transparent !important;
+
+      border-bottom:
+        1px solid
+        rgba(255,255,255,.15) !important;
+
+      box-shadow: none !important;
+    }
+
+
+    /*
+      Menu wit.
+    */
+
+    #vhliso-{{ section.id }} .vhliso-nav-link {
+      color: #ffffff !important;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-nav-link::after {
+      background: #ffffff !important;
+    }
+
+
+    /*
+      Logo wit.
+    */
+
+    #vhliso-{{ section.id }} .vhliso-logo img,
+    #vhliso-{{ section.id }} .vhliso-mobile-logo img {
+      filter:
+        brightness(0)
+        invert(1);
+    }
+
+
+    /*
+      Iconen wit.
+    */
+
+    #vhliso-{{ section.id }} .vhliso-icon,
+    #vhliso-{{ section.id }} .vhliso-mobile-icon,
+    #vhliso-{{ section.id }} .vhliso-mobile-search {
+      color: #ffffff !important;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-icon:hover {
+      background:
+        rgba(255,255,255,.10) !important;
+    }
+
+
+    /*
+      Joseph-style searchbar.
+      Licht doorschijnend zodat video erachter blijft leven.
+    */
+
+    #vhliso-{{ section.id }} .vhliso-search-input {
+      background:
+        rgba(255,255,255,.82) !important;
+
+      color: #333330 !important;
+
+      border:
+        1px solid
+        rgba(255,255,255,.35) !important;
+
+      -webkit-backdrop-filter:
+        blur(12px);
+
+      backdrop-filter:
+        blur(12px);
+
+      box-shadow: none !important;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-search-input::placeholder {
+      color:
+        rgba(55,55,52,.72) !important;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-search-submit-link {
+      color: #333330 !important;
+    }
+
+
+    /*
+      Badge zichtbaar houden.
+    */
+
+    #vhliso-{{ section.id }} .vhliso-cart-count {
+      background: #ffffff !important;
+      color: #222220 !important;
+    }
+
+
+    /* =====================================================
+       MOBILE HOMEPAGE
+    ===================================================== */
+
+    @media (max-width: 989px) {
+
+      #vhliso-{{ section.id }} .vhliso-mobile {
+        background: transparent !important;
+        background-color: transparent !important;
+
+        border-bottom:
+          1px solid
+          rgba(255,255,255,.15) !important;
+
+        color: #ffffff !important;
+
+        box-shadow: none !important;
+      }
+
+    }
+
+  {% endif %}
+
+</style>
+
+
+<header
+  id="vhliso-{{ section.id }}"
+  class="vhliso-root"
+>
+
+  <!-- =====================================================
+       DESKTOP HEADER
+  ====================================================== -->
+
+  <div class="vhliso-main">
+
+    <a
+      class="vhliso-logo"
+      href="{{ routes.root_url }}"
+      aria-label="{{ shop.name | escape }}"
+    >
+
+      {% if settings.logo != blank %}
+
+        {{
+          settings.logo
+          | image_url: width: 500
+          | image_tag:
+            loading: 'eager',
+            widths: '180,260,360,500',
+            alt: shop.name
+        }}
+
+      {% else %}
+
+        <span class="vhliso-logo-fallback">
+          {{ shop.name }}
+        </span>
+
+      {% endif %}
+
+    </a>
+
+
+    <!-- SEARCH -->
+
+    <form
+      class="vhliso-search"
+      action="{{ routes.search_url }}"
+      method="get"
+      role="search"
+      id="vhliso-search-form-{{ section.id }}"
+    >
+
+      <input
+        class="vhliso-search-input"
+        id="vhliso-search-input-{{ section.id }}"
+        type="search"
+        name="q"
+        value="{{ search.terms | escape }}"
+        placeholder="Waar ben je vandaag naar op zoek?"
+        aria-label="Zoeken"
+      >
+
+      <a
+        class="vhliso-search-submit-link"
+        href="{{ routes.search_url }}"
+        aria-label="Zoeken"
+        data-vhliso-search-submit
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            cx="11"
+            cy="11"
+            r="7"
+          ></circle>
+
+          <path
+            d="m20 20-4-4"
+          ></path>
+        </svg>
+
+      </a>
+
+    </form>
+
+
+    <!-- ACTIONS -->
+
+    <div class="vhliso-actions">
+
+      <a
+        class="vhliso-icon"
+        href="/pages/favorieten"
+        aria-label="Favorieten"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+
+          <path
+            d="M20.8 4.8a5.5 5.5 0 0 0-7.8 0L12 5.8l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.4a5.5 5.5 0 0 0 0-7.8Z"
+          ></path>
+
+        </svg>
+
+        <span
+          class="vhliso-fav-count"
+          data-vhliso-fav-count
+        ></span>
+
+      </a>
+
+
+      {% if shop.customer_accounts_enabled %}
+
+        <a
+          class="vhliso-icon"
+          href="
+            {% if customer %}
+              {{ routes.account_url }}
+            {% else %}
+              {{ routes.account_login_url }}
+            {% endif %}
+          "
+          aria-label="Account"
+        >
+
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+
+            <circle
+              cx="12"
+              cy="7.5"
+              r="3.5"
+            ></circle>
+
+            <path
+              d="M5.5 21v-2.5a6.5 6.5 0 0 1 13 0V21"
+            ></path>
+
+          </svg>
+
+        </a>
+
+      {% endif %}
+
+
+      <a
+        class="vhliso-icon"
+        href="{{ routes.cart_url }}"
+        aria-label="Winkelwagen"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+
+          <path
+            d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 7H6"
+          ></path>
+
+          <circle
+            cx="9.5"
+            cy="20"
+            r="1"
+          ></circle>
+
+          <circle
+            cx="18"
+            cy="20"
+            r="1"
+          ></circle>
+
+        </svg>
+
+
+        {% if cart.item_count > 0 %}
+
+          <span class="vhliso-cart-count">
+            {{ cart.item_count }}
+          </span>
+
+        {% endif %}
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       NAV
+  ====================================================== -->
+
+  {% if section.settings.menu != blank %}
+
+    <nav
+      class="vhliso-nav"
+      aria-label="Hoofdnavigatie"
+    >
+
+      <ul
+        class="vhliso-nav-list"
+        role="list"
+      >
+
+        {% for link in section.settings.menu.links %}
+
+          <li>
+
+            <a
+              class="vhliso-nav-link"
+              href="{{ link.url }}"
+              {% if link.current %}
+                aria-current="page"
+              {% endif %}
+            >
+              {{ link.title | escape }}
+            </a>
+
+          </li>
+
+        {% endfor %}
+
+      </ul>
+
+    </nav>
+
+  {% endif %}
+
+
+  <!-- =====================================================
+       PRODUCT BREADCRUMB
+  ====================================================== -->
+
+  {% if request.page_type == 'product' %}
+
+    <nav
+      class="vhliso-crumb"
+      aria-label="Kruimelpad"
+    >
+
+      <a href="{{ routes.root_url }}">
+        Home
+      </a>
+
+      <span class="vhliso-crumb-sep">
+        /
+      </span>
+
+
+      {% if product.collections.first != blank %}
+
+        <a href="{{ product.collections.first.url }}">
+          {{ product.collections.first.title | escape }}
+        </a>
+
+        <span class="vhliso-crumb-sep">
+          /
+        </span>
+
+      {% endif %}
+
+
+      <span aria-current="page">
+        {{ product.title | escape }}
+      </span>
+
+    </nav>
+
+  {% endif %}
+
+
+  <!-- =====================================================
+       MOBILE HEADER
+  ====================================================== -->
+
+  <div class="vhliso-mobile">
+
+    <a
+      class="vhliso-mobile-search"
+      href="{{ routes.search_url }}"
+      aria-label="Zoeken"
+    >
+
+      <svg viewBox="0 0 24 24">
+
+        <circle
+          cx="11"
+          cy="11"
+          r="7"
+        ></circle>
+
+        <path
+          d="m20 20-4-4"
+        ></path>
+
+      </svg>
+
+    </a>
+
+
+    <a
+      class="vhliso-mobile-logo"
+      href="{{ routes.root_url }}"
+      aria-label="{{ shop.name | escape }}"
+    >
+
+      {% if settings.logo != blank %}
+
+        {{
+          settings.logo
+          | image_url: width: 420
+          | image_tag:
+            loading: 'eager',
+            widths: '180,280,420',
+            alt: shop.name
+        }}
+
+      {% else %}
+
+        <span>
+          {{ shop.name }}
+        </span>
+
+      {% endif %}
+
+    </a>
+
+
+    <div class="vhliso-mobile-actions">
+
+      <a
+        class="vhliso-mobile-icon"
+        href="/pages/favorieten"
+        aria-label="Favorieten"
+      >
+
+        <svg viewBox="0 0 24 24">
+
+          <path
+            d="M20.8 4.8a5.5 5.5 0 0 0-7.8 0L12 5.8l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.4a5.5 5.5 0 0 0 0-7.8Z"
+          ></path>
+
+        </svg>
+
+      </a>
+
+
+      <a
+        class="vhliso-mobile-icon"
+        href="{{ routes.cart_url }}"
+        aria-label="Winkelwagen"
+      >
+
+        <svg viewBox="0 0 24 24">
+
+          <path
+            d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 7H6"
+          ></path>
+
+          <circle
+            cx="9.5"
+            cy="20"
+            r="1"
+          ></circle>
+
+          <circle
+            cx="18"
+            cy="20"
+            r="1"
+          ></circle>
+
+        </svg>
+
+      </a>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+<script>
+
+(function(){
+
+  var root =
+    document.getElementById(
+      'vhliso-{{ section.id }}'
+    );
+
+  if (!root) return;
+
+
+  /* =====================================================
+     SEARCH
+  ====================================================== */
+
+  var form =
+    root.querySelector(
+      '#vhliso-search-form-{{ section.id }}'
+    );
+
+  var input =
+    root.querySelector(
+      '#vhliso-search-input-{{ section.id }}'
+    );
+
+  var submitLink =
+    root.querySelector(
+      '[data-vhliso-search-submit]'
+    );
+
+
+  if (
+    form &&
+    input &&
+    submitLink
+  ) {
+
+    submitLink.addEventListener(
+      'click',
+      function(event) {
+
+        event.preventDefault();
+
+        var query =
+          (input.value || '').trim();
+
+
+        if (query) {
+
+          window.location.href =
+            '{{ routes.search_url }}?q='
+            +
+            encodeURIComponent(query);
+
+        }
+
+        else {
+
+          input.focus();
+
+        }
+
+      }
+    );
+
+
+    input.addEventListener(
+      'keydown',
+      function(event) {
+
+        if (
+          event.key === 'Enter'
+        ) {
+
+          event.preventDefault();
+
+          var query =
+            (input.value || '').trim();
+
+
+          if (query) {
+
+            window.location.href =
+              '{{ routes.search_url }}?q='
+              +
+              encodeURIComponent(query);
+
+          }
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* =====================================================
+     FAVORITES
+  ====================================================== */
+
+  var out =
+    root.querySelector(
+      '[data-vhliso-fav-count]'
+    );
+
+
+  function refreshFavorites(){
+
+    if (!out) return;
+
+    var count = 0;
+
+    try {
+
+      for (
+        var i = 0;
+        i < localStorage.length;
+        i++
+      ) {
+
+        var key =
+          localStorage.key(i) || '';
+
+        if (
+          key.indexOf(
+            'vhl-favorite-'
+          ) === 0
+        ) {
+
+          count++;
+
+        }
+
+      }
+
+    }
+
+    catch (e) {}
+
+
+    out.textContent =
+      count
+        ? String(count)
+        : '';
+
+  }
+
+
+  refreshFavorites();
+
+  window.addEventListener(
+    'storage',
+    refreshFavorites
+  );
+
+  document.addEventListener(
+    'vhl:favorites-updated',
+    refreshFavorites
+  );
+
+
+  /* =====================================================
+     ANNOUNCEMENT BAR HEIGHT
+     HOMEPAGE ONLY
+  ====================================================== */
+
+  {% if request.page_type == 'index' %}
+
+    function updateVHLHeaderOffset(){
+
+      var wrapper =
+        document.getElementById(
+          'shopify-section-{{ section.id }}'
+        );
+
+      if (!wrapper) return;
+
+
+      /*
+        De announcement bar staat in jouw header group
+        vóór deze header-section.
+
+        Daarom zoeken we het vorige zichtbare
+        section-element.
+      */
+
+      var previous =
+        wrapper.previousElementSibling;
+
+      var announcementHeight = 0;
+
+
+      while (previous) {
+
+        var rect =
+          previous.getBoundingClientRect();
+
+        var style =
+          window.getComputedStyle(previous);
+
+
+        if (
+          rect.height > 0 &&
+          style.display !== 'none'
+        ) {
+
+          announcementHeight =
+            rect.height;
+
+          break;
+
+        }
+
+
+        previous =
+          previous.previousElementSibling;
+
+      }
+
+
+      document.documentElement.style.setProperty(
+        '--vhl-announcement-height',
+        announcementHeight + 'px'
+      );
+
+    }
+
+
+    updateVHLHeaderOffset();
+
+
+    window.addEventListener(
+      'resize',
+      updateVHLHeaderOffset
+    );
+
+
+    /*
+      Shopify Theme Editor kan afmetingen
+      veranderen zonder volledige reload.
+    */
+
+    document.addEventListener(
+      'shopify:section:load',
+      updateVHLHeaderOffset
+    );
+
+    document.addEventListener(
+      'shopify:section:select',
+      updateVHLHeaderOffset
+    );
+
+  {% endif %}
+
+})();
+
+</script>
+
+
+<style>
+
+  /* =========================================================
+     PRODUCT PAGE
+  ========================================================= */
+
+  @media (min-width: 990px) {
+
+    body.template-product
+    .shop-product-section {
+      padding-top: 24px !important;
+    }
+
+    #vhliso-{{ section.id }}
+    .vhliso-crumb {
+      min-height: 54px;
+    }
+
+  }
+
+
+  /* =========================================================
+     JOSEPH STYLE LARGE DESKTOP
+  ========================================================= */
+
+  @media (min-width: 1280px) {
+
+    #vhliso-{{ section.id }}
+    .vhliso-main {
+      padding-left: 26px;
+      padding-right: 26px;
+    }
+
+    #vhliso-{{ section.id }}
+    .vhliso-search {
+      width: 96%;
+    }
+
+    #vhliso-{{ section.id }}
+    .vhliso-actions {
+      padding-right: 2px;
+    }
+
+  }
+
+
+  @media (min-width: 1600px) {
+
+    #vhliso-{{ section.id }}
+    .vhliso-search {
+      width: 94%;
+    }
+
+  }
+
+</style>
+
+
+{% schema %}
+{
+  "name": "Header",
+
+  "class": "section-header",
+
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "default": "main-menu",
+      "label": "Menu"
+    }
+  ],
+
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ]
+}
+{% endschema %}

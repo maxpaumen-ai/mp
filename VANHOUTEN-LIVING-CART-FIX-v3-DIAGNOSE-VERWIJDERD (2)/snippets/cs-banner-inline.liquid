@@ -1,0 +1,112 @@
+{% comment %}
+  Snippet: CS Banner Inline
+  Renders a full-width sticky banner/header outside of the main content container
+{% endcomment %}
+
+{%- assign this = block.settings -%}
+
+<style>
+  /* CS Banner - Full width sticky header banner */
+  .cs-banner-wrapper-{{ block.id }} {
+    position: {% if this.sticky %}sticky{% else %}relative{% endif %};
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    background-color: {{ this.bg_color }};
+    {% if this.use_gradient %}
+      background: {{ this.bg_gradient }};
+    {% endif %}
+  }
+  
+  .cs-banner-{{ block.id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    max-width: {{ this.max_width }}px;
+    margin: 0 auto;
+    padding: {{ this.padding_vertical }}px {{ this.padding_horizontal }}px;
+    color: {{ this.text_color }};
+    font-size: {{ this.font_size }}px;
+    font-weight: {{ this.font_weight }};
+    letter-spacing: 0px;
+    text-align: center;
+  }
+  
+  .cs-banner-{{ block.id }} .cs-banner-text {
+    flex: 0 1 auto;
+  }
+  
+  .cs-banner-{{ block.id }} .cs-banner-text a {
+    color: inherit;
+    text-decoration: {% if this.underline_link %}underline{% else %}none{% endif %};
+  }
+  
+  .cs-banner-{{ block.id }} .cs-banner-text a:hover {
+    opacity: 0.9;
+  }
+  
+  /* CTA Button */
+  .cs-banner-{{ block.id }} .cs-banner-cta {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: {{ this.button_bg_color | default: '#2e7d32' }};
+    color: {{ this.button_text_color | default: '#ffffff' }};
+    padding: {{ this.button_padding_vertical | default: 12 }}px {{ this.button_padding_horizontal | default: 24 }}px;
+    border-radius: {{ this.button_border_radius | default: 6 }}px;
+    font-size: {{ this.button_font_size | default: 14 }}px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  
+  .cs-banner-{{ block.id }} .cs-banner-cta:hover {
+    opacity: 0.9;
+    transform: translateX(3px);
+  }
+  
+  .cs-banner-{{ block.id }} .cs-banner-cta svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  
+  @media screen and (max-width: 768px) {
+    .cs-banner-{{ block.id }} {
+      flex-direction: {% if this.mobile_stack %}column{% else %}row{% endif %};
+      gap: {% if this.mobile_stack %}12px{% else %}15px{% endif %};
+      font-size: {{ this.font_size | times: 0.85 | round }}px;
+      padding: {{ this.padding_vertical | times: 0.8 | round }}px {{ this.padding_horizontal | times: 0.6 | round }}px;
+    }
+    
+    .cs-banner-{{ block.id }} .cs-banner-cta {
+      font-size: {{ this.button_font_size | default: 14 | times: 0.9 | round }}px;
+      padding: {{ this.button_padding_vertical | default: 12 | times: 0.8 | round }}px {{ this.button_padding_horizontal | default: 24 | times: 0.8 | round }}px;
+    }
+  }
+</style>
+
+<div class="cs-banner-wrapper-{{ block.id }}" {{ block.shopify_attributes }}>
+  <div class="cs-banner-{{ block.id }}">
+    <div class="cs-banner-text">
+      {%- if this.link != blank and this.button_text == blank -%}
+        <a href="{{ this.link }}">{{ this.text }}</a>
+      {%- else -%}
+        {{ this.text }}
+      {%- endif -%}
+    </div>
+    
+    {%- if this.button_text != blank -%}
+      <a href="{{ this.link | default: '#' }}" class="cs-banner-cta">
+        {{ this.button_text }}
+        {%- if this.show_button_arrow -%}
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13.025 1l-2.847 2.828 6.176 6.176h-16.354v3.992h16.354l-6.176 6.176 2.847 2.828 10.975-11z"/></svg>
+        {%- endif -%}
+      </a>
+    {%- endif -%}
+  </div>
+</div>

@@ -1,0 +1,2140 @@
+{{ 'component-accordion.css' | asset_url | stylesheet_tag }}
+
+{% comment %} Google Fonts for accent text customization {% endcomment %}
+{% if section.settings.override_global_accent %}
+  {% if section.settings.accent_font_family != 'inherit' and section.settings.accent_font_family != 'serif' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% case section.settings.accent_font_family %}
+      {% when 'Bodoni Moda' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Instrument Serif' %}
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'DM Serif Text' %}
+        <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'Nothing You Could Do' %}
+        <link href="https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+    {% endcase %}
+  {% endif %}
+{% endif %}
+
+{% liquid
+  assign scheme = section.settings.color_scheme
+  assign contained = section.settings.contained_section
+  assign enable_spacing = section.settings.enable_spacing
+  assign section_spacing_top_mobile = section.settings.section_spacing_top_mobile
+  assign section_spacing_bottom_mobile = section.settings.section_spacing_bottom_mobile
+  assign section_spacing_left_mobile = section.settings.section_spacing_left_mobile
+  assign section_spacing_right_mobile = section.settings.section_spacing_right_mobile
+  assign section_spacing_top_desktop = section.settings.section_spacing_top_desktop
+  assign section_spacing_bottom_desktop = section.settings.section_spacing_bottom_desktop
+  assign section_spacing_left_desktop = section.settings.section_spacing_left_desktop
+  assign section_spacing_right_desktop = section.settings.section_spacing_right_desktop
+%}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    {% if enable_spacing %}
+      padding-top: {{ section_spacing_top_mobile }}px;
+      padding-bottom: {{ section_spacing_bottom_mobile }}px;
+      padding-left: {{ section_spacing_left_mobile }}px;
+      padding-right: {{ section_spacing_right_mobile }}px;
+    {% endif %}
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      {% if enable_spacing %}
+        padding-top: {{ section_spacing_top_desktop }}px;
+        padding-bottom: {{ section_spacing_bottom_desktop }}px;
+        padding-left: {{ section_spacing_left_desktop }}px;
+        padding-right: {{ section_spacing_right_desktop }}px;
+      {% endif %}
+    }
+  }
+
+  .roadmap-section {
+    position: relative;
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.text_color }}{% endif %};
+    
+    {% if section.settings.enable_background_image and section.settings.background_image_desktop != blank %}
+      /* Multiple backgrounds: PNG image on top, gradient underneath */
+      {% if section.settings.use_theme_colors %}
+        background: url('{{ section.settings.background_image_desktop | image_url: width: 1920 }}'), {{ settings.global_section_background_gradient }};
+      {% else %}
+        background: url('{{ section.settings.background_image_desktop | image_url: width: 1920 }}'), {{ section.settings.section_background }};
+      {% endif %}
+      background-size: {{ section.settings.background_size_desktop | default: 'cover' }}, cover;
+      background-position: {{ section.settings.background_position_desktop | default: 'center center' }}, center;
+      background-repeat: no-repeat, no-repeat;
+      background-attachment: scroll, scroll;
+    {% else %}
+      /* Only gradient/color when no background image */
+    {% if section.settings.use_theme_colors %}
+      background: {{ settings.global_section_background_gradient }};
+    {% else %}
+      background: {{ section.settings.section_background }};
+    {% endif %}
+    {% endif %}
+  }
+
+  /* Max section width for content when not contained (background stays full width) */
+  {% unless section.settings.contained_section %}
+  .roadmap-section > div:first-child {
+    max-width: {{ section.settings.max_section_width | default: 1400 }}px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+  {% endunless %}
+
+  /* Remove page-width constraints when full height is enabled */
+  {% if section.settings.image_column_full_height %}
+  @media screen and (min-width: 750px) {
+    .roadmap-section .page-width {
+      max-width: none !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+  }
+  {% endif %}
+
+  {% if section.settings.enable_background_image and section.settings.enable_background_overlay %}
+  .roadmap-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: {{ section.settings.background_overlay_color | default: '#000000' }};
+    opacity: {{ section.settings.background_overlay_opacity | default: 50 | divided_by: 100.0 }};
+    z-index: 1;
+    pointer-events: none;
+  }
+  {% endif %}
+
+  /* Two-column layout on desktop (only for placeholder, not when image exists) */
+  {% if section.settings.enable_placeholder_space_desktop and section.settings.desktop_image == blank %}
+  @media screen and (min-width: 768px) {
+    /* Ensure page-width container is maintained */
+    .roadmap-section .page-width {
+      max-width: var(--page-width);
+      margin: 0 auto;
+    }
+    
+    .roadmap-section .section-{{ section.id }}-padding {
+      display: flex !important;
+      /* Respect Layout position setting: reverse for left position */
+      flex-direction: {% if section.settings.image_position == 'left' %}row-reverse{% else %}row{% endif %};
+      gap: 60px;
+      align-items: flex-start;
+      max-width: 100%;
+      overflow: visible;
+    }
+    
+    /* Apply text column width when placeholder is enabled */
+    .roadmap-section .roadmap-container {
+      flex: 0 0 {{ section.settings.text_column_width }}%;
+      max-width: {{ section.settings.text_column_width }}%;
+      min-width: 0;
+      overflow: visible;
+    }
+    
+    /* Placeholder element to maintain layout spacing - uses image column width setting */
+    .roadmap-section .section-{{ section.id }}-padding::after {
+      content: '';
+      display: block;
+      flex: 0 0 {{ section.settings.image_column_width }}%;
+      max-width: {{ section.settings.image_column_width }}%;
+      flex-shrink: 0;
+      min-height: {{ section.settings.placeholder_min_height_desktop | default: 600 }}px;
+      background: transparent;
+      border-radius: {{ section.settings.image_border_radius | default: 0 }}px;
+      /* Debug outline - uncomment to visualize placeholder */
+      /* outline: 2px dashed rgba(0, 0, 0, 0.1); */
+      /* outline-offset: -2px; */
+    }
+  }
+  {% endif %}
+
+  /* Mobile placeholder space (below timeline) */
+  {% if section.settings.enable_placeholder_space_mobile %}
+  @media screen and (max-width: 767px) {
+    .roadmap-section::after {
+      content: '';
+      display: block;
+      height: {{ section.settings.placeholder_height_mobile | default: 300 }}px;
+      width: 100%;
+      background: transparent;
+      /* Debug outline - uncomment to visualize placeholder */
+      /* outline: 2px dashed rgba(0, 0, 0, 0.1); */
+      /* outline-offset: -2px; */
+    }
+  }
+  {% endif %}
+
+  .roadmap-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    max-width: 100%;
+    position: relative;
+    z-index: 2;
+    margin: 0 auto;
+  }
+
+  /* Apply padding to roadmap content on mobile when full height is enabled */
+  {% if section.settings.image_column_full_height and enable_spacing %}
+  .roadmap-content {
+    padding-top: {{ section_spacing_top_mobile }}px;
+    padding-bottom: {{ section_spacing_bottom_mobile }}px;
+  }
+  {% endif %}
+
+  /* Mobile image above timeline styling */
+  .roadmap-image-mobile-above {
+    width: 100%;
+    margin-bottom: 30px;
+    display: none;
+  }
+
+  .roadmap-image-mobile-above img {
+    width: 100%;
+    height: auto;
+    border-radius: {{ section.settings.image_border_radius }}px;
+  }
+
+  /* Mobile background image */
+  @media screen and (max-width: 749px) {
+    .roadmap-section {
+      {% if section.settings.enable_background_image and section.settings.background_image_mobile != blank %}
+        /* Multiple backgrounds: PNG image on top, gradient underneath */
+        {% if section.settings.use_theme_colors %}
+          background: url('{{ section.settings.background_image_mobile | image_url: width: 768 }}'), {{ settings.global_section_background_gradient }} !important;
+        {% else %}
+          background: url('{{ section.settings.background_image_mobile | image_url: width: 768 }}'), {{ section.settings.section_background }} !important;
+        {% endif %}
+        background-size: {{ section.settings.background_size_mobile | default: 'cover' }}, cover !important;
+        background-position: {{ section.settings.background_position_mobile | default: 'center center' }}, center !important;
+        background-repeat: no-repeat, no-repeat !important;
+      {% elsif section.settings.enable_background_image and section.settings.background_image_desktop != blank %}
+        /* Fallback to desktop image if mobile image is not provided */
+        {% if section.settings.use_theme_colors %}
+          background: url('{{ section.settings.background_image_desktop | image_url: width: 768 }}'), {{ settings.global_section_background_gradient }} !important;
+        {% else %}
+          background: url('{{ section.settings.background_image_desktop | image_url: width: 768 }}'), {{ section.settings.section_background }} !important;
+        {% endif %}
+        background-size: {{ section.settings.background_size_mobile | default: 'cover' }}, cover !important;
+        background-position: {{ section.settings.background_position_mobile | default: 'center center' }}, center !important;
+        background-repeat: no-repeat, no-repeat !important;
+      {% endif %}
+    }
+
+    {% if section.settings.mobile_image_above_timeline %}
+    /* Show mobile image above timeline */
+    .roadmap-image-mobile-above {
+      display: block !important;
+    }
+    
+    /* Hide the regular image column on mobile */
+    .roadmap-image-column {
+      display: none !important;
+    }
+    {% endif %}
+  }
+
+  @media screen and (min-width: 750px) {
+    .roadmap-container {
+      flex-direction: {% if section.settings.image_position == 'left' %}row-reverse{% else %}row{% endif %};
+      align-items: {% if section.settings.image_column_full_height %}stretch{% else %}flex-start{% endif %};
+      gap: 60px;
+      {% if section.settings.desktop_image != blank %}
+        max-width: 100%;
+        margin: 0;
+      {% else %}
+        max-width: {{ section.settings.max_container_width }}px;
+      {% endif %}
+      {% if section.settings.image_column_full_height %}
+        min-height: {{ section.settings.full_height_min_height | default: 600 }}px;
+      {% endif %}
+    }
+
+    /* Hide mobile image above timeline on desktop */
+    .roadmap-image-mobile-above {
+      display: none !important;
+    }
+
+    .roadmap-content {
+      {% if section.settings.desktop_image != blank %}
+        flex: 0 0 {{ section.settings.text_column_width }}%;
+        max-width: {{ section.settings.text_column_width }}%;
+      {% else %}
+        flex: 1;
+      {% endif %}
+      min-width: 0;
+      {% if section.settings.image_column_full_height and enable_spacing %}
+        padding-top: {{ section_spacing_top_desktop }}px;
+        padding-bottom: {{ section_spacing_bottom_desktop }}px;
+      {% endif %}
+    }
+
+    .roadmap-image-column {
+      flex: 0 0 {{ section.settings.image_column_width }}%;
+      max-width: {{ section.settings.image_column_width }}%;
+      {% if section.settings.image_column_full_height %}
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+      {% endif %}
+    }
+
+    {% if section.settings.image_column_full_height %}
+    .roadmap-image-column img {
+      flex: 1;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    {% endif %}
+  }
+
+  .roadmap-image {
+    width: 100%;
+    height: auto;
+    border-radius: {{ section.settings.image_border_radius }}px;
+  }
+
+  .roadmap-timeline {
+    position: relative;
+    max-width: {{ section.settings.timeline_max_width | default: 100 }}%;
+  }
+
+  .roadmap-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 30px;
+    bottom: 0;
+    width: {{ section.settings.timeline_width }}px;
+    background: {{ section.settings.timeline_color }};
+    border-radius: {{ section.settings.timeline_border_radius }}px;
+  }
+
+  /* Desktop: Adjust timeline height when button is present */
+  @media screen and (min-width: 750px) {
+    {% if section.settings.show_button %}
+      .roadmap-timeline::before {
+        bottom: 100px; /* Reduce height by 100px when button is present on desktop */
+      }
+    {% endif %}
+  }
+
+  /* Active fill line that animates with scroll */
+  .roadmap-timeline .timeline-fill {
+    position: absolute;
+    left: 15px;
+    top: 30px;
+    width: {{ section.settings.timeline_width }}px;
+    background: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.active_timeline_color | default: '#4CAF50' }}{% endif %};
+    border-radius: {{ section.settings.timeline_border_radius }}px;
+    height: 0%;
+    min-height: 0;
+    transition: height 0.3s ease-out;
+    z-index: 2;
+    transform-origin: top;
+    pointer-events: none;
+    /* Prevent fill from extending beyond roadmap items */
+    overflow: hidden;
+  }
+
+  .roadmap-item {
+    position: relative;
+    margin-bottom: {{ section.settings.roadmap_item_spacing_desktop }}px;
+    padding-left: 50px;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .roadmap-item.fade-out {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .roadmap-item.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Respect user's motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .roadmap-item {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    
+    .roadmap-item.animate-in {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .roadmap-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .roadmap-circle {
+    position: absolute;
+    left: 0;
+    top: 0px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_2_color }}{% else %}{{ section.settings.circle_color }}{% endif %};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .roadmap-circle svg {
+    width: 16px;
+    height: 16px;
+    fill: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.circle_icon_color }}{% endif %} !important;
+  }
+
+  .roadmap-badge {
+    display: inline-block;
+    background: {{ section.settings.badge_background }};
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.badge_text_color }}{% endif %};
+    padding: 4px 12px;
+    border-radius: {{ section.settings.badge_border_radius }}px;
+    font-size: {{ section.settings.desktop_badge_font_size }}px !important;
+    font-weight: {{ section.settings.badge_font_weight | default: '600' }} !important;
+    margin-bottom: 6px;
+    letter-spacing: var(--letter-spacing-body);
+    border: {{ section.settings.badge_border_width }}px {{ section.settings.badge_border_style }} {{ section.settings.badge_border_color }};
+  }
+
+  .roadmap-title {
+    font-size: {{ section.settings.step_title_size }}px !important;
+    font-weight: var(--font-weight-bold) !important;
+    {% unless settings.h3_use_heading_font %}
+      font-style: normal !important;
+      font-family: var(--font-body-family) !important;
+    {% endunless %}
+    margin-bottom: 8px;
+    letter-spacing: {% if section.settings.step_title_letter_spacing == 'body' %}var(--letter-spacing-body){% else %}var(--letter-spacing-heading){% endif %} !important;
+    line-height: 1.3;
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.step_title_color }}{% endif %} !important;
+  }
+
+  .roadmap-description {
+    font-size: {{ section.settings.step_description_size }}px !important;
+    line-height: 1.6;
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.step_description_color }}{% endif %} !important;
+    opacity: 0.9;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  /* Bullet list styling for roadmap descriptions */
+  .roadmap-description ul,
+  .roadmap-description ol {
+    margin: 10px 0;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .roadmap-description ul li,
+  .roadmap-description ol li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  /* Default bullet style */
+  .roadmap-description ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.35em;
+    width: 8px;
+    height: 8px;
+    background: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.circle_color }}{% endif %};
+    border-radius: 50%;
+  }
+
+  /* Ordered list numbers */
+  .roadmap-description ol {
+    counter-reset: list-counter;
+  }
+
+  .roadmap-description ol li::before {
+    counter-increment: list-counter;
+    content: counter(list-counter) ".";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: 600;
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.circle_color }}{% endif %};
+  }
+
+  .roadmap-header {
+    text-align: {{ section.settings.desktop_content_alignment }} !important;
+    margin-bottom: 40px;
+  }
+
+  .roadmap-header .heading {
+    font-size: {{ section.settings.heading_size }}px !important;
+    font-weight: var(--font-weight-bold);
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.heading_color }}{% endif %} !important;
+    margin-bottom: 15px;
+    letter-spacing: var(--letter-spacing-heading) !important;
+    line-height: {{ section.settings.heading_line_height | default: 1.3 }};
+  }
+
+  .roadmap-header .subheading {
+    font-size: {{ section.settings.subheading_size }}px !important;
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subheading_color }}{% endif %} !important;
+    opacity: 0.8;
+    letter-spacing: var(--letter-spacing-body) !important;
+  }
+
+  /* Enhanced accent text styling with global and local customization options */
+  .roadmap-section .accent,
+  .roadmap-section .global-accent-text,
+  .roadmap-section .custom-accent-text {
+    {% comment %} Always apply core accent text styling {% endcomment %}
+    padding-right: 0px !important;
+    display: inline-block !important;
+
+    {% comment %} Apply color or gradient based on theme colors and settings {% endcomment %}
+    {% if section.settings.use_theme_colors %}
+      {% comment %} Use global dark gradient when theme colors are enabled {% endcomment %}
+      background: {{ settings.global_accent_text_gradient_dark }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+      line-height: 1.3 !important;
+    {% elsif section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+      line-height: 1.3 !important;
+    {% else %}
+      {% comment %} Apply solid color {% endcomment %}
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.accent_color }}{% endif %} !important;
+    {% endif %}
+
+    {% if section.settings.override_global_accent %}
+      {% comment %} Use section-specific typography settings when override is enabled {% endcomment %}
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %}
+            font-family: serif !important;
+          {% when 'Bodoni Moda' %}
+            font-family: 'Bodoni Moda', Georgia, serif !important;
+          {% when 'Instrument Serif' %}
+            font-family: 'Instrument Serif', Georgia, serif !important;
+          {% when 'DM Serif Text' %}
+            font-family: 'DM Serif Text', Georgia, serif !important;
+          {% when 'Nothing You Could Do' %}
+            font-family: 'Nothing You Could Do', cursive !important;
+        {% endcase %}
+      {% else %}
+        font-family: var(--font-accent-family, var(--font-body-family)) !important;
+      {% endif %}
+
+      font-style: {% if section.settings.accent_font_style != 'normal' %}{{ section.settings.accent_font_style }}{% else %}var(--font-accent-style, normal){% endif %} !important;
+      font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+
+    {% else %}
+      {% comment %} Use global accent typography system {% endcomment %}
+      font-family: var(--font-accent-family, var(--font-body-family)) !important;
+      font-style: var(--font-accent-style, normal) !important;
+      font-weight: var(--font-accent-weight, inherit) !important;
+      letter-spacing: var(--font-accent-letter-spacing, inherit) !important;
+      text-transform: var(--font-accent-text-transform, none) !important;
+    {% endif %}
+  }
+
+  @media screen and (max-width: 749px) {
+    .roadmap-header {
+      text-align: {{ section.settings.mobile_content_alignment }} !important;
+      margin-bottom: 30px;
+    }
+
+    .roadmap-header .heading {
+      font-size: {{ section.settings.heading_size_mobile }}px !important;
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.heading_color }}{% endif %} !important;
+      letter-spacing: var(--letter-spacing-heading) !important;
+      line-height: {{ section.settings.heading_line_height_mobile | default: 1.3 }};
+    }
+
+    .roadmap-header .subheading {
+      font-size: {{ section.settings.subheading_size_mobile }}px !important;
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subheading_color }}{% endif %} !important;
+      letter-spacing: var(--letter-spacing-body) !important;
+    }
+
+    .roadmap-timeline::before {
+      left: 15px;
+      top: 25px;
+    }
+
+    .roadmap-item {
+      padding-left: 50px;
+      margin-bottom: {{ section.settings.roadmap_item_spacing_mobile }}px;
+    }
+
+    .roadmap-item.fade-out {
+      /* Reduce animation distance on mobile for better UX */
+      transform: translateY(20px);
+    }
+
+    .roadmap-item.animate-in {
+      transform: translateY(0);
+    }
+
+    .roadmap-circle {
+      left: 0;
+      top: 0px;
+      width: 30px;
+      height: 30px;
+    }
+
+    .roadmap-circle svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .roadmap-badge {
+      font-size: {{ section.settings.badge_font_size_mobile }}px !important;
+      padding: 3px 10px;
+      margin-bottom: 6px;
+    }
+
+    .roadmap-title {
+      font-size: {{ section.settings.step_title_size_mobile }}px !important;
+      {% unless settings.h3_use_heading_font %}
+        font-style: normal !important;
+        font-family: var(--font-body-family) !important;
+      {% endunless %}
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.step_title_color }}{% endif %} !important;
+    }
+
+    .roadmap-description {
+      font-size: {{ section.settings.step_description_size_mobile }}px !important;
+      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.step_description_color }}{% endif %} !important;
+    }
+
+    /* Mobile bullet list adjustments */
+    .roadmap-description ul li,
+    .roadmap-description ol li {
+      padding-left: 24px;
+      margin-bottom: 6px;
+    }
+
+    .roadmap-description ul li::before {
+      width: 6px;
+      height: 6px;
+      top: 0.4em;
+    }
+  }
+
+  /* Roadmap Button Styling */
+  .roadmap-button-container {
+    text-align: center;
+    margin-top: 0px;
+    margin-bottom: 20px;
+    padding-top: 0px;
+  }
+
+  .roadmap-cta-button {
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    
+    {% if section.settings.use_global_button_style %}
+      /* Use Global Button Styling */
+      padding: var(--global-button-padding-y, 12px) 24px;
+      font-size: var(--global-button-font-size, 16px);
+      font-weight: var(--global-button-font-weight, 600);
+      font-family: var(--global-button-font-family, var(--font-body-family, sans-serif));
+      text-transform: var(--global-button-text-transform, uppercase);
+      letter-spacing: var(--global-button-letter-spacing, 1px);
+      border-radius: var(--global-button-radius, 8px);
+      {% if settings.enable_button_gradient %}
+        background: linear-gradient(var(--button-gradient-direction, to bottom), var(--button-gradient-start, #EF4A65), var(--button-gradient-end, #D63953));
+      {% else %}
+        background-color: var(--global-button-bg-color, #000000);
+      {% endif %}
+      color: var(--global-button-text-color, #ffffff);
+      border-left: var(--global-button-border-width, 2px) solid var(--global-button-border-color, #EF4A65);
+      border-right: var(--global-button-border-width, 2px) solid var(--global-button-border-color, #EF4A65);
+      border-top: var(--global-button-border-width, 2px) solid var(--global-button-border-color, #EF4A65);
+      border-bottom: var(--global-button-bottom-border-width, 4px) solid var(--global-button-bottom-border-color, #000000);
+    {% else %}
+      /* Use Custom Section Styling */
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-radius: {{ section.settings.button_border_radius }}px;
+      background-color: {{ section.settings.button_background_color }};
+      color: {{ section.settings.button_text_color }};
+      border: 2px solid {{ section.settings.button_background_color }};
+    {% endif %}
+  }
+
+  .roadmap-cta-button:hover {
+    {% if section.settings.use_global_button_style %}
+      /* Global Button Hover State */
+      {% if settings.enable_button_gradient %}
+        background: linear-gradient(var(--button-gradient-direction, to bottom), var(--button-gradient-hover-start, #D63953), var(--button-gradient-hover-end, #B8314A));
+      {% else %}
+        background-color: var(--global-button-hover-bg-color, #333333);
+      {% endif %}
+      color: var(--global-button-hover-text-color, #ffffff);
+      border-left-color: var(--global-button-border-color, #EF4A65);
+      border-right-color: var(--global-button-border-color, #EF4A65);
+      border-top-color: var(--global-button-border-color, #EF4A65);
+      border-bottom-color: var(--global-button-bottom-border-color, #000000);
+    {% else %}
+      /* Custom Section Hover State */
+      background-color: {{ section.settings.button_hover_background_color }};
+      color: {{ section.settings.button_hover_text_color }};
+      border-color: {{ section.settings.button_background_color }};
+    {% endif %}
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Desktop: Show button inside timeline, hide mobile button */
+  @media screen and (min-width: 750px) {
+    .roadmap-button-desktop {
+      display: block;
+    }
+    
+    .roadmap-button-mobile {
+      display: none;
+    }
+  }
+
+  /* Mobile: Hide desktop button, show mobile button */
+  @media screen and (max-width: 749px) {
+    .roadmap-button-desktop {
+      display: none;
+    }
+    
+    .roadmap-button-mobile {
+      display: block;
+      margin-top: 0px;
+      margin-bottom: 20px;
+      padding-top: 0px;
+    }
+
+    {% if section.settings.show_button %}
+    .roadmap-content {
+      padding-bottom: 0px !important;
+    }
+    {% endif %}
+  }
+{%- endstyle -%}
+
+<div class="roadmap-section roadmap-section-{{ section.id }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}" data-section-id="{{ section.id }}">
+  <div class="{% unless contained == false %}page-width{% endunless %}">
+    <div class="section-{{ section.id }}-padding">
+      <div class="roadmap-container">
+        <div class="roadmap-content">
+          {% if section.settings.heading != blank or section.settings.accent_text != blank %}
+            <div class="roadmap-header">
+              {% if section.settings.heading != blank or section.settings.accent_text != blank %}
+                <h2 class="heading">
+                  {% if section.settings.heading != blank %}{{ section.settings.heading }}{% endif %}{% if section.settings.accent_text != blank %} <span class="accent{% unless section.settings.override_global_accent %} global-accent-text{% endunless %}">{{ section.settings.accent_text }}</span>{% endif %}
+                </h2>
+              {% endif %}
+              {% if section.settings.subheading != blank %}
+                <div class="subheading rte">{{ section.settings.subheading }}</div>
+              {% endif %}
+            </div>
+          {% endif %}
+          
+          {% comment %} Mobile image above timeline {% endcomment %}
+          {% if section.settings.mobile_image_above_timeline and section.settings.desktop_image != blank %}
+            <div class="roadmap-image-mobile-above">
+              <img 
+                src="{{ section.settings.desktop_image | image_url: width: 600 }}" 
+                alt="{{ section.settings.desktop_image.alt | escape }}"
+                class="roadmap-image"
+                loading="lazy"
+                width="{{ section.settings.desktop_image.width }}"
+                height="{{ section.settings.desktop_image.height }}"
+              >
+            </div>
+          {% endif %}
+          <div class="roadmap-timeline">
+            <div class="timeline-fill"></div>
+            {% for block in section.blocks %}
+              {% if block.settings.bullet_icon != blank %}
+                <style>
+                  .roadmap-item-{{ block.id }} .roadmap-description ul li::before {
+                    content: '' !important;
+                    background: url('{{ block.settings.bullet_icon | image_url: width: 60 }}') no-repeat center center !important;
+                    background-size: contain !important;
+                    width: {{ block.settings.bullet_icon_size }}px !important;
+                    height: {{ block.settings.bullet_icon_size }}px !important;
+                    border-radius: 0 !important;
+                    top: 0.2em !important;
+                  }
+                  .roadmap-item-{{ block.id }} .roadmap-description ul li {
+                    padding-left: {{ block.settings.bullet_icon_size | plus: 12 }}px !important;
+                  }
+                </style>
+              {% endif %}
+              <div class="roadmap-item roadmap-item-{{ block.id }}" {{ block.shopify_attributes }}>
+                <div class="roadmap-circle">
+                  {% if block.settings.custom_icon != blank %}
+                    {{ block.settings.custom_icon }}
+                  {% else %}
+                    <svg
+                      aria-hidden="true"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z"/>
+                    </svg>
+                  {% endif %}
+                </div>
+
+                {% if block.settings.badge_text != blank and section.settings.show_badges %}
+                  <div class="roadmap-badge">{{ block.settings.badge_text }}</div>
+                {% endif %}
+
+                {% if block.settings.title != blank %}
+                  <h3 class="roadmap-title">{{ block.settings.title }}</h3>
+                {% endif %}
+
+                {% if block.settings.description != blank %}
+                  <div class="roadmap-description rte">{{ block.settings.description }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+            
+            {% comment %} Button inside timeline on desktop {% endcomment %}
+            {% if section.settings.show_button %}
+              <div class="roadmap-button-container roadmap-button-desktop">
+                {% assign button_href = '#' %}
+                {% assign button_data_attrs = '' %}
+                
+                {% case section.settings.button_action_type %}
+                  {% when 'product' %}
+                    {% if section.settings.redirect_product != blank %}
+                      {% assign button_href = section.settings.redirect_product.url %}
+                    {% else %}
+                      {% assign button_href = '#' %}
+                    {% endif %}
+                  {% when 'scroll_top' %}
+                    {% assign button_href = '#' %}
+                    {% assign button_data_attrs = 'data-scroll-to-top="true"' %}
+                  {% when 'url' %}
+                    {% if section.settings.custom_url != blank %}
+                      {% assign button_href = section.settings.custom_url %}
+                    {% else %}
+                      {% assign button_href = '#' %}
+                    {% endif %}
+                {% endcase %}
+                
+                <a href="{{ button_href }}" class="roadmap-cta-button" {{ button_data_attrs }}>
+                  {{ section.settings.button_text }}
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if section.settings.desktop_image != blank %}
+          <div class="roadmap-image-column">
+            <img
+              src="{{ section.settings.desktop_image | image_url: width: 600 }}"
+              alt="{{ section.settings.desktop_image.alt | escape }}"
+              class="roadmap-image"
+              loading="lazy"
+              width="{{ section.settings.desktop_image.width }}"
+              height="{{ section.settings.desktop_image.height }}"
+            >
+          </div>
+        {% endif %}
+      </div>
+
+      {% comment %} Button outside timeline on mobile {% endcomment %}
+      {% if section.settings.show_button %}
+        <div class="roadmap-button-container roadmap-button-mobile">
+          {% assign button_href = '#' %}
+          {% assign button_data_attrs = '' %}
+          
+          {% case section.settings.button_action_type %}
+            {% when 'product' %}
+              {% if section.settings.redirect_product != blank %}
+                {% assign button_href = section.settings.redirect_product.url %}
+              {% else %}
+                {% assign button_href = '#' %}
+              {% endif %}
+            {% when 'scroll_top' %}
+              {% assign button_href = '#' %}
+              {% assign button_data_attrs = 'data-scroll-to-top="true"' %}
+            {% when 'url' %}
+              {% if section.settings.custom_url != blank %}
+                {% assign button_href = section.settings.custom_url %}
+              {% else %}
+                {% assign button_href = '#' %}
+              {% endif %}
+          {% endcase %}
+          
+          <a href="{{ button_href }}" class="roadmap-cta-button" {{ button_data_attrs }}>
+            {{ section.settings.button_text }}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const roadmapSection = document.querySelector('.roadmap-section-{{ section.id }}');
+  if (!roadmapSection) return;
+
+  // Handle roadmap button functionality
+  const roadmapButtons = roadmapSection.querySelectorAll('.roadmap-cta-button');
+  roadmapButtons.forEach(button => {
+    // Prevent default behavior for buttons with href="#" that are not scroll buttons
+    if (button.getAttribute('href') === '#' && !button.hasAttribute('data-scroll-to-top')) {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.warn('⚠️ Roadmap button clicked but no valid redirect URL is set. Please configure the product or URL in the section settings.');
+      });
+    }
+
+    // Handle scroll-to-top functionality
+    if (button.hasAttribute('data-scroll-to-top')) {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }
+  });
+  
+  const timeline = roadmapSection.querySelector('.roadmap-timeline');
+  const timelineFill = roadmapSection.querySelector('.timeline-fill');
+  const roadmapItems = roadmapSection.querySelectorAll('.roadmap-item');
+  
+  if (!timeline || !timelineFill || roadmapItems.length === 0) return;
+  
+  function updateTimelineFill() {
+    const sectionRect = roadmapSection.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    
+    // Calculate how much of the section is visible
+    const sectionTop = sectionRect.top;
+    const sectionBottom = sectionRect.bottom;
+    
+    // Start filling when section enters viewport
+    if (sectionBottom < 0 || sectionTop > viewportHeight) {
+      timelineFill.style.height = '0%';
+      return;
+    }
+    
+    // Calculate progress based on roadmap items, not the entire timeline container
+    let progress = 0;
+    
+    if (roadmapItems.length > 0) {
+      // Get the position of the last roadmap item
+      const lastItem = roadmapItems[roadmapItems.length - 1];
+      const lastItemRect = lastItem.getBoundingClientRect();
+      const lastItemBottom = lastItemRect.bottom;
+      
+      // Calculate progress based on scroll position relative to roadmap items
+      if (sectionTop <= viewportHeight && sectionBottom >= 0) {
+        // Calculate how much we've scrolled through the roadmap items area
+        const visibleTop = Math.max(0, -sectionTop);
+        
+        // Use the distance from section top to last item bottom as the reference height
+        const itemsHeight = lastItemBottom - sectionRect.top;
+        
+        // Calculate progress, but cap it so it doesn't go beyond the last item
+        progress = Math.min(1, visibleTop / (itemsHeight * 0.8));
+      }
+    }
+    
+    // Ensure progress is between 0 and 1
+    progress = Math.max(0, Math.min(1, progress));
+    
+    // Apply the fill height directly to the element
+    const fillHeight = progress * 100;
+    timelineFill.style.height = fillHeight + '%';
+    
+    // Debug logging (remove in production)
+    console.log('Roadmap fill progress:', progress, 'height:', fillHeight + '%', 'items:', roadmapItems.length);
+  }
+  
+  // Throttle scroll events for better performance
+  let ticking = false;
+  function handleScroll() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        updateTimelineFill();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+  
+  // Initial calculation
+  updateTimelineFill();
+  
+  // Listen for scroll events
+  window.addEventListener('scroll', handleScroll);
+  window.addEventListener('resize', updateTimelineFill);
+  
+  // Debug logging
+  console.log('Roadmap script initialized');
+  console.log('Timeline fill element:', timelineFill);
+  console.log('Timeline element:', timeline);
+  console.log('Roadmap section:', roadmapSection);
+
+  // Animate roadmap items on scroll
+  const roadmapItemsToAnimate = roadmapSection.querySelectorAll('.roadmap-item');
+  
+  if (roadmapItemsToAnimate.length > 0) {
+    // Check if Intersection Observer is supported
+    if ('IntersectionObserver' in window) {
+      const observerOptions = {
+        threshold: 0.2,
+        rootMargin: '0px 0px -100px 0px'
+      };
+
+      const itemObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Item is coming into view - animate in
+            entry.target.classList.remove('fade-out');
+            entry.target.classList.add('animate-in');
+          } else {
+            // Item is going out of view - animate out
+            entry.target.classList.remove('animate-in');
+            entry.target.classList.add('fade-out');
+          }
+        });
+      }, observerOptions);
+
+      // Start observing each roadmap item with staggered delays
+      roadmapItemsToAnimate.forEach((item, index) => {
+        // Initially set items to fade-out state
+        item.classList.add('fade-out');
+        // Add a small delay for staggered animation effect
+        item.style.transitionDelay = `${index * 0.1}s`;
+        itemObserver.observe(item);
+      });
+    } else {
+      // Fallback for browsers without Intersection Observer support
+      // Use scroll event listener
+      let ticking = false;
+      
+      function checkItemsVisibility() {
+        const viewportHeight = window.innerHeight;
+        
+        roadmapItemsToAnimate.forEach((item) => {
+          const rect = item.getBoundingClientRect();
+          const isVisible = rect.top < viewportHeight * 0.8 && rect.bottom > viewportHeight * 0.2;
+          
+          if (isVisible) {
+            item.classList.remove('fade-out');
+            item.classList.add('animate-in');
+          } else {
+            item.classList.remove('animate-in');
+            item.classList.add('fade-out');
+          }
+        });
+        
+        ticking = false;
+      }
+      
+      function onScroll() {
+        if (!ticking) {
+          requestAnimationFrame(checkItemsVisibility);
+          ticking = true;
+        }
+      }
+      
+      // Initial check
+      roadmapItemsToAnimate.forEach((item, index) => {
+        item.classList.add('fade-out');
+        item.style.transitionDelay = `${index * 0.1}s`;
+      });
+      
+      checkItemsVisibility();
+      window.addEventListener('scroll', onScroll);
+    }
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Roadmap",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "default": false,
+      "label": "Use theme colors"
+    },
+    {
+      "type": "header",
+      "content": "General Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "contained_section",
+      "default": true,
+      "label": "Contained section"
+    },
+    {
+      "type": "range",
+      "id": "max_container_width",
+      "min": 200,
+      "max": 1400,
+      "step": 100,
+      "default": 1200,
+      "label": "Max container width (px)",
+      "info": "Only applies to desktop"
+    },
+    {
+      "type": "range",
+      "id": "max_section_width",
+      "min": 800,
+      "max": 1800,
+      "step": 50,
+      "default": 1400,
+      "unit": "px",
+      "label": "Max section width",
+      "info": "Maximum width of the entire section when not contained. Centers the section on larger screens."
+    },
+    {
+      "type": "header",
+      "content": "Background Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_background_image",
+      "default": false,
+      "label": "Enable background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_desktop",
+      "label": "Desktop background image",
+      "info": "Recommended size: 1920x1080px or larger"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Mobile background image",
+      "info": "Recommended size: 768x1024px or larger. If left empty, desktop image will be used."
+    },
+    {
+      "type": "select",
+      "id": "background_size_desktop",
+      "label": "Desktop background size",
+      "default": "cover",
+      "options": [
+        { "label": "Cover", "value": "cover" },
+        { "label": "Contain", "value": "contain" },
+        { "label": "Auto", "value": "auto" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "background_position_desktop",
+      "label": "Desktop background position",
+      "default": "center center",
+      "options": [
+        { "label": "Top Left", "value": "top left" },
+        { "label": "Top Center", "value": "top center" },
+        { "label": "Top Right", "value": "top right" },
+        { "label": "Center Left", "value": "center left" },
+        { "label": "Center Center", "value": "center center" },
+        { "label": "Center Right", "value": "center right" },
+        { "label": "Bottom Left", "value": "bottom left" },
+        { "label": "Bottom Center", "value": "bottom center" },
+        { "label": "Bottom Right", "value": "bottom right" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "background_size_mobile",
+      "label": "Mobile background size",
+      "default": "cover",
+      "options": [
+        { "label": "Cover", "value": "cover" },
+        { "label": "Contain", "value": "contain" },
+        { "label": "Auto", "value": "auto" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "background_position_mobile",
+      "label": "Mobile background position",
+      "default": "center center",
+      "options": [
+        { "label": "Top Left", "value": "top left" },
+        { "label": "Top Center", "value": "top center" },
+        { "label": "Top Right", "value": "top right" },
+        { "label": "Center Left", "value": "center left" },
+        { "label": "Center Center", "value": "center center" },
+        { "label": "Center Right", "value": "center right" },
+        { "label": "Bottom Left", "value": "bottom left" },
+        { "label": "Bottom Center", "value": "bottom center" },
+        { "label": "Bottom Right", "value": "bottom right" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_background_overlay",
+      "default": false,
+      "label": "Enable background overlay"
+    },
+    {
+      "type": "color",
+      "id": "background_overlay_color",
+      "label": "Overlay color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "background_overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Overlay opacity",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Section Header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "default": "Our Roadmap",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "default": "<p>Follow your progress and see what's ahead on your path to success</p>",
+      "label": "Subheading"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "default": 36,
+      "label": "Heading size"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "min": 1.0,
+      "max": 2.0,
+      "step": 0.1,
+      "default": 1.3,
+      "label": "Heading line height"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 16,
+      "max": 60,
+      "step": 1,
+      "default": 24,
+      "label": "Mobile heading size"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height_mobile",
+      "min": 1.0,
+      "max": 2.0,
+      "step": 0.1,
+      "default": 1.3,
+      "label": "Mobile heading line height"
+    },
+    {
+      "type": "range",
+      "id": "subheading_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "default": 16,
+      "label": "Subheading size"
+    },
+    {
+      "type": "range",
+      "id": "subheading_size_mobile",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "default": 14,
+      "label": "Mobile subheading size"
+    },
+    {
+      "type": "range",
+      "id": "step_title_size",
+      "min": 16,
+      "max": 32,
+      "step": 1,
+      "default": 20,
+      "label": "Step title size"
+    },
+    {
+      "type": "select",
+      "id": "step_title_letter_spacing",
+      "label": "Step title letter spacing",
+      "options": [
+        {
+          "value": "heading",
+          "label": "Heading"
+        },
+        {
+          "value": "body",
+          "label": "Body"
+        }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "range",
+      "id": "step_title_size_mobile",
+      "min": 14,
+      "max": 40,
+      "step": 1,
+      "default": 18,
+      "label": "Mobile step title size"
+    },
+    {
+      "type": "range",
+      "id": "step_description_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "default": 14,
+      "label": "Step description size"
+    },
+    {
+      "type": "range",
+      "id": "step_description_size_mobile",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "default": 12,
+      "label": "Mobile step description size"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text"
+    },
+    {
+      "type": "text",
+      "id": "accent_text",
+      "label": "Accent Text",
+      "default": "Ahead",
+      "info": "Optional accent text to highlight in the heading"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "default": false,
+      "label": "Override global accent text settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "default": false,
+      "label": "Use accent gradient",
+      "info": "Only applies when override is enabled"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "default": "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 248, 248, 1) 100%)",
+      "label": "Accent text gradient",
+      "info": "Only applies when override is enabled and use_accent_gradient is true"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "default": "#007bff",
+      "label": "Accent color",
+      "info": "Only applies when override is enabled and gradient is disabled"
+    },
+    {
+      "type": "header",
+      "content": "Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit"
+        },
+        {
+          "value": "serif",
+          "label": "Serif"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "label": "Accent font family",
+      "info": "Only applies when override is enabled"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        },
+        {
+          "value": "oblique",
+          "label": "Oblique"
+        }
+      ],
+      "default": "normal",
+      "label": "Accent font style",
+      "info": "Only applies when override is enabled"
+    },
+    {
+      "type": "range",
+      "id": "accent_font_weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "default": 700,
+      "label": "Accent font weight",
+      "info": "Only applies when override is enabled"
+    },
+    {
+      "type": "header",
+      "content": "Desktop Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "desktop_image",
+      "label": "Desktop image"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left (Image left, Text right)"
+        },
+        {
+          "value": "right",
+          "label": "Right (Image right, Text left)"
+        }
+      ],
+      "default": "right",
+      "label": "Layout position",
+      "info": "Choose whether the image appears on the left or right side of the content"
+    },
+    {
+      "type": "range",
+      "id": "image_column_width",
+      "min": 25,
+      "max": 50,
+      "step": 5,
+      "default": 40,
+      "label": "Image column width (%)"
+    },
+    {
+      "type": "checkbox",
+      "id": "image_column_full_height",
+      "default": false,
+      "label": "Make image column full height",
+      "info": "On desktop, the image column will span the full height of the section"
+    },
+    {
+      "type": "range",
+      "id": "full_height_min_height",
+      "min": 400,
+      "max": 1000,
+      "step": 50,
+      "default": 600,
+      "unit": "px",
+      "label": "Minimum section height",
+      "info": "Only applies when full height is enabled",
+      "visible_if": "{{ section.settings.image_column_full_height }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_image_above_timeline",
+      "default": false,
+      "label": "Show image above timeline on mobile",
+      "info": "On mobile, the image will appear after the subheading and before the timeline"
+    },
+    {
+      "type": "range",
+      "id": "text_column_width",
+      "min": 30,
+      "max": 50,
+      "step": 5,
+      "default": 50,
+      "label": "Text column width (%)",
+      "info": "Applies when desktop image or placeholder is added"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "default": 8,
+      "label": "Image border radius"
+    },
+    {
+      "type": "header",
+      "content": "Timeline Design"
+    },
+    {
+      "type": "range",
+      "id": "timeline_width",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "default": 2,
+      "label": "Timeline width (px)"
+    },
+    {
+      "type": "range",
+      "id": "timeline_border_radius",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 2,
+      "label": "Timeline border radius"
+    },
+    {
+      "type": "range",
+      "id": "timeline_max_width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "label": "Timeline max width (%)"
+    },
+    {
+      "type": "header",
+      "content": "Badge Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_badges",
+      "default": true,
+      "label": "Show badges"
+    },
+    {
+      "type": "range",
+      "id": "desktop_badge_font_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "default": 12,
+      "label": "Desktop badge font size"
+    },
+    {
+      "type": "range",
+      "id": "badge_font_size_mobile",
+      "min": 8,
+      "max": 14,
+      "step": 1,
+      "default": 11,
+      "label": "Mobile badge font size"
+    },
+    {
+      "type": "select",
+      "id": "badge_font_weight",
+      "label": "Badge font weight",
+      "options": [
+        { "value": "400", "label": "Normal (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-Bold (600)" },
+        { "value": "700", "label": "Bold (700)" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "range",
+      "id": "badge_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 50,
+      "label": "Badge border radius (px)"
+    },
+    {
+      "type": "header",
+      "content": "Badge Border"
+    },
+    {
+      "type": "range",
+      "id": "badge_border_width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 1,
+      "label": "Badge border width (px)"
+    },
+    {
+      "type": "select",
+      "id": "badge_border_style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        },
+        {
+          "value": "double",
+          "label": "Double"
+        }
+      ],
+      "default": "solid",
+      "label": "Badge border style"
+    },
+    {
+      "type": "color",
+      "id": "badge_border_color",
+      "default": "#4CAF50",
+      "label": "Badge border color"
+    },
+    {
+      "type": "header",
+      "content": "Layout Options"
+    },
+    {
+      "type": "select",
+      "id": "desktop_content_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center",
+      "label": "Desktop content alignment"
+    },
+    {
+      "type": "select",
+      "id": "mobile_content_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center",
+      "label": "Mobile content alignment"
+    },
+    {
+      "type": "range",
+      "id": "roadmap_item_spacing_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 40,
+      "label": "Desktop roadmap item spacing (px)"
+    },
+    {
+      "type": "range",
+      "id": "roadmap_item_spacing_mobile",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "default": 30,
+      "label": "Mobile roadmap item spacing (px)"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_spacing",
+      "default": true,
+      "label": "Enable custom spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_top_desktop",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "default": 72,
+      "label": "Desktop top padding"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_bottom_desktop",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "default": 72,
+      "label": "Desktop bottom padding"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_left_desktop",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "default": 80,
+      "label": "Desktop left padding"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_right_desktop",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "default": 80,
+      "label": "Desktop right padding"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_top_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 36,
+      "label": "Mobile top padding"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 36,
+      "label": "Mobile bottom padding"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_left_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 24,
+      "label": "Mobile left padding"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_right_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 24,
+      "label": "Mobile right padding"
+    },
+    {
+      "type": "header",
+      "content": "Placeholder Space (For Background Images)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_placeholder_space_desktop",
+      "label": "Enable Desktop Placeholder Space",
+      "default": false,
+      "info": "Creates empty space to show background image on desktop. Uses 'Image column width' and 'Text column width' settings."
+    },
+    {
+      "type": "range",
+      "id": "placeholder_min_height_desktop",
+      "min": 300,
+      "max": 1200,
+      "step": 50,
+      "unit": "px",
+      "label": "Desktop Placeholder Min Height",
+      "default": 600,
+      "info": "Minimum height for placeholder space. Width is controlled by 'Image column width' setting."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_placeholder_space_mobile",
+      "label": "Enable Mobile Placeholder Space",
+      "default": false,
+      "info": "Creates empty space to show background image on mobile"
+    },
+    {
+      "type": "range",
+      "id": "placeholder_height_mobile",
+      "min": 100,
+      "max": 600,
+      "step": 50,
+      "unit": "px",
+      "label": "Mobile Placeholder Height",
+      "default": 300
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Only applies when theme colors are disabled"
+    },
+    {
+      "type": "color_background",
+      "id": "section_background",
+      "default": "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 248, 248, 1) 100%)",
+      "label": "Section background"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "default": "#121212",
+      "label": "Heading color"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "default": "#121212",
+      "label": "Subheading color"
+    },
+    {
+      "type": "color",
+      "id": "step_title_color",
+      "default": "#121212",
+      "label": "Step title color"
+    },
+    {
+      "type": "color",
+      "id": "step_description_color",
+      "default": "#666666",
+      "label": "Step description color"
+    },
+    {
+      "type": "header",
+      "content": "Timeline & Badge Colors",
+      "info": "These colors are customizable even when theme colors are enabled"
+    },
+    {
+      "type": "color",
+      "id": "timeline_color",
+      "default": "#e0e0e0",
+      "label": "Timeline line color"
+    },
+    {
+      "type": "color",
+      "id": "active_timeline_color",
+      "default": "#4CAF50",
+      "label": "Active timeline fill color",
+      "info": "Color of the line that fills as you scroll down"
+    },
+    {
+      "type": "color",
+      "id": "circle_color",
+      "default": "#4CAF50",
+      "label": "Circle background color"
+    },
+    {
+      "type": "color",
+      "id": "circle_icon_color",
+      "default": "#ffffff",
+      "label": "Circle icon color"
+    },
+    {
+      "type": "color",
+      "id": "badge_background",
+      "default": "#4CAF50",
+      "label": "Badge background color"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "default": "#ffffff",
+      "label": "Badge text color"
+    },
+    {
+      "type": "header",
+      "content": "Button Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_button",
+      "label": "Show button",
+      "default": false,
+      "info": "Display a call-to-action button at the bottom of the roadmap"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "GET STARTED",
+      "info": "Text displayed on the button"
+    },
+    {
+      "type": "select",
+      "id": "button_action_type",
+      "label": "Button action",
+      "options": [
+        {
+          "value": "product",
+          "label": "Redirect to Product Page"
+        },
+        {
+          "value": "scroll_top",
+          "label": "Scroll to Top of Page"
+        },
+        {
+          "value": "url",
+          "label": "Custom URL"
+        }
+      ],
+      "default": "scroll_top",
+      "info": "Choose what happens when the button is clicked"
+    },
+    {
+      "type": "product",
+      "id": "redirect_product",
+      "label": "Product to redirect to",
+      "info": "Select the product page to redirect to (only used when 'Redirect to Product Page' is selected)"
+    },
+    {
+      "type": "url",
+      "id": "custom_url",
+      "label": "Custom URL",
+      "info": "Enter a custom URL to redirect to (only used when 'Custom URL' is selected)"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_global_button_style",
+      "label": "Use global button styling",
+      "default": true,
+      "info": "Use the theme's global button colors and styling"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Button border radius",
+      "default": 8,
+      "info": "Only used when global button styling is disabled"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Button background color",
+      "default": "#000000",
+      "info": "Only used when global button styling is disabled"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff",
+      "info": "Only used when global button styling is disabled"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background_color",
+      "label": "Button hover background color",
+      "default": "#ffffff",
+      "info": "Only used when global button styling is disabled"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Button hover text color",
+      "default": "#000000",
+      "info": "Only used when global button styling is disabled"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "roadmap_step",
+      "name": "Roadmap Step",
+      "settings": [
+        {
+          "type": "text",
+          "id": "badge_text",
+          "default": "Phase 1",
+          "label": "Badge text"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "default": "GETTING STARTED",
+          "label": "Title"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "default": "<p>Begin your journey with our comprehensive onboarding process. Set up your account, explore key features, and get familiar with the platform.</p>",
+          "label": "Description"
+        },
+        {
+          "type": "html",
+          "id": "custom_icon",
+          "label": "Custom SVG Icon",
+          "info": "Leave blank to use default checkmark icon"
+        },
+        {
+          "type": "header",
+          "content": "Bullet List Icon"
+        },
+        {
+          "type": "image_picker",
+          "id": "bullet_icon",
+          "label": "Custom Bullet Icon",
+          "info": "Upload a custom icon (PNG/SVG recommended, 16x16 or 20x20px) to use for bullet list items. Leave blank to use default bullet style."
+        },
+        {
+          "type": "range",
+          "id": "bullet_icon_size",
+          "min": 10,
+          "max": 30,
+          "step": 2,
+          "unit": "px",
+          "label": "Bullet Icon Size",
+          "default": 16
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Roadmap",
+      "settings": {
+        "heading": "Your Journey",
+        "accent_text": "Ahead",
+        "subheading": "<p>Follow your progress and see what's ahead on your path to success</p>"
+      },
+      "blocks": [
+        {
+          "type": "roadmap_step",
+          "settings": {
+            "badge_text": "Phase 1",
+            "title": "GETTING STARTED",
+            "description": "<p>Begin your journey with our comprehensive onboarding process. Set up your account, explore key features, and get familiar with the platform.</p>"
+          }
+        },
+        {
+          "type": "roadmap_step",
+          "settings": {
+            "badge_text": "Phase 2",
+            "title": "BUILDING MOMENTUM",
+            "description": "<p>Start implementing what you've learned. Access advanced features, customize your experience, and begin seeing initial results.</p>"
+          }
+        },
+        {
+          "type": "roadmap_step",
+          "settings": {
+            "badge_text": "Phase 3",
+            "title": "REACHING MILESTONES",
+            "description": "<p>Achieve significant progress markers. Unlock premium features, optimize your workflow, and experience measurable improvements.</p>"
+          }
+        },
+        {
+          "type": "roadmap_step",
+          "settings": {
+            "badge_text": "Phase 4",
+            "title": "MASTERING SUCCESS",
+            "description": "<p>Reach your full potential with expert-level capabilities. Enjoy all benefits, share your achievements, and inspire others on their journey.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

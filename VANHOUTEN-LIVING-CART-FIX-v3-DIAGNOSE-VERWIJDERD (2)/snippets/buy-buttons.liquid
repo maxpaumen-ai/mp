@@ -1,0 +1,416 @@
+{% comment %}
+  Renders product buy-buttons.
+  Accepts:
+  - product: {Object} product object.
+  - block: {Object} passing the block information.
+  - product_form_id: {String} product form id.
+  - section_id: {String} id of section to which this snippet belongs.
+  - show_pickup_availability: {Boolean} for the pickup availability. If true the pickup availability is rendered, false - not rendered (optional).
+  - use_custom_button: {Boolean} whether to use the custom styled button (optional, defaults to false).
+  - button_text: {String} custom button text (optional).
+  - button_bg_color: {String} custom button background color (optional, defaults to #EF4A65).
+  - button_text_color: {String} custom button text color (optional, defaults to #FFFFFF).
+  - button_hover_color: {String} custom button hover color (optional, defaults to button_bg_color).
+  - button_icon: {String} icon to use - 'none', 'cart', 'bag', 'arrow', 'custom' (optional, defaults to 'none').
+  - icon_position: {String} position of icon - 'left' or 'right' (optional, defaults to 'left').
+  - icon_size: {Number} size of icon in pixels (optional, defaults to 20).
+
+  Usage:
+  {% render 'buy-buttons', block: block, product: product, product_form_id: product_form_id, section_id: section.id, show_pickup_availability: true %}
+
+  With custom button:
+  {% render 'buy-buttons', block: block, product: product, product_form_id: product_form_id, section_id: section.id, use_custom_button: true, button_text: "Add to Cart", button_bg_color: "#EF4A65" %}
+{% endcomment %}
+
+{%- liquid
+  assign use_custom_button = use_custom_button | default: false
+  assign button_text = button_text | default: 'Add to Cart'
+  assign button_bg_color = button_bg_color | default: '#EF4A65'
+  assign button_text_color = button_text_color | default: '#FFFFFF'
+  assign button_hover_color = button_hover_color | default: button_bg_color
+  assign button_icon = button_icon | default: 'none'
+  assign icon_position = icon_position | default: 'left'
+  assign icon_size = icon_size | default: 20
+
+  # Check if there's a quantity selector block in the section
+  assign has_quantity_selector = false
+  # This check works if this snippet is being rendered within a section with blocks
+  if block != blank and section != blank and section.blocks != blank
+    for _block in section.blocks
+      if _block.type == 'quantity_selector'
+        assign has_quantity_selector = true
+        break
+      endif
+    endfor
+  endif
+-%}
+
+<div {{ block.shopify_attributes }}>
+  {%- if product != blank -%}
+    {%- liquid
+      assign gift_card_recipient_feature_active = false
+      if block.settings.show_gift_card_recipient and product.gift_card?
+        assign gift_card_recipient_feature_active = true
+      endif
+
+      assign show_dynamic_checkout = false
+      if block.settings.show_dynamic_checkout and gift_card_recipient_feature_active == false
+        assign show_dynamic_checkout = true
+      endif
+    -%}
+
+    {% if use_custom_button %}
+      <div class="shop-add-to-cart-wrapper">
+        <product-form
+          class="product-form"
+          data-hide-errors="{{ gift_card_recipient_feature_active }}"
+          data-section-id="{{ section_id }}"
+        >
+          <div class="product-form__error-message-wrapper" role="alert" hidden>
+            <span class="svg-wrapper">
+              <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-error" viewBox="0 0 13 13">
+                <circle cx="6.5" cy="6.5" r="6.5"/>
+                <path d="M5.87413 3.5L6.50004 4.16945L7.12595 3.5L8.50004 4.87426L7.87412 5.50004L8.50004 6.12582L7.12595 7.50004L6.50004 6.87426L5.87413 7.50004L4.50004 6.12582L5.12596 5.50004L4.50004 4.87426L5.87413 3.5Z" fill="white"/>
+              </svg>
+            </span>
+            <span class="product-form__error-message"></span>
+          </div>
+
+          {%- form 'product',
+            product,
+            id: product_form_id,
+            class: 'form',
+            novalidate: 'novalidate',
+            data-type: 'add-to-cart-form'
+          -%}
+            <input
+              type="hidden"
+              name="id"
+              value="{{ product.selected_or_first_available_variant.id }}"
+              {% if product.selected_or_first_available_variant.available == false
+                or quantity_rule_soldout
+                or product.selected_or_first_available_variant == null
+              %}
+                disabled
+              {% endif %}
+              class="product-variant-id"
+            >
+
+            {%- if gift_card_recipient_feature_active -%}
+              {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+            {%- endif -%}
+
+            {% unless has_quantity_selector %}
+              <input type="hidden" name="quantity" value="1">
+            {% endunless %}
+
+            <button
+              type="submit"
+              name="add"
+              class="gb-sumbit-free shop-add-to-cart-button{% if product.selected_or_first_available_variant.available == false %} sold-out{% endif %}"
+              style="{% if settings.enable_global_button_styling and block.settings.use_global_button_styling %}--button-text-font-size: var(--global-button-font-size, 14px); padding: var(--global-button-padding-y, 12px) 20px !important; font-size: var(--global-button-font-size, 14px) !important; font-weight: var(--global-button-font-weight, 700) !important; letter-spacing: var(--global-button-letter-spacing, 1px) !important; text-transform: var(--global-button-text-transform, none) !important; border-radius: var(--global-button-radius, 8px) !important; background-color: var(--global-button-bg-color, #EF4A65) !important; color: var(--global-button-text-color, #FFFFFF) !important; border: var(--global-button-border-width, 0px) solid var(--global-button-border-color, #EF4A65) !important;{% else %}--button-text-font-size: {{ block.settings.custom_button_font_size | default: 14 }}px; padding: {{ block.settings.custom_button_padding_y | default: 12 }}px 20px; font-size: {{ block.settings.custom_button_font_size | default: 14 }}px; letter-spacing: var(--global-button-letter-spacing, 1px); font-weight: var(--global-button-font-weight, 700); background-color: {% if block.settings.use_theme_colors %}{% if settings.use_dedicated_button_colors %}{% if settings.global_section_button_color != blank %}{{ settings.global_section_button_color }}{% else %}{{ settings.global_section_accent_1_color }}{% endif %}{% else %}{{ settings.global_section_accent_1_color }}{% endif %}{% else %}{{ button_bg_color }}{% endif %}; color: {% if block.settings.use_theme_colors %}{% if settings.use_dedicated_button_colors %}{% if settings.global_section_button_text_color != blank %}{{ settings.global_section_button_text_color }}{% else %}{{ settings.global_section_background_color }}{% endif %}{% else %}{{ settings.global_section_background_color }}{% endif %}{% else %}{{ button_text_color }}{% endif %}; --button-hover-color: {% if block.settings.use_theme_colors %}{% if settings.use_dedicated_button_colors %}{% if settings.global_section_button_color != blank %}{{ settings.global_section_button_color | color_darken: 5 }}{% else %}{{ settings.global_section_accent_1_color | color_darken: 5 }}{% endif %}{% else %}{{ settings.global_section_accent_1_color | color_darken: 5 }}{% endif %}{% else %}{{ button_hover_color }}{% endif %};{% endif %}"
+              {% if product.selected_or_first_available_variant.available == false
+                or quantity_rule_soldout
+                or product.selected_or_first_available_variant == null
+              %}
+                disabled
+              {% endif %}
+            >
+              {% if button_icon != 'none' and icon_position == 'left' %}
+                <span class="button-icon">
+                  {% case button_icon %}
+                    {% when 'cart' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                      </svg>
+                    {% when 'bag' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path>
+                      </svg>
+                    {% when 'arrow' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                    {% when 'custom' %}
+                      {% if block.settings.custom_icon != blank %}
+                        {{ block.settings.custom_icon }}
+                      {% endif %}
+                  {% endcase %}
+                </span>
+              {% endif %}
+
+              <span class="button-text">
+                {% if product.selected_or_first_available_variant.available
+                  and product.selected_or_first_available_variant.available == true
+                  and quantity_rule_soldout != true
+                %}
+                  {{ button_text }} - {{ product.selected_or_first_available_variant.price | money }}
+                  {% if product.selected_or_first_available_variant.compare_at_price
+                      > product.selected_or_first_available_variant.price
+                  %}
+                    <span class="compare-price"
+                      >({{ product.selected_or_first_available_variant.compare_at_price | money }})</span
+                    >
+                  {% endif %}
+                {% else %}
+                  {%- if product.selected_or_first_available_variant == null -%}
+                    {{ 'products.product.unavailable' | t }}
+                  {%- else -%}
+                    {{ 'products.product.sold_out' | t }}
+                  {%- endif -%}
+                {% endif %}
+              </span>
+
+              {% if button_icon != 'none' and icon_position == 'right' %}
+                <span class="button-icon">
+                  {% case button_icon %}
+                    {% when 'cart' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                      </svg>
+                    {% when 'bag' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path>
+                      </svg>
+                    {% when 'arrow' %}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="{{ icon_size }}"
+                        height="{{ icon_size }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                    {% when 'custom' %}
+                      {% if block.settings.custom_icon != blank %}
+                        {{ block.settings.custom_icon }}
+                      {% endif %}
+                  {% endcase %}
+                </span>
+              {% endif %}
+
+              <div class="loading__spinner hidden">
+                <svg
+                  aria-hidden="true"
+                  focusable="false"
+                  class="spinner"
+                  viewBox="0 0 66 66"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                </svg>
+              </div>
+            </button>
+
+            {%- if show_dynamic_checkout -%}
+              {{ form | payment_button }}
+            {%- endif -%}
+          {%- endform -%}
+        </product-form>
+      </div>
+    {% else %}
+      <product-form
+        class="product-form"
+        data-hide-errors="{{ gift_card_recipient_feature_active }}"
+        data-section-id="{{ section_id }}"
+      >
+        <div class="product-form__error-message-wrapper" role="alert" hidden>
+          <span class="svg-wrapper">
+            <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-error" viewBox="0 0 13 13">
+              <circle cx="6.5" cy="6.5" r="6.5"/>
+              <path d="M5.87413 3.5L6.50004 4.16945L7.12595 3.5L8.50004 4.87426L7.87412 5.50004L8.50004 6.12582L7.12595 7.50004L6.50004 6.87426L5.87413 7.50004L4.50004 6.12582L5.12596 5.50004L4.50004 4.87426L5.87413 3.5Z" fill="white"/>
+            </svg>
+          </span>
+          <span class="product-form__error-message"></span>
+        </div>
+
+        {%- form 'product',
+          product,
+          id: product_form_id,
+          class: 'form',
+          novalidate: 'novalidate',
+          data-type: 'add-to-cart-form'
+        -%}
+          <input
+            type="hidden"
+            name="id"
+            value="{{ product.selected_or_first_available_variant.id }}"
+            {% if product.selected_or_first_available_variant.available == false
+              or quantity_rule_soldout
+              or product.selected_or_first_available_variant == null
+            %}
+              disabled
+            {% endif %}
+            class="product-variant-id"
+          >
+
+          {%- if gift_card_recipient_feature_active -%}
+            {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+          {%- endif -%}
+
+          <div class="product-form__buttons">
+            {%- liquid
+              assign check_against_inventory = true
+              if product.selected_or_first_available_variant.inventory_management != 'shopify' or product.selected_or_first_available_variant.inventory_policy == 'continue'
+                assign check_against_inventory = false
+              endif
+              if product.selected_or_first_available_variant.quantity_rule.min > product.selected_or_first_available_variant.inventory_quantity and check_against_inventory
+                assign quantity_rule_soldout = true
+              endif
+            -%}
+            <button
+              id="ProductSubmitButton-{{ section_id }}"
+              type="submit"
+              name="add"
+              class="gb-sumbit-free product-form__submit button button--full-width {% if show_dynamic_checkout %}button--secondary{% else %}button--primary{% endif %}"
+              {% if product.selected_or_first_available_variant.available == false
+                or quantity_rule_soldout
+                or product.selected_or_first_available_variant == null
+              %}
+                disabled
+              {% endif %}
+            >
+              <span>
+                {%- if product.selected_or_first_available_variant == null -%}
+                  {{ 'products.product.unavailable' | t }}
+                {%- elsif product.selected_or_first_available_variant.available == false or quantity_rule_soldout -%}
+                  {{ 'products.product.sold_out' | t }}
+                {%- else -%}
+                  {{ 'products.product.add_to_cart' | t }}
+                {%- endif -%}
+              </span>
+              <div class="loading__spinner hidden">
+                <svg
+                  aria-hidden="true"
+                  focusable="false"
+                  class="spinner"
+                  viewBox="0 0 66 66"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                </svg>
+              </div>
+            </button>
+            {%- if show_dynamic_checkout -%}
+              {{ form | payment_button }}
+            {%- endif -%}
+          </div>
+        {%- endform -%}
+      </product-form>
+    {% endif %}
+  {%- else -%}
+    <div class="product-form">
+      <div class="product-form__buttons form">
+        <button
+          type="submit"
+          name="add"
+          class="product-form__submit button button--full-width button--primary"
+          disabled
+        >
+          {{ 'products.product.sold_out' | t }}
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- if show_pickup_availability -%}
+    {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
+
+    {%- assign pick_up_availabilities = product.selected_or_first_available_variant.store_availabilities
+      | where: 'pick_up_enabled', true
+    -%}
+
+    <pickup-availability
+      class="product__pickup-availabilities quick-add-hidden"
+      {% if product.selected_or_first_available_variant.available and pick_up_availabilities.size > 0 %}
+        available
+      {% endif %}
+      data-root-url="{{ routes.root_url }}"
+      data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+      data-has-only-default-variant="{{ product.has_only_default_variant }}"
+      data-product-page-color-scheme="gradient"
+    >
+      <template>
+        <pickup-availability-preview class="pickup-availability-preview">
+          <span class="svg-wrapper">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              aria-hidden="true"
+              focusable="false"
+              role="presentation"
+              class="icon icon-unavailable"
+              fill="none"
+              viewBox="0 0 20 20"
+            >
+              <path fill="#DE3618" stroke="#fff" d="M13.94 3.94L10 7.878l-3.94-3.94A1.499 1.499 0 103.94 6.06L7.88 10l-3.94 3.94a1.499 1.499 0 102.12 2.12L10 12.12l3.94 3.94a1.497 1.497 0 002.12 0 1.499 1.499 0 000-2.12L12.122 10l3.94-3.94a1.499 1.499 0 10-2.121-2.12z"/>
+            </svg>
+          </span>
+          <div class="pickup-availability-info">
+            <p class="caption-large">{{ 'products.product.pickup_availability.unavailable' | t }}</p>
+            <button class="pickup-availability-button link link--text underlined-link">
+              {{ 'products.product.pickup_availability.refresh' | t }}
+            </button>
+          </div>
+        </pickup-availability-preview>
+      </template>
+    </pickup-availability>
+
+    <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+</div>

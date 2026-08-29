@@ -1,0 +1,194 @@
+{% comment %}
+  ===========================================
+  GLOBAL BUTTON STYLING SYSTEM DOCUMENTATION
+  ===========================================
+
+  This theme now includes a comprehensive global button styling system that ensures consistency
+  across all sections while allowing for section-specific customization when needed.
+
+  OVERVIEW:
+  --------
+  1. Global button settings in Theme Settings > Button Styling
+  2. Master toggle: "Enable Global Button Styling for Sections"
+  3. CSS variables automatically defined in layout/theme.liquid
+  4. Utility classes in assets/button-styling.css
+  5. Reusable snippets for section implementation
+
+  IMPORTANT: The master toggle "Enable Global Button Styling for Sections" controls button colors
+  and styling. When ON, sections use global colors and styling. When OFF, sections use custom colors
+  but maintain global vertical padding and letter spacing for visual consistency.
+
+  GLOBAL BUTTON SETTINGS:
+  ----------------------
+  These are defined in config/settings_schema.json under "Button Styling":
+
+  Typography:
+  - global_button_padding_y (vertical padding - horizontal padding is fixed at 20px)
+  - global_button_font_size
+  - global_button_font_weight
+  - global_button_letter_spacing
+  - global_button_text_transform
+
+  Appearance:
+  - global_button_radius (border radius)
+  - global_button_background_color
+  - global_button_text_color_primary
+  - global_button_border_color
+  - global_button_border_width
+
+  Hover Effects:
+  - global_button_hover_bg_color
+  - global_button_hover_text_color
+  - global_button_hover_brightness
+
+  System Control:
+  - enable_global_button_styling (master toggle for global button system)
+
+  Behavior:
+  - apply_button_radius_to_all (applies radius to all button-like elements)
+
+  CSS VARIABLES:
+  --------------
+  These are automatically available throughout the theme:
+
+  --global-button-padding-y
+  --global-button-font-size
+  --global-button-font-weight
+  --global-button-letter-spacing
+  --global-button-text-transform
+  --global-button-radius
+  --global-button-bg-color
+  --global-button-text-color
+  --global-button-border-color
+  --global-button-border-width
+  --global-button-hover-bg-color
+  --global-button-hover-text-color
+
+  UTILITY CLASSES:
+  ---------------
+  Use these classes in your HTML:
+
+  .button-global-style
+  .use-global-button-styling
+  - Applies complete global button styling
+
+  .button-global-typography
+  - Applies global spacing and consistency (padding, letter-spacing) but allows custom colors and other styling
+
+  .button-section-override
+  - Resets global styles for custom implementation
+
+  .button--primary
+  - Primary button using global colors
+
+  .button--secondary
+  - Secondary button (outline style with global colors)
+
+  .button--outline
+  - Outline button variant
+
+  .button--text
+  - Text-only button variant
+
+  AUTOMATIC APPLICATION:
+  ---------------------
+  These selectors automatically get global styling:
+  .button, .btn, button[type="submit"], input[type="submit"],
+  .product-form__submit, .cart__checkout-button
+
+  FOR SECTION DEVELOPERS:
+  ======================
+
+  METHOD 1 - SIMPLE GLOBAL STYLING:
+  ---------------------------------
+  Just add the class to your button:
+  <button class="button-global-style">My Button</button>
+
+  METHOD 2 - SECTION SETTINGS (RECOMMENDED):
+  ------------------------------------------
+
+  Step 1: Add to your section schema (before closing schema array):
+  ```liquid
+  {% render 'button-settings', prefix: 'cta' %}
+  ```
+
+  Step 2: Add CSS to your section:
+  ```liquid
+  {% render 'button-styles',
+    section: section,
+    prefix: 'cta',
+    selector: '.my-section .cta-button'
+  %}
+  ```
+
+  Step 3: Use in your section HTML:
+  ```liquid
+  <button class="cta-button">
+    {{ section.settings.button_text }}
+  </button>
+  ```
+
+  This gives merchants the option to:
+  - Use complete global button styling including colors (when both global setting and section setting are enabled)
+  - Use custom colors but maintain global spacing consistency (when either setting is disabled)
+
+  MIGRATION GUIDE:
+  ===============
+
+  To convert existing sections to use this system:
+
+  1. FIND: Inline button styles or hardcoded CSS
+     REPLACE: Use global variables or utility classes
+
+  2. FIND: Section-specific button color settings
+     ADD: {% render 'button-settings', prefix: 'section_name' %}
+     ADD: {% render 'button-styles', section: section, prefix: 'section_name' %}
+
+  3. FIND: Inconsistent button styling across sections
+     REPLACE: Use .button-global-style class or the snippet system
+
+  EXAMPLES:
+  ========
+
+  Hero Section Button:
+  ```liquid
+  <a href="{{ section.settings.button_link }}" class="button-global-style">
+    {{ section.settings.button_text }}
+  </a>
+  ```
+
+  Custom Section with Override Option:
+  ```liquid
+  <!-- In schema -->
+  {% render 'button-settings', prefix: 'hero' %}
+
+  <!-- In section CSS -->
+  {% render 'button-styles',
+    section: section,
+    prefix: 'hero',
+    selector: '.hero-section .hero-button'
+  %}
+
+  <!-- In section HTML -->
+  <button class="hero-button">{{ section.settings.button_text }}</button>
+  ```
+
+  Product Form Integration:
+  ```liquid
+  <!-- Product forms automatically inherit global styling -->
+  <button type="submit" name="add" class="product-form__submit">
+    Add to Cart
+  </button>
+  ```
+
+  TESTING:
+  =======
+  1. Go to Theme Settings > Button Styling
+  2. Make sure "Enable Global Button Styling for Sections" is ON
+  3. Change global button settings and verify they apply across sections
+  4. In sections with override options, test both global and custom styling
+  5. Test the master toggle: Turn OFF "Enable Global Button Styling for Sections"
+     and verify that sections use custom colors but keep global spacing consistency
+  6. Verify hover states and transitions work correctly
+  7. Test on different screen sizes for responsive behavior
+{% endcomment %}

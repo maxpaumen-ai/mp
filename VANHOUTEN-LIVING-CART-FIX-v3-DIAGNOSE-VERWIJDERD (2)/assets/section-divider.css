@@ -1,0 +1,41 @@
+/* Base Divider Section Styles (shared across all instances) */
+
+.section-divider {
+  display: block;
+  width: 100%;
+}
+
+/* SVG wrapper ensures consistent baseline */
+.section-divider .divider-svg-wrap {
+  display: block;
+  line-height: 0; /* Only resets inline-gap for SVG */
+  overflow: hidden;
+}
+
+/* SVG defaults */
+.section-divider svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Paths and rects */
+.section-divider svg path,
+.section-divider svg rect {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    fill 0.3s ease,
+    stroke 0.3s ease;
+}
+
+/* Optional border stroke (wired by Liquid when enabled) */
+.section-divider [data-divider-stroke] {
+  vector-effect: non-scaling-stroke;
+  fill: none;
+}
+
+/* Utility: flipped wrapper (composed with CSS variable) */
+.section-divider.is-flipped svg {
+  transform: scaleY(-1);
+}

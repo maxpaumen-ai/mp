@@ -1,0 +1,3161 @@
+{% assign ai_gen_id = section.id | replace: '_', '' | downcase %}
+
+{% style %}
+  /* Global Overrides and Custom Font */
+  {% if section.settings.override_global_typography %}
+    .article-advert-section-{{ ai_gen_id }} * {
+      font-family: {{ section.settings.custom_font.family }}, {{ section.settings.custom_font.fallback_families }} !important;
+    }
+  {% endif %}
+
+  /* Reset Default Browser Margins for All Block Content */
+  .article-advert-section-{{ ai_gen_id }} .ai-article-heading__text-{{ ai_gen_id }} *,
+  .article-advert-section-{{ ai_gen_id }} .ai-article-description__text-{{ ai_gen_id }} *,
+  .article-advert-section-{{ ai_gen_id }} .ai-article-author__name-{{ ai_gen_id }} *,
+  .article-advert-section-{{ ai_gen_id }} .ai-text-block__content-{{ ai_gen_id }} *,
+  .article-advert-section-{{ ai_gen_id }} .article-advert-feature-description-{{ ai_gen_id }} *,
+  .article-advert-section-{{ ai_gen_id }} .article-advert-title-{{ ai_gen_id }} *,
+  .article-advert-section-{{ ai_gen_id }} .article-advert-title-{{ ai_gen_id }},
+  .article-advert-section-{{ ai_gen_id }} .article-advert-feature-title-{{ ai_gen_id }} {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Subtitle keeps its custom top margin - only reset bottom/left/right */
+  .article-advert-section-{{ ai_gen_id }} .article-advert-subtitle-{{ ai_gen_id }} {
+    margin-bottom: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Bold text styling for richtext content */
+  .article-advert-section-{{ ai_gen_id }} strong,
+  .article-advert-section-{{ ai_gen_id }} b {
+    font-weight: 700 !important;
+  }
+
+  /* Heading Standardization - All headings use font-weight: 700 !important */
+  .article-advert-section-{{ ai_gen_id }} h1,
+  .article-advert-section-{{ ai_gen_id }} h2,
+  .article-advert-section-{{ ai_gen_id }} h3,
+  .article-advert-section-{{ ai_gen_id }} h4,
+  .article-advert-section-{{ ai_gen_id }} h5,
+  .article-advert-section-{{ ai_gen_id }} h6,
+  .article-advert-section-{{ ai_gen_id }} .article-advert-title-{{ ai_gen_id }},
+  .article-advert-section-{{ ai_gen_id }} .ai-before-after-article__heading-{{ ai_gen_id }},
+  .article-advert-section-{{ ai_gen_id }} .article-advert-feature-title-{{ ai_gen_id }},
+  .article-advert-section-{{ ai_gen_id }} .ai-article-heading__text-{{ ai_gen_id }} p,
+  .article-advert-section-{{ ai_gen_id }} .ai-article-heading__text-{{ ai_gen_id }} h1,
+  .article-advert-section-{{ ai_gen_id }} .ai-article-heading__text-{{ ai_gen_id }} h2,
+  .article-advert-section-{{ ai_gen_id }} .ai-article-heading__text-{{ ai_gen_id }} h3,
+  .article-advert-section-{{ ai_gen_id }} .ai-article-heading__text-{{ ai_gen_id }} h4,
+  .article-advert-section-{{ ai_gen_id }} .ai-article-heading__text-{{ ai_gen_id }} h5,
+  .article-advert-section-{{ ai_gen_id }} .ai-article-heading__text-{{ ai_gen_id }} h6 {
+    font-weight: 700 !important;
+  }
+  /* Full Width Background Wrapper */
+  .article-advert-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    background-color: {{ section.settings.full_width_background_color }} !important;
+    padding-top: {{ section.settings.section_padding_top | default: 60 }}px;
+    padding-bottom: {{ section.settings.section_padding_bottom | default: 60 }}px;
+  }
+
+  /* Container */
+  .article-advert-section-{{ ai_gen_id }} {
+    padding: 0 20px;
+    {% if section.settings.full_width_background %}
+      background-color: transparent !important;
+    {% else %}
+      background-color: {{ section.settings.section_background }} !important;
+    {% endif %}
+    margin-left: auto;
+    margin-right: auto;
+    max-width: {{ section.settings.page_width | default: 1200 }}px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color: {% if section.settings.override_global_colors %}{{ section.settings.title_color }}{% else %}{{ settings.global_section_text_color | default: section.settings.title_color }}{% endif %};
+  }
+
+  /* Header */
+  .article-advert-header-{{ ai_gen_id }} { margin-bottom: 32px; }
+  .article-advert-title-{{ ai_gen_id }} { margin: 0 0 8px 0; font-weight:700; line-height:1.2; text-align:left; letter-spacing: var(--letter-spacing-body); }
+  .article-advert-subtitle-{{ ai_gen_id }} { margin: 0; font-weight:400; text-align:left; letter-spacing: var(--letter-spacing-body); }
+
+  /* List */
+  .article-advert-list-{{ ai_gen_id }} { display: flex; flex-direction: column; gap: 18px; margin: 30px 0 24px; }
+
+  /* Box */
+  .article-advert-feature-box-{{ ai_gen_id }} {
+    padding: 20px;
+    background-color: {% if section.settings.override_global_colors %}{{ section.settings.box_background }}{% else %}{{ settings.global_section_background_color | default: section.settings.box_background }}{% endif %};
+    border-color: {% if section.settings.override_global_colors %}{{ section.settings.box_border_color }}{% else %}{{ settings.global_section_accent_1_color | default: section.settings.box_border_color }}{% endif %};
+    box-sizing: border-box;
+  }
+
+  /* Top row */
+  .article-advert-feature-top-{{ ai_gen_id }} { display:flex; gap:12px; align-items:flex-start; }
+  .article-advert-feature-number-{{ ai_gen_id }} {
+    font-weight:800;
+    flex-shrink:0;
+    line-height:1;
+    color: {% if section.settings.override_global_colors %}{{ section.settings.box_border_color }}{% else %}{{ settings.global_section_accent_1_color | default: section.settings.box_border_color }}{% endif %};
+  }
+  .article-advert-feature-title-{{ ai_gen_id }} {
+    margin: 0;
+    font-weight:700;
+    color: {% if section.settings.override_global_colors %}{{ section.settings.symptom_title_color }}{% else %}{{ settings.global_section_text_color | default: section.settings.symptom_title_color }}{% endif %};
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  /* Divider */
+  .article-advert-feature-divider-{{ ai_gen_id }} { height: 2px; margin: 12px 0; width: 100%; }
+
+  /* Description */
+  .article-advert-feature-description-{{ ai_gen_id }} { margin: 0 0 12px 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; letter-spacing: var(--letter-spacing-body); }
+
+  /* Science */
+  .article-advert-feature-science-{{ ai_gen_id }} { display:flex; gap:10px; align-items:center; }
+  .article-advert-feature-science-icon-{{ ai_gen_id }} { display:flex; align-items:center; justify-content:center; }
+
+  /* CTA */
+  .article-advert-cta-{{ ai_gen_id }} { text-align:center; margin-top:18px; }
+  .article-advert-button-{{ ai_gen_id }} { display:inline-block; width:100%; text-decoration:none; font-weight:700; transition: background 0.18s ease, transform 0.18s ease; letter-spacing: var(--letter-spacing-body); }
+
+  /* Sticky Cart Bar */
+  .sticky-cart-bar-{{ ai_gen_id }} {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: {{ section.settings.sticky_cart_background | default: '#ffffff' }};
+    border-top: 1px solid {{ section.settings.sticky_cart_border_color | default: '#e0e0e0' }};
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: {{ section.settings.sticky_cart_padding | default: 16 }}px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sticky-cart-bar-{{ ai_gen_id }}.show {
+    transform: translateY(0);
+  }
+
+  .sticky-cart-content-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 16px;
+  }
+
+  .sticky-cart-product-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .sticky-cart-image-{{ ai_gen_id }} {
+    width: {{ section.settings.sticky_image_size | default: 60 }}px;
+    height: {{ section.settings.sticky_image_size | default: 60 }}px;
+    object-fit: cover;
+    border-radius: {{ section.settings.sticky_image_border_radius | default: 8 }}px;
+    flex-shrink: 0;
+  }
+
+  .sticky-cart-info-{{ ai_gen_id }} {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sticky-cart-title-{{ ai_gen_id }} {
+    font-size: {{ section.settings.sticky_title_size | default: 16 }}px;
+    font-weight: 600;
+    color: {{ section.settings.sticky_title_color | default: '#333333' }};
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .sticky-cart-price-{{ ai_gen_id }} {
+    font-size: {{ section.settings.sticky_price_size | default: 14 }}px;
+    font-weight: 700;
+    color: {{ section.settings.sticky_price_color | default: '#ff6b35' }};
+    margin: 0;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .sticky-cart-actions-{{ ai_gen_id }} {
+    flex-shrink: 0;
+  }
+
+  .sticky-cart-button-{{ ai_gen_id }} {
+    background: {{ section.settings.sticky_button_background | default: '#ff6b35' }};
+    color: {{ section.settings.sticky_button_text_color | default: '#ffffff' }};
+    border: none;
+    padding: {{ section.settings.sticky_button_padding_vertical | default: 12 }}px {{ section.settings.sticky_button_padding_horizontal | default: 24 }}px;
+    border-radius: {{ section.settings.sticky_button_border_radius | default: 8 }}px;
+    font-size: {{ section.settings.sticky_button_font_size | default: 16 }}px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    white-space: nowrap;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .sticky-cart-button-{{ ai_gen_id }}:hover {
+    background: {{ section.settings.sticky_button_hover_background | default: '#e55a2b' }};
+    transform: translateY(-1px);
+  }
+
+  /* Mobile */
+  @media (max-width: 749px) {
+    .article-advert-section-{{ ai_gen_id }} { padding: {{ section.settings.section_padding | times: 0.7 }}px 16px; }
+    .article-advert-feature-box-{{ ai_gen_id }} { padding: 16px; }
+    .article-advert-button-{{ ai_gen_id }} { width: 100%; padding: 14px; letter-spacing: var(--letter-spacing-body); }
+
+    .sticky-cart-bar-{{ ai_gen_id }} {
+      padding: {{ section.settings.sticky_cart_padding_mobile | default: 12 }}px;
+    }
+
+    .sticky-cart-content-{{ ai_gen_id }} {
+      gap: 12px;
+    }
+
+    .sticky-cart-image-{{ ai_gen_id }} {
+      width: {{ section.settings.sticky_image_size_mobile | default: 50 }}px;
+      height: {{ section.settings.sticky_image_size_mobile | default: 50 }}px;
+    }
+
+    .sticky-cart-title-{{ ai_gen_id }} {
+      font-size: {{ section.settings.sticky_title_size_mobile | default: 14 }}px;
+    }
+
+    .sticky-cart-price-{{ ai_gen_id }} {
+      font-size: {{ section.settings.sticky_price_size_mobile | default: 12 }}px;
+    }
+
+    .sticky-cart-actions-{{ ai_gen_id }} {
+      flex: 1;
+      width: 100%;
+    }
+
+    .sticky-cart-button-{{ ai_gen_id }} {
+      width: 100% !important;
+      padding: {{ section.settings.sticky_button_padding_vertical_mobile | default: 10 }}px {{ section.settings.sticky_button_padding_horizontal_mobile | default: 20 }}px;
+      font-size: {{ section.settings.sticky_button_font_size_mobile | default: 14 }}px;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+{% endstyle %}
+
+<div class="article-advert-wrapper-{{ ai_gen_id }}" {{ section.shopify_attributes }}>
+  <section class="article-advert-section-{{ ai_gen_id }}">
+    <div class="article-advert-list-{{ ai_gen_id }}">
+      {% if section.blocks.size > 0 %}
+        {% for block in section.blocks %}
+          {% render 'article-advert-block', block: block, section: section, index: forloop.index %}
+        {% endfor %}
+      {% else %}
+        <div style="padding: 60px 20px; text-align: center; background: #f9f9f9; border: 2px dashed #ddd; border-radius: 8px; margin: 20px 0;">
+          <p style="font-size: 18px; color: #666; margin: 0 0 10px 0;">👋 This section is empty!</p>
+          <p style="font-size: 14px; color: #999; margin: 0;">Click "Add block" below to add content to your Advertorial 2 section.</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+{% if section.settings.enable_simple_sticky_btn %}
+  <style>
+    .simple-sticky-btn-wrapper {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(100%);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      padding: 12px 20px;
+      box-sizing: border-box;
+      background-color: {{ section.settings.simple_sticky_bar_bg | default: '#ffffff' }};
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+    .simple-sticky-btn-wrapper.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .simple-sticky-btn {
+      background-color: {{ section.settings.simple_sticky_bg }};
+      color: {{ section.settings.simple_sticky_text_color }};
+      font-size: {{ section.settings.simple_sticky_font_size }}px;
+      font-weight: 700;
+      text-decoration: none;
+      padding: {{ section.settings.simple_sticky_padding_v }}px {{ section.settings.simple_sticky_padding_h }}px;
+      border-radius: {{ section.settings.simple_sticky_radius }}px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      text-align: center;
+      line-height: 1.2;
+      max-width: {{ section.settings.simple_sticky_width_max }}px;
+      width: 100%; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    .simple-sticky-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 768px) {
+      .simple-sticky-btn {
+        max-width: 100% !important;
+      }
+    }
+  </style>
+  <div class="simple-sticky-btn-wrapper" id="simpleStickyBtn-{{ section.id }}">
+    <a href="{{ section.settings.simple_sticky_url }}" class="simple-sticky-btn">
+      {{ section.settings.simple_sticky_text }}
+    </a>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const stickyWrapper = document.getElementById('simpleStickyBtn-{{ section.id }}');
+      const threshold = {{ section.settings.simple_sticky_threshold | default: 300 }};
+      
+      function checkScroll() {
+        if (window.scrollY > threshold) {
+          stickyWrapper.classList.add('visible');
+        } else {
+          stickyWrapper.classList.remove('visible');
+        }
+      }
+      
+      window.addEventListener('scroll', checkScroll);
+      checkScroll(); // initial check
+    });
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Advertorial 2",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "Page Layout" },
+    {
+      "type": "range",
+      "id": "page_width",
+      "label": "Page Width",
+      "min": 600,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "default": 800,
+      "info": "Maximum width of the section content"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width_background",
+      "label": "Full Width Background",
+      "default": false,
+      "info": "Extend background color to cover entire page width (not just content area)"
+    },
+    {
+      "type": "color",
+      "id": "full_width_background_color",
+      "label": "Page Background Color",
+      "default": "#ffffff",
+      "info": "Background color that extends to full page width (always visible)"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Section Padding Top",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 60,
+      "info": "Top padding for the wrapper section"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Section Padding Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 60,
+      "info": "Bottom padding for the wrapper section"
+    },
+
+    { "type": "header", "content": "Global Overrides" },
+    {
+      "type": "checkbox",
+      "id": "override_global_colors",
+      "label": "Override Global Section Colors",
+      "default": false,
+      "info": "Use custom colors instead of global theme colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_typography",
+      "label": "Override Global Typography",
+      "default": false,
+      "info": "Use custom fonts instead of global theme fonts"
+    },
+    {
+      "type": "font_picker",
+      "id": "custom_font",
+      "label": "Custom Font Family",
+      "default": "system_ui_n4",
+      "info": "Custom font for all text in this section"
+    },
+
+    { "type": "header", "content": "Button Settings" },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Button Font Size (px)",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_vertical_padding",
+      "label": "Button Vertical Padding (px)",
+      "min": 8,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_horizontal_padding",
+      "label": "Button Horizontal Padding (px)",
+      "min": 16,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    { "type": "color", "id": "button_background_color", "label": "Button Background Color", "default": "#000000" },
+    { "type": "color", "id": "button_text_color", "label": "Button Text Color", "default": "#ffffff" },
+    { "type": "color", "id": "button_border_color", "label": "Button Border Color", "default": "#000000" },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Button Border Radius (px)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "label": "Button Border Width (px)",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "checkbox",
+      "id": "button_show_arrow",
+      "label": "Show Arrow Icon",
+      "default": false,
+      "info": "Display arrow icon after button text"
+    },
+    {
+      "type": "range",
+      "id": "button_arrow_size",
+      "label": "Arrow Icon Size (px)",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+
+    { "type": "header", "content": "Simple Sticky Button" },
+    {
+      "type": "checkbox",
+      "id": "enable_simple_sticky_btn",
+      "label": "Enable Simple Sticky Button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "simple_sticky_text",
+      "label": "Button Text",
+      "default": "SHOP NOW"
+    },
+    {
+      "type": "url",
+      "id": "simple_sticky_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "range",
+      "id": "simple_sticky_threshold",
+      "label": "Show After Scroll (px)",
+      "min": 0,
+      "max": 2000,
+      "step": 100,
+      "default": 300
+    },
+    { "type": "header", "content": "Styling" },
+    { "type": "color", "id": "simple_sticky_bar_bg", "label": "Bar Background Color", "default": "#FFFFFF" },
+    { "type": "color", "id": "simple_sticky_bg", "label": "Button Background Color", "default": "#F27B21" },
+    { "type": "color", "id": "simple_sticky_text_color", "label": "Button Text Color", "default": "#FFFFFF" },
+    { "type": "range", "id": "simple_sticky_font_size", "label": "Font Size (px)", "min": 12, "max": 30, "default": 16 },
+    { "type": "range", "id": "simple_sticky_radius", "label": "Border Radius (px)", "min": 0, "max": 50, "default": 8 },
+    { "type": "range", "id": "simple_sticky_padding_v", "label": "Vertical Padding (px)", "min": 5, "max": 30, "default": 15 },
+    { "type": "range", "id": "simple_sticky_padding_h", "label": "Horizontal Padding (px)", "min": 10, "max": 60, "default": 30 },
+    { "type": "range", "id": "simple_sticky_width_max", "label": "Desktop Button Width (px)", "min": 200, "max": 1200, "step": 10, "default": 400 },
+
+
+
+    { "type": "header", "content": "General styling" },
+    { "type": "color", "id": "section_background", "label": "Section background", "default": "#ffffff" },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding (px)",
+      "min": 10,
+      "max": 120,
+      "step": 2,
+      "default": 40
+    },
+
+    { "type": "header", "content": "Box styling" },
+    { "type": "color", "id": "box_background", "label": "Box background", "default": "#ffffff" },
+    { "type": "color", "id": "box_border_color", "label": "Box border color", "default": "#000000" },
+    {
+      "type": "range",
+      "id": "box_border_radius",
+      "label": "Box border radius (px)",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "number_size",
+      "label": "Symptom number size (px)",
+      "min": 14,
+      "max": 36,
+      "step": 1,
+      "default": 20
+    },
+
+    { "type": "header", "content": "Text sizes & colors" },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title font size (px)",
+      "min": 18,
+      "max": 48,
+      "step": 1,
+      "default": 38
+    },
+    { "type": "color", "id": "title_color", "label": "Title color", "default": "#111111" },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "label": "Subtitle font size (px)",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "default": 16
+    },
+    { "type": "color", "id": "subtitle_color", "label": "Subtitle color", "default": "#666666" },
+
+    {
+      "type": "range",
+      "id": "symptom_title_size",
+      "label": "Symptom title size (px)",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "default": 18
+    },
+    { "type": "color", "id": "symptom_title_color", "label": "Symptom title color", "default": "#111111" },
+
+    {
+      "type": "range",
+      "id": "description_size",
+      "label": "Description font size (px)",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "default": 14
+    },
+    { "type": "color", "id": "description_color", "label": "Description color", "default": "#333333" },
+
+    {
+      "type": "range",
+      "id": "science_text_size",
+      "label": "Science text size (px)",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "default": 13
+    },
+    { "type": "color", "id": "science_text_color", "label": "Science text color", "default": "#666666" },
+    {
+      "type": "range",
+      "id": "science_icon_size",
+      "label": "Science icon size (px)",
+      "min": 12,
+      "max": 50,
+      "step": 1,
+      "default": 16
+    },
+
+    { "type": "header", "content": "Legacy Button styling" },
+    { "type": "color", "id": "legacy_button_background", "label": "Legacy Button background", "default": "#000000" },
+    { "type": "color", "id": "legacy_button_text_color", "label": "Legacy Button text color", "default": "#ffffff" },
+    {
+      "type": "range",
+      "id": "legacy_button_text_size",
+      "label": "Legacy Button text size (px)",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "legacy_button_padding",
+      "label": "Legacy Button vertical padding (px)",
+      "min": 8,
+      "max": 30,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "legacy_button_border_radius",
+      "label": "Legacy Button border radius (px)",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 8
+    }
+  ],
+
+  "blocks": [
+    {
+      "type": "breadcrumb",
+      "name": "Breadcrumb",
+      "settings": [
+        {
+          "type": "text",
+          "id": "link_1_text",
+          "label": "Link 1 Text",
+          "default": "Home"
+        },
+        {
+          "type": "url",
+          "id": "link_1_url",
+          "label": "Link 1 URL",
+          "default": "/"
+        },
+        {
+          "type": "text",
+          "id": "link_2_text",
+          "label": "Link 2 Text",
+          "default": "Trending"
+        },
+        {
+          "type": "url",
+          "id": "link_2_url",
+          "label": "Link 2 URL"
+        },
+        {
+          "type": "text",
+          "id": "link_3_text",
+          "label": "Link 3 Text (Current Page)",
+          "default": "Beauty & Wellness"
+        },
+        {
+          "type": "header",
+          "content": "Styling"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#666666"
+        },
+        {
+          "type": "color",
+          "id": "current_page_color",
+          "label": "Current Page Color",
+          "default": "#000000"
+        },
+        {
+          "type": "range",
+          "id": "font_size",
+          "label": "Font Size (px)",
+          "min": 10,
+          "max": 18,
+          "step": 1,
+          "unit": "px",
+          "default": 13
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Margin Top (px)",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Margin Bottom (px)",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 8
+        }
+      ]
+    },
+    {
+      "type": "article_category",
+      "name": "Article Category",
+      "settings": [
+        { "type": "text", "id": "category_text", "label": "Category Text", "default": "NATION" },
+        { "type": "color", "id": "category_color", "label": "Category Text Color", "default": "#000000" },
+        { "type": "color", "id": "underline_color", "label": "Underline Color", "default": "#000000" },
+        {
+          "type": "range",
+          "id": "category_font_size",
+          "label": "Font Size (px)",
+          "min": 12,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 14
+        },
+        {
+          "type": "select",
+          "id": "category_font_weight",
+          "label": "Font Weight",
+          "options": [
+            { "value": "400", "label": "Normal" },
+            { "value": "500", "label": "Medium" },
+            { "value": "600", "label": "Semi Bold" },
+            { "value": "700", "label": "Bold" }
+          ],
+          "default": "600"
+        },
+        {
+          "type": "range",
+          "id": "underline_thickness",
+          "label": "Underline Thickness (px)",
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "unit": "px",
+          "default": 2
+        },
+        {
+          "type": "range",
+          "id": "underline_offset",
+          "label": "Underline Offset (px)",
+          "min": 0,
+          "max": 8,
+          "step": 1,
+          "unit": "px",
+          "default": 2
+        },
+        {
+          "type": "select",
+          "id": "category_alignment",
+          "label": "Text Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Margin Top (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Margin Bottom (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 8
+        }
+      ]
+    },
+
+    {
+      "type": "header",
+      "name": "Header",
+      "settings": [
+        { "type": "richtext", "id": "title_text", "label": "Title Text", "default": "<p>Article Title</p>" },
+        {
+          "type": "text",
+          "id": "title_highlight_text",
+          "label": "Highlight Text",
+          "info": "Text to highlight within the title"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_section_colors",
+          "label": "Use Section Colors",
+          "default": true,
+          "info": "Use section-level colors instead of custom colors"
+        },
+        {
+          "type": "range",
+          "id": "title_size",
+          "label": "Title size (px)",
+          "min": 18,
+          "max": 48,
+          "step": 1,
+          "default": 38
+        },
+        {
+          "type": "range",
+          "id": "title_line_height",
+          "label": "Title line height",
+          "min": 1.0,
+          "max": 2.0,
+          "step": 0.1,
+          "default": 1.2
+        },
+        { "type": "color", "id": "title_color", "label": "Title color", "default": "#111111" },
+        { "type": "color", "id": "title_highlight_color", "label": "Title highlight color", "default": "#000000" },
+        {
+          "type": "text",
+          "id": "section_subtitle",
+          "label": "Subtitle",
+          "default": "And why you shouldn't ignore them."
+        },
+        {
+          "type": "range",
+          "id": "subtitle_size",
+          "label": "Subtitle size (px)",
+          "min": 12,
+          "max": 22,
+          "step": 1,
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "subtitle_line_height",
+          "label": "Subtitle line height",
+          "min": 1.0,
+          "max": 2.0,
+          "step": 0.1,
+          "default": 1.4
+        },
+        { "type": "color", "id": "subtitle_color", "label": "Subtitle color", "default": "#666666" },
+        {
+          "type": "range",
+          "id": "subtitle_margin_top",
+          "label": "Subtitle Top Margin (px)",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "default": 5
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+
+    {
+      "type": "symptom",
+      "name": "Feature",
+      "settings": [
+        { "type": "text", "id": "symptom_title", "label": "Feature Title", "default": "Amazing Feature" },
+        {
+          "type": "richtext",
+          "id": "symptom_description",
+          "label": "Description",
+          "default": "<p>Feature description goes here...</p>"
+        },
+        {
+          "type": "richtext",
+          "id": "symptom_science_text",
+          "label": "Supporting text",
+          "default": "<p>Additional supporting information</p>"
+        },
+        { "type": "image_picker", "id": "symptom_icon", "label": "Feature icon" },
+        { "type": "image_picker", "id": "supporting_text_icon", "label": "Supporting Text Icon", "info": "Optional icon to display before supporting text" },
+        {
+          "type": "header",
+          "content": "Icon Container Settings"
+        },
+        {
+          "type": "range",
+          "id": "icon_container_size",
+          "label": "Icon Container Size (px)",
+          "min": 32,
+          "max": 80,
+          "step": 4,
+          "unit": "px",
+          "default": 48,
+          "info": "Size of the square icon container"
+        },
+        {
+          "type": "range",
+          "id": "icon_border_radius",
+          "label": "Icon Container Border Radius (px)",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "unit": "px",
+          "default": 8
+        },
+        {
+          "type": "color",
+          "id": "icon_background_color",
+          "label": "Icon Container Background Color",
+          "default": "#FFB800",
+          "info": "Only used if 'Use Section Colors' is off"
+        },
+        {
+          "type": "header",
+          "content": "Text Highlighting"
+        },
+        {
+          "type": "text",
+          "id": "highlight_words",
+          "label": "Words to Highlight in Supporting Text",
+          "info": "Enter words separated by commas (e.g., 'proven, science, effective')"
+        },
+        {
+          "type": "color",
+          "id": "highlight_background_color",
+          "label": "Highlight Background Color",
+          "default": "#e0e0e0"
+        },
+        {
+          "type": "color",
+          "id": "highlight_text_color",
+          "label": "Highlight Text Color",
+          "default": "#000000"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_section_colors",
+          "label": "Use Section Colors",
+          "default": true,
+          "info": "Use section-level colors instead of custom colors"
+        },
+        { "type": "color", "id": "custom_background_color", "label": "Custom Background Color", "default": "#ffffff" },
+        { "type": "color", "id": "custom_border_color", "label": "Custom Border Color", "default": "#000000" },
+        { "type": "color", "id": "custom_title_color", "label": "Custom Title Color", "default": "#111111" },
+        {
+          "type": "color",
+          "id": "custom_description_color",
+          "label": "Custom Description Color",
+          "default": "#666666"
+        },
+        {
+          "type": "color",
+          "id": "custom_science_color",
+          "label": "Custom Supporting Text Color",
+          "default": "#999999"
+        },
+        {
+          "type": "range",
+          "id": "symptom_title_size",
+          "label": "Title size (px)",
+          "min": 14,
+          "max": 28,
+          "default": 18
+        },
+        {
+          "type": "range",
+          "id": "description_size",
+          "label": "Description size (px)",
+          "min": 12,
+          "max": 20,
+          "default": 14
+        },
+        {
+          "type": "range",
+          "id": "science_text_size",
+          "label": "Supporting text size (px)",
+          "min": 10,
+          "max": 18,
+          "default": 13
+        },
+        {
+          "type": "range",
+          "id": "science_icon_size",
+          "label": "Feature icon size (px)",
+          "min": 12,
+          "max": 50,
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "custom_border_width",
+          "label": "Custom Border Width (px)",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "default": 2
+        },
+        {
+          "type": "checkbox",
+          "id": "show_supporting_divider",
+          "label": "Show Supporting Text Divider",
+          "default": true,
+          "info": "Display divider line below supporting text"
+        },
+        { "type": "color", "id": "custom_divider_color", "label": "Custom Divider Color", "default": "#000000" },
+        {
+          "type": "header",
+          "content": "Spacing"
+        },
+        {
+          "type": "range",
+          "id": "element_vertical_gap",
+          "label": "Vertical Gap Between Elements (px)",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "unit": "px",
+          "default": 16,
+          "info": "Controls spacing between icon/title, description, divider, supporting text, and bottom line"
+        },
+        {
+          "type": "header",
+          "content": "Box Padding"
+        },
+        {
+          "type": "checkbox",
+          "id": "remove_box_padding",
+          "label": "Remove Box Padding",
+          "default": false,
+          "info": "Remove all padding from the feature box"
+        },
+        {
+          "type": "range",
+          "id": "box_padding_desktop",
+          "label": "Desktop Padding (px)",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "default": 20,
+          "info": "Padding inside the feature box on desktop"
+        },
+        {
+          "type": "range",
+          "id": "box_padding_mobile",
+          "label": "Mobile Padding (px)",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "default": 16,
+          "info": "Padding inside the feature box on mobile"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+
+    {
+      "type": "cta",
+      "name": "CTA Button",
+      "settings": [
+        { "type": "text", "id": "cta_text", "label": "CTA Button Text", "default": "TRY RESILIA RISK-FREE" },
+        { "type": "url", "id": "cta_link", "label": "CTA Button Link" },
+        {
+          "type": "checkbox",
+          "id": "use_section_button_style",
+          "label": "Use Section Button Style",
+          "default": true,
+          "info": "Use section-level button styling instead of custom styling"
+        },
+        { "type": "color", "id": "cta_background", "label": "Custom CTA Background", "default": "#000000" },
+        { "type": "color", "id": "cta_text_color", "label": "Custom CTA Text Color", "default": "#ffffff" },
+        { "type": "color", "id": "cta_border_color", "label": "Custom CTA Border Color", "default": "#000000" },
+        {
+          "type": "range",
+          "id": "cta_font_size",
+          "label": "Custom CTA Font Size",
+          "min": 12,
+          "max": 20,
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "cta_border_radius",
+          "label": "Custom CTA Border Radius",
+          "min": 0,
+          "max": 30,
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "cta_border_width",
+          "label": "Custom CTA Border Width",
+          "min": 0,
+          "max": 5,
+          "default": 2
+        },
+        {
+          "type": "range",
+          "id": "cta_padding_top",
+          "label": "Custom CTA Padding Top",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "cta_padding_bottom",
+          "label": "Custom CTA Padding Bottom",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "cta_padding_left",
+          "label": "Custom CTA Padding Left",
+          "min": 0,
+          "max": 60,
+          "step": 1,
+          "unit": "px",
+          "default": 24
+        },
+        {
+          "type": "range",
+          "id": "cta_padding_right",
+          "label": "Custom CTA Padding Right",
+          "min": 0,
+          "max": 60,
+          "step": 1,
+          "unit": "px",
+          "default": 24
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+
+    {
+      "type": "article_heading",
+      "name": "Article Heading",
+      "settings": [
+        { "type": "richtext", "id": "heading_text", "label": "Heading Text", "default": "<p>Article Heading</p>" },
+        {
+          "type": "text",
+          "id": "highlight_text",
+          "label": "Highlight Text",
+          "info": "Text to highlight within the heading"
+        },
+        {
+          "type": "range",
+          "id": "heading_font_size",
+          "label": "Heading Font Size (px)",
+          "min": 12,
+          "max": 72,
+          "step": 1,
+          "default": 38
+        },
+        {
+          "type": "range",
+          "id": "heading_line_height",
+          "label": "Heading Line Height",
+          "min": 0.8,
+          "max": 2.5,
+          "step": 0.1,
+          "default": 1.2
+        },
+        { "type": "color", "id": "text_color", "label": "Text Color", "default": "#000000" },
+        { "type": "color", "id": "highlight_color", "label": "Highlight Text Color", "default": "#000000" },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+    {
+      "type": "article_description",
+      "name": "Article Description",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "description_text",
+          "label": "Description Text",
+          "default": "Article description goes here."
+        },
+        {
+          "type": "range",
+          "id": "description_font_size",
+          "label": "Description Font Size (px)",
+          "min": 12,
+          "max": 32,
+          "step": 1,
+          "default": 20
+        },
+        { "type": "color", "id": "text_color", "label": "Text Color", "default": "#000000" },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+    {
+      "type": "article_author",
+      "name": "Article Author",
+      "settings": [
+        { "type": "image_picker", "id": "author_image", "label": "Author Image" },
+        {
+          "type": "range",
+          "id": "author_image_size",
+          "label": "Author Image Size",
+          "min": 30,
+          "max": 100,
+          "step": 5,
+          "unit": "px",
+          "default": 50
+        },
+        { "type": "richtext", "id": "author_name", "label": "Author Name", "default": "<p>Author Name</p>" },
+        { "type": "text", "id": "publish_date", "label": "Publish Date", "default": "Publication Date" },
+        { "type": "color", "id": "text_color", "label": "Text Color", "default": "#000000" },
+        {
+          "type": "header",
+          "content": "Text Sizing"
+        },
+        {
+          "type": "range",
+          "id": "author_name_font_size",
+          "label": "Author Name Font Size",
+          "min": 12,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "publish_date_font_size",
+          "label": "Publish Date Font Size",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 14
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+    {
+      "type": "article_image",
+      "name": "Image",
+      "settings": [
+        { "type": "image_picker", "id": "article_image", "label": "Image" },
+        {
+          "type": "header",
+          "content": "Mobile Settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "full_width_mobile",
+          "label": "Full Width on Mobile",
+          "default": false,
+          "info": "Makes the image extend to full screen width on mobile devices"
+        },
+        {
+          "type": "header",
+          "content": "Styling"
+        },
+        {
+          "type": "range",
+          "id": "border_radius",
+          "label": "Border Radius (px)",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+    {
+      "type": "article_reading_time",
+      "name": "Article Reading Time",
+      "settings": [
+        {
+          "type": "text",
+          "id": "reading_time_text",
+          "label": "Reading Time Text",
+          "default": "Estimated 5-7 Minute Read"
+        },
+        {
+          "type": "range",
+          "id": "reading_time_font_size",
+          "label": "Font Size",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 14
+        },
+        {
+          "type": "header",
+          "content": "Icon"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_icon",
+          "label": "Custom Icon",
+          "info": "Upload a custom icon (optional, overrides default clock icon)"
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "label": "Icon Size",
+          "min": 12,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 16
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color",
+          "id": "reading_time_bg_color",
+          "label": "Reading Time Background Color",
+          "default": "#f0f0f0"
+        },
+        { "type": "color", "id": "reading_time_text_color", "label": "Reading Time Text Color", "default": "#000000" },
+        {
+          "type": "color",
+          "id": "reading_time_border_color",
+          "label": "Reading Time Border Color",
+          "default": "#000000"
+        },
+        {
+          "type": "range",
+          "id": "reading_time_border_width",
+          "label": "Reading Time Border Width",
+          "min": 0,
+          "max": 4,
+          "step": 1,
+          "unit": "px",
+          "default": 1
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+    {
+      "type": "divider_line",
+      "name": "Divider Line",
+      "settings": [
+        {
+          "type": "range",
+          "id": "divider_width",
+          "label": "Divider Width (%)",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 100
+        },
+        {
+          "type": "range",
+          "id": "divider_height",
+          "label": "Divider Height (px)",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "default": 1
+        },
+        { "type": "color", "id": "divider_color", "label": "Divider Color", "default": "#e0e0e0" },
+        {
+          "type": "select",
+          "id": "divider_alignment",
+          "label": "Divider Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "text_block",
+      "name": "Text Block",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text_content",
+          "label": "Text Content",
+          "default": "<p>Add your text content here.</p>"
+        },
+        {
+          "type": "range",
+          "id": "text_font_size",
+          "label": "Text Font Size (px)",
+          "min": 12,
+          "max": 32,
+          "step": 1,
+          "default": 16
+        },
+        { "type": "color", "id": "text_color", "label": "Text Color", "default": "#000000" },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "line_height",
+          "label": "Line Height",
+          "min": 1.0,
+          "max": 2.5,
+          "step": 0.1,
+          "default": 1.5
+        },
+        { "type": "header", "content": "Text Highlighting" },
+        {
+          "type": "text",
+          "id": "highlight_words",
+          "label": "Words to Highlight",
+          "info": "Enter words separated by commas (e.g., 'important, highlight, special')"
+        },
+        {
+          "type": "color",
+          "id": "highlight_background_color",
+          "label": "Highlight Background Color",
+          "default": "#e0e0e0"
+        },
+        { "type": "color", "id": "highlight_text_color", "label": "Highlight Text Color", "default": "#000000" },
+        {
+          "type": "range",
+          "id": "highlight_padding",
+          "label": "Highlight Padding (px)",
+          "min": 0,
+          "max": 8,
+          "step": 1,
+          "unit": "px",
+          "default": 2
+        },
+        {
+          "type": "range",
+          "id": "highlight_border_radius",
+          "label": "Highlight Border Radius (px)",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "default": 3
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+
+    {
+      "type": "icon_bullet_list",
+      "name": "Icon Bullet List",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "list_content",
+          "label": "List Content",
+          "default": "<ul><li>Eliminate parasites and candida naturally</li><li>Reduce inflammation and bloating</li><li>Restore gut balance and immune strength</li><li>Improve energy, focus, and mental clarity</li><li>Stop sugar cravings at the root</li></ul>"
+        },
+        { "type": "image_picker", "id": "bullet_icon", "label": "Bullet Icon" },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "label": "Icon Size (px)",
+          "min": 12,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "list_font_size",
+          "label": "Text Font Size (px)",
+          "min": 12,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 16
+        },
+        { "type": "color", "id": "list_text_color", "label": "Text Color", "default": "#333333" },
+        {
+          "type": "range",
+          "id": "line_height",
+          "label": "Line Height",
+          "min": 1.0,
+          "max": 2.0,
+          "step": 0.1,
+          "default": 1.4
+        },
+        {
+          "type": "range",
+          "id": "item_spacing",
+          "label": "Item Spacing (px)",
+          "min": 8,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+
+    {
+      "type": "social_sharing",
+      "name": "Social Sharing",
+      "settings": [
+        {
+          "type": "range",
+          "id": "icon_size",
+          "label": "Icon Size (px)",
+          "min": 16,
+          "max": 48,
+          "step": 1,
+          "unit": "px",
+          "default": 24
+        },
+        {
+          "type": "range",
+          "id": "icon_spacing",
+          "label": "Icon Spacing (px)",
+          "min": 8,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 16
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "header",
+          "content": "Text After Icons"
+        },
+        {
+          "type": "text",
+          "id": "share_text",
+          "label": "Share Text",
+          "info": "Text to display after the social icons (e.g., 'Share this article')"
+        },
+        {
+          "type": "range",
+          "id": "share_text_font_size",
+          "label": "Share Text Font Size",
+          "min": 12,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "default": 14
+        },
+        {
+          "type": "color",
+          "id": "share_text_color",
+          "label": "Share Text Color",
+          "default": "#666666"
+        },
+        { "type": "color", "id": "icon_color", "label": "Icon Color", "default": "#666666" },
+        { "type": "color", "id": "icon_hover_color", "label": "Icon Hover Color", "default": "#333333" },
+        { "type": "checkbox", "id": "show_facebook", "label": "Show Facebook", "default": true },
+        { "type": "checkbox", "id": "show_x", "label": "Show X (Twitter)", "default": true },
+        { "type": "checkbox", "id": "show_email", "label": "Show Email", "default": true },
+        { "type": "checkbox", "id": "show_share", "label": "Show Native Share", "default": true },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Margin Top (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Margin Bottom (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+
+    {
+      "type": "video",
+      "name": "Shopify Video",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video_shopify",
+          "label": "Shopify Hosted Video"
+        },
+        {
+          "type": "checkbox",
+          "id": "autoplay",
+          "label": "Autoplay Video",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "loop",
+          "label": "Loop Video",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "muted",
+          "label": "Mute Video",
+          "default": true,
+          "info": "Videos must be muted to autoplay"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_controls",
+          "label": "Show Video Controls",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "border_radius",
+          "label": "Border Radius (px)",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "video_width",
+          "label": "Video Width (%)",
+          "min": 50,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 100
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Margin Top (px)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Margin Bottom (px)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        }
+      ]
+    },
+
+    {
+      "type": "comparison_table",
+      "name": "Product Comparison Table",
+      "settings": [
+        { "type": "header", "content": "Content" },
+        { "type": "image_picker", "id": "product_image", "label": "Product image" },
+
+        { "type": "header", "content": "Table Style" },
+        { "type": "font_picker", "id": "table_font", "label": "Table font", "default": "inter_n4" },
+        {
+          "type": "range",
+          "id": "table_font_size",
+          "min": 12,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "label": "Table font size",
+          "default": 14
+        },
+        { "type": "color", "id": "table_text_color", "label": "Table text color", "default": "#000000" },
+        {
+          "type": "header",
+          "content": "Outer Border"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_outer_border",
+          "label": "Show Outer Border",
+          "default": true,
+          "info": "Display border around the entire table"
+        },
+        { "type": "color", "id": "outer_border_color", "label": "Outer Border Color", "default": "#e0e0e0" },
+        {
+          "type": "range",
+          "id": "outer_border_width",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "px",
+          "label": "Outer Border Width",
+          "default": 1
+        },
+        {
+          "type": "select",
+          "id": "outer_border_style",
+          "label": "Outer Border Style",
+          "options": [
+            { "value": "solid", "label": "Solid" },
+            { "value": "dashed", "label": "Dashed" },
+            { "value": "dotted", "label": "Dotted" },
+            { "value": "double", "label": "Double" }
+          ],
+          "default": "solid"
+        },
+        {
+          "type": "range",
+          "id": "outer_border_radius",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Outer Border Radius",
+          "default": 8
+        },
+        {
+          "type": "header",
+          "content": "Inner Borders"
+        },
+        { "type": "color", "id": "table_border_color", "label": "Inner border color", "default": "#e0e0e0" },
+        {
+          "type": "range",
+          "id": "table_border_width",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "unit": "px",
+          "label": "Table border width",
+          "default": 1
+        },
+        {
+          "type": "select",
+          "id": "table_border_style",
+          "label": "Table border style",
+          "options": [
+            { "value": "solid", "label": "Solid" },
+            { "value": "dashed", "label": "Dashed" },
+            { "value": "dotted", "label": "Dotted" }
+          ],
+          "default": "solid"
+        },
+        {
+          "type": "range",
+          "id": "table_border_radius",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "label": "Table border radius",
+          "default": 8
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_inner_borders",
+          "label": "Show inner cell borders",
+          "default": true,
+          "info": "Display borders between table cells"
+        },
+        {
+          "type": "range",
+          "id": "inner_border_width",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "unit": "px",
+          "label": "Inner border width",
+          "default": 1
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_alternating_rows",
+          "label": "Enable alternating row colors",
+          "default": true
+        },
+        {
+          "type": "color",
+          "id": "table_row_alt_background",
+          "label": "Alternating row background",
+          "default": "#f9f9f9"
+        },
+
+        { "type": "header", "content": "Column Colors" },
+        {
+          "type": "color",
+          "id": "product_column_background",
+          "label": "Product column background",
+          "default": "#f0f8ff"
+        },
+        {
+          "type": "color",
+          "id": "feature_column_background",
+          "label": "Feature column background",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "competitor_column_background",
+          "label": "Competitor column background",
+          "default": "#fff8f0"
+        },
+
+        { "type": "header", "content": "Icons" },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "min": 12,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Icon size",
+          "default": 17
+        },
+        { "type": "color", "id": "check_icon_color", "label": "Check icon color", "default": "#00aa00" },
+        { "type": "color", "id": "cross_icon_color", "label": "Cross icon color", "default": "#cc0000" },
+
+        { "type": "header", "content": "Features" },
+        { "type": "text", "id": "feature_1", "label": "Feature 1", "default": "Premium Quality" },
+        {
+          "type": "select",
+          "id": "competitor_1",
+          "label": "Competitor has feature 1",
+          "options": [
+            { "value": "check", "label": "Yes" },
+            { "value": "cross", "label": "No" }
+          ],
+          "default": "cross"
+        },
+        { "type": "text", "id": "feature_2", "label": "Feature 2", "default": "24/7 Support" },
+        {
+          "type": "select",
+          "id": "competitor_2",
+          "label": "Competitor has feature 2",
+          "options": [
+            { "value": "check", "label": "Yes" },
+            { "value": "cross", "label": "No" }
+          ],
+          "default": "cross"
+        },
+        { "type": "text", "id": "feature_3", "label": "Feature 3", "default": "Money Back Guarantee" },
+        {
+          "type": "select",
+          "id": "competitor_3",
+          "label": "Competitor has feature 3",
+          "options": [
+            { "value": "check", "label": "Yes" },
+            { "value": "cross", "label": "No" }
+          ],
+          "default": "cross"
+        },
+        { "type": "text", "id": "feature_4", "label": "Feature 4" },
+        {
+          "type": "select",
+          "id": "competitor_4",
+          "label": "Competitor has feature 4",
+          "options": [
+            { "value": "check", "label": "Yes" },
+            { "value": "cross", "label": "No" }
+          ],
+          "default": "cross"
+        },
+        { "type": "text", "id": "feature_5", "label": "Feature 5" },
+        {
+          "type": "select",
+          "id": "competitor_5",
+          "label": "Competitor has feature 5",
+          "options": [
+            { "value": "check", "label": "Yes" },
+            { "value": "cross", "label": "No" }
+          ],
+          "default": "cross"
+        },
+        { "type": "text", "id": "feature_6", "label": "Feature 6" },
+        {
+          "type": "select",
+          "id": "competitor_6",
+          "label": "Competitor has feature 6",
+          "options": [
+            { "value": "check", "label": "Yes" },
+            { "value": "cross", "label": "No" }
+          ],
+          "default": "cross"
+        },
+        { "type": "text", "id": "feature_7", "label": "Feature 7" },
+        {
+          "type": "select",
+          "id": "competitor_7",
+          "label": "Competitor has feature 7",
+          "options": [
+            { "value": "check", "label": "Yes" },
+            { "value": "cross", "label": "No" }
+          ],
+          "default": "cross"
+        },
+        { "type": "text", "id": "feature_8", "label": "Feature 8" },
+        {
+          "type": "select",
+          "id": "competitor_8",
+          "label": "Competitor has feature 8",
+          "options": [
+            { "value": "check", "label": "Yes" },
+            { "value": "cross", "label": "No" }
+          ],
+          "default": "cross"
+        },
+
+        {
+          "type": "range",
+          "id": "margin_top",
+          "label": "Top Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom Margin (px)",
+          "min": -50,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        }
+      ]
+    },
+    {
+      "type": "sticky_add_to_cart",
+      "name": "Sticky Add to Cart",
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "YES, GET 60% OFF"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "text",
+          "id": "verification_text",
+          "label": "Verification Text",
+          "default": "VERIFIED LOWEST PRICE EVER"
+        },
+        {
+          "type": "header",
+          "content": "Button Styling"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_gradient",
+          "label": "Use Gradient Background",
+          "default": false,
+          "info": "Enable gradient background instead of solid color"
+        },
+        {
+          "type": "color",
+          "id": "button_bg_color",
+          "label": "Button Background Color",
+          "default": "#25282A"
+        },
+        {
+          "type": "color_background",
+          "id": "button_gradient",
+          "label": "Button Gradient Background",
+          "default": "linear-gradient(180deg, #25282A 0%, #1a1c1e 100%)",
+          "info": "Only used if 'Use Gradient Background' is enabled"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": "Button Text Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "color",
+          "id": "button_icon_color",
+          "label": "Button Icon Color",
+          "default": "#FFFFFF",
+          "info": "Color of the arrow icon"
+        },
+        {
+          "type": "range",
+          "id": "button_border_radius",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "Button Border Radius",
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "button_padding_vertical",
+          "min": 10,
+          "max": 25,
+          "step": 1,
+          "unit": "px",
+          "label": "Button Vertical Padding",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "button_padding_horizontal",
+          "min": 15,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "label": "Button Horizontal Padding",
+          "default": 24
+        },
+        {
+          "type": "range",
+          "id": "button_font_size",
+          "min": 8,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "Button Font Size",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "arrow_size",
+          "min": 14,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "label": "Arrow Size",
+          "default": 18
+        },
+        {
+          "type": "header",
+          "content": "Verification Styling"
+        },
+        {
+          "type": "color",
+          "id": "verification_color",
+          "label": "Verification Color",
+          "default": "#25282A"
+        },
+        {
+          "type": "range",
+          "id": "verification_font_size",
+          "min": 8,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "Verification Font Size",
+          "default": 13
+        },
+        {
+          "type": "range",
+          "id": "checkmark_size",
+          "min": 12,
+          "max": 18,
+          "step": 1,
+          "unit": "px",
+          "label": "Checkmark Size",
+          "default": 14
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "range",
+          "id": "max_width",
+          "min": 300,
+          "max": 800,
+          "step": 20,
+          "unit": "px",
+          "label": "Max Width",
+          "default": 600
+        },
+        {
+          "type": "range",
+          "id": "container_padding",
+          "min": 10,
+          "max": 30,
+          "step": 2,
+          "unit": "px",
+          "label": "Container Padding",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "gap",
+          "min": 4,
+          "max": 16,
+          "step": 2,
+          "unit": "px",
+          "label": "Gap Between Elements",
+          "default": 8
+        },
+        {
+          "type": "header",
+          "content": "Mobile Settings"
+        },
+        {
+          "type": "range",
+          "id": "mobile_container_padding",
+          "min": 8,
+          "max": 24,
+          "step": 2,
+          "unit": "px",
+          "label": "Mobile Container Padding",
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "mobile_button_font_size",
+          "min": 8,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "Mobile Button Font Size",
+          "default": 15
+        },
+        {
+          "type": "range",
+          "id": "mobile_button_padding_vertical",
+          "min": 8,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "label": "Mobile Button Vertical Padding",
+          "default": 14
+        },
+        {
+          "type": "range",
+          "id": "mobile_button_padding_horizontal",
+          "min": 12,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Mobile Button Horizontal Padding",
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "mobile_arrow_size",
+          "min": 12,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "label": "Mobile Arrow Size",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "mobile_verification_font_size",
+          "min": 8,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "Mobile Verification Font Size",
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "mobile_checkmark_size",
+          "min": 10,
+          "max": 16,
+          "step": 1,
+          "unit": "px",
+          "label": "Mobile Checkmark Size",
+          "default": 12
+        }
+      ]
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "Article Advert",
+      "settings": {
+        "page_width": 800,
+        "full_width_background": false,
+        "full_width_background_color": "#ffffff",
+        "section_padding_top": 60,
+        "section_padding_bottom": 60,
+        "override_global_colors": false,
+        "override_global_typography": false,
+        "button_font_size": 18,
+        "button_vertical_padding": 14,
+        "button_horizontal_padding": 32,
+        "button_background_color": "#000000",
+        "button_text_color": "#ffffff",
+        "button_border_color": "#000000",
+        "button_border_radius": 8,
+        "button_border_width": 0,
+        "button_show_arrow": false,
+        "section_background": "#ffffff",
+        "section_padding": 40,
+        "box_background": "#ffffff",
+        "box_border_color": "#000000",
+        "box_border_radius": 10,
+        "title_size": 38,
+        "title_color": "#111111",
+        "subtitle_size": 16,
+        "subtitle_color": "#666666",
+        "symptom_title_size": 18,
+        "symptom_title_color": "#111111",
+        "description_size": 14,
+        "description_color": "#333333",
+        "science_text_size": 13,
+        "science_text_color": "#666666"
+      },
+      "blocks": [
+        {
+          "type": "article_category",
+          "settings": {
+            "category_text": "BEAUTY & WELLNESS",
+            "category_color": "#000000",
+            "underline_color": "#000000",
+            "category_font_size": 14,
+            "category_font_weight": "600",
+            "underline_thickness": 2,
+            "category_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 12
+          }
+        },
+        {
+          "type": "header",
+          "settings": {
+            "title_text": "<p>I Spent $12,000 on Anti-Aging Treatments. Then I Discovered This $249 Device That Works Better.</p>",
+            "title_highlight_text": "$249 Device",
+            "use_section_colors": true,
+            "title_size": 38,
+            "title_line_height": 1.2,
+            "title_color": "#111111",
+            "title_highlight_color": "#000000",
+            "section_subtitle": "Dermatologists don't want you to know about this NASA-inspired technology you can use at home.",
+            "subtitle_size": 18,
+            "subtitle_line_height": 1.4,
+            "subtitle_color": "#666666",
+            "subtitle_margin_top": 8,
+            "margin_top": 0,
+            "margin_bottom": 24
+          }
+        },
+        {
+          "type": "article_author",
+          "settings": {
+            "author_image_size": 50,
+            "author_name": "<p>Jennifer Matthews</p>",
+            "publish_date": "February 14th, 2025",
+            "text_color": "#000000",
+            "author_name_font_size": 16,
+            "publish_date_font_size": 14,
+            "text_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 20
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p><strong>Did you know there's a clinically-proven way to reverse visible signs of aging in just 10 minutes a day, without needles, downtime, or dermatologist visits?</strong></p><p>I'm 47, and for years I watched my reflection betray me. Deep lines around my eyes. Sagging along my jawline. Age spots that makeup couldn't hide. Every morning felt like a reminder that I was losing the battle against time.</p><p>The worst part? I'd already tried everything. I've spent over $12,000 in the past three years alone. Professional microneedling at $400 per session. Prescription retinoids that burned my skin. $200 serums. Monthly hydrafacials. LED treatments at my dermatologist's office for $150 each.</p><p>They helped... temporarily. My skin would look better for a few days, then right back to square one. I was trapped in an expensive cycle with no end in sight.</p><p>My dermatologist kept pushing me toward Botox or fillers. But the thought of injecting toxins into my face every few months terrified me. Plus, those costs never end.</p><p>I was ready to accept that youthful, glowing skin was behind me.</p><p><strong>Until my sister's wedding changed everything.</strong></p><p>At the reception, I barely recognized her maid of honor—my childhood friend Rachel. We're the same age, but her skin was absolutely glowing. No visible pores. Smooth texture. That natural radiance I thought was gone forever.</p><p>She showed me a before photo from just 4 months earlier. I couldn't believe it was the same person. The transformation was dramatic—and she'd done it all at home with an LED light therapy mask she used for just 10 minutes a day.</p><p>For less than two visits to my dermatologist, I could own one forever. Three days later, mine arrived.</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "margin_top": 0,
+            "margin_bottom": 28
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 80,
+            "divider_height": 1,
+            "divider_color": "#e0e0e0",
+            "divider_alignment": "center",
+            "margin_top": 30,
+            "margin_bottom": 30
+          }
+        },
+        {
+          "type": "article_heading",
+          "settings": {
+            "heading_text": "<p>What Is This Device?</p>",
+            "heading_font_size": 32,
+            "text_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 16
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p>Introducing <strong>Luvea</strong>, a breakthrough LED face mask that brings professional-grade light therapy into your home.</p><p>This isn't some gimmicky beauty gadget. The technology behind LED light therapy was originally developed by NASA for wound healing in space. Dermatologists have been using it in their offices for years, charging $150-300 per session.</p><p>Luvea uses seven different wavelengths of light, each targeting specific skin concerns:</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "highlight_words": "Luvea,NASA,seven different wavelengths",
+            "highlight_background_color": "#f5f5f5",
+            "highlight_text_color": "#000000",
+            "margin_top": 0,
+            "margin_bottom": 20
+          }
+        },
+        {
+          "type": "symptom",
+          "settings": {
+            "symptom_title": "Red Light (630nm & 660nm)",
+            "symptom_description": "<p>Penetrates deep into skin to stimulate collagen and elastin production. This is what reduces fine lines, wrinkles, and improves skin firmness.</p>",
+            "symptom_science_text": "<p>Clinical studies show red light increases collagen density by up to 31% after 12 weeks of consistent use.</p>",
+            "icon_container_size": 48,
+            "icon_border_radius": 8,
+            "icon_background_color": "#000000",
+            "use_section_colors": false,
+            "custom_background_color": "#ffffff",
+            "custom_border_color": "#000000",
+            "custom_title_color": "#111111",
+            "custom_description_color": "#333333",
+            "custom_science_color": "#666666",
+            "symptom_title_size": 18,
+            "description_size": 15,
+            "science_text_size": 13,
+            "custom_border_width": 1,
+            "show_supporting_divider": true,
+            "custom_divider_color": "#e0e0e0",
+            "element_vertical_gap": 14,
+            "box_padding_desktop": 20,
+            "box_padding_mobile": 16,
+            "margin_top": 0,
+            "margin_bottom": 14
+          }
+        },
+        {
+          "type": "symptom",
+          "settings": {
+            "symptom_title": "Blue Light (415nm)",
+            "symptom_description": "<p>Destroys acne-causing bacteria beneath the skin's surface. If you struggle with breakouts, hormonal acne, or occasional blemishes, blue light is your secret weapon.</p>",
+            "symptom_science_text": "<p>Blue light therapy has been shown to reduce inflammatory acne lesions by up to 77% in clinical trials.</p>",
+            "icon_container_size": 48,
+            "icon_border_radius": 8,
+            "icon_background_color": "#000000",
+            "use_section_colors": false,
+            "custom_background_color": "#ffffff",
+            "custom_border_color": "#000000",
+            "custom_title_color": "#111111",
+            "custom_description_color": "#333333",
+            "custom_science_color": "#666666",
+            "symptom_title_size": 18,
+            "description_size": 15,
+            "science_text_size": 13,
+            "custom_border_width": 1,
+            "show_supporting_divider": true,
+            "custom_divider_color": "#e0e0e0",
+            "element_vertical_gap": 14,
+            "box_padding_desktop": 20,
+            "box_padding_mobile": 16,
+            "margin_top": 0,
+            "margin_bottom": 14
+          }
+        },
+        {
+          "type": "symptom",
+          "settings": {
+            "symptom_title": "Near-Infrared Light (850nm)",
+            "symptom_description": "<p>The deepest penetrating wavelength that promotes healing, reduces inflammation, and improves skin tone. This is what gives you that enviable glow.</p>",
+            "symptom_science_text": "<p>Near-infrared light reduces inflammation markers and accelerates skin repair at the cellular level.</p>",
+            "icon_container_size": 48,
+            "icon_border_radius": 8,
+            "icon_background_color": "#000000",
+            "use_section_colors": false,
+            "custom_background_color": "#ffffff",
+            "custom_border_color": "#000000",
+            "custom_title_color": "#111111",
+            "custom_description_color": "#333333",
+            "custom_science_color": "#666666",
+            "symptom_title_size": 18,
+            "description_size": 15,
+            "science_text_size": 13,
+            "custom_border_width": 1,
+            "show_supporting_divider": true,
+            "custom_divider_color": "#e0e0e0",
+            "element_vertical_gap": 14,
+            "box_padding_desktop": 20,
+            "box_padding_mobile": 16,
+            "margin_top": 0,
+            "margin_bottom": 20
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p>Unlike drugstore LED masks that use weak, ineffective lights, Luvea delivers medical-grade intensity without any heat, pain, or side effects. And it works on all skin types and tones—something many laser treatments can't claim.</p><p><strong>How Does It Work?</strong></p><p>Your skin cells have photoreceptors—they literally absorb light energy just like plants do. When exposed to specific wavelengths of LED light, it triggers a cascade of beneficial cellular responses. Red light penetrates 8-10mm deep, stimulating fibroblasts to produce more collagen and elastin. Blue light destroys P. acnes bacteria. Near-infrared light boosts circulation, delivering more oxygen and nutrients to skin cells.</p><p>The result? Skin that looks and acts younger at a cellular level. Most users start seeing visible improvements within 2-3 weeks. By week 8-12, the results are dramatic—reduced wrinkles, smaller pores, more even tone, and that healthy glow.</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "margin_top": 0,
+            "margin_bottom": 28
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 80,
+            "divider_height": 1,
+            "divider_color": "#e0e0e0",
+            "divider_alignment": "center",
+            "margin_top": 30,
+            "margin_bottom": 30
+          }
+        },
+        {
+          "type": "article_heading",
+          "settings": {
+            "heading_text": "<p>How Do You Use It?</p>",
+            "heading_font_size": 28,
+            "text_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 16
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p>This is the best part—it's ridiculously easy. No complicated routines. No painful procedures.</p><p><strong>Step 1:</strong> Cleanse your face like you normally would</p><p><strong>Step 2:</strong> Put on the mask, select your treatment mode (there are 7 preset combinations), and relax</p><p><strong>Step 3:</strong> After 10 minutes, the mask automatically shuts off. Remove it, apply your serum or moisturizer, and you're done</p><p>That's it. Ten minutes. Once a day. You can do it while you answer emails, watch TV, or meditate. The mask is completely hands-free with an adjustable strap, so you can move around while using it. And unlike some LED devices that feel hot or uncomfortable, this one stays cool and gentle on your skin.</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "highlight_words": "10 minutes,Once a day",
+            "highlight_background_color": "#f5f5f5",
+            "highlight_text_color": "#000000",
+            "margin_top": 0,
+            "margin_bottom": 28
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 80,
+            "divider_height": 1,
+            "divider_color": "#e0e0e0",
+            "divider_alignment": "center",
+            "margin_top": 30,
+            "margin_bottom": 30
+          }
+        },
+        {
+          "type": "article_heading",
+          "settings": {
+            "heading_text": "<p>Here's What Others Are Saying:</p>",
+            "heading_font_size": 28,
+            "text_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 20
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p><strong>Sarah K., Age 52</strong> ⭐⭐⭐⭐⭐</p><p><em>\"My dermatologist literally asked what I'd been doing differently\"</em></p><p>I've been using Luvea for 3 months now and I'm blown away. The deep lines on my forehead have softened significantly, and my skin texture is smoother than it's been in a decade. My dermatologist noticed at my last appointment and was shocked when I told her it was from an at-home device. She said my collagen production has visibly improved. Best $249 I've ever spent on my skin—and that's saying something because I've tried EVERYTHING.</p>",
+            "text_font_size": 15,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.5,
+            "margin_top": 0,
+            "margin_bottom": 20
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 60,
+            "divider_height": 1,
+            "divider_color": "#e0e0e0",
+            "divider_alignment": "center",
+            "margin_top": 16,
+            "margin_bottom": 16
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p><strong>Michelle T., Age 38</strong> ⭐⭐⭐⭐⭐</p><p><em>\"Cleared my hormonal acne when nothing else would\"</em></p><p>I've struggled with hormonal breakouts along my jawline for YEARS. The blue light mode on this mask has been a game-changer. My skin is clearer than it's been since high school. And the red light is helping fade my acne scars! I use it religiously every night while I watch Netflix. Easy, effective, and so much cheaper than my monthly facials.</p><p><strong>Jennifer L., Age 61</strong> ⭐⭐⭐⭐⭐</p><p><em>\"I almost got Botox. So glad I tried this first\"</em></p><p>At 61, I thought my only options were injectables or just accepting my aging skin. But after 6 weeks with Luvea, the improvement is undeniable. The nasolabial folds that bothered me so much have softened. My skin looks brighter and more lifted. I'm so glad I didn't go the Botox route. This actually improves my skin health rather than just freezing it in place.</p>",
+            "text_font_size": 15,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.5,
+            "margin_top": 0,
+            "margin_bottom": 28
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 80,
+            "divider_height": 1,
+            "divider_color": "#e0e0e0",
+            "divider_alignment": "center",
+            "margin_top": 30,
+            "margin_bottom": 30
+          }
+        },
+        {
+          "type": "article_heading",
+          "settings": {
+            "heading_text": "<p>My Own 90-Day Transformation</p>",
+            "heading_font_size": 28,
+            "text_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 16
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p>When my mask arrived, I took a no-makeup selfie in harsh bathroom lighting. Trust me, it wasn't pretty. But I wanted to track my results honestly.</p><p>The first week, I didn't notice much. By week 3, my husband commented that my skin looked \"really good lately.\" My pores appeared smaller, and I had this subtle glow even without makeup.</p><p>Week 6 was when things got dramatic. The fine lines around my eyes had noticeably softened. A dark sun spot on my cheek had lightened by at least 40%. My skin felt firmer when I touched it.</p><p>Now, at 90 days, I barely recognize myself—in the best way possible. The forehead lines that used to bother me every time I looked in the mirror? Significantly reduced. My jawline looks more defined. My skin tone is more even. And that healthy, youthful glow I thought was gone forever? It's back.</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "highlight_words": "90 days",
+            "highlight_background_color": "#f5f5f5",
+            "highlight_text_color": "#000000",
+            "margin_top": 0,
+            "margin_bottom": 28
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 80,
+            "divider_height": 1,
+            "divider_color": "#e0e0e0",
+            "divider_alignment": "center",
+            "margin_top": 30,
+            "margin_bottom": 30
+          }
+        },
+        {
+          "type": "article_heading",
+          "settings": {
+            "heading_text": "<p>Why Haven't You Heard About This Before?</p>",
+            "heading_font_size": 26,
+            "text_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 16
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p>Here's the uncomfortable truth: the medical aesthetics industry is worth $60 billion annually. Dermatologists make substantial income from in-office LED treatments, Botox, fillers, and laser procedures.</p><p>If everyone knew they could achieve professional results at home for a one-time cost of $249, that's a lot of recurring revenue at risk.</p><p>Luvea uses the exact same technology and similar power output as the professional machines. The main difference? You own it. You use it in your bathroom. And you never have to book another expensive appointment.</p><p>That's why you won't find this in Sephora or Ulta. We sell directly to consumers to keep costs down and put the power literally in your hands.</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "margin_top": 0,
+            "margin_bottom": 28
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 80,
+            "divider_height": 1,
+            "divider_color": "#e0e0e0",
+            "divider_alignment": "center",
+            "margin_top": 30,
+            "margin_bottom": 30
+          }
+        },
+        {
+          "type": "article_heading",
+          "settings": {
+            "heading_text": "<p>Why Other Solutions Keep Failing You</p>",
+            "heading_font_size": 26,
+            "text_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 16
+          }
+        },
+        {
+          "type": "comparison_table",
+          "settings": {
+            "table_font_size": 14,
+            "table_text_color": "#000000",
+            "enable_outer_border": true,
+            "outer_border_color": "#000000",
+            "outer_border_width": 2,
+            "outer_border_style": "solid",
+            "outer_border_radius": 12,
+            "table_border_color": "#e0e0e0",
+            "table_border_width": 1,
+            "enable_inner_borders": true,
+            "enable_alternating_rows": true,
+            "table_row_alt_background": "#f9f9f9",
+            "product_column_background": "#ffffff",
+            "feature_column_background": "#ffffff",
+            "competitor_column_background": "#f5f5f5",
+            "icon_size": 18,
+            "check_icon_color": "#000000",
+            "cross_icon_color": "#666666",
+            "feature_1": "Clinically Proven Results",
+            "competitor_1": "cross",
+            "feature_2": "No Needles or Injections",
+            "competitor_2": "cross",
+            "feature_3": "Works on All Skin Types",
+            "competitor_3": "cross",
+            "feature_4": "One-Time Cost",
+            "competitor_4": "cross",
+            "feature_5": "Pain-Free Treatment",
+            "competitor_5": "cross",
+            "feature_6": "No Downtime",
+            "competitor_6": "cross",
+            "feature_7": "90-Day Guarantee",
+            "competitor_7": "cross",
+            "feature_8": "Medical-Grade Power",
+            "competitor_8": "cross",
+            "margin_top": 0,
+            "margin_bottom": 20
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p><strong>Expensive Creams & Serums:</strong> At best, they work on the surface. Most active ingredients can't penetrate deep enough to stimulate real collagen production.</p><p><strong>In-Office Treatments:</strong> They work! But you're paying $150-300 per session, twice weekly. That's $1,200-2,400 per month. Most people can't sustain that.</p><p><strong>Botox & Fillers:</strong> Temporary paralysis or artificial volume. You'll need repeat treatments every 3-6 months, forever. Plus, they don't actually improve skin health.</p><p><strong>Cheap LED Devices:</strong> Most don't have enough power output or the right wavelengths to create real change. They're basically expensive night lights.</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "margin_top": 0,
+            "margin_bottom": 28
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 80,
+            "divider_height": 1,
+            "divider_color": "#e0e0e0",
+            "divider_alignment": "center",
+            "margin_top": 30,
+            "margin_bottom": 30
+          }
+        },
+        {
+          "type": "article_heading",
+          "settings": {
+            "heading_text": "<p>Special Launch Pricing: 40% OFF</p>",
+            "heading_font_size": 32,
+            "highlight_text": "40% OFF",
+            "text_color": "#000000",
+            "highlight_color": "#000000",
+            "text_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 16
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p>Professional LED light therapy sessions cost $150-300 per visit. Dermatologists recommend at least 2 sessions per week for 12 weeks to see optimal results. That's $3,600-7,200 for three months of treatment.</p><p>Luvea costs $249. Use it every day for the rest of your life.</p><p>For the next 48 hours, we're offering Luvea at <strong>40% OFF the regular price</strong>. That brings your cost to just <strong>$149</strong>—less than the cost of a single professional LED session.</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "highlight_words": "40% OFF,$149",
+            "highlight_background_color": "#f5f5f5",
+            "highlight_text_color": "#000000",
+            "margin_top": 0,
+            "margin_bottom": 16
+          }
+        },
+        {
+          "type": "icon_bullet_list",
+          "settings": {
+            "list_content": "<ul><li>FREE protective storage case ($39 value)</li><li>FREE shipping anywhere in the US</li><li>Complete user guide with treatment protocols</li><li>90-day money-back guarantee</li><li>2-year manufacturer warranty</li></ul>",
+            "icon_size": 20,
+            "list_font_size": 16,
+            "list_text_color": "#333333",
+            "line_height": 1.5,
+            "item_spacing": 12,
+            "margin_top": 0,
+            "margin_bottom": 20
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p>If you use this for just 10 minutes a day for one year (365 days), that's <strong>41¢ per treatment</strong>.</p><p>Compare that to professional LED sessions ($150-300), Botox ($400-600), prescription retinoids ($80-200), or monthly facials ($150-250).</p><p>After just one month of daily use, your cost per treatment drops to mere pennies. This isn't just more effective than expensive creams and sporadic treatments—it's also the most economical way to maintain young, healthy skin long-term.</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "highlight_words": "41¢ per treatment",
+            "highlight_background_color": "#f5f5f5",
+            "highlight_text_color": "#000000",
+            "margin_top": 0,
+            "margin_bottom": 24
+          }
+        },
+        {
+          "type": "cta",
+          "settings": {
+            "cta_text": "CLAIM MY 40% DISCOUNT NOW",
+            "use_section_button_style": true,
+            "margin_top": 8,
+            "margin_bottom": 28
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 80,
+            "divider_height": 1,
+            "divider_color": "#e0e0e0",
+            "divider_alignment": "center",
+            "margin_top": 30,
+            "margin_bottom": 30
+          }
+        },
+        {
+          "type": "article_heading",
+          "settings": {
+            "heading_text": "<p>You Get 90 Days to Try It Risk-Free</p>",
+            "heading_font_size": 26,
+            "text_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 16
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p>Use Luvea for a full 90 days. If you don't see visible improvement in your skin—fewer wrinkles, clearer complexion, better texture, more radiance—return it for a complete refund.</p><p>No questions asked. No restocking fees. No hassle.</p><p>We can make this guarantee because we know the technology works. Thousands of women (and men) have transformed their skin with this device. The science is solid. The results are real.</p><p>But we also know you've been burned by products that promised miracles before. So we're putting our money where our mouth is.</p><p>Either this becomes your favorite skincare tool and you wonder how you ever lived without it, or you get every penny back. That's what a true risk-free guarantee looks like.</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "highlight_words": "90 days,complete refund",
+            "highlight_background_color": "#f5f5f5",
+            "highlight_text_color": "#000000",
+            "margin_top": 0,
+            "margin_bottom": 24
+          }
+        },
+        {
+          "type": "cta",
+          "settings": {
+            "cta_text": "TRY LUVEA RISK-FREE",
+            "use_section_button_style": true,
+            "margin_top": 8,
+            "margin_bottom": 28
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 80,
+            "divider_height": 1,
+            "divider_color": "#e0e0e0",
+            "divider_alignment": "center",
+            "margin_top": 30,
+            "margin_bottom": 30
+          }
+        },
+        {
+          "type": "article_heading",
+          "settings": {
+            "heading_text": "<p>Don't Wait—Stock Is Limited</p>",
+            "heading_font_size": 26,
+            "text_alignment": "left",
+            "margin_top": 0,
+            "margin_bottom": 16
+          }
+        },
+        {
+          "type": "text_block",
+          "settings": {
+            "text_content": "<p>Click the button below to secure your Luvea mask at 40% OFF before this offer ends.</p><p>You'll be taken to our secure checkout page where you can choose your mask color (rose gold, pearl white, or matte black) and see your 40% discount automatically applied.</p><p>Your order will ship within 24 hours with tracking information sent via email.</p><p><strong>Many customers order two</strong>—one for themselves and one as a gift. With Mother's Day, birthdays, and holidays coming up, this makes an incredible present for any woman who cares about her skin.</p><p>But here's the important part: <strong>this 40% discount expires in 48 hours</strong>, and our current inventory is selling faster than expected. We manufacture these in limited batches to ensure quality control, and when this batch sells out, the next one won't arrive for 6-8 weeks. The discount definitely won't be available then.</p><p><strong>STOCK ALERT:</strong> As of this morning, we have fewer than 200 units remaining in this production run. At our current sales velocity, we expect to sell out within the next 24-36 hours.</p><p>Don't let another month go by watching your skin age when you could be actively reversing the damage. Click below to claim your Luvea mask while this offer lasts.</p>",
+            "text_font_size": 16,
+            "text_color": "#000000",
+            "text_alignment": "left",
+            "line_height": 1.6,
+            "highlight_words": "40% discount expires in 48 hours,fewer than 200 units",
+            "highlight_background_color": "#f5f5f5",
+            "highlight_text_color": "#000000",
+            "margin_top": 0,
+            "margin_bottom": 24
+          }
+        },
+        {
+          "type": "cta",
+          "settings": {
+            "cta_text": "CHECK AVAILABILITY & CLAIM 40% OFF",
+            "use_section_button_style": true,
+            "margin_top": 8,
+            "margin_bottom": 40
+          }
+        },
+        {
+          "type": "divider_line",
+          "settings": {
+            "divider_width": 100,
+            "divider_height": 2,
+            "divider_color": "#000000",
+            "divider_alignment": "center",
+            "margin_top": 40,
+            "margin_bottom": 20
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

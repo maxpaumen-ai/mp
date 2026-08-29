@@ -1,0 +1,53 @@
+{{ 'typography-system.css' | asset_url | stylesheet_tag }}
+{{ 'typography-settings.js' | asset_url | script_tag }}
+
+<script>
+  // Set theme settings data attributes on the root element
+  document.documentElement.setAttribute('data-heading-scale', '{{ settings.heading_scale }}');
+  document.documentElement.setAttribute('data-body-scale', '{{ settings.body_scale }}');
+  document.documentElement.setAttribute('data-heading-letter-spacing', '{{ settings.heading_letter_spacing }}');
+  document.documentElement.setAttribute('data-body-letter-spacing', '{{ settings.body_letter_spacing }}');
+  document.documentElement.setAttribute('data-button-text-case', '{{ settings.button_text_case }}');
+  document.documentElement.setAttribute('data-button-radius', '{{ settings.global_button_radius }}');
+  document.documentElement.setAttribute('data-apply-button-radius-to-all', '{{ settings.apply_button_radius_to_all }}');
+</script>
+
+<style>
+  /* CSS variable overrides from theme settings */
+  :root {
+    /* Font families from theme settings */
+    --font-heading-family: {{ settings.type_header_font.family }}, {{ settings.type_header_font.fallback_families }};
+    --font-body-family: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
+
+    /* Font weights from theme settings */
+    --font-heading-weight: {{ settings.type_header_font.weight }};
+    --font-body-weight: {{ settings.type_body_font.weight }};
+
+    /* Apply text transform for buttons based on settings */
+    --button-text-transform: {{ settings.button_text_case }};
+
+    /* Set these for our override variables too so they cascade down */
+    --font-body-family-override: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
+    --font-heading-family-override: {{ settings.type_header_font.family }}, {{ settings.type_header_font.fallback_families }};
+    --font-body-weight-override: {{ settings.type_body_font.weight }};
+    --font-heading-weight-override: {{ settings.font_weight_bold | default: 700 }};
+
+    /* Button styling variables */
+    --global-button-radius: {{ settings.global_button_radius }}px;
+
+    {% if settings.enable_custom_typography %}
+    /* Custom font sizes from theme settings */
+    --h1-font-size: {{ settings.h1_font_size }}px;
+    --h2-font-size: {{ settings.h2_font_size }}px;
+    --h3-font-size: {{ settings.h3_font_size }}px;
+    --body-font-size: {{ settings.body_font_size }}px;
+    --subtitle-font-size: {{ settings.subtitle_font_size }}px;
+  {% endif %}
+  }
+
+  /* Apply button text transform */
+  .button, .button-text, button[type="submit"], input[type="submit"] {
+    text-transform: var(--button-text-transform);
+    font-family: var(--font-body-family-override);
+  }
+</style>

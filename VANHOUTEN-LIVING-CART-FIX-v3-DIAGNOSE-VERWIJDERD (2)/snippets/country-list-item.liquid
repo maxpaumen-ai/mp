@@ -1,0 +1,34 @@
+{%- comment -%}
+  Renders a single country list item
+
+  Accepts:
+    - country: country object
+    - show_currencies: boolean to show/hide currency
+    - current_country: the currently selected country object
+{%- endcomment -%}
+
+<li class="disclosure__item" tabindex="-1">
+  <a
+    class="link link--text disclosure__link caption-large focus-inset"
+    href="#"
+    {% if country.iso_code == current_country.iso_code %}
+      aria-current="true"
+    {% endif %}
+    data-value="{{ country.iso_code }}"
+    id="{{ country.name }}"
+  >
+    <span
+      class="localization-check{% if country.iso_code != current_country.iso_code %} visibility-hidden{% endif %}"
+    >
+      {{- 'icon-checkmark.svg' | inline_asset_content -}}
+    </span>
+    <span class="country">
+      {{ country | image_url: width: 18 | image_tag }}
+      <span class="country-name">{{- country.name -}}</span>
+    </span>
+    <span class="localization-form__currency motion-reduce{% unless show_currencies %} hidden{% endunless %}">
+      {{ country.currency.iso_code }}
+      {{ country.currency.symbol -}}
+    </span>
+  </a>
+</li>

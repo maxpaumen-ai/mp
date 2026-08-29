@@ -1,0 +1,985 @@
+{{ 'sticky-add-to-cart.css' | asset_url | stylesheet_tag }}
+{{ 'sticky-add-to-cart.js' | asset_url | script_tag }}
+{% if use_theme_colors == true %}
+  {% assign actual_use_theme_colors = true %}
+{% elsif use_theme_colors == false %}
+  {% assign actual_use_theme_colors = false %}
+{% elsif use_theme_colors == null or use_theme_colors == blank %}
+  {% comment %} Default to theme colors if no value provided {% endcomment %}
+  {% assign actual_use_theme_colors = true %}
+{% else %}
+  {% comment %} For strings 'true'/'false' or other cases {% endcomment %}
+  {% if use_theme_colors == 'true' %}
+    {% assign actual_use_theme_colors = true %}
+  {% else %}
+    {% assign actual_use_theme_colors = false %}
+  {% endif %}
+{% endif %}
+
+{% assign use_theme_colors_forced = actual_use_theme_colors %}
+
+{% comment %}
+  Sticky Add to Cart Component
+  - Shows when the main add to cart button is scrolled out of view
+  - Customizable through the theme editor
+{% endcomment %}
+
+{% comment %}
+  DEBUG VALUES:
+  use_theme_colors: {{ use_theme_colors }}
+  show_desktop_shipping: {{ show_desktop_shipping }}
+  show_mobile_shipping: {{ show_mobile_shipping }}
+{% endcomment %}
+
+{% comment %} Force the use_theme_colors value to ensure it's being applied correctly {% endcomment %}
+{% assign debug_use_theme_colors = use_theme_colors %}
+{% assign use_theme_colors = use_theme_colors %}
+
+{% comment %} Preprocess the rating text if it has placeholders {% endcomment %}
+{% assign processed_rating_text = rating_text %}
+{% if processed_rating_text contains '{{'
+  and processed_rating_text contains 'product.metafields.reviews.rating_count'
+%}
+  {% if product.metafields.reviews.rating_count %}
+    {% assign processed_rating_text = processed_rating_text
+      | replace: '{{ product.metafields.reviews.rating_count | default: "1319" }}',
+        product.metafields.reviews.rating_count
+    %}
+  {% else %}
+    {% assign processed_rating_text = processed_rating_text
+      | replace: '{{ product.metafields.reviews.rating_count | default: "1319" }}', '1319'
+    %}
+  {% endif %}
+{% endif %}
+
+{% comment %} Handle button text with translation support {% endcomment %}
+{% if button_text != blank %}
+  {% if button_text contains '.' %}
+    {% assign button_text = button_text | t %}
+  {% endif %}
+{% else %}
+  {% assign button_text = 'sections.add_to_cart.button_text' | t %}
+{% endif %}
+
+{% if added_button_text != blank %}
+  {% if added_button_text contains '.' %}
+    {% assign added_button_text = added_button_text | t %}
+  {% endif %}
+{% else %}
+  {% assign added_button_text = 'sections.add_to_cart.added_text' | t %}
+{% endif %}
+
+{% assign delivery_days = delivery_days | default: 5 %}
+{% assign guarantee_text = guarantee_text | default: '30 Day Money Back Guarantee' %}
+{% assign button_bg_color = button_bg_color | default: '#EF4A65' %}
+{% assign button_hover_color = button_hover_color | default: '#7BDBF1' %}
+{% assign button_text_color = button_text_color | default: '#FFFFFF' %}
+{% assign star_color = star_color | default: '#99E9FF' %}
+{% assign background_color = background_color | default: '#FFFFFF' %}
+{% assign border_radius = border_radius | default: 6 %}
+{% assign z_index = z_index | default: 9900 %}
+{% assign delivery_text_color = delivery_text_color | default: '#333333' %}
+{% assign delivery_text_prefix = delivery_text_prefix | default: 'Arrives by' %}
+{% assign delivery_date_display_format = delivery_date_display_format | default: 'weekday_month_day' %}
+{% assign delivery_text_letter_spacing = delivery_text_letter_spacing | default: 0 %}
+{% assign show_delivery_date = show_delivery_date | default: true %}
+{% assign show_desktop_shipping = show_desktop_shipping | default: true %}
+{% assign show_mobile_shipping = show_mobile_shipping | default: true %}
+
+{% comment %} Title Customization Settings {% endcomment %}
+{% assign title_color = title_color | default: '#000000' %}
+{% assign title_desktop_font_size = title_desktop_font_size | default: 16 %}
+{% assign title_mobile_font_size = title_mobile_font_size | default: 14 %}
+{% assign title_letter_spacing = title_letter_spacing | default: 0 %}
+
+{% comment %} Rating Text Customization Settings {% endcomment %}
+{% assign rating_text_color = rating_text_color | default: '#333333' %}
+{% assign rating_text_font_weight = rating_text_font_weight | default: 'var(--font-weight-regular)' %}
+{% assign rating_text_desktop_font_size = rating_text_desktop_font_size | default: 14 %}
+{% assign rating_text_mobile_font_size = rating_text_mobile_font_size | default: 12 %}
+{% assign rating_text_letter_spacing = rating_text_letter_spacing | default: 0 %}
+
+{% comment %} Delivery Date Text Customization Settings {% endcomment %}
+{% assign delivery_text_font_weight = delivery_text_font_weight | default: 'var(--font-weight-regular)' %}
+{% assign delivery_text_desktop_font_size = delivery_text_desktop_font_size | default: 14 %}
+{% assign delivery_text_mobile_font_size = delivery_text_mobile_font_size | default: 12 %}
+{% assign delivery_text_letter_spacing = delivery_text_letter_spacing | default: 0 %}
+
+{% comment %} Calculate delivery date {% endcomment %}
+{% assign today = 'now' | date: '%s' %}
+{% assign seconds_in_day = 86400 %}
+{% assign shipping_days_in_seconds = delivery_days | times: seconds_in_day %}
+{% assign delivery_date_seconds = today | plus: shipping_days_in_seconds %}
+
+{% comment %} Store the timestamp for JavaScript localization {% endcomment %}
+{% assign delivery_timestamp = delivery_date_seconds %}
+
+{% comment %} Format date with proper Shopify date formatting based on selected format {% endcomment %}
+{% case delivery_date_display_format %}
+  {% when 'weekday_month_day' %}
+    {% assign delivery_date = delivery_date_seconds | date: '%A, %B %-d' %}
+  {% when 'month_day_weekday' %}
+    {% assign delivery_date = delivery_date_seconds | date: '%B %-d, %A' %}
+  {% when 'month_day' %}
+    {% assign delivery_date = delivery_date_seconds | date: '%B %-d' %}
+  {% when 'day_month' %}
+    {% assign delivery_date = delivery_date_seconds | date: '%-d %B' %}
+  {% else %}
+    {% assign delivery_date = delivery_date_seconds | date: '%A, %B %-d' %}
+{% endcase %}
+
+<!-- Sticky Add to Cart Main Container -->
+<div id="stickyAddToCart" data-sticky-add-to-cart class="sticky-add-to-cart">
+  <div class="sticky-add-to-cart__container">
+    <div class="desktop-view">
+      <div class="sticky-add-to-cart__product">
+        <div class="sticky-add-to-cart__image">
+          <img
+            src="{{ product.featured_image | img_url: '60x60', crop: 'center' }}"
+            width=""
+            height=""
+            alt="{{ product.title }}"
+          >
+        </div>
+        <div class="sticky-add-to-cart__details">
+          {% if rating_text != blank %}
+            <div class="sticky-add-to-cart__ratings">
+              <div class="sticky-add-to-cart__stars">
+                {% for i in (1..5) %}
+                  <span class="star">
+                    <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                {% endfor %}
+              </div>
+              <span class="sticky-add-to-cart__rating-text">{{ processed_rating_text }}</span>
+            </div>
+          {% endif %}
+          <h3 class="sticky-add-to-cart__title">
+            <strong>{{ product.title | default: 'Bleame Crystal Hair Eraser' }}</strong>
+          </h3>
+        </div>
+      </div>
+
+      <!-- Desktop shipping section -->
+      {% assign desktop_shipping_visible = false %}
+      {% if show_desktop_shipping == true %}
+        {% assign desktop_shipping_visible = true %}
+      {% elsif show_desktop_shipping == false %}
+        {% assign desktop_shipping_visible = false %}
+      {% elsif show_desktop_shipping == null or show_desktop_shipping == blank %}
+        {% assign desktop_shipping_visible = true %}
+      {% endif %}
+
+      {% if desktop_shipping_visible and show_delivery_date == true %}
+        <div class="sticky-add-to-cart__shipping">
+          <!-- Shipping icon and text -->
+          <span class="delivery-icon" style="display: inline-flex; margin-right: 5px;">
+            <svg width="20" height="20" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M311.069,130.515c-0.963-5.641-5.851-9.768-11.578-9.768H35.43c-7.61,0-13.772,6.169-13.772,13.765
+                c0,7.61,6.162,13.772,13.772,13.772h64.263c7.61,0,13.772,6.17,13.772,13.773c0,7.603-6.162,13.772-13.772,13.772H13.772
+                C6.169,175.829,0,181.998,0,189.601c0,7.603,6.169,13.764,13.772,13.764h117.114c6.72,0,12.172,5.46,12.172,12.18
+                c0,6.72-5.452,12.172-12.172,12.172H68.665c-7.61,0-13.772,6.17-13.772,13.773c0,7.602,6.162,13.772,13.772,13.772h45.857
+                c6.726,0,12.179,5.452,12.179,12.172c0,6.719-5.453,12.172-12.179,12.172H51.215c-7.61,0-13.772,6.169-13.772,13.772
+                c0,7.603,6.162,13.772,13.772,13.772h87.014l5.488,31.042h31.52c-1.854,4.504-2.911,9.421-2.911,14.598
+                c0,21.245,17.218,38.464,38.464,38.464c21.237,0,38.456-17.219,38.456-38.464c0-5.177-1.057-10.094-2.911-14.598h100.04
+                L311.069,130.515z M227.342,352.789c0,9.146-7.407,16.553-16.553,16.553c-9.152,0-16.56-7.407-16.56-16.553
+                c0-6.364,3.627-11.824,8.892-14.598h15.329C223.714,340.965,227.342,346.424,227.342,352.789z" fill="currentColor"/>
+              <path d="M511.598,314.072l-15.799-77.941l-57.689-88.759H333.074l32.534,190.819h38.42
+                c-1.846,4.504-2.904,9.421-2.904,14.598c0,21.245,17.219,38.464,38.456,38.464c21.246,0,38.464-17.219,38.464-38.464
+                c0-5.177-1.057-10.094-2.91-14.598h16.741c6.039,0,11.759-2.708,15.582-7.386C511.273,326.136,512.8,319.988,511.598,314.072z
+                M392.529,182.882h26.314l34.162,52.547h-51.512L392.529,182.882z M456.14,352.789c0,9.146-7.407,16.553-16.56,16.553
+                c-9.138,0-16.552-7.407-16.552-16.553c0-6.364,3.635-11.824,8.892-14.598h15.329C452.513,340.965,456.14,346.424,456.14,352.789z" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="delivery-text" style="margin-right: 4px;">
+            {% if delivery_text_prefix contains '.' %}
+              {{ delivery_text_prefix | t }}
+            {% else %}
+              {{ delivery_text_prefix }}
+            {% endif %}
+          </span>
+          <span
+            class="delivery-date"
+            data-timestamp="{{ delivery_timestamp }}"
+            data-locale="{{ request.locale.iso_code }}"
+            data-format="{{ delivery_date_display_format }}"
+          >
+            <!-- Placeholder - JavaScript will format this date -->
+          </span>
+        </div>
+      {% endif %}
+
+      {% if block.settings.button_link != blank %}
+        <a href="{{ block.settings.button_link }}" class="theme-button sticky-add-to-cart__button" id="stickyAddToCartBtn">
+          <span class="button-text">{{ button_text }}</span>
+          <span class="button-added-text">{{ added_button_text }}</span>
+        </a>
+      {% else %}
+        <button class="theme-button sticky-add-to-cart__button" id="stickyAddToCartBtn" onclick="scrollToTop(event)">
+          <span class="button-text">{{ button_text }}</span>
+          <span class="button-added-text">{{ added_button_text }}</span>
+        </button>
+      {% endif %}
+    </div>
+
+    <div class="mobile-view">
+      <div class="mobile-button-wrapper">
+        {% if block.settings.button_link != blank %}
+          <a
+            href="{{ block.settings.button_link }}"
+            class="theme-button sticky-add-to-cart__button"
+            id="stickyAddToCartBtnMobile"
+          >
+            <span class="button-text">{{ button_text }}</span>
+            <span class="button-added-text">{{ added_button_text }}</span>
+          </a>
+        {% else %}
+          <button
+            class="theme-button sticky-add-to-cart__button"
+            id="stickyAddToCartBtnMobile"
+            onclick="scrollToTop(event)"
+          >
+            <span class="button-text">{{ button_text }}</span>
+            <span class="button-added-text">{{ added_button_text }}</span>
+          </button>
+        {% endif %}
+      </div>
+      <!-- Mobile shipping section -->
+      {% assign mobile_shipping_visible = false %}
+      {% if show_mobile_shipping == true %}
+        {% assign mobile_shipping_visible = true %}
+      {% elsif show_mobile_shipping == false %}
+        {% assign mobile_shipping_visible = false %}
+      {% elsif show_mobile_shipping == null or show_mobile_shipping == blank %}
+        {% assign mobile_shipping_visible = true %}
+      {% endif %}
+
+      {% if mobile_shipping_visible and show_delivery_date == true %}
+        <div class="mobile-shipping-info">
+          <span class="delivery-icon" style="display: inline-flex; margin-right: 5px;">
+            <svg width="20" height="20" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M311.069,130.515c-0.963-5.641-5.851-9.768-11.578-9.768H35.43c-7.61,0-13.772,6.169-13.772,13.765
+                c0,7.61,6.162,13.772,13.772,13.772h64.263c7.61,0,13.772,6.17,13.772,13.773c0,7.603-6.162,13.772-13.772,13.772H13.772
+                C6.169,175.829,0,181.998,0,189.601c0,7.603,6.169,13.764,13.772,13.764h117.114c6.72,0,12.172,5.46,12.172,12.18
+                c0,6.72-5.452,12.172-12.172,12.172H68.665c-7.61,0-13.772,6.17-13.772,13.773c0,7.602,6.162,13.772,13.772,13.772h45.857
+                c6.726,0,12.179,5.452,12.179,12.172c0,6.719-5.453,12.172-12.179,12.172H51.215c-7.61,0-13.772,6.169-13.772,13.772
+                c0,7.603,6.162,13.772,13.772,13.772h87.014l5.488,31.042h31.52c-1.854,4.504-2.911,9.421-2.911,14.598
+                c0,21.245,17.218,38.464,38.464,38.464c21.237,0,38.456-17.219,38.456-38.464c0-5.177-1.057-10.094-2.911-14.598h100.04
+                L311.069,130.515z M227.342,352.789c0,9.146-7.407,16.553-16.553,16.553c-9.152,0-16.56-7.407-16.56-16.553
+                c0-6.364,3.627-11.824,8.892-14.598h15.329C223.714,340.965,227.342,346.424,227.342,352.789z" fill="currentColor"/>
+              <path d="M511.598,314.072l-15.799-77.941l-57.689-88.759H333.074l32.534,190.819h38.42
+                c-1.846,4.504-2.904,9.421-2.904,14.598c0,21.245,17.219,38.464,38.456,38.464c21.246,0,38.464-17.219,38.464-38.464
+                c0-5.177-1.057-10.094-2.91-14.598h16.741c6.039,0,11.759-2.708,15.582-7.386C511.273,326.136,512.8,319.988,511.598,314.072z
+                M392.529,182.882h26.314l34.162,52.547h-51.512L392.529,182.882z M456.14,352.789c0,9.146-7.407,16.553-16.56,16.553
+                c-9.138,0-16.552-7.407-16.552-16.553c0-6.364,3.635-11.824,8.892-14.598h15.329C452.513,340.965,456.14,346.424,456.14,352.789z" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="delivery-text" style="margin-right: 4px;">
+            {% if delivery_text_prefix contains '.' %}
+              {{ delivery_text_prefix | t }}
+            {% else %}
+              {{ delivery_text_prefix }}
+            {% endif %}
+          </span>
+          <span
+            class="delivery-date"
+            data-timestamp="{{ delivery_timestamp }}"
+            data-locale="{{ request.locale.iso_code }}"
+            data-format="{{ delivery_date_display_format }}"
+          >
+            <!-- Placeholder - JavaScript will format this date -->
+          </span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+      {% if use_theme_colors_forced %}
+      /* Theme colors enabled - use_theme_colors_forced: {{ use_theme_colors_forced }} */
+      #stickyAddToCart {
+        background: {{ settings.global_section_background_color }} !important;
+        color: {{ settings.global_section_text_color }} !important;
+        z-index: {{ z_index }};
+      }
+
+      .sticky-add-to-cart__container {
+        background: {{ settings.global_section_background_color }} !important;
+      }
+
+      .sticky-add-to-cart__product,
+      .sticky-add-to-cart__shipping,
+      .sticky-add-to-cart__shipping-date,
+      .sticky-add-to-cart__details,
+      .sticky-add-to-cart__ratings,
+      .sticky-add-to-cart__stars,
+      .sticky-add-to-cart__rating-text,
+      .sticky-add-to-cart__title,
+      .desktop-view,
+      .mobile-view,
+      .mobile-shipping-info {
+        background: {{ settings.global_section_background_color }} !important;
+      }
+
+      .sticky-add-to-cart__button {
+        {% if settings.enable_global_button_styling and use_global_button_styling %}
+          /* Use Global Button Styling System */
+          --button-text-font-size: var(--global-button-font-size, 14px);
+          padding: var(--global-button-padding-y, 12px) 20px !important;
+          font-size: var(--global-button-font-size, 14px) !important;
+          font-weight: var(--global-button-font-weight, 700) !important;
+          letter-spacing: var(--global-button-letter-spacing, 1px) !important;
+          text-transform: var(--global-button-text-transform, none) !important;
+          background-color: var(--global-button-bg-color) !important;
+          color: var(--global-button-text-color) !important;
+          border: var(--global-button-border-width) solid var(--global-button-border-color) !important;
+          border-radius: var(--global-button-radius) !important;
+        {% else %}
+          /* Use Custom Button Styling */
+          --button-text-font-size: {{ custom_button_font_size | default: 14 }}px;
+          padding: {{ custom_button_padding_y | default: 15 }}px 20px !important;
+          font-size: {{ custom_button_font_size | default: 14 }}px !important;
+        {% if settings.use_dedicated_button_colors %}
+          background-color: {% if settings.global_section_button_color != blank %}
+                              {{ settings.global_section_button_color }}
+                            {% else %}
+                              {{ settings.global_section_accent_1_color }}
+                            {% endif %} !important;
+          color: {% if settings.global_section_button_text_color != blank %}
+                   {{ settings.global_section_button_text_color }}
+                 {% else %}
+                   {{ settings.global_section_background_color }}
+                 {% endif %} !important;
+        {% else %}
+          background-color: {{ settings.global_section_accent_1_color }} !important;
+          color: {{ settings.global_section_background_color }} !important;
+          {% endif %}
+          border-radius: {{ border_radius }}px;
+        {% endif %}
+      }
+
+      .sticky-add-to-cart__button:hover {
+        {% if settings.enable_global_button_styling and use_global_button_styling %}
+          /* Use Global Button Hover Styling */
+          background-color: var(--global-button-hover-bg-color) !important;
+          color: var(--global-button-hover-text-color) !important;
+        {% else %}
+          /* Use Custom Button Hover Styling */
+        {% if settings.use_dedicated_button_colors %}
+          background-color: {% if settings.global_section_button_color != blank %}
+                              {{ settings.global_section_button_color | color_darken: 5 }}
+                            {% else %}
+                              {{ settings.global_section_accent_1_color | color_darken: 5 }}
+                            {% endif %} !important;
+        {% else %}
+          background-color: {{ settings.global_section_accent_1_color | color_darken: 5 }} !important;
+          {% endif %}
+        {% endif %}
+      }
+
+      .sticky-add-to-cart__title {
+        color: {{ settings.global_section_text_color }} !important;
+      }
+
+      .sticky-add-to-cart__rating-text {
+        color: {{ settings.global_section_text_color }} !important;
+      }
+
+      .star {
+        color: {{ settings.global_section_accent_1_color }} !important;
+      }
+
+      .mobile-stars .star {
+        color: {{ settings.global_section_accent_1_color }} !important;
+      }
+
+      .sticky-add-to-cart__image {
+        border-color: {{ settings.global_section_accent_1_color | color_lighten: 30 }} !important;
+      }
+
+      .delivery-icon {
+        color: {{ settings.global_section_accent_1_color }} !important;
+      }
+
+      .delivery-text {
+        color: {{ settings.global_section_text_color }} !important;
+        font-weight: var(--font-weight-regular) !important;
+        letter-spacing: var(--letter-spacing-body) !important;
+      }
+
+      .delivery-date {
+        color: {{ settings.global_section_accent_1_color }} !important;
+        font-weight: var(--font-weight-semibold) !important;
+      }
+
+    {% else %}
+      /* Custom colors enabled - use_theme_colors_forced: {{ use_theme_colors_forced }} */
+      #stickyAddToCart {
+        background: {{ background_color }} !important;
+        z-index: {{ z_index }};
+      }
+
+      .sticky-add-to-cart__container {
+        background: {{ background_color }} !important;
+      }
+
+      .sticky-add-to-cart__product,
+      .sticky-add-to-cart__shipping,
+      .sticky-add-to-cart__shipping-date,
+      .sticky-add-to-cart__details,
+      .sticky-add-to-cart__ratings,
+      .sticky-add-to-cart__stars,
+      .sticky-add-to-cart__rating-text,
+      .sticky-add-to-cart__title,
+      .desktop-view,
+      .mobile-view,
+      .mobile-shipping-info {
+        background: {{ background_color }} !important;
+      }
+
+      .sticky-add-to-cart__button {
+        background-color: {{ button_bg_color }} !important;
+        color: {{ button_text_color }} !important;
+      }
+
+      .sticky-add-to-cart__button:hover {
+        background-color: {{ button_hover_color }} !important;
+      }
+
+      .sticky-add-to-cart__title {
+        color: {{ title_color }} !important;
+      }
+
+      .sticky-add-to-cart__rating-text {
+        color: {{ rating_text_color }} !important;
+      }
+
+      .star {
+        color: {{ star_color }} !important;
+      }
+
+      .delivery-icon {
+        color: {{ star_color }} !important;
+      }
+
+      .delivery-text {
+        color: {{ delivery_text_color }} !important;
+      }
+
+      .delivery-date {
+        color: {{ star_color }} !important;
+      }
+
+      .mobile-view .delivery-icon {
+        color: {{ mobile_star_color }} !important;
+      }
+
+      .mobile-view .delivery-date {
+        color: {{ mobile_star_color }} !important;
+      }
+    {% endif %}
+  #stickyAddToCart {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw; /* Use viewport width instead of percentage */
+    max-width: 100%; /* Add max-width constraint */
+    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+    z-index: {{ z_index }};
+    opacity: 0;
+    transform: translateY(100%);
+    transition: transform 0.4s ease, opacity 0.3s ease;
+    padding: 12px 0;
+    pointer-events: none;
+    display: none;
+    box-sizing: border-box; /* Add box-sizing to include padding in width calculation */
+    overflow-x: hidden; /* Prevent horizontal overflow */
+  }
+
+  #stickyAddToCart.show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+    display: block !important;
+  }
+
+  .sticky-add-to-cart__container {
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 15px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .sticky-add-to-cart__product {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .sticky-add-to-cart__image {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    margin-right: 15px;
+  }
+
+  .sticky-add-to-cart__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .sticky-add-to-cart__details {
+    flex: 1;
+  }
+
+  .sticky-add-to-cart__ratings {
+    display: flex;
+    align-items: center;
+    margin-bottom: 3px;
+  }
+
+  .sticky-add-to-cart__stars {
+    display: flex;
+    margin-right: 8px;
+  }
+
+  .star {
+    color: {% if use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ star_color }}{% endif %} !important;
+    font-size: 14px;
+    line-height: 1;
+    margin-right: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .star svg {
+    display: block;
+  }
+
+  .sticky-add-to-cart__rating-text {
+    color: {{ rating_text_color }};
+    font-size: {{ rating_text_mobile_font_size }}px;
+    letter-spacing: {{ rating_text_letter_spacing }}px;
+    font-weight: {{ rating_text_font_weight }};
+  }
+
+  .sticky-add-to-cart__title {
+    font-size: {{ title_mobile_font_size }}px;
+    font-weight: var(--font-weight-bold);
+    color: {{ title_color }};
+    margin: 0;
+    letter-spacing: {{ title_letter_spacing }}px;
+  }
+
+  .sticky-add-to-cart__shipping {
+    {% if section.settings.show_delivery_date == false %}display: none !important;{% else %}display: flex;{% endif %}
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+    color: {% if use_theme_colors %}#333{% else %}{{ delivery_text_color }}{% endif %};
+    font-size: 14px;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .hide-desktop-shipping {
+    display: none !important;
+  }
+
+  .hide-mobile-shipping {
+    display: none !important;
+  }
+
+  .sticky-add-to-cart__shipping-icon {
+    margin-right: 5px;
+    font-size: 16px;
+  }
+
+  .sticky-add-to-cart__shipping-date {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .delivery-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 5px;
+  }
+
+  .delivery-text {
+    font-size: {{ delivery_text_mobile_font_size }}px;
+    letter-spacing: {{ delivery_text_letter_spacing }}px;
+    margin-right: 5px;
+  }
+
+  .delivery-date {
+    margin-left: 3px;
+  }
+
+  .mobile-shipping-info {
+    {% if section.settings.show_delivery_date == false %}display: none !important;{% else %}display: flex;{% endif %}
+    justify-content: center;
+    width: 100%;
+    margin-top: 2px;
+    text-align: center;
+    font-size: 13px;
+    color: {% if use_theme_colors %}#333{% else %}{{ delivery_text_color }}{% endif %};
+    font-weight: var(--font-weight-regular);
+    padding: 3px 0;
+  }
+
+  .mobile-shipping-info .delivery-date-calculator__date {
+    font-weight: var(--font-weight-bold);
+  }
+
+  @keyframes shine {
+    0% {
+      left: -100%;
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.8;
+    }
+    20% {
+      opacity: 0.9;
+    }
+    40% {
+      opacity: 0.8;
+    }
+    100% {
+      left: 200%;
+      opacity: 0;
+    }
+  }
+
+  /* Base button styles - keep isolated from other elements */
+  .sticky-add-to-cart__button,
+  #stickyAddToCart .sticky-add-to-cart__button,
+  html body .sticky-add-to-cart__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    /* Use global settings */
+    padding: var(--global-button-padding-y) 10px; /* Keep horizontal padding */
+    font-size: var(--global-button-font-size);
+    font-weight: var(--global-button-font-weight);
+    letter-spacing: var(--global-button-letter-spacing) !important;
+    text-transform: var(--global-button-text-transform);
+    border-radius: {{ border_radius }}px;
+    /* Keep other styles */
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .mobile-view .sticky-add-to-cart__button:after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 50%;
+    height: 200%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    transform: rotate(25deg);
+    pointer-events: none;
+    animation: shine 6s infinite;
+    animation-delay: 2s;
+  }
+
+  .sticky-add-to-cart__button:hover {
+    transform: translateY(-2px);
+  }
+
+  .sticky-add-to-cart__button:active {
+    transform: translateY(1px);
+  }
+
+  .button-text, .button-added-text {
+    display: inline-block;
+    transition: all 0.7s ease;
+    font-size: var(--button-text-font-size, var(--global-button-font-size)) !important;
+  }
+
+  .button-added-text {
+    position: absolute;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .sticky-add-to-cart__button.added .button-text {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  .sticky-add-to-cart__button.added .button-added-text {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .sticky-add-to-cart__mobile-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .sticky-add-to-cart__guarantee {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: {% if use_theme_colors %}#333{% else %}{{ delivery_text_color }}{% endif %};
+    letter-spacing: var(--letter-spacing-body);
+    white-space: nowrap;
+    flex: 1;
+    padding: 0 5px;
+  }
+
+  .sticky-add-to-cart__guarantee-icon {
+    color: {% if use_theme_colors %}#000{% else %}{{ title_color }}{% endif %};
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-body);
+    margin-right: 4px;
+  }
+
+  .mobile-divider {
+    width: 1px;
+    height: 16px;
+    background-color: {% if use_theme_colors %}#333{% else %}{{ delivery_text_color }}{% endif %};
+    margin: 0 10px;
+  }
+
+  .mobile-button-wrapper {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  .desktop-view {
+    display: none;
+  }
+
+  .mobile-view {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .mobile-shipping-info {
+    {% if section.settings.show_delivery_date == false %}display: none !important;{% else %}display: flex;{% endif %}
+    justify-content: center;
+    width: 100%;
+    margin-top: 2px;
+    text-align: center;
+    font-size: 13px;
+    color: {% if use_theme_colors %}#333{% else %}{{ delivery_text_color }}{% endif %};
+    font-weight: var(--font-weight-regular);
+    padding: 3px 0;
+  }
+
+  .mobile-shipping-info .delivery-date-calculator__date {
+    font-weight: var(--font-weight-bold);
+  }
+
+  @keyframes shine {
+    0% {
+      left: -100%;
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.8;
+    }
+    20% {
+      opacity: 0.9;
+    }
+    40% {
+      opacity: 0.8;
+    }
+    100% {
+      left: 200%;
+      opacity: 0;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .sticky-add-to-cart__container {
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .desktop-view {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .mobile-view {
+      display: none;
+    }
+
+    .sticky-add-to-cart__product {
+      margin-bottom: 0;
+      flex: 1;
+    }
+
+    .sticky-add-to-cart__shipping {
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+
+    #stickyAddToCart .desktop-view .sticky-add-to-cart__button {
+      flex: 1;
+      max-width: 250px;
+      /* Use global settings, but keep desktop specific padding */
+      padding: var(--global-button-padding-y) 20px;
+      font-size: var(--global-button-font-size);
+      font-weight: var(--global-button-font-weight);
+      letter-spacing: var(--global-button-letter-spacing);
+      text-transform: var(--global-button-text-transform);
+      border-radius: var(--global-button-radius);
+    }
+
+    .sticky-add-to-cart__title {
+      font-size: {{ title_desktop_font_size }}px;
+    }
+
+    .sticky-add-to-cart__rating-text {
+      font-size: {{ rating_text_desktop_font_size }}px;
+    }
+
+    .delivery-text {
+      font-size: {{ delivery_text_desktop_font_size }}px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .sticky-add-to-cart__container {
+      padding: 0;
+    }
+
+    .mobile-view {
+      padding: 0 15px 0px 15px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .sticky-add-to-cart__button {
+      padding: 15px 20px !important;
+      margin: 0 !important;
+    }
+  }
+
+  /* Extra specific selectors to ensure hiding works */
+  #stickyAddToCart .hide-desktop-shipping,
+  #stickyAddToCart .sticky-add-to-cart__shipping.hide-desktop-shipping,
+  #stickyAddToCart .sticky-add-to-cart__shipping-date.hide-desktop-shipping,
+  #stickyAddToCart .delivery-icon.hide-desktop-shipping,
+  #stickyAddToCart .delivery-text.hide-desktop-shipping,
+  #stickyAddToCart .delivery-date.hide-desktop-shipping,
+  #stickyAddToCart .hide-mobile-shipping,
+  #stickyAddToCart .mobile-shipping-info.hide-mobile-shipping,
+  #stickyAddToCart .sticky-add-to-cart__shipping-date.hide-mobile-shipping,
+  #stickyAddToCart .delivery-icon.hide-mobile-shipping,
+  #stickyAddToCart .delivery-text.hide-mobile-shipping,
+  #stickyAddToCart .delivery-date.hide-mobile-shipping
+  {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Format delivery dates with proper localization
+    const deliveryDateElements = document.querySelectorAll('.delivery-date[data-timestamp]');
+
+    deliveryDateElements.forEach(function (element) {
+      try {
+        const timestamp = parseInt(element.dataset.timestamp, 10) * 1000; // Convert Liquid seconds to JS milliseconds
+        const locale = element.dataset.locale || 'en';
+        const format = element.dataset.format || 'weekday_month_day';
+        const jsDate = new Date(timestamp);
+
+        // Define formatting options based on the selected format
+        let options = {};
+        switch (format) {
+          case 'weekday_month_day':
+            options = { weekday: 'long', month: 'long', day: 'numeric' };
+            break;
+          case 'month_day_weekday':
+            options = { month: 'long', day: 'numeric', weekday: 'long' };
+            break;
+          case 'month_day':
+            options = { month: 'long', day: 'numeric' };
+            break;
+          case 'day_month':
+            options = { day: 'numeric', month: 'long' };
+            break;
+          default:
+            options = { weekday: 'long', month: 'long', day: 'numeric' };
+        }
+
+        const formatter = new Intl.DateTimeFormat(locale, options);
+        let formattedDate = formatter.format(jsDate);
+
+        // For specific formats, adjust the order
+        if (format === 'month_day_weekday') {
+          // Convert "Monday, January 5" to "January 5, Monday"
+          const parts = formatter.formatToParts(jsDate);
+          const weekday = parts.find((part) => part.type === 'weekday')?.value;
+          const month = parts.find((part) => part.type === 'month')?.value;
+          const day = parts.find((part) => part.type === 'day')?.value;
+          if (weekday && month && day) {
+            formattedDate = `${month} ${day}, ${weekday}`;
+          }
+        }
+
+        element.textContent = formattedDate;
+      } catch (error) {
+        console.error('Error formatting delivery date:', error);
+        // Fallback to simple format if error occurs
+        const timestamp = parseInt(element.dataset.timestamp, 10) * 1000;
+        const jsDate = new Date(timestamp);
+        element.textContent = jsDate.toLocaleDateString();
+      }
+    });
+  });
+</script>

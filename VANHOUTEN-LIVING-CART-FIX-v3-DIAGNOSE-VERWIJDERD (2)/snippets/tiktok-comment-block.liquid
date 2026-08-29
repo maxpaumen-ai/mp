@@ -1,0 +1,253 @@
+<div
+  class="tiktok-comment-block"
+  id="block-{{ block.id }}"
+  {{ block.shopify_attributes }}
+  style="margin-top: {{ block.settings.margin_top }}px; margin-bottom: {{ block.settings.margin_bottom }}px; width: 100%;"
+>
+  <div
+    class="tiktok-comment"
+    style="
+      background: {{ block.settings.background_color }};
+      border-radius: {{ block.settings.border_radius }}px;
+      max-width: none;
+      width: 100%;
+      margin: 0;
+      padding: {{ block.settings.block_padding }}px 0;
+      border: 1px solid {{ block.settings.border_color }};
+      {% if block.settings.show_box_shadow %}box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);{% endif %}
+    "
+  >
+    <div
+      class="comment-container"
+      style="
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 0 {{ block.settings.block_padding }}px;
+      "
+    >
+      {% if block.settings.profile_image != blank %}
+        <div
+          class="profile-picture"
+          style="
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+          "
+        >
+          <img
+            src="{{ block.settings.profile_image | image_url }}"
+            alt="Profile picture"
+            style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"
+            width=""
+            height=""
+          >
+        </div>
+      {% else %}
+        <div
+          class="profile-picture"
+          style="
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #c4c4c4;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+          "
+        >
+          <div
+            style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 20px;
+              height: 20px;
+              background: #ffffff;
+              border-radius: 50%;
+            "
+          ></div>
+          <div
+            style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              font-size: 16px;
+              color: #c4c4c4;
+            "
+          >
+            👤
+          </div>
+        </div>
+      {% endif %}
+
+      <div
+        class="comment-content"
+        style="
+          flex: 1;
+          min-width: 0;
+        "
+      >
+        <div
+          class="comment-header"
+          style="
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 4px;
+          "
+        >
+          <div class="comment-left" style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+              <div
+                class="username"
+                style="
+                  font-weight: var(--font-weight-bold) !important;
+                  font-size: {{ block.settings.username_font_size }}px;
+                  letter-spacing: var(--letter-spacing-body);
+                  color: {{ block.settings.username_color }};
+                "
+              >
+                {{ block.settings.username }}
+              </div>
+              {% if block.settings.show_verified_badge %}
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  style="
+                    flex-shrink: 0;
+                    margin-top: 1px;
+                    display: block;
+                  "
+                >
+                  <circle cx="12" cy="12" r="10" style="fill: {{ block.settings.verified_badge_color | default: '#12DBF0' }};"></circle>
+                  <path d="M11,15.5a1,1,0,0,1-.71-.29l-3-3a1,1,0,1,1,1.42-1.42L11,13.09l4.29-4.3a1,1,0,0,1,1.42,1.42l-5,5A1,1,0,0,1,11,15.5Z" style="fill: white;"></path>
+                </svg>
+              {% endif %}
+            </div>
+            <div
+              class="comment-text"
+              style="
+                color: {{ block.settings.comment_text_color }};
+                font-size: {{ block.settings.comment_text_font_size }}px;
+                line-height: 1.4;
+                word-wrap: break-word;
+              "
+            >
+              {{ block.settings.comment_text }}
+            </div>
+          </div>
+
+          {% if block.settings.show_like_section %}
+            <div
+              class="like-section"
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0px;
+                margin-left: 12px;
+              "
+            >
+              <div
+                class="heart-button"
+                style="
+                  cursor: pointer;
+                  padding: 4px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <svg
+                  class="heart-icon"
+                  viewBox="0 0 32 32"
+                  style="
+                    width: 20px;
+                    height: 20px;
+                    fill: none;
+                    stroke: {{ block.settings.heart_color }};
+                    stroke-width: 2;
+                    transition: stroke 0.2s ease;
+                  "
+                >
+                  <path d="M26.996 12.898c-.064-2.207-1.084-4.021-2.527-5.13-1.856-1.428-4.415-1.69-6.542-.132-.702.516-1.359 1.23-1.927 2.168-.568-.938-1.224-1.652-1.927-2.167-2.127-1.559-4.685-1.297-6.542.132-1.444 1.109-2.463 2.923-2.527 5.13-.035 1.172.145 2.48.788 3.803 1.01 2.077 5.755 6.695 10.171 10.683l.035.038.002-.002.002.002.036-.038c4.415-3.987 9.159-8.605 10.17-10.683.644-1.323.822-2.632.788-3.804z"/>
+                </svg>
+              </div>
+              <span
+                class="like-count"
+                style="
+                  font-size: {{ block.settings.like_count_font_size }}px;
+                  color: {{ block.settings.like_count_color }};
+                  font-weight: var(--font-weight-regular);
+                  display: flex;
+                  align-items: center;
+                "
+              >
+                {{- block.settings.like_count -}}
+              </span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div
+          class="comment-meta"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: {{ block.settings.meta_font_size }}px;
+            color: {{ block.settings.meta_color }};
+          "
+        >
+          <span class="timestamp" style="font-weight: 400;">{{ block.settings.timestamp }}</span>
+          {% if block.settings.show_reply_button %}
+            <span
+              class="reply-button"
+              style="
+                cursor: pointer;
+                font-weight: 600;
+                color: {{ block.settings.meta_color }};
+              "
+            >
+              {{- block.settings.reply_text -}}
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .tiktok-comment-block {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.4;
+    width: 100%;
+  }
+
+  .tiktok-comment-block .heart-button:hover .heart-icon {
+    stroke: #fe2c55 !important;
+  }
+
+  .tiktok-comment-block .reply-button:hover {
+    color: #161823 !important;
+  }
+
+  @media (max-width: 550px) {
+    .tiktok-comment-block .comment-meta {
+      gap: 12px !important;
+    }
+
+    .tiktok-comment-block .like-section {
+      margin-left: 8px !important;
+    }
+  }
+</style>

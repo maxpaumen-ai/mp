@@ -1,0 +1,100 @@
+{% liquid
+  assign selected_products = section.blocks | where: 'type', 'product'
+  assign source_collection = section.settings.collection
+%}
+{{ 'vhl-product-card.css' | asset_url | stylesheet_tag }}
+<section id="VHLFavorites-{{ section.id }}" class="vhl-favorites">
+  <div class="vhl-favorites__inner">
+    <header class="vhl-favorites__header">
+      <div>
+        {% if section.settings.eyebrow != blank %}<p class="vhl-favorites__eyebrow">{{ section.settings.eyebrow | escape }}</p>{% endif %}
+        {% if section.settings.heading != blank %}<h2 class="vhl-favorites__heading">{{ section.settings.heading | escape }}</h2>{% endif %}
+      </div>
+      <div class="vhl-favorites__controls" aria-label="Productslider bedienen">
+        <button type="button" class="vhl-favorites__arrow" data-vhl-previous aria-label="Vorige producten"><span aria-hidden="true">←</span></button>
+        <button type="button" class="vhl-favorites__arrow" data-vhl-next aria-label="Volgende producten"><span aria-hidden="true">→</span></button>
+      </div>
+    </header>
+
+    <div class="vhl-favorites__track" data-vhl-track tabindex="0" aria-label="{{ section.settings.heading | escape }}">
+      {% if selected_products.size > 0 %}
+        {% for block in selected_products %}
+          {% assign product = block.settings.product %}
+          {% if product != blank %}{% render 'vhl-product-card', product: product, section_id: section.id, quick_add_text: section.settings.quick_add_text, choose_options_text: section.settings.choose_options_text, block_attributes: block.shopify_attributes %}{% endif %}
+        {% endfor %}
+      {% elsif source_collection != blank %}
+        {% for product in source_collection.products limit: section.settings.products_to_show %}
+          {% render 'vhl-product-card', product: product, section_id: section.id, quick_add_text: section.settings.quick_add_text, choose_options_text: section.settings.choose_options_text %}
+        {% endfor %}
+      {% else %}
+        {% for i in (1..4) %}
+          <article class="vhl-product-card vhl-product-card--placeholder">
+            <div class="vhl-product-card__media">{{ 'product-' | append: i | placeholder_svg_tag }}</div>
+            <div class="vhl-product-card__content"><h3>Selecteer een product</h3></div>
+          </article>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% style %}
+  #VHLFavorites-{{ section.id }} { overflow: hidden; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px; background: {{ section.settings.background }}; color: {{ section.settings.text_color }}; }
+  #VHLFavorites-{{ section.id }} * { box-sizing: border-box; }
+  #VHLFavorites-{{ section.id }} .vhl-favorites__inner { width: min(100%, 1500px); margin: 0 auto; padding: 0 clamp(18px,4vw,58px); }
+  #VHLFavorites-{{ section.id }} .vhl-favorites__header { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: clamp(28px,4vw,48px); }
+  #VHLFavorites-{{ section.id }} .vhl-favorites__eyebrow { margin: 0 0 10px; font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; opacity: .62; }
+  #VHLFavorites-{{ section.id }} .vhl-favorites__heading { margin: 0; color: {{ section.settings.text_color }} !important; font-family: var(--font-heading-family); font-size: clamp(34px,4vw,58px); font-weight: var(--font-heading-weight); line-height: 1; letter-spacing: -.04em; }
+  #VHLFavorites-{{ section.id }} .vhl-favorites__controls { display: flex; gap: 9px; }
+  #VHLFavorites-{{ section.id }} .vhl-favorites__arrow { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(36,33,30,.25); border-radius: 50%; background: transparent; color: inherit; cursor: pointer; transition: background 180ms ease,color 180ms ease; }
+  #VHLFavorites-{{ section.id }} .vhl-favorites__arrow:hover { background: #24211e; color: #fff; }
+  #VHLFavorites-{{ section.id }} .vhl-favorites__track { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(260px, calc((100% - 60px)/3.2)); gap: 20px; overflow-x: auto; padding: 0 1px 12px; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-inline: contain; }
+  #VHLFavorites-{{ section.id }} .vhl-favorites__track::-webkit-scrollbar { display: none; }
+  #VHLFavorites-{{ section.id }} .vhl-product-card { min-width: 0; scroll-snap-align: start; }
+  @media screen and (max-width: 749px) {
+    #VHLFavorites-{{ section.id }} { padding: {{ section.settings.padding_top_mobile }}px 0 {{ section.settings.padding_bottom_mobile }}px; }
+    #VHLFavorites-{{ section.id }} .vhl-favorites__inner { padding-inline: 16px; }
+    #VHLFavorites-{{ section.id }} .vhl-favorites__header { align-items: center; margin-bottom: 26px; }
+    #VHLFavorites-{{ section.id }} .vhl-favorites__heading { font-size: clamp(31px,9vw,42px); }
+    #VHLFavorites-{{ section.id }} .vhl-favorites__controls { display: none; }
+    #VHLFavorites-{{ section.id }} .vhl-favorites__track { grid-auto-columns: minmax(245px, 84vw); gap: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) { #VHLFavorites-{{ section.id }} .vhl-favorites__track { scroll-behavior: auto; } #VHLFavorites-{{ section.id }} .vhl-favorites__arrow { transition: none; } }
+{% endstyle %}
+
+<script>
+  (() => {
+    const section = document.getElementById('VHLFavorites-{{ section.id }}');
+    if (!section || section.dataset.ready === 'true') return;
+    section.dataset.ready = 'true';
+    const track = section.querySelector('[data-vhl-track]');
+    const move = (direction) => track?.scrollBy({ left: direction * Math.max(track.clientWidth * .82, 280), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    section.querySelector('[data-vhl-previous]')?.addEventListener('click', () => move(-1));
+    section.querySelector('[data-vhl-next]')?.addEventListener('click', () => move(1));
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "VHL Favorites",
+  "tag": "section",
+  "class": "section-vhl-favorites",
+  "max_blocks": 12,
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Boventitel", "default": "Voor jouw badkamer" },
+    { "type": "text", "id": "heading", "label": "Titel", "default": "Onze favorieten" },
+    { "type": "collection", "id": "collection", "label": "Collectie", "info": "Wordt gebruikt als er geen losse productblokken zijn toegevoegd." },
+    { "type": "range", "id": "products_to_show", "label": "Aantal producten uit collectie", "min": 4, "max": 12, "step": 1, "default": 8 },
+    { "type": "text", "id": "quick_add_text", "label": "Tekst snelle toevoeging", "default": "Toevoegen" },
+    { "type": "text", "id": "choose_options_text", "label": "Tekst bij varianten", "default": "Kies opties" },
+    { "type": "color", "id": "background", "label": "Achtergrond", "default": "#F7F4EF" },
+    { "type": "color", "id": "text_color", "label": "Tekstkleur", "default": "#24211E" },
+    { "type": "range", "id": "padding_top", "label": "Bovenruimte desktop", "min": 30, "max": 160, "step": 5, "unit": "px", "default": 95 },
+    { "type": "range", "id": "padding_bottom", "label": "Onderruimte desktop", "min": 30, "max": 160, "step": 5, "unit": "px", "default": 95 },
+    { "type": "range", "id": "padding_top_mobile", "label": "Bovenruimte mobiel", "min": 20, "max": 100, "step": 5, "unit": "px", "default": 60 },
+    { "type": "range", "id": "padding_bottom_mobile", "label": "Onderruimte mobiel", "min": 20, "max": 100, "step": 5, "unit": "px", "default": 60 }
+  ],
+  "blocks": [{ "type": "product", "name": "Handmatig product", "settings": [{ "type": "product", "id": "product", "label": "Product" }] }],
+  "presets": [{ "name": "VHL Favorites" }]
+}
+{% endschema %}

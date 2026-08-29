@@ -1,0 +1,560 @@
+{{ 'facebook-comments.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  # Determine background style based on gradient settings
+  if section.settings.use_gradient_background
+    assign background_style = 'background: linear-gradient(' | append: section.settings.gradient_angle | append: 'deg, ' | append: section.settings.gradient_start_color | append: ', ' | append: section.settings.gradient_end_color | append: ');'
+  else
+    assign background_style = 'background-color: ' | append: section.settings.background_color | append: ';'
+  endif
+%}
+
+<section
+  class="facebook-reviews-section {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}"
+  id="facebook-reviews-{{ section.id }}"
+  style="{{ background_style }}"
+>
+  {% if section.settings.title != blank %}
+    <div class="title-container">
+      <h2
+        class="reviews-title"
+        style="color: {{ section.settings.title_color }} !important; font-size: {{ section.settings.title_size }}px;"
+      >
+        {{ section.settings.title }}
+      </h2>
+      <div class="facebook-views-badge" style="background-color: {{ section.settings.views_badge_color }} !important; color: {{ section.settings.badge_text_color }} !important; font-size: {{ section.settings.badge_text_size }}px;">
+        <svg
+          class="facebook-icon"
+          width="{{ section.settings.badge_icon_size }}"
+          height="{{ section.settings.badge_icon_size }}"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          style="fill: {{ section.settings.badge_text_color }};"
+        >
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+        <span class="facebook-text">{{ section.settings.badge_text }}</span>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="reviews-container" style="max-width: {{ section.settings.container_width }}px;">
+    <div
+      class="reviews-grid md:grid-cols-3 {% if section.settings.single_column_mobile %}grid-cols-1{% else %}grid-cols-2{% endif %}"
+      style="grid-gap: {{ section.settings.column_spacing }}px;"
+    >
+      {% for block in section.blocks %}
+        <div
+          class="review-item"
+          {{ block.shopify_attributes }}
+          style="margin-bottom: {{ section.settings.review_spacing }}px;"
+        >
+          <div
+            class="profile-pic"
+            style="width: {{ section.settings.profile_size }}px; height: {{ section.settings.profile_size }}px;"
+          >
+            {% if block.settings.profile_image != blank %}
+              <img
+                src="{{ block.settings.profile_image | image_url: width: 100, height: 100, crop: 'center' }}"
+                alt="{{ block.settings.name }}"
+                width=""
+                height=""
+              >
+            {% else %}
+              <img src="{{ 'user-placeholder.png' | asset_url }}" alt="Profile Picture" width="" height="">
+            {% endif %}
+          </div>
+          <div class="fb-comment-wrapper">
+            <div class="fb-comment-card" style="background-color: {{ section.settings.comment_background }}">
+              <div class="reviewer-name" style="color: {{ section.settings.name_color }}">
+                {{ block.settings.name }}
+              </div>
+              <p class="fb-comment-text" style="color: {{ section.settings.text_color }}">
+                {{ block.settings.comment }}
+              </p>
+            </div>
+            <div class="review-meta">
+              <div class="review-actions">
+                <span class="review-action" style="color: {{ section.settings.action_color }}">
+                  {{- section.settings.like_text -}}
+                </span>
+                <span class="review-action" style="color: {{ section.settings.action_color }}">
+                  {{- section.settings.reply_text -}}
+                </span>
+              </div>
+              <div class="review-time" style="color: {{ section.settings.date_color }}">
+                {{ block.settings.date }}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Dynamic styles that use section-specific settings */
+  #facebook-reviews-{{ section.id }} {
+    padding: {{ section.settings.section_padding_vertical }}px {{ section.settings.section_padding_horizontal }}px;
+  }
+
+  #facebook-reviews-{{ section.id }} .reviewer-name {
+    font-size: {{ section.settings.reviewer_size }}px;
+  }
+
+  #facebook-reviews-{{ section.id }} .fb-comment-text {
+    font-size: {{ section.settings.review_text_size }}px;
+  }
+
+  #facebook-reviews-{{ section.id }} .review-action,
+  #facebook-reviews-{{ section.id }} .review-time {
+    font-size: {{ section.settings.action_date_size }}px;
+  }
+
+  @media (max-width: 767px) {
+    #facebook-reviews-{{ section.id }} .reviews-title {
+      font-size: {{ section.settings.title_size_mobile }}px !important;
+    }
+
+    #facebook-reviews-{{ section.id }} .facebook-views-badge {
+      font-size: {{ section.settings.badge_text_size_mobile }}px !important;
+    }
+
+    #facebook-reviews-{{ section.id }} .facebook-icon {
+      width: {{ section.settings.badge_icon_size_mobile }}px !important;
+      height: {{ section.settings.badge_icon_size_mobile }}px !important;
+    }
+    #facebook-reviews-{{ section.id }} .profile-pic {
+      width: {{ section.settings.profile_size_mobile }}px !important;
+      height: {{ section.settings.profile_size_mobile }}px !important;
+    }
+    #facebook-reviews-{{ section.id }} .reviewer-name {
+      font-size: {{ section.settings.reviewer_size_mobile }}px !important;
+    }
+    #facebook-reviews-{{ section.id }} .fb-comment-text {
+      font-size: {{ section.settings.review_text_size_mobile }}px !important;
+    }
+    #facebook-reviews-{{ section.id }} .review-action,
+    #facebook-reviews-{{ section.id }} .review-time {
+      font-size: {{ section.settings.action_date_size_mobile }}px !important;
+    }
+  }
+
+  /* Single Column Mobile Layout */
+  @media (max-width: 767px) {
+    #facebook-reviews-{{ section.id }} .reviews-grid.single-column-mobile {
+      flex-direction: column;
+    }
+
+    #facebook-reviews-{{ section.id }} .reviews-grid.single-column-mobile .reviews-column {
+      width: 100%;
+      margin-bottom: 0;
+    }
+
+    #facebook-reviews-{{ section.id }} .reviews-grid.single-column-mobile .reviews-column .review-item {
+      margin-bottom: {{ section.settings.review_spacing }}px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Facebook Reviews",
+  "tag": "section",
+  "class": "facebook-reviews-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Latest Facebook Reviews"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "Recently viral on Facebook"
+    },
+    {
+      "type": "text",
+      "id": "like_text",
+      "label": "Like Button Text",
+      "default": "Like"
+    },
+    {
+      "type": "text",
+      "id": "reply_text",
+      "label": "Reply Button Text",
+      "default": "Reply"
+    },
+    {
+      "type": "header",
+      "content": "Desktop Sizing"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 16,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Title Size",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "badge_text_size",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Text Size",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "badge_icon_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Icon Size",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "profile_size",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Profile Picture Size",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "reviewer_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Reviewer Name Size",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "review_text_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Text Size",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "action_date_size",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Actions/Date Size",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Mobile Sizing"
+    },
+    {
+      "type": "range",
+      "id": "title_size_mobile",
+      "min": 16,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Title Size",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "badge_text_size_mobile",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Text Size",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "badge_icon_size_mobile",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge Icon Size",
+      "default": 11
+    },
+    {
+      "type": "range",
+      "id": "profile_size_mobile",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Profile Picture Size",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "reviewer_size_mobile",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Reviewer Name Size",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "review_text_size_mobile",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Text Size",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "action_date_size_mobile",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Actions/Date Size",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "min": 600,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Container Width",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "section_padding_vertical",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Section Vertical Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "section_padding_horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Section Horizontal Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "column_spacing",
+      "min": 3,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Column Spacing",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "review_spacing",
+      "min": 3,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Spacing",
+      "default": 5
+    },
+    {
+      "type": "checkbox",
+      "id": "single_column_mobile",
+      "label": "Single Column on Mobile",
+      "default": false,
+      "info": "Display comments in one column instead of two on mobile devices"
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_background",
+      "label": "Use Gradient Background",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Solid Background Color",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "gradient_start_color",
+      "label": "Gradient Start Color",
+      "default": "#ff6b6b"
+    },
+    {
+      "type": "color",
+      "id": "gradient_end_color",
+      "label": "Gradient End Color",
+      "default": "#4ecdc4"
+    },
+    {
+      "type": "range",
+      "id": "gradient_angle",
+      "min": 0,
+      "max": 360,
+      "step": 10,
+      "unit": "deg",
+      "label": "Gradient Angle",
+      "default": 130
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "views_badge_color",
+      "label": "Badge Background Color",
+      "default": "#1877f2"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Badge Text & Icon Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "comment_background",
+      "label": "Comment Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "name_color",
+      "label": "Username Color",
+      "default": "#050505"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Comment Text Color",
+      "default": "#050505"
+    },
+    {
+      "type": "color",
+      "id": "date_color",
+      "label": "Date/Time Color",
+      "default": "#65676B"
+    },
+    {
+      "type": "color",
+      "id": "action_color",
+      "label": "Action Button Color",
+      "default": "#65676B"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "profile_image",
+          "label": "Profile Image"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Reviewer Name",
+          "default": "John Doe"
+        },
+        {
+          "type": "textarea",
+          "id": "comment",
+          "label": "Review Comment",
+          "default": "This product is amazing! I highly recommend it to everyone."
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Date/Time Text",
+          "default": "48 min"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Facebook Reviews",
+      "category": "Social",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "name": "card_king620",
+            "comment": "I had a brutal shoulder injury from wrestling, this is the only thing that has helped. Miracle stuff!",
+            "date": "48 min"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "name": "Reynir Sigurvir Bryniόlfsson",
+            "comment": "Works great miracle stuff for me suffer from chronic pain for years!",
+            "date": "19 min"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "name": "Randy Goad",
+            "comment": "I am amazed at how well it has worked for me. From shoulder pain, arm pain, to knee pain from flight travel; this has done the trick!",
+            "date": "35 min"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

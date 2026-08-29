@@ -1,0 +1,122 @@
+<style>
+  .award-badge-container {
+    position: relative;
+    margin-top: {{ margin_top | default: 8 }}px;
+    margin-bottom: {{ margin_bottom | default: 8 }}px;
+    width: {{ badge_width | default: 270 }}px;
+    height: {{ badge_height | default: 40 }}px;
+    max-width: 100%;
+  }
+
+  .award-gradient-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    {% if section.settings.use_theme_colors %}
+      background: {{ settings.global_section_accent_1_color }};
+    {% else %}
+      background: linear-gradient(to right, {{ gradient_start_color | default: "#6366f1" }}, {{ gradient_end_color | default: "#ec4899" }});
+    {% endif %}
+    border-radius: {{ border_radius | default: 5 }}px;
+    padding: 1px;
+  }
+
+  .award-badge-content {
+    position: relative;
+    background-color: {{ background_color | default: "#F6F6F6" }};
+    border-radius: {{ border_radius | minus: 1 | default: 4 }}px;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Debug: Theme colors: {{ section.settings.use_theme_colors }}, Text color param: {{ number_badge_text_color }} */
+  #block-{{ block.id }} .award-number-badge {
+    {% if section.settings.use_theme_colors %}
+      background: {{ settings.global_section_accent_1_color }} !important;
+      color: {{ settings.global_section_background_color }} !important;
+    {% else %}
+      {% if number_badge_bg_color %}
+        background: {{ number_badge_bg_color }} !important;
+      {% else %}
+        background: linear-gradient(to right, {{ gradient_start_color | default: "#6366f1" }}, {{ gradient_end_color | default: "#ec4899" }}) !important;
+      {% endif %}
+      color: {{ number_badge_text_color | default: "#FFFFFF" }} !important;
+    {% endif %}
+    padding: {{ number_badge_padding | default: "0 10px" }};
+    border-radius: {{ border_radius | minus: 1 | default: 4 }}px 0 0 {{ border_radius | minus: 1 | default: 4 }}px;
+    font-size: {{ number_badge_font_size | default: 11 }}px;
+    font-weight: {{ number_badge_font_weight | default: 700 }} !important;
+    margin-right: 9px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    {% if number_badge_width %}width: {{ number_badge_width }}px;{% endif %}
+    min-width: fit-content;
+  }
+
+  /* Extra specificity with multiple selectors to override any global styles */
+  #block-{{ block.id }} .award-badge-content .award-number-badge,
+  .award-badge-container#block-{{ block.id }} .award-number-badge,
+  div#block-{{ block.id }} .award-number-badge {
+    {% if section.settings.use_theme_colors %}
+      color: {{ settings.global_section_background_color }} !important;
+    {% else %}
+      color: {{ number_badge_text_color | default: "#FFFFFF" }} !important;
+    {% endif %}
+  }
+
+  .award-text-container {
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_color | default: "#171E2C" }}{% endif %} !important;
+  }
+
+  .award-title {
+    font-size: 13px;
+    font-weight: var(--font-weight-bold) !important;
+    line-height: 1.2;
+    letter-spacing: var(--letter-spacing-body);
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_color | default: "#171E2C" }}{% endif %} !important;
+  }
+
+  .award-subtitle {
+    font-size: 9px;
+    line-height: 1.1;
+    letter-spacing: var(--letter-spacing-body);
+    font-style: italic;
+    font-weight: 300;
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ text_color | default: "#171E2C" }}{% endif %} !important;
+  }
+
+  @media (max-width: 480px) {
+    .award-badge-container {
+      width: {{ badge_width | default: 270 }}px;
+      max-width: 100%;
+    }
+  }
+</style>
+
+<!--
+  Debug info: use_theme_colors={{ section.settings.use_theme_colors }}, number_badge_text_color={{ number_badge_text_color }}
+-->
+
+<div class="award-badge-container" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+  <div class="award-gradient-border">
+    <div class="award-badge-content">
+      <div
+        class="award-number-badge"
+        style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ number_badge_text_color | default: '#FFFFFF' }}{% endif %} !important; font-weight: {{ number_badge_font_weight | default: 700 }} !important;"
+      >
+        {{ badge_number | default: '#1' }}
+      </div>
+      <div class="award-text-container">
+        <div class="award-title">{{ title_text | default: 'BESTSELLER OF 2024' }}</div>
+        <div class="award-subtitle">{{ subtitle_text | default: 'The best against the cold' }}</div>
+      </div>
+    </div>
+  </div>
+</div>

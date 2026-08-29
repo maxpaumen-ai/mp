@@ -1,0 +1,1800 @@
+{% comment %} 
+Button Horizontal Padding - Added the missing setting and CSS implementation
+Desktop Title Size - Fixed the responsive implementation for mobile font sizes
+Google Fonts - Moved from link tags to CSS imports for better performance
+Image Loading - Added lazy loading attributes to all images
+CSS Structure - Consolidated all styles into a single {% style %} block
+Gradient Settings - Fixed the gradient implementation for rating summary
+Mobile Responsiveness - Improved mobile styling for better display on small screens
+Performance - Optimized the code structure for better loading
+ {% endcomment %}
+
+ {%- style -%}
+ /* Google Fonts for accent text customization */
+ {% if section.settings.override_global_accent and section.settings.accent_font_family != 'inherit' and section.settings.accent_font_family != 'serif' %}
+   @import url('https://fonts.googleapis.com/css2?family=
+   {%- case section.settings.accent_font_family -%}
+     {%- when 'Georgia Pro' -%}Georgia+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700
+     {%- when 'Bodoni Moda' -%}Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800
+     {%- when 'Instrument Serif' -%}Instrument+Serif:ital@0;1
+     {%- when 'DM Serif Text' -%}DM+Serif+Text:ital@0;1
+     {%- when 'Nothing You Could Do' -%}Nothing+You+Could+Do
+   {%- endcase -%}
+   &display=swap');
+ {% endif %}
+
+.section-{{ section.id }}.reviews-transformation-section {
+  --section-max-width: {{ section.settings.section_width }}px;
+  background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.section_background }}{% endif %} !important;
+}
+
+ /* Header Styles with increased specificity */
+ .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle,
+ .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle.section-title,
+ .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle.heading,
+ .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle.h1 {
+   {% unless section.settings.custom_heading_styling %}
+     font-size: 3.5rem !important;
+     font-weight: var(--font-weight-bold) !important;
+     letter-spacing: var(--letter-spacing-heading) !important;
+   {% else %}
+     font-size: {{ section.settings.heading_font_size }}px !important;
+     line-height: {{ section.settings.heading_line_height }} !important;
+     letter-spacing: var(--letter-spacing-heading) !important;
+   {% endunless %}
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_color }}{% endif %} !important;
+ }
+
+ /* Enhanced accent text styling with global and local customization options */
+ .section-{{ section.id }}.reviews-transformation-section .global-accent-text,
+ .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle .global-accent-text,
+ .section-{{ section.id }}.reviews-transformation-section .custom-accent-text {
+   {% comment %} Always apply core accent text styling {% endcomment %}
+   padding: 2px 4px !important;
+   margin: -2px -4px !important;
+   margin-left: calc({{ section.settings.accent_text_margin_left }}px - 4px) !important;
+   display: inline-block !important;
+   letter-spacing: var(--letter-spacing-heading) !important;
+   
+   {% comment %} Apply color or gradient based on theme colors and settings {% endcomment %}
+   {% if section.settings.use_theme_colors %}
+     {% comment %} Use global dark gradient when theme colors are enabled {% endcomment %}
+     background: {{ settings.global_accent_text_gradient_dark }} !important;
+     -webkit-background-clip: text !important;
+     -webkit-text-fill-color: transparent !important;
+     background-clip: text !important;
+     color: transparent !important;
+     line-height: 1.3 !important;
+   {% elsif section.settings.use_accent_gradient %}
+     background: {{ section.settings.accent_text_gradient }} !important;
+     -webkit-background-clip: text !important;
+     -webkit-text-fill-color: transparent !important;
+     background-clip: text !important;
+     color: transparent !important;
+     line-height: 1.3 !important;
+   {% else %}
+     {% comment %} Apply solid color {% endcomment %}
+     color: {{ section.settings.accent_color | default: settings.accent_text_color }} !important;
+   {% endif %}
+   
+   {% if section.settings.override_global_accent %}
+     {% comment %} Use section-specific typography settings when override is enabled {% endcomment %}
+     {% if section.settings.accent_font_family != 'inherit' %}
+       {% case section.settings.accent_font_family %}
+         {% when 'serif' %}
+           font-family: serif !important;
+         {% when 'Georgia Pro' %}
+           font-family: 'Georgia Pro', Georgia, serif !important;
+         {% when 'Bodoni Moda' %}
+           font-family: 'Bodoni Moda', Georgia, serif !important;
+         {% when 'Instrument Serif' %}
+           font-family: 'Instrument Serif', Georgia, serif !important;
+         {% when 'DM Serif Text' %}
+           font-family: 'DM Serif Text', Georgia, serif !important;
+         {% when 'Nothing You Could Do' %}
+           font-family: 'Nothing You Could Do', cursive !important;
+       {% endcase %}
+     {% else %}
+       font-family: var(--font-accent-family, var(--font-body-family)) !important;
+     {% endif %}
+     
+     font-style: {% if section.settings.accent_font_style != 'normal' %}{{ section.settings.accent_font_style }}{% else %}var(--font-accent-style, normal){% endif %} !important;
+     font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+     
+   {% else %}
+     {% comment %} Use global accent typography system {% endcomment %}
+     font-family: var(--font-accent-family, var(--font-body-family)) !important;
+     font-style: var(--font-accent-style, normal) !important;
+     font-weight: var(--font-accent-weight, inherit) !important;
+     letter-spacing: var(--font-accent-letter-spacing, inherit) !important;
+     text-transform: var(--font-accent-text-transform, none) !important;
+   {% endif %}
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .reviews-section-header {
+   margin-bottom: {{ section.settings.header_margin_bottom | default: 10 }}px;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .reviews-description {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.description_color }}{% endif %} !important;
+   font-size: {{ section.settings.description_font_size | default: 16 }}px !important;
+   margin-bottom: {{ section.settings.description_bottom_margin }}px !important;
+ }
+
+ /* Summary Stars */
+ .section-{{ section.id }}.reviews-transformation-section .reviews-summary-star {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.summary_star_color }}{% endif %} !important;
+ }
+
+ /* Rating Stars (in rating-stars container) */
+ .section-{{ section.id }}.reviews-transformation-section .rating-stars .reviews-summary-star {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.summary_star_color }}{% endif %} !important;
+ }
+
+ /* Rating Summary Stars - More specific targeting */
+ .section-{{ section.id }}.reviews-transformation-section .rating-summary-wrapper .rating-stars .star {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.summary_star_color }}{% endif %} !important;
+ }
+
+/* Carousel Review Stars - Clean Implementation */
+.section-{{ section.id }}.reviews-transformation-section .carousel-review-star.star-filled {
+  color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.star_filled_color }}{% endif %} !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.section-{{ section.id }}.reviews-transformation-section .carousel-review-star.star-empty {
+  color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 40 }}{% else %}{{ section.settings.star_empty_color }}{% endif %} !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+ /* Carousel Review Star Size */
+ .section-{{ section.id }}.reviews-transformation-section .carousel-review-star {
+   width: {{ section.settings.carousel_review_star_size }}px !important;
+   height: {{ section.settings.carousel_review_star_size }}px !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .review-stars .carousel-review-star,
+ .section-{{ section.id }}.reviews-transformation-section .carousel-review-header .carousel-review-star {
+   width: {{ section.settings.carousel_review_star_size }}px !important;
+   height: {{ section.settings.carousel_review_star_size }}px !important;
+ }
+
+/* Navigation buttons now use global-nav-button snippet */
+
+ /* Review Card */
+ .section-{{ section.id }}.reviews-transformation-section .review-card {
+   width: {{ section.settings.card_width }}px;
+   border-radius: {{ section.settings.card_border_radius }}px;
+   border: 1px solid {% if section.settings.use_theme_colors %}#e0e0e0{% else %}{{ section.settings.card_border_color }}{% endif %};
+   background: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.card_background }}{% endif %} !important;
+   margin: {{ section.settings.card_margin_top }}px {{ section.settings.card_margin_right }}px {{ section.settings.card_margin_bottom }}px {{ section.settings.card_margin_left }}px;
+ }
+
+ /* Review Image Container */
+ .section-{{ section.id }}.reviews-transformation-section .review-image-container {
+   border-top-left-radius: {{ section.settings.card_border_radius }}px;
+   border-top-right-radius: {{ section.settings.card_border_radius }}px;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .empty-image {
+   background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color | color_lighten: 10 }}{% else %}#f0f0f0{% endif %} !important;
+ }
+
+ /* Review Text */
+ .section-{{ section.id }}.reviews-transformation-section .review-text {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.review_text_color }}{% endif %} !important;
+   font-size: {{ section.settings.review_text_size }}px !important;
+ }
+
+ /* Reviewer Info */
+ .section-{{ section.id }}.reviews-transformation-section .reviewer-info {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.reviewer_info_color }}{% endif %} !important;
+   background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.reviewer_info_bg_color }}{% endif %} !important;
+   font-size: {{ section.settings.reviewer_info_font_size }}px !important;
+   {% if section.settings.enable_reviewer_info_border %}
+     border: {{ section.settings.reviewer_info_border_width }}px {{ section.settings.reviewer_info_border_style }} {{ section.settings.reviewer_info_border_color }} !important;
+     border-radius: {{ section.settings.reviewer_info_border_radius }}px !important;
+   {% endif %}
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .carousel-reviewer-name,
+ .section-{{ section.id }}.reviews-transformation-section .reviewer-age {
+   font-size: {{ section.settings.reviewer_info_font_size }}px !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .verified-badge {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.verified_badge_color }}{% endif %} !important;
+   font-size: {{ section.settings.verified_badge_font_size }}px !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .verified-icon {
+   width: {{ section.settings.verified_badge_font_size | times: 1.2 }}px !important;
+   height: {{ section.settings.verified_badge_font_size | times: 1.2 }}px !important;
+   margin-right: 3px !important;
+   vertical-align: middle !important;
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.verified_icon_color }}{% endif %} !important;
+ }
+
+ /* Product Purchased */
+ .section-{{ section.id }}.reviews-transformation-section .product-purchased {
+   border-width: {{ section.settings.product_border_width }}px !important;
+   border-style: {{ section.settings.product_border_style }} !important;
+   border-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 70 }}{% else %}{{ section.settings.product_border_color }}{% endif %} !important;
+   background-color: {{ section.settings.product_bg_color }} !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .product-info {
+   flex: 1 !important;
+   overflow: visible !important;
+   display: flex !important;
+   flex-direction: column !important;
+   height: auto !important;
+   min-height: 60px !important;
+   justify-content: center !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .product-label {
+   display: none !important;
+   letter-spacing: 0.08em !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .product-purchased-container {
+   width: 100% !important;
+   overflow: visible !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .review-product-title {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.product_title_color }}{% endif %} !important;
+   font-size: {{ section.settings.product_title_font_size }}px !important;
+   word-wrap: break-word !important;
+   overflow-wrap: break-word !important;
+   white-space: normal !important;
+   line-height: 1.3 !important;
+   display: block !important;
+   visibility: visible !important;
+   -webkit-line-clamp: unset !important;
+   line-clamp: unset !important;
+   -webkit-box-orient: unset !important;
+   overflow: visible !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .product-price {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.product_price_color }}{% endif %} !important;
+   font-size: {{ section.settings.product_price_font_size }}px !important;
+   letter-spacing: var(--letter-spacing-body);
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .product-compare-price {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 40 }}{% else %}{{ section.settings.product_compare_price_color }}{% endif %} !important;
+   font-size: {{ section.settings.product_compare_price_font_size }}px !important;
+   letter-spacing: var(--letter-spacing-body);
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .product-purchase-date {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 20 }}{% else %}{{ section.settings.purchase_date_color }}{% endif %} !important;
+   font-size: {{ section.settings.purchase_date_font_size }}px !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .purchase-date-icon {
+   stroke: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_lighten: 20 }}{% else %}{{ section.settings.purchase_date_icon_color }}{% endif %} !important;
+ }
+
+ /* Rating Summary */
+ .section-{{ section.id }}.reviews-transformation-section .reviews-rating-summary {
+   {% if section.settings.enable_rating_summary_gradient %}
+     background: linear-gradient({{ section.settings.rating_summary_gradient_direction }}, {{ section.settings.rating_summary_gradient_start }}, {{ section.settings.rating_summary_gradient_end }}) !important;
+   {% else %}
+     background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_2_color }}{% else %}{{ section.settings.rating_summary_bg_color }}{% endif %} !important;
+   {% endif %}
+   {% if section.settings.enable_rating_summary_border %}
+     border: {{ section.settings.rating_summary_border_width }}px {{ section.settings.rating_summary_border_style }} {{ section.settings.rating_summary_border_color }};
+   {% endif %}
+   border-radius: {{ section.settings.rating_summary_border_radius | default: 50 }}px;
+   margin-bottom: {{ section.settings.rating_summary_margin_bottom | default: 0 }}px;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .rating-text {
+   color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.summary_text_color }}{% endif %} !important;
+   font-size: {{ section.settings.rating_summary_font_size | default: 13 }}px !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .rating-text p {
+   margin: 0 !important;
+   color: inherit !important;
+   font-size: inherit !important;
+ }
+
+ .section-{{ section.id }}.reviews-transformation-section .rating-text strong {
+   font-weight: bold !important;
+ }
+
+/* Responsive overrides */
+@media (max-width: 768px) {
+  .section-{{ section.id }}.reviews-transformation-section .review-card {
+    width: {{ section.settings.card_width_tablet | default: 300 }}px;
+  }
+   
+   .section-{{ section.id }}.reviews-transformation-section .review-text {
+     font-size: {{ section.settings.review_text_size }}px !important;
+   }
+   
+   .section-{{ section.id }}.reviews-transformation-section .rating-text {
+     font-size: {{ section.settings.rating_summary_font_size | default: 13 }}px !important;
+   }
+   
+   .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle,
+   .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle.section-title,
+   .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle.heading,
+   .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle.h1 {
+    {% if section.settings.custom_heading_styling %}
+      font-size: {{ section.settings.heading_font_size_mobile | default: 48 }}px !important;
+      line-height: {{ section.settings.heading_line_height | default: 1.2 }} !important;
+     {% else %}
+      font-size: 3.4rem !important;
+    {% endif %}
+   }
+ }
+
+@media (max-width: 480px) {
+  .section-{{ section.id }}.reviews-transformation-section .review-card {
+    width: {{ section.settings.card_width_mobile | default: 280 }}px;
+  }
+   
+   .section-{{ section.id }}.reviews-transformation-section .review-text {
+     font-size: {{ section.settings.review_text_size_mobile | default: section.settings.review_text_size | minus: 2 }}px !important;
+   }
+   
+   .section-{{ section.id }}.reviews-transformation-section .rating-text {
+     font-size: {{ section.settings.rating_summary_font_size | default: 13 }}px !important;
+   }
+  
+  .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle,
+  .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle.section-title,
+  .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle.heading,
+  .section-{{ section.id }}.reviews-transformation-section .reviews-subtitle.h1 {
+    {% if section.settings.custom_heading_styling %}
+      font-size: {{ section.settings.heading_font_size_mobile | default: 48 }}px !important;
+      line-height: {{ section.settings.heading_line_height | default: 1.2 }} !important;
+    {% else %}
+      font-size: 3.4rem !important;
+    {% endif %}
+  }
+ }
+
+/* New CSS rules for wrapping images */
+.section-{{ section.id }}.reviews-transformation-section .image-wrapped {
+  height: auto;
+}
+
+/* Ensure navigation buttons are clickable */
+.section-{{ section.id }}.reviews-transformation-section .reviews-navigation-container {
+  position: relative;
+  z-index: 1;
+  margin-top: {{ section.settings.navigation_margin_top | default: 5 }}px;
+}
+
+.section-{{ section.id }}.reviews-transformation-section .reviews-navigation {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+}
+
+.section-{{ section.id }}.reviews-transformation-section .global-nav-button,
+.section-{{ section.id }}.reviews-transformation-section .nav-button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 11;
+}
+
+/* Swiper carousel: hide until ready to prevent flicker */
+.reviews-transformation-section .reviews-carousel-swiper.swiper {
+  overflow: hidden;
+  transition: opacity 0.15s ease-out;
+}
+.reviews-transformation-section .reviews-carousel-swiper--pending {
+  opacity: 0;
+  pointer-events: none;
+}
+.reviews-transformation-section .reviews-carousel-swiper .swiper-slide {
+  width: auto;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+{%- endstyle -%}
+
+{{ 'customer-reviews-carousel.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'customer-reviews-carousel.js' | asset_url }}" defer></script>
+
+{% assign reviews_anchor = section.settings.anchor_id | default: 'reviews' %}
+<div class="reviews-transformation-section section-{{ section.id }}" id="{{ reviews_anchor }}" data-center-cards-desktop="{{ section.settings.center_cards_desktop }}" data-center-cards-mobile="{{ section.settings.center_cards_mobile }}">
+ <div class="rating-summary-wrapper">
+   <div class="reviews-rating-summary" style="
+     {% if section.settings.use_theme_colors %}
+       background: {{ settings.global_accent_text_gradient_dark }};
+     {% elsif section.settings.rating_summary_gradient != blank %}
+       background: {{ section.settings.rating_summary_gradient }};
+     {% else %}
+       background-color: {{ section.settings.rating_summary_bg_color }};
+     {% endif %}
+     {% if section.settings.enable_rating_summary_border %}
+       {% if section.settings.use_theme_colors %}
+         border: {{ section.settings.rating_summary_border_width }}px {{ section.settings.rating_summary_border_style }} {{ settings.global_section_accent_1_color }};
+       {% else %}
+         border: {{ section.settings.rating_summary_border_width }}px {{ section.settings.rating_summary_border_style }} {{ section.settings.rating_summary_border_color }};
+       {% endif %}
+     {% endif %}
+     border-radius: {{ section.settings.rating_summary_border_radius | default: 50 }}px;
+   ">
+     <span class="rating-stars">
+       <div class="stars">
+         {% for i in (1..5) %}
+           <svg class="star reviews-summary-star" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+             <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z" fill="currentColor"/>
+           </svg>
+         {% endfor %}
+       </div>
+     </span>
+     <div class="rating-text">
+       {{ section.settings.rating_summary_text | default: 'Rated 4.8/5 based on +10,839 Total Ratings' }}
+     </div>
+   </div>
+ </div>
+
+ <div class="reviews-section-header">
+   <h2 class="reviews-subtitle section-title heading h1">
+     {{ section.settings.title_text }} <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">{{ section.settings.accent_text }}</span>
+   </h2>
+   {% if section.settings.show_description %}
+     <p class="reviews-description">
+       {{ section.settings.description_text }}
+     </p>
+   {% endif %}
+ </div>
+
+ <div class="reviews-container reviews-carousel-swiper swiper reviews-carousel-swiper--pending" data-scroll-amount="{{ section.settings.scroll_amount }}" data-section-id="{{ section.id }}">
+   <div class="swiper-wrapper">
+   {% for block in section.blocks %}
+     {% if block.type == 'review' %}
+       <div class="swiper-slide">
+       <div class="review-card" {{ block.shopify_attributes }}>
+         <div class="review-image-container{% if block.settings.wrap_image %} image-wrapped{% endif %}">
+           {% if block.settings.review_image != blank %}
+             <div class="carousel-review-image">
+               <img
+                 src="{{ block.settings.review_image | image_url: width: 720 }}"
+                 srcset="{{ block.settings.review_image | image_url: width: 400 }} 400w,
+                         {{ block.settings.review_image | image_url: width: 600 }} 600w,
+                         {{ block.settings.review_image | image_url: width: 720 }} 720w,
+                         {{ block.settings.review_image | image_url: width: 1000 }} 1000w"
+                 sizes="(max-width: 480px) 280px, (max-width: 768px) 300px, 360px"
+                 alt="Review by {{ block.settings.reviewer_name }}"
+                 style="object-position: {{ block.settings.image_position }};{% if block.settings.wrap_image %}object-fit: contain;{% endif %}"
+                 width="360"
+                 height="300"
+                 loading="lazy"
+               >
+               
+             </div>
+           {% else %}
+             <div class="carousel-review-image empty-image"></div>
+           {% endif %}
+         </div>
+         
+         <div class="review-content">
+           <div class="carousel-review-header">
+             <div class="review-stars">
+               <div class="stars">
+                 {% for i in (1..5) %}
+                   <svg class="star carousel-review-star {% if i <= block.settings.rating %}star-filled{% else %}star-empty{% endif %}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path d="M11.5245 3.46353C11.6741 3.00287 12.3259 3.00287 12.4755 3.46353L14.1329 8.56434C14.1998 8.77035 14.3918 8.90983 14.6084 8.90983H19.9717C20.4561 8.90983 20.6575 9.52964 20.2656 9.81434L15.9266 12.9668C15.7514 13.0941 15.678 13.3198 15.745 13.5258L17.4023 18.6266C17.552 19.0873 17.0248 19.4704 16.6329 19.1857L12.2939 16.0332C12.1186 15.9059 11.8814 15.9059 11.7061 16.0332L7.3671 19.1857C6.97524 19.4704 6.448 19.0873 6.59768 18.6266L8.25503 13.5258C8.32197 13.3198 8.24864 13.0941 8.07339 12.9668L3.73438 9.81434C3.34253 9.52964 3.54392 8.90983 4.02828 8.90983H9.39159C9.6082 8.90983 9.80018 8.77035 9.86712 8.56434L11.5245 3.46353Z" fill="currentColor"/>
+                   </svg>
+                 {% endfor %}
+               </div>
+             </div>
+             
+             <div class="reviewer-info-container">
+               <div class="reviewer-info">
+                 <span class="carousel-reviewer-name">{{ block.settings.reviewer_name }}</span>, 
+                 <span class="reviewer-age">{{ block.settings.reviewer_age }}</span>
+                 {% if block.settings.show_verified_badge %}
+                   <span class="verified-badge">
+                     <svg class="verified-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                       <path fill-rule="evenodd" clip-rule="evenodd" d="M9.5924 3.20027C9.34888 3.4078 9.22711 3.51158 9.09706 3.59874C8.79896 3.79854 8.46417 3.93721 8.1121 4.00672C7.95851 4.03705 7.79903 4.04977 7.48008 4.07522C6.6787 4.13918 6.278 4.17115 5.94371 4.28923C5.17051 4.56233 4.56233 5.17051 4.28923 5.94371C4.17115 6.278 4.13918 6.6787 4.07522 7.48008C4.04977 7.79903 4.03705 7.95851 4.00672 8.1121C3.93721 8.46417 3.79854 8.79896 3.59874 9.09706C3.51158 9.22711 3.40781 9.34887 3.20027 9.5924C2.67883 10.2043 2.4181 10.5102 2.26522 10.8301C1.91159 11.57 1.91159 12.43 2.26522 13.1699C2.41811 13.4898 2.67883 13.7957 3.20027 14.4076C3.40778 14.6511 3.51158 14.7729 3.59874 14.9029C3.79854 15.201 3.93721 15.5358 4.00672 15.8879C4.03705 16.0415 4.04977 16.201 4.07522 16.5199C4.13918 17.3213 4.17115 17.722 4.28923 18.0563C4.56233 18.8295 5.17051 19.4377 5.94371 19.7108C6.278 19.8288 6.6787 19.8608 7.48008 19.9248C7.79903 19.9502 7.95851 19.963 8.1121 19.9933C8.46417 20.0628 8.79896 20.2015 9.09706 20.4013C9.22711 20.4884 9.34887 20.5922 9.5924 20.7997C10.2043 21.3212 10.5102 21.5819 10.8301 21.7348C11.57 22.0884 12.43 22.0884 13.1699 21.7348C13.4898 21.5819 13.7957 21.3212 14.4076 20.7997C14.6511 20.5922 14.7729 20.4884 14.9029 20.4013C15.201 20.2015 15.5358 20.0628 15.8879 19.9933C16.0415 19.963 16.201 19.9502 16.5199 19.9248C17.3213 19.8608 17.722 19.8288 18.0563 19.7108C18.8295 19.4377 19.4377 18.8295 19.7108 18.0563C19.8288 17.722 19.8608 17.3213 19.9248 16.5199C19.9502 16.201 19.963 16.0415 19.9933 15.8879C20.0628 15.5358 20.2015 15.201 20.4013 14.9029C20.4884 14.7729 20.5922 14.6511 20.7997 14.4076C21.3212 13.7957 21.5819 13.4898 21.7348 13.1699C22.0884 12.43 22.0884 11.57 21.7348 10.8301C21.5819 10.5102 21.3212 10.2043 20.7997 9.5924C20.5922 9.34887 20.4884 9.22711 20.4013 9.09706C20.2015 8.79896 20.0628 8.46417 19.9933 8.1121C19.963 7.95851 19.9502 7.79903 19.9248 7.48008C19.8608 6.6787 19.8288 6.278 19.7108 5.94371C19.4377 5.17051 18.8295 4.56233 18.0563 4.28923C17.722 4.17115 17.3213 4.13918 16.5199 4.07522C16.201 4.04977 16.0415 4.03705 15.8879 4.00672C15.5358 3.93721 15.201 3.79854 14.9029 3.59874C14.7729 3.51158 14.6511 3.40781 14.4076 3.20027C13.7957 2.67883 13.4898 2.41811 13.1699 2.26522C12.43 1.91159 11.57 1.91159 10.8301 2.26522C10.5102 2.4181 10.2043 2.67883 9.5924 3.20027ZM16.3735 9.86314C16.6913 9.5453 16.6913 9.03 16.3735 8.71216C16.0557 8.39433 15.5403 8.39433 15.2225 8.71216L10.3723 13.5624L8.77746 11.9676C8.45963 11.6498 7.94432 11.6498 7.62649 11.9676C7.30866 12.2854 7.30866 12.8007 7.62649 13.1186L9.79678 15.2889C10.1146 15.6067 10.6299 15.6067 10.9478 15.2889L16.3735 9.86314Z" fill="currentColor"/>
+                     </svg>
+                     {{ section.settings.verified_badge_text | escape }}
+                   </span>
+                 {% endif %}
+               </div>
+             </div>
+           </div>
+           
+           <div class="review-text">
+             {{ block.settings.review_text }}
+           </div>
+           
+           {% if block.settings.show_purchased_product %}
+           <div class="product-purchased-container">
+             <div class="product-purchased">
+               <div class="product-details">
+                 {% if block.settings.product_reference != blank %}
+                   {% assign product = block.settings.product_reference %}
+                   {% assign product_image = product.featured_image | default: product.featured_media.preview_image %}
+                   <div class="review-product-image">
+                     {% if product_image != blank %}
+                       <img 
+                         src="{{ product_image | image_url: width: 120 }}" 
+                         srcset="{{ product_image | image_url: width: 60 }} 60w,
+                                 {{ product_image | image_url: width: 120 }} 120w,
+                                 {{ product_image | image_url: width: 180 }} 180w,
+                                 {{ product_image | image_url: width: 240 }} 240w"
+                         sizes="(max-width: 480px) 40px, (max-width: 768px) 50px, 55px"
+                         alt="{{ product.title }}" 
+                         width="55" 
+                         height="55" 
+                         loading="lazy">
+                     {% elsif block.settings.product_image %}
+                       <img 
+                         src="{{ block.settings.product_image | image_url: width: 120 }}" 
+                         srcset="{{ block.settings.product_image | image_url: width: 60 }} 60w,
+                                 {{ block.settings.product_image | image_url: width: 120 }} 120w,
+                                 {{ block.settings.product_image | image_url: width: 180 }} 180w,
+                                 {{ block.settings.product_image | image_url: width: 240 }} 240w"
+                         sizes="(max-width: 480px) 40px, (max-width: 768px) 50px, 55px"
+                         alt="{{ block.settings.product_title }}" 
+                         width="55" 
+                         height="55" 
+                         loading="lazy">
+                     {% endif %}
+                   </div>
+                   <div class="product-info">
+                     <p class="review-product-title">{{ product.title }}</p>
+                     <p class="product-price">
+                       {{ product.price | money }}
+                       {% if product.compare_at_price > product.price %}
+                         <span class="product-compare-price">{{ product.compare_at_price | money }}</span>
+                       {% endif %}
+                     </p>
+                     {% if block.settings.show_purchase_date %}
+                       <p class="product-purchase-date">
+                         <svg class="purchase-date-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+                           <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                           <line x1="3" y1="6" x2="21" y2="6"></line>
+                           <path d="M16 10a4 4 0 0 1-8 0"></path>
+                         </svg>
+                         {{ section.settings.purchase_date_prefix | default: 'Purchased on' | escape }} {{ block.settings.purchase_date | default: 'March 14th, 2025' }}
+                       </p>
+                     {% endif %}
+                   </div>
+                 {% elsif block.settings.product_title != blank %}
+                   {% if block.settings.product_image %}
+                     <div class="review-product-image">
+                       <img 
+                         src="{{ block.settings.product_image | image_url: width: 120 }}" 
+                         srcset="{{ block.settings.product_image | image_url: width: 60 }} 60w,
+                                 {{ block.settings.product_image | image_url: width: 120 }} 120w,
+                                 {{ block.settings.product_image | image_url: width: 180 }} 180w,
+                                 {{ block.settings.product_image | image_url: width: 240 }} 240w"
+                         sizes="(max-width: 480px) 40px, (max-width: 768px) 50px, 55px"
+                         alt="{{ block.settings.product_title }}" 
+                         width="55" 
+                         height="55" 
+                         loading="lazy">
+                     </div>
+                   {% endif %}
+                   <div class="product-info">
+                     <p class="review-product-title">{{ block.settings.product_title }}</p>
+                     {% if block.settings.product_price != blank %}
+                       <p class="product-price">
+                         {{ block.settings.product_price }}
+                         {% if block.settings.product_compare_price != blank %}
+                           <span class="product-compare-price">{{ block.settings.product_compare_price }}</span>
+                         {% endif %}
+                       </p>
+                     {% endif %}
+                     {% if block.settings.show_purchase_date %}
+                       <p class="product-purchase-date">
+                         <svg class="purchase-date-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+                           <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                           <line x1="3" y1="6" x2="21" y2="6"></line>
+                           <path d="M16 10a4 4 0 0 1-8 0"></path>
+                         </svg>
+                         {{ section.settings.purchase_date_prefix | default: 'Purchased on' | escape }} {{ block.settings.purchase_date | default: 'March 14th, 2025' }}
+                       </p>
+                     {% endif %}
+                   </div>
+                 {% endif %}
+               </div>
+             </div>
+           </div>
+           {% endif %}
+         </div>
+       </div>
+       </div>
+     {% endif %}
+   {% endfor %}
+   </div>
+ </div>
+
+ <div class="reviews-navigation-container">
+   <div class="reviews-navigation">
+     {% render 'global-nav-button', 
+       direction: 'prev', 
+       aria_label: 'Previous reviews',
+       use_global: section.settings.use_global_nav_buttons,
+       section_settings: section.settings
+     %}
+     {% render 'global-nav-button', 
+       direction: 'next', 
+       aria_label: 'Next reviews',
+       use_global: section.settings.use_global_nav_buttons,
+       section_settings: section.settings
+     %}
+   </div>
+ </div>
+</div>
+
+{% schema %}
+{
+ "name": "Customer Reviews",
+ "tag": "section",
+ "class": "section",
+ "settings": [
+   {
+     "type": "checkbox",
+     "id": "use_theme_colors",
+     "label": "Use Theme Colors",
+     "default": true,
+     "info": "Apply the global theme colors to this section"
+   },
+   {
+     "type": "header",
+     "content": "Section Settings"
+   },
+   {
+     "type": "text",
+     "id": "anchor_id",
+     "label": "Section anchor ID",
+     "default": "reviews",
+     "info": "Used for in-page links (e.g., enter \"reviews\" to link to #reviews)."
+   },
+   {
+     "type": "range",
+     "id": "section_width",
+     "min": 800,
+     "max": 1600,
+     "step": 50,
+     "unit": "px",
+     "label": "Content Max Width",
+     "default": 1200,
+     "info": "Maximum width of the content (background will still fill full width)"
+   },
+   {
+     "type": "checkbox",
+     "id": "center_cards_desktop",
+     "label": "Center Cards on Desktop",
+     "default": true,
+     "info": "When enabled, cards will be centered on desktop and tablet devices"
+   },
+   {
+     "type": "checkbox",
+     "id": "center_cards_mobile",
+     "label": "Center Cards on Mobile",
+     "default": false,
+     "info": "When enabled, cards will be centered on mobile devices"
+   },
+   {
+     "type": "color",
+     "id": "section_background",
+     "label": "Section Background",
+     "default": "#ffffff"
+   },
+   {
+     "type": "header",
+     "content": "Heading"
+   },
+   {
+     "type": "text",
+     "id": "title_text",
+     "label": "Title Text",
+     "default": "Customer"
+   },
+   {
+     "type": "text",
+     "id": "accent_text",
+     "label": "Accent Text",
+     "default": "Reviews"
+   },
+   {
+     "type": "color",
+     "id": "title_color",
+     "label": "Title Color",
+     "default": "#EF4A65"
+   },
+   {
+     "type": "color",
+     "id": "accent_color",
+     "label": "Accent Color",
+     "default": "#000000"
+   },
+   {
+     "type": "header",
+     "content": "Accent Text Settings"
+   },
+   {
+     "type": "checkbox",
+     "id": "override_global_accent",
+     "label": "Override Global Accent Typography",
+     "default": false,
+     "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+   },
+   {
+     "type": "range",
+     "id": "accent_text_margin_left",
+     "min": 0,
+     "max": 50,
+     "step": 1,
+     "unit": "px",
+     "label": "Accent Text Left Margin",
+     "default": 0
+   },
+   {
+     "type": "checkbox",
+     "id": "use_accent_gradient",
+     "label": "Use Accent Gradient",
+     "default": false,
+     "info": "Apply gradient effect to the accent text instead of solid color"
+   },
+   {
+     "type": "color_background",
+     "id": "accent_text_gradient",
+     "label": "Accent Text Gradient",
+     "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+     "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+   },
+   {
+     "type": "header",
+     "content": "Section-Specific Accent Font Settings"
+   },
+   {
+     "type": "select",
+     "id": "accent_font_family",
+     "label": "Section Accent Font Family",
+     "options": [
+       {
+         "value": "inherit",
+         "label": "Use Global Setting"
+       },
+       {
+         "value": "serif",
+         "label": "System Serif"
+       },
+       {
+         "value": "Georgia Pro",
+         "label": "Georgia Pro"
+       },
+       {
+         "value": "Bodoni Moda",
+         "label": "Bodoni Moda"
+       },
+       {
+         "value": "Instrument Serif",
+         "label": "Instrument Serif"
+       },
+       {
+         "value": "DM Serif Text",
+         "label": "DM Serif Text"
+       },
+       {
+         "value": "Nothing You Could Do",
+         "label": "Nothing You Could Do"
+       }
+     ],
+     "default": "inherit",
+     "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+   },
+   {
+     "type": "select",
+     "id": "accent_font_style",
+     "label": "Accent Text Font Style",
+     "options": [
+       {
+         "value": "normal",
+         "label": "Normal"
+       },
+       {
+         "value": "italic",
+         "label": "Italic"
+       }
+     ],
+     "default": "normal",
+     "info": "Choose the font style for the accent text"
+   },
+   {
+     "type": "select",
+     "id": "accent_font_weight",
+     "label": "Accent Text Font Weight",
+     "options": [
+       {
+         "value": "inherit",
+         "label": "Default (Inherit)"
+       },
+       {
+         "value": "300",
+         "label": "Light (300)"
+       },
+       {
+         "value": "400",
+         "label": "Normal (400)"
+       },
+       {
+         "value": "500",
+         "label": "Medium (500)"
+       },
+       {
+         "value": "600",
+         "label": "Semi Bold (600)"
+       },
+       {
+         "value": "700",
+         "label": "Bold (700)"
+       },
+       {
+         "value": "800",
+         "label": "Extra Bold (800)"
+       },
+       {
+         "value": "900",
+         "label": "Black (900)"
+       }
+     ],
+     "default": "inherit",
+     "info": "Choose the font weight (boldness) for the accent text"
+   },
+   {
+     "type": "header",
+     "content": "Heading Typography"
+   },
+   {
+     "type": "checkbox",
+     "id": "custom_heading_styling",
+     "label": "Override default heading styling",
+     "default": false,
+     "info": "Enable to customize the heading font size and styling"
+   },
+   {
+     "type": "range",
+     "id": "heading_font_size",
+     "min": 24,
+     "max": 72,
+     "step": 1,
+     "unit": "px",
+     "label": "Heading Font Size (Desktop)",
+     "default": 56,
+     "info": "Default is 3.5rem (approximately 56px)"
+   },
+   {
+     "type": "range",
+     "id": "heading_font_size_mobile",
+     "min": 20,
+     "max": 60,
+     "step": 1,
+     "unit": "px",
+     "label": "Heading Font Size (Mobile)",
+     "default": 48,
+     "info": "Default is 3.4rem (approximately 48px)"
+   },
+  {
+    "type": "range",
+    "id": "heading_line_height",
+    "min": 0.8,
+    "max": 2.0,
+    "step": 0.1,
+    "unit": "x",
+    "label": "Heading Line Height",
+    "default": 1.2
+  },
+  {
+    "type": "range",
+    "id": "header_margin_bottom",
+    "min": 0,
+    "max": 60,
+    "step": 2,
+    "unit": "px",
+    "label": "Header Section Margin Bottom",
+    "default": 10,
+    "info": "Space below the header section (title + subtitle)"
+  },
+  {
+    "type": "header",
+   "content": "Subtitle / Subheading"
+  },
+   {
+     "type": "checkbox",
+     "id": "show_description",
+    "label": "Show Subtitle",
+    "default": true,
+    "info": "Display a subtitle/subheading below the main heading"
+   },
+   {
+     "type": "textarea",
+     "id": "description_text",
+    "label": "Subtitle Text",
+    "default": "See what our customers are saying about our products",
+    "info": "Appears below the main heading as a subtitle"
+   },
+   {
+     "type": "color",
+     "id": "description_color",
+    "label": "Subtitle Text Color",
+     "default": "#000000"
+   },
+  {
+    "type": "range",
+    "id": "description_font_size",
+    "min": 12,
+    "max": 32,
+    "step": 1,
+    "unit": "px",
+    "label": "Subtitle Font Size",
+    "default": 16
+  },
+  {
+    "type": "range",
+    "id": "description_bottom_margin",
+    "min": 0,
+    "max": 60,
+    "step": 2,
+    "unit": "px",
+    "label": "Subtitle Bottom Margin",
+    "default": 24
+  },
+   {
+     "type": "header",
+     "content": "Navigation"
+   },
+   {
+     "type": "checkbox",
+     "id": "use_global_nav_buttons",
+     "label": "Use Global Navigation Button Styling",
+     "default": true,
+     "info": "Use global navigation button settings from theme settings. When disabled, use section-specific settings below."
+   },
+   {
+     "type": "paragraph",
+     "content": "Custom Navigation Button Styling (only applies when 'Use Global Navigation Button Styling' is disabled)"
+   },
+   {
+     "type": "color",
+     "id": "prev_button_bg",
+     "label": "Previous Button Background",
+     "default": "#ffffff"
+   },
+   {
+     "type": "color",
+     "id": "prev_button_color",
+     "label": "Previous Button Color",
+     "default": "#000000"
+   },
+   {
+     "type": "color",
+     "id": "prev_button_border",
+     "label": "Previous Button Border",
+     "default": "#e0e0e0"
+   },
+   {
+     "type": "color",
+     "id": "next_button_bg",
+     "label": "Next Button Background",
+     "default": "#EF4A65"
+   },
+   {
+     "type": "color",
+     "id": "next_button_color",
+     "label": "Next Button Color",
+     "default": "#ffffff"
+   },
+   {
+     "type": "color",
+     "id": "next_button_border",
+     "label": "Next Button Border",
+     "default": "#EF4A65"
+   },
+   {
+     "type": "range",
+     "id": "button_horizontal_padding",
+     "min": 0,
+     "max": 30,
+     "step": 1,
+     "unit": "px",
+     "label": "Button Horizontal Padding",
+     "default": 12,
+     "info": "Horizontal padding for navigation buttons"
+   },
+  {
+    "type": "range",
+    "id": "scroll_amount",
+    "min": 200,
+    "max": 800,
+    "step": 20,
+    "unit": "px",
+    "label": "Scroll Amount",
+    "default": 360
+  },
+  {
+    "type": "range",
+    "id": "navigation_margin_top",
+    "min": 0,
+    "max": 60,
+    "step": 1,
+    "unit": "px",
+    "label": "Navigation Margin Top",
+    "default": 5,
+    "info": "Space above the navigation buttons"
+  },
+  {
+    "type": "header",
+    "content": "Card Styling"
+  },
+   {
+     "type": "range",
+     "id": "card_width",
+     "min": 260,
+     "max": 500,
+     "step": 10,
+     "unit": "px",
+     "label": "Card Width (Desktop)",
+     "default": 390
+   },
+   {
+     "type": "range",
+     "id": "card_width_tablet",
+     "min": 220,
+     "max": 400,
+     "step": 10,
+     "unit": "px",
+     "label": "Card Width (Tablet)",
+     "default": 300
+   },
+   {
+     "type": "range",
+     "id": "card_width_mobile",
+     "min": 200,
+     "max": 350,
+     "step": 10,
+     "unit": "px",
+     "label": "Card Width (Mobile)",
+     "default": 280
+   },
+   {
+     "type": "range",
+     "id": "card_border_radius",
+     "min": 0,
+     "max": 20,
+     "step": 1,
+     "unit": "px",
+     "label": "Card Border Radius",
+     "default": 10
+   },
+   {
+     "type": "color",
+     "id": "card_border_color",
+     "label": "Card Border Color",
+     "default": "#e0e0e0"
+   },
+   {
+     "type": "color",
+     "id": "card_background",
+     "label": "Card Background",
+     "default": "#ffffff"
+   },
+   {
+     "type": "range",
+     "id": "card_margin_top",
+     "min": 0,
+     "max": 50,
+     "step": 5,
+     "unit": "px",
+     "label": "Card Top Margin",
+     "default": 0
+   },
+   {
+     "type": "range",
+     "id": "card_margin_right",
+     "min": 0,
+     "max": 50,
+     "step": 5,
+     "unit": "px",
+     "label": "Card Right Margin",
+     "default": 0
+   },
+   {
+     "type": "range",
+     "id": "card_margin_bottom",
+     "min": 0,
+     "max": 50,
+     "step": 5,
+     "unit": "px",
+     "label": "Card Bottom Margin",
+     "default": 0
+   },
+   {
+     "type": "range",
+     "id": "card_margin_left",
+     "min": 0,
+     "max": 50,
+     "step": 5,
+     "unit": "px",
+     "label": "Card Left Margin",
+     "default": 0
+   },
+   {
+     "type": "header",
+     "content": "Review Content"
+   },
+   {
+     "type": "color",
+     "id": "star_filled_color",
+     "label": "Filled Star Color",
+     "default": "#ffc107"
+   },
+   {
+     "type": "color",
+     "id": "star_empty_color",
+     "label": "Empty Star Color",
+     "default": "#e0e0e0"
+   },
+   {
+     "type": "range",
+     "id": "carousel_review_star_size",
+     "min": 12,
+     "max": 32,
+     "step": 2,
+     "unit": "px",
+     "label": "Review Star Size",
+     "default": 16
+   },
+   {
+     "type": "color",
+     "id": "review_text_color",
+     "label": "Review Text Color",
+     "default": "#000000"
+   },
+   {
+     "type": "range",
+     "id": "review_text_size",
+     "min": 10,
+     "max": 24,
+     "step": 1,
+     "unit": "px",
+     "label": "Review Text Size (Desktop)",
+     "default": 14
+   },
+   {
+     "type": "range",
+     "id": "review_text_size_mobile",
+     "min": 8,
+     "max": 20,
+     "step": 1,
+     "unit": "px",
+     "label": "Review Text Size (Mobile)",
+     "default": 12
+   },
+   {
+     "type": "header",
+     "content": "Reviewer Info"
+   },
+   {
+     "type": "color",
+     "id": "reviewer_info_color",
+     "label": "Reviewer Info Color",
+     "default": "#000000"
+   },
+   {
+     "type": "color",
+     "id": "reviewer_info_bg_color",
+     "label": "Reviewer Info Background Color",
+     "default": "#f5f5f5"
+   },
+   {
+     "type": "range",
+     "id": "reviewer_info_font_size",
+     "min": 8,
+     "max": 24,
+     "step": 1,
+     "unit": "px",
+     "label": "Reviewer Info Font Size",
+     "default": 12
+   },
+   {
+     "type": "text",
+     "id": "verified_badge_text",
+     "label": "Verified Badge Text",
+     "default": "Verified Buyer"
+   },
+   {
+     "type": "color",
+     "id": "verified_badge_color",
+     "label": "Verified Badge Color",
+     "default": "#EF4A65"
+   },
+   {
+     "type": "color",
+     "id": "verified_icon_color",
+     "label": "Verified Icon Color",
+     "default": "#EF4A65"
+   },
+   {
+     "type": "range",
+     "id": "verified_badge_font_size",
+     "min": 8,
+     "max": 20,
+     "step": 1,
+     "unit": "px",
+     "label": "Verified Badge Font Size",
+     "default": 10
+   },
+   {
+     "type": "header",
+     "content": "Reviewer Info Border"
+   },
+   {
+     "type": "checkbox",
+     "id": "enable_reviewer_info_border",
+     "label": "Enable Reviewer Info Border",
+     "default": false,
+     "info": "Add a border around the reviewer information section"
+   },
+   {
+     "type": "range",
+     "id": "reviewer_info_border_width",
+     "min": 1,
+     "max": 10,
+     "step": 1,
+     "unit": "px",
+     "label": "Reviewer Info Border Width",
+     "default": 1,
+     "info": "Width of the reviewer info border"
+   },
+   {
+     "type": "select",
+     "id": "reviewer_info_border_style",
+     "label": "Reviewer Info Border Style",
+     "options": [
+       {
+         "value": "solid",
+         "label": "Solid"
+       },
+       {
+         "value": "dashed",
+         "label": "Dashed"
+       },
+       {
+         "value": "dotted",
+         "label": "Dotted"
+       },
+       {
+         "value": "double",
+         "label": "Double"
+       },
+       {
+         "value": "groove",
+         "label": "Groove"
+       },
+       {
+         "value": "ridge",
+         "label": "Ridge"
+       },
+       {
+         "value": "inset",
+         "label": "Inset"
+       },
+       {
+         "value": "outset",
+         "label": "Outset"
+       }
+     ],
+     "default": "solid",
+     "info": "Style of the reviewer info border"
+   },
+   {
+     "type": "color",
+     "id": "reviewer_info_border_color",
+     "label": "Reviewer Info Border Color",
+     "default": "#e0e0e0",
+     "info": "Color of the reviewer info border"
+   },
+   {
+     "type": "range",
+     "id": "reviewer_info_border_radius",
+     "min": 0,
+     "max": 50,
+     "step": 1,
+     "unit": "px",
+     "label": "Reviewer Info Border Radius",
+     "default": 8,
+     "info": "Rounded corners for the reviewer info border"
+   },
+   {
+     "type": "header",
+     "content": "Product Purchased"
+   },
+   {
+     "type": "color",
+     "id": "product_title_color",
+     "label": "Product Title Color",
+     "default": "#000000"
+   },
+   {
+     "type": "color",
+     "id": "product_price_color",
+     "label": "Product Price Color",
+     "default": "#EF4A65"
+   },
+   {
+     "type": "color",
+     "id": "product_bg_color",
+     "label": "Product Background Color",
+     "default": "#f9f9f9",
+     "info": "Background color for the product purchased section (works with both theme colors and custom colors)"
+   },
+   {
+     "type": "range",
+     "id": "product_title_font_size",
+     "min": 8,
+     "max": 20,
+     "step": 1,
+     "unit": "px",
+     "label": "Product Title Font Size",
+     "default": 12
+   },
+   {
+     "type": "range",
+     "id": "product_price_font_size",
+     "min": 8,
+     "max": 20,
+     "step": 1,
+     "unit": "px",
+     "label": "Product Price Font Size",
+     "default": 12
+   },
+   {
+     "type": "range",
+     "id": "product_compare_price_font_size",
+     "min": 8,
+     "max": 18,
+     "step": 1,
+     "unit": "px",
+     "label": "Compare At Price Font Size",
+     "default": 10
+   },
+   {
+     "type": "color",
+     "id": "product_compare_price_color",
+     "label": "Compare At Price Color",
+     "default": "#9b9b9b"
+   },
+   {
+     "type": "range",
+     "id": "purchase_date_font_size",
+     "min": 8,
+     "max": 16,
+     "step": 1,
+     "unit": "px",
+     "label": "Purchase Date Font Size",
+     "default": 10
+   },
+   {
+     "type": "color",
+     "id": "product_border_color",
+     "label": "Product Border Color",
+     "default": "#eeeeee"
+   },
+   {
+     "type": "range",
+     "id": "product_border_width",
+     "min": 0,
+     "max": 10,
+     "step": 1,
+     "unit": "px",
+     "label": "Product Border Width",
+     "default": 1
+   },
+   {
+     "type": "select",
+     "id": "product_border_style",
+     "label": "Product Border Style",
+     "options": [
+       {
+         "value": "solid",
+         "label": "Solid"
+       },
+       {
+         "value": "dashed",
+         "label": "Dashed"
+       },
+       {
+         "value": "dotted",
+         "label": "Dotted"
+       },
+       {
+         "value": "double",
+         "label": "Double"
+       }
+     ],
+     "default": "solid"
+   },
+   {
+     "type": "header",
+     "content": "Rating Summary"
+   },
+   {
+     "type": "color",
+     "id": "summary_star_color",
+     "label": "Summary Star Color",
+     "default": "#ffbf00"
+   },
+   {
+     "type": "color",
+     "id": "summary_text_color",
+     "label": "Summary Text Color",
+     "default": "#000000"
+   },
+   {
+     "type": "richtext",
+     "id": "rating_summary_text",
+     "label": "Rating Summary Text",
+     "default": "<p>Rated 4.8/5 based on +10,839 Total Ratings</p>",
+     "info": "Enter the complete rating summary text. You can use bold, italic, and other formatting."
+   },
+   {
+     "type": "range",
+     "id": "rating_summary_font_size",
+     "min": 10,
+     "max": 24,
+     "step": 1,
+     "unit": "px",
+     "label": "Rating Summary Font Size",
+     "default": 13
+   },
+   {
+     "type": "color",
+     "id": "rating_summary_bg_color",
+     "label": "Rating Summary Background",
+     "default": "#FEF6E6"
+   },
+   {
+     "type": "range",
+     "id": "rating_summary_margin_bottom",
+     "min": 0,
+     "max": 100,
+     "step": 5,
+     "unit": "px",
+     "label": "Rating Summary Bottom Margin",
+     "default": 0
+   },
+   {
+     "type": "header",
+     "content": "Purchase Date Settings"
+   },
+   {
+     "type": "text",
+     "id": "purchase_date_prefix",
+     "label": "Purchase Date Prefix",
+     "default": "Purchased on"
+   },
+   {
+     "type": "color",
+     "id": "purchase_date_color",
+     "label": "Purchase Date Text Color",
+     "default": "#000000"
+   },
+   {
+     "type": "color",
+     "id": "purchase_date_icon_color",
+     "label": "Purchase Date Icon Color",
+     "default": "#000000"
+   },
+
+   {
+     "type": "header",
+     "content": "Rating Summary Gradient"
+   },
+   {
+     "type": "color_background",
+     "id": "rating_summary_gradient",
+     "label": "Rating Summary Gradient",
+     "info": "Choose a gradient or solid color for the rating summary background. Only used when theme colors are disabled."
+   },
+   {
+     "type": "header",
+     "content": "Rating Summary Border"
+   },
+   {
+     "type": "checkbox",
+     "id": "enable_rating_summary_border",
+     "label": "Enable Rating Summary Border",
+     "default": false
+   },
+   {
+     "type": "range",
+     "id": "rating_summary_border_width",
+     "min": 0,
+     "max": 5,
+     "step": 1,
+     "unit": "px",
+     "label": "Rating Summary Border Width",
+     "default": 1
+   },
+   {
+     "type": "select",
+     "id": "rating_summary_border_style",
+     "label": "Rating Summary Border Style",
+     "options": [
+       {
+         "value": "solid",
+         "label": "Solid"
+       },
+       {
+         "value": "dashed",
+         "label": "Dashed"
+       },
+       {
+         "value": "dotted",
+         "label": "Dotted"
+       },
+       {
+         "value": "double",
+         "label": "Double"
+       },
+       {
+         "value": "groove",
+         "label": "Groove"
+       },
+       {
+         "value": "ridge",
+         "label": "Ridge"
+       },
+       {
+         "value": "inset",
+         "label": "Inset"
+       },
+       {
+         "value": "outset",
+         "label": "Outset"
+       }
+     ],
+     "default": "solid"
+   },
+   {
+     "type": "color",
+     "id": "rating_summary_border_color",
+     "label": "Rating Summary Border Color",
+     "default": "#ffbf00"
+   },
+   {
+     "type": "range",
+     "id": "rating_summary_border_radius",
+     "min": 0,
+     "max": 50,
+     "step": 1,
+     "unit": "px",
+     "label": "Rating Summary Border Radius",
+     "default": 50
+   }
+ ],
+ "blocks": [
+   {
+     "type": "review",
+     "name": "Review",
+     "settings": [
+       {
+         "type": "header",
+         "content": "Review Details"
+       },
+       {
+         "type": "image_picker",
+         "id": "review_image",
+         "label": "Review Image"
+       },
+       {
+         "type": "select",
+         "id": "image_position",
+         "label": "Image Focus Position",
+         "options": [
+           {
+             "value": "center center",
+             "label": "Center"
+           },
+           {
+             "value": "top center",
+             "label": "Top"
+           },
+           {
+             "value": "bottom center",
+             "label": "Bottom"
+           },
+           {
+             "value": "left center",
+             "label": "Left"
+           },
+           {
+             "value": "right center",
+             "label": "Right"
+           },
+           {
+             "value": "top left",
+             "label": "Top Left"
+           },
+           {
+             "value": "top right",
+             "label": "Top Right"
+           },
+           {
+             "value": "bottom left",
+             "label": "Bottom Left"
+           },
+           {
+             "value": "bottom right",
+             "label": "Bottom Right"
+           }
+         ],
+         "default": "center center"
+       },
+       {
+         "type": "checkbox",
+         "id": "wrap_image",
+         "label": "Wrap Full Image (Variable Aspect Ratio)",
+         "default": false,
+         "info": "If enabled, the entire image will be displayed, potentially changing the card's aspect ratio. If disabled, images are cropped to fit."
+       },
+       {
+         "type": "range",
+         "id": "rating",
+         "min": 1,
+         "max": 5,
+         "step": 1,
+         "label": "Rating",
+         "default": 5
+       },
+       {
+         "type": "textarea",
+         "id": "review_text",
+         "label": "Review Text",
+         "default": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+       },
+       {
+         "type": "header",
+         "content": "Reviewer Info"
+       },
+       {
+         "type": "text",
+         "id": "reviewer_name",
+         "label": "Reviewer Name",
+         "default": "User1"
+       },
+       {
+         "type": "text",
+         "id": "reviewer_age",
+         "label": "Reviewer Age",
+         "default": "30"
+       },
+       {
+         "type": "checkbox",
+         "id": "show_verified_badge",
+         "label": "Show Verified Badge",
+         "default": true
+       },
+       {
+         "type": "header",
+         "content": "Purchased Product"
+       },
+       {
+         "type": "checkbox",
+         "id": "show_purchased_product",
+         "label": "Show Purchased Product",
+         "default": true
+       },
+       {
+         "type": "product",
+         "id": "product_reference",
+         "label": "Select Product",
+         "info": "Select a product to automatically display its details"
+       },
+       {
+         "type": "header",
+         "content": "Manual Product Details (Fallback)"
+       },
+       {
+         "type": "image_picker",
+         "id": "product_image",
+         "label": "Product Image (fallback)"
+       },
+       {
+         "type": "text",
+         "id": "product_title",
+         "label": "Product Title (fallback)",
+         "default": "Product Name"
+       },
+       {
+         "type": "text",
+         "id": "product_price",
+         "label": "Product Price (fallback)",
+         "default": "$29.99"
+       },
+       {
+         "type": "text",
+         "id": "product_compare_price",
+         "label": "Product Compare Price (fallback)",
+         "default": "$39.99"
+       },
+       {
+         "type": "checkbox",
+         "id": "show_purchase_date",
+         "label": "Show Purchase Date",
+         "default": true
+       },
+       {
+         "type": "text",
+         "id": "purchase_date",
+         "label": "Purchase Date",
+         "default": "March 14th, 2025"
+       }
+     ]
+   }
+ ],
+ "presets": [
+   {
+     "name": "Customer Reviews",
+     "blocks": [
+       {
+         "type": "review",
+         "settings": {
+           "rating": 5,
+           "review_text": "The product has completely transformed my routine. I'm seeing amazing results and couldn't be happier with my purchase.",
+           "reviewer_name": "Sarah",
+           "reviewer_age": "28",
+           "show_verified_badge": true,
+           "show_purchased_product": true,
+           "product_title": "Product Name",
+           "product_price": "$29.99",
+           "product_compare_price": "$39.99"
+         }
+       },
+       {
+         "type": "review",
+         "settings": {
+           "rating": 5,
+           "review_text": "I was skeptical at first, but after using this for a month, I'm a true believer. The quality is outstanding!",
+           "reviewer_name": "Michael",
+           "reviewer_age": "35",
+           "show_verified_badge": true,
+           "show_purchased_product": true,
+           "product_title": "Product Name",
+           "product_price": "$29.99",
+           "product_compare_price": "$39.99"
+         }
+       },
+       {
+         "type": "review",
+         "settings": {
+           "rating": 4,
+           "review_text": "Great product that delivers on its promises. Would definitely recommend to friends and family.",
+           "reviewer_name": "Jessica",
+           "reviewer_age": "42",
+           "show_verified_badge": true,
+           "show_purchased_product": true,
+           "product_title": "Product Name",
+           "product_price": "$29.99",
+           "product_compare_price": "$39.99"
+         }
+       }
+     ]
+   }
+ ]
+}
+{% endschema %}

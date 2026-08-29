@@ -1,0 +1,1621 @@
+{% comment %}
+  Schema cleanup: removed unused settings, simplified, grouped logically.
+  Global consistency: added page_width + shared padding controls.
+  Dynamic bindings: fixed colors & typography to respond to editor.
+  Layout fix: step cards/columns now stable with flex + overflow rules.
+  Responsive: improved mobile/desktop carousel + breakpoints.
+  Code organization: scoped variables, removed duplicates, added comments.
+  Performance: lighter JS, optimized fonts, base.css compatibility.
+{% endcomment %}
+
+{{ 'section-steps.css' | asset_url | stylesheet_tag }}
+
+{% comment %} Load Google Fonts only when valid & required {% endcomment %}
+{% if section.settings.override_global_accent %}
+  {% assign fam = section.settings.accent_font_family %}
+  {% if fam and fam != 'inherit' and fam != 'serif' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% case fam %}
+      {% when 'Bodoni Moda' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Instrument Serif' %}
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'DM Serif Text' %}
+        <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'Nothing You Could Do' %}
+        <link href="https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+      {% else %}
+        {%- comment -%} Do NOT attempt to load non-Google fonts like “Georgia Pro” {%- endcomment -%}
+    {% endcase %}
+  {% endif %}
+{% endif %}
+
+{% comment %}
+  Steps Results Section (audited & optimized)
+  - A11y: landmarks, labelled controls, carousel semantics, reduced motion
+  - Perf: smaller inline styles, responsive images/sizes, lazy decode, no empty width/height
+  - DX: removed unused code, consistent data attributes, theme width control
+{% endcomment %}
+
+<style>
+  .section-{{ section.id }} {
+    --padding-top: {{ section.settings.padding_top }}px;
+    --padding-bottom: {{ section.settings.padding_bottom }}px;
+    --padding-horizontal: {{ section.settings.padding_horizontal }}px;
+
+    --title-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_color }}{% endif %};
+    --highlight-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.highlight_color }}{% endif %};
+    --subtitle-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subtitle_color }}{% endif %};
+
+    --card-border-radius: {{ section.settings.card_border_radius }}px;
+    --card-border-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.card_border_color }}{% endif %};
+    --card-border-style: {{ section.settings.card_border_style }};
+    --card-border-width: {{ section.settings.card_border_width }}px;
+
+    --step-title-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.step_title_color }}{% endif %};
+    --description-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.description_color }}{% endif %};
+
+    --number-border-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.number_border_color }}{% endif %};
+    --number-border-width: {{ section.settings.number_border_width }}px;
+    --number-border-style: {{ section.settings.number_border_style }};
+    --number-border-radius: {{ section.settings.number_border_radius }}px;
+    --number-background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.number_background_color }}{% endif %};
+    --number-font-weight: {{ section.settings.number_font_weight }};
+    --label-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.label_color }}{% endif %};
+
+    --title-size: {{ section.settings.title_size_desktop }}px;
+    --title-size-mobile: {{ section.settings.title_size_mobile }}px;
+    --title-line-height: {{ section.settings.title_line_height_desktop }};
+    --title-line-height-mobile: {{ section.settings.title_line_height_mobile }};
+    --subtitle-size: {{ section.settings.subtitle_size_desktop }}px;
+    --subtitle-size-mobile: {{ section.settings.subtitle_size_mobile }}px;
+
+    --step-title-size: {{ section.settings.step_title_size_desktop }}px;
+    --step-title-size-mobile: {{ section.settings.step_title_size_mobile }}px;
+    --step-description-size: {{ section.settings.step_description_size_desktop }}px;
+    --step-description-size-mobile: {{ section.settings.step_description_size_mobile }}px;
+
+    --number-size: {{ section.settings.number_size_desktop }}px;
+    --number-size-mobile: {{ section.settings.number_size_mobile }}px;
+    --number-circle-size: {{ section.settings.number_circle_size_desktop }}px;
+    --number-circle-size-mobile: {{ section.settings.number_circle_size_mobile }}px;
+
+    --title-margin-bottom: {{ section.settings.title_margin_bottom }}px;
+    --title-margin-bottom-tablet: {{ section.settings.title_margin_bottom_tablet }}px;
+    --title-margin-bottom-mobile: {{ section.settings.title_margin_bottom_mobile }}px;
+    --subtitle-margin-top: {{ section.settings.subtitle_margin_top }}px;
+    --subtitle-margin-bottom: {{ section.settings.subtitle_margin_bottom }}px;
+
+    --step-content-padding-vertical: {{ section.settings.step_content_padding_vertical_desktop | default: 16 }}px;
+    --step-content-padding-horizontal: {{ section.settings.step_content_padding_horizontal_desktop | default: 12 }}px;
+    --step-content-padding-vertical-mobile: {{ section.settings.step_content_padding_vertical_mobile | default: 16 }}px;
+    --step-content-padding-horizontal-mobile: {{ section.settings.step_content_padding_horizontal_mobile | default: 12 }}px;
+    --step-item-margin-bottom: {{ section.settings.step_item_margin_bottom | default: 10 }}px;
+    --steps-layout-gap: {{ section.settings.steps_layout_gap | default: 10 }}px;
+
+    --step-item-max-width-750px: {{ section.settings.step_item_max_width_750px }}px;
+    --content-max-width: {{ section.settings.content_max_width }}px;
+    --mobile-carousel-padding: {{ section.settings.mobile_carousel_padding | default: 8 }}px;
+
+    /* Defaults used by per-step overrides */
+    --default-card-bg: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.default_card_background }}{% endif %};
+    --default-image-bg: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.default_image_background }}{% endif %};
+
+    /* Section Border Variables */
+    --enable-top-border: {{ section.settings.enable_top_border }};
+    --top-border-width: {{ section.settings.top_border_width | default: 1 }}px;
+    --top-border-style: {{ section.settings.top_border_style | default: 'solid' }};
+    --top-border-color: {{ section.settings.top_border_color | default: '#e0e0e0' }};
+    --enable-bottom-border: {{ section.settings.enable_bottom_border }};
+    --bottom-border-width: {{ section.settings.bottom_border_width | default: 1 }}px;
+    --bottom-border-style: {{ section.settings.bottom_border_style | default: 'solid' }};
+    --bottom-border-color: {{ section.settings.bottom_border_color | default: '#e0e0e0' }};
+
+    /* Background Image Variables */
+    {% if section.settings.background_type == 'image' and section.settings.background_image_desktop != blank %}
+      --background-image-desktop: url('{{ section.settings.background_image_desktop | image_url: width: 1920 }}');
+      {% if section.settings.background_image_mobile != blank %}
+        --background-image-mobile: url('{{ section.settings.background_image_mobile | image_url: width: 768 }}');
+      {% else %}
+        --background-image-mobile: url('{{ section.settings.background_image_desktop | image_url: width: 768 }}');
+      {% endif %}
+      --background-image-size: {{ section.settings.background_image_size | default: 'cover' }};
+      --background-image-position: {{ section.settings.background_image_position | default: 'center center' }};
+      --background-image-repeat: {{ section.settings.background_image_repeat | default: 'no-repeat' }};
+      {% if section.settings.background_overlay_enable %}
+        --background-overlay-color: {{ section.settings.background_overlay_color | default: '#000000' }};
+        --background-overlay-opacity: {{ section.settings.background_overlay_opacity | default: 0.5 }};
+      {% endif %}
+    {% endif %}
+  }
+
+  /* Basic visibility helpers */
+  @media (min-width: 769px){ .mobile-only{ display:none !important; } }
+  @media (max-width: 768px){ .desktop-only{ display:none !important; } }
+
+  /* Image/card structure */
+  .section-{{ section.id }} .step-image-container{
+    position:relative; width:100%; aspect-ratio:1/1;
+    background-color: var(--image-bg-color, var(--default-image-bg));
+    {% if section.settings.disable_image_border_radius %}border-radius:0!important;{% else %}border-radius:var(--card-border-radius)!important;{% endif %}
+    overflow:hidden !important; display:flex; align-items:center; justify-content:center;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+  }
+  .section-{{ section.id }} .step-card{
+    overflow:hidden!important; border-radius:var(--card-border-radius)!important;
+    border:var(--card-border-width) var(--card-border-style) var(--card-border-color)!important;
+    background:var(--card-bg-color, transparent)!important; display:flex!important; flex-direction:column; height:auto!important;
+  }
+  .section-{{ section.id }} .step-image{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; object-position:center;
+    {% if section.settings.disable_image_border_radius %}border-radius:0!important;{% else %}border-radius:var(--card-border-radius)!important;{% endif %}
+    transform: translateZ(0); backface-visibility:hidden; pointer-events:none;
+  }
+  .section-{{ section.id }} .placeholder-image{
+    position:absolute; inset:0; background-color:#f0f0f0;
+    {% if section.settings.disable_image_border_radius %}border-radius:0!important;{% else %}border-radius:var(--card-border-radius)!important;{% endif %}
+  }
+  .section-{{ section.id }} .step-content{
+    border-radius:var(--card-border-radius)!important; 
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    overflow:hidden!important;
+    background-color: var(--content-bg-color, var(--default-card-bg))!important;
+    padding:var(--step-content-padding-vertical) var(--step-content-padding-horizontal)!important; flex:1!important; display:flex!important; flex-direction:column; justify-content:flex-start!important;
+  }
+  .section-{{ section.id }} .step-title-container{ display:flex!important; align-items:center!important; gap:8px!important; margin-bottom:8px!important; overflow:hidden!important; }
+  .section-{{ section.id }} .step-title{ margin:0!important; overflow-wrap:break-word!important; hyphens:auto!important; flex:1!important; }
+  .section-{{ section.id }} .step-description{ margin:0!important; overflow-wrap:break-word!important; hyphens:auto!important; line-height:1.4!important; }
+
+  /* Mobile image sizing options - only apply when full height is enabled */
+  {% if section.settings.full_height_image_mobile %}
+    {% if section.settings.mobile_image_layout == 'compact' and section.settings.mobile_card_layout == 'horizontal' %}
+      @media (max-width:768px){
+        .section-{{ section.id }} .steps-container.has-carousel-mobile[data-mobile-layout="horizontal"] .step-image-container{ width:33%!important; min-width:30%!important; }
+      }
+      @media (max-width:410px){
+        .section-{{ section.id }} .steps-container.has-carousel-mobile[data-mobile-layout="horizontal"] .step-image-container{ width:37%!important; }
+      }
+    {% endif %}
+    {% if section.settings.mobile_image_layout == 'wide' and section.settings.mobile_card_layout == 'horizontal' %}
+      @media (max-width:768px){
+        .section-{{ section.id }} .steps-container.has-carousel-mobile[data-mobile-layout="horizontal"] .step-image-container{ width:50%!important; min-width:50%!important; flex:0 0 50%!important; }
+      }
+    {% endif %}
+    {% if section.settings.mobile_image_layout == 'compact' %}
+      @media (max-width:768px){ .section-{{ section.id }} .steps-regular-layout .step-image-container{ width:33%!important; min-width:30%!important; } }
+      @media (max-width:410px){ .section-{{ section.id }} .steps-regular-layout .step-image-container{ width:37%!important; } }
+    {% endif %}
+    {% if section.settings.mobile_image_layout == 'wide' %}
+      @media (max-width:768px){ .section-{{ section.id }} .steps-regular-layout .step-image-container{ width:50%!important; min-width:50%!important; flex:0 0 50%!important; } }
+    {% endif %}
+    @media (max-width:768px){
+      .section-{{ section.id }} .step-image-container{ width:100%!important; min-width:100%!important; max-width:100%!important; }
+    }
+  {% endif %}
+
+  /* Carousel presence toggles */
+  @media (min-width:769px){
+    .section-{{ section.id }} .carousel-container.mobile-carousel:not(.desktop-carousel){ display:none!important; }
+    .section-{{ section.id }} .carousel-container.mobile-carousel:not(.desktop-carousel) + .steps-navigation-container{ display:none!important; }
+  }
+  @media (max-width:768px){
+    .section-{{ section.id }} .carousel-container.desktop-carousel:not(.mobile-carousel){ display:none!important; }
+    .section-{{ section.id }} .carousel-container.desktop-carousel:not(.mobile-carousel) + .steps-navigation-container{ display:none!important; }
+  }
+  @media (min-width:769px){
+    .section-{{ section.id }} .has-carousel-mobile:not(.has-carousel-desktop) .steps-regular-layout{ display:block!important; }
+    .section-{{ section.id }} .has-carousel-desktop .steps-regular-layout{ display:none!important; }
+  }
+  @media (max-width:768px){
+    .section-{{ section.id }} .has-carousel-desktop:not(.has-carousel-mobile) .steps-regular-layout{ display:block!important; }
+    .section-{{ section.id }} .has-carousel-mobile .steps-regular-layout{ display:none!important; }
+  }
+
+  /* Section background */
+  .section-{{ section.id }}.results-steps-section{
+    {% if section.settings.background_type == 'image' and section.settings.background_image_desktop != blank %}
+      {% comment %} Layer background image over gradient/color using multiple backgrounds {% endcomment %}
+      {% if section.settings.use_theme_colors %}
+        background: var(--background-image-desktop), {{ settings.global_section_background_color }} !important;
+      {% elsif section.settings.section_background_gradient != blank %}
+        background: var(--background-image-desktop), {{ section.settings.section_background_gradient }} !important;
+      {% else %}
+        background: var(--background-image-desktop), {{ section.settings.section_background_color | default: '#FFFFFF' }} !important;
+      {% endif %}
+      background-size: var(--background-image-size), auto !important;
+      background-position: var(--background-image-position), center !important;
+      background-repeat: var(--background-image-repeat), no-repeat !important;
+      background-attachment: fixed, scroll !important;
+      {% if section.settings.background_overlay_enable %}
+        position: relative !important;
+      {% endif %}
+    {% elsif section.settings.use_theme_colors %}
+      background: {{ settings.global_section_background_color }} !important;
+    {% elsif section.settings.background_type == 'gradient' %}
+      {% if section.settings.section_background_gradient != blank %}
+        background: {{ section.settings.section_background_gradient }} !important;
+      {% else %}
+        background: linear-gradient(135deg,#ffffff 0%,#f8f8f8 100%) !important;
+      {% endif %}
+    {% else %}
+      background: {{ section.settings.section_background_color | default: '#FFFFFF' }} !important;
+    {% endif %}
+    padding-top:var(--padding-top)!important; padding-bottom:var(--padding-bottom)!important; width:100%!important; max-width:none!important;
+    {% if section.settings.enable_top_border %}
+      border-top: var(--top-border-width) var(--top-border-style) var(--top-border-color);
+    {% endif %}
+    {% if section.settings.enable_bottom_border %}
+      border-bottom: var(--bottom-border-width) var(--bottom-border-style) var(--bottom-border-color);
+    {% endif %}
+  }
+
+  /* Background Image Overlay */
+  {% if section.settings.background_type == 'image' and section.settings.background_overlay_enable %}
+    .section-{{ section.id }}.results-steps-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--background-overlay-color);
+      opacity: var(--background-overlay-opacity);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .section-{{ section.id }} .steps-content-wrapper {
+      position: relative;
+      z-index: 2;
+    }
+  {% endif %}
+
+
+  /* Content bounds controlled by setting */
+  .section-{{ section.id }} .steps-content-wrapper{
+    max-width: var(--content-max-width)!important;
+    margin:0 auto!important;
+    padding-left:var(--padding-horizontal)!important; padding-right:var(--padding-horizontal)!important;
+  }
+
+  /* Typography colors/sizes */
+  .section-{{ section.id }} .section-title.global-heading,
+  .section-{{ section.id }} .section-title{ 
+    color:var(--title-color)!important; 
+    font-size:var(--title-size)!important; 
+    line-height:var(--title-line-height)!important;
+    margin-bottom:var(--title-margin-bottom)!important;
+    text-align: {{ section.settings.header_alignment | default: 'center' }} !important;
+  }
+  .section-{{ section.id }} .section-title .global-accent-text,
+  .section-{{ section.id }} .section-title span{ color:var(--highlight-color)!important; }
+  .section-{{ section.id }} .section-subtitle{
+    color:var(--subtitle-color)!important; 
+    font-size:var(--subtitle-size)!important; 
+    text-align: {{ section.settings.header_alignment | default: 'center' }} !important;
+    margin-bottom:var(--subtitle-margin-bottom)!important; 
+    margin-top:var(--subtitle-margin-top)!important; 
+    {% if section.settings.header_alignment == 'left' %}
+      margin-left: 0 !important; 
+      margin-right: auto !important;
+    {% else %}
+      margin-left: auto !important; 
+      margin-right: auto !important;
+    {% endif %}
+    max-width:800px!important; 
+    display:block!important;
+  }
+  .section-{{ section.id }} .step-title{ color:var(--step-title-color)!important; font-size:var(--step-title-size)!important; }
+  .section-{{ section.id }} .step-description,
+  .section-{{ section.id }} .step-description.global-text{ color:var(--description-color)!important; font-size:var(--step-description-size)!important; }
+
+  .section-{{ section.id }} .number-icon{
+    color:var(--label-color)!important; border:var(--number-border-width) var(--number-border-style) var(--number-border-color)!important;
+    border-radius:var(--number-border-radius)!important; background-color:var(--number-background-color)!important;
+    font-weight:var(--number-font-weight)!important; font-size:var(--number-size)!important; width:var(--number-circle-size)!important; height:var(--number-circle-size)!important;
+    display:flex!important; align-items:center!important; justify-content:center!important; flex-shrink:0!important;
+  }
+  .section-{{ section.id }} .number-icon.has-custom-icon{
+    border:none!important; background-color:transparent!important; width:auto!important; height:auto!important;
+  }
+  .section-{{ section.id }} .number-icon .custom-step-icon{
+    width:{{ section.settings.custom_icon_size }}px!important; height:{{ section.settings.custom_icon_size }}px!important; object-fit:contain!important;
+  }
+
+  /* Responsive text sizes */
+  @media (max-width:768px){
+    .section-{{ section.id }} .section-title.global-heading,
+    .section-{{ section.id }} .section-title{ font-size:var(--title-size-mobile)!important; line-height:var(--title-line-height-mobile)!important; margin-bottom:var(--title-margin-bottom-mobile)!important; }
+    .section-{{ section.id }} .section-subtitle{ font-size:var(--subtitle-size-mobile)!important; }
+    .section-{{ section.id }} .step-title{ font-size:var(--step-title-size-mobile)!important; }
+    .section-{{ section.id }} .step-description,
+    .section-{{ section.id }} .step-description.global-text{ font-size:var(--step-description-size-mobile)!important; }
+    .section-{{ section.id }} .number-icon{ font-size:var(--number-size-mobile)!important; width:var(--number-circle-size-mobile)!important; height:var(--number-circle-size-mobile)!important; }
+    
+    /* Mobile step content padding */
+    .section-{{ section.id }} .step-content{
+      padding: var(--step-content-padding-vertical-mobile) var(--step-content-padding-horizontal-mobile) !important;
+    }
+  }
+  @media (min-width:769px) and (max-width:1024px){
+    .section-{{ section.id }} .section-title.global-heading,
+    .section-{{ section.id }} .section-title{ margin-bottom:var(--title-margin-bottom-tablet)!important; }
+  }
+
+  /* Hide-image mode */
+  {% unless section.settings.show_step_images %}
+    .section-{{ section.id }} .step-card{ display:flex!important; flex-direction:column; width:100%!important; }
+    .section-{{ section.id }} .step-content{ width:100%!important; max-width:none!important; text-align:center!important; }
+    .section-{{ section.id }} .step-title-container{ justify-content:center!important; }
+    @media (max-width:768px){
+      .section-{{ section.id }} .step-card{ text-align:center!important; overflow:hidden!important; border-radius:var(--card-border-radius)!important; }
+      .section-{{ section.id }} .step-content{ padding:20px!important; overflow:hidden!important; }
+      .section-{{ section.id }} .steps-container[data-mobile-layout="horizontal"] .step-card{ display:flex!important; flex-direction:row!important; overflow:hidden!important; height:auto!important; }
+      .section-{{ section.id }} .steps-container[data-mobile-layout="horizontal"] .step-image-container{
+        {% if section.settings.disable_image_border_radius %}border-radius:0!important;{% else %}border-radius:var(--card-border-radius)!important;{% endif %}
+      }
+      .section-{{ section.id }} .steps-container[data-mobile-layout="horizontal"] .step-content{ border-radius:var(--card-border-radius)!important; }
+    }
+  {% endunless %}
+
+  /* Mobile horizontal layout for step cards */
+  @media (max-width:768px){
+    .section-{{ section.id }} .steps-container[data-mobile-layout="horizontal"] .step-card{ 
+      display:flex!important; 
+      flex-direction:row!important; 
+      overflow:hidden!important; 
+      height:auto!important; 
+    }
+    
+    /* Mobile border radius - remove left side corners to connect with image */
+    .section-{{ section.id }} .steps-container[data-mobile-layout="horizontal"] .step-content{
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+    }
+  }
+
+  /* Carousel structure */
+  .section-{{ section.id }} .carousel-slide{ overflow:hidden!important; }
+  @media (max-width: 768px) {
+    .section-{{ section.id }} .carousel-slide {
+      padding: var(--mobile-carousel-padding) !important;
+    }
+  }
+  .section-{{ section.id }} .carousel-track{ display:flex!important; transition:transform .3s ease!important; overflow:visible!important; }
+  .section-{{ section.id }} .carousel-track-container{ overflow:hidden!important; width:100%!important; }
+  .section-{{ section.id }} .carousel-slide .step-card{ height:auto!important; min-height:300px!important; }
+  @media (min-width:769px){
+    .section-{{ section.id }} .step-card{ height:auto!important; max-height:none!important; flex-direction:column; }
+    .section-{{ section.id }} .carousel-slide .step-card{ min-height:350px!important; }
+  }
+  @media (max-width:768px){
+    .section-{{ section.id }} .carousel-slide .step-card{ min-height:auto!important; height:auto!important; }
+  }
+
+  /* Mobile Background Image - Must be after all other mobile styles */
+  @media (max-width: 768px) {
+    {% if section.settings.background_type == 'image' and section.settings.background_image_desktop != blank %}
+      .section-{{ section.id }}.results-steps-section {
+        {% comment %} Layer background image over gradient/color using multiple backgrounds {% endcomment %}
+        {% if section.settings.background_image_mobile != blank %}
+          {% assign mobile_bg_image = section.settings.background_image_mobile | image_url: width: 1024 %}
+        {% else %}
+          {% assign mobile_bg_image = section.settings.background_image_desktop | image_url: width: 1024 %}
+        {% endif %}
+        
+        {% if section.settings.use_theme_colors %}
+          background: url('{{ mobile_bg_image }}'), {{ settings.global_section_background_color }} !important;
+        {% elsif section.settings.section_background_gradient != blank %}
+          background: url('{{ mobile_bg_image }}'), {{ section.settings.section_background_gradient }} !important;
+        {% else %}
+          background: url('{{ mobile_bg_image }}'), {{ section.settings.section_background_color | default: '#FFFFFF' }} !important;
+        {% endif %}
+        background-size: cover, auto !important;
+        background-position: {{ section.settings.background_image_position | default: 'center center' }}, center !important;
+        background-repeat: no-repeat, no-repeat !important;
+        background-attachment: scroll, scroll !important;
+        width: 100% !important;
+        margin: 0 !important;
+      }
+    {% endif %}
+  }
+
+  /* Accent text styling (robust fallbacks) */
+  .section-{{ section.id }} .global-accent-text,
+  .section-{{ section.id }} .custom-accent-text{
+    padding:2px 4px!important; margin:-2px -4px!important; display:inline-block!important; margin-left:{{ section.settings.accent_text_margin_left }}px!important;
+    {% if section.settings.use_theme_colors and settings.global_accent_text_gradient_dark != blank %}
+      background: {{ settings.global_accent_text_gradient_dark }}!important;
+      -webkit-background-clip:text!important; -webkit-text-fill-color:transparent!important; background-clip:text!important; color:transparent!important; line-height:1.3!important;
+    {% elsif section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }}!important;
+      -webkit-background-clip:text!important; -webkit-text-fill-color:transparent!important; background-clip:text!important; color:transparent!important; line-height:1.3!important;
+    {% else %}
+      color: {{ section.settings.highlight_color }}!important;
+    {% endif %}
+    {% if section.settings.override_global_accent %}
+      {% case section.settings.accent_font_family %}
+        {% when 'serif' %}            font-family: serif!important;
+        {% when 'Bodoni Moda' %}      font-family: 'Bodoni Moda', Georgia, serif!important;
+        {% when 'Instrument Serif' %} font-family: 'Instrument Serif', Georgia, serif!important;
+        {% when 'DM Serif Text' %}    font-family: 'DM Serif Text', Georgia, serif!important;
+        {% when 'Nothing You Could Do' %} font-family: 'Nothing You Could Do', cursive!important;
+        {% else %}                    font-family: var(--font-accent-family, var(--font-body-family))!important;
+      {% endcase %}
+      font-style:{% if section.settings.accent_font_style != 'normal' %}{{ section.settings.accent_font_style }}{% else %}var(--font-accent-style, normal){% endif %}!important;
+      font-weight:{% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %}!important;
+    {% else %}
+      font-family: var(--font-accent-family, var(--font-body-family))!important;
+      font-style: var(--font-accent-style, normal)!important;
+      font-weight: var(--font-accent-weight, inherit)!important;
+      letter-spacing: var(--font-accent-letter-spacing, inherit)!important;
+      text-transform: var(--font-accent-text-transform, none)!important;
+    {% endif %}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .section-{{ section.id }} .carousel-track{ transition:none!important; }
+  }
+
+  {% unless section.settings.full_height_image_mobile %}
+    @media (max-width: 768px) {
+      .section-{{ section.id }} .step-card {
+        padding: 16px !important;
+        gap: 16px !important;
+        background-color: var(--content-bg-color, var(--default-card-bg)) !important;
+        overflow: visible !important;
+        min-height: auto !important;
+        {% if section.settings.mobile_card_layout == 'horizontal' %}
+          flex-direction: row !important;
+          align-items: center !important;
+        {% else %}
+          flex-direction: column !important;
+          align-items: flex-start !important;
+        {% endif %}
+      }
+      .section-{{ section.id }} .steps-container .step-image-container,
+      .section-{{ section.id }} .steps-container[data-mobile-layout="horizontal"] .step-image-container,
+      .section-{{ section.id }} .step-image-container {
+        width: {{ section.settings.mobile_image_width }}% !important;
+        min-width: {{ section.settings.mobile_image_width }}% !important;
+        max-width: {{ section.settings.mobile_image_width }}% !important;
+        flex: 0 0 {{ section.settings.mobile_image_width }}% !important;
+        height: auto !important;
+        aspect-ratio: 1/1 !important;
+        border-radius: 8px !important;
+        flex-shrink: 0 !important;
+        position: relative !important;
+        background-color: transparent !important;
+        margin: 0 !important;
+      }
+      .section-{{ section.id }} .step-image {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 8px !important;
+        object-fit: cover !important;
+        display: block !important;
+        inset: auto !important;
+      }
+      .section-{{ section.id }} .step-content {
+        background: transparent !important;
+        padding: 0 !important;
+        flex: 1 !important;
+        border-radius: 0 !important;
+        min-height: auto !important;
+      }
+      .section-{{ section.id }} .step-title-container {
+        margin-bottom: 4px !important;
+      }
+      .section-{{ section.id }} .steps-container[data-mobile-layout="horizontal"] .step-content {
+        padding-left: 0 !important;
+      }
+    }
+  {% endunless %}
+
+  /* Navigation buttons now use global-nav-button snippet */
+</style>
+
+<section
+  class="results-steps-section section-{{ section.id }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}"
+  role="region"
+  aria-label="{{ section.settings.title | escape }} {{ section.settings.title_highlight | escape }}"
+  data-show-images="{{ section.settings.show_step_images }}"
+>
+  <div class="steps-content-wrapper">
+    <h2 class="section-title global-heading">
+      {{ section.settings.title }}
+      <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+        {{- section.settings.title_highlight -}}
+      </span>
+    </h2>
+
+    {% if section.settings.subtitle != blank %}
+      <p class="section-subtitle">{{ section.settings.subtitle }}</p>
+    {% endif %}
+
+    {%- comment -%} DESKTOP {%- endcomment -%}
+    <div class="steps-container-desktop desktop-only">
+      {% if section.blocks.size > 4 %}
+        {% assign desktop_track_id = 'steps-track-desktop-' | append: section.id %}
+        <div
+          class="steps-container has-carousel-desktop"
+          data-total-steps="{{ section.blocks.size }}"
+          data-show-numbers="{{ section.settings.show_step_numbers }}"
+        >
+          <div class="carousel-container desktop-carousel" aria-roledescription="carousel">
+            <div class="carousel-track-container">
+              <div class="carousel-track" id="{{ desktop_track_id }}">
+                {% for block in section.blocks %}
+                  {% if block.type == 'step' %}
+                    <div
+                      class="step-item carousel-slide"
+                      id="step-item-{{block.id }}"
+                      {{ block.shopify_attributes }}
+                      data-step="{{ forloop.index }}"
+                      style="--image-bg-color:{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ block.settings.image_background_color | default: section.settings.default_image_background }}{% endif %}; --content-bg-color:{% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ block.settings.content_background_color | default: section.settings.default_card_background }}{% endif %}; --card-bg-color:{% if section.settings.use_theme_colors %}transparent{% else %}{{ block.settings.card_background_color | default: section.settings.default_card_container_background | default: 'transparent' }}{% endif %};"
+                    >
+                      <div class="step-card">
+                        {% if section.settings.show_step_images %}
+                          <div class="step-image-container">
+                            {% if block.settings.step_image != blank %}
+                              <img
+                                class="step-image"
+                                src="{{ block.settings.step_image | image_url: width: 309 }}"
+                                srcset="{{ block.settings.step_image | image_url: width: 309 }} 309w, {{ block.settings.step_image | image_url: width: 618 }} 618w, {{ block.settings.step_image | image_url: width: 927 }} 927w"
+                                sizes="(max-width:768px) 100vw, 25vw"
+                                alt="{{ block.settings.step_title | escape }}"
+                                loading="lazy"
+                                width=""
+                                height=""
+                                decoding="async"
+                                draggable="false"
+                              >
+                            {% else %}
+                              <div class="step-image placeholder-image" aria-hidden="true"></div>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                        <div class="step-content">
+                          <div class="step-title-container">
+                            {% if section.settings.show_step_numbers %}
+                              <div class="number-icon{% if block.settings.custom_step_icon != blank %} has-custom-icon{% endif %}" aria-hidden="true">
+                                {% if block.settings.custom_step_icon != blank %}
+                                  <img src="{{ block.settings.custom_step_icon | image_url: width: 120 }}" alt="{{ block.settings.custom_step_icon.alt | escape }}" width="{{ section.settings.custom_icon_size }}" height="{{ section.settings.custom_icon_size }}" loading="lazy" class="custom-step-icon">
+                                {% else %}
+                                  {{ forloop.index }}
+                                {% endif %}
+                              </div>
+                            {% endif %}
+                            <h3 class="step-title">{{ block.settings.step_title }}</h3>
+                          </div>
+                          <p class="step-description global-text">{{ block.settings.step_description }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="steps-navigation-container">
+            <div class="steps-navigation">
+              {% render 'global-nav-button', 
+                direction: 'prev', 
+                aria_label: 'Previous steps',
+                aria_controls: desktop_track_id,
+                use_global: section.settings.use_global_nav_buttons,
+                section_settings: section.settings
+              %}
+              {% render 'global-nav-button', 
+                direction: 'next', 
+                aria_label: 'Next steps',
+                aria_controls: desktop_track_id,
+                use_global: section.settings.use_global_nav_buttons,
+                section_settings: section.settings
+              %}
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="steps-container" data-show-numbers="{{ section.settings.show_step_numbers }}">
+          <div class="steps-regular-layout">
+            {% for block in section.blocks %}
+              {% if block.type == 'step' %}
+                <div
+                  class="step-item"
+                  {{ block.shopify_attributes }}
+                  data-step="{{ forloop.index }}"
+                  style="--image-bg-color:{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ block.settings.image_background_color | default: section.settings.default_image_background }}{% endif %}; --content-bg-color:{% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ block.settings.content_background_color | default: section.settings.default_card_background }}{% endif %}; --card-bg-color:{% if section.settings.use_theme_colors %}transparent{% else %}{{ block.settings.card_background_color | default: section.settings.default_card_container_background | default: 'transparent' }}{% endif %};"
+                >
+                  <div class="step-card">
+                    {% if section.settings.show_step_images %}
+                      <div class="step-image-container">
+                        {% if block.settings.step_image != blank %}
+                          <img
+                            class="step-image"
+                            src="{{ block.settings.step_image | image_url: width: 309 }}"
+                            srcset="{{ block.settings.step_image | image_url: width: 309 }} 309w, {{ block.settings.step_image | image_url: width: 618 }} 618w, {{ block.settings.step_image | image_url: width: 927 }} 927w"
+                            sizes="(max-width:768px) 100vw, 25vw"
+                            alt="{{ block.settings.step_title | escape }}"
+                            loading="lazy"
+                            width=""
+                            height=""
+                            decoding="async"
+                            draggable="false"
+                          >
+                        {% else %}
+                          <div class="step-image placeholder-image" aria-hidden="true"></div>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                    <div class="step-content">
+                      <div class="step-title-container">
+                        {% if section.settings.show_step_numbers %}
+                          <div class="number-icon{% if block.settings.custom_step_icon != blank %} has-custom-icon{% endif %}" aria-hidden="true">
+                                {% if block.settings.custom_step_icon != blank %}
+                                  <img src="{{ block.settings.custom_step_icon | image_url: width: 120 }}" alt="{{ block.settings.custom_step_icon.alt | escape }}" width="{{ section.settings.custom_icon_size }}" height="{{ section.settings.custom_icon_size }}" loading="lazy" class="custom-step-icon">
+                                {% else %}
+                                  {{ forloop.index }}
+                                {% endif %}
+                              </div>
+                        {% endif %}
+                        <h3 class="step-title">{{ block.settings.step_title }}</h3>
+                      </div>
+                      <p class="step-description global-text">{{ block.settings.step_description }}</p>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    {%- comment -%} MOBILE {%- endcomment -%}
+    <div class="steps-container-mobile mobile-only">
+      {% if section.settings.enable_mobile_carousel %}
+        {% assign mobile_track_id = 'steps-track-mobile-' | append: section.id %}
+        <div
+          class="steps-container has-carousel-mobile"
+          data-total-steps="{{ section.blocks.size }}"
+          data-mobile-layout="{{ section.settings.mobile_card_layout }}"
+          data-show-numbers="{{ section.settings.show_step_numbers }}"
+        >
+          <div class="carousel-container mobile-carousel" aria-roledescription="carousel">
+            <div class="carousel-track-container">
+              <div class="carousel-track" id="{{ mobile_track_id }}">
+                {% for block in section.blocks %}
+                  {% if block.type == 'step' %}
+                    <div
+                      class="step-item carousel-slide"
+                      {{ block.shopify_attributes }}
+                      data-step="{{ forloop.index }}"
+                      style="--image-bg-color:{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ block.settings.image_background_color | default: section.settings.default_image_background }}{% endif %}; --content-bg-color:{% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ block.settings.content_background_color | default: section.settings.default_card_background }}{% endif %}; --card-bg-color:{% if section.settings.use_theme_colors %}transparent{% else %}{{ block.settings.card_background_color | default: section.settings.default_card_container_background | default: 'transparent' }}{% endif %};"
+                    >
+                      <div class="step-card">
+                        {% if section.settings.show_step_images %}
+                          <div class="step-image-container">
+                            {% if block.settings.step_image != blank %}
+                              <img
+                                class="step-image"
+                                src="{{ block.settings.step_image | image_url: width: 309 }}"
+                                srcset="{{ block.settings.step_image | image_url: width: 309 }} 309w, {{ block.settings.step_image | image_url: width: 618 }} 618w, {{ block.settings.step_image | image_url: width: 927 }} 927w"
+                                sizes="100vw"
+                                alt="{{ block.settings.step_title | escape }}"
+                                loading="lazy"
+                                width=""
+                                height=""
+                                decoding="async"
+                                draggable="false"
+                              >
+                            {% else %}
+                              <div class="step-image placeholder-image" aria-hidden="true"></div>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                        <div class="step-content">
+                          <div class="step-title-container">
+                            {% if section.settings.show_step_numbers %}
+                              <div class="number-icon{% if block.settings.custom_step_icon != blank %} has-custom-icon{% endif %}" aria-hidden="true">
+                                {% if block.settings.custom_step_icon != blank %}
+                                  <img src="{{ block.settings.custom_step_icon | image_url: width: 120 }}" alt="{{ block.settings.custom_step_icon.alt | escape }}" width="{{ section.settings.custom_icon_size }}" height="{{ section.settings.custom_icon_size }}" loading="lazy" class="custom-step-icon">
+                                {% else %}
+                                  {{ forloop.index }}
+                                {% endif %}
+                              </div>
+                            {% endif %}
+                            <h3 class="step-title">{{ block.settings.step_title }}</h3>
+                          </div>
+                          <p class="step-description global-text">{{ block.settings.step_description }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="steps-navigation-container">
+            <div class="steps-navigation">
+              {% render 'global-nav-button', 
+                direction: 'prev', 
+                aria_label: 'Previous steps',
+                aria_controls: mobile_track_id,
+                use_global: section.settings.use_global_nav_buttons,
+                section_settings: section.settings
+              %}
+              {% render 'global-nav-button', 
+                direction: 'next', 
+                aria_label: 'Next steps',
+                aria_controls: mobile_track_id,
+                use_global: section.settings.use_global_nav_buttons,
+                section_settings: section.settings
+              %}
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div
+          class="steps-container"
+          data-mobile-layout="{{ section.settings.mobile_card_layout }}"
+          data-show-numbers="{{ section.settings.show_step_numbers }}"
+        >
+          <div class="steps-regular-layout">
+            {% for block in section.blocks %}
+              {% if block.type == 'step' %}
+                <div
+                  class="step-item"
+                  {{ block.shopify_attributes }}
+                  data-step="{{ forloop.index }}"
+                  style="--image-bg-color:{% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ block.settings.image_background_color | default: section.settings.default_image_background }}{% endif %}; --content-bg-color:{% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ block.settings.content_background_color | default: section.settings.default_card_background }}{% endif %}; --card-bg-color:{% if section.settings.use_theme_colors %}transparent{% else %}{{ block.settings.card_background_color | default: section.settings.default_card_container_background | default: 'transparent' }}{% endif %};"
+                >
+                  <div class="step-card">
+                    {% if section.settings.show_step_images %}
+                      <div class="step-image-container">
+                        {% if block.settings.step_image != blank %}
+                          <img
+                            class="step-image"
+                            src="{{ block.settings.step_image | image_url: width: 309 }}"
+                            srcset="{{ block.settings.step_image | image_url: width: 309 }} 309w, {{ block.settings.step_image | image_url: width: 618 }} 618w, {{ block.settings.step_image | image_url: width: 927 }} 927w"
+                            sizes="100vw"
+                            alt="{{ block.settings.step_title | escape }}"
+                            loading="lazy"
+                            width=""
+                            height=""
+                            decoding="async"
+                            draggable="false"
+                          >
+                        {% else %}
+                          <div class="step-image placeholder-image" aria-hidden="true"></div>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                    <div class="step-content">
+                      <div class="step-title-container">
+                        {% if section.settings.show_step_numbers %}
+                          <div class="number-icon{% if block.settings.custom_step_icon != blank %} has-custom-icon{% endif %}" aria-hidden="true">
+                                {% if block.settings.custom_step_icon != blank %}
+                                  <img src="{{ block.settings.custom_step_icon | image_url: width: 120 }}" alt="{{ block.settings.custom_step_icon.alt | escape }}" width="{{ section.settings.custom_icon_size }}" height="{{ section.settings.custom_icon_size }}" loading="lazy" class="custom-step-icon">
+                                {% else %}
+                                  {{ forloop.index }}
+                                {% endif %}
+                              </div>
+                        {% endif %}
+                        <h3 class="step-title">{{ block.settings.step_title }}</h3>
+                      </div>
+                      <p class="step-description global-text">{{ block.settings.step_description }}</p>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const root = document.querySelector('.section-{{ section.id }}.results-steps-section');
+    if (!root) return;
+
+    function init(containerScope) {
+      const container = containerScope && containerScope.querySelector('.steps-container');
+      if (!container) return null;
+
+      const desktop = container.classList.contains('has-carousel-desktop');
+      const mobile = container.classList.contains('has-carousel-mobile');
+
+      if (!desktop && !mobile) return null;
+
+      const track = container.querySelector('.carousel-track');
+      const slides = container.querySelectorAll('.carousel-slide');
+      const navWrap = containerScope.querySelector('.steps-navigation-container');
+      const prevBtn = navWrap ? navWrap.querySelector('.nav-button.prev') : null;
+      const nextBtn = navWrap ? navWrap.querySelector('.nav-button.next') : null;
+      if (!track || !slides.length || !prevBtn || !nextBtn) return null;
+
+      const state = { current: 0, desktop, mobile, track, slides, prevBtn, nextBtn, container };
+      function isActive() {
+        const isMobile = window.innerWidth <= 768;
+        return (isMobile && state.mobile) || (!isMobile && state.desktop);
+      }
+      function perView() {
+        if (window.innerWidth <= 768 && state.mobile) return 1;
+        return Math.min(4, state.slides.length);
+      }
+      function update() {
+        if (!isActive()) return;
+        const spv = perView();
+        const max = Math.max(0, state.slides.length - spv);
+        state.current = Math.max(0, Math.min(state.current, max));
+        const slideW = 100 / spv;
+        state.track.style.transform = 'translateX(' + -(state.current * slideW) + '%)';
+        state.prevBtn.disabled = state.current === 0;
+        state.nextBtn.disabled = state.current >= max;
+        // hide nav if not needed
+        if (state.prevBtn && state.nextBtn) {
+          const needed = max > 0;
+          state.prevBtn.parentElement.style.display = needed ? '' : 'none';
+        }
+      }
+      function next() {
+        if (!isActive()) return;
+        const spv = perView();
+        const max = Math.max(0, state.slides.length - spv);
+        if (state.current < max) {
+          state.current += window.innerWidth <= 768 && state.mobile ? 1 : spv;
+          update();
+        }
+      }
+      function prev() {
+        if (!isActive()) return;
+        const spv = perView();
+        if (state.current > 0) {
+          state.current -= window.innerWidth <= 768 && state.mobile ? 1 : spv;
+          update();
+        }
+      }
+
+      // Pointer / touch drag
+      let down = false,
+        startX = 0,
+        startY = 0,
+        curX = 0,
+        dragging = false,
+        hadVertical = false;
+      function currentTransformPercent() {
+        const spv = perView();
+        return -(state.current * (100 / spv));
+      }
+      function onStart(e) {
+        if (!isActive()) return;
+        down = true;
+        dragging = false;
+        hadVertical = false;
+        curX = 0;
+        startX = e.touches ? e.touches[0].clientX : e.clientX;
+        startY = e.touches ? e.touches[0].clientY : e.clientY;
+        state.track.style.transition = 'none';
+        state.track.style.cursor = 'grabbing';
+      }
+      function onMove(e) {
+        if (!down || !isActive()) return;
+        const x = e.touches ? e.touches[0].clientX : e.clientX;
+        const y = e.touches ? e.touches[0].clientY : e.clientY;
+        const dx = x - startX;
+        const dy = y - startY;
+        if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
+          hadVertical = true;
+          return;
+        }
+        if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+          dragging = true;
+          if (e.cancelable) e.preventDefault();
+          const movePct = (dx / state.track.offsetWidth) * 100;
+          const t = currentTransformPercent() + movePct;
+          state.track.style.transform = 'translateX(' + t + '%)';
+        }
+        curX = x;
+      }
+      function onEnd() {
+        if (!down || !isActive()) return;
+        down = false;
+        state.track.style.cursor = 'grab';
+        state.track.style.transition = 'transform .3s ease';
+        if (hadVertical) {
+          update();
+          dragging = false;
+          hadVertical = false;
+          return;
+        }
+        if (dragging) {
+          const dx = curX - startX;
+          const threshold = 50;
+          if (Math.abs(dx) > threshold) {
+            dx > 0 ? prev() : next();
+          } else {
+            update();
+          }
+          setTimeout(() => (dragging = false), 100);
+        } else {
+          update();
+        }
+      }
+      function onClick(e) {
+        if (dragging) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+
+      // Bindings
+      state.nextBtn.addEventListener('click', next);
+      state.prevBtn.addEventListener('click', prev);
+      state.track.addEventListener('touchstart', onStart, { passive: true });
+      state.track.addEventListener('touchmove', onMove, { passive: false });
+      state.track.addEventListener('touchend', onEnd, { passive: true });
+      if (!('ontouchstart' in window)) {
+        state.track.addEventListener('mousedown', onStart);
+        state.track.addEventListener('mousemove', onMove);
+        state.track.addEventListener('mouseup', onEnd);
+        state.track.addEventListener('mouseleave', onEnd);
+      }
+      state.track.addEventListener('click', onClick, true);
+
+      // Init + resize
+      update();
+      window.addEventListener('resize', function () {
+        state.current = 0;
+        update();
+      });
+
+      return state;
+    }
+
+    const desktopScope = root.querySelector('.steps-container-desktop');
+    const mobileScope = root.querySelector('.steps-container-mobile');
+    const ds = desktopScope ? init(desktopScope) : null;
+    const ms = mobileScope ? init(mobileScope) : null;
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Steps Results Section",
+  "tag": "section",
+  "enabled_on": {
+    "templates": ["index", "page", "product", "collection", "cart"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "Apply the global theme colors to this section"
+    },
+
+    { "type": "header", "content": "Section Background" },
+    { "type": "select", "id": "background_type", "label": "Background Type", "options": [ { "value": "solid", "label": "Solid Color" }, { "value": "gradient", "label": "Gradient" }, { "value": "image", "label": "Background Image" } ], "default": "gradient" },
+    { "type": "color", "id": "section_background_color", "label": "Background Color", "default": "#FFFFFF", "info": "Used when 'Solid Color' is selected" },
+    { "type": "color_background", "id": "section_background_gradient", "label": "Background Gradient", "default": "linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%)", "info": "Used when 'Gradient' is selected" },
+    { "type": "image_picker", "id": "background_image_desktop", "label": "Desktop Background Image", "info": "Used when 'Background Image' is selected" },
+    { "type": "image_picker", "id": "background_image_mobile", "label": "Mobile Background Image", "info": "Optional: Different image for mobile. Falls back to desktop image if not set" },
+    { "type": "select", "id": "background_image_size", "label": "Background Image Size", "options": [ { "value": "cover", "label": "Cover" }, { "value": "contain", "label": "Contain" }, { "value": "auto", "label": "Auto" } ], "default": "cover", "info": "How the background image should be sized" },
+    { "type": "select", "id": "background_image_position", "label": "Background Image Position", "options": [ { "value": "center center", "label": "Center" }, { "value": "top center", "label": "Top Center" }, { "value": "bottom center", "label": "Bottom Center" }, { "value": "left center", "label": "Left Center" }, { "value": "right center", "label": "Right Center" } ], "default": "center center", "info": "Position of the background image" },
+    { "type": "select", "id": "background_image_repeat", "label": "Background Image Repeat", "options": [ { "value": "no-repeat", "label": "No Repeat" }, { "value": "repeat", "label": "Repeat" }, { "value": "repeat-x", "label": "Repeat Horizontally" }, { "value": "repeat-y", "label": "Repeat Vertically" } ], "default": "no-repeat", "info": "How the background image should repeat" },
+    { "type": "checkbox", "id": "background_overlay_enable", "label": "Enable Background Overlay", "default": false, "info": "Add a color overlay on top of the background image" },
+    { "type": "color", "id": "background_overlay_color", "label": "Background Overlay Color", "default": "#000000", "info": "Color of the overlay (only used when overlay is enabled)" },
+    { "type": "range", "id": "background_overlay_opacity", "min": 0.0, "max": 1.0, "step": 0.1, "label": "Background Overlay Opacity", "default": 0.5, "info": "Opacity of the overlay (only used when overlay is enabled)" },
+
+    { "type": "header", "content": "Section Padding" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 1, "unit": "px", "label": "Top Padding", "default": 60 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 1, "unit": "px", "label": "Bottom Padding", "default": 60 },
+    { "type": "range", "id": "padding_horizontal", "min": 0, "max": 80, "step": 5, "unit": "px", "label": "Horizontal Padding", "default": 20 },
+
+    { "type": "header", "content": "Section Borders" },
+    { "type": "checkbox", "id": "enable_top_border", "label": "Enable Top Border", "default": false, "info": "Add a customizable border to the top of the section" },
+    { "type": "range", "id": "top_border_width", "min": 1, "max": 10, "step": 1, "unit": "px", "label": "Top Border Width", "default": 1, "info": "Only used when 'Enable Top Border' is checked" },
+    { "type": "select", "id": "top_border_style", "label": "Top Border Style", "options": [ {"value": "solid", "label": "Solid"}, {"value": "dashed", "label": "Dashed"}, {"value": "dotted", "label": "Dotted"}, {"value": "double", "label": "Double"} ], "default": "solid", "info": "Only used when 'Enable Top Border' is checked" },
+    { "type": "color", "id": "top_border_color", "label": "Top Border Color", "default": "#e0e0e0", "info": "Only used when 'Enable Top Border' is checked" },
+    { "type": "checkbox", "id": "enable_bottom_border", "label": "Enable Bottom Border", "default": false, "info": "Add a customizable border to the bottom of the section" },
+    { "type": "range", "id": "bottom_border_width", "min": 1, "max": 10, "step": 1, "unit": "px", "label": "Bottom Border Width", "default": 1, "info": "Only used when 'Enable Bottom Border' is checked" },
+    { "type": "select", "id": "bottom_border_style", "label": "Bottom Border Style", "options": [ {"value": "solid", "label": "Solid"}, {"value": "dashed", "label": "Dashed"}, {"value": "dotted", "label": "Dotted"}, {"value": "double", "label": "Double"} ], "default": "solid", "info": "Only used when 'Enable Bottom Border' is checked" },
+    { "type": "color", "id": "bottom_border_color", "label": "Bottom Border Color", "default": "#e0e0e0", "info": "Only used when 'Enable Bottom Border' is checked" },
+
+    { "type": "header", "content": "Section Content" },
+    { "type": "text", "id": "title", "label": "Section Title", "default": "How" },
+    { "type": "text", "id": "title_highlight", "label": "Highlighted Title Text", "default": "It Works" },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Learn how our process works in three simple steps",
+      "info": "Optional subtitle to display below the main title"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Header Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center",
+      "info": "Alignment for the section title and subtitle"
+    },
+
+    { "type": "header", "content": "Content Width" },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "min": 800,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "label": "Max Content Width",
+      "default": 1200
+    },
+
+    { "type": "header", "content": "Section Colors" },
+    { "type": "color", "id": "title_color", "label": "Title Color", "default": "#000000" },
+    { "type": "color", "id": "highlight_color", "label": "Highlight Color", "default": "#EF4A65" },
+    { "type": "color", "id": "subtitle_color", "label": "Subtitle Color", "default": "#4A4A4A" },
+
+    { "type": "header", "content": "Text Sizing" },
+    { "type": "range", "id": "title_size_desktop", "min": 24, "max": 60, "step": 2, "unit": "px", "label": "Title Size (Desktop)", "default": 34 },
+    { "type": "range", "id": "title_line_height_desktop", "min": 0.8, "max": 2, "step": 0.1, "label": "Title Line Height (Desktop)", "default": 1.2 },
+    { "type": "range", "id": "title_size_mobile", "min": 20, "max": 60, "step": 2, "unit": "px", "label": "Title Size (Mobile)", "default": 34 },
+    { "type": "range", "id": "title_line_height_mobile", "min": 0.8, "max": 2, "step": 0.1, "label": "Title Line Height (Mobile)", "default": 1.2 },
+    { "type": "range", "id": "subtitle_size_desktop", "min": 14, "max": 30, "step": 1, "unit": "px", "label": "Subtitle Size (Desktop)", "default": 18 },
+    { "type": "range", "id": "subtitle_size_mobile", "min": 12, "max": 24, "step": 1, "unit": "px", "label": "Subtitle Size (Mobile)", "default": 14 },
+    { "type": "range", "id": "step_title_size_desktop", "min": 14, "max": 32, "step": 1, "unit": "px", "label": "Step Title Size (Desktop)", "default": 18 },
+    { "type": "range", "id": "step_title_size_mobile", "min": 14, "max": 28, "step": 1, "unit": "px", "label": "Step Title Size (Mobile)", "default": 20 },
+    { "type": "range", "id": "step_description_size_desktop", "min": 12, "max": 20, "step": 1, "unit": "px", "label": "Step Description Size (Desktop)", "default": 12 },
+    { "type": "range", "id": "step_description_size_mobile", "min": 10, "max": 18, "step": 1, "unit": "px", "label": "Step Description Size (Mobile)", "default": 13 },
+
+    {
+      "type": "range",
+      "id": "number_size_desktop",
+      "min": 16,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Step Number Size (Desktop)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "number_size_mobile",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Step Number Size (Mobile)",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "number_circle_size_desktop",
+      "min": 10,
+      "max": 70,
+      "step": 5,
+      "unit": "px",
+      "label": "Number Circle Size (Desktop)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "number_circle_size_mobile",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Number Circle Size (Mobile)",
+      "default": 40
+    },
+
+    { "type": "header", "content": "Spacing & Layout" },
+    {
+      "type": "range",
+      "id": "title_margin_bottom",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Title Bottom Margin (Desktop)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom_tablet",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Title Bottom Margin (Tablet)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom_mobile",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Title Bottom Margin (Mobile)",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "subtitle_margin_top",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Subtitle Top Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "subtitle_margin_bottom",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Subtitle Bottom Margin",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "step_content_padding_vertical_desktop",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Step Content Vertical Padding - Desktop",
+      "default": 16,
+      "info": "Top and bottom padding inside the step content area on desktop (769px and above)"
+    },
+    {
+      "type": "range",
+      "id": "step_content_padding_horizontal_desktop",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Step Content Horizontal Padding - Desktop",
+      "default": 12,
+      "info": "Left and right padding inside the step content area on desktop (769px and above)"
+    },
+    {
+      "type": "range",
+      "id": "step_content_padding_vertical_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Step Content Vertical Padding - Mobile",
+      "default": 16,
+      "info": "Top and bottom padding inside the step content area on mobile (768px and below)"
+    },
+    {
+      "type": "range",
+      "id": "step_content_padding_horizontal_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Step Content Horizontal Padding - Mobile",
+      "default": 12,
+      "info": "Left and right padding inside the step content area on mobile (768px and below)"
+    },
+    {
+      "type": "range",
+      "id": "step_item_margin_bottom",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Step Item Margin Bottom",
+      "default": 10,
+      "info": "Space between step items on mobile"
+    },
+    {
+      "type": "range",
+      "id": "steps_layout_gap",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Steps Layout Gap",
+      "default": 10,
+      "info": "Gap between steps in the regular layout"
+    },
+    {
+      "type": "range",
+      "id": "step_item_max_width_750px",
+      "min": 150,
+      "max": 350,
+      "step": 10,
+      "unit": "px",
+      "label": "Step Item Max Width (Desktop)",
+      "default": 250,
+      "info": "Maximum width of each step item on screens 750px and wider (layout dependent)"
+    },
+
+    { "type": "checkbox", "id": "show_step_numbers", "label": "Show Step Numbers/Icons", "default": true },
+    {
+      "type": "range",
+      "id": "custom_icon_size",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Custom Icon Size",
+      "default": 32,
+      "info": "Size of custom step icons (when uploaded per step)"
+    },
+    { "type": "checkbox", "id": "show_step_images", "label": "Show Step Images", "default": true },
+
+    { "type": "header", "content": "Carousel Settings" },
+    {
+      "type": "checkbox",
+      "id": "enable_mobile_carousel",
+      "label": "Enable Mobile Carousel",
+      "default": false,
+      "info": "Mobile Only: show one step at a time on small screens."
+    },
+    {
+      "type": "select",
+      "id": "mobile_image_layout",
+      "label": "Mobile Image Layout",
+      "options": [
+        { "value": "compact", "label": "Compact" },
+        { "value": "wide", "label": "Wide" }
+      ],
+      "default": "compact"
+    },
+    {
+      "type": "select",
+      "id": "mobile_card_layout",
+      "label": "Mobile Card Layout",
+      "options": [
+        { "value": "horizontal", "label": "Horizontal (Image Left, Content Right)" },
+        { "value": "vertical", "label": "Vertical (Image Top, Content Bottom)" }
+      ],
+      "default": "horizontal"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_height_image_mobile",
+      "label": "Full Height image",
+      "default": true,
+      "info": "On mobile, if unchecked, the image will be contained within the card padding."
+    },
+    {
+      "type": "range",
+      "id": "mobile_image_width",
+      "min": 35,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "label": "Mobile Image Width (%)",
+      "default": 35,
+      "info": "Only applies when 'Full Height image' is OFF and 'Mobile Card Layout' is Horizontal."
+    },
+
+    {
+      "type": "range",
+      "id": "mobile_carousel_padding",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile Carousel Slide Padding",
+      "default": 8,
+      "info": "Padding around each slide in the mobile carousel."
+    },
+    { "type": "header", "content": "Navigation Buttons" },
+    { 
+      "type": "checkbox", 
+      "id": "use_global_nav_buttons", 
+      "label": "Use Global Navigation Button Styling", 
+      "default": true,
+      "info": "Use global navigation button settings from theme settings. When disabled, use section-specific settings below."
+    },
+    { 
+      "type": "paragraph", 
+      "content": "Custom Navigation Button Styling (only applies when 'Use Global Navigation Button Styling' is disabled)"
+    },
+    { "type": "color", "id": "prev_button_bg", "label": "Previous Button Background", "default": "#ffffff" },
+    { "type": "color", "id": "prev_button_color", "label": "Previous Button Color", "default": "#000000" },
+    { "type": "color", "id": "prev_button_border", "label": "Previous Button Border", "default": "#e0e0e0" },
+    { "type": "color", "id": "next_button_bg", "label": "Next Button Background", "default": "#EF4A65" },
+    { "type": "color", "id": "next_button_color", "label": "Next Button Color", "default": "#ffffff" },
+    { "type": "color", "id": "next_button_border", "label": "Next Button Border", "default": "#EF4A65" },
+
+    { "type": "header", "content": "Step Colors" },
+    { "type": "color", "id": "label_color", "label": "Number Color", "default": "#000000" },
+    { "type": "color", "id": "number_border_color", "label": "Number Border Color", "default": "#000000" },
+    {
+      "type": "range",
+      "id": "number_border_width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Number Border Width",
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "number_border_style",
+      "label": "Number Border Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" },
+        { "value": "none", "label": "None" }
+      ],
+      "default": "solid"
+    },
+    { "type": "color", "id": "number_background_color", "label": "Number Background Color", "default": "#FFFFFF" },
+    {
+      "type": "range",
+      "id": "number_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Number Border Radius",
+      "default": 50
+    },
+    {
+      "type": "select",
+      "id": "number_font_weight",
+      "label": "Number Font Weight",
+      "options": [
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Normal (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi Bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra Bold (800)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "600"
+    },
+
+    { "type": "color", "id": "step_title_color", "label": "Step Title Color", "default": "#000000" },
+    { "type": "color", "id": "description_color", "label": "Description Text Color", "default": "#000000" },
+
+    { "type": "header", "content": "Card Styling" },
+    { "type": "color", "id": "default_card_background", "label": "Default Content Background", "default": "#FFFFFF", "info": "Background for the text content area" },
+    { "type": "color", "id": "default_image_background", "label": "Default Image Background", "default": "#F5F5F5" },
+    { "type": "color", "id": "default_card_container_background", "label": "Default Card Container Background", "info": "Background for the entire card container. Leave empty for transparent." },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Border Radius",
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "disable_image_border_radius",
+      "label": "Disable Image Border Radius",
+      "default": false
+    },
+    { "type": "color", "id": "card_border_color", "label": "Card Border Color", "default": "#e0e0e0" },
+    {
+      "type": "select",
+      "id": "card_border_style",
+      "label": "Card Border Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" },
+        { "value": "none", "label": "None" }
+      ],
+      "default": "dashed"
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Border Width",
+      "default": 1
+    },
+
+    { "type": "header", "content": "Accent Text Settings" },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, section-specific accent typography is used below."
+    },
+    { "type": "checkbox", "id": "use_accent_gradient", "label": "Use Accent Gradient", "default": false },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)"
+    },
+
+    { "type": "header", "content": "Section-Specific Accent Font Settings" },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Section Accent Font Family",
+      "options": [
+        { "value": "inherit", "label": "Use Global Setting" },
+        { "value": "serif", "label": "System Serif" },
+        { "value": "Bodoni Moda", "label": "Bodoni Moda" },
+        { "value": "Instrument Serif", "label": "Instrument Serif" },
+        { "value": "DM Serif Text", "label": "DM Serif Text" },
+        { "value": "Nothing You Could Do", "label": "Nothing You Could Do" }
+      ],
+      "default": "inherit",
+      "info": "Only used when Override Global Accent Typography is enabled. (Georgia Pro is system-only and not loaded from Google.)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        { "value": "normal", "label": "Normal" },
+        { "value": "italic", "label": "Italic" }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        { "value": "inherit", "label": "Default (Inherit)" },
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Normal (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi Bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra Bold (800)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "inherit"
+    },
+    { "type": "range", "id": "accent_text_margin_left", "min": -10, "max": 50, "step": 1, "unit": "px", "label": "Accent Text Left Margin", "default": 0 }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "custom_step_icon",
+          "label": "Custom Step Icon",
+          "info": "Upload an icon to replace the step number. Leave empty to show the number."
+        },
+        { "type": "image_picker", "id": "step_image", "label": "Step Image" },
+        {
+          "type": "color",
+          "id": "image_background_color",
+          "label": "Image Background Color",
+          "default": "#F5F5F5",
+          "info": "Background behind the image. Empty = section default."
+        },
+        { "type": "text", "id": "step_title", "label": "Step Title", "default": "Enter Step Here" },
+        {
+          "type": "textarea",
+          "id": "step_description",
+          "label": "Step Description",
+          "default": "Add full step description here."
+        },
+        {
+          "type": "color",
+          "id": "content_background_color",
+          "label": "Content Background Color",
+          "default": "#FFFFFF",
+          "info": "Empty = section default."
+        },
+        {
+          "type": "color",
+          "id": "card_background_color",
+          "label": "Card Container Background",
+          "info": "Background color for the entire step card container. Leave empty for transparent."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Steps Results Section",
+      "settings": {
+        "title": "How",
+        "title_highlight": "It Works",
+        "subtitle": "Follow these simple steps to get started",
+        "background_type": "gradient",
+        "section_background_color": "#FFFFFF",
+        "section_background_gradient": "linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%)",
+        "content_max_width": 1200,
+        "accent_text_gradient": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+        "card_border_style": "dashed",
+        "card_border_width": 1,
+        "number_border_width": 2,
+        "number_border_style": "solid",
+        "number_background_color": "#FFFFFF",
+        "title_line_height_desktop": 1.2,
+        "title_line_height_mobile": 1.2,
+        "title_margin_bottom": 16,
+        "title_margin_bottom_tablet": 12,
+        "title_margin_bottom_mobile": 10,
+        "subtitle_margin_top": 0,
+        "subtitle_margin_bottom": 30,
+        "number_border_radius": 50,
+        "number_font_weight": "600",
+        "show_step_numbers": true,
+        "enable_mobile_carousel": false,
+        "mobile_image_layout": "compact",
+        "mobile_card_layout": "horizontal",
+        "mobile_carousel_padding": 8
+      },
+      "blocks": [
+        {
+          "type": "step",
+          "settings": {
+            "step_title": "Choose Your Product",
+            "step_description": "Browse our collection and select the perfect product for your needs."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "step_title": "Customize Options",
+            "step_description": "Personalize your selection with available customization options."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "step_title": "Complete Purchase",
+            "step_description": "Secure checkout process with fast shipping to your door."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "step_title": "Track & Enjoy",
+            "step_description": "Track your order and enjoy your new purchase with our satisfaction guarantee."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "step_title": "Share Experience",
+            "step_description": "Share your experience and help others discover the quality and value we provide."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,38 @@
+{% comment %}Shared VHL product card. Centralized further in Phase 2.{% endcomment %}
+<article class="vhl-product-card" {{ block_attributes }}>
+  <a class="vhl-product-card__media" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+    {% if product.featured_image != blank %}
+      {{ product.featured_image | image_url: width: 1200 | image_tag: class: 'vhl-product-card__image vhl-product-card__image--primary', loading: 'lazy', widths: '360, 540, 720, 900, 1200', sizes: '(min-width: 990px) 30vw, 84vw', alt: product.featured_image.alt }}
+      {% if product.images.size > 1 %}
+        {% assign hover_image = product.images[1] %}
+        {{ hover_image | image_url: width: 1200 | image_tag: class: 'vhl-product-card__image vhl-product-card__image--hover', loading: 'lazy', widths: '360, 540, 720, 900, 1200', sizes: '(min-width: 990px) 30vw, 84vw', alt: hover_image.alt }}
+      {% endif %}
+    {% else %}
+      {{ 'product-1' | placeholder_svg_tag: 'vhl-product-card__image' }}
+    {% endif %}
+    <span class="vhl-product-card__badges">
+      {% if product.compare_at_price_max > product.price %}<span>Sale</span>{% endif %}
+      {% if product.tags contains 'Nieuw' %}<span>Nieuw</span>{% endif %}
+    </span>
+  </a>
+  <div class="vhl-product-card__content">
+    <h3 class="vhl-product-card__title"><a href="{{ product.url }}">{{ product.title | escape }}</a></h3>
+    <p class="vhl-product-card__price">
+      <span>{{ product.price | money }}</span>
+      {% if product.compare_at_price_max > product.price %}<s>{{ product.compare_at_price_max | money }}</s>{% endif %}
+    </p>
+    {% if product.available %}
+      {% if product.has_only_default_variant %}
+        {% form 'product', product, class: 'vhl-product-card__form' %}
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit">{{ quick_add_text | default: 'Toevoegen' | escape }}</button>
+        {% endform %}
+      {% else %}
+        <a class="vhl-product-card__button" href="{{ product.url }}">{{ choose_options_text | default: 'Kies opties' | escape }}</a>
+      {% endif %}
+    {% else %}
+      <span class="vhl-product-card__button vhl-product-card__button--disabled">Uitverkocht</span>
+    {% endif %}
+  </div>
+</article>

@@ -1,0 +1,640 @@
+{% comment %}
+  Component: As Seen In Logos Section
+  
+  Description: Displays a collection of brand logos in a responsive grid layout
+  
+  Features:
+  - Responsive design with separate mobile/desktop settings
+  - Customizable background colors and gradients
+  - Individual logo size adjustments
+  - Optional links for each logo
+  - Fade-in animation
+  - Accessible alt text
+  
+  Settings:
+  - use_theme_colors: boolean - Use global theme colors
+  - section_title: string - Optional section heading
+  - background_type: select - Gradient or solid background
+  - Various layout and spacing controls
+{% endcomment %}
+
+{{ 'as-seen-in-logos.css' | asset_url | stylesheet_tag }}
+
+
+
+{%- style -%}
+  #section-{{ section.id }} {
+    --desktop-heading-size: {{ section.settings.desktop_heading_size }}px;
+    --mobile-heading-size: {{ section.settings.mobile_heading_size }}px;
+    --mobile-heading-margin: {{ section.settings.mobile_heading_margin }}px;
+    --desktop-logo-max-width: {{ section.settings.logo_max_width }}px;
+    --mobile-logo-max-width: {{ section.settings.mobile_logo_max_width }}px;
+    --desktop-logo-height: {{ section.settings.logo_height }}px;
+    --mobile-logo-height: {{ section.settings.mobile_logo_height }}px;
+    --desktop-gap: {{ section.settings.desktop_gap }}px;
+    --mobile-gap: {{ section.settings.mobile_gap }}px;
+    --logo-padding: {{ section.settings.logo_padding }}px;
+    
+    padding-top: {{ section.settings.mobile_padding_top }}px;
+    padding-bottom: {{ section.settings.mobile_padding_bottom }}px;
+    
+    {% if section.settings.use_theme_colors %}
+      {% if settings.global_section_use_gradient_background %}
+        background: var(--gradient-background, linear-gradient(to right, #FFF9EC, #FFCFD7));
+      {% elsif settings.global_section_gradient %}
+        background: {{ settings.global_section_gradient | default: 'linear-gradient(to right, #FFF9EC, #FFCFD7)' }};
+      {% else %}
+        background: linear-gradient(to right, {{ settings.global_section_accent_1_color | color_lighten: 35 | default: '#FFF9EC' }}, {{ settings.global_section_background_color | default: '#FFFFFF' }});
+      {% endif %}
+      color: {{ settings.global_section_text_color }};
+    {% else %}
+      {% if section.settings.background_type == 'solid' %}
+        background: {{ section.settings.background_color }};
+      {% else %}
+        background: {{ section.settings.background }};
+      {% endif %}
+      color: {{ section.settings.text_color }};
+    {% endif %}
+    
+    {% if section.settings.enable_top_border %}
+      border-top: {{ section.settings.top_border_width }}px solid {{ section.settings.top_border_color }};
+    {% else %}
+      border-top: none;
+    {% endif %}
+    {% if section.settings.enable_bottom_border %}
+      border-bottom: {{ section.settings.bottom_border_width }}px solid {{ section.settings.bottom_border_color }};
+    {% else %}
+      border-bottom: none;
+    {% endif %}
+  }
+
+  #section-{{ section.id }} .as-seen-in-title {
+    {% if section.settings.use_theme_colors %}
+      color: {{ settings.global_section_text_color }} !important;
+    {% else %}
+      color: {{ section.settings.text_color }} !important;
+    {% endif %}
+  }
+
+  @media (min-width: 769px) {
+    #section-{{ section.id }} {
+      padding-top: {{ section.settings.desktop_padding_top | default: section.settings.mobile_padding_top }}px;
+      padding-bottom: {{ section.settings.desktop_padding_bottom | default: section.settings.mobile_padding_bottom }}px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    #section-{{ section.id }} {
+      {% unless section.settings.use_theme_colors %}
+        {% if section.settings.mobile_background_type == 'solid' and section.settings.mobile_background_type != 'same' %}
+          background: {{ section.settings.mobile_background_color }};
+        {% elsif section.settings.mobile_background_type == 'gradient' and section.settings.mobile_background_type != 'same' %}
+          background: {{ section.settings.mobile_background }};
+        {% endif %}
+      {% endunless %}
+    }
+  }
+
+  /* Individual logo scale adjustments */
+  {% for block in section.blocks %}
+    #section-{{ section.id }} .logo-image--desktop-scale-{{ block.settings.size_adjustment }} {
+      transform: scale({{ block.settings.size_adjustment | divided_by: 100.0 }});
+    }
+    @media (max-width: 768px) {
+      #section-{{ section.id }} .logo-image--mobile-scale-{{ block.settings.mobile_size_adjustment }} {
+        transform: scale({{ block.settings.mobile_size_adjustment | divided_by: 100.0 }});
+      }
+    }
+  {% endfor %}
+{%- endstyle -%}
+
+<section id="section-{{ section.id }}" class="as-seen-in-section {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}" data-section-id="{{ section.id }}">
+  {% if section.settings.section_title != blank %}
+    {% assign heading_tag = section.settings.heading_tag %}
+    <{{ heading_tag }} class="as-seen-in-title">
+      {{ section.settings.section_title }}
+    </{{ heading_tag }}>
+  {% endif %}
+  
+  <div class="logo-container">
+    {% for block in section.blocks limit: 10 %}
+      {% if block.settings.logo_image != blank %}
+        <div class="brand-logo" {{ block.shopify_attributes }}>
+          {% if block.settings.logo_link != blank %}
+            <a href="{{ block.settings.logo_link }}" {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener"{% endif %}>
+              <div class="logo-image-wrapper">
+                {%- assign logo_width = block.settings.logo_image.width | default: 160 -%}
+                {%- assign logo_height = block.settings.logo_image.height | default: 80 -%}
+                {%- assign is_svg = false -%}
+                {%- if block.settings.logo_image.src contains '.svg' -%}
+                  {%- assign is_svg = true -%}
+                {%- endif -%}
+                <img
+                  src="{{ block.settings.logo_image | image_url }}"
+                  {% unless is_svg %}
+                  srcset="
+                    {{ block.settings.logo_image | image_url: width: 160 }} 160w,
+                    {{ block.settings.logo_image | image_url: width: 320 }} 320w,
+                    {{ block.settings.logo_image | image_url: width: 480 }} 480w
+                  "
+                  sizes="(max-width: 768px) {{ section.settings.mobile_logo_max_width }}px, {{ section.settings.logo_max_width }}px"
+                  {% endunless %}
+                  alt="{{ block.settings.logo_alt | default: 'Brand logo' | escape }}"
+                  loading="lazy"
+                  class="logo-image logo-image--desktop-scale-{{ block.settings.size_adjustment }} logo-image--mobile-scale-{{ block.settings.mobile_size_adjustment }}{% if is_svg %} logo-image--svg{% endif %}"
+                  width="{{ logo_width }}"
+                  height="{{ logo_height }}"
+                  style="{% if is_svg %}width: auto; height: auto;{% endif %}"
+                >
+              </div>
+            </a>
+          {% else %}
+            <div class="logo-image-wrapper">
+              {%- assign logo_width = block.settings.logo_image.width | default: 160 -%}
+              {%- assign logo_height = block.settings.logo_image.height | default: 80 -%}
+              {%- assign is_svg = false -%}
+              {%- if block.settings.logo_image.src contains '.svg' -%}
+                {%- assign is_svg = true -%}
+              {%- endif -%}
+              <img
+                src="{{ block.settings.logo_image | image_url }}"
+                {% unless is_svg %}
+                srcset="
+                  {{ block.settings.logo_image | image_url: width: 160 }} 160w,
+                  {{ block.settings.logo_image | image_url: width: 320 }} 320w,
+                  {{ block.settings.logo_image | image_url: width: 480 }} 480w
+                "
+                sizes="(max-width: 768px) {{ section.settings.mobile_logo_max_width }}px, {{ section.settings.logo_max_width }}px"
+                {% endunless %}
+                alt="{{ block.settings.logo_alt | default: 'Brand logo' | escape }}"
+                loading="lazy"
+                class="logo-image logo-image--desktop-scale-{{ block.settings.size_adjustment }} logo-image--mobile-scale-{{ block.settings.mobile_size_adjustment }}{% if is_svg %} logo-image--svg{% endif %}"
+                width="{{ logo_width }}"
+                height="{{ logo_height }}"
+                style="{% if is_svg %}width: auto; height: auto;{% endif %}"
+              >
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Fix SVG display issues
+  const logoImages = document.querySelectorAll('#section-{{ section.id }} .logo-image');
+  
+  logoImages.forEach(function(img) {
+    // Check if it's an SVG
+    if (img.src && (img.src.includes('.svg') || img.classList.contains('logo-image--svg'))) {
+      // Force dimensions if they're 0
+      if (img.naturalWidth === 0 || img.naturalHeight === 0 || img.offsetWidth === 0 || img.offsetHeight === 0) {
+        // Set explicit dimensions
+        img.style.width = '100%';
+        img.style.height = 'auto';
+        img.style.minWidth = '80px';
+        img.style.minHeight = '40px';
+        img.style.maxWidth = '150px';
+        img.style.maxHeight = '80px';
+        img.style.display = 'block';
+        img.style.objectFit = 'contain';
+      }
+      
+      // Add error handler
+      img.onerror = function() {
+        console.warn('SVG failed to load:', img.src);
+        // Try to reload without parameters
+        if (img.src.includes('?')) {
+          const cleanSrc = img.src.split('?')[0];
+          img.src = cleanSrc;
+        }
+      };
+      
+      // Force reflow
+      img.style.display = 'none';
+      img.offsetHeight; // trigger reflow
+      img.style.display = 'block';
+    }
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "As Seen In Logos",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "aside"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "Apply the global theme colors to this section"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "As seen in"
+    },
+    {
+      "type": "header",
+      "content": "Background Settings"
+    },
+    {
+      "type": "select",
+      "id": "background_type",
+      "label": "Background Type",
+      "options": [
+        {
+          "value": "gradient",
+          "label": "Gradient"
+        },
+        {
+          "value": "solid",
+          "label": "Solid Color"
+        }
+      ],
+      "default": "gradient"
+    },
+    {
+      "type": "color_background",
+      "id": "background",
+      "label": "Background Gradient (Desktop)",
+      "default": "linear-gradient(to right, #FFF9EC, #FFCFD7)",
+      "info": "Used when Background Type is set to Gradient"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color (Desktop)",
+      "default": "#FFF9EC",
+      "info": "Used when Background Type is set to Solid Color"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "logo_max_width",
+      "min": 80,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Maximum Logo Width (Desktop)",
+      "default": 150
+    },
+    {
+      "type": "range",
+      "id": "desktop_gap",
+      "min": 5,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Desktop Gap Between Logos",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "logo_height",
+      "min": 40,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "label": "Logo Container Height (Desktop)",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "logo_padding",
+      "min": 0,
+      "max": 30,
+      "step": 5,
+      "unit": "px",
+      "label": "Logo Padding (Desktop)",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_top",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding (Desktop)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_bottom",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding (Desktop)",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Section Borders"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_top_border",
+      "label": "Enable Top Border",
+      "default": false,
+      "info": "Add a border to the top of the section"
+    },
+    {
+      "type": "range",
+      "id": "top_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Border Width",
+      "default": 1,
+      "info": "Width of the top border"
+    },
+    {
+      "type": "color",
+      "id": "top_border_color",
+      "label": "Top Border Color",
+      "default": "#000000",
+      "info": "Color of the top border"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bottom_border",
+      "label": "Enable Bottom Border",
+      "default": false,
+      "info": "Add a border to the bottom of the section"
+    },
+    {
+      "type": "range",
+      "id": "bottom_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Border Width",
+      "default": 1,
+      "info": "Width of the bottom border"
+    },
+    {
+      "type": "color",
+      "id": "bottom_border_color",
+      "label": "Bottom Border Color",
+      "default": "#000000",
+      "info": "Color of the bottom border"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Settings"
+    },
+    {
+      "type": "select",
+      "id": "mobile_background_type",
+      "label": "Mobile Background Type",
+      "options": [
+        {
+          "value": "gradient",
+          "label": "Gradient"
+        },
+        {
+          "value": "solid",
+          "label": "Solid Color"
+        },
+        {
+          "value": "same",
+          "label": "Same as Desktop"
+        }
+      ],
+      "default": "same"
+    },
+    {
+      "type": "color_background",
+      "id": "mobile_background",
+      "label": "Background Gradient (Mobile)",
+      "default": "linear-gradient(to right, #FFF9EC, #FFCFD7)",
+      "info": "Used when Mobile Background Type is set to Gradient"
+    },
+    {
+      "type": "color",
+      "id": "mobile_background_color",
+      "label": "Background Color (Mobile)",
+      "default": "#FFF9EC",
+      "info": "Used when Mobile Background Type is set to Solid Color"
+    },
+    {
+      "type": "range",
+      "id": "mobile_heading_size",
+      "min": 12,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading Font Size (Mobile)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "desktop_heading_size",
+      "min": 16,
+      "max": 36,
+      "step": 1,
+      "unit": "px", 
+      "label": "Heading Font Size (Desktop)",
+      "default": 25
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading Tag",
+      "default": "h2",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        },
+        {
+          "value": "p",
+          "label": "P"
+        },
+        {
+          "value": "span",
+          "label": "Span"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "mobile_heading_margin",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "label": "Heading Bottom Margin (Mobile)",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_top",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Top Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_bottom",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom Padding (Mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "mobile_logo_max_width",
+      "min": 50,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "label": "Maximum Logo Width (Mobile)",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "mobile_logo_height",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Logo Container Height (Mobile)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "mobile_gap",
+      "min": 5,
+      "max": 30,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile Gap Between Logos",
+      "default": 15
+    }
+  ],
+  "blocks": [
+    {
+      "type": "logo",
+      "name": "Brand Logo",
+      "limit": 10,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "logo_image",
+          "label": "Logo Image"
+        },
+        {
+          "type": "text",
+          "id": "logo_alt",
+          "label": "Alt Text",
+          "default": "Brand logo",
+          "info": "Describe the brand or publication for accessibility"
+        },
+        {
+          "type": "range",
+          "id": "size_adjustment",
+          "min": 50,
+          "max": 200,
+          "step": 10,
+          "unit": "%",
+          "label": "Size Adjustment (Desktop)",
+          "default": 100,
+          "info": "Adjust the size of this specific logo relative to others"
+        },
+        {
+          "type": "range",
+          "id": "mobile_size_adjustment",
+          "min": 50,
+          "max": 200,
+          "step": 10,
+          "unit": "%",
+          "label": "Size Adjustment (Mobile)",
+          "default": 100,
+          "info": "Adjust the size of this specific logo on mobile"
+        },
+        {
+          "type": "url",
+          "id": "logo_link",
+          "label": "Logo Link (Optional)"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "Open link in new tab",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "As Seen In Logos",
+      "blocks": [
+        {
+          "type": "logo"
+        },
+        {
+          "type": "logo"
+        },
+        {
+          "type": "logo"
+        },
+        {
+          "type": "logo"
+        },
+        {
+          "type": "logo"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

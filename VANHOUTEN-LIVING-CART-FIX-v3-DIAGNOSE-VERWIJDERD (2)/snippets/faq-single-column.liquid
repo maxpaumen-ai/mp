@@ -1,0 +1,110 @@
+{% doc %}
+  Usage:
+  {% render 'faq-single-column', 
+  blocks: section.blocks, 
+  border_style: section.settings.border_style, 
+  individual_item_borders: section.settings.individual_borders, 
+  accordion_mode: section.settings.accordion_mode, 
+  border_color: section.settings.border_color %}
+{% enddoc %}
+
+
+<div class="page-width store-faq-flex-container {% if section.settings.center_when_no_image and section.settings.header_image == blank %}center-no-image{% endif %}">
+  <div class="store-faq-header-column">
+    {% if section.settings.heading != blank %}
+      <h2
+        class="store-faq-heading"
+        style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.heading_color }}{% endif %} !important; font-size: {{ section.settings.heading_font_size }}px;"
+      >
+        {{ section.settings.heading }}
+      </h2>
+    {% endif %}
+
+    {% if section.settings.subtitle != blank %}
+      <div
+        class="store-faq-subtitle"
+        style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subtitle_color }}{% endif %} !important; font-size: {{ section.settings.subtitle_font_size }}px;"
+      >
+        {{ section.settings.subtitle }}
+      </div>
+    {% endif %}
+
+    <div
+      class="store-faq"
+      id="store-faq-{{ section.id }}"
+      style="
+        width: 100%;
+        margin: 0 auto;
+      "
+    >
+        <!-- Single Column Layout (Default) -->
+        <div
+          class="store-faq-items-container{% if border_style == 'bottom_only' %} border-bottom-only{% endif %}{% if individual_item_borders %} individual-borders{% endif %}"
+          style="border-radius: {{ section.settings.border_radius }}px;"
+          data-accordion="{{ accordion_mode }}"
+        >
+          {% for block in section.blocks %}
+            {% case block.type %}
+              {% when 'faq_item' %}
+                <div
+                  class="store-faq-item"
+                  {{ block.shopify_attributes }}
+                  style="{% unless forloop.last or section.settings.border_style == 'none' %}border-bottom: {{ section.settings.border_width | default: 1 }}px solid {% if section.settings.use_theme_colors %}#E5E5E5{% else %}{{ section.settings.divider_color }}{% endif %} !important;{% endunless %}"
+                >
+                  <div
+                    class="store-faq-question"
+                    style="
+                      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.question_color }}{% endif %} !important;
+                      background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.question_bg_color }}{% endif %} !important;
+                      --question-padding-top: {{ section.settings.question_padding_top | default: 15 }}px;
+                      --question-padding-bottom: {{ section.settings.question_padding_bottom | default: 15 }}px;
+                      --question-padding-left: {{ section.settings.question_padding_left | default: 20 }}px;
+                      --question-padding-right: {{ section.settings.question_padding_right | default: 20 }}px;
+                    "
+                  >
+                    <span>{{ block.settings.question }}</span>
+                    <span class="store-faq-toggle">+</span>
+                  </div>
+                  <div
+                    class="store-faq-answer"
+                    style="
+                      color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.answer_color }}{% endif %} !important;
+                      background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.answer_bg_color }}{% endif %} !important;
+                      --answer-padding-top: {{ section.settings.answer_padding_top | default: 15 }}px;
+                      --answer-padding-bottom: {{ section.settings.answer_padding_bottom | default: 15 }}px;
+                      --answer-padding-left: {{ section.settings.answer_padding_left | default: 10 }}px;
+                      --answer-padding-right: {{ section.settings.answer_padding_right | default: 10 }}px;
+                    "
+                  >
+                    {{ block.settings.answer }}
+                  </div>
+                </div>
+            {% endcase %}
+          {% endfor %}
+        </div>
+    </div>
+  </div>
+
+  <div class="store-faq-content-column{% if section.settings.image_full_height %} full-height-image{% endif %}">
+    {% comment %} Only show inline image if NOT using background image mode {% endcomment %}
+    {% unless section.settings.use_background_image %}
+      {% if section.settings.header_image != blank %}
+        <div class="store-faq-header-image desktop-only{% if section.settings.image_full_height %} full-height{% endif %}">
+          <img
+            src="{{ section.settings.header_image | image_url: width: 600 }}"
+            alt="{{ section.settings.header_image.alt | default: section.settings.heading }}"
+            style="
+              {% unless section.settings.image_full_height %}
+                max-width: 100%;
+                height: auto;
+              {% endunless %}
+              border-radius: {{ section.settings.image_border_radius }}px;
+            "
+            width=""
+            height=""
+          >
+        </div>
+      {% endif %}
+    {% endunless %}
+  </div>
+</div>

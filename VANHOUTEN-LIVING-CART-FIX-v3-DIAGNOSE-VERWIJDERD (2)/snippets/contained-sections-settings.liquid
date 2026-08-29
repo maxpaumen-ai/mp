@@ -1,0 +1,43 @@
+{% comment %}
+  CONTAINED SECTIONS SETTINGS - JSON REFERENCE
+
+  Copy the JSON below into your section's schema to add contained sections support.
+  DO NOT use {% render 'contained-sections-settings' %} in schema - Shopify schemas must be pure JSON.
+
+  Example usage in schema:
+  {
+    "name": "Your Section",
+    "settings": [
+      // ... your existing settings ...
+
+      // Copy from here:
+      {
+        "type": "header",
+        "content": "📦 Contained Section Styling"
+      },
+      // ... rest of the JSON below ...
+    ]
+  }
+{% endcomment %}
+
+{ "type": "header", "content": "📦 Contained Section Styling" }, { "type": "checkbox", "id": "use_contained_section",
+"label": "Use Contained Section Style", "default": false, "info": "Apply the global contained section styling to this
+section. Configure global settings in Theme Settings > Contained Sections." }, { "type": "header", "content": "Override
+Global Settings (Optional)" }, { "type": "paragraph", "content": "Leave these blank to use global settings, or customize
+them for this specific section." }, { "type": "select", "id": "contained_section_size", "label": "Container Size",
+"options": [ { "value": "default", "label": "Default (Use Global)" }, { "value": "compact", "label": "Compact" }, {
+"value": "spacious", "label": "Spacious" }, { "value": "full-width", "label": "Full Width" } ], "default": "default",
+"info": "Choose container size variant" }, { "type": "select", "id": "contained_section_style", "label": "Container
+Style", "options": [ { "value": "default", "label": "Default (Use Global)" }, { "value": "light", "label": "Light Theme"
+}, { "value": "dark", "label": "Dark Theme" }, { "value": "accent", "label": "Accent Color" } ], "default": "default",
+"info": "Choose color theme for this container" }, { "type": "select", "id": "contained_section_border", "label":
+"Border Style", "options": [ { "value": "default", "label": "Default (Use Global)" }, { "value": "no-border", "label":
+"No Border" }, { "value": "thick-border", "label": "Thick Border" }, { "value": "dashed-border", "label": "Dashed
+Border" } ], "default": "default", "info": "Choose border style variant" }, { "type": "select", "id":
+"contained_section_shadow", "label": "Shadow Style", "options": [ { "value": "default", "label": "Default (Use Global)"
+}, { "value": "no-shadow", "label": "No Shadow" }, { "value": "heavy-shadow", "label": "Heavy Shadow" } ], "default":
+"default", "info": "Choose shadow intensity" }, { "type": "select", "id": "contained_section_radius", "label": "Corner
+Style", "options": [ { "value": "default", "label": "Default (Use Global)" }, { "value": "sharp", "label": "Sharp
+Corners" }, { "value": "rounded", "label": "Extra Rounded" }, { "value": "pill", "label": "Pill Shape" } ], "default":
+"default", "info": "Choose corner radius style" }, { "type": "checkbox", "id": "contained_section_disable_hover",
+"label": "Disable Hover Animation", "default": false, "info": "Turn off the subtle hover lift effect" }

@@ -1,0 +1,384 @@
+{% comment %} Variant Selector {% endcomment %}
+
+{%- liquid
+  assign show_variant_selector = true
+  assign current_product = product | default: section.settings.current_product
+  assign layout = block.settings.layout
+-%}
+
+<!--
+  DEBUG: show_variant_selector = {{ show_variant_selector }}, current_product = {{ current_product.title | default: 'none' }}, variants = {{ current_product.variants.size | default: 0 }}
+-->
+
+{% if show_variant_selector and current_product %}
+  <div
+    class="variant-selector-container"
+    data-layout="{{ card_layout }}"
+    {% if enable_hover_effects %}
+      data-hover-effects="true"
+    {% endif %}
+    style="
+       {% if block %}
+          {% if block.settings.image_width_desktop and block.settings.image_width_desktop != 'auto' %}--variant-image-width-desktop: {{ block.settings.image_width_desktop }}px;{% endif %}
+          {% if block.settings.image_width_mobile and block.settings.image_width_mobile != 'auto' %}--variant-image-width-mobile: {{ block.settings.image_width_mobile }}px;{% endif %}
+          {% if block.settings.badge_font_size %}--badge-font-size: {{ block.settings.badge_font_size }}px;{% endif %}
+          {% if block.settings.badge_padding_y %}--badge-padding-y: {{ block.settings.badge_padding_y }}px;{% endif %}
+          {% if block.settings.badge_padding_x %}--badge-padding-x: {{ block.settings.badge_padding_x }}px;{% endif %}
+          {% if block.settings.badge_border_radius %}--badge-radius: {{ block.settings.badge_border_radius }}px;{% endif %}
+          {% if block.settings.badge_offset_top %}--badge-offset-top: {{ block.settings.badge_offset_top }}px;{% endif %}
+          {% if block.settings.badge_border_color %}--badge-border-color: {{ block.settings.badge_border_color }};{% endif %}
+          {% if block.settings.badge_border_width != nil %}--badge-border-width: {{ block.settings.badge_border_width }}px;{% endif %}
+         {% if block.settings.card_background %}--card-background: {{ block.settings.card_background }};{% endif %}
+        --card-padding: {{ block.settings.card_padding | default: 12 }}px;
+        --card-border-width: {{ block.settings.card_border_width | default: 2 }}px;
+        --selected-card-border-width: {{ block.settings.selected_card_border_width | default: 2 }}px;
+        {% if block.settings.card_border_color %}--variant-border-color: {{ block.settings.card_border_color }};{% endif %}
+        {% if block.settings.card_hover_border_color %}--variant-hover-border-color: {{ block.settings.card_hover_border_color }};{% endif %}
+        {% if block.settings.selected_card_border_color %}--variant-selected-border-color: {{ block.settings.selected_card_border_color }};{% endif %}
+        {% if block.settings.selected_card_background %}--variant-selected-bg-color: {{ block.settings.selected_card_background }};{% endif %}
+        {% if block.settings.badge_background_color %}--variant-badge-bg-color: {{ block.settings.badge_background_color }};{% endif %}
+        {% if block.settings.badge_text_color %}--variant-badge-text-color: {{ block.settings.badge_text_color }};{% endif %}
+        {% if block.settings.title_color %}--variant-title-color: {{ block.settings.title_color }};{% endif %}
+        --title-font-size: {{ block.settings.title_font_size | default: 14 }}px;
+        {% if block.settings.description_color %}--variant-description-color: {{ block.settings.description_color }};{% endif %}
+        --description-font-size: {{ block.settings.description_font_size | default: 11 }}px;
+        {% if block.settings.current_price_color %}--variant-current-price-color: {{ block.settings.current_price_color }};{% endif %}
+        --current-price-font-size: {{ block.settings.current_price_font_size | default: 16 }}px;
+        {% if block.settings.original_price_color %}--variant-original-price-color: {{ block.settings.original_price_color }};{% endif %}
+        --original-price-font-size: {{ block.settings.original_price_font_size | default: 11 }}px;
+        --card-padding: {{ block.settings.card_padding | default: 12 }}px;
+        --card-border-width: {{ block.settings.card_border_width | default: 2 }}px;
+        --selected-card-border-width: {{ block.settings.selected_card_border_width | default: 2 }}px;
+        --card-gap: {{ block.settings.card_gap | default: 8 }}px;
+        --border-radius: {{ block.settings.border_radius | default: 8 }}px;
+      {% else %}
+        {% if section.settings.variant_border_color %}--variant-border-color: {{ section.settings.variant_border_color }};{% endif %}
+        {% if section.settings.variant_hover_border_color %}--variant-hover-border-color: {{ section.settings.variant_hover_border_color }};{% endif %}
+        {% if section.settings.variant_selected_border_color %}--variant-selected-border-color: {{ section.settings.variant_selected_border_color }};{% endif %}
+        {% if section.settings.variant_selected_bg_color %}--variant-selected-bg-color: {{ section.settings.variant_selected_bg_color }};{% endif %}
+        {% if section.settings.variant_badge_bg_color %}--variant-badge-bg-color: {{ section.settings.variant_badge_bg_color }};{% endif %}
+        {% if section.settings.variant_badge_text_color %}--variant-badge-text-color: {{ section.settings.variant_badge_text_color }};{% endif %}
+        {% if section.settings.variant_title_color %}--variant-title-color: {{ section.settings.variant_title_color }};{% endif %}
+        {% if section.settings.variant_description_color %}--variant-description-color: {{ section.settings.variant_description_color }};{% endif %}
+        {% if section.settings.variant_original_price_color %}--variant-original-price-color: {{ section.settings.variant_original_price_color }};{% endif %}
+        {% if section.settings.variant_current_price_color %}--variant-current-price-color: {{ section.settings.variant_current_price_color }};{% endif %}
+        --card-padding: {{ section.settings.card_padding | default: 12 }}px;
+        --card-border-width: 2px;
+        --selected-card-border-width: 2px;
+        --card-gap: 8px;
+        --border-radius: 8px;
+      {% endif %}
+    "
+  >
+    {%- liquid
+      if block
+        assign variant_limit = null
+        assign show_images = block.settings.show_variant_images | default: true
+        assign show_compare_price = block.settings.show_compare_price
+        assign show_variant_description = block.settings.show_variant_description
+        assign description_mode = block.settings.description_mode
+
+        assign show_badge_1 = block.settings.show_badge_1
+        assign badge_text_1 = block.settings.badge_text_1 | default: 'BEST VALUE'
+        assign show_badge_2 = block.settings.show_badge_2
+        assign badge_text_2 = block.settings.badge_text_2 | default: 'POPULAR'
+        assign show_badge_3 = block.settings.show_badge_3
+        assign badge_text_3 = block.settings.badge_text_3 | default: 'SALE'
+        assign badge_bg_color_1 = block.settings.badge_bg_color_1 | default: '#3b82f6'
+        assign badge_text_color_1 = block.settings.badge_text_color_1 | default: '#ffffff'
+        assign badge_bg_color_2 = block.settings.badge_bg_color_2 | default: '#10b981'
+        assign badge_text_color_2 = block.settings.badge_text_color_2 | default: '#ffffff'
+        assign badge_bg_color_3 = block.settings.badge_bg_color_3 | default: '#f59e0b'
+        assign badge_text_color_3 = block.settings.badge_text_color_3 | default: '#ffffff'
+        assign card_layout = 'horizontal'
+        assign card_padding = block.settings.card_padding | default: 12
+        assign border_radius = block.settings.border_radius | default: 8
+
+        assign enable_hover_effects = block.settings.enable_hover_effects | default: true
+        assign show_sold_out_overlay = block.settings.show_sold_out_overlay | default: true
+      else
+        assign variant_limit = null
+        assign show_images = section.settings.show_variant_images | default: true
+        assign show_compare_price = section.settings.show_compare_price
+        assign show_variant_description = section.settings.show_variant_description
+        assign description_mode = section.settings.description_mode
+
+        assign show_badge_1 = false
+        assign badge_text_1 = 'BEST VALUE'
+        assign show_badge_2 = false
+        assign badge_text_2 = 'POPULAR'
+        assign show_badge_3 = false
+        assign badge_text_3 = 'SALE'
+        assign badge_bg_color_1 = '#3b82f6'
+        assign badge_text_color_1 = '#ffffff'
+        assign badge_bg_color_2 = '#10b981'
+        assign badge_text_color_2 = '#ffffff'
+        assign badge_bg_color_3 = '#f59e0b'
+        assign badge_text_color_3 = '#ffffff'
+        assign card_layout = 'horizontal'
+        assign card_padding = 12
+        assign border_radius = 8
+
+        assign enable_hover_effects = true
+        assign show_sold_out_overlay = true
+      endif
+    -%}
+
+    {%- liquid
+      assign show_images = show_images
+    -%}
+
+    <div
+      class="variant-products-container variant-layout-{{ layout }}"
+
+      {% if layout == 'vertical' %}
+        style="display: flex; flex-direction: column;"
+      {% endif %}
+
+      data-variants-count="{{ current_product.variants.size | at_most: 3 }}"
+      data-image-padding-style="{{ block.settings.image_padding_style | default: 'full_width' }}"
+      data-image-width-desktop="{{ block.settings.image_width_desktop | default: 'auto' }}"
+      data-image-width-mobile="{{ block.settings.image_width_mobile | default: 'auto' }}"
+      data-hover-effects="{{ enable_hover_effects }}"
+      data-show-sold-out-overlay="{{ show_sold_out_overlay }}"
+      data-show-images="{{ show_images }}"
+    >
+      {% for variant in current_product.variants limit: 3 %}
+        {%- liquid
+          assign variant_image = variant.featured_media | default: current_product.featured_media
+          assign variant_title = variant.title
+        -%}
+
+        <div
+          class="variant-product-card"
+          data-variant-id="{{ variant.id }}"
+          data-variant-price="{{ variant.price }}"
+          data-variant-compare-price="{{ variant.compare_at_price | default: '' }}"
+          data-variant-available="{{ variant.available }}"
+          data-variant-title="{{ variant_title | escape }}"
+
+          {% if layout == 'vertical' %}
+            style="display: flex; flex-direction: row;"
+          {% endif %}
+        >
+          {% liquid
+            assign show_badge = false
+            assign badge_text = ''
+            assign badge_bg_color = ''
+            assign badge_text_color = ''
+
+            case forloop.index
+              when 1
+                assign show_badge = show_badge_1
+                assign badge_text = badge_text_1
+                assign badge_bg_color = badge_bg_color_1
+                assign badge_text_color = badge_text_color_1
+              when 2
+                assign show_badge = show_badge_2
+                assign badge_text = badge_text_2
+                assign badge_bg_color = badge_bg_color_2
+                assign badge_text_color = badge_text_color_2
+              when 3
+                assign show_badge = show_badge_3
+                assign badge_text = badge_text_3
+                assign badge_bg_color = badge_bg_color_3
+                assign badge_text_color = badge_text_color_3
+            endcase
+          %}
+
+          {% if show_badge %}
+            <div
+              class="variant-best-value-badge"
+              style="background: {{ badge_bg_color }}; color: {{ badge_text_color }};"
+            >
+              {{ badge_text }}
+            </div>
+          {% endif %}
+
+          {% if show_images and variant_image %}
+            <div class="variant-product-image">
+              <div
+                class="variant-product-visual"
+                style="background-image: url('{{ variant_image | image_url: width: 200 }}');"
+              ></div>
+            </div>
+          {% endif %}
+
+          <div class="variant-product-content">
+            <div class="variant-content-main">
+              <h3 class="variant-product-title">{{ variant_title }}</h3>
+
+              {% liquid
+                assign show_desc = false
+                assign variant_description = ''
+
+                if show_variant_description
+                  assign show_desc = true
+
+                  if description_mode == 'custom'
+                    case forloop.index
+                      when 1
+                        assign variant_description = block.settings.desc_var_1
+                      when 2
+                        assign variant_description = block.settings.desc_var_2
+                      when 3
+                        assign variant_description = block.settings.desc_var_3
+                      when 4
+                        assign variant_description = block.settings.desc_var_4
+                    endcase
+                  else
+                    # Show variant options as description (Size: Large, Color: Blue, etc.)
+                    assign variant_description = ''
+                    for option in variant.options
+                      assign option_name = product.options[forloop.index0]
+                      if variant_description != blank
+                        assign variant_description = variant_description | append: ', '
+                      endif
+                      assign variant_description = variant_description | append: option_name | append: ': ' | append: option
+                    endfor
+                  endif
+                endif
+              %}
+
+              {% if show_desc and variant_description != blank %}
+                <p class="variant-product-description">{{ variant_description }}</p>
+              {% endif %}
+            </div>
+
+            <div class="variant-pricing-container">
+              <div class="variant-pricing">
+                {% if show_compare_price and variant.compare_at_price and variant.compare_at_price > variant.price %}
+                  <span
+                    class="variant-original-price"
+                    style="text-decoration: line-through; color: var(--variant-original-price-color); font-size: var(--original-price-font-size);"
+                  >
+                    {{ variant.compare_at_price | money }}
+                  </span>
+                {% endif %}
+                <span
+                  class="variant-current-price"
+                  style="color: var(--variant-current-price-color); font-size: var(--current-price-font-size);"
+                >
+                  {{ variant.price | money }}
+                </span>
+              </div>
+
+              {% unless variant.available %}
+                <div
+                  class="variant-sold-out"
+                  style="margin-top: 8px; color: #ef4444; font-size: 12px; font-weight: 600;"
+                >
+                  {{ 'products.product.sold_out' | t | default: 'Sold out' }}
+                </div>
+              {% endunless %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+{% else %}
+  <p>Variant selector is disabled or product not found.</p>
+{% endif %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.variant-product-card');
+
+    const addToCartBtn =
+      document.querySelector('.product-form__submit .button__text') ||
+      document.querySelector('.shop-add-to-cart-button .button-text') ||
+      document.querySelector('[data-add-to-cart-text]');
+
+    const priceBlockElement = document.querySelector('.shop-product-price-block');
+    const priceCompareAtPriceElement = document.querySelector('.shop-compare-price');
+    if (!cards.length || !addToCartBtn) return;
+
+    const baseText =
+      typeof addToCartButtonText !== 'undefined' && addToCartButtonText ? addToCartButtonText : 'Add to cart';
+
+    function ensureCompareSpan() {
+      let span = addToCartBtn.querySelector('.compare-price');
+      if (!span) {
+        span = document.createElement('span');
+        span.className = 'compare-price';
+        addToCartBtn.appendChild(document.createTextNode(' '));
+        addToCartBtn.appendChild(span);
+      }
+      return span;
+    }
+
+    cards.forEach((card) => {
+      card.addEventListener('click', () => {
+        cards.forEach((c) => c.classList.remove('selected'));
+        card.classList.add('selected');
+
+        const currentEl = card.querySelector('.variant-pricing .variant-current-price');
+        const compareEl = card.querySelector('.variant-pricing .variant-original-price');
+
+        if (currentEl) {
+          addToCartBtn.innerHTML = `${baseText} - ${currentEl.innerText}`;
+        } else {
+          addToCartBtn.textContent = baseText;
+        }
+
+        if (!priceBlockElement || !priceCompareAtPriceElement) return;
+        priceBlockElement.innerText = `${currentEl.innerText}`;
+        priceCompareAtPriceElement.innerText = `${compareEl.innerText}`;
+
+        const compareText = compareEl?.innerText?.trim();
+        if (compareText) {
+          const cmp = ensureCompareSpan();
+          cmp.textContent = ` (${compareText})`;
+        } else {
+          addToCartBtn.querySelector('.compare-price')?.remove();
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  /* Default card state */
+  .variant-product-card {
+    position: relative;
+    opacity: 1;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  /* selected */
+  .variant-product-card.selected {
+    opacity: 1;
+    border-color: var(--variant-selected-border-color, #000) !important;
+    background-color: var(--variant-selected-bg-color, transparent);
+    transform: scale(1.02);
+  }
+
+  /* Badge positioning */
+  .variant-best-value-badge {
+    position: absolute;
+    top: var(--badge-offset-top, -10px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    box-sizing: border-box;
+    line-height: 1;
+    background: var(--variant-badge-bg-color, #3b82f6);
+    color: var(--variant-badge-text-color, white);
+    padding: var(--badge-padding-y, 3px) var(--badge-padding-x, 6px);
+    border-radius: var(--badge-radius, 4px);
+    font-size: var(--badge-font-size, 10px);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-body);
+    text-transform: uppercase;
+    z-index: 10;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: var(--badge-border-width, 0) solid var(--badge-border-color, transparent);
+  }
+</style>

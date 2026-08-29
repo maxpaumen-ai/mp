@@ -1,0 +1,451 @@
+<link rel="preload" href="{{ 'component-cart.css' | asset_url }}" as="style">
+<link rel="stylesheet" href="{{ 'component-cart.css' | asset_url }}">
+<link rel="preload" href="{{ 'component-totals.css' | asset_url }}" as="style">
+<link rel="stylesheet" href="{{ 'component-totals.css' | asset_url }}">
+<link rel="preload" href="{{ 'component-price.css' | asset_url }}" as="style">
+<link rel="stylesheet" href="{{ 'component-price.css' | asset_url }}">
+<link rel="preload" href="{{ 'component-discounts.css' | asset_url }}" as="style">
+<link rel="stylesheet" href="{{ 'component-discounts.css' | asset_url }}">
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  @media screen and (max-width: 750px) {
+    #main-cart-footer .page-width {
+      padding: 0 3rem;
+    }
+  }
+
+  /* Custom Color Styling for Cart Footer */
+  {% unless section.settings.use_theme_colors %}
+    /* Subtotal Block Colors */
+    #main-cart-footer .js-contents .totals .totals__total,
+    #main-cart-footer .totals .totals__total,
+    #main-cart-footer .cart__footer .totals__total {
+      color: {{ section.settings.total_heading_color }} !important;
+    }
+
+    #main-cart-footer .js-contents .totals .totals__total-value,
+    #main-cart-footer .totals .totals__total-value,
+    #main-cart-footer .cart__footer .totals__total-value {
+      color: {{ section.settings.total_price_color }} !important;
+    }
+
+    /* Discounts in Subtotal Block */
+    #main-cart-footer .js-contents .discounts__discount,
+    #main-cart-footer .discounts .discounts__discount,
+    #main-cart-footer .cart__footer .discounts__discount {
+      color: {{ section.settings.discount_text_color }} !important;
+    }
+
+    #main-cart-footer .js-contents .discounts__discount svg,
+    #main-cart-footer .discounts .discounts__discount svg,
+    #main-cart-footer .cart__footer .discounts__discount svg {
+      fill: {{ section.settings.discount_text_color }} !important;
+    }
+
+    /* Tax Note in Subtotal Block */
+    #main-cart-footer .js-contents .tax-note,
+    #main-cart-footer .tax-note,
+    #main-cart-footer .cart__footer .tax-note {
+      color: {{ section.settings.tax_note_color }} !important;
+    }
+
+    #main-cart-footer .js-contents .tax-note a,
+    #main-cart-footer .tax-note a,
+    #main-cart-footer .cart__footer .tax-note a {
+      color: {{ section.settings.tax_note_color }} !important;
+    }
+
+    /* Cart Note Label */
+    #main-cart-footer cart-note label {
+      color: {{ section.settings.note_label_color }} !important;
+    }
+
+    /* Cart Note Input */
+    #main-cart-footer cart-note textarea {
+      color: {{ section.settings.note_input_text_color }} !important;
+      border-color: {{ section.settings.note_input_border_color }} !important;
+    }
+
+    #main-cart-footer cart-note textarea::placeholder {
+      color: {{ section.settings.note_input_text_color | color_modify: 'alpha', 0.5 }} !important;
+    }
+
+    /* Checkout Button */
+    #main-cart-footer .cart__checkout-button {
+      background-color: {{ section.settings.checkout_button_background_color }} !important;
+      color: {{ section.settings.checkout_button_text_color }} !important;
+      border-color: {{ section.settings.checkout_button_background_color }} !important;
+      border-radius: {{ section.settings.checkout_button_border_radius | default: 4 }}px !important;
+    }
+
+    #main-cart-footer .cart__checkout-button:hover:not([disabled]) {
+      background-color: {{ section.settings.checkout_button_hover_background_color }} !important;
+      border-color: {{ section.settings.checkout_button_hover_background_color }} !important;
+    }
+
+    /* Additional Checkout Buttons */
+    #main-cart-footer .additional-checkout-buttons .shopify-payment-button__button--unbranded {
+      background-color: {{ section.settings.checkout_button_background_color }} !important;
+      color: {{ section.settings.checkout_button_text_color }} !important;
+    }
+
+    #main-cart-footer .additional-checkout-buttons .shopify-payment-button__button--unbranded:hover {
+      background-color: {{ section.settings.checkout_button_hover_background_color }} !important;
+    }
+  {% endunless %}
+{%- endstyle -%}
+
+<div
+  class="{% if cart == empty %} is-empty{% endif %}"
+  id="main-cart-footer"
+  data-id="{{ section.id }}"
+  style="{% if section.settings.use_theme_colors %}background-color: {{ settings.global_section_background_color }}; color: {{ settings.global_section_text_color }};{% else %}background-color: {{ section.settings.section_background_color }}; color: {{ section.settings.section_text_color }};{% endif %}"
+>
+  <div class="page-width">
+    <div class="cart__footer isolate section-{{ section.id }}-padding">
+      {%- if settings.show_cart_note -%}
+        <cart-note class="cart__note field">
+          <label for="Cart-note">{{ 'sections.cart.note' | t }}</label>
+          <textarea
+            class="text-area field__input"
+            name="note"
+            form="cart"
+            id="Cart-note"
+            placeholder="{{ 'sections.cart.note' | t }}"
+          >{{ cart.note }}</textarea>
+        </cart-note>
+      {%- endif -%}
+
+      <div class="cart__blocks">
+        {% for block in section.blocks %}
+          {%- case block.type -%}
+            {%- when '@app' -%}
+              {% render block %}
+            {%- when 'subtotal' -%}
+              <div class="js-contents" {{ block.shopify_attributes }}>
+                <div>
+                  {%- if cart.cart_level_discount_applications.size > 0 -%}
+                    <ul class="discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
+                      {%- for discount in cart.cart_level_discount_applications -%}
+                        <li class="discounts__discount discounts__discount--position">
+                          {{- 'icon-discount.svg' | inline_asset_content -}}
+                          {{ discount.title | escape }}
+                          (-{{ discount.total_allocated_amount | money }})
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                </div>
+
+                <div
+                  class="totals gb-discounts-cart-values"
+                  role="status"
+                  style="display: flex; flex-direction: column; gap: 4px;"
+                >
+                  {%- liquid
+                    assign cart_total_compare_at_price = 0
+                    for item_loop_var in cart.items
+                      assign item_price_for_calc = item_loop_var.variant.price
+                      assign item_display_price_before_any_discount = item_price_for_calc
+                      if item_loop_var.variant.compare_at_price and item_loop_var.variant.compare_at_price > item_price_for_calc
+                        assign item_display_price_before_any_discount = item_loop_var.variant.compare_at_price
+                      endif
+                      assign line_total_compare_price = item_display_price_before_any_discount | times: item_loop_var.quantity
+                      assign cart_total_compare_at_price = cart_total_compare_at_price | plus: line_total_compare_price
+                    endfor
+
+                    assign cart_total_savings = cart_total_compare_at_price | minus: cart.total_price
+                  -%}
+                  <div style="display: flex; justify-content: space-between; align-items: end;">
+                    <div class="totals__total">
+                      <span class="total_count">
+                        {{ 'sections.cart.items_total' | t: item_count: cart.item_count }}
+                      </span>
+                    </div>
+                    <div></div>
+                  </div>
+                  {%- if cart_total_savings > 0 -%}
+                    <div style="display: flex; justify-content: space-between; align-items: end;">
+                      <span>{{ 'sections.cart.discounts' | t }}</span>
+                      <span>-{{ cart_total_savings | money }}</span>
+                    </div>
+                  {%- endif -%}
+                  <div style="display: flex; justify-content: space-between; align-items: end;">
+                    <div></div>
+                    <div class="discount_price-container">
+                      {% if cart_total_savings > 0 %}
+                        <div class="discount_discount-value" style="margin-left: 8px;">
+                          {% if total_discount_msg != '' %}
+                            <span class="discount_discount-label">{{ total_discount_msg }}</span>
+                          {% endif %}
+                          <span style="font-weight: var(--font-weight-regular);"
+                            >-{{ cart_total_savings | money -}}
+                          </span>
+                        </div>
+                      {% endif %}
+                      <div style="display: flex; align-items: baseline;">
+                        {% if cart_total_compare_at_price > cart.total_price %}
+                          <s
+                            class="cart-item__old-price product-option"
+                            style="margin-right: 3px; font-size: 14px; color: currentColor; opacity: 0.7;"
+                          >
+                            {{ cart_total_compare_at_price | money }}
+                          </s>
+                        {% endif %}
+
+                        <div class="totals__total-value">
+                          {{ cart.total_price | money }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <small class="tax-note caption-large rte">
+                  {%- if cart.duties_included and cart.taxes_included -%}
+                    {%- if shop.shipping_policy.body == blank -%}
+                      {{ 'sections.cart.duties_and_taxes_included_shipping_at_checkout_without_policy' | t }}
+                    {%- else -%}
+                      {{
+                        'sections.cart.duties_and_taxes_included_shipping_at_checkout_with_policy_html'
+                        | t: link: shop.shipping_policy.url
+                      }}
+                    {%- endif -%}
+                  {%- elsif cart.duties_included == false and cart.taxes_included -%}
+                    {%- if shop.shipping_policy.body == blank -%}
+                      {{ 'sections.cart.taxes_included_shipping_at_checkout_without_policy' | t }}
+                    {%- else -%}
+                      {{
+                        'sections.cart.taxes_included_shipping_at_checkout_with_policy_html'
+                        | t: link: shop.shipping_policy.url
+                      }}
+                    {%- endif -%}
+                  {%- elsif cart.duties_included and cart.taxes_included == false -%}
+                    {%- if shop.shipping_policy.body == blank -%}
+                      {{ 'sections.cart.duties_included_taxes_at_checkout_shipping_at_checkout_without_policy' | t }}
+                    {%- else -%}
+                      {{
+                        'sections.cart.duties_included_taxes_at_checkout_shipping_at_checkout_with_policy_html'
+                        | t: link: shop.shipping_policy.url
+                      }}
+                    {%- endif -%}
+                  {%- elsif cart.duties_included == false and cart.taxes_included == false -%}
+                    {%- if shop.shipping_policy.body == blank -%}
+                      {{ 'sections.cart.taxes_at_checkout_shipping_at_checkout_without_policy' | t }}
+                    {%- else -%}
+                      {{
+                        'sections.cart.taxes_at_checkout_shipping_at_checkout_with_policy_html'
+                        | t: link: shop.shipping_policy.url
+                      }}
+                    {%- endif -%}
+                  {%- endif -%}
+                </small>
+              </div>
+            {%- else -%}
+              <div class="cart__ctas" {{ block.shopify_attributes }}>
+                <button
+                  type="submit"
+                  id="checkout"
+                  class="cart__checkout-button button"
+                  name="checkout"
+                  {% if cart == empty %}
+                    disabled
+                  {% endif %}
+                  form="cart"
+                >
+                  {{ 'sections.cart.checkout' | t }}
+                </button>
+              </div>
+
+              {%- if additional_checkout_buttons -%}
+                <div class="cart__dynamic-checkout-buttons additional-checkout-buttons">
+                  {{ content_for_additional_checkout_buttons }}
+                </div>
+              {%- endif -%}
+          {%- endcase -%}
+        {% endfor %}
+
+        <div id="cart-errors"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-cart-footer.name",
+  "tag": "section",
+  "class": "cart__footer-wrapper",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "When enabled, uses global theme colors for section background and text"
+    },
+    {
+      "type": "header",
+      "content": "Section Colors"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section Background Color",
+      "default": "#FFFFFF",
+      "info": "Applies when theme colors are disabled"
+    },
+    {
+      "type": "color",
+      "id": "section_text_color",
+      "label": "Section Text Color",
+      "default": "#000000",
+      "info": "Applies when theme colors are disabled"
+    },
+    {
+      "type": "header",
+      "content": "Cart Totals"
+    },
+    {
+      "type": "color",
+      "id": "total_heading_color",
+      "label": "Total Heading Color",
+      "default": "#000000",
+      "info": "Color for 'Estimated Total' text"
+    },
+    {
+      "type": "color",
+      "id": "total_price_color",
+      "label": "Total Price Color",
+      "default": "#000000",
+      "info": "Color for the total price value"
+    },
+    {
+      "type": "color",
+      "id": "discount_text_color",
+      "label": "Discount Text Color",
+      "default": "#D32F2F",
+      "info": "Color for discount codes and amounts"
+    },
+    {
+      "type": "color",
+      "id": "tax_note_color",
+      "label": "Tax Note Color",
+      "default": "#666666",
+      "info": "Color for shipping/tax information text"
+    },
+    {
+      "type": "header",
+      "content": "Cart Note"
+    },
+    {
+      "type": "color",
+      "id": "note_label_color",
+      "label": "Note Label Color",
+      "default": "#000000",
+      "info": "Color for the cart note label"
+    },
+    {
+      "type": "color",
+      "id": "note_input_text_color",
+      "label": "Note Input Text Color",
+      "default": "#000000",
+      "info": "Color for text in the note textarea"
+    },
+    {
+      "type": "color",
+      "id": "note_input_border_color",
+      "label": "Note Input Border Color",
+      "default": "#E5E5E5",
+      "info": "Border color for the note textarea"
+    },
+    {
+      "type": "header",
+      "content": "Checkout Button"
+    },
+    {
+      "type": "color",
+      "id": "checkout_button_background_color",
+      "label": "Checkout Button Background",
+      "default": "#000000",
+      "info": "Background color for checkout button"
+    },
+    {
+      "type": "color",
+      "id": "checkout_button_text_color",
+      "label": "Checkout Button Text",
+      "default": "#FFFFFF",
+      "info": "Text color for checkout button"
+    },
+    {
+      "type": "color",
+      "id": "checkout_button_hover_background_color",
+      "label": "Checkout Button Hover Background",
+      "default": "#333333",
+      "info": "Background color when hovering over checkout button"
+    },
+    {
+      "type": "range",
+      "id": "checkout_button_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Checkout Button Border Radius",
+      "default": 4,
+      "info": "Controls the roundness of checkout button corners"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:sections.all.padding.padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:sections.all.padding.padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 40,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "subtotal",
+      "name": "t:sections.main-cart-footer.blocks.subtotal.name",
+      "limit": 1
+    },
+    {
+      "type": "buttons",
+      "name": "t:sections.main-cart-footer.blocks.buttons.name",
+      "limit": 1
+    },
+    {
+      "type": "@app"
+    }
+  ]
+}
+{% endschema %}

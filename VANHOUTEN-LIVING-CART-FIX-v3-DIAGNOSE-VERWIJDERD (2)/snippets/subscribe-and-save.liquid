@@ -1,0 +1,2464 @@
+{% comment %}
+  Subscribe & Save Block
+  Replicates the design provided by the user.
+  Usage: {% render 'subscribe-and-save', block: block %}
+
+  Toggle Behavior:
+  - When Toggle ON (checked):
+    * CSS: Container gets active styles (red border, background color, active tab appears, benefits opacity 1, gift prices unlock)
+    * JavaScript: Elixir_SetProductFormSellingPlan(block.settings.subscribe_selling_plan_id) via product-form-controller.js
+    * JavaScript: Sets hidden input name="quantity" to block.settings.subscribe_quantity (default: 3)
+
+  - When Toggle OFF (unchecked):
+    * CSS: Container returns to unselected state (gray border, default background, benefits fade to 0.4 opacity, gift prices lock)
+    * JavaScript: Elixir_SetProductFormSellingPlan('') via product-form-controller.js
+    * JavaScript: Sets hidden input name="quantity" to 1
+{% endcomment %}
+
+{% if block.settings.subscribe_mode == 'custom' %}
+  <div
+    class="subscribe-save-wrapper"
+    {{ block.shopify_attributes }}
+    data-block-id="{{ block.id }}"
+    data-selling-plan-id="{{ block.settings.subscribe_selling_plan_id }}"
+  >
+    {% if block.settings.heading != blank %}
+      <div class="subscribe-save-heading">{{ block.settings.heading }}</div>
+    {% endif %}
+
+    <!-- SINGLE CONTAINER WITH TOGGLE INSIDE -->
+    <div class="subscribe-save-container">
+      {% if block.settings.enable_active_tab %}
+        <div class="subscribe-active-tab subscribe-active-tab--{{ block.settings.active_tab_alignment | default: 'center' }}">
+          {{ block.settings.active_tab_text | replace: '[count]', block.settings.number_of_free_gifts }}
+        </div>
+      {% endif %}
+
+      <!-- Badge (Always Visible) -->
+
+      <!-- Top Row: Toggle + Title + Price Row -->
+      <div class="subscribe-top-row">
+        <div class="subscribe-row-content">
+          <div class="subscribe-top-left">
+            <!-- Toggle Switch -->
+            <label class="subscribe-toggle-switch">
+              <input
+                type="checkbox"
+                id="subscribe-toggle-{{ block.id }}"
+                {% if block.settings.preselect_option == 'subscribe' %}
+                  checked
+                {% endif %}
+              >
+              <span class="subscribe-toggle-slider"></span>
+            </label>
+
+            <!-- Title -->
+            <div class="subscribe-toggle-header">
+              <div class="subscribe-title-row">
+                <span class="subscribe-toggle-option">{{ block.settings.subscribe_title }}</span>
+                {% if block.settings.show_save_badge and block.settings.subscribe_save_badge_text != blank %}
+                  <div class="subscribe-save-badge">{{ block.settings.subscribe_save_badge_text }}</div>
+                {% endif %}
+              </div>
+              {% if block.settings.subscribe_title_subtitle != blank %}
+                <div class="subscribe-title-subtitle">{{ block.settings.subscribe_title_subtitle }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Price Row (Outside Top Left, Inside Top Row) -->
+          {% if block.settings.show_subscribe_price %}
+            <div class="subscribe-price-row">
+              <span class="subscribe-price-current">{{ block.settings.subscribe_price_text }}</span>
+              <span class="subscribe-price-compare">{{ block.settings.subscribe_compare_price_text }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Delivery Frequency Dropdown -->
+        {% if block.settings.enable_frequency_dropdown %}
+          <div class="subscribe-frequency-wrapper">
+            <label for="delivery-frequency-{{ block.id }}" class="subscribe-frequency-label">
+              {{ block.settings.frequency_label | default: 'Delivery every:' }}
+            </label>
+            <select id="delivery-frequency-{{ block.id }}" class="subscribe-frequency-dropdown">
+              {% assign frequencies = block.settings.frequency_options | newline_to_br | split: '<br />' %}
+              {% for frequency in frequencies %}
+                {% if frequency != blank %}
+                  <option value="{{ frequency | strip }}">{{ frequency | strip }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Divider Line -->
+      <div class="subscribe-divider"></div>
+
+      <!-- Main Content -->
+      <div class="subscribe-main-content">
+        <!-- Benefits (Always visible, faded when not subscribed) -->
+        <div class="subscribe-benefits-wrapper">
+          <!-- Subscribe Bonuses - Individual items with richtext support -->
+          {% assign num_benefits = block.settings.number_of_benefits | default: 0 %}
+
+          {% if num_benefits > 0 %}
+            <div class="bonus-list bonus-list-{{ block.settings.benefits_layout | default: 'single' }}">
+              {% for i in (1..6) %}
+                {% if i > num_benefits %}
+                  {% break %}
+                {% endif %}
+                {%- liquid
+                  assign bonus_key = 'bonus_item_' | append: i
+                  assign bonus_text = block.settings[bonus_key]
+                -%}
+                {% if bonus_text != blank %}
+                  <div class="bonus-item">
+                    {% if block.settings.subscribe_bonus_icon != blank %}
+                      <img
+                        src="{{ block.settings.subscribe_bonus_icon | image_url: width: 40 }}"
+                        class="bonus-icon"
+                        alt="{{ block.settings.subscribe_bonus_icon.alt | escape }}"
+                        width="20"
+                        height="20"
+                      >
+                    {% else %}
+                      <svg class="bonus-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                        <rect width="256" height="256" fill="none"/><path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-52.2,6.84-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z" fill="currentColor"/>
+                      </svg>
+                    {% endif %}
+                    <span class="bonus-text">{{ bonus_text }}</span>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <!-- Subscribe Gifts (1-5) -->
+          {% for i in (1..5) %}
+            {% if i > block.settings.number_of_free_gifts %}
+              {% break %}
+            {% endif %}
+
+            {%- liquid
+              assign gift_text_key = 'subscribe_gift_' | append: i | append: '_text'
+              assign gift_image_key = 'subscribe_gift_' | append: i | append: '_image'
+              assign gift_qty_key = 'subscribe_gift_' | append: i | append: '_qty'
+              assign gift_price_key = 'subscribe_gift_' | append: i | append: '_price'
+              assign gift_compare_price_key = 'subscribe_gift_' | append: i | append: '_compare_price'
+
+              assign gift_text = block.settings[gift_text_key]
+              assign gift_image = block.settings[gift_image_key]
+              assign gift_qty = block.settings[gift_qty_key]
+              assign gift_price = block.settings[gift_price_key]
+              assign gift_compare_price = block.settings[gift_compare_price_key]
+            -%}
+
+            {% if gift_text != blank %}
+              <div class="free-gift-container" style="--gift-index: {{ forloop.index }};">
+                <div class="gift-content-left">
+                  {% if gift_image != blank %}
+                    <img
+                      src="{{ gift_image | image_url: width: 100 }}"
+                      class="gift-image"
+                      alt="{{ gift_text }}"
+                      width="50"
+                      height="50"
+                    >
+                  {% endif %}
+                  {% if gift_qty != blank %}
+                    <div class="gift-qty-inline">
+                      <span>{{ gift_qty }}</span>
+                    </div>
+                  {% endif %}
+                  <span class="gift-text">{{ gift_text }}</span>
+                </div>
+                <div class="gift-price-right">
+                  <div class="gift-price-locked-wrapper">
+                    <div class="gift-price-lock">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </div>
+                    {% if gift_price != blank %}
+                      <span class="gift-price">{{ gift_price }}</span>
+                    {% endif %}
+                  </div>
+                  {% if gift_compare_price != blank %}
+                    <span class="gift-compare-price">{{ gift_compare_price }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <!-- .subscribe-save-container -->
+  </div>
+  <!-- .subscribe-save-wrapper -->
+
+  <style>
+    .subscribe-save-wrapper {
+      margin-top: {{ block.settings.margin_top | default: 0 }}px;
+      margin-bottom: {{ block.settings.margin_bottom | default: 20 }}px;
+      width: 100% !important;
+      margin-left: auto;
+      margin-right: auto;
+
+      /* Custom Variables */
+      --subscribe-border-color: {{ block.settings.border_color_unselected | default: '#e0e0e0' }};
+      --subscribe-border-color-selected: {{ block.settings.border_color_selected | default: '#D32F2F' }};
+      --subscribe-border-width-unselected: {{ block.settings.border_width_unselected | default: 1 }}px;
+      --subscribe-border-width-selected: {{ block.settings.border_width_selected | default: 2 }}px;
+      --subscribe-border-radius: {{ block.settings.border_radius | default: 8 }}px;
+      --subscribe-bg-unselected: {{ block.settings.bg_color_unselected | default: '#ffffff' }};
+      --subscribe-bg-selected: {{ block.settings.bg_color_selected | default: '#fff5f5' }};
+      --subscribe-hover-bg: {{ block.settings.hover_bg_color | default: '#f8f9fa' }};
+      --subscribe-heading-color: {{ block.settings.heading_color | default: '#000000' }};
+      --subscribe-heading-size: {{ block.settings.heading_font_size | default: 16 }}px;
+      --subscribe-title-color: {{ block.settings.title_color | default: '#333333' }};
+      --subscribe-title-size: {{ block.settings.title_font_size | default: 16 }}px;
+      --subscribe-subtitle-color: {{ block.settings.subtitle_color | default: '#666666' }};
+      --subscribe-subtitle-size: {{ block.settings.subtitle_font_size | default: 13 }}px;
+      --subscribe-price-color-unselected: {{ block.settings.price_color_unselected | default: '#000000' }};
+      --subscribe-price-color-selected: {{ block.settings.price_color_selected | default: '#000000' }};
+      --subscribe-price-size: {{ block.settings.price_font_size | default: 18 }}px;
+      --subscribe-compare-price-color-unselected: {{ block.settings.compare_price_color_unselected | default: '#999999' }};
+      --subscribe-compare-price-color-selected: {{ block.settings.compare_price_color_selected | default: '#999999' }};
+      --subscribe-compare-price-size: {{ block.settings.compare_price_font_size | default: 14 }}px;
+      --subscribe-per-serving-size: {{ block.settings.per_serving_font_size | default: 12 }}px;
+      --subscribe-benefits-color: {{ block.settings.benefits_color | default: '#666666' }};
+      --subscribe-benefits-size: {{ block.settings.benefits_font_size | default: 13 }}px;
+      --subscribe-toggle-bg-unselected: {{ block.settings.toggle_slider_bg_unselected | default: '#cccccc' }};
+      --subscribe-toggle-bg-selected: {{ block.settings.toggle_slider_bg_selected | default: '#D32F2F' }};
+      --subscribe-toggle-circle: {{ block.settings.toggle_circle_color | default: '#ffffff' }};
+      --subscribe-badge-size: {{ block.settings.badge_font_size | default: 11 }}px;
+      --subscribe-badge-radius: {{ block.settings.badge_border_radius | default: 4 }}px;
+      --subscribe-badge-padding-v: {{ block.settings.badge_padding_v | default: 4 }}px;
+      --subscribe-badge-padding-h: {{ block.settings.badge_padding_h | default: 8 }}px;
+      --subscribe-save-badge-bg: {{ block.settings.save_badge_bg | default: '#FF4444' }};
+      --subscribe-save-badge-color: {{ block.settings.save_badge_text_color | default: '#FFFFFF' }};
+      --subscribe-save-badge-size: {{ block.settings.save_badge_font_size | default: 11 }}px;
+      --subscribe-save-badge-radius: {{ block.settings.save_badge_border_radius | default: 4 }}px;
+      --subscribe-gift-image-size: {{ block.settings.gift_image_size | default: 60 }}px;
+      --subscribe-gift-text-color-unselected: {{ block.settings.gift_text_color_unselected | default: '#333333' }};
+      --subscribe-gift-text-color-selected: {{ block.settings.gift_text_color_selected | default: '#333333' }};
+      --subscribe-gift-text-size: {{ block.settings.gift_text_font_size | default: 12 }}px;
+      --subscribe-gift-text-size-mobile: {{ block.settings.gift_text_font_size_mobile | default: 12 }}px;
+      --subscribe-gift-text-weight: {{ block.settings.gift_text_font_weight | default: 600 }};
+      --subscribe-gift-qty-bg: {{ block.settings.gift_qty_bg | default: '#D32F2F' }};
+      --subscribe-gift-qty-color: {{ block.settings.gift_qty_text_color | default: '#FFFFFF' }};
+      --subscribe-gift-qty-size: {{ block.settings.gift_qty_font_size | default: 11 }}px;
+      --subscribe-gift-container-radius: {{ block.settings.gift_container_border_radius | default: 8 }}px;
+      --subscribe-gift-bg-unselected: {{ block.settings.gift_container_bg_unselected | default: '#f9f9f9' }};
+      --subscribe-gift-border-unselected: {{ block.settings.gift_container_border_unselected | default: '#cccccc' }};
+      --subscribe-gift-bg-selected: {{ block.settings.gift_container_bg_selected | default: '#fff5f5' }};
+      --subscribe-gift-border-selected: {{ block.settings.gift_container_border_selected | default: '#D32F2F' }};
+      --subscribe-bonus-text-color: {{ block.settings.bonus_text_color | default: '#333333' }};
+      --subscribe-bonus-size: {{ block.settings.bonus_font_size | default: 13 }}px;
+      --subscribe-bonus-icon-size: {{ block.settings.bonus_icon_size | default: 16 }}px;
+      --subscribe-bonus-icon-color: {{ block.settings.subscribe_bonus_icon_color | default: '#333333' }};
+      --subscribe-padding-top: {{ block.settings.padding_top | default: 15 }}px;
+      --subscribe-padding-bottom: {{ block.settings.padding_bottom | default: 15 }}px;
+      --subscribe-padding-left: {{ block.settings.padding_left | default: 15 }}px;
+      --subscribe-padding-right: {{ block.settings.padding_right | default: 15 }}px;
+      --subscribe-gap: {{ block.settings.gap_between_options | default: 12 }}px;
+      --subscribe-top-row-border-color: {{ block.settings.top_row_border_color | default: '#e0e0e0' }};
+      --subscribe-top-row-border-color-selected: {{ block.settings.top_row_border_active | default: '#D32F2F' }};
+      --subscribe-top-row-border-width: {{ block.settings.top_row_border_width | default: 1 }}px;
+      --subscribe-tab-bg: {{ block.settings.active_tab_bg | default: '#333333' }};
+      --subscribe-tab-text-color: {{ block.settings.active_tab_text_color | default: '#FFFFFF' }};
+      --subscribe-tab-font-size: {{ block.settings.active_tab_font_size | default: 11 }}px;
+      --subscribe-frequency-label-color: {{ block.settings.frequency_label_color | default: '#666666' }};
+      --subscribe-frequency-label-size: {{ block.settings.frequency_label_font_size | default: 12 }}px;
+      --subscribe-frequency-dropdown-bg: {{ block.settings.frequency_dropdown_bg | default: '#ffffff' }};
+      --subscribe-frequency-dropdown-border: {{ block.settings.frequency_dropdown_border_color | default: '#cccccc' }};
+      --subscribe-frequency-dropdown-text: {{ block.settings.frequency_dropdown_text_color | default: '#333333' }};
+      --subscribe-frequency-dropdown-size: {{ block.settings.frequency_dropdown_font_size | default: 13 }}px;
+      --subscribe-frequency-wrapper-bg: {{ block.settings.frequency_wrapper_bg | default: '#f9f9f9' }};
+      --subscribe-frequency-wrapper-padding: {{ block.settings.frequency_wrapper_padding | default: 10 }}px;
+      --subscribe-frequency-wrapper-radius: {{ block.settings.frequency_wrapper_radius | default: 6 }}px;
+
+      {% if block.settings.enable_active_inner_shadow %}
+        {% assign shadow_opacity = block.settings.active_inner_shadow_opacity | default: 10 | divided_by: 100.0 %}
+        --subscribe-active-shadow-value: inset 0 {{ block.settings.active_inner_shadow_v_offset | default: 0 }}px {{ block.settings.active_inner_shadow_blur | default: 10 }}px {{ block.settings.active_inner_shadow_spread | default: 0 }}px {{ block.settings.active_inner_shadow_color | default: '#000000' | color_modify: 'alpha', shadow_opacity }};
+      {% endif %}
+    }
+
+    .subscribe-save-wrapper,
+    .subscribe-save-wrapper * {
+      letter-spacing: var(--letter-spacing-body) !important;
+      font-family: var(--font-body-family) !important;
+    }
+
+    /* Heading */
+    .subscribe-save-heading {
+      font-size: var(--subscribe-heading-size) !important;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--subscribe-heading-color);
+    }
+    .subscribe-save-heading p { margin: 0; }
+    .subscribe-save-heading strong, .subscribe-save-heading b {
+      font-weight: 700 !important;
+    }
+
+    /* Container */
+    .subscribe-save-container {
+      border: var(--subscribe-border-width-unselected) {% if block.settings.use_dashed_border_unselected %}dashed{% else %}solid{% endif %} var(--subscribe-border-color);
+      border-radius: var(--subscribe-border-radius);
+      padding: var(--subscribe-padding-top) var(--subscribe-padding-right) var(--subscribe-padding-bottom) var(--subscribe-padding-left);
+      position: relative;
+      background: var(--subscribe-bg-unselected);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Container state changes based on toggle */
+    .subscribe-save-container:has(input:checked) {
+      border-color: var(--subscribe-border-color-selected);
+      border-width: var(--subscribe-border-width-selected);
+      background-color: var(--subscribe-bg-selected);
+      {% if block.settings.enable_active_inner_shadow %}
+      box-shadow: var(--subscribe-active-shadow-value);
+      {% endif %}
+    }
+
+    /* Active Pop-up Tab */
+    .subscribe-active-tab {
+      position: absolute;
+      top: -24px;
+      background-color: var(--subscribe-tab-bg);
+      color: var(--subscribe-tab-text-color);
+      font-size: var(--subscribe-tab-font-size) !important;
+      padding: 6px 16px;
+      border-radius: 8px 8px 0 0;
+      font-weight: 700;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: -1;
+      white-space: nowrap;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    /* Alignment Variants */
+    .subscribe-active-tab--center {
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+    }
+    .subscribe-active-tab--left {
+      left: 20px;
+      transform: translateY(10px);
+    }
+    .subscribe-active-tab--right {
+      right: 20px;
+      left: auto;
+      transform: translateY(10px);
+    }
+
+    /* Reveal States */
+    .subscribe-save-container:has(input:checked) .subscribe-active-tab--center {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .subscribe-save-container:has(input:checked) .subscribe-active-tab--left {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .subscribe-save-container:has(input:checked) .subscribe-active-tab--right {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Top Row */
+    .subscribe-top-row {
+      width: 100%;
+      {% if block.settings.enable_top_row_border %}
+      border-bottom: var(--subscribe-top-row-border-width) solid var(--subscribe-top-row-border-color);
+      {% endif %}
+      transition: border-color 0.3s ease;
+    }
+
+    .subscribe-row-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      margin-bottom: {{ block.settings.row_content_margin_bottom | default: 0 }}px;
+    }
+
+    .subscribe-save-container:has(input:checked) .subscribe-top-row {
+      {% if block.settings.enable_top_row_border %}
+      border-bottom-color: var(--subscribe-top-row-border-color-selected);
+      {% endif %}
+    }
+
+    /* Divider Line */
+    .subscribe-divider {
+      height: 1px;
+      background-color: var(--subscribe-border-color);
+      width: 100%;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .subscribe-top-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Toggle Switch */
+    .subscribe-toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    /* Toggle Header */
+    .subscribe-toggle-header {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0px;
+      min-width: 0;
+    }
+
+    .subscribe-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .subscribe-toggle-option {
+      font-size: var(--subscribe-title-size) !important;
+      font-weight: 700;
+      color: var(--subscribe-title-color);
+      user-select: none;
+    }
+
+    .subscribe-title-subtitle {
+      font-size: var(--subscribe-subtitle-size) !important;
+      color: var(--subscribe-subtitle-color);
+      line-height: 1.4;
+      font-weight: 400;
+    }
+
+    .subscribe-title-subtitle p {
+      margin: 0;
+    }
+
+    .subscribe-title-subtitle strong,
+    .subscribe-title-subtitle b {
+      font-weight: 700 !important;
+    }
+
+    /* Delivery Frequency Dropdown */
+    .subscribe-frequency-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      margin-top: 0px;
+      width: 100%;
+
+      /* Hidden state by default */
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      margin-bottom: 0;
+      padding: 0 var(--subscribe-frequency-wrapper-padding);
+
+      background-color: var(--subscribe-frequency-wrapper-bg);
+      border-radius: var(--subscribe-frequency-wrapper-radius);
+
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .subscribe-save-container:has(input:checked) .subscribe-frequency-wrapper {
+      max-height: 80px;
+      opacity: 1;
+      margin-top: 12px;
+      padding: 10px;
+    }
+
+    .subscribe-frequency-label {
+      font-size: var(--subscribe-frequency-label-size) !important;
+      color: var(--subscribe-frequency-label-color);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .subscribe-frequency-dropdown {
+      font-size: var(--subscribe-frequency-dropdown-size) !important;
+      color: var(--subscribe-frequency-dropdown-text);
+      background-color: var(--subscribe-frequency-dropdown-bg);
+      border: 1px solid var(--subscribe-frequency-dropdown-border);
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: var(--font-body-family) !important;
+      letter-spacing: var(--letter-spacing-body) !important;
+      transition: border-color 0.3s ease;
+    }
+
+    .subscribe-frequency-dropdown:hover {
+      border-color: var(--subscribe-border-color-selected);
+    }
+
+    .subscribe-frequency-dropdown:focus {
+      outline: none;
+      border-color: var(--subscribe-border-color-selected);
+    }
+
+    .subscribe-toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .subscribe-toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--subscribe-toggle-bg-unselected);
+      transition: 0.3s;
+      border-radius: 28px;
+    }
+
+    .subscribe-toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: var(--subscribe-toggle-circle);
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    .subscribe-toggle-switch input:checked + .subscribe-toggle-slider {
+      background-color: var(--subscribe-toggle-bg-selected);
+    }
+
+    .subscribe-toggle-switch input:checked + .subscribe-toggle-slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Badge (Always Visible) */
+    .subscribe-badges {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      display: flex;
+      pointer-events: none;
+    }
+
+    .subscribe-badge {
+      padding: var(--subscribe-badge-padding-v) var(--subscribe-badge-padding-h);
+      border-radius: var(--subscribe-badge-radius);
+      font-size: var(--subscribe-badge-size) !important;
+      font-weight: 800;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .subscribe-save-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--subscribe-save-badge-bg);
+      color: var(--subscribe-save-badge-color);
+      font-size: var(--subscribe-save-badge-size) !important;
+      padding: 4px 8px;
+      border-radius: var(--subscribe-save-badge-radius);
+      font-weight: 700 !important;
+      text-transform: uppercase;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    /* Main Content */
+    .subscribe-main-content {
+      padding-top: 0;
+    }
+
+    .subscribe-price-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      width: 80px !important;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    .subscribe-price-current {
+      font-weight: 700;
+      font-size: var(--subscribe-price-size) !important;
+      color: var(--subscribe-price-color-unselected);
+      line-height: 1.2;
+      transition: color 0.3s ease;
+    }
+
+    .subscribe-price-compare {
+      font-size: var(--subscribe-compare-price-size) !important;
+      text-decoration: line-through;
+      color: var(--subscribe-compare-price-color-unselected);
+      line-height: 1.2;
+      transition: color 0.3s ease;
+    }
+
+    .subscribe-save-container:has(input:checked) .subscribe-price-current {
+      color: var(--subscribe-price-color-selected) !important;
+    }
+    .subscribe-save-container:has(input:checked) .subscribe-price-compare {
+      color: var(--subscribe-compare-price-color-selected) !important;
+    }
+
+    /* Benefits Wrapper - Always visible, faded when not subscribed */
+    .subscribe-benefits-wrapper {
+      margin-top: {% if block.settings.enable_top_row_border %}10px{% else %}0px{% endif %};
+      transition: opacity 0.3s ease;
+      opacity: 0.4;
+    }
+
+    .subscribe-save-container:has(input:checked) .subscribe-benefits-wrapper {
+      opacity: 1;
+    }
+
+    /* General Benefits (Richtext) */
+    .subscribe-benefits {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+      font-size: var(--subscribe-benefits-size) !important;
+      line-height: 1.6;
+      color: var(--subscribe-benefits-color);
+    }
+    .subscribe-benefits p { margin: 0 0 5px; display: flex; align-items: center; gap: 5px; }
+    .subscribe-benefits:last-child { border-bottom: none; }
+
+    /* Benefits Layout: Two Columns */
+    .subscribe-benefits-two_column {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 5px 10px !important;
+    }
+    .subscribe-benefits-two_column p,
+    .subscribe-benefits-two_column li {
+      width: calc(50% - 5px) !important;
+      display: inline-flex !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Benefits Layout: Flex Row */
+    .subscribe-benefits-flex_row {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 10px 15px !important;
+    }
+    .subscribe-benefits-flex_row p,
+    .subscribe-benefits-flex_row li {
+      width: auto !important;
+      margin: 0 !important;
+      flex-shrink: 0 !important;
+      display: inline-flex !important;
+    }
+
+    /* Bonus List (Bullet list with icons) */
+    .bonus-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+    .bonus-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--subscribe-bonus-size) !important;
+      color: var(--subscribe-bonus-text-color);
+      width: fit-content;
+    }
+    .bonus-icon {
+      flex-shrink: 0;
+      width: var(--subscribe-bonus-icon-size);
+      height: var(--subscribe-bonus-icon-size);
+      object-fit: contain;
+      color: var(--subscribe-bonus-icon-color);
+    }
+
+    /* Bonus text - handle richtext p tags */
+    .bonus-text {
+      display: inline;
+    }
+    .bonus-text p {
+      display: inline;
+      margin: 0;
+      padding: 0;
+    }
+    .bonus-text strong,
+    .bonus-text b {
+      font-weight: 700 !important;
+    }
+
+    /* Bonus List Layouts */
+    .bonus-list.bonus-list-two_column {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 5px 10px !important;
+    }
+    .bonus-list.bonus-list-two_column .bonus-item {
+      width: calc(50% - 5px) !important;
+      display: inline-flex !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      flex: 0 0 auto !important;
+    }
+
+    .bonus-list.bonus-list-flex_row {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 10px 15px !important;
+    }
+    .bonus-list.bonus-list-flex_row .bonus-item {
+      width: auto !important;
+      margin: 0 !important;
+      flex-shrink: 0 !important;
+      display: inline-flex !important;
+      flex: 0 0 auto !important;
+    }
+
+    /* Free Gift Container */
+    .free-gift-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--subscribe-gift-bg-unselected);
+      border: 1px {% if block.settings.gift_container_border_style == 'solid' %}solid{% else %}dashed{% endif %} var(--subscribe-gift-border-unselected);
+      border-radius: var(--subscribe-gift-container-radius);
+      padding: 8px 8px;
+      margin-top: 5px;
+      opacity: 0.6;
+      transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    }
+
+    .subscribe-save-container:has(input:checked) .free-gift-container {
+      background: var(--subscribe-gift-bg-selected);
+      border-color: var(--subscribe-gift-border-selected);
+      opacity: 1;
+    }
+    .gift-content-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .gift-image {
+      width: calc(var(--subscribe-gift-image-size) * 0.53);
+      height: calc(var(--subscribe-gift-image-size) * 0.53);
+      object-fit: contain;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .gift-qty-inline {
+      background: var(--subscribe-gift-qty-bg);
+      color: var(--subscribe-gift-qty-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--subscribe-gift-qty-size) !important;
+      font-weight: 700;
+      flex-shrink: 0;
+      width: 17px;
+      height: 17px;
+      min-width: 17px;
+      padding: 0;
+    }
+    .gift-qty-inline span {
+      line-height: 1;
+    }
+    .gift-text {
+      font-size: var(--subscribe-gift-text-size) !important;
+      font-weight: var(--subscribe-gift-text-weight);
+      color: var(--subscribe-gift-text-color-unselected);
+      flex: 1;
+      transition: color 0.3s ease;
+    }
+
+    .subscribe-save-container:has(input:checked) .gift-text {
+      color: var(--subscribe-gift-text-color-selected);
+    }
+    .gift-price-right {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+      flex-shrink: 0;
+      gap: 6px;
+    }
+    .gift-price-locked-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      border-radius: 4px;
+    }
+
+    .gift-price {
+      font-weight: 700;
+      font-size: var(--subscribe-gift-text-size) !important;
+      color: var(--subscribe-gift-text-color-unselected);
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: opacity 0.4s ease, transform 0.4s ease, color 0.3s ease;
+      display: inline-block;
+    }
+
+    .subscribe-save-container:has(input:checked) .gift-price {
+      color: var(--subscribe-gift-text-color-selected);
+    }
+
+    .gift-price-lock {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--subscribe-gift-bg-unselected);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      color: #999;
+      opacity: 1;
+      transform: translateX(0);
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    }
+
+    /* Reveal on Subscribe with Stagger */
+    .subscribe-save-container:has(input:checked) .gift-price-lock {
+      transform: translateX(100%);
+      opacity: 0;
+      transition-delay: calc(var(--gift-index) * 0.15s);
+    }
+    .subscribe-save-container:has(input:checked) .gift-price {
+      opacity: 1;
+      transform: translateX(0);
+      transition-delay: calc(var(--gift-index) * 0.15s);
+    }
+
+    .gift-compare-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: calc(var(--subscribe-gift-text-size) * 0.9) !important;
+    }
+
+    @media (max-width: 480px) {
+      .subscribe-row-content {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .subscribe-top-left {
+        width: 100%;
+      }
+
+      .subscribe-price-row {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .subscribe-toggle-option {
+        font-size: 14px;
+      }
+
+      .subscribe-save-badge {
+        font-size: 9px;
+        padding: 4px 8px;
+      }
+
+      .subscribe-badge {
+        font-size: 9px;
+        padding: 2px 6px;
+      }
+
+      .gift-text {
+        font-size: var(--subscribe-gift-text-size-mobile);
+      }
+
+      .subscribe-frequency-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .subscribe-frequency-dropdown {
+        width: 100%;
+        font-size: 12px !important;
+      }
+
+      /* Stack benefits layouts on mobile */
+      .subscribe-benefits-two_column,
+      .subscribe-benefits-flex_row,
+      .bonus-list-two_column,
+      .bonus-list-flex_row {
+        flex-direction: column;
+      }
+
+      .subscribe-benefits-two_column p,
+      .bonus-list-two_column .bonus-item {
+        width: 100% !important;
+      }
+    }
+  </style>
+
+  <script>
+    (function() {
+      function initSubscribeSave() {
+        const wrapper = document.querySelector('.subscribe-save-wrapper[data-block-id="{{ block.id }}"]');
+        if (!wrapper) {
+          console.log('Subscribe & Save wrapper not found');
+          return;
+        }
+
+        const toggle = wrapper.querySelector('#subscribe-toggle-{{ block.id }}');
+        const container = wrapper.querySelector('.subscribe-save-container');
+        const frequencyDropdown = wrapper.querySelector('#delivery-frequency-{{ block.id }}');
+        const form = (typeof Elixir_GetProductForm === 'function' && Elixir_GetProductForm()) || document.querySelector('form[action*="/cart/add"]');
+
+        const subscribeData = {
+          planId: '{{ block.settings.subscribe_selling_plan_id }}',
+          quantity: '{{ block.settings.subscribe_quantity | default: 3 }}'
+        };
+
+        let customPlanData = null;
+        {% if product.selling_plan_groups.size > 0 %}
+          {% for group in product.selling_plan_groups %}
+            {% for plan in group.selling_plans %}
+              {% if plan.id == block.settings.subscribe_selling_plan_id %}
+                customPlanData = {
+                  id: {{ plan.id }},
+                  priceAdjustments: [
+                    {% for adjustment in plan.price_adjustments %}
+                      {
+                        valueType: {{ adjustment.value_type | json }},
+                        value: {{ adjustment.value }}
+                      }{% unless forloop.last %},{% endunless %}
+                    {% endfor %}
+                  ]
+                };
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        {% endif %}
+
+        let selectedFrequency = frequencyDropdown ? frequencyDropdown.value : '';
+
+
+        function getProductForm() {
+          if (typeof Elixir_GetProductForm === 'function') {
+            const f = Elixir_GetProductForm();
+            if (f) return f;
+          }
+          return document.querySelector('form[action*="/cart/add"]') ||
+            document.querySelector('product-form')?.querySelector('form[action*="/cart/add"]') ||
+            (document.querySelectorAll('form[id^="product-form-"]')[0] || null) ||
+            document.querySelector('form.form[action*="/cart/add"]') ||
+            null;
+        }
+
+        function getCurrentVariantForCustom() {
+          const productVariants = {{ product.variants | json }};
+          const variantId = (typeof Elixir_GetProductFormVariantId === 'function' && Elixir_GetProductFormVariantId()) || null;
+          if (!variantId) return productVariants[0] || null;
+          return productVariants.find(v => v.id.toString() === variantId.toString()) || productVariants[0] || null;
+        }
+
+        function updateSubscription(isSubscribe) {
+          console.log('Toggle state:', isSubscribe ? 'Subscribe' : 'One-time');
+
+          const form = getProductForm();
+
+          if (!form) {
+            if (isSubscribe && typeof Elixir_SetProductFormSellingPlan === 'function') {
+              setTimeout(function() {
+                Elixir_SetProductFormSellingPlan(subscribeData.planId);
+              }, 200);
+            }
+            return;
+          }
+
+          if (typeof Elixir_SetProductFormSellingPlan === 'function') {
+            Elixir_SetProductFormSellingPlan(isSubscribe ? subscribeData.planId : '');
+          }
+
+          if (isSubscribe) {
+            let qtyInput = form.querySelector('input[name="quantity"]');
+            if (!qtyInput) {
+              qtyInput = document.createElement('input');
+              qtyInput.type = 'hidden';
+              qtyInput.name = 'quantity';
+              form.appendChild(qtyInput);
+            }
+            qtyInput.value = subscribeData.quantity;
+            qtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+          } else {
+            // Reset to default quantity 1 for one-time purchase
+            let qtyInput = form.querySelector('input[name="quantity"]');
+            if (qtyInput) {
+              qtyInput.value = 1;
+              qtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+
+          // Update window context
+          if (isSubscribe) {
+            const variant = getCurrentVariantForCustom();
+            Elixir_SetSubscriptionContext(subscribeData.planId, variant, customPlanData);
+          } else {
+            Elixir_SetSubscriptionContext();
+          }
+        }
+
+        // Frequency dropdown change handler
+        if (frequencyDropdown) {
+          frequencyDropdown.addEventListener('change', function() {
+            selectedFrequency = this.value;
+            console.log('Delivery frequency changed to:', selectedFrequency);
+            // You can add custom logic here to handle frequency changes
+            // For example, update selling plan ID based on frequency
+          });
+        }
+
+        // Make entire container clickable
+        if (container && toggle) {
+          container.addEventListener('click', function(e) {
+            // Don't toggle if clicking on links or buttons
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a, button')) {
+              return;
+            }
+            // Don't toggle if clicking on select/dropdown
+            if (e.target.tagName === 'SELECT' || e.target.closest('select')) {
+              return;
+            }
+            // Don't toggle if clicking directly on the toggle switch (it handles itself)
+            if (e.target.closest('.subscribe-toggle-switch')) {
+              return;
+            }
+            // Toggle the checkbox
+            toggle.checked = !toggle.checked;
+            toggle.dispatchEvent(new Event('change'));
+          });
+        }
+
+        // Toggle switch change handler
+        if (toggle) {
+          toggle.addEventListener('change', function() {
+            updateSubscription(this.checked);
+          });
+        }
+
+        if (toggle) {
+
+
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
+
+          if (document.readyState === 'complete') {
+            setTimeout(initializeSubscription, 500);
+          } else {
+            window.addEventListener('load', () => {
+              setTimeout(initializeSubscription, 500);
+            });
+          }
+
+          setTimeout(() => {
+            observer.disconnect();
+          }, 6000);
+        }
+
+        const form = getProductForm();
+        if (form) {
+          form.addEventListener('submit', function(e) {
+            if (toggle && toggle.checked && typeof Elixir_GetProductFormSellingPlan === 'function' && typeof Elixir_SetProductFormSellingPlan === 'function' && !Elixir_GetProductFormSellingPlan()) {
+              Elixir_SetProductFormSellingPlan(subscribeData.planId);
+            }
+          });
+        // Listen for variant changes to update context
+        function setupVariantListenersForCustom() {
+          if (!form) return;
+          let variantInput = form.querySelector('input[name="id"], select[name="id"]') || form.querySelector('.product-variant-id');
+
+          if (variantInput) {
+            const handleVariantChange = () => {
+              setTimeout(() => {
+                if (toggle && toggle.checked) {
+                  const variant = getCurrentVariantForCustom();
+                  Elixir_SetSubscriptionContext(subscribeData.planId, variant, customPlanData);
+                }
+              }, 150);
+            };
+
+            variantInput.addEventListener('change', handleVariantChange);
+            variantInput.addEventListener('input', handleVariantChange);
+            document.addEventListener('simple-variant-picker:variantChange', function(event) {
+              const eventVariant = event.detail?.variant;
+              if (eventVariant && toggle && toggle.checked) {
+                const normalizedVariant = {
+                  id: eventVariant.id,
+                  price: eventVariant.price || eventVariant.currentPrice || 0,
+                  compare_at_price: eventVariant.compare_at_price || eventVariant.compareAtPrice || null
+                };
+                Elixir_SetSubscriptionContext(subscribeData.planId, normalizedVariant, customPlanData);
+              } else {
+                handleVariantChange();
+              }
+            });
+          }
+        }
+
+        // Initialize with toggle state
+        if (toggle) {
+          updateSubscription(toggle.checked);
+          setupVariantListenersForCustom();
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSubscribeSave);
+      } else {
+        initSubscribeSave();
+      }
+    })();
+  </script>
+
+{% elsif block.settings.subscribe_mode == 'dynamic' %}
+  {% comment %} Dynamic Mode: One block per selling plan GROUP; one dropdown with all frequencies (plans) in that group. Outer wrapper groups all subscriptions for form lookup. {% endcomment %}
+  {% if product.selling_plan_groups.size > 0 %}
+    <div class="subscribe-save-dynamic-outer" data-block-id="{{ block.id }}" data-multiply-by-quantity="{{ block.settings.multiply_values_by_quantity }}" {{ block.shopify_attributes }}>
+      {% if block.settings.heading != blank %}
+        <div class="subscribe-save-heading">{{ block.settings.heading }}</div>
+      {% endif %}
+
+      {% for group in product.selling_plan_groups %}
+        <div
+          class="subscribe-save-wrapper subscribe-save-wrapper-dynamic"
+          data-block-id="{{ block.id }}"
+          data-group-id="{{ group.id }}"
+        >
+          <div class="subscribe-save-container">
+            {% if block.settings.enable_active_tab %}
+              <div class="subscribe-active-tab subscribe-active-tab--{{ block.settings.active_tab_alignment | default: 'center' }}">
+                {{ block.settings.active_tab_text | replace: '[count]', block.settings.number_of_free_gifts }}
+              </div>
+            {% endif %}
+
+            <div class="subscribe-top-row">
+              <div class="subscribe-row-content">
+                <div class="subscribe-top-left">
+                  <label class="subscribe-toggle-switch">
+                    <input
+                      type="checkbox"
+                      class="subscribe-toggle-dynamic"
+                      id="subscribe-toggle-{{ block.id }}-{{ group.id }}"
+                      data-group-id="{{ group.id }}"
+                    >
+                    <span class="subscribe-toggle-slider"></span>
+                  </label>
+
+                  <div class="subscribe-toggle-header">
+                    {%- liquid
+                      assign titles_lines = block.settings.dynamic_titles_list | newline_to_br | split: '<br />'
+                      assign custom_title_raw = titles_lines[forloop.index0]
+                      assign custom_title = custom_title_raw | strip
+                      assign display_title = group.name
+                      if block.settings.enable_custom_titles_subtitles and custom_title != blank
+                        assign display_title = custom_title
+                      endif
+
+                      assign show_single_as_subtitle = false
+                      if group.selling_plans.size == 1 and block.settings.show_single_frequency_as_subtitle
+                        assign show_single_as_subtitle = true
+                        assign single_plan = group.selling_plans.first
+                        assign single_plan_label = single_plan.name
+                        if single_plan.options.size > 0
+                          assign first_opt = single_plan.options.first
+                          if first_opt.value != blank
+                            assign single_plan_label = first_opt.value
+                          elsif first_opt.name != blank
+                            assign single_plan_label = first_opt.name
+                          endif
+                        endif
+                      endif
+
+                      assign subtitles_lines = block.settings.dynamic_subtitles_list | newline_to_br | split: '<br />'
+                      assign custom_subtitle_raw = subtitles_lines[forloop.index0]
+                      assign custom_subtitle = custom_subtitle_raw | strip
+                    -%}
+                    <div class="subscribe-title-row">
+                      <span class="subscribe-toggle-option">{{ display_title }}</span>
+                    </div>
+                    {% if block.settings.enable_custom_titles_subtitles and custom_subtitle != blank %}
+                      <div class="subscribe-title-subtitle">{{ custom_subtitle }}</div>
+                    {% elsif show_single_as_subtitle %}
+                      <div class="subscribe-title-subtitle">
+                        {{ block.settings.frequency_label | default: 'Delivery every:' }}
+                        {{ single_plan_label }}
+                      </div>
+                    {% elsif block.settings.subscribe_title_subtitle != blank %}
+                      <div class="subscribe-title-subtitle">{{ block.settings.subscribe_title_subtitle }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="subscribe-price-row">
+                  <span class="subscribe-price-current" data-group-id="{{ group.id }}">Calculating...</span>
+                  <span class="subscribe-price-compare" data-group-id="{{ group.id }}"></span>
+                </div>
+              </div>
+
+              {% if group.selling_plans.size > 1 %}
+                <div class="subscribe-frequency-wrapper subscribe-frequency-wrapper-dynamic">
+                  <label for="delivery-frequency-{{ block.id }}-{{ group.id }}" class="subscribe-frequency-label">
+                    {{ block.settings.frequency_label | default: 'Delivery every:' }}
+                  </label>
+                  <select
+                    id="delivery-frequency-{{ block.id }}-{{ group.id }}"
+                    class="subscribe-frequency-dropdown"
+                    data-group-id="{{ group.id }}"
+                    data-options-count="{{ group.selling_plans.size }}"
+                  >
+                    {% for plan in group.selling_plans %}
+                      {%- liquid
+                        assign plan_label = plan.name
+                        if plan.options.size > 0
+                          assign first_opt = plan.options.first
+                          if first_opt.value != blank
+                            assign plan_label = first_opt.value
+                          elsif first_opt.name != blank
+                            assign plan_label = first_opt.name
+                          endif
+                        endif
+                      -%}
+                      <option
+                        value="{{ plan.id }}"
+                        {% if forloop.first %}
+                          selected
+                        {% endif %}
+                      >
+                        {{ plan_label }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              {% else %}
+                <div class="subscribe-frequency-wrapper subscribe-frequency-wrapper-dynamic" style="display: none;">
+                  <label>{{ block.settings.frequency_label | default: 'Delivery every:' }}</label>
+                  <select
+                    class="subscribe-frequency-dropdown"
+                    data-group-id="{{ group.id }}"
+                    data-options-count="{{ group.selling_plans.size }}"
+                  >
+                    {% if group.selling_plans.size == 1 %}
+                      {%- assign single_plan = group.selling_plans.first -%}
+                      {%- liquid
+                        assign single_plan_label = single_plan.name
+                        if single_plan.options.size > 0
+                          assign first_opt = single_plan.options.first
+                          if first_opt.value != blank
+                            assign single_plan_label = first_opt.value
+                          elsif first_opt.name != blank
+                            assign single_plan_label = first_opt.name
+                          endif
+                        endif
+                      -%}
+                      <option value="{{ single_plan.id }}" selected>{{ single_plan_label }}</option>
+                    {% else %}
+                      <option value="">No options available</option>
+                    {% endif %}
+                  </select>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="subscribe-divider"></div>
+
+            <div class="subscribe-main-content">
+              {% if block.settings.show_benefits_dynamic %}
+                <div class="subscribe-benefits-wrapper">
+                  {% assign num_benefits = block.settings.number_of_benefits | default: 0 %}
+                  {% if num_benefits > 0 %}
+                    <div class="bonus-list bonus-list-{{ block.settings.benefits_layout | default: 'single' }}">
+                      {% for i in (1..6) %}
+                        {% if i > num_benefits %}
+                          {% break %}
+                        {% endif %}
+                        {%- liquid
+                          assign bonus_key = 'bonus_item_' | append: i
+                          assign bonus_text = block.settings[bonus_key]
+                        -%}
+                        {% if bonus_text != blank %}
+                          <div class="bonus-item">
+                            {% if block.settings.subscribe_bonus_icon != blank %}
+                              <img
+                                src="{{ block.settings.subscribe_bonus_icon | image_url: width: 40 }}"
+                                class="bonus-icon"
+                                alt="{{ block.settings.subscribe_bonus_icon.alt | escape }}"
+                                width="20"
+                                height="20"
+                              >
+                            {% else %}
+                              <svg class="bonus-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"/><path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-52.2,6.84-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z" fill="currentColor"/>
+                              </svg>
+                            {% endif %}
+                            <span class="bonus-text">{{ bonus_text }}</span>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+
+                  {% for i in (1..5) %}
+                    {% if i > block.settings.number_of_free_gifts %}
+                      {% break %}
+                    {% endif %}
+                    {%- liquid
+                      assign gift_text_key = 'subscribe_gift_' | append: i | append: '_text'
+                      assign gift_image_key = 'subscribe_gift_' | append: i | append: '_image'
+                      assign gift_qty_key = 'subscribe_gift_' | append: i | append: '_qty'
+                      assign gift_price_key = 'subscribe_gift_' | append: i | append: '_price'
+                      assign gift_compare_price_key = 'subscribe_gift_' | append: i | append: '_compare_price'
+                      assign gift_text = block.settings[gift_text_key]
+                      assign gift_image = block.settings[gift_image_key]
+                      assign gift_qty = block.settings[gift_qty_key]
+                      assign gift_price = block.settings[gift_price_key]
+                      assign gift_compare_price = block.settings[gift_compare_price_key]
+                    -%}
+                    {% if gift_text != blank %}
+                      <div class="free-gift-container" style="--gift-index: {{ forloop.index }};">
+                        <div class="gift-content-left">
+                          {% if gift_image != blank %}
+                            <img
+                              src="{{ gift_image | image_url: width: 100 }}"
+                              class="gift-image"
+                              alt="{{ gift_text }}"
+                              width="50"
+                              height="50"
+                            >
+                          {% endif %}
+                          {% if gift_qty != blank %}
+                            <div class="gift-qty-inline">
+                              <span>{{ gift_qty }}</span>
+                            </div>
+                          {% endif %}
+                          <span class="gift-text">{{ gift_text }}</span>
+                        </div>
+                        <div class="gift-price-right">
+                          <div class="gift-price-locked-wrapper">
+                            <div class="gift-price-lock">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                              </svg>
+                            </div>
+                            {% if gift_price != blank %}
+                              <span class="gift-price">{{ gift_price }}</span>
+                            {% endif %}
+                          </div>
+                          {% if gift_compare_price != blank %}
+                            <span class="gift-compare-price">{{ gift_compare_price }}</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          <!-- .subscribe-save-container -->
+        </div>
+        <!-- .subscribe-save-wrapper -->
+      {% endfor %}
+    </div>
+    <!-- .subscribe-save-dynamic-outer -->
+  {% endif %}
+
+  <style>
+    .subscribe-save-dynamic-outer {
+      width: 100%;
+    }
+    .subscribe-save-wrapper-dynamic {
+      margin-top: {{ block.settings.margin_top | default: 0 }}px;
+      margin-bottom: {{ block.settings.margin_bottom | default: 20 }}px;
+      width: 100% !important;
+      margin-left: auto;
+      margin-right: auto;
+
+      --subscribe-border-color: {{ block.settings.border_color_unselected | default: '#e0e0e0' }};
+      --subscribe-border-color-selected: {{ block.settings.border_color_selected | default: '#D32F2F' }};
+      --subscribe-border-width-unselected: {{ block.settings.border_width_unselected | default: 1 }}px;
+      --subscribe-border-width-selected: {{ block.settings.border_width_selected | default: 2 }}px;
+      --subscribe-border-radius: {{ block.settings.border_radius | default: 8 }}px;
+      --subscribe-bg-unselected: {{ block.settings.bg_color_unselected | default: '#ffffff' }};
+      --subscribe-bg-selected: {{ block.settings.bg_color_selected | default: '#fff5f5' }};
+      --subscribe-hover-bg: {{ block.settings.hover_bg_color | default: '#f8f9fa' }};
+      --subscribe-heading-color: {{ block.settings.heading_color | default: '#000000' }};
+      --subscribe-heading-size: {{ block.settings.heading_font_size | default: 16 }}px;
+      --subscribe-title-color: {{ block.settings.title_color | default: '#333333' }};
+      --subscribe-title-size: {{ block.settings.title_font_size | default: 16 }}px;
+      --subscribe-subtitle-color: {{ block.settings.subtitle_color | default: '#666666' }};
+      --subscribe-subtitle-size: {{ block.settings.subtitle_font_size | default: 13 }}px;
+      --subscribe-price-color-unselected: {{ block.settings.price_color_unselected | default: '#000000' }};
+      --subscribe-price-color-selected: {{ block.settings.price_color_selected | default: '#000000' }};
+      --subscribe-price-size: {{ block.settings.price_font_size | default: 18 }}px;
+      --subscribe-compare-price-color-unselected: {{ block.settings.compare_price_color_unselected | default: '#999999' }};
+      --subscribe-compare-price-color-selected: {{ block.settings.compare_price_color_selected | default: '#999999' }};
+      --subscribe-compare-price-size: {{ block.settings.compare_price_font_size | default: 14 }}px;
+      --subscribe-toggle-bg-unselected: {{ block.settings.toggle_slider_bg_unselected | default: '#cccccc' }};
+      --subscribe-toggle-bg-selected: {{ block.settings.toggle_slider_bg_selected | default: '#D32F2F' }};
+      --subscribe-toggle-circle: {{ block.settings.toggle_circle_color | default: '#ffffff' }};
+      --subscribe-frequency-label-color: {{ block.settings.frequency_label_color | default: '#666666' }};
+      --subscribe-frequency-label-size: {{ block.settings.frequency_label_font_size | default: 12 }}px;
+      --subscribe-frequency-dropdown-bg: {{ block.settings.frequency_dropdown_bg | default: '#ffffff' }};
+      --subscribe-frequency-dropdown-border: {{ block.settings.frequency_dropdown_border_color | default: '#cccccc' }};
+      --subscribe-frequency-dropdown-text: {{ block.settings.frequency_dropdown_text_color | default: '#333333' }};
+      --subscribe-frequency-dropdown-size: {{ block.settings.frequency_dropdown_font_size | default: 13 }}px;
+      --subscribe-frequency-wrapper-bg: {{ block.settings.frequency_wrapper_bg | default: '#f9f9f9' }};
+      --subscribe-frequency-wrapper-padding: {{ block.settings.frequency_wrapper_padding | default: 10 }}px;
+      --subscribe-frequency-wrapper-radius: {{ block.settings.frequency_wrapper_radius | default: 6 }}px;
+      --subscribe-padding-top: {{ block.settings.padding_top | default: 15 }}px;
+      --subscribe-padding-bottom: {{ block.settings.padding_bottom | default: 15 }}px;
+      --subscribe-padding-left: {{ block.settings.padding_left | default: 15 }}px;
+      --subscribe-padding-right: {{ block.settings.padding_right | default: 15 }}px;
+      --subscribe-top-row-border-color: {{ block.settings.top_row_border_color | default: '#e0e0e0' }};
+      --subscribe-top-row-border-color-selected: {{ block.settings.top_row_border_active | default: '#D32F2F' }};
+      --subscribe-top-row-border-width: {{ block.settings.top_row_border_width | default: 1 }}px;
+      --subscribe-tab-bg: {{ block.settings.active_tab_bg | default: '#333333' }};
+      --subscribe-tab-text-color: {{ block.settings.active_tab_text_color | default: '#FFFFFF' }};
+      --subscribe-tab-font-size: {{ block.settings.active_tab_font_size | default: 11 }}px;
+      --subscribe-benefits-color: {{ block.settings.benefits_color | default: '#666666' }};
+      --subscribe-benefits-size: {{ block.settings.benefits_font_size | default: 13 }}px;
+      --subscribe-bonus-text-color: {{ block.settings.bonus_text_color | default: '#333333' }};
+      --subscribe-bonus-size: {{ block.settings.bonus_font_size | default: 13 }}px;
+      --subscribe-bonus-icon-size: {{ block.settings.bonus_icon_size | default: 16 }}px;
+      --subscribe-bonus-icon-color: {{ block.settings.subscribe_bonus_icon_color | default: '#333333' }};
+      --subscribe-gift-image-size: {{ block.settings.gift_image_size | default: 60 }}px;
+      --subscribe-gift-text-color-unselected: {{ block.settings.gift_text_color_unselected | default: '#333333' }};
+      --subscribe-gift-text-color-selected: {{ block.settings.gift_text_color_selected | default: '#333333' }};
+      --subscribe-gift-text-size: {{ block.settings.gift_text_font_size | default: 12 }}px;
+      --subscribe-gift-text-size-mobile: {{ block.settings.gift_text_font_size_mobile | default: 12 }}px;
+      --subscribe-gift-text-weight: {{ block.settings.gift_text_font_weight | default: 600 }};
+      --subscribe-gift-qty-bg: {{ block.settings.gift_qty_bg | default: '#D32F2F' }};
+      --subscribe-gift-qty-color: {{ block.settings.gift_qty_text_color | default: '#FFFFFF' }};
+      --subscribe-gift-qty-size: {{ block.settings.gift_qty_font_size | default: 11 }}px;
+      --subscribe-gift-container-radius: {{ block.settings.gift_container_border_radius | default: 8 }}px;
+      --subscribe-gift-bg-unselected: {{ block.settings.gift_container_bg_unselected | default: '#f9f9f9' }};
+      --subscribe-gift-border-unselected: {{ block.settings.gift_container_border_unselected | default: '#cccccc' }};
+      --subscribe-gift-bg-selected: {{ block.settings.gift_container_bg_selected | default: '#fff5f5' }};
+      --subscribe-gift-border-selected: {{ block.settings.gift_container_border_selected | default: '#D32F2F' }};
+
+      {% if block.settings.enable_active_inner_shadow %}
+        {% assign shadow_opacity = block.settings.active_inner_shadow_opacity | default: 10 | divided_by: 100.0 %}
+        --subscribe-active-shadow-value: inset 0 {{ block.settings.active_inner_shadow_v_offset | default: 0 }}px {{ block.settings.active_inner_shadow_blur | default: 10 }}px {{ block.settings.active_inner_shadow_spread | default: 0 }}px {{ block.settings.active_inner_shadow_color | default: '#000000' | color_modify: 'alpha', shadow_opacity }};
+      {% endif %}
+    }
+
+    .subscribe-save-wrapper-dynamic,
+    .subscribe-save-wrapper-dynamic * {
+      letter-spacing: var(--letter-spacing-body) !important;
+      font-family: var(--font-body-family) !important;
+    }
+
+    /* Heading */
+    .subscribe-save-wrapper-dynamic .subscribe-save-heading {
+      font-size: var(--subscribe-heading-size) !important;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--subscribe-heading-color);
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-save-heading p { margin: 0; }
+    .subscribe-save-wrapper-dynamic .subscribe-save-heading strong,
+    .subscribe-save-wrapper-dynamic .subscribe-save-heading b {
+      font-weight: 700 !important;
+    }
+
+    /* Container */
+    .subscribe-save-wrapper-dynamic .subscribe-save-container {
+      border: var(--subscribe-border-width-unselected) {% if block.settings.use_dashed_border_unselected %}dashed{% else %}solid{% endif %} var(--subscribe-border-color);
+      border-radius: var(--subscribe-border-radius);
+      padding: var(--subscribe-padding-top) var(--subscribe-padding-right) var(--subscribe-padding-bottom) var(--subscribe-padding-left);
+      position: relative;
+      background: var(--subscribe-bg-unselected);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Container state changes based on toggle */
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked),
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) {
+      border-color: var(--subscribe-border-color-selected);
+      border-width: var(--subscribe-border-width-selected);
+      background-color: var(--subscribe-bg-selected);
+      {% if block.settings.enable_active_inner_shadow %}
+      box-shadow: var(--subscribe-active-shadow-value);
+      {% endif %}
+    }
+
+    /* Active Pop-up Tab */
+    .subscribe-save-wrapper-dynamic .subscribe-active-tab {
+      position: absolute;
+      top: -24px;
+      background-color: var(--subscribe-tab-bg);
+      color: var(--subscribe-tab-text-color);
+      font-size: var(--subscribe-tab-font-size) !important;
+      padding: 6px 16px;
+      border-radius: 8px 8px 0 0;
+      font-weight: 700;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: -1;
+      white-space: nowrap;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    /* Alignment Variants */
+    .subscribe-save-wrapper-dynamic .subscribe-active-tab--center {
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-active-tab--left {
+      left: 20px;
+      transform: translateY(10px);
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-active-tab--right {
+      right: 20px;
+      left: auto;
+      transform: translateY(10px);
+    }
+
+    /* Reveal States */
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .subscribe-active-tab--center,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .subscribe-active-tab--center {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .subscribe-active-tab--left,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .subscribe-active-tab--left {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .subscribe-active-tab--right,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .subscribe-active-tab--right {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Top Row */
+    .subscribe-save-wrapper-dynamic .subscribe-top-row {
+      width: 100%;
+      {% if block.settings.enable_top_row_border %}
+      border-bottom: var(--subscribe-top-row-border-width) solid var(--subscribe-top-row-border-color);
+      {% endif %}
+      transition: border-color 0.3s ease;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-row-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      margin-bottom: {{ block.settings.row_content_margin_bottom | default: 0 }}px;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .subscribe-top-row,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .subscribe-top-row {
+      {% if block.settings.enable_top_row_border %}
+      border-bottom-color: var(--subscribe-top-row-border-color-selected);
+      {% endif %}
+    }
+
+    /* Divider Line */
+    .subscribe-save-wrapper-dynamic .subscribe-divider {
+      height: 1px;
+      background-color: var(--subscribe-border-color);
+      width: 100%;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-top-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Toggle Switch */
+    .subscribe-save-wrapper-dynamic .subscribe-toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    /* Toggle Header */
+    .subscribe-save-wrapper-dynamic .subscribe-toggle-header {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0px;
+      min-width: 0;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-toggle-option {
+      font-size: var(--subscribe-title-size) !important;
+      font-weight: 700;
+      color: var(--subscribe-title-color);
+      user-select: none;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-title-subtitle {
+      font-size: var(--subscribe-subtitle-size) !important;
+      color: var(--subscribe-subtitle-color);
+      line-height: 1.4;
+      font-weight: 400;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-title-subtitle p {
+      margin: 0;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-title-subtitle strong,
+    .subscribe-save-wrapper-dynamic .subscribe-title-subtitle b {
+      font-weight: 700 !important;
+    }
+
+    /* Delivery Frequency Dropdown */
+    .subscribe-save-wrapper-dynamic .subscribe-frequency-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      margin-top: 0px;
+      width: 100%;
+
+      /* Hidden state by default */
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      margin-bottom: 0;
+      padding: 0 var(--subscribe-frequency-wrapper-padding);
+
+      background-color: var(--subscribe-frequency-wrapper-bg);
+      border-radius: var(--subscribe-frequency-wrapper-radius);
+
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Show frequency wrapper when toggle is checked */
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .subscribe-frequency-wrapper,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .subscribe-frequency-wrapper {
+      max-height: 80px;
+      opacity: 1;
+      margin-top: 12px;
+      padding: 10px;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-frequency-label {
+      font-size: var(--subscribe-frequency-label-size) !important;
+      color: var(--subscribe-frequency-label-color);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-frequency-dropdown {
+      font-size: var(--subscribe-frequency-dropdown-size) !important;
+      color: var(--subscribe-frequency-dropdown-text);
+      background-color: var(--subscribe-frequency-dropdown-bg);
+      border: 1px solid var(--subscribe-frequency-dropdown-border);
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: var(--font-body-family) !important;
+      letter-spacing: var(--letter-spacing-body) !important;
+      transition: border-color 0.3s ease;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-frequency-dropdown:hover {
+      border-color: var(--subscribe-border-color-selected);
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-frequency-dropdown:focus {
+      outline: none;
+      border-color: var(--subscribe-border-color-selected);
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--subscribe-toggle-bg-unselected);
+      transition: 0.3s;
+      border-radius: 28px;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: var(--subscribe-toggle-circle);
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-toggle-switch input:checked + .subscribe-toggle-slider {
+      background-color: var(--subscribe-toggle-bg-selected);
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-toggle-switch input:checked + .subscribe-toggle-slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Main Content */
+    .subscribe-save-wrapper-dynamic .subscribe-main-content {
+      padding-top: 0;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-price-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      width: 80px !important;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-price-current {
+      font-weight: 700;
+      font-size: var(--subscribe-price-size) !important;
+      color: var(--subscribe-price-color-unselected);
+      line-height: 1.2;
+      transition: color 0.3s ease;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-price-compare {
+      font-size: var(--subscribe-compare-price-size) !important;
+      text-decoration: line-through;
+      color: var(--subscribe-compare-price-color-unselected);
+      line-height: 1.2;
+      transition: color 0.3s ease;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .subscribe-price-current,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .subscribe-price-current {
+      color: var(--subscribe-price-color-selected) !important;
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .subscribe-price-compare,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .subscribe-price-compare {
+      color: var(--subscribe-compare-price-color-selected) !important;
+    }
+
+    /* Benefits Wrapper - Always visible, faded when not subscribed */
+    .subscribe-save-wrapper-dynamic .subscribe-benefits-wrapper {
+      margin-top: {% if block.settings.enable_top_row_border %}10px{% else %}0px{% endif %};
+      transition: opacity 0.3s ease;
+      opacity: 0.4;
+    }
+
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .subscribe-benefits-wrapper,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .subscribe-benefits-wrapper {
+      opacity: 1;
+    }
+
+    /* Bonus List */
+    .subscribe-save-wrapper-dynamic .bonus-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+    .subscribe-save-wrapper-dynamic .bonus-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--subscribe-bonus-size) !important;
+      color: var(--subscribe-bonus-text-color);
+      width: fit-content;
+    }
+    .subscribe-save-wrapper-dynamic .bonus-icon {
+      flex-shrink: 0;
+      width: var(--subscribe-bonus-icon-size);
+      height: var(--subscribe-bonus-icon-size);
+      object-fit: contain;
+      color: var(--subscribe-bonus-icon-color);
+    }
+    .subscribe-save-wrapper-dynamic .bonus-text {
+      display: inline;
+    }
+    .subscribe-save-wrapper-dynamic .bonus-text p {
+      display: inline;
+      margin: 0;
+      padding: 0;
+    }
+    .subscribe-save-wrapper-dynamic .bonus-text strong,
+    .subscribe-save-wrapper-dynamic .bonus-text b {
+      font-weight: 700 !important;
+    }
+
+    /* Bonus List Layouts */
+    .subscribe-save-wrapper-dynamic .bonus-list.bonus-list-two_column {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 5px 10px !important;
+    }
+    .subscribe-save-wrapper-dynamic .bonus-list.bonus-list-two_column .bonus-item {
+      width: calc(50% - 5px) !important;
+      display: inline-flex !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      flex: 0 0 auto !important;
+    }
+    .subscribe-save-wrapper-dynamic .bonus-list.bonus-list-flex_row {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 10px 15px !important;
+    }
+    .subscribe-save-wrapper-dynamic .bonus-list.bonus-list-flex_row .bonus-item {
+      width: auto !important;
+      margin: 0 !important;
+      flex-shrink: 0 !important;
+      display: inline-flex !important;
+      flex: 0 0 auto !important;
+    }
+
+    /* Free Gift Container */
+    .subscribe-save-wrapper-dynamic .free-gift-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--subscribe-gift-bg-unselected);
+      border: 1px {% if block.settings.gift_container_border_style == 'solid' %}solid{% else %}dashed{% endif %} var(--subscribe-gift-border-unselected);
+      border-radius: var(--subscribe-gift-container-radius);
+      padding: 8px;
+      margin-top: 5px;
+      opacity: 0.6;
+      transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .free-gift-container,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .free-gift-container {
+      background: var(--subscribe-gift-bg-selected);
+      border-color: var(--subscribe-gift-border-selected);
+      opacity: 1;
+    }
+    .subscribe-save-wrapper-dynamic .gift-content-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .subscribe-save-wrapper-dynamic .gift-image {
+      width: calc(var(--subscribe-gift-image-size) * 0.53);
+      height: calc(var(--subscribe-gift-image-size) * 0.53);
+      object-fit: contain;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .subscribe-save-wrapper-dynamic .gift-qty-inline {
+      background: var(--subscribe-gift-qty-bg);
+      color: var(--subscribe-gift-qty-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--subscribe-gift-qty-size) !important;
+      font-weight: 700;
+      flex-shrink: 0;
+      width: 17px;
+      height: 17px;
+      min-width: 17px;
+      padding: 0;
+    }
+    .subscribe-save-wrapper-dynamic .gift-qty-inline span {
+      line-height: 1;
+    }
+    .subscribe-save-wrapper-dynamic .gift-text {
+      font-size: var(--subscribe-gift-text-size) !important;
+      font-weight: var(--subscribe-gift-text-weight);
+      color: var(--subscribe-gift-text-color-unselected);
+      flex: 1;
+      transition: color 0.3s ease;
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .gift-text,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .gift-text {
+      color: var(--subscribe-gift-text-color-selected);
+    }
+    .subscribe-save-wrapper-dynamic .gift-price-right {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+      flex-shrink: 0;
+      gap: 6px;
+    }
+    .subscribe-save-wrapper-dynamic .gift-price-locked-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      border-radius: 4px;
+    }
+    .subscribe-save-wrapper-dynamic .gift-price {
+      font-weight: 700;
+      font-size: var(--subscribe-gift-text-size) !important;
+      color: var(--subscribe-gift-text-color-unselected);
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: opacity 0.4s ease, transform 0.4s ease, color 0.3s ease;
+      display: inline-block;
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .gift-price,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .gift-price {
+      color: var(--subscribe-gift-text-color-selected);
+    }
+    .subscribe-save-wrapper-dynamic .gift-price-lock {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--subscribe-gift-bg-unselected);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      color: #999;
+      opacity: 1;
+      transform: translateX(0);
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .gift-price-lock,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .gift-price-lock {
+      transform: translateX(100%);
+      opacity: 0;
+      transition-delay: calc(var(--gift-index) * 0.15s);
+    }
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(input:checked) .gift-price,
+    .subscribe-save-wrapper-dynamic .subscribe-save-container:has(.subscribe-toggle-dynamic:checked) .gift-price {
+      opacity: 1;
+      transform: translateX(0);
+      transition-delay: calc(var(--gift-index) * 0.15s);
+    }
+    .subscribe-save-wrapper-dynamic .gift-compare-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: calc(var(--subscribe-gift-text-size) * 0.9) !important;
+    }
+
+    @media (max-width: 480px) {
+      .subscribe-save-wrapper-dynamic .bonus-list-two_column,
+      .subscribe-save-wrapper-dynamic .bonus-list-flex_row {
+        flex-direction: column !important;
+      }
+      .subscribe-save-wrapper-dynamic .bonus-list-two_column .bonus-item {
+        width: 100% !important;
+      }
+      .subscribe-save-wrapper-dynamic .gift-text {
+        font-size: var(--subscribe-gift-text-size-mobile) !important;
+      }
+    }
+  </style>
+
+  <script type="application/json" id="selling-plans-data-{{ block.id }}">
+    [
+    {%- assign plan_index = 0 -%}
+    {%- for group in product.selling_plan_groups -%}
+      {%- for plan in group.selling_plans -%}
+        {%- assign plan_index = plan_index | plus: 1 -%}
+        {%- if plan_index > 1 -%},{%- endif -%}
+        {
+          "id": {{ plan.id }},
+          "name": {{ plan.name | json }},
+          "description": {{ plan.description | json }},
+          "priceAdjustments": [
+            {%- assign adj_index = 0 -%}
+            {%- for adjustment in plan.price_adjustments -%}
+              {%- assign adj_index = adj_index | plus: 1 -%}
+              {%- if adj_index > 1 -%},{%- endif -%}
+              {
+                "valueType": {{ adjustment.value_type | json }},
+                "value": {{ adjustment.value }}
+              }
+            {%- endfor -%}
+          ],
+          "options": [
+            {%- assign opt_index = 0 -%}
+            {%- for option in plan.options -%}
+              {%- assign opt_index = opt_index | plus: 1 -%}
+              {%- if opt_index > 1 -%},{%- endif -%}
+              {
+                "name": {% if option.name != blank %}{{ option.name | json }}{% elsif option.value != blank %}{{ option.value | json }}{% else %}{{ option | json }}{% endif %},
+                "value": {% if option.value != blank %}{{ option.value | json }}{% elsif option.name != blank %}{{ option.name | json }}{% else %}{{ option | json }}{% endif %}
+              }
+            {%- endfor -%}
+          ]
+        }
+      {%- endfor -%}
+    {%- endfor -%}
+    ]
+  </script>
+
+  <script>
+    (function() {
+      function initDynamicSubscribeSave() {
+        const outerWrapper = document.querySelector('.subscribe-save-dynamic-outer[data-block-id="{{ block.id }}"]');
+        if (!outerWrapper) {
+          return;
+        }
+        const dynamicWrappers = outerWrapper.querySelectorAll('.subscribe-save-wrapper-dynamic');
+        if (dynamicWrappers.length === 0) {
+          return;
+        }
+
+        const form = (typeof Elixir_GetProductForm === 'function' && Elixir_GetProductForm()) || document.querySelector('form[action*="/cart/add"]');
+        const toggles = document.querySelectorAll('.subscribe-save-wrapper-dynamic[data-block-id="{{ block.id }}"] .subscribe-toggle-dynamic');
+        
+        // Get selling plans data
+        const sellingPlansDataEl = document.getElementById('selling-plans-data-{{ block.id }}');
+        let sellingPlans = [];
+        try {
+          if (sellingPlansDataEl) {
+            sellingPlans = JSON.parse(sellingPlansDataEl.textContent);
+          }
+        } catch (e) {
+          console.error('[Subscribe & Save] Error parsing selling plans data:', e, sellingPlansDataEl?.textContent);
+        }
+
+        const productVariants = {{ product.variants | json }};
+        const moneyFormat = {{ shop.money_format | json }};
+        const multiplyByQuantity = outerWrapper.dataset.multiplyByQuantity !== 'false';
+
+        /** Use global Elixir_SetSubscriptionContext (theme-loaders.js). No args = clear. */
+        function ensureSingleActiveToggle(activeToggle) {
+          toggles.forEach(toggle => {
+            if (toggle !== activeToggle && toggle.checked) {
+              toggle.checked = false;
+              toggle.dispatchEvent(new Event('change'));
+            }
+          });
+        }
+
+        function getCurrentVariant() {
+          const variantId = (typeof Elixir_GetProductFormVariantId === 'function' && Elixir_GetProductFormVariantId()) || null;
+          if (!variantId) {
+            return productVariants[0] || null;
+          }
+          const variant = productVariants.find(v => v.id.toString() === variantId.toString());
+          if (!variant) {
+            console.warn('[Subscribe & Save] Variant not found for ID:', variantId, 'Available variants:', productVariants.map(v => v.id));
+            return productVariants[0] || null;
+          }
+          return variant;
+        }
+
+        function getQuantity() {
+          if (!form) return 1;
+          const input = form.querySelector('input[name="quantity"]');
+          const qty = input ? parseInt(input.value, 10) : 1;
+          return isNaN(qty) || qty < 1 ? 1 : qty;
+        }
+
+        /**
+         * Calculate subscription price based on variant price and selling plan adjustments (used when wrapper plan is not the active context)
+         */
+        function calculateSubscriptionPrice(variant, plan) {
+          if (!variant || !plan) {
+            console.warn('[Subscribe & Save] calculateSubscriptionPrice: Missing variant or plan', { variant: !!variant, plan: !!plan });
+            return null;
+          }
+          
+          // define values format for price
+          let basePrice = 0;
+          if (typeof variant.price === 'number') {
+            basePrice = variant.price;
+          } else if (typeof variant.price === 'string') {
+            basePrice = parseInt(variant.price) || 0;
+          } else if (variant.currentPrice) {
+            basePrice = typeof variant.currentPrice === 'number' ? variant.currentPrice : parseInt(variant.currentPrice) || 0;
+          }
+          
+          let finalPrice = basePrice;
+          
+          if (plan.priceAdjustments && plan.priceAdjustments.length > 0) {
+            const adjustment = plan.priceAdjustments[0];
+            const adjustmentValue = parseFloat(adjustment.value);
+            
+            switch (adjustment.valueType) {
+              case 'percentage':
+                finalPrice = basePrice * (1 - adjustmentValue / 100);
+                break;
+              case 'fixed_amount':
+                finalPrice = basePrice - adjustmentValue;
+                break;
+              case 'price':
+                finalPrice = adjustmentValue;
+                break;
+              default:
+                // No adjustment or unknown type, so we will use base price
+                finalPrice = basePrice;
+                break;
+            }
+          }
+          
+          let compareAtPrice = null;
+          if (variant.compare_at_price) {
+            compareAtPrice = typeof variant.compare_at_price === 'number' 
+              ? variant.compare_at_price 
+              : parseInt(variant.compare_at_price);
+          } 
+          else if (variant.compareAtPrice) {
+            compareAtPrice = typeof variant.compareAtPrice === 'number' 
+              ? variant.compareAtPrice 
+              : parseInt(variant.compareAtPrice);
+          }
+          
+          const result = {
+            subscriptionPrice: Math.max(0, Math.round(finalPrice)),
+            compareAtPrice: compareAtPrice
+          };
+          return result;
+        }
+
+        /**
+         * Update price display for a specific plan (by plan id; used when we have data-plan-id on elements)
+         */
+        function updatePlanPrice(planId) {          
+          const variant = getCurrentVariant();
+          const plan = sellingPlans.find(p => p.id.toString() === planId.toString());
+          
+          if (!variant || !plan) {
+            return;
+          }
+          
+          const priceData = calculateSubscriptionPrice(variant, plan);
+          
+          if (!priceData) {
+            return;
+          }
+          
+          const priceCurrentEl = document.querySelector(`.subscribe-price-current[data-plan-id="${planId}"]`);
+          const priceCompareEl = document.querySelector(`.subscribe-price-compare[data-plan-id="${planId}"]`);
+          
+          if (priceCurrentEl) {
+            const formattedPrice = Elixir_FormatMoney(priceData.subscriptionPrice, moneyFormat);
+            priceCurrentEl.textContent = formattedPrice;
+          }
+          
+          if (priceCompareEl) {
+            const basePrice = parseInt(variant.price) || 0;
+            const comparePrice = priceData.compareAtPrice || basePrice;
+            
+            if (comparePrice > priceData.subscriptionPrice) {
+              priceCompareEl.textContent = Elixir_FormatMoney(comparePrice, moneyFormat);
+              priceCompareEl.style.display = '';
+            } 
+            else {
+              priceCompareEl.style.display = 'none';
+            }
+          }
+        }
+
+        /**
+         * Update price display for one group wrapper (dropdown selects which plan; price elements have data-group-id).
+         * When this wrapper's plan is the active subscription, uses Elixir_GetDisplayPrice (theme-loaders); otherwise uses local calculateSubscriptionPrice.
+         */
+        function updateWrapperPrice(wrapper) {
+          const dropdown = wrapper.querySelector('.subscribe-frequency-dropdown');
+          const planId = dropdown && dropdown.value ? dropdown.value.trim() : null;
+          if (!planId) return;
+          const variant = getCurrentVariant();
+          const plan = sellingPlans.find(p => p.id.toString() === planId.toString());
+          if (!variant || !plan) return;
+          const priceCurrentEl = wrapper.querySelector('.subscribe-price-current[data-group-id]');
+          const priceCompareEl = wrapper.querySelector('.subscribe-price-compare[data-group-id]');
+          const isActivePlan = window.subscriptionContext && String(window.subscriptionContext.sellingPlanId) === String(planId);
+          const qty = getQuantity();
+          let priceCents, compareCents;
+          if (isActivePlan && typeof Elixir_GetDisplayPrice === 'function') {
+            const compareAt = variant.compare_at_price != null ? variant.compare_at_price : (variant.compareAtPrice != null ? variant.compareAtPrice : 0);
+            const result = Elixir_GetDisplayPrice({
+              price: variant.price,
+              quantity: qty,
+              multiplyByQuantity: multiplyByQuantity,
+              compareAtPrice: compareAt,
+              applySubscriptionDiscount: true
+            });
+            priceCents = result.price;
+            compareCents = result.compareAtPrice;
+          } else {
+            const priceData = calculateSubscriptionPrice(variant, plan);
+            if (!priceData) return;
+            priceCents = priceData.subscriptionPrice * Math.max(1, qty);
+            const compareAt = priceData.compareAtPrice != null ? priceData.compareAtPrice : (parseInt(variant.compare_at_price || variant.compareAtPrice, 10) || 0);
+            compareCents = compareAt * Math.max(1, qty);
+          }
+          if (priceCurrentEl) {
+            priceCurrentEl.textContent = Elixir_FormatMoney(priceCents, moneyFormat);
+          }
+          if (priceCompareEl) {
+            if (compareCents > priceCents) {
+              priceCompareEl.textContent = Elixir_FormatMoney(compareCents, moneyFormat);
+              priceCompareEl.style.display = '';
+            } else {
+              priceCompareEl.style.display = 'none';
+            }
+          }
+        }
+
+        function updateAllPlanPrices() {
+          const qty = getQuantity();
+          dynamicWrappers.forEach(wrapper => {
+            updateWrapperPrice(wrapper);
+          });
+        }
+
+        /**
+         * Update price display for one group wrapper with a specific variant (same logic as updateWrapperPrice; used when variant comes from event)
+         */
+        function updateWrapperPriceWithVariant(wrapper, variant) {
+          if (!variant) return;
+          const dropdown = wrapper.querySelector('.subscribe-frequency-dropdown');
+          const planId = dropdown && dropdown.value ? dropdown.value.trim() : null;
+          if (!planId) return;
+          const plan = sellingPlans.find(p => p.id.toString() === planId.toString());
+          if (!plan) return;
+          const priceCurrentEl = wrapper.querySelector('.subscribe-price-current[data-group-id]');
+          const priceCompareEl = wrapper.querySelector('.subscribe-price-compare[data-group-id]');
+          const isActivePlan = window.subscriptionContext && String(window.subscriptionContext.sellingPlanId) === String(planId);
+          const qty = getQuantity();
+          let priceCents, compareCents;
+          if (isActivePlan && typeof Elixir_GetDisplayPrice === 'function') {
+            const compareAt = variant.compare_at_price != null ? variant.compare_at_price : (variant.compareAtPrice != null ? variant.compareAtPrice : 0);
+            const result = Elixir_GetDisplayPrice({
+              price: variant.price,
+              quantity: qty,
+              multiplyByQuantity: multiplyByQuantity,
+              compareAtPrice: compareAt,
+              applySubscriptionDiscount: true
+            });
+            priceCents = result.price;
+            compareCents = result.compareAtPrice;
+          } else {
+            const priceData = calculateSubscriptionPrice(variant, plan);
+            if (!priceData) return;
+            priceCents = priceData.subscriptionPrice * Math.max(1, qty);
+            const compareAt = priceData.compareAtPrice != null ? priceData.compareAtPrice : (parseInt(variant.compare_at_price || variant.compareAtPrice, 10) || 0);
+            compareCents = compareAt * Math.max(1, qty);
+          }
+          if (priceCurrentEl) {
+            priceCurrentEl.textContent = Elixir_FormatMoney(priceCents, moneyFormat);
+          }
+          if (priceCompareEl) {
+            if (compareCents > priceCents) {
+              priceCompareEl.textContent = Elixir_FormatMoney(compareCents, moneyFormat);
+              priceCompareEl.style.display = '';
+            } else {
+              priceCompareEl.style.display = 'none';
+            }
+          }
+        }
+
+        /**
+         * Update all plan prices with a specific variant (used when variant comes from event)
+         */
+        function updateAllPlanPricesWithVariant(variant) {
+          if (!variant) return;
+          dynamicWrappers.forEach(wrapper => {
+            updateWrapperPriceWithVariant(wrapper, variant);
+          });
+        }
+
+        /**
+         * Update subscription in cart form
+         */
+        function updateSubscription(planId, isSubscribe) {
+          if (!form) return;
+
+          if (typeof Elixir_SetProductFormSellingPlan === 'function') {
+            Elixir_SetProductFormSellingPlan(isSubscribe ? planId : '');
+          }
+
+          // Update window context
+          if (isSubscribe) {
+            const variant = getCurrentVariant();
+            const plan = sellingPlans.find(p => p.id.toString() === planId.toString());
+            Elixir_SetSubscriptionContext(planId, variant, plan);
+          } else {
+            Elixir_SetSubscriptionContext();
+          }
+        }
+
+        toggles.forEach(toggle => {
+          toggle.addEventListener('change', function() {
+            const wrapper = this.closest('.subscribe-save-wrapper-dynamic');
+            const dropdown = wrapper ? wrapper.querySelector('.subscribe-frequency-dropdown') : null;
+            const isChecked = this.checked;
+
+            if (isChecked) {
+              ensureSingleActiveToggle(this);
+              // Defer so "uncheck" handlers run first and clear selling_plan; then we set the correct plan
+              const planId = (dropdown && dropdown.value) ? dropdown.value.trim() : '';
+              setTimeout(function() {
+                updateSubscription(planId, true);
+                if (wrapper) updateWrapperPrice(wrapper);
+              }, 0);
+            } else {
+              updateSubscription('', false);
+              if (wrapper) updateWrapperPrice(wrapper);
+            }
+          });
+        });
+
+        dynamicWrappers.forEach(wrapper => {
+          const dropdown = wrapper.querySelector('.subscribe-frequency-dropdown');
+          if (dropdown) {
+            dropdown.addEventListener('change', function() {
+              const toggle = wrapper.querySelector('.subscribe-toggle-dynamic');
+              if (toggle && toggle.checked) {
+                const planId = this.value ? this.value.trim() : '';
+                updateSubscription(planId, true);
+                updateWrapperPrice(wrapper);
+              }
+            });
+          }
+        });
+
+        function syncContextAndUpdatePrices() {
+          const variant = getCurrentVariant();
+          if (window.subscriptionContext && window.subscriptionContext.sellingPlanId && variant) {
+            const plan = sellingPlans.find(p => p.id.toString() === window.subscriptionContext.sellingPlanId);
+            if (plan) Elixir_SetSubscriptionContext(window.subscriptionContext.sellingPlanId, variant, plan);
+          }
+          updateAllPlanPrices();
+        }
+
+        document.addEventListener('simple-variant-picker:variantChange', function(event) {
+          const eventVariant = event.detail && event.detail.variant;
+          if (eventVariant && eventVariant.id) {
+            const normalizedVariant = {
+              id: eventVariant.id,
+              price: eventVariant.price || eventVariant.currentPrice || 0,
+              compare_at_price: eventVariant.compare_at_price != null ? eventVariant.compare_at_price : (eventVariant.compareAtPrice != null ? eventVariant.compareAtPrice : null)
+            };
+            if (window.subscriptionContext && window.subscriptionContext.sellingPlanId) {
+              const plan = sellingPlans.find(p => p.id.toString() === window.subscriptionContext.sellingPlanId);
+              if (plan) Elixir_SetSubscriptionContext(window.subscriptionContext.sellingPlanId, normalizedVariant, plan);
+            }
+            updateAllPlanPricesWithVariant(normalizedVariant);
+          } else {
+            setTimeout(syncContextAndUpdatePrices, 0);
+          }
+        });
+
+        document.addEventListener('quantity:changed', function(e) {
+          console.log('[Subscribe & Save] quantity:changed received', e.detail);
+          updateAllPlanPrices();
+        });
+
+        document.addEventListener('quantity_break:changed', updateAllPlanPrices);
+
+        document.addEventListener('subscriptionContext:updated', updateAllPlanPrices);
+
+        // Initialize prices and subscription state on load.
+        // First frequency option is already selected in Liquid (option with {% if forloop.first %}selected{% endif %}).
+        // Here we: (1) update prices for each wrapper from its dropdown value; (2) if no toggle is checked, check the first one (which uses that dropdown's first-option value); (3) if any toggle is already checked, sync selling_plan and context from each checked wrapper's dropdown value.
+        setTimeout(() => {
+          updateAllPlanPrices();
+          const checkedToggles = Array.from(toggles).filter(t => t.checked);
+          if (checkedToggles.length === 0 && toggles.length > 0) {
+            const firstToggle = toggles[0];
+            firstToggle.checked = true;
+            firstToggle.dispatchEvent(new Event('change', { bubbles: true }));
+          } else {
+            checkedToggles.forEach(toggle => {
+              const wrapper = toggle.closest('.subscribe-save-wrapper-dynamic');
+              if (wrapper) {
+                const planId = (wrapper.querySelector('.subscribe-frequency-dropdown')?.value || '').trim();
+                if (planId) updateSubscription(planId, true);
+                updateWrapperPrice(wrapper);
+              }
+            });
+          }
+        }, 200);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDynamicSubscribeSave);
+      } else {
+        initDynamicSubscribeSave();
+      }
+    })();
+  </script>
+{% endif %}

@@ -1,0 +1,681 @@
+{% style %}
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background: {{ section.settings.section_background }};
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__wrapper {
+    width: 100%;
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__card {
+    position: relative;
+    min-height: {{ section.settings.desktop_height }}px;
+    overflow: hidden;
+    border-radius: {{ section.settings.border_radius }}px;
+    background: #ddd6cc;
+    color: {{ section.settings.text_color }};
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: {{ section.settings.image_position }};
+    transition: transform 1s ease;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__card:hover
+  .vhl-lifestyle-banner__image {
+    transform: scale(1.025);
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: #d9d1c7;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__overlay {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background: rgba(0, 0, 0, {{ section.settings.overlay_opacity | divided_by: 100.0 }});
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__gradient {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    background:
+      linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.55) 0%,
+        rgba(0, 0, 0, 0.28) 42%,
+        rgba(0, 0, 0, 0.05) 75%,
+        rgba(0, 0, 0, 0) 100%
+      );
+    opacity: {{ section.settings.gradient_strength | divided_by: 100.0 }};
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    min-height: {{ section.settings.desktop_height }}px;
+    padding: 70px;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content--left {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content--center {
+    justify-content: center;
+    text-align: center;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content--right {
+    justify-content: flex-end;
+    text-align: left;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content--top {
+    align-items: flex-start;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content--middle {
+    align-items: center;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content--bottom {
+    align-items: flex-end;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__inner {
+    width: 100%;
+    max-width: {{ section.settings.content_width }}px;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content--center
+  .vhl-lifestyle-banner__inner {
+    margin: 0 auto;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__eyebrow {
+    margin: 0 0 18px;
+    color: {{ section.settings.text_color }};
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__title {
+    margin: 0;
+    color: {{ section.settings.text_color }} !important;
+    font-size: {{ section.settings.heading_size }}px;
+    font-weight: 500;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    text-shadow: 0 3px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__text {
+    max-width: 590px;
+    margin-top: 22px;
+    color: {{ section.settings.text_color }};
+    font-size: 17px;
+    line-height: 1.65;
+    opacity: 0.94;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__text p {
+    margin: 0;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content--center
+  .vhl-lifestyle-banner__text {
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 52px;
+    margin-top: 30px;
+    padding: 13px 26px;
+    border: 1px solid {{ section.settings.button_border_color }};
+    border-radius: {{ section.settings.button_radius }}px;
+    background: {{ section.settings.button_background }};
+    color: {{ section.settings.button_text_color }} !important;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition:
+      transform 0.3s ease,
+      background 0.3s ease,
+      color 0.3s ease;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__button:hover {
+    transform: translateY(-2px);
+    background: {{ section.settings.button_hover_background }};
+    color: {{ section.settings.button_hover_text_color }} !important;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__button svg {
+    flex: 0 0 auto;
+    transition: transform 0.3s ease;
+  }
+
+  #shopify-section-{{ section.id }} .vhl-lifestyle-banner__button:hover svg {
+    transform: translateX(5px);
+  }
+
+  @media screen and (max-width: 989px) {
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__wrapper {
+      padding: 0 22px;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__card,
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content {
+      min-height: {{ section.settings.tablet_height }}px;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content {
+      padding: 50px;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__title {
+      font-size: calc({{ section.settings.heading_size }}px * 0.78);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner {
+      padding-top: {{ section.settings.mobile_padding_top }}px;
+      padding-bottom: {{ section.settings.mobile_padding_bottom }}px;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__wrapper {
+      padding: 0 16px;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__card,
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content {
+      min-height: {{ section.settings.mobile_height }}px;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__card {
+      border-radius: {{ section.settings.mobile_border_radius }}px;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__content {
+      align-items: flex-end;
+      justify-content: flex-start;
+      padding: 32px 26px;
+      text-align: left;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__inner {
+      max-width: 100%;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__gradient {
+      background:
+        linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.72) 0%,
+          rgba(0, 0, 0, 0.34) 48%,
+          rgba(0, 0, 0, 0.04) 100%
+        );
+      opacity: 1;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__title {
+      font-size: {{ section.settings.mobile_heading_size }}px;
+      line-height: 1.08;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__eyebrow {
+      margin-bottom: 12px;
+      font-size: 10px;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__text {
+      margin-top: 16px;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__button {
+      min-height: 48px;
+      margin-top: 23px;
+      padding: 12px 20px;
+      font-size: 11px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__image,
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__button,
+    #shopify-section-{{ section.id }} .vhl-lifestyle-banner__button svg {
+      transition: none;
+    }
+  }
+{% endstyle %}
+
+<section class="vhl-lifestyle-banner">
+  <div class="vhl-lifestyle-banner__wrapper">
+    <div class="vhl-lifestyle-banner__card">
+
+      {% if section.settings.image != blank %}
+        {{
+          section.settings.image
+          | image_url: width: 2400
+          | image_tag:
+            class: 'vhl-lifestyle-banner__image',
+            loading: 'lazy',
+            widths: '750, 1100, 1500, 1900, 2400',
+            sizes: '(min-width: 1500px) 1420px, calc(100vw - 80px)',
+            alt: section.settings.heading
+        }}
+      {% else %}
+        <div class="vhl-lifestyle-banner__placeholder"></div>
+      {% endif %}
+
+      <div class="vhl-lifestyle-banner__overlay"></div>
+      <div class="vhl-lifestyle-banner__gradient"></div>
+
+      <div
+        class="
+          vhl-lifestyle-banner__content
+          vhl-lifestyle-banner__content--{{ section.settings.horizontal_alignment }}
+          vhl-lifestyle-banner__content--{{ section.settings.vertical_alignment }}
+        "
+      >
+        <div class="vhl-lifestyle-banner__inner">
+
+          {% if section.settings.eyebrow != blank %}
+            <p class="vhl-lifestyle-banner__eyebrow">
+              {{ section.settings.eyebrow | escape }}
+            </p>
+          {% endif %}
+
+          {% if section.settings.heading != blank %}
+            <h2 class="vhl-lifestyle-banner__title">
+              {{ section.settings.heading | escape }}
+            </h2>
+          {% endif %}
+
+          {% if section.settings.text != blank %}
+            <div class="vhl-lifestyle-banner__text">
+              {{ section.settings.text }}
+            </div>
+          {% endif %}
+
+          {% if section.settings.button_text != blank %}
+            <a
+              class="vhl-lifestyle-banner__button"
+              href="{{ section.settings.button_link | default: '#' }}"
+            >
+              {{ section.settings.button_text | escape }}
+
+              <svg
+                width="19"
+                height="19"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 12H19"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M13 6L19 12L13 18"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+          {% endif %}
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "VHL Lifestyle banner",
+  "tag": "section",
+  "class": "section-vhl-lifestyle-banner",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Achtergrondafbeelding"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Positie afbeelding",
+      "default": "center center",
+      "options": [
+        {
+          "value": "left center",
+          "label": "Links"
+        },
+        {
+          "value": "center center",
+          "label": "Midden"
+        },
+        {
+          "value": "right center",
+          "label": "Rechts"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Kleine titel",
+      "default": "VANHOUTEN LIVING"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Hoofdtitel",
+      "default": "Creëer een badkamer waar je tot rust komt"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Tekst",
+      "default": "<p>Ontdek zorgvuldig geselecteerde badkameraccessoires die rust, functionaliteit en tijdloos design samenbrengen.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Knoptekst",
+      "default": "Ontdek de collectie"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Knoplink"
+    },
+    {
+      "type": "select",
+      "id": "horizontal_alignment",
+      "label": "Horizontale positie tekst",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Links"
+        },
+        {
+          "value": "center",
+          "label": "Midden"
+        },
+        {
+          "value": "right",
+          "label": "Rechts"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "vertical_alignment",
+      "label": "Verticale positie tekst",
+      "default": "middle",
+      "options": [
+        {
+          "value": "top",
+          "label": "Boven"
+        },
+        {
+          "value": "middle",
+          "label": "Midden"
+        },
+        {
+          "value": "bottom",
+          "label": "Onder"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "min": 380,
+      "max": 800,
+      "step": 20,
+      "unit": "px",
+      "label": "Breedte tekstvlak",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 32,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Titelgrootte desktop",
+      "default": 54
+    },
+    {
+      "type": "range",
+      "id": "mobile_heading_size",
+      "min": 26,
+      "max": 46,
+      "step": 1,
+      "unit": "px",
+      "label": "Titelgrootte mobiel",
+      "default": 34
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "%",
+      "label": "Donkere overlay",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "gradient_strength",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Verloop achter tekst",
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "desktop_height",
+      "min": 450,
+      "max": 900,
+      "step": 25,
+      "unit": "px",
+      "label": "Hoogte desktop",
+      "default": 650
+    },
+    {
+      "type": "range",
+      "id": "tablet_height",
+      "min": 400,
+      "max": 750,
+      "step": 25,
+      "unit": "px",
+      "label": "Hoogte tablet",
+      "default": 550
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "min": 400,
+      "max": 700,
+      "step": 25,
+      "unit": "px",
+      "label": "Hoogte mobiel",
+      "default": 525
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 1000,
+      "max": 1800,
+      "step": 50,
+      "unit": "px",
+      "label": "Maximale sectiebreedte",
+      "default": 1500
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Afronding desktop",
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "mobile_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Afronding mobiel",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "section_background",
+      "label": "Achtergrond sectie",
+      "default": "#F8F6F2"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Tekstkleur",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Achtergrond knop",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Tekstkleur knop",
+      "default": "#202020"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Randkleur knop",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Achtergrond knop bij hover",
+      "default": "#202020"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Tekstkleur knop bij hover",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Afronding knop",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 140,
+      "step": 5,
+      "unit": "px",
+      "label": "Ruimte boven desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 140,
+      "step": 5,
+      "unit": "px",
+      "label": "Ruimte onder desktop",
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Ruimte boven mobiel",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Ruimte onder mobiel",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "VHL Lifestyle banner"
+    }
+  ]
+}
+{% endschema %}

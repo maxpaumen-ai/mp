@@ -1,0 +1,145 @@
+{%- comment -%}
+  Accent Typography Style Helper
+
+  Generates CSS custom properties and inline styles for accent typography.
+
+  Usage in sections for CSS custom properties:
+  <style>
+    .section-{{ section.id }} {
+      {% render 'accent-typography-style', section: section, type: 'custom-properties' %}
+    }
+  </style>
+
+  Usage for inline styles:
+  <div style="{% render 'accent-typography-style', section: section, type: 'inline' %}">...</div>
+{%- endcomment -%}
+
+{%- liquid
+  assign use_accent = section.settings.use_accent_font
+  assign font_size = section.settings.accent_font_size | default: 'base'
+  assign font_weight = section.settings.accent_font_weight | default: 'normal'
+  assign text_transform = section.settings.accent_text_transform | default: 'none'
+  assign is_italic = section.settings.accent_font_italic | default: false
+  assign font_element = section.settings.accent_font_element | default: 'heading'
+  assign custom_selector = section.settings.accent_font_selector
+
+  if use_accent
+    if type == 'custom-properties'
+      echo '--section-accent-font-family: var(--font-accent-family);'
+      echo '--section-accent-font-style: '
+      if is_italic
+        echo 'italic;'
+      else
+        echo 'var(--font-accent-style);'
+      endif
+
+      case font_weight
+        when 'light'
+          echo '--section-accent-font-weight: 300;'
+        when 'normal'
+          echo '--section-accent-font-weight: 400;'
+        when 'medium'
+          echo '--section-accent-font-weight: 500;'
+        when 'semibold'
+          echo '--section-accent-font-weight: 600;'
+        when 'bold'
+          echo '--section-accent-font-weight: 700;'
+        when 'extrabold'
+          echo '--section-accent-font-weight: 800;'
+        else
+          echo '--section-accent-font-weight: var(--font-accent-weight);'
+      endcase
+
+      echo '--section-accent-letter-spacing: var(--font-accent-letter-spacing);'
+      echo '--section-accent-text-transform: ' | append: text_transform | append: ';'
+
+      case font_size
+        when 'xs'
+          echo '--section-accent-font-size: calc(0.75rem * var(--font-accent-scale));'
+        when 'sm'
+          echo '--section-accent-font-size: calc(0.875rem * var(--font-accent-scale));'
+        when 'base'
+          echo '--section-accent-font-size: calc(1rem * var(--font-accent-scale));'
+        when 'lg'
+          echo '--section-accent-font-size: calc(1.125rem * var(--font-accent-scale));'
+        when 'xl'
+          echo '--section-accent-font-size: calc(1.25rem * var(--font-accent-scale));'
+        when '2xl'
+          echo '--section-accent-font-size: calc(1.5rem * var(--font-accent-scale));'
+        when '3xl'
+          echo '--section-accent-font-size: calc(1.875rem * var(--font-accent-scale));'
+        when '4xl'
+          echo '--section-accent-font-size: calc(2.25rem * var(--font-accent-scale));'
+      endcase
+
+    elsif type == 'inline'
+      echo 'font-family: var(--font-accent-family);'
+      if is_italic
+        echo 'font-style: italic;'
+      else
+        echo 'font-style: var(--font-accent-style);'
+      endif
+
+      case font_weight
+        when 'light'
+          echo 'font-weight: 300;'
+        when 'normal'
+          echo 'font-weight: 400;'
+        when 'medium'
+          echo 'font-weight: 500;'
+        when 'semibold'
+          echo 'font-weight: 600;'
+        when 'bold'
+          echo 'font-weight: 700;'
+        when 'extrabold'
+          echo 'font-weight: 800;'
+        else
+          echo 'font-weight: var(--font-accent-weight);'
+      endcase
+
+      echo 'letter-spacing: var(--font-accent-letter-spacing);'
+      echo 'text-transform: ' | append: text_transform | append: ';'
+
+      case font_size
+        when 'xs'
+          echo 'font-size: calc(0.75rem * var(--font-accent-scale));'
+        when 'sm'
+          echo 'font-size: calc(0.875rem * var(--font-accent-scale));'
+        when 'base'
+          echo 'font-size: calc(1rem * var(--font-accent-scale));'
+        when 'lg'
+          echo 'font-size: calc(1.125rem * var(--font-accent-scale));'
+        when 'xl'
+          echo 'font-size: calc(1.25rem * var(--font-accent-scale));'
+        when '2xl'
+          echo 'font-size: calc(1.5rem * var(--font-accent-scale));'
+        when '3xl'
+          echo 'font-size: calc(1.875rem * var(--font-accent-scale));'
+        when '4xl'
+          echo 'font-size: calc(2.25rem * var(--font-accent-scale));'
+      endcase
+
+    elsif type == 'selectors'
+      case font_element
+        when 'heading'
+          echo '.section-heading, .heading, h1, h2'
+        when 'subheading'
+          echo '.subheading, .caption, .subtitle'
+        when 'highlights'
+          echo '.highlight, .accent, .featured-text'
+        when 'buttons'
+          echo '.button, .btn, .cta-button'
+        when 'badges'
+          echo '.badge, .label, .tag'
+        when 'accent_text'
+          echo '.accent-text, .new-hero-accent-text, .global-accent-text'
+        when 'custom'
+          if custom_selector != blank
+            echo custom_selector
+          else
+            echo '.accent-element'
+          endif
+      endcase
+    endif
+  endif
+-%}

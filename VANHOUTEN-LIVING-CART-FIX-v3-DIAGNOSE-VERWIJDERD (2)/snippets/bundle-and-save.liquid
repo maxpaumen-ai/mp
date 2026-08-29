@@ -1,0 +1,1651 @@
+{%- comment -%}
+  Bundle and Save Block
+  Allows customers to select up to 3 products and add them all to cart at once
+{%- endcomment -%}
+
+{%- liquid
+  assign product_list = block.settings.product_list
+  assign product_count = product_list.size
+
+  assign title_text = block.settings.title
+  if block.settings.title_highlight_text != blank and title_text != blank
+    assign highlight_span = '<span class="title-highlight">' | append: block.settings.title_highlight_text | append: '</span>'
+    assign title_text = title_text | replace: block.settings.title_highlight_text, highlight_span
+  endif
+-%}
+
+{% style %}
+  .bundle-save-block-{{ block.id }} {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: {{ block.settings.margin_top }}px;
+    margin-bottom: {{ block.settings.margin_bottom }}px;
+    position: relative;
+    {% if block.settings.show_background %}
+      background: {{ block.settings.background_color }};
+      padding-top: {{ block.settings.padding_top | default: 18 }}px;
+      padding-bottom: {{ block.settings.padding_vertical | default: 12 }}px;
+      padding-left: 0;
+      padding-right: 0;
+      border-radius: {{ block.settings.border_radius }}px;
+    {% else %}
+      background: transparent;
+      padding: 0;
+      padding-top: 16px;
+    {% endif %}
+    {% if block.settings.show_border %}
+      border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+      border-radius: {{ block.settings.border_radius }}px;
+    {% endif %}
+  }
+
+  /* Badge styling */
+  .bundle-save-block-{{ block.id }} .bundle-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: {{ block.settings.badge_background }};
+    color: {{ block.settings.badge_text_color }} !important;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: {{ block.settings.badge_font_size }}px;
+    font-weight: var(--font-weight-bold, 700) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    text-transform: uppercase;
+    white-space: nowrap;
+    {% if block.settings.badge_position == 'top' %}
+      position: absolute;
+      top: {{ block.settings.badge_top_offset | default: -10 }}px;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      {% case block.settings.badge_alignment %}
+        {% when 'left' %}
+          left: {{ block.settings.padding_horizontal | default: 16 }}px;
+          transform: none;
+        {% when 'right' %}
+          right: {{ block.settings.padding_horizontal | default: 16 }}px;
+          left: auto;
+          transform: none;
+        {% else %}
+          left: 50%;
+          transform: translateX(-50%);
+      {% endcase %}
+    {% else %}
+      position: static;
+      flex-shrink: 0;
+    {% endif %}
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-badge .badge-icon {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-badge .custom-icon,
+  .bundle-save-block-{{ block.id }} .bundle-total-saved .custom-icon {
+    width: {{ block.settings.custom_icon_size | default: 16 }}px;
+    height: {{ block.settings.custom_icon_size | default: 16 }}px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header {
+    {% if block.settings.show_header_images %}
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    {% else %}
+      text-align: {{ block.settings.text_alignment }};
+    {% endif %}
+    margin-bottom: 12px;
+    {% if block.settings.show_background %}
+      padding-left: {{ block.settings.padding_horizontal | default: 16 }}px;
+      padding-right: {{ block.settings.padding_horizontal | default: 16 }}px;
+    {% endif %}
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header .bundle-header-text {
+    display: flex;
+    flex-direction: column;
+    {% unless block.settings.show_header_images %}
+      text-align: {{ block.settings.text_alignment }};
+    {% endunless %}
+  }
+
+  /* Header with inline badge */
+  .bundle-save-block-{{ block.id }} .bundle-header-with-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    {% if block.settings.show_background %}
+      padding-left: {{ block.settings.padding_horizontal | default: 16 }}px;
+      padding-right: {{ block.settings.padding_horizontal | default: 16 }}px;
+    {% endif %}
+    {% if block.settings.text_alignment == 'center' %}
+      justify-content: center;
+    {% elsif block.settings.text_alignment == 'right' %}
+      justify-content: flex-end;
+    {% else %}
+      justify-content: flex-start;
+    {% endif %}
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-with-badge .bundle-header-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-with-badge .bundle-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-with-badge .bundle-title {
+    margin: 0;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-with-badge .bundle-subtitle {
+    margin-top: 4px;
+  }
+
+  /* Header with toggle in same row */
+  .bundle-save-block-{{ block.id }} .bundle-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    {% if block.settings.show_background %}
+      padding-left: {{ block.settings.padding_horizontal | default: 16 }}px;
+      padding-right: {{ block.settings.padding_horizontal | default: 16 }}px;
+    {% endif %}
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-images {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-image {
+    width: {{ block.settings.header_image_size | default: 36 }}px;
+    height: {{ block.settings.header_image_size | default: 36 }}px;
+    border-radius: {{ block.settings.header_image_radius | default: 6 }}px;
+    overflow: hidden;
+    border: 1px solid {{ block.settings.header_image_border_color | default: '#000000' }};
+    position: relative;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-image:nth-child(2) {
+    margin-left: -25px;
+    z-index: 1;
+    box-shadow: -2px 0 1px rgba(0, 0, 0, 0.25);
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-image:nth-child(3) {
+    margin-left: -25px;
+    z-index: 2;
+    box-shadow: -2px 0 1px rgba(0, 0, 0, 0.25);
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-footer-images {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: 0px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-footer-images .bundle-header-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-content {
+    flex: 1;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-toggle {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-title {
+    font-size: {{ block.settings.title_font_size }}px;
+    font-weight: var(--font-weight-bold, 700) !important;
+    letter-spacing: var(--letter-spacing-heading, 0) !important;
+    color: {{ block.settings.title_color }} !important;
+    margin: 0 0 2px 0;
+    line-height: 1.3;
+  }
+  .bundle-save-block-{{ block.id }} .bundle-title * {
+    color: inherit !important;
+  }
+  .bundle-save-block-{{ block.id }} .bundle-title .title-highlight {
+    color: {{ block.settings.title_highlight_color | default: '#ffffff' }} !important;
+    background-color: {{ block.settings.title_highlight_background | default: '#000000' }} !important;
+    padding: 0 6px;
+    border-radius: 0px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-subtitle {
+    font-size: {{ block.settings.subtitle_font_size }}px;
+    font-weight: var(--font-weight-regular, 400) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    color: {{ block.settings.subtitle_color }} !important;
+    margin: 0;
+    opacity: 0.85;
+  }
+  .bundle-save-block-{{ block.id }} .bundle-subtitle * {
+    color: inherit !important;
+  }
+
+  /* Inline toggle switch for header */
+  .bundle-save-block-{{ block.id }} .bundle-inline-toggle {
+    position: relative;
+    width: 46px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-inline-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-inline-toggle .toggle-track {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: {{ block.settings.toggle_off_color | default: '#d1d5db' }};
+    transition: 0.3s;
+    border-radius: 26px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-inline-toggle .toggle-track:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: {{ block.settings.toggle_knob_color | default: '#ffffff' }};
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-inline-toggle input:checked + .toggle-track {
+    background-color: {{ block.settings.toggle_on_color | default: '#22c55e' }};
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-inline-toggle input:checked + .toggle-track:before {
+    transform: translateX(20px);
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-inline-toggle.is-loading .toggle-track:before {
+    background-color: {{ block.settings.toggle_knob_color | default: '#ffffff' }};
+    animation: bundle-toggle-pulse 1s ease-in-out infinite;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-header-toggle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    position: relative;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-message {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: var(--font-weight-semibold, 600) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    color: {{ block.settings.accent_color }} !important;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    margin-top: 4px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-message.is-visible {
+    opacity: 1;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-message.is-loading {
+    opacity: 1;
+    background: linear-gradient(
+      90deg,
+      {{ block.settings.accent_color | default: '#e63946' }} 0%,
+      {{ block.settings.accent_color | default: '#e63946' | color_lighten: 30 }} 50%,
+      {{ block.settings.accent_color | default: '#e63946' }} 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: bundle-text-shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes bundle-text-shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-products {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    margin-bottom: 0px;
+  }
+
+  {% if block.settings.show_plus_separator %}
+  .bundle-save-block-{{ block.id }} .bundle-plus-separator-wrapper {
+    position: relative;
+    height: 0;
+    width: 100%;
+    z-index: 5;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-plus-separator {
+    position: absolute;
+    top: 50%;
+    {%- assign plus_size = block.settings.plus_separator_size | default: 18 | plus: 10 -%}
+    {%- assign row_padding = block.settings.row_padding | default: 8 -%}
+    {%- if block.settings.plus_separator_alignment == 'center' -%}
+      left: 50%;
+      transform: translate(-50%, -50%);
+    {%- else -%}
+      {%- assign image_size = block.settings.product_image_size | default: 60 -%}
+      {%- assign image_center = image_size | divided_by: 2 -%}
+      {%- assign plus_offset = plus_size | divided_by: 2 -%}
+      {%- if block.settings.show_checkboxes -%}
+        {%- comment -%} Row padding + Checkbox (20px) + gap + image center - plus offset {%- endcomment -%}
+        left: calc({{ row_padding }}px + 20px + {{ block.settings.row_gap | default: 10 }}px + {{ image_center }}px - {{ plus_offset }}px);
+      {%- else -%}
+        {%- comment -%} Row padding + image center - plus offset {%- endcomment -%}
+        left: calc({{ row_padding }}px + {{ image_center }}px - {{ plus_offset }}px);
+      {%- endif -%}
+      transform: translateY(-50%);
+    {%- endif -%}
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: {{ plus_size }}px;
+    height: {{ plus_size }}px;
+    font-size: {{ block.settings.plus_separator_size | default: 18 }}px;
+    font-weight: var(--font-weight-bold, 700) !important;
+    color: {{ block.settings.plus_separator_color | default: '#9ca3af' }} !important;
+    line-height: 1;
+    background: {{ block.settings.background_color | default: '#ffffff' }};
+    border-radius: 50%;
+  }
+  {% endif %}
+
+  .bundle-save-block-{{ block.id }} .bundle-product-item {
+    display: flex;
+    align-items: center;
+    gap: {{ block.settings.row_gap | default: 10 }}px;
+    padding: {{ block.settings.row_padding | default: 8 }}px;
+    background: {{ block.settings.product_item_background }};
+    border-radius: {{ block.settings.item_border_radius | default: 6 }}px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-item.no-checkbox {
+    cursor: default;
+  }
+
+  {% if block.settings.alternate_row_colors %}
+  .bundle-save-block-{{ block.id }} .bundle-products label.bundle-product-item:nth-of-type(odd) {
+    background: {{ block.settings.row_odd_background | default: '#f8f9fa' }};
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-products label.bundle-product-item:nth-of-type(even) {
+    background: {{ block.settings.row_even_background | default: '#ffffff' }};
+  }
+  {% endif %}
+
+  .bundle-save-block-{{ block.id }} .bundle-product-checkbox {
+    flex-shrink: 0;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-checkbox input[type="checkbox"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 2px solid {{ block.settings.accent_color | default: '#1a1a1a' }};
+    border-radius: {{ block.settings.item_border_radius | default: 6 | divided_by: 2 }}px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-checkbox input[type="checkbox"]:checked {
+    background: {{ block.settings.accent_color | default: '#1a1a1a' }};
+    border-color: {{ block.settings.accent_color | default: '#1a1a1a' }};
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-checkbox input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -60%) rotate(45deg);
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-checkbox input[type="checkbox"]:hover {
+    border-color: {{ block.settings.accent_color | default: '#1a1a1a' }};
+    box-shadow: 0 0 0 3px {{ block.settings.accent_color | color_modify: 'alpha', 0.15 }};
+  }
+
+  /* Toggle switch for add all / remove all */
+  .bundle-save-block-{{ block.id }} .bundle-toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    background: {{ block.settings.button_background }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-label {
+    color: {{ block.settings.button_text_color }};
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: var(--font-weight-bold, 700) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.3);
+    transition: 0.3s;
+    border-radius: 28px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-switch input:checked + .bundle-toggle-slider {
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-switch input:checked + .bundle-toggle-slider:before {
+    transform: translateX(24px);
+    background-color: #22c55e;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-switch.is-loading .bundle-toggle-slider:before {
+    background-color: #fbbf24;
+    animation: bundle-toggle-pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes bundle-toggle-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-toggle-status {
+    font-size: 12px;
+    font-weight: var(--font-weight-regular, 400) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    color: {{ block.settings.button_text_color }} !important;
+    opacity: 0.8;
+    min-width: 70px;
+    text-align: right;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-image {
+    flex-shrink: 0;
+    width: {{ block.settings.product_image_size }}px;
+    height: {{ block.settings.product_image_size }}px;
+    border-radius: {{ block.settings.item_border_radius | default: 6 }}px;
+    overflow: hidden;
+    background: #f5f5f5;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-variant-selector {
+    margin-top: 4px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-variant-select {
+    width: 100%;
+    max-width: 160px;
+    padding: 4px 8px;
+    font-size: {{ block.settings.variant_font_size | default: 11 }}px;
+    font-weight: var(--font-weight-regular, 400) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: {{ block.settings.item_border_radius | default: 6 }}px;
+    background: #fff;
+    color: {{ block.settings.variant_text_color | default: '#666666' }} !important;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    padding-right: 24px;
+  }
+  .bundle-save-block-{{ block.id }} .bundle-variant-select * {
+    color: inherit !important;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-variant-select:focus {
+    outline: none;
+    border-color: {{ block.settings.accent_color }};
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-variant-single {
+    display: block;
+    font-size: {{ block.settings.variant_font_size | default: 11 }}px;
+    font-weight: var(--font-weight-regular, 400) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    color: {{ block.settings.variant_text_color | default: '#666666' }} !important;
+    margin-top: 2px;
+  }
+  .bundle-save-block-{{ block.id }} .bundle-variant-single * {
+    color: inherit !important;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-title {
+    font-size: {{ block.settings.product_title_size | default: 13 }}px !important;
+    font-weight: var(--font-weight-semibold, 600) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    color: {{ block.settings.product_title_color | default: '#1a1a1a' }} !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .bundle-save-block-{{ block.id }} .bundle-product-title * {
+    color: inherit !important;
+  }
+
+  /* Receipt-style pricing on the right */
+  .bundle-save-block-{{ block.id }} .bundle-product-pricing {
+    flex-shrink: 0;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-price {
+    font-size: {{ block.settings.price_font_size | default: 14 }}px;
+    font-weight: var(--font-weight-semibold, 600) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    color: {{ block.settings.product_price_color | default: '#1a1a1a' }} !important;
+    line-height: 1.2;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-price .compare-price {
+    text-decoration: line-through;
+    color: {{ block.settings.product_compare_price_color | default: '#999999' }} !important;
+    opacity: 0.8;
+    font-weight: var(--font-weight-regular, 400) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    font-size: {{ block.settings.compare_price_font_size | default: 12 }}px;
+    margin-right: 4px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-product-price .sale-price {
+    font-weight: var(--font-weight-bold, 700) !important;
+    color: {{ block.settings.title_color }} !important;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-save-badge {
+    display: inline-block;
+    background: {{ block.settings.save_badge_background | default: block.settings.accent_color }} !important;
+    color: {{ block.settings.save_badge_text_color | default: '#ffffff' }} !important;
+    font-size: {{ block.settings.save_badge_font_size_row | default: 10 }}px;
+    font-weight: var(--font-weight-bold, 700) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    padding: 2px 6px;
+    border-radius: {{ block.settings.item_border_radius | default: 6 | divided_by: 2 }}px;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: {{ block.settings.padding_vertical | default: 12 }}px 0;
+    {% if block.settings.show_background %}
+      padding-left: {{ block.settings.padding_horizontal | default: 16 }}px;
+      padding-right: {{ block.settings.padding_horizontal | default: 16 }}px;
+    {% endif %}
+    {% if block.settings.show_footer_border %}
+      border-top: {{ block.settings.footer_border_width | default: 1 }}px solid {{ block.settings.footer_border_color | default: '#e0e0e0' }};
+    {% else %}
+      border-top: none;
+    {% endif %}
+    margin-bottom: 0px;
+    gap: 12px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-summary-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Center bundle-total-saved when it's the only child (no summary text) */
+  .bundle-save-block-{{ block.id }} .bundle-summary-left .bundle-total-saved:only-child {
+    align-self: center;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-summary-text {
+    font-size: {{ block.settings.summary_text_font_size | default: 13 }}px;
+    font-weight: var(--font-weight-regular, 400) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    color: {{ block.settings.subtitle_color }} !important;
+    margin-bottom: 4px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-summary-text strong {
+    color: {{ block.settings.title_color }} !important;
+    font-weight: var(--font-weight-bold, 700) !important;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-total-saved {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: {{ block.settings.save_badge_background | default: '#22c55e' }} !important;
+    color: {{ block.settings.save_badge_text_color | default: '#ffffff' }} !important;
+    font-size: {{ block.settings.total_saved_font_size | default: 12 }}px;
+    font-weight: var(--font-weight-bold, 700) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: {{ block.settings.item_border_radius | default: 6 }}px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-total-saved .saved-icon {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-summary-right {
+    text-align: right;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-compare-total {
+    font-size: {{ block.settings.compare_total_font_size | default: 12 }}px;
+    font-weight: var(--font-weight-regular, 400) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    color: {{ block.settings.subtitle_color }} !important;
+    text-decoration: line-through;
+    opacity: 0.6;
+    margin-bottom: 2px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-total-price {
+    font-size: {{ block.settings.total_price_font_size | default: 20 }}px;
+    font-weight: var(--font-weight-bold, 700) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    color: {{ block.settings.title_color }} !important;
+    line-height: 1.2;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-button-wrapper {
+    margin-top: 10px;
+    {% if block.settings.show_background %}
+      padding-left: {{ block.settings.padding_horizontal | default: 16 }}px;
+      padding-right: {{ block.settings.padding_horizontal | default: 16 }}px;
+    {% endif %}
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-add-button {
+    width: 100%;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    background: {{ block.settings.button_background }} !important;
+    color: {{ block.settings.button_text_color }} !important;
+    border: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: var(--font-weight-bold, 700) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+    text-transform: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-add-button .button-price {
+    opacity: 0.9;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-add-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px {{ block.settings.button_background | color_modify: 'alpha', 0.4 }};
+    opacity: 0.95;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-add-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-add-button.is-loading {
+    pointer-events: none;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-add-button .button-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: bundle-spin 0.8s linear infinite;
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-add-button.is-success {
+    background: #22c55e;
+  }
+
+  @keyframes bundle-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .bundle-save-block-{{ block.id }} .bundle-empty-state {
+    text-align: center;
+    padding: 20px;
+    color: {{ block.settings.subtitle_color }} !important;
+    font-size: 14px;
+    font-weight: var(--font-weight-regular, 400) !important;
+    letter-spacing: var(--letter-spacing-body, 0) !important;
+  }
+
+  @media screen and (max-width: 767px) {
+    .bundle-save-block-{{ block.id }} .bundle-product-image {
+      width: {{ block.settings.product_image_size | times: 0.8 | round }}px;
+      height: {{ block.settings.product_image_size | times: 0.8 | round }}px;
+    }
+
+    .bundle-save-block-{{ block.id }} .bundle-title {
+      font-size: {{ block.settings.title_font_size | times: 0.9 | round }}px;
+    }
+  }
+{% endstyle %}
+
+<div
+  class="bundle-save-block-{{ block.id }}"
+  id="bundle-save-{{ block.id }}"
+  data-block-id="{{ block.id }}"
+  data-use-toggle="{{ block.settings.use_toggle_switch }}"
+  {{ block.shopify_attributes }}
+>
+  {% if product_count > 0 %}
+    {%- comment -%} Badge at top position (absolute) {%- endcomment -%}
+    {%- if block.settings.show_badge
+      and block.settings.badge_text != blank
+      and block.settings.badge_position == 'top'
+    -%}
+      <span class="bundle-badge">
+        {{ block.settings.badge_text }}
+        {%- if block.settings.custom_icon != blank -%}
+          <img
+            class="custom-icon"
+            src="{{ block.settings.custom_icon | image_url: width: 64 }}"
+            alt="{{ block.settings.custom_icon.alt | escape }}"
+            loading="lazy"
+            width="{{ block.settings.custom_icon_size | default: 16 }}"
+            height="{{ block.settings.custom_icon_size | default: 16 }}"
+          >
+        {%- else -%}
+          <svg class="badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <path d="M94.52008,45.46,66.0799,17.03,49.04987,0,38.31012,2.57,18.72,7.25,10.64,9.18l-2.04,8.52-5.71,23.89L1.46,47.6l4,4,9.75,38.05A13.78024,13.78024,0,0,0,28.52985,100,13.91533,13.91533,0,0,0,31.97,99.57l17.51-4.49A13.78824,13.78824,0,0,0,66.39,93.06l14.23-14.23L94.52008,64.94A13.80968,13.80968,0,0,0,94.52008,45.46Zm-27.46,13.26a5.685,5.685,0,1,1,5.68994-5.68A5.68477,5.68477,0,0,1,67.06012,58.72ZM55.75006,70.42h-6V35.65h6ZM44.11993,52.72A5.68494,5.68494,0,1,1,38.44,47.03,5.67612,5.67612,0,0,1,44.11993,52.72ZM28.27985,23.79a3.035,3.035,0,1,1-3.02979,3.03A3.02808,3.02808,0,0,1,28.27985,23.79ZM30.47,93.7a7.73433,7.73433,0,0,1-9.39013-5.56l-7.21-28.13,30.2,30.2Z"></path>
+          </svg>
+        {%- endif -%}
+      </span>
+    {%- endif -%}
+
+    {%- if block.settings.show_header -%}
+      {%- if block.settings.use_toggle_switch -%}
+        {%- comment -%} Header with toggle switch inline {%- endcomment -%}
+        <div class="bundle-header-row">
+          {%- if block.settings.show_header_images and block.settings.header_images_position == 'header' -%}
+            <div class="bundle-header-images">
+              {%- for product in product_list limit: 3 -%}
+                {%- if product != blank and product.featured_image -%}
+                  <div class="bundle-header-image">
+                    <img
+                      src="{{ product.featured_image | image_url: width: 100 }}"
+                      alt="{{ product.title | escape }}"
+                      loading="lazy"
+                      width="100"
+                      height="100"
+                    >
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+          <div class="bundle-header-content">
+            {%- if block.settings.title != blank -%}
+              <h3 class="bundle-title">{{ title_text }}</h3>
+            {%- endif -%}
+            {%- if block.settings.subtitle != blank -%}
+              <p class="bundle-subtitle">{{ block.settings.subtitle }}</p>
+            {%- endif -%}
+          </div>
+          <div class="bundle-header-toggle">
+            <label class="bundle-inline-toggle" data-bundle-toggle-switch>
+              <input type="checkbox" data-bundle-toggle-input>
+              <span class="toggle-track"></span>
+            </label>
+            <span class="bundle-toggle-message" data-bundle-toggle-message></span>
+          </div>
+        </div>
+      {%- elsif block.settings.badge_position == 'inline'
+        and block.settings.show_badge
+        and block.settings.badge_text != blank
+      -%}
+        {%- comment -%} Header with badge inline {%- endcomment -%}
+        <div class="bundle-header-with-badge">
+          {%- if block.settings.show_header_images and block.settings.header_images_position == 'header' -%}
+            <div class="bundle-header-images">
+              {%- for product in product_list limit: 3 -%}
+                {%- if product != blank and product.featured_image -%}
+                  <div class="bundle-header-image">
+                    <img
+                      src="{{ product.featured_image | image_url: width: 100 }}"
+                      alt="{{ product.title | escape }}"
+                      loading="lazy"
+                      width="100"
+                      height="100"
+                    >
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+          <div class="bundle-header-text">
+            <div class="bundle-title-row">
+              {%- if block.settings.title != blank -%}
+                <h3 class="bundle-title">{{ title_text }}</h3>
+              {%- endif -%}
+              <span class="bundle-badge">
+                {{ block.settings.badge_text }}
+                {%- if block.settings.custom_icon != blank -%}
+                  <img
+                    class="custom-icon"
+                    src="{{ block.settings.custom_icon | image_url: width: 64 }}"
+                    alt="{{ block.settings.custom_icon.alt | escape }}"
+                    loading="lazy"
+                    width="{{ block.settings.custom_icon_size | default: 16 }}"
+                    height="{{ block.settings.custom_icon_size | default: 16 }}"
+                  >
+                {%- else -%}
+                  <svg class="badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <path d="M94.52008,45.46,66.0799,17.03,49.04987,0,38.31012,2.57,18.72,7.25,10.64,9.18l-2.04,8.52-5.71,23.89L1.46,47.6l4,4,9.75,38.05A13.78024,13.78024,0,0,0,28.52985,100,13.91533,13.91533,0,0,0,31.97,99.57l17.51-4.49A13.78824,13.78824,0,0,0,66.39,93.06l14.23-14.23L94.52008,64.94A13.80968,13.80968,0,0,0,94.52008,45.46Zm-27.46,13.26a5.685,5.685,0,1,1,5.68994-5.68A5.68477,5.68477,0,0,1,67.06012,58.72ZM55.75006,70.42h-6V35.65h6ZM44.11993,52.72A5.68494,5.68494,0,1,1,38.44,47.03,5.67612,5.67612,0,0,1,44.11993,52.72ZM28.27985,23.79a3.035,3.035,0,1,1-3.02979,3.03A3.02808,3.02808,0,0,1,28.27985,23.79ZM30.47,93.7a7.73433,7.73433,0,0,1-9.39013-5.56l-7.21-28.13,30.2,30.2Z"></path>
+                  </svg>
+                {%- endif -%}
+              </span>
+            </div>
+            {%- if block.settings.subtitle != blank -%}
+              <p class="bundle-subtitle">{{ block.settings.subtitle }}</p>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- else -%}
+        {%- comment -%} Standard header {%- endcomment -%}
+        <div class="bundle-header">
+          {%- if block.settings.show_header_images and block.settings.header_images_position == 'header' -%}
+            <div class="bundle-header-images">
+              {%- for product in product_list limit: 3 -%}
+                {%- if product != blank and product.featured_image -%}
+                  <div class="bundle-header-image">
+                    <img
+                      src="{{ product.featured_image | image_url: width: 100 }}"
+                      alt="{{ product.title | escape }}"
+                      loading="lazy"
+                      width="100"
+                      height="100"
+                    >
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+          <div class="bundle-header-text">
+            {%- if block.settings.title != blank -%}
+              <h3 class="bundle-title">{{ title_text }}</h3>
+            {%- endif -%}
+            {%- if block.settings.subtitle != blank -%}
+              <p class="bundle-subtitle">{{ block.settings.subtitle }}</p>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    <div class="bundle-products">
+      {%- if product_list != blank -%}
+        {%- for product in product_list -%}
+          {%- if product != blank -%}
+            {%- assign product_index = forloop.index -%}
+            {%- if block.settings.show_plus_separator and forloop.index > 1 -%}
+              <div class="bundle-plus-separator-wrapper">
+                <div class="bundle-plus-separator">+</div>
+              </div>
+            {%- endif -%}
+            {%- assign bundle_product_variant = product.selected_or_first_available_variant -%}
+            <label
+              class="bundle-product-item{% unless block.settings.show_checkboxes %} no-checkbox{% endunless %}"
+              data-product-index="{{ product_index }}"
+              data-product-id="{{ product.id }}"
+            >
+              {%- if block.settings.show_checkboxes -%}
+                <div class="bundle-product-checkbox">
+                  <input
+                    type="checkbox"
+                    name="bundle_product_{{ product_index }}"
+                    value="{{ bundle_product_variant.id }}"
+                    data-price="{{ bundle_product_variant.price }}"
+                    data-compare-price="{{ bundle_product_variant.compare_at_price | default: bundle_product_variant.price }}"
+                    checked
+                  >
+                </div>
+              {%- else -%}
+                <input
+                  type="hidden"
+                  name="bundle_product_{{ product_index }}"
+                  value="{{ bundle_product_variant.id }}"
+                  data-price="{{ bundle_product_variant.price }}"
+                  data-compare-price="{{ bundle_product_variant.compare_at_price | default: bundle_product_variant.price }}"
+                  data-always-selected="true"
+                >
+              {%- endif -%}
+              <div class="bundle-product-image">
+                {%- if product.featured_image -%}
+                  <img
+                    src="{{ product.featured_image | image_url: width: 400 }}"
+                    alt="{{ product.title | escape }}"
+                    loading="lazy"
+                    width="400"
+                    height="400"
+                  >
+                {%- endif -%}
+              </div>
+              <div class="bundle-product-info">
+                <h4 class="bundle-product-title">{{ product.title }}</h4>
+                {%- if block.settings.show_variant_selector -%}
+                  {%- if product.variants.size > 1 -%}
+                    <div class="bundle-variant-selector">
+                      <select
+                        class="bundle-variant-select"
+                        data-product-index="{{ product_index }}"
+                        onchange="event.stopPropagation();"
+                      >
+                        {%- for variant in product.variants -%}
+                          <option
+                            value="{{ variant.id }}"
+                            data-price="{{ variant.price }}"
+                            data-compare-price="{{ variant.compare_at_price | default: variant.price }}"
+                            data-image="{{ variant.featured_image | default: product.featured_image | image_url: width: 400 }}"
+                            {% if variant.id == bundle_product_variant.id %}
+                              selected
+                            {% endif %}
+                          >
+                            {{ variant.title }}
+                          </option>
+                        {%- endfor -%}
+                      </select>
+                    </div>
+                  {%- else -%}
+                    <span class="bundle-variant-single">{{ bundle_product_variant.title }}</span>
+                  {%- endif -%}
+                {%- endif -%}
+              </div>
+              <div class="bundle-product-pricing">
+                <div class="bundle-product-price" data-product-index="{{ product_index }}">
+                  {%- if bundle_product_variant.compare_at_price > bundle_product_variant.price -%}
+                    <span class="compare-price">{{ bundle_product_variant.compare_at_price | money }}</span>
+                    <span class="sale-price">{{ bundle_product_variant.price | money }}</span>
+                  {%- else -%}
+                    <span class="sale-price">{{ bundle_product_variant.price | money }}</span>
+                  {%- endif -%}
+                </div>
+                {%- if block.settings.show_item_save_badges
+                  and bundle_product_variant.compare_at_price > bundle_product_variant.price
+                -%}
+                  {%- assign bundle_product_savings = bundle_product_variant.compare_at_price
+                    | minus: bundle_product_variant.price
+                  -%}
+                  <span class="bundle-save-badge" data-product-index="{{ product_index }}">
+                    {{- block.settings.save_badge_text | default: 'SAVE' }}
+                    {{ bundle_product_savings | money -}}
+                  </span>
+                {%- endif -%}
+              </div>
+            </label>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    {%- if block.settings.show_summary -%}
+      {%- comment -%} Calculate totals {%- endcomment -%}
+      {%- assign total_price = 0 -%}
+      {%- assign total_compare_price = 0 -%}
+      {%- if product_list != blank -%}
+        {%- for product in product_list -%}
+          {%- if product != blank -%}
+            {%- assign bundle_product_var = product.selected_or_first_available_variant -%}
+            {%- assign total_price = total_price | plus: bundle_product_var.price -%}
+            {%- assign total_compare_price = total_compare_price
+              | plus: bundle_product_var.compare_at_price
+              | default: bundle_product_var.price
+            -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+      {%- assign total_savings = total_compare_price | minus: total_price -%}
+
+      <div class="bundle-summary">
+        {%- if block.settings.show_header_images and block.settings.header_images_position == 'footer' -%}
+          <div class="bundle-footer-images">
+            {%- for product in product_list limit: 3 -%}
+              {%- if product != blank and product.featured_image -%}
+                <div class="bundle-header-image">
+                  <img
+                    src="{{ product.featured_image | image_url: width: 100 }}"
+                    alt="{{ product.title | escape }}"
+                    loading="lazy"
+                    width="100"
+                    height="100"
+                  >
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+        <div class="bundle-summary-left">
+          {%- if block.settings.show_checkboxes -%}
+            <div class="bundle-summary-text">
+              <span class="bundle-selected-count">{{ product_count }}</span> {{ block.settings.items_selected_text }}
+            </div>
+          {%- elsif block.settings.show_fixed_bundle_text -%}
+            <div class="bundle-summary-text">
+              {{ block.settings.fixed_bundle_text | default: 'Bundle includes all items' }}
+            </div>
+          {%- endif -%}
+          {%- if total_savings > 0 -%}
+            <div class="bundle-total-saved">
+              {%- if block.settings.custom_icon != blank -%}
+                <img
+                  class="custom-icon"
+                  src="{{ block.settings.custom_icon | image_url: width: 64 }}"
+                  alt="{{ block.settings.custom_icon.alt | escape }}"
+                  loading="lazy"
+                  width="{{ block.settings.custom_icon_size | default: 16 }}"
+                  height="{{ block.settings.custom_icon_size | default: 16 }}"
+                >
+              {%- else -%}
+                <svg class="saved-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                  <path d="M94.52008,45.46,66.0799,17.03,49.04987,0,38.31012,2.57,18.72,7.25,10.64,9.18l-2.04,8.52-5.71,23.89L1.46,47.6l4,4,9.75,38.05A13.78024,13.78024,0,0,0,28.52985,100,13.91533,13.91533,0,0,0,31.97,99.57l17.51-4.49A13.78824,13.78824,0,0,0,66.39,93.06l14.23-14.23L94.52008,64.94A13.80968,13.80968,0,0,0,94.52008,45.46Zm-27.46,13.26a5.685,5.685,0,1,1,5.68994-5.68A5.68477,5.68477,0,0,1,67.06012,58.72ZM55.75006,70.42h-6V35.65h6ZM44.11993,52.72A5.68494,5.68494,0,1,1,38.44,47.03,5.67612,5.67612,0,0,1,44.11993,52.72ZM28.27985,23.79a3.035,3.035,0,1,1-3.02979,3.03A3.02808,3.02808,0,0,1,28.27985,23.79ZM30.47,93.7a7.73433,7.73433,0,0,1-9.39013-5.56l-7.21-28.13,30.2,30.2Z"></path>
+                </svg>
+              {%- endif -%}
+              <span>
+                {{- block.settings.save_badge_text | default: 'SAVE' }}
+                <span class="bundle-savings-amount">{{ total_savings | money }}</span></span
+              >
+            </div>
+          {%- endif -%}
+        </div>
+        <div class="bundle-summary-right">
+          {%- if total_compare_price > total_price -%}
+            <div class="bundle-compare-total" data-compare-total>{{ total_compare_price | money }}</div>
+          {%- endif -%}
+          <div class="bundle-total-price" data-currency-symbol="{{ cart.currency.symbol }}">
+            {{ total_price | money }}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- unless block.settings.use_toggle_switch -%}
+      {%- comment -%} Button Mode - only show button when not in toggle mode {%- endcomment -%}
+      <div class="bundle-button-wrapper">
+        <button
+          type="button"
+          class="bundle-add-button"
+          data-bundle-add-btn
+        >
+          {%- if block.settings.button_icon -%}
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+          {%- endif -%}
+          <span class="button-text">{{ block.settings.button_text }}</span>
+          {%- if block.settings.show_price_in_button -%}
+            <span class="button-price" data-bundle-button-price>- {{ total_price | money }}</span>
+          {%- endif -%}
+        </button>
+      </div>
+    {%- endunless -%}
+
+    <script>
+      (function () {
+        const blockId = '{{ block.id }}';
+        const container = document.getElementById('bundle-save-' + blockId);
+        if (!container) return;
+
+        const useToggle = container.dataset.useToggle === 'true';
+        const checkboxes = container.querySelectorAll('.bundle-product-checkbox input[type="checkbox"]');
+        const hiddenInputs = container.querySelectorAll('input[type="hidden"][data-always-selected="true"]');
+        const allInputs = [...checkboxes, ...hiddenInputs];
+        const selectedCountEl = container.querySelector('.bundle-selected-count');
+        const totalPriceEl = container.querySelector('.bundle-total-price');
+        const currencySymbol = totalPriceEl ? totalPriceEl.dataset.currencySymbol : '$';
+
+        // Get all variant IDs for cart operations (from checkboxes or hidden inputs)
+        const allVariantIds = allInputs.map((input) => parseInt(input.value));
+
+        function formatMoney(cents) {
+          return currencySymbol + (cents / 100).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        const compareTotalEl = container.querySelector('[data-compare-total]');
+        const savingsAmountEl = container.querySelector('.bundle-savings-amount');
+        const totalSavedEl = container.querySelector('.bundle-total-saved');
+
+        function updateSummary() {
+          let selectedCount = 0;
+          let totalPrice = 0;
+          let totalComparePrice = 0;
+
+          // Handle checkboxes (selectable mode)
+          checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+              selectedCount++;
+              totalPrice += parseInt(checkbox.dataset.price || 0);
+              totalComparePrice += parseInt(checkbox.dataset.comparePrice || checkbox.dataset.price || 0);
+            }
+          });
+
+          // Handle hidden inputs (fixed bundle mode - always selected)
+          hiddenInputs.forEach(function (input) {
+            selectedCount++;
+            totalPrice += parseInt(input.dataset.price || 0);
+            totalComparePrice += parseInt(input.dataset.comparePrice || input.dataset.price || 0);
+          });
+
+          const totalSavings = totalComparePrice - totalPrice;
+
+          if (selectedCountEl) {
+            selectedCountEl.textContent = selectedCount;
+          }
+
+          if (totalPriceEl) {
+            totalPriceEl.textContent = formatMoney(totalPrice);
+          }
+
+          if (compareTotalEl) {
+            compareTotalEl.textContent = formatMoney(totalComparePrice);
+            compareTotalEl.style.display = totalSavings > 0 ? 'block' : 'none';
+          }
+
+          if (savingsAmountEl) {
+            savingsAmountEl.textContent = formatMoney(totalSavings);
+          }
+
+          if (totalSavedEl) {
+            totalSavedEl.style.display = totalSavings > 0 ? 'inline-flex' : 'none';
+          }
+
+          // Update button disabled state if in button mode
+          const addButton = container.querySelector('[data-bundle-add-btn]');
+          if (addButton) {
+            addButton.disabled = selectedCount === 0;
+          }
+
+          // Update button price if enabled
+          const buttonPriceEl = container.querySelector('[data-bundle-button-price]');
+          if (buttonPriceEl) {
+            buttonPriceEl.textContent = '- ' + formatMoney(totalPrice);
+          }
+        }
+
+        checkboxes.forEach(function (checkbox) {
+          checkbox.addEventListener('change', updateSummary);
+        });
+
+        // Handle variant selector changes
+        const variantSelects = container.querySelectorAll('.bundle-variant-select');
+        variantSelects.forEach(function (select) {
+          select.addEventListener('change', function (e) {
+            const productIndex = select.dataset.productIndex;
+            const selectedOption = select.options[select.selectedIndex];
+            const variantId = selectedOption.value;
+            const price = parseInt(selectedOption.dataset.price);
+            const comparePrice = parseInt(selectedOption.dataset.comparePrice);
+            const imageUrl = selectedOption.dataset.image;
+
+            // Update the checkbox value and data attributes
+            const productItem = container.querySelector(
+              '.bundle-product-item[data-product-index="' + productIndex + '"]',
+            );
+            if (productItem) {
+              const checkbox = productItem.querySelector('input[type="checkbox"]');
+              if (checkbox) {
+                checkbox.value = variantId;
+                checkbox.dataset.price = price;
+                checkbox.dataset.comparePrice = comparePrice;
+              }
+
+              // Update the image if available
+              const img = productItem.querySelector('.bundle-product-image img');
+              if (img && imageUrl) {
+                img.src = imageUrl;
+              }
+
+              // Update the price display
+              const priceEl = productItem.querySelector(
+                '.bundle-product-price[data-product-index="' + productIndex + '"]',
+              );
+              if (priceEl) {
+                if (comparePrice > price) {
+                  priceEl.innerHTML =
+                    '<span class="compare-price">' +
+                    formatMoney(comparePrice) +
+                    '</span><span class="sale-price">' +
+                    formatMoney(price) +
+                    '</span>';
+                } else {
+                  priceEl.innerHTML = '<span class="sale-price">' + formatMoney(price) + '</span>';
+                }
+              }
+
+              // Update the save badge
+              const saveBadge = productItem.querySelector(
+                '.bundle-save-badge[data-product-index="' + productIndex + '"]',
+              );
+              const savings = comparePrice - price;
+              if (saveBadge) {
+                if (savings > 0) {
+                  saveBadge.textContent =
+                    '{{ block.settings.save_badge_text | default: "SAVE" }} ' + formatMoney(savings);
+                  saveBadge.style.display = 'inline-flex';
+                } else {
+                  saveBadge.style.display = 'none';
+                }
+              } else if (savings > 0) {
+                // Create save badge if it doesn't exist but there are savings
+                const pricingDiv = productItem.querySelector('.bundle-product-pricing');
+                if (pricingDiv) {
+                  const newBadge = document.createElement('span');
+                  newBadge.className = 'bundle-save-badge';
+                  newBadge.dataset.productIndex = productIndex;
+                  newBadge.textContent =
+                    '{{ block.settings.save_badge_text | default: "SAVE" }} ' + formatMoney(savings);
+                  pricingDiv.appendChild(newBadge);
+                }
+              }
+            }
+
+            // Update totals
+            updateSummary();
+          });
+        });
+
+        async function updateCartCount() {
+          try {
+            const cart = await fetch('/cart.js').then((r) => r.json());
+            document.querySelectorAll('.cart-count-bubble, [data-cart-count]').forEach((el) => {
+              el.textContent = cart.item_count;
+            });
+          } catch (e) {}
+        }
+
+        async function refreshCartDrawer() {
+          if (typeof window.refreshCartDrawer === 'function') {
+            await window.refreshCartDrawer();
+          }
+        }
+
+        async function applyDiscountCode(discountCode) {
+          if (!discountCode || discountCode.trim() === '') return;
+
+          try {
+            const discountResponse = await fetch(`/discount/${encodeURIComponent(discountCode.trim())}`, {
+              method: 'GET',
+              redirect: 'manual',
+              credentials: 'include',
+            });
+
+            // Redirect = success
+            if (
+              discountResponse.type === 'opaqueredirect' ||
+              discountResponse.status === 0 ||
+              discountResponse.status === 302
+            ) {
+              await new Promise((resolve) => setTimeout(resolve, 500));
+            }
+          } catch (discountError) {
+            console.log('Error applying discount code:', discountError);
+          }
+        }
+
+        if (useToggle) {
+          // Toggle Switch Mode
+          const toggleSwitch = container.querySelector('[data-bundle-toggle-switch]');
+          const toggleInput = container.querySelector('[data-bundle-toggle-input]');
+          const toggleMessage = container.querySelector('[data-bundle-toggle-message]');
+
+          function showMessage(text, isLoading = false) {
+            if (toggleMessage) {
+              toggleMessage.textContent = text;
+              toggleMessage.classList.remove('is-loading', 'is-visible');
+              if (isLoading) {
+                toggleMessage.classList.add('is-loading');
+              } else {
+                toggleMessage.classList.add('is-visible');
+                setTimeout(() => {
+                  toggleMessage.classList.remove('is-visible');
+                }, 2000);
+              }
+            }
+          }
+
+          function hideLoadingMessage() {
+            if (toggleMessage) {
+              toggleMessage.classList.remove('is-loading');
+            }
+          }
+
+          if (toggleInput) {
+            toggleInput.addEventListener('change', async function () {
+              const isChecked = this.checked;
+              toggleSwitch.classList.add('is-loading');
+              showMessage(
+                isChecked
+                  ? '{{ block.settings.loading_add_text | default: "ADDING" }}'
+                  : '{{ block.settings.loading_remove_text | default: "REMOVING" }}',
+                true,
+              );
+
+              try {
+                if (isChecked) {
+                  // Add all selected items to cart
+                  const selectedItems = [];
+
+                  // Add items from checkboxes (if any are checked)
+                  checkboxes.forEach(function (checkbox) {
+                    if (checkbox.checked) {
+                      selectedItems.push({
+                        id: parseInt(checkbox.value),
+                        quantity: 1,
+                      });
+                    }
+                  });
+
+                  // Add items from hidden inputs (fixed bundle mode - always included)
+                  hiddenInputs.forEach(function (input) {
+                    selectedItems.push({
+                      id: parseInt(input.value),
+                      quantity: 1,
+                    });
+                  });
+
+                  // Step 1: Apply discount code if configured (FIRST CALL)
+                  const discountCode = '{{ block.settings.discount_code | strip }}';
+                  if (discountCode && selectedItems.length > 0) {
+                    await applyDiscountCode(discountCode);
+                  }
+
+                  // Step 2: Add items to cart (SECOND CALL)
+                  if (selectedItems.length > 0) {
+                    const response = await fetch('/cart/add.js', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                      },
+                      body: JSON.stringify({ items: selectedItems }),
+                    });
+
+                    if (!response.ok) throw new Error('Failed to add');
+                  }
+
+                  showMessage('{{ block.settings.toggle_on_text | default: "Added!" }}');
+                  await updateCartCount();
+                  await refreshCartDrawer();
+                } else {
+                  // Remove all bundle items from cart
+                  const cart = await fetch('/cart.js').then((r) => r.json());
+                  const updates = {};
+
+                  cart.items.forEach((item) => {
+                    if (allVariantIds.includes(item.variant_id)) {
+                      updates[item.key] = 0;
+                    }
+                  });
+
+                  if (Object.keys(updates).length > 0) {
+                    const response = await fetch('/cart/update.js', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                      },
+                      body: JSON.stringify({ updates: updates }),
+                    });
+
+                    if (!response.ok) throw new Error('Failed to remove');
+                  }
+
+                  showMessage('{{ block.settings.toggle_off_text | default: "Removed" }}');
+                  await updateCartCount();
+                  await refreshCartDrawer();
+                }
+              } catch (error) {
+                console.error('Bundle toggle error:', error);
+                toggleInput.checked = !isChecked; // Revert toggle state
+                hideLoadingMessage();
+                showMessage('{{ block.settings.error_text | default: "Error" }}');
+              } finally {
+                toggleSwitch.classList.remove('is-loading');
+                hideLoadingMessage();
+              }
+            });
+          }
+        } else {
+          // Button Mode
+          const addButton = container.querySelector('[data-bundle-add-btn]');
+          const buttonText = addButton ? addButton.querySelector('.button-text') : null;
+          const originalButtonText = buttonText ? buttonText.textContent : '';
+
+          if (addButton) {
+            addButton.addEventListener('click', async function () {
+              const selectedItems = [];
+
+              // Add items from checkboxes (if any are checked)
+              checkboxes.forEach(function (checkbox) {
+                if (checkbox.checked) {
+                  selectedItems.push({
+                    id: parseInt(checkbox.value),
+                    quantity: 1,
+                  });
+                }
+              });
+
+              // Add items from hidden inputs (fixed bundle mode - always included)
+              hiddenInputs.forEach(function (input) {
+                selectedItems.push({
+                  id: parseInt(input.value),
+                  quantity: 1,
+                });
+              });
+
+              if (selectedItems.length === 0) return;
+
+              addButton.classList.add('is-loading');
+              addButton.disabled = true;
+              buttonText.innerHTML = '<span class="button-spinner"></span>';
+
+              try {
+                // Step 1: Apply discount code if configured (FIRST CALL)
+                const discountCode = '{{ block.settings.discount_code | strip }}';
+                if (discountCode) {
+                  await applyDiscountCode(discountCode);
+                }
+
+                // Step 2: Add items to cart (SECOND CALL)
+                const response = await fetch('/cart/add.js', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                  },
+                  body: JSON.stringify({ items: selectedItems }),
+                });
+
+                if (!response.ok) throw new Error('Failed to add items to cart');
+
+                addButton.classList.remove('is-loading');
+                addButton.classList.add('is-success');
+                buttonText.textContent = '{{ block.settings.success_text | default: "✓ Added to Cart!" }}';
+
+                await updateCartCount();
+                await refreshCartDrawer();
+
+                setTimeout(function () {
+                  addButton.classList.remove('is-success');
+                  buttonText.textContent = originalButtonText;
+                  addButton.disabled = false;
+                  updateSummary();
+                }, 2500);
+              } catch (error) {
+                console.error('Bundle add error:', error);
+                addButton.classList.remove('is-loading');
+                buttonText.textContent = '{{ block.settings.error_text | default: "Error - Try Again" }}';
+                addButton.disabled = false;
+
+                setTimeout(function () {
+                  buttonText.textContent = originalButtonText;
+                  updateSummary();
+                }, 2000);
+              }
+            });
+          }
+        }
+
+        // Initialize
+        updateSummary();
+      })();
+    </script>
+
+  {% else %}
+    <div class="bundle-empty-state">
+      <p>{{ block.settings.empty_state_text | default: 'Select products in the theme editor to create a bundle.' }}</p>
+    </div>
+  {% endif %}
+</div>

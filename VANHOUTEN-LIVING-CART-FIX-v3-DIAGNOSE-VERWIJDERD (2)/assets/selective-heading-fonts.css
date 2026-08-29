@@ -1,0 +1,140 @@
+/*
+  Selective Heading Font System - V2 (Robust)
+
+  This system uses explicit "on" and "off" states for each heading level,
+  making it highly resilient to overrides from other stylesheets.
+
+  - body:not(.hN-heading-font) hN: Applies BODY font when the toggle is OFF.
+  - body.hN-heading-font hN:    Applies HEADING font when the toggle is ON.
+
+  This is the most durable way to handle this, as it's highly specific and
+  leaves no room for ambiguity from the CSS cascade.
+*/
+
+/* --- H1 Rules --- */
+body:not(.h1-heading-font) h1,
+body:not(.h1-heading-font) .h1 {
+  font-family: var(--font-body-family) !important;
+}
+body.h1-heading-font h1,
+body.h1-heading-font .h1 {
+  font-family: var(--font-heading-family) !important;
+}
+
+/* --- H2 Rules --- */
+body:not(.h2-heading-font) h2,
+body:not(.h2-heading-font) .h2 {
+  font-family: var(--font-body-family) !important;
+}
+body.h2-heading-font h2,
+body.h2-heading-font .h2 {
+  font-family: var(--font-heading-family) !important;
+}
+
+/* --- H3 Rules --- */
+body:not(.h3-heading-font) h3,
+body:not(.h3-heading-font) .h3 {
+  font-family: var(--font-body-family) !important;
+}
+body.h3-heading-font h3,
+body.h3-heading-font .h3 {
+  font-family: var(--font-heading-family) !important;
+}
+
+/* --- H4 Rules --- */
+body:not(.h4-heading-font) h4,
+body:not(.h4-heading-font) .h4 {
+  font-family: var(--font-body-family) !important;
+}
+body.h4-heading-font h4,
+body.h4-heading-font .h4 {
+  font-family: var(--font-heading-family) !important;
+}
+
+/* --- H5 Rules --- */
+body:not(.h5-heading-font) h5,
+body:not(.h5-heading-font) .h5 {
+  font-family: var(--font-body-family) !important;
+}
+body.h5-heading-font h5,
+body.h5-heading-font .h5 {
+  font-family: var(--font-heading-family) !important;
+}
+
+/* --- H6 Rules --- */
+body:not(.h6-heading-font) h6,
+body:not(.h6-heading-font) .h6 {
+  font-family: var(--font-body-family) !important;
+}
+body.h6-heading-font h6,
+body.h6-heading-font .h6 {
+  font-family: var(--font-heading-family) !important;
+}
+
+/* --- OVERRIDE TYPOGRAPHY-SYSTEM.CSS SPAN RULES --- */
+
+/* 
+  The typography-system.css file has aggressive rules that apply heading font
+  to span elements with class names containing "title", "heading", etc.
+  We need to override these with our selective system.
+*/
+
+/* Force body font for spans when heading levels are OFF */
+body:not(.h1-heading-font) span[class*="title"],
+body:not(.h2-heading-font) span[class*="title"],
+body:not(.h3-heading-font) span[class*="title"],
+body:not(.h4-heading-font) span[class*="title"],
+body:not(.h5-heading-font) span[class*="title"],
+body:not(.h6-heading-font) span[class*="title"],
+body:not(.h1-heading-font) span[class*="heading"],
+body:not(.h2-heading-font) span[class*="heading"],
+body:not(.h3-heading-font) span[class*="heading"],
+body:not(.h4-heading-font) span[class*="heading"],
+body:not(.h5-heading-font) span[class*="heading"],
+body:not(.h6-heading-font) span[class*="heading"],
+body:not(.h3-heading-font) span[class*="product-title"],
+body:not(.h1-heading-font) span[class*="section-title"],
+body:not(.h2-heading-font) span[class*="section-title"] {
+  font-family: var(--font-body-family) !important;
+}
+
+/* Specific overrides for common UI elements that should always use body font */
+.tab-title,
+[class*="tab-title"],
+.button-text,
+[class*="button-text"],
+.nav-title,
+[class*="nav-title"] {
+  font-family: var(--font-body-family) !important;
+}
+
+/* --- UNIVERSAL OVERRIDES --- */
+
+/* 
+  These must remain to ensure special typography cases are not broken by the
+  heading font system above.
+*/
+
+/* Ensure accent typography still works regardless of heading level settings */
+.accent-font,
+.accent-font-xs,
+.accent-font-sm,
+.accent-font-md,
+.accent-font-lg,
+.accent-font-xl,
+.accent-font-2xl,
+.accent-font-3xl,
+.accent-font-4xl,
+.accent-font-5xl,
+.accent-text,
+.global-accent-text,
+.custom-accent-text {
+  font-family: var(--font-accent-family, var(--font-body-family)) !important;
+  font-style: var(--font-accent-style, normal) !important;
+  font-weight: var(--font-accent-weight, 400) !important;
+}
+
+/* Ensure .heading-text class always uses heading font */
+.heading-text {
+  font-family: var(--font-heading-family) !important;
+}

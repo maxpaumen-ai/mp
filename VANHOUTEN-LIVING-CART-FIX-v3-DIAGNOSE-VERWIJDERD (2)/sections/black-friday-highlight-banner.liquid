@@ -1,0 +1,408 @@
+<div class="bf-highlight-banner {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+    {% if section.settings.show_tape %}
+      <div class="bf-tape bf-tape-left">
+        <span class="bf-tape-content">{{ section.settings.tape_text }}</span>
+      </div>
+      <div class="bf-tape bf-tape-right">
+        <span class="bf-tape-content">{{ section.settings.tape_text }}</span>
+      </div>
+    {% endif %}
+
+    <div class="bf-highlight-container">
+      <div class="bf-highlight-content-wrapper">
+        <div class="bf-highlight-text-wrapper">
+          <span class="bf-highlight-text">{{ section.settings.banner_text }}</span>
+        </div>
+        
+        {% if section.settings.additional_text != blank %}
+          <div class="bf-additional-text">
+            {{ section.settings.additional_text }}
+          </div>
+        {% endif %}
+
+        {% if section.settings.highlight_richtext != blank %}
+          <div class="bf-highlight-richtext">
+            {{ section.settings.highlight_richtext }}
+          </div>
+        {% endif %}
+        
+        <div class="bf-highlight-timer">
+          <div class="bf-timer-block">
+            <span class="bf-timer-value" id="hl-days">00</span>
+            <span class="bf-timer-label">D</span>
+          </div>
+          <span class="bf-timer-sep">:</span>
+          <div class="bf-timer-block">
+            <span class="bf-timer-value" id="hl-hours">00</span>
+            <span class="bf-timer-label">H</span>
+          </div>
+          <span class="bf-timer-sep">:</span>
+          <div class="bf-timer-block">
+            <span class="bf-timer-value" id="hl-minutes">00</span>
+            <span class="bf-timer-label">M</span>
+          </div>
+          <span class="bf-timer-sep">:</span>
+          <div class="bf-timer-block">
+            <span class="bf-timer-value" id="hl-seconds">00</span>
+            <span class="bf-timer-label">S</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    .bf-highlight-banner {
+      height: 50px;
+      background-color: {{ section.settings.background_color }};
+      color: {{ section.settings.text_color }};
+      width: 100%;
+      overflow: hidden;
+      font-family: var(--font-body-family);
+      letter-spacing: var(--letter-spacing-body);
+      position: relative; /* Ensure relative positioning for absolute children */
+    }
+  
+    .bf-tape {
+      position: absolute;
+      top: 50%;
+      background-color: {{ section.settings.tape_background }};
+      color: {{ section.settings.tape_text_color }};
+      padding: 2px 100px; /* Wide padding for the strip */
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 10px;
+      white-space: nowrap;
+      z-index: 2;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none; /* Let clicks pass through */
+    }
+
+    .bf-tape-left {
+      left: -60px;
+      transform: translateY(-50%) rotate(-35deg);
+      border: 1px dashed rgba(0,0,0,0.1);
+    }
+
+    .bf-tape-right {
+      right: -60px;
+      transform: translateY(-50%) rotate(35deg);
+      border: 1px dashed rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 1000px) {
+      .bf-tape {
+        display: none; /* Hide tape on smaller screens to prevent overlapping content */
+      }
+    }
+  
+    .bf-highlight-container {
+      height: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: center; /* Centered content */
+      align-items: center;
+    }
+  
+    .bf-highlight-content-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 15px; /* Spacing between elements */
+    }
+  
+    .bf-highlight-text-wrapper {
+      display: flex;
+      align-items: center;
+    }
+  
+    .bf-highlight-text {
+      font-weight: bold;
+      font-size: 16px;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1;
+      padding: 2px 8px;
+      border-radius: 0px !important; /* Enforce 0px border radius */
+      /* Highlighter Effect */
+      background: linear-gradient(90deg, {{ section.settings.highlighter_color_1 }}, {{ section.settings.highlighter_color_2 }});
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent; /* Fallback */
+      
+      /* Alternative: Background behind text */
+      {% if section.settings.highlighter_style == 'background' %}
+        background: linear-gradient(90deg, {{ section.settings.highlighter_color_1 }}, {{ section.settings.highlighter_color_2 }});
+        -webkit-background-clip: border-box;
+        -webkit-text-fill-color: {{ section.settings.text_color }};
+        background-clip: border-box;
+        color: {{ section.settings.text_color }};
+      {% endif %}
+    }
+
+    .bf-additional-text, .bf-highlight-richtext {
+      font-size: 14px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .bf-additional-text p, .bf-highlight-richtext p {
+      margin: 0;
+      padding: 0;
+    }
+
+    .bf-additional-text strong, .bf-highlight-richtext strong {
+      font-weight: 700 !important; /* Force bold weight */
+    }
+  
+    .bf-highlight-timer {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+  
+    .bf-timer-block {
+      display: flex;
+      align-items: baseline;
+      gap: 1px;
+    }
+  
+    .bf-timer-value {
+      font-weight: bold;
+      font-size: 16px;
+    }
+  
+    .bf-timer-label {
+      font-size: 10px;
+      opacity: 0.8;
+      margin-left: 1px;
+    }
+  
+    .bf-timer-sep {
+      font-weight: bold;
+      margin: 0 2px;
+      opacity: 0.6;
+    }
+  
+    @media (max-width: 768px) {
+      .bf-highlight-text {
+        font-size: 14px;
+      }
+      .bf-timer-value {
+        font-size: 14px;
+      }
+      .bf-highlight-container {
+        padding: 0 10px;
+      }
+      .bf-additional-text {
+        font-size: 12px;
+        display: none; /* Hide on very small screens if needed, or adjust */
+      }
+      .bf-highlight-content-wrapper {
+          gap: 8px;
+      }
+    }
+  </style>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const daysEl = document.getElementById('hl-days');
+      const hoursEl = document.getElementById('hl-hours');
+      const minutesEl = document.getElementById('hl-minutes');
+      const secondsEl = document.getElementById('hl-seconds');
+  
+      // Set end date from settings
+      const endYear = {{ section.settings.end_year }};
+      const endMonth = {{ section.settings.end_month }} - 1; // JS months are 0-indexed
+      const endDay = {{ section.settings.end_day }};
+      const endHour = {{ section.settings.end_hour }};
+      const endMinute = {{ section.settings.end_minute }};
+      
+      const endDate = new Date(endYear, endMonth, endDay, endHour, endMinute, 0);
+  
+      function updateTimer() {
+        const now = new Date();
+        const diff = endDate - now;
+  
+        if (diff <= 0) {
+          if(daysEl) daysEl.textContent = "00";
+          if(hoursEl) hoursEl.textContent = "00";
+          if(minutesEl) minutesEl.textContent = "00";
+          if(secondsEl) secondsEl.textContent = "00";
+          return;
+        }
+  
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  
+        if(daysEl) daysEl.textContent = days < 10 ? '0' + days : days;
+        if(hoursEl) hoursEl.textContent = hours < 10 ? '0' + hours : hours;
+        if(minutesEl) minutesEl.textContent = minutes < 10 ? '0' + minutes : minutes;
+        if(secondsEl) secondsEl.textContent = seconds < 10 ? '0' + seconds : seconds;
+      }
+  
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    });
+  </script>
+  
+  {% schema %}
+  {
+    "name": "BF Highlight Banner",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Content"
+      },
+      {
+        "type": "text",
+        "id": "banner_text",
+        "label": "Banner Text",
+        "default": "BLACK FRIDAY SALE IS LIVE"
+      },
+      {
+        "type": "richtext",
+        "id": "additional_text",
+        "label": "Additional Text 1",
+        "default": "<p><strong>BIGGEST SALE OF THE YEAR</strong></p>"
+      },
+      {
+        "type": "richtext",
+        "id": "highlight_richtext",
+        "label": "Additional Text 2",
+        "default": "<p><strong>BIGGEST SALE OF THE YEAR</strong></p>"
+      },
+      {
+        "type": "header",
+        "content": "Tape Settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_tape",
+        "label": "Show Tape Banners",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "tape_text",
+        "label": "Tape Text",
+        "default": "SALE SALE SALE SALE"
+      },
+      {
+        "type": "color",
+        "id": "tape_background",
+        "label": "Tape Background",
+        "default": "#FFC700"
+      },
+      {
+        "type": "color",
+        "id": "tape_text_color",
+        "label": "Tape Text Color",
+        "default": "#000000"
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "color",
+        "id": "background_color",
+        "label": "Background Color",
+        "default": "#000000"
+      },
+      {
+        "type": "color",
+        "id": "text_color",
+        "label": "Text Color",
+        "default": "#FFFFFF"
+      },
+      {
+        "type": "header",
+        "content": "Highlighter Effect"
+      },
+      {
+        "type": "select",
+        "id": "highlighter_style",
+        "label": "Highlighter Style",
+        "options": [
+          { "value": "text", "label": "Gradient Text" },
+          { "value": "background", "label": "Gradient Background" }
+        ],
+        "default": "background"
+      },
+      {
+        "type": "color",
+        "id": "highlighter_color_1",
+        "label": "Gradient Color 1",
+        "default": "#FF0080"
+      },
+      {
+        "type": "color",
+        "id": "highlighter_color_2",
+        "label": "Gradient Color 2",
+        "default": "#7928CA"
+      },
+      {
+        "type": "header",
+        "content": "Timer Settings"
+      },
+      {
+        "type": "number",
+        "id": "end_year",
+        "label": "Year",
+        "default": 2024
+      },
+      {
+        "type": "range",
+        "id": "end_month",
+        "min": 1,
+        "max": 12,
+        "step": 1,
+        "label": "Month",
+        "default": 11
+      },
+      {
+        "type": "range",
+        "id": "end_day",
+        "min": 1,
+        "max": 31,
+        "step": 1,
+        "label": "Day",
+        "default": 29
+      },
+      {
+        "type": "range",
+        "id": "end_hour",
+        "min": 0,
+        "max": 23,
+        "step": 1,
+        "label": "Hour (24h)",
+        "default": 23
+      },
+      {
+        "type": "range",
+        "id": "end_minute",
+        "min": 0,
+        "max": 59,
+        "step": 1,
+        "label": "Minute",
+        "default": 59
+      }
+    ],
+    "presets": [
+      {
+        "name": "BF Highlight Banner"
+      }
+    ]
+  }
+  {% endschema %}
+  

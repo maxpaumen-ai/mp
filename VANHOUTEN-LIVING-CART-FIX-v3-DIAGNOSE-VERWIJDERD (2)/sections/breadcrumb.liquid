@@ -1,0 +1,291 @@
+{% comment %}
+  Component: Breadcrumb Navigation
+  
+  Description: Displays a breadcrumb trail for navigation based on page type
+  
+  Features:
+  - Dynamic breadcrumb generation for different page types
+  - Theme color integration
+  - Customizable separators and styling
+  - Mobile-responsive design
+  - Accessible navigation
+  
+  Settings:
+  - use_theme_colors: boolean - Use global theme colors
+  - Custom styling options for colors and typography
+  - Navigation behavior controls
+{% endcomment %}
+
+{{ 'breadcrumb.css' | asset_url | stylesheet_tag }}
+
+<style>
+  /* Dynamic styles with Liquid variables */
+  
+  /* Section container */
+  .breadcrumb-section {
+    background-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.background_color }}{% endif %};
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;
+  }
+
+  /* Typography */
+  .breadcrumb-nav {
+    font-size: {{ section.settings.font_size }}px;
+  }
+
+  /* Link colors */
+  .breadcrumb-link {
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.7 }}{% else %}{{ section.settings.link_color }}{% endif %};
+  }
+
+  .breadcrumb-link:hover {
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.link_hover_color }}{% endif %};
+  }
+
+  /* Separator color */
+  .breadcrumb-separator {
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.5 }}{% else %}{{ section.settings.separator_color }}{% endif %};
+  }
+
+  /* Current page styling */
+  .breadcrumb-current {
+    color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.current_color }}{% endif %};
+    font-weight: {{ section.settings.current_font_weight }};
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .breadcrumb-nav {
+      font-size: {{ section.settings.font_size | minus: 1 }}px;
+    }
+  }
+</style>
+
+<div class="breadcrumb-section {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}" data-component="breadcrumb">
+  <div class="breadcrumb-container">
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+      
+      {%- comment -%} Home link {%- endcomment -%}
+      <div class="breadcrumb-item">
+        <a href="{{ routes.root_url }}" class="breadcrumb-link">
+          {% if section.settings.home_text != blank %}{{ section.settings.home_text }}{% else %}{{ 'sections.breadcrumb.home' | t }}{% endif %}
+        </a>
+        <span class="breadcrumb-separator">{{ section.settings.separator | default: '>' }}</span>
+      </div>
+
+      {%- comment -%} Dynamic breadcrumb based on page type {%- endcomment -%}
+      {% case template %}
+        
+        {%- comment -%} Product page {%- endcomment -%}
+        {% when 'product' %}
+          {% if product.collections.size > 0 %}
+            {% assign main_collection = product.collections.first %}
+            {% if section.settings.show_collection_in_breadcrumb %}
+              <div class="breadcrumb-item">
+                <a href="{{ main_collection.url }}" class="breadcrumb-link">{{ main_collection.title }}</a>
+                <span class="breadcrumb-separator">{{ section.settings.separator | default: '>' }}</span>
+              </div>
+            {% endif %}
+          {% endif %}
+          <div class="breadcrumb-item">
+            <span class="breadcrumb-current">{{ product.title }}</span>
+          </div>
+
+        {%- comment -%} Collection page {%- endcomment -%}
+        {% when 'collection' %}
+          <div class="breadcrumb-item">
+            <span class="breadcrumb-current">{{ collection.title }}</span>
+          </div>
+
+        {%- comment -%} Blog page {%- endcomment -%}
+        {% when 'blog' %}
+          <div class="breadcrumb-item">
+            <span class="breadcrumb-current">{{ blog.title }}</span>
+          </div>
+
+        {%- comment -%} Article page {%- endcomment -%}
+        {% when 'article' %}
+          <div class="breadcrumb-item">
+            <a href="{{ blog.url }}" class="breadcrumb-link">{{ blog.title }}</a>
+            <span class="breadcrumb-separator">{{ section.settings.separator | default: '>' }}</span>
+          </div>
+          <div class="breadcrumb-item">
+            <span class="breadcrumb-current">{{ article.title }}</span>
+          </div>
+
+        {%- comment -%} Page {%- endcomment -%}
+        {% when 'page' %}
+          <div class="breadcrumb-item">
+            <span class="breadcrumb-current">{{ page.title }}</span>
+          </div>
+
+        {%- comment -%} Custom breadcrumb from section settings {%- endcomment -%}
+        {% else %}
+          {% if section.settings.custom_breadcrumb_text != blank %}
+            <div class="breadcrumb-item">
+              <span class="breadcrumb-current">{{ section.settings.custom_breadcrumb_text }}</span>
+            </div>
+          {% endif %}
+      {% endcase %}
+      
+    </nav>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Breadcrumb",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "General Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "Use global theme colors instead of custom colors below"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Home Link Settings"
+    },
+    {
+      "type": "text",
+      "id": "home_text",
+      "label": "Home Text",
+      "default": "Home",
+      "info": "Text for the home link"
+    },
+
+    {
+      "type": "header",
+      "content": "Navigation Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_in_breadcrumb",
+      "label": "Show Collection in Product Breadcrumb",
+      "default": true,
+      "info": "Include the product's collection in the breadcrumb on product pages"
+    },
+    {
+      "type": "text",
+      "id": "separator",
+      "label": "Breadcrumb Separator",
+      "default": ">",
+      "info": "Character to separate breadcrumb items"
+    },
+    {
+      "type": "text",
+      "id": "custom_breadcrumb_text",
+      "label": "Custom Breadcrumb Text",
+      "info": "Use this for pages that don't have automatic breadcrumb detection"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Font Size",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "current_font_weight",
+      "label": "Current Page Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "header",
+      "content": "Custom Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff",
+      "info": "Only used when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link Color",
+      "default": "#666666",
+      "info": "Only used when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "link_hover_color",
+      "label": "Link Hover Color",
+      "default": "#333333",
+      "info": "Only used when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "current_color",
+      "label": "Current Page Color",
+      "default": "#333333",
+      "info": "Only used when 'Use Theme Colors' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "separator_color",
+      "label": "Separator Color",
+      "default": "#999999",
+      "info": "Only used when 'Use Theme Colors' is disabled"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Breadcrumb"
+    }
+  ]
+}
+{% endschema %}

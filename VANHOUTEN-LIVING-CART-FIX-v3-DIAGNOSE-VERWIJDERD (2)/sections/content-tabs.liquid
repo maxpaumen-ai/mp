@@ -1,0 +1,1734 @@
+{%- liquid
+  assign section_id = section.id
+  assign heading = section.settings.heading
+  assign accent_text = section.settings.accent_text
+  assign subheading = section.settings.subheading
+  assign use_theme_colors = section.settings.use_theme_colors
+
+  # Color settings
+  if use_theme_colors
+    assign heading_color = settings.global_section_text_color | default: '#000000'
+    assign subheading_color = settings.global_section_text_color | default: '#666666'
+    assign accent_color = settings.global_section_accent_1_color | default: '#ff6b35'
+    assign text_color = settings.global_section_text_color | default: '#333333'
+    assign background_color = settings.global_section_background_color | default: '#ffffff'
+    assign tab_active_color = settings.global_section_accent_1_color | default: '#ff6b35'
+    assign tab_inactive_color = settings.global_section_text_color | default: '#333333'
+    assign tab_active_bg = settings.global_section_accent_1_color | default: '#ff6b35'
+    assign button_text_color = settings.global_section_background_color | default: '#ffffff'
+    assign content_title_color = settings.global_section_text_color | default: '#333333'
+    assign benefit_text_color = settings.global_section_text_color | default: '#333333'
+    assign border_color = settings.global_section_text_color | default: '#e5e5e5'
+  else
+    assign heading_color = section.settings.heading_color | default: '#000000'
+    assign subheading_color = section.settings.subheading_color | default: '#666666'
+    assign accent_color = section.settings.accent_color | default: '#ff6b35'
+    assign text_color = section.settings.text_color | default: '#333333'
+    assign background_color = section.settings.background_color | default: '#ffffff'
+    assign tab_active_color = section.settings.tab_active_color | default: '#ff6b35'
+    assign tab_inactive_color = section.settings.tab_inactive_color | default: '#666666'
+    assign tab_active_bg = section.settings.tab_active_bg | default: '#ff6b35'
+    assign button_text_color = section.settings.button_text_color | default: '#ffffff'
+    assign content_title_color = section.settings.content_title_color | default: '#333333'
+    assign benefit_text_color = section.settings.benefit_text_color | default: '#333333'
+    assign border_color = section.settings.border_color | default: '#e5e5e5'
+  endif
+
+  # Typography settings
+  assign heading_font_size = section.settings.heading_font_size | default: 36
+  assign subheading_font_size = section.settings.subheading_font_size | default: 18
+  assign content_font_size = section.settings.content_font_size | default: 13
+  assign content_title_font_size = section.settings.content_title_font_size | default: 20
+  assign tab_font_size = section.settings.tab_font_size | default: 14
+  assign benefit_font_size = section.settings.benefit_font_size | default: 16
+  assign bullet_font_size = section.settings.bullet_font_size | default: 16
+
+  # Layout settings
+  assign section_padding_top = section.settings.section_padding_top | default: 60
+  assign section_padding_bottom = section.settings.section_padding_bottom | default: 60
+  assign content_max_width = section.settings.content_max_width | default: 1000
+  assign tab_style = section.settings.tab_style | default: 'underline'
+  assign tab_layout = section.settings.tab_layout | default: 'grid'
+  assign mobile_full_width_images = section.settings.mobile_full_width_images | default: false
+  assign tab_border_radius = section.settings.tab_border_radius | default: 0
+  assign image_border_radius = section.settings.image_border_radius | default: 8
+  assign mobile_image_text_gap = section.settings.mobile_image_text_gap | default: 20
+
+  # Image size settings
+  assign image_max_width = section.settings.image_max_width | default: 600
+  assign image_with_text_width = section.settings.image_with_text_width | default: 400
+  assign image_wrapper_width = section.settings.image_wrapper_width | default: 200
+  assign shared_image = section.settings.shared_image
+  assign shared_image_width = section.settings.shared_image_width | default: 500
+-%}
+
+{% comment %} Google Fonts for accent text customization {% endcomment %}
+{% if section.settings.override_global_accent %}
+  {% if section.settings.accent_font_family != 'inherit' and section.settings.accent_font_family != 'serif' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% case section.settings.accent_font_family %}
+      {% when 'Georgia Pro' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Georgia+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Bodoni Moda' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Instrument Serif' %}
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'DM Serif Text' %}
+        <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'Nothing You Could Do' %}
+        <link href="https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+    {% endcase %}
+  {% endif %}
+{% endif %}
+
+<style>
+  .content-tabs-{{ section_id }} {
+    padding: {{ section_padding_top }}px 20px {{ section_padding_bottom }}px;
+    background-color: {{ background_color }};
+    color: {{ text_color }};
+    font-family: var(--font-body-family);
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .content-tabs-container-{{ section_id }} {
+    max-width: {{ content_max_width }}px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .content-tabs-wrapper-{{ section_id }} {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .content-tabs-wrapper-{{ section_id }}.has-shared-image {
+    flex-direction: row;
+    gap: 40px;
+    align-items: flex-start;
+  }
+
+  .tabs-content-section-{{ section_id }} {
+    flex: 1;
+    width: 100%;
+  }
+
+  .content-tabs-heading-wrapper-{{ section_id }} {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .content-tabs-heading-{{ section_id }} {
+    font-size: {{ heading_font_size }}px;
+    font-weight: var(--font-weight-bold);
+    color: {{ heading_color }} !important;
+    margin: 0;
+    font-family: var(--font-heading-family);
+    letter-spacing: var(--letter-spacing-heading);
+    line-height: 1.2;
+  }
+
+  .content-tabs-heading-{{ section_id }} .accent {
+    color: {{ accent_color }};
+  }
+
+  /* Enhanced accent text styling with global and local customization options */
+  .content-tabs-{{ section_id }} .accent,
+  .content-tabs-{{ section_id }} .global-accent-text,
+  .content-tabs-{{ section_id }} .custom-accent-text {
+    {% comment %} Always apply core accent text styling {% endcomment %}
+    padding-right: 0px !important;
+    display: inline-block !important;
+
+    {% comment %} Apply color or gradient based on theme colors and settings {% endcomment %}
+    {% if use_theme_colors %}
+      {% comment %} Use global dark gradient when theme colors are enabled {% endcomment %}
+      background: {{ settings.global_accent_text_gradient_dark }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+      line-height: 1.3 !important;
+    {% elsif section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+      line-height: 1.3 !important;
+    {% else %}
+      {% comment %} Apply solid color {% endcomment %}
+      color: {{ accent_color }} !important;
+    {% endif %}
+
+    {% if section.settings.override_global_accent %}
+      {% comment %} Use section-specific typography settings when override is enabled {% endcomment %}
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %}
+            font-family: serif !important;
+          {% when 'Georgia Pro' %}
+            font-family: 'Georgia Pro', Georgia, serif !important;
+          {% when 'Bodoni Moda' %}
+            font-family: 'Bodoni Moda', Georgia, serif !important;
+          {% when 'Instrument Serif' %}
+            font-family: 'Instrument Serif', Georgia, serif !important;
+          {% when 'DM Serif Text' %}
+            font-family: 'DM Serif Text', Georgia, serif !important;
+          {% when 'Nothing You Could Do' %}
+            font-family: 'Nothing You Could Do', cursive !important;
+        {% endcase %}
+      {% else %}
+        font-family: var(--font-accent-family, var(--font-body-family)) !important;
+      {% endif %}
+
+      font-style: {% if section.settings.accent_font_style != 'normal' %}{{ section.settings.accent_font_style }}{% else %}var(--font-accent-style, normal){% endif %} !important;
+      font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+
+    {% else %}
+      {% comment %} Use global accent typography system {% endcomment %}
+      font-family: var(--font-accent-family, var(--font-body-family)) !important;
+      font-style: var(--font-accent-style, normal) !important;
+      font-weight: var(--font-accent-weight, inherit) !important;
+      letter-spacing: var(--font-accent-letter-spacing, inherit) !important;
+      text-transform: var(--font-accent-text-transform, none) !important;
+    {% endif %}
+  }
+
+  .content-tabs-subheading-{{ section_id }} {
+    font-size: {{ subheading_font_size | times: 0.9 }}px;
+    margin: 8px 0 0 0;
+    color: {{ subheading_color }};
+  }
+
+  .content-tabs-subheading-{{ section_id }} p {
+    font-size: {{ subheading_font_size | times: 0.9 }}px !important;
+    margin: 0 !important;
+    color: {{ subheading_color }} !important;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  /* Force the bold and italic in the subheading */
+  .content-tabs-subheading-{{ section_id }} strong,
+  .content-tabs-subheading-{{ section_id }} b,
+  .content-tabs-subheading-{{ section_id }} p strong,
+  .content-tabs-subheading-{{ section_id }} p b {
+    font-weight: 700 !important;
+  }
+
+  .content-tabs-subheading-{{ section_id }} em,
+  .content-tabs-subheading-{{ section_id }} i,
+  .content-tabs-subheading-{{ section_id }} p em,
+  .content-tabs-subheading-{{ section_id }} p i {
+    font-style: italic !important;
+  }
+
+  .shared-image-{{ section_id }} {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .content-tabs-wrapper-{{ section_id }}.has-shared-image .shared-image-{{ section_id }} {
+    flex: 0 0 {{ shared_image_width }}px;
+    margin-bottom: 0;
+    text-align: left;
+  }
+
+  .shared-image-{{ section_id }} img {
+    max-width: {{ shared_image_width }}px;
+    width: 100%;
+    height: auto;
+    border-radius: {{ image_border_radius }}px;
+  }
+
+  .tabs-navigation-{{ section_id }} {
+    display: {% if tab_layout == 'single_row' %}flex{% else %}grid{% endif %};
+    {% if tab_layout == 'single_row' %}
+      flex-wrap: wrap;
+      justify-content: center;
+    {% else %}
+      grid-template-columns: 1fr 1fr;
+    {% endif %}
+    gap: {% if tab_style == 'pills' %}12px{% else %}8px{% endif %};
+    margin-bottom: {{ section.settings.section_margin_bottom | default: 50 }}px;
+    width: 100%;
+  }
+
+  .tab-button-{{ section_id }} {
+    background: {% if tab_style == 'pills' %}transparent{% else %}none{% endif %} !important;
+    border: {% if tab_style == 'pills' %}1px solid {{ border_color }}{% else %}none{% endif %} !important;
+    padding: {% if tab_style == 'pills' %}12px 16px{% else %}16px 16px{% endif %};
+    font-size: {{ tab_font_size }}px;
+    font-weight: var(--font-weight-medium);
+    color: {{ tab_inactive_color }} !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: {{ tab_border_radius }}px !important;
+    {% if tab_style == 'underline' %}
+    border-bottom: 2px solid transparent !important;
+    {% endif %}
+    font-family: var(--font-body-family);
+    letter-spacing: var(--letter-spacing-body);
+    white-space: normal;
+    position: relative;
+    text-align: center;
+    {% if tab_layout == 'single_row' %}
+      width: auto;
+      flex: 0 0 auto;
+      min-width: 120px;
+    {% else %}
+      width: 100%;
+    {% endif %}
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+  }
+
+  .tab-button-{{ section_id }}:hover {
+    color: {{ tab_active_color }} !important;
+    {% if tab_style == 'pills' %}
+    border-color: {{ tab_active_color }} !important;
+    background-color: rgba({{ tab_active_color | color_extract: 'red' }}, {{ tab_active_color | color_extract: 'green' }}, {{ tab_active_color | color_extract: 'blue' }}, 0.1) !important;
+    {% endif %}
+  }
+
+  .tab-button-{{ section_id }}.active {
+    color: {% if tab_style == 'pills' %}{{ button_text_color }}{% else %}{{ tab_active_color }}{% endif %} !important;
+    {% if tab_style == 'pills' %}
+    background-color: {{ tab_active_bg }} !important;
+    border-color: {{ tab_active_bg }} !important;
+    {% else %}
+    border-bottom-color: {{ tab_active_color }} !important;
+    {% endif %}
+  }
+
+  .tab-button-{{ section_id }}.has-icon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tab-icon-{{ section_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .tab-icon-{{ section_id }} svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    fill: currentColor;
+  }
+
+  .tab-title-{{ section_id }} {
+    display: inline-block;
+    font-family: var(--font-body-family);
+    letter-spacing: var(--letter-spacing-body);
+    color: inherit !important;
+  }
+
+  .tab-button-{{ section_id }} .tab-title-{{ section_id }} {
+    color: {{ tab_inactive_color }} !important;
+  }
+
+  .tab-button-{{ section_id }}:hover .tab-title-{{ section_id }} {
+    color: {{ tab_active_color }} !important;
+  }
+
+  .tab-button-{{ section_id }}.active .tab-title-{{ section_id }} {
+    color: {% if tab_style == 'pills' %}{{ button_text_color }}{% else %}{{ tab_active_color }}{% endif %} !important;
+  }
+
+  .tab-content-{{ section_id }} {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .tab-content-{{ section_id }}.active {
+    display: block;
+  }
+
+  .tab-content-inner-{{ section_id }} {
+    display: grid;
+    gap: 40px;
+  }
+
+  .tab-content-inner-{{ section_id }}.layout-two-column {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: flex-start;
+  }
+
+  .tab-content-inner-{{ section_id }}.layout-single-column {
+    grid-template-columns: 1fr;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .content-block-{{ section_id }} {
+    padding: 0;
+  }
+
+  .content-block-title-{{ section_id }} {
+    color: {{ content_title_color }} !important;
+    font-size: {{ content_title_font_size }}px;
+    margin-bottom: 12px;
+    font-weight: var(--font-weight-bold) !important;
+    line-height: 1.3;
+    font-family: var(--font-body-family);
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .content-block-content-{{ section_id }} {
+    font-size: {{ content_font_size }}px;
+    line-height: 1.6;
+    color: {{ text_color }};
+  }
+
+  .content-block-content-{{ section_id }} p {
+    margin-bottom: 16px;
+  }
+
+  /* Force le bold et italic dans le contenu des blocks */
+  .content-block-content-{{ section_id }} strong,
+  .content-block-content-{{ section_id }} b {
+    font-weight: 700 !important;
+  }
+
+  .content-block-content-{{ section_id }} em,
+  .content-block-content-{{ section_id }} i {
+    font-style: italic !important;
+  }
+
+  .content-image-{{ section_id }} {
+    width: 100%;
+    height: auto;
+    border-radius: {{ image_border_radius }}px;
+    margin-bottom: 4px;
+  }
+
+  .image-with-text-{{ section_id }} {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+  }
+
+  .image-with-text-{{ section_id }} .image-wrapper {
+    flex: 0 0 {{ image_wrapper_width }}px;
+  }
+
+  .image-with-text-{{ section_id }} .text-wrapper {
+    flex: 1;
+  }
+
+  .bullet-list-{{ section_id }} {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .bullet-item-{{ section_id }} {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 0;
+    gap: 12px;
+  }
+
+  .bullet-icon-{{ section_id }} {
+    width: calc({{ bullet_font_size }}px * 1.25);
+    height: calc({{ bullet_font_size }}px * 1.25);
+    margin-top: 2px;
+    color: {{ accent_color }};
+    flex-shrink: 0;
+  }
+
+  .bullet-text-{{ section_id }} {
+    font-size: {{ bullet_font_size }}px;
+    line-height: 1.6;
+    color: {{ benefit_text_color }};
+  }
+
+  .benefit-list-{{ section_id }} {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .benefit-item-{{ section_id }} {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid {{ border_color }};
+  }
+
+  .benefit-item-{{ section_id }}:last-child {
+    border-bottom: none;
+  }
+
+  .benefit-icon-{{ section_id }} {
+    width: calc({{ bullet_font_size }}px * 1.25);
+    height: calc({{ bullet_font_size }}px * 1.25);
+    margin-right: 16px;
+    color: {{ accent_color }};
+    flex-shrink: 0;
+  }
+
+  .benefit-text-{{ section_id }} {
+    font-size: {{ benefit_font_size }}px;
+    font-weight: var(--font-weight-medium);
+    color: {{ benefit_text_color }};
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .content-tabs-{{ section_id }} {
+      padding: {{ section_padding_top | divided_by: 1.5 }}px 16px {{ section_padding_bottom | divided_by: 1.5 }}px;
+    }
+
+    .content-tabs-heading-{{ section_id }} {
+      font-size: {{ heading_font_size }}px;
+    }
+
+    .tabs-navigation-{{ section_id }} {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: {% if tab_style == 'pills' %}8px{% else %}6px{% endif %};
+    }
+
+    .tab-button-{{ section_id }} {
+      padding: {% if tab_style == 'pills' %}10px 12px{% else %}12px 12px{% endif %};
+      font-size: {{ tab_font_size | times: 0.9 }}px;
+      min-height: 44px;
+      width: 100% !important;
+      flex: none !important;
+    }
+
+    .tab-button-{{ section_id }}.has-icon {
+      gap: 6px;
+    }
+
+    .tab-content-inner-{{ section_id }}.layout-two-column {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .content-block-title-{{ section_id }} {
+      font-size: {{ content_title_font_size | times: 0.85 }}px;
+      margin-bottom: 16px;
+    }
+
+    .content-block-content-{{ section_id }} {
+      font-size: {{ content_font_size | times: 0.85 }}px;
+    }
+
+    .benefit-text-{{ section_id }} {
+      font-size: {{ benefit_font_size | times: 0.85 }}px;
+    }
+
+    .bullet-text-{{ section_id }} {
+      font-size: {{ bullet_font_size | times: 0.85 }}px;
+    }
+
+    .benefit-icon-{{ section_id }} {
+      width: calc({{ bullet_font_size | times: 0.85 }}px * 1.25);
+      height: calc({{ bullet_font_size | times: 0.85 }}px * 1.25);
+    }
+
+    .bullet-icon-{{ section_id }} {
+      width: calc({{ bullet_font_size | times: 0.85 }}px * 1.25);
+      height: calc({{ bullet_font_size | times: 0.85 }}px * 1.25);
+    }
+
+    .benefit-item-{{ section_id }}, .bullet-item-{{ section_id }} {
+      padding: 10px 0;
+    }
+
+    .image-with-text-{{ section_id }} {
+      flex-direction: column;
+      gap: {{ mobile_image_text_gap }}px;
+    }
+
+    .image-with-text-{{ section_id }} .image-wrapper {
+      flex: none;
+    }
+
+    /* Keep images at full size on mobile */
+    .content-image-{{ section_id }} {
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  /* Mobile Styles */
+  @media (max-width: 767px) {
+    .container-{{ section_id }} {
+      padding: 40px 20px;
+    }
+
+    .content-tabs-wrapper-{{ section_id }}.has-shared-image {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .shared-image-{{ section_id }} {
+      order: -1;
+      margin-bottom: 20px;
+    }
+
+    .content-tabs-wrapper-{{ section_id }}.has-shared-image .shared-image-{{ section_id }} {
+      flex: none;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .shared-image-{{ section_id }} img {
+      max-width: 100%;
+      border-radius: {{ image_border_radius }}px;
+    }
+
+    .tab-button-{{ section_id }} {
+      padding: {% if tab_style == 'pills' %}8px 12px{% else %}10px 12px{% endif %};
+      font-size: {{ tab_font_size | times: 0.85 }}px;
+      line-height: 1.2;
+      min-height: 40px;
+    }
+
+    .tab-button-{{ section_id }}.has-icon {
+      gap: 5px;
+      justify-content: center;
+    }
+  }
+
+  /* Keep images at full size on mobile */
+  .content-image-{{ section_id }} {
+    width: 100%;
+    height: auto;
+  }
+
+  {% if mobile_full_width_images %}
+  /* Full width images on mobile when enabled */
+  @media (max-width: 767px) {
+    /* Force on Shopify parent wrapper */
+    .shopify-section:has(.content-tabs-{{ section_id }}) {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    /* Remove padding from section */
+    .content-tabs-{{ section_id }} {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    /* Remove padding from container */
+    .content-tabs-container-{{ section_id }} {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .content-tabs-wrapper-{{ section_id }} {
+      align-items: stretch !important;
+    }
+
+    /* Keep heading centered with padding */
+    .content-tabs-heading-wrapper-{{ section_id }} {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    /* Keep tabs with padding */
+    .tabs-navigation-{{ section_id }} {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    /* Keep tab content blocks with padding except images */
+    .tab-content-inner-{{ section_id }} {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    /* Force images to full width - this overrides the padding */
+    .content-image-{{ section_id }} {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      margin-left: calc(-50vw + 50%) !important;
+      margin-right: calc(-50vw + 50%) !important;
+      border-radius: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    /* For image-with-text layout */
+    .image-with-text-{{ section_id }} {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      margin-left: -16px;
+      margin-right: -16px;
+    }
+
+    .image-with-text-{{ section_id }} .image-wrapper {
+      width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .image-with-text-{{ section_id }} .image-wrapper .content-image-{{ section_id }} {
+      width: 100% !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      border-radius: 0 !important;
+    }
+
+    .image-with-text-{{ section_id }} .text-wrapper {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    /* Shared image should also be full width */
+    .shared-image-{{ section_id }} {
+      margin-left: 0;
+      margin-right: 0;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .shared-image-{{ section_id }} img {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      margin-left: calc(-50vw + 50%) !important;
+      margin-right: calc(-50vw + 50%) !important;
+      border-radius: 0 !important;
+    }
+  }
+  {% endif %}
+</style>
+
+<section class="content-tabs-{{ section_id }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  <div class="content-tabs-container-{{ section_id }}">
+    {% if heading != blank or accent_text != blank %}
+      <div class="content-tabs-heading-wrapper-{{ section_id }}">
+        {% if heading != blank or accent_text != blank %}
+          <h2 class="content-tabs-heading-{{ section_id }}">
+            {% if heading != blank %}{{ heading }}{% endif -%}
+            {%- if accent_text != blank %}
+              <span class="accent{% unless section.settings.override_global_accent %} global-accent-text{% endunless %}">
+                {{- accent_text -}}
+              </span>
+            {%- endif %}
+          </h2>
+        {% endif %}
+        {% if subheading != blank %}
+          <div class="content-tabs-subheading-{{ section_id }}">{{ subheading }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="content-tabs-wrapper-{{ section_id }}{% if shared_image != blank %} has-shared-image{% endif %}">
+      {% if shared_image != blank %}
+        <div class="shared-image-{{ section_id }}">
+          <img
+            src="{{ shared_image | image_url: width: shared_image_width }}"
+            alt="{{ shared_image.alt | escape }}"
+            width="{{ shared_image.width }}"
+            height="{{ shared_image.height }}"
+            loading="lazy"
+          >
+        </div>
+      {% endif %}
+
+      <div class="tabs-content-section-{{ section_id }}">
+        <div class="tabs-navigation-{{ section_id }}">
+          {% for block in section.blocks %}
+            <button
+              class="tab-button-{{ section_id }} {% if forloop.first %}active{% endif %}{% if block.settings.show_tab_icon and block.settings.tab_icon_svg != blank %} has-icon{% endif %}"
+              data-tab="tab-{{ section_id }}-{{ forloop.index }}"
+            >
+              {% if block.settings.show_tab_icon and block.settings.tab_icon_svg != blank %}
+                <span
+                  class="tab-icon-{{ section_id }}"
+                  style="width: {{ block.settings.tab_icon_size | default: 16 }}px; height: {{ block.settings.tab_icon_size | default: 16 }}px;"
+                >
+                  {{ block.settings.tab_icon_svg }}
+                </span>
+              {% endif %}
+              <span class="tab-title-{{ section_id }}">
+                {% if block.settings.tab_title != blank %}
+                  {{ block.settings.tab_title }}
+                {% else %}
+                  Tab {{ forloop.index }}
+                {% endif %}
+              </span>
+            </button>
+          {% endfor %}
+        </div>
+
+        <div class="tabs-content-{{ section_id }}">
+          {% for block in section.blocks %}
+            {% assign layout_class = 'layout-single-column' %}
+            {% if block.settings.content_layout == 'two_column' %}
+              {% assign layout_class = 'layout-two-column' %}
+            {% endif %}
+
+            <div
+              id="tab-{{ section_id }}-{{ forloop.index }}"
+              class="tab-content-{{ section_id }} {% if forloop.first %}active{% endif %}"
+            >
+              <div class="tab-content-inner-{{ section_id }} {{ layout_class }}">
+                {% comment %} First Content Block {% endcomment %}
+                {% if block.settings.first_content_type != 'none' %}
+                  <div class="content-block-{{ section_id }}">
+                    {% if block.settings.first_title != blank %}
+                      <h3 class="content-block-title-{{ section_id }}">{{ block.settings.first_title }}</h3>
+                    {% endif %}
+
+                    <div class="content-block-content-{{ section_id }}">
+                      {% case block.settings.first_content_type %}
+                        {% when 'text' %}
+                          {{ block.settings.first_text_content }}
+
+                        {% when 'image' %}
+                          {% if block.settings.first_image != blank %}
+                            <img
+                              src="{{ block.settings.first_image | image_url: width: image_max_width }}"
+                              alt="{{ block.settings.first_image.alt | escape }}"
+                              width="{{ block.settings.first_image.width }}"
+                              height="{{ block.settings.first_image.height }}"
+                              class="content-image-{{ section_id }}"
+                              loading="lazy"
+                            >
+                          {% endif %}
+
+                        {% when 'image_with_text' %}
+                          <div class="image-with-text-{{ section_id }}">
+                            {% if block.settings.first_image != blank %}
+                              <div class="image-wrapper">
+                                <img
+                                  src="{{ block.settings.first_image | image_url: width: image_with_text_width }}"
+                                  alt="{{ block.settings.first_image.alt | escape }}"
+                                  width="{{ block.settings.first_image.width }}"
+                                  height="{{ block.settings.first_image.height }}"
+                                  class="content-image-{{ section_id }}"
+                                  loading="lazy"
+                                >
+                              </div>
+                            {% endif %}
+                            <div class="text-wrapper">
+                              {{ block.settings.first_text_content }}
+                            </div>
+                          </div>
+
+                        {% when 'bullet_points' %}
+                          {% if block.settings.first_bullet_points != blank %}
+                            <ul class="bullet-list-{{ section_id }}">
+                              {% assign bullets = block.settings.first_bullet_points | split: ',' %}
+                              {% for bullet in bullets %}
+                                <li class="bullet-item-{{ section_id }}">
+                                  <svg class="bullet-icon-{{ section_id }}" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                                  </svg>
+                                  <span class="bullet-text-{{ section_id }}">{{ bullet | strip }}</span>
+                                </li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
+
+                        {% when 'benefits_list' %}
+                          {% if block.settings.first_benefits != blank %}
+                            <ul class="benefit-list-{{ section_id }}">
+                              {% assign benefits = block.settings.first_benefits | split: ',' %}
+                              {% for benefit in benefits %}
+                                <li class="benefit-item-{{ section_id }}">
+                                  <svg class="benefit-icon-{{ section_id }}" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+                                  </svg>
+                                  <span class="benefit-text-{{ section_id }}">{{ benefit | strip }}</span>
+                                </li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
+                      {% endcase %}
+                    </div>
+                  </div>
+                {% endif %}
+
+                {% comment %} Second Content Block (for two-column layout) {% endcomment %}
+                {% if block.settings.content_layout == 'two_column' and block.settings.second_content_type != 'none' %}
+                  <div class="content-block-{{ section_id }}">
+                    {% if block.settings.second_title != blank %}
+                      <h3 class="content-block-title-{{ section_id }}">{{ block.settings.second_title }}</h3>
+                    {% endif %}
+
+                    <div class="content-block-content-{{ section_id }}">
+                      {% case block.settings.second_content_type %}
+                        {% when 'text' %}
+                          {{ block.settings.second_text_content }}
+
+                        {% when 'image' %}
+                          {% if block.settings.second_image != blank %}
+                            <img
+                              src="{{ block.settings.second_image | image_url: width: image_max_width }}"
+                              alt="{{ block.settings.second_image.alt | escape }}"
+                              width="{{ block.settings.second_image.width }}"
+                              height="{{ block.settings.second_image.height }}"
+                              class="content-image-{{ section_id }}"
+                              loading="lazy"
+                            >
+                          {% endif %}
+
+                        {% when 'image_with_text' %}
+                          <div class="image-with-text-{{ section_id }}">
+                            {% if block.settings.second_image != blank %}
+                              <div class="image-wrapper">
+                                <img
+                                  src="{{ block.settings.second_image | image_url: width: image_with_text_width }}"
+                                  alt="{{ block.settings.second_image.alt | escape }}"
+                                  width="{{ block.settings.second_image.width }}"
+                                  height="{{ block.settings.second_image.height }}"
+                                  class="content-image-{{ section_id }}"
+                                  loading="lazy"
+                                >
+                              </div>
+                            {% endif %}
+                            <div class="text-wrapper">
+                              {{ block.settings.second_text_content }}
+                            </div>
+                          </div>
+
+                        {% when 'bullet_points' %}
+                          {% if block.settings.second_bullet_points != blank %}
+                            <ul class="bullet-list-{{ section_id }}">
+                              {% assign bullets = block.settings.second_bullet_points | split: ',' %}
+                              {% for bullet in bullets %}
+                                <li class="bullet-item-{{ section_id }}">
+                                  <svg class="bullet-icon-{{ section_id }}" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                                  </svg>
+                                  <span class="bullet-text-{{ section_id }}">{{ bullet | strip }}</span>
+                                </li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
+
+                        {% when 'benefits_list' %}
+                          {% if block.settings.second_benefits != blank %}
+                            <ul class="benefit-list-{{ section_id }}">
+                              {% assign benefits = block.settings.second_benefits | split: ',' %}
+                              {% for benefit in benefits %}
+                                <li class="benefit-item-{{ section_id }}">
+                                  <svg class="benefit-icon-{{ section_id }}" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+                                  </svg>
+                                  <span class="benefit-text-{{ section_id }}">{{ benefit | strip }}</span>
+                                </li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
+                      {% endcase %}
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Find all tab buttons in this section
+    const sectionElement = document.querySelector('.content-tabs-{{ section_id }}');
+    if (!sectionElement) return;
+
+    const tabButtons = sectionElement.querySelectorAll('.tab-button-{{ section_id }}');
+    const tabContents = sectionElement.querySelectorAll('.tab-content-{{ section_id }}');
+
+    // Add click event listeners to all tab buttons
+    tabButtons.forEach(function (button, index) {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        // Remove active class from all tabs and content
+        tabButtons.forEach(function (btn) {
+          btn.classList.remove('active');
+        });
+        tabContents.forEach(function (content) {
+          content.classList.remove('active');
+        });
+
+        // Add active class to clicked tab and corresponding content
+        button.classList.add('active');
+        if (tabContents[index]) {
+          tabContents[index].classList.add('active');
+        }
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Content Tabs",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Discover Our Features",
+      "info": "Main heading text"
+    },
+    {
+      "type": "text",
+      "id": "accent_text",
+      "label": "Accent Text",
+      "default": "and Benefits",
+      "info": "This text will appear in the accent color after the main heading"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>Learn more about what makes our products and services unique.</p>",
+      "info": "Optional subheading that appears below the main heading"
+    },
+    {
+      "type": "header",
+      "content": "Shared Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "shared_image",
+      "label": "Shared image for all tabs",
+      "info": "This image will appear above the tab content on all tabs. On mobile, it displays above the tabs."
+    },
+    {
+      "type": "range",
+      "id": "shared_image_width",
+      "min": 200,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "Shared image max width",
+      "default": 500,
+      "info": "Maximum width of the shared image on desktop"
+    },
+    {
+      "type": "header",
+      "content": "Tab Style"
+    },
+    {
+      "type": "select",
+      "id": "tab_style",
+      "label": "Tab style",
+      "options": [
+        {
+          "value": "underline",
+          "label": "Underline"
+        },
+        {
+          "value": "pills",
+          "label": "Pills/Buttons"
+        }
+      ],
+      "default": "pills"
+    },
+    {
+      "type": "select",
+      "id": "tab_layout",
+      "label": "Tab Layout (Desktop)",
+      "options": [
+        {
+          "value": "grid",
+          "label": "2x2 Grid"
+        },
+        {
+          "value": "single_row",
+          "label": "Single Row"
+        }
+      ],
+      "default": "grid",
+      "info": "Choose how tabs are arranged on desktop. Mobile always uses grid layout."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use theme colors",
+      "default": true,
+      "info": "When checked, uses global theme colors. When unchecked, uses custom colors below."
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#ff6b35"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "header",
+      "content": "Section-Specific Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Section Accent Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "tab_active_color",
+      "label": "Active tab text color",
+      "default": "#ff6b35"
+    },
+    {
+      "type": "color",
+      "id": "tab_inactive_color",
+      "label": "Inactive tab color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "tab_active_bg",
+      "label": "Active tab background (for pill style)",
+      "default": "#ff6b35"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Active tab text color (for pill style)",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "content_title_color",
+      "label": "Content block title color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "benefit_text_color",
+      "label": "Benefit/bullet text color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "min": 24,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading font size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "subheading_font_size",
+      "min": 10,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Subheading font size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "content_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Content font size",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "content_title_font_size",
+      "min": 14,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Content block title font size",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "tab_font_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Tab font size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "benefit_font_size",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "label": "Benefit list font size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "bullet_font_size",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "label": "Bullet point font size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "label": "Section bottom padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "min": 600,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "label": "Content maximum width",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "min": 200,
+      "max": 1000,
+      "step": 50,
+      "unit": "px",
+      "label": "Regular image max width",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "image_with_text_width",
+      "min": 200,
+      "max": 1000,
+      "step": 50,
+      "unit": "px",
+      "label": "Image with text image width",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "image_wrapper_width",
+      "min": 100,
+      "max": 400,
+      "step": 50,
+      "unit": "px",
+      "label": "Image wrapper width",
+      "default": 200
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_full_width_images",
+      "label": "Mobile full width images",
+      "default": false,
+      "info": "When checked, images will be full width on mobile devices"
+    },
+    {
+      "type": "range",
+      "id": "tab_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Tab border radius",
+      "default": 0,
+      "info": "Border radius for pill-style tabs. Uses global button radius by default."
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 8,
+      "info": "Border radius for all images within the content tabs"
+    },
+    {
+      "type": "range",
+      "id": "mobile_image_text_gap",
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile image-with-text gap",
+      "default": 20,
+      "info": "Gap between image and text on mobile devices"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Tab navigation bottom margin",
+      "default": 50,
+      "info": "Space between the tab buttons and the tab content below"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Tab",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tab_title",
+          "label": "Tab Title",
+          "default": "Feature One"
+        },
+        {
+          "type": "header",
+          "content": "Tab Icon"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_tab_icon",
+          "label": "Show tab icon",
+          "default": false,
+          "info": "Display an icon before the tab title"
+        },
+        {
+          "type": "textarea",
+          "id": "tab_icon_svg",
+          "label": "Custom SVG icon code",
+          "info": "Paste your custom SVG code here. Only used when 'Show tab icon' is enabled."
+        },
+        {
+          "type": "range",
+          "id": "tab_icon_size",
+          "min": 12,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "label": "Tab icon size",
+          "default": 16,
+          "info": "Size of the SVG icon in the tab"
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "select",
+          "id": "content_layout",
+          "label": "Content layout",
+          "options": [
+            {
+              "value": "single_column",
+              "label": "Single column"
+            },
+            {
+              "value": "two_column",
+              "label": "Two columns"
+            }
+          ],
+          "default": "two_column"
+        },
+        {
+          "type": "header",
+          "content": "First Content Block"
+        },
+        {
+          "type": "select",
+          "id": "first_content_type",
+          "label": "First content type",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "text",
+              "label": "Rich text"
+            },
+            {
+              "value": "image",
+              "label": "Image only"
+            },
+            {
+              "value": "image_with_text",
+              "label": "Image with text"
+            },
+            {
+              "value": "bullet_points",
+              "label": "Bullet points"
+            },
+            {
+              "value": "benefits_list",
+              "label": "Benefits list (checkmarks)"
+            }
+          ],
+          "default": "text"
+        },
+        {
+          "type": "text",
+          "id": "first_title",
+          "label": "First section title",
+          "default": "About This Feature"
+        },
+        {
+          "type": "richtext",
+          "id": "first_text_content",
+          "label": "First section text content",
+          "default": "<p>This is where you can describe the key features and benefits of your product or service. <strong>Highlight important</strong> information and <strong>key benefits</strong> that matter most to your customers.</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "first_image",
+          "label": "First section image"
+        },
+        {
+          "type": "textarea",
+          "id": "first_bullet_points",
+          "label": "First section bullet points (comma-separated)",
+          "info": "Enter points separated by commas"
+        },
+        {
+          "type": "textarea",
+          "id": "first_benefits",
+          "label": "First section benefits (comma-separated)",
+          "info": "Enter benefits separated by commas for checkmark list"
+        },
+        {
+          "type": "header",
+          "content": "Second Content Block (Two-column only)"
+        },
+        {
+          "type": "select",
+          "id": "second_content_type",
+          "label": "Second content type",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "text",
+              "label": "Rich text"
+            },
+            {
+              "value": "image",
+              "label": "Image only"
+            },
+            {
+              "value": "image_with_text",
+              "label": "Image with text"
+            },
+            {
+              "value": "bullet_points",
+              "label": "Bullet points"
+            },
+            {
+              "value": "benefits_list",
+              "label": "Benefits list (checkmarks)"
+            }
+          ],
+          "default": "benefits_list"
+        },
+        {
+          "type": "text",
+          "id": "second_title",
+          "label": "Second section title",
+          "default": "Key Benefits"
+        },
+        {
+          "type": "richtext",
+          "id": "second_text_content",
+          "label": "Second section text content"
+        },
+        {
+          "type": "image_picker",
+          "id": "second_image",
+          "label": "Second section image"
+        },
+        {
+          "type": "textarea",
+          "id": "second_bullet_points",
+          "label": "Second section bullet points (comma-separated)",
+          "info": "Enter points separated by commas"
+        },
+        {
+          "type": "textarea",
+          "id": "second_benefits",
+          "label": "Second section benefits (comma-separated)",
+          "default": "Improves user experience, Saves time and effort, Provides excellent value",
+          "info": "Enter benefits separated by commas for checkmark list"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Content Tabs",
+      "blocks": [
+        {
+          "type": "tab",
+          "settings": {
+            "tab_title": "Feature One",
+            "content_layout": "two_column",
+            "first_content_type": "text",
+            "first_title": "About This Feature",
+            "first_text_content": "<p>This is where you can describe the key features and benefits of your product or service. <strong>Highlight important</strong> information and <strong>key benefits</strong> that matter most to your customers.</p>",
+            "second_content_type": "benefits_list",
+            "second_title": "Key Benefits",
+            "second_benefits": "Improves user experience, Saves time and effort, Provides excellent value"
+          }
+        },
+        {
+          "type": "tab",
+          "settings": {
+            "tab_title": "Feature Two",
+            "content_layout": "two_column",
+            "first_content_type": "text",
+            "first_title": "About This Feature",
+            "first_text_content": "<p>This is where you can describe the key features and benefits of your product or service. <strong>Highlight important</strong> information and <strong>key benefits</strong> that matter most to your customers.</p>",
+            "second_content_type": "benefits_list",
+            "second_title": "Key Benefits",
+            "second_benefits": "Easy to use interface, Professional results, Great customer support"
+          }
+        },
+        {
+          "type": "tab",
+          "settings": {
+            "tab_title": "Feature Three",
+            "content_layout": "two_column",
+            "first_content_type": "text",
+            "first_title": "About This Feature",
+            "first_text_content": "<p>This is where you can describe the key features and benefits of your product or service. <strong>Highlight important</strong> information and <strong>key benefits</strong> that matter most to your customers.</p>",
+            "second_content_type": "benefits_list",
+            "second_title": "Key Benefits",
+            "second_benefits": "Fast implementation, Reliable performance, Cost-effective solution"
+          }
+        },
+        {
+          "type": "tab",
+          "settings": {
+            "tab_title": "Additional Info",
+            "content_layout": "single_column",
+            "first_content_type": "bullet_points",
+            "first_title": "Important Details",
+            "first_bullet_points": "Quick and easy setup process, Compatible with existing systems, Comprehensive documentation included, 24/7 customer support available, Regular updates and improvements"
+          }
+        },
+        {
+          "type": "tab",
+          "settings": {
+            "tab_title": "Getting Started",
+            "content_layout": "two_column",
+            "first_content_type": "text",
+            "first_title": "About This Feature",
+            "first_text_content": "<p>This is where you can describe the key features and benefits of your product or service. <strong>Highlight important</strong> information and <strong>key benefits</strong> that matter most to your customers.</p>",
+            "second_content_type": "benefits_list",
+            "second_title": "Key Benefits",
+            "second_benefits": "Simple onboarding process, Immediate results, Ongoing support"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

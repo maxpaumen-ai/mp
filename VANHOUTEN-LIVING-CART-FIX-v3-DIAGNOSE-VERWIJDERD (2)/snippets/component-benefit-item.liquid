@@ -1,0 +1,88 @@
+{% comment %}
+  Component: Individual Benefit Item
+  
+  Parameters:
+  - benefit: block object with settings
+  - index: number (for animations)
+{% endcomment %}
+
+<div class="benefit-item" 
+     data-index="{{ index }}" 
+     data-block-id="{{ benefit.id }}" 
+     {{ benefit.shopify_attributes }}>
+  
+  <div class="benefit-item__icon">
+    {% if benefit.settings.use_custom_icon and benefit.settings.custom_icon_svg != blank %}
+      {%- assign custom_svg = benefit.settings.custom_icon_svg | strip -%}
+      {%- if custom_svg contains '<svg' -%}
+        {%- comment -%}Add proper SVG attributes for crisp scaling{%- endcomment -%}
+        {%- assign enhanced_svg = custom_svg | replace: '<svg', '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet"' -%}
+        <div class="benefit-item__icon-svg" aria-hidden="true">{{ enhanced_svg }}</div>
+      {%- else -%}
+        <div class="benefit-item__icon-svg" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+      {%- endif -%}
+    {% elsif benefit.settings.icon_image != blank %}
+      {%- liquid
+        # Always generate high-res images to prevent blurriness
+        # Use custom sizes if enabled, otherwise generate larger images that CSS will scale down
+        
+        if benefit.settings.use_custom_icon_size
+          assign icon_size_base = benefit.settings.icon_size_desktop | default: 30
+        else
+          # Use 200px as safe maximum that covers all section settings
+          assign icon_size_base = 200
+        endif
+        
+        assign icon_size_1x = icon_size_base
+        assign icon_size_2x = icon_size_base | times: 2
+        assign icon_size_3x = icon_size_base | times: 3
+      -%}
+      <img 
+        src="{{ benefit.settings.icon_image | image_url: width: icon_size_2x }}" 
+        srcset="{{ benefit.settings.icon_image | image_url: width: icon_size_1x }} 1x,
+                {{ benefit.settings.icon_image | image_url: width: icon_size_2x }} 2x,
+                {{ benefit.settings.icon_image | image_url: width: icon_size_3x }} 3x"
+        alt="{{ benefit.settings.title | escape }}" 
+        class="benefit-item__icon-image"
+        width="{{ icon_size_1x }}"
+        height="{{ icon_size_1x }}"
+        loading="lazy"
+        style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;">
+    {% else %}
+      <div class="benefit-item__icon-svg" aria-hidden="true">
+        {% case benefit.settings.preset_icon %}
+          {% when 'lightning' %}
+            <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+              <path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/>
+            </svg>
+          {% when 'shield' %}
+            <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+              <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.6 14.8,10V11.5C15.4,11.5 16,12.4 16,13V16C16,17.4 15.4,18 14.8,18H9.2C8.6,18 8,17.4 8,16V13C8,12.4 8.6,11.5 9.2,11.5V10C9.2,8.6 10.6,7 12,7M12,8.2C11.2,8.2 10.5,8.7 10.5,10V11.5H13.5V10C13.5,8.7 12.8,8.2 12,8.2Z"/>
+            </svg>
+          {% when 'refresh' %}
+            <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+              <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+            </svg>
+          {% when 'check' %}
+            <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+          {% else %}
+            <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        {% endcase %}
+      </div>
+    {% endif %}
+  </div>
+  
+  <h3 class="benefit-item__title">{{ benefit.settings.title }}</h3>
+  
+  {% if benefit.settings.description != blank %}
+    <p class="benefit-item__description">{{ benefit.settings.description }}</p>
+  {% endif %}
+</div>

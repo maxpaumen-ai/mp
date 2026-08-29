@@ -1,0 +1,1078 @@
+{%- liquid
+  assign show_variant_selector = true
+  assign current_product = product | default: section.settings.current_product
+  assign layout = block.settings.layout | default: 'horizontal'
+-%}
+
+{% if show_variant_selector and current_product %}
+<div
+  class="variant-selector-block"
+  id="block-{{ block.id }}"
+  {{ block.shopify_attributes }}
+  style="
+  margin-top: {{ block.settings.margin_top | default: 16 }}px;
+  margin-bottom: {{ block.settings.margin_bottom | default: 16 }}px;
+  {% if layout == 'vertical' %}width: 100%;{% endif %}"
+>
+  <div
+    class="variant-selector-container"
+    data-layout="{{ layout }}"
+    {% if block.settings.enable_hover_effects %}data-hover-effects="true"{% endif %}
+    style="
+      {% if block %}
+        {% if block.settings.image_width_desktop and block.settings.image_width_desktop != 'auto' %}--variant-image-width-desktop: {{ block.settings.image_width_desktop }}px;{% endif %}
+        {% if block.settings.image_width_mobile and block.settings.image_width_mobile != 'auto' %}--variant-image-width-mobile: {{ block.settings.image_width_mobile }}px;{% endif %}
+        {% if block.settings.badge_font_size %}--badge-font-size: {{ block.settings.badge_font_size }}px;{% endif %}
+        {% if block.settings.badge_padding_y %}--badge-padding-y: {{ block.settings.badge_padding_y }}px;{% endif %}
+        {% if block.settings.badge_padding_x %}--badge-padding-x: {{ block.settings.badge_padding_x }}px;{% endif %}
+        {% if block.settings.badge_border_radius %}--badge-radius: {{ block.settings.badge_border_radius }}px;{% endif %}
+        {% if block.settings.badge_offset_top != nil %}--badge-offset-top: {{ block.settings.badge_offset_top }}px;{% endif %}
+        {% if block.settings.badge_border_color %}--badge-border-color: {{ block.settings.badge_border_color }};{% endif %}
+        {% if block.settings.badge_border_width != nil %}--badge-border-width: {{ block.settings.badge_border_width }}px;{% endif %}
+        {% if block.settings.card_background %}--card-background: {{ block.settings.card_background }};{% endif %}
+        --card-padding: {{ block.settings.card_padding | default: 12 }}px;
+        --content-gap: {{ block.settings.content_gap | default: 6 }}px;
+        --card-border-width: {{ block.settings.card_border_width | default: 2 }}px;
+        --selected-card-border-width: {{ block.settings.selected_card_border_width | default: 2 }}px;
+        {% if block.settings.card_border_color %}--variant-border-color: {{ block.settings.card_border_color }};{% endif %}
+        {% if block.settings.card_hover_border_color %}--variant-hover-border-color: {{ block.settings.card_hover_border_color }};{% endif %}
+        {% if block.settings.card_border_style %}--variant-border-style: {{ block.settings.card_border_style }};{% endif %}
+        {% if block.settings.selected_card_border_color %}--variant-selected-border-color: {{ block.settings.selected_card_border_color }};{% endif %}
+        {% if block.settings.selected_card_background %}--variant-selected-bg-color: {{ block.settings.selected_card_background }};{% endif %}
+        {% if block.settings.badge_background_color %}--variant-badge-bg-color: {{ block.settings.badge_background_color }};{% endif %}
+        {% if block.settings.badge_text_color %}--variant-badge-text-color: {{ block.settings.badge_text_color }};{% endif %}
+        {% if block.settings.save_badge_bg_color %}--save-badge-bg-color: {{ block.settings.save_badge_bg_color }};{% endif %}
+        {% if block.settings.save_badge_text_color %}--save-badge-text-color: {{ block.settings.save_badge_text_color }};{% endif %}
+        --save-badge-font-size: {{ block.settings.save_badge_font_size | default: 10 }}px;
+        --save-badge-border-radius: {{ block.settings.save_badge_border_radius | default: 12 }}px;
+        --save-badge-padding-y: {{ block.settings.save_badge_padding_y | default: 3 }}px;
+        --save-badge-padding-x: {{ block.settings.save_badge_padding_x | default: 6 }}px;
+        {% if block.settings.title_color %}--variant-title-color: {{ block.settings.title_color }};{% endif %}
+        --title-font-size: {{ block.settings.title_font_size | default: 14 }}px;
+        {% if block.settings.description_color %}--variant-description-color: {{ block.settings.description_color }};{% endif %}
+        --description-font-size: {{ block.settings.description_font_size | default: 11 }}px;
+        {% if block.settings.current_price_color %}--variant-current-price-color: {{ block.settings.current_price_color }};{% endif %}
+        --current-price-font-size: {{ block.settings.current_price_font_size | default: 16 }}px;
+        {% if block.settings.original_price_color %}--variant-original-price-color: {{ block.settings.original_price_color }};{% endif %}
+        --original-price-font-size: {{ block.settings.original_price_font_size | default: 11 }}px;
+        --card-gap: {{ block.settings.card_gap | default: 8 }}px;
+        --border-radius: {{ block.settings.border_radius | default: 8 }}px;
+        --image-border-radius: {{ block.settings.image_border_radius | default: 6 }}px;
+      {% else %}
+        {% if section.settings.variant_border_color %}--variant-border-color: {{ section.settings.variant_border_color }};{% endif %}
+        {% if section.settings.variant_hover_border_color %}--variant-hover-border-color: {{ section.settings.variant_hover_border_color }};{% endif %}
+        {% if section.settings.variant_border_style %}--variant-border-style: {{ section.settings.variant_border_style }};{% endif %}
+        {% if section.settings.variant_selected_border_color %}--variant-selected-border-color: {{ section.settings.variant_selected_border_color }};{% endif %}
+        {% if section.settings.variant_selected_bg_color %}--variant-selected-bg-color: {{ section.settings.variant_selected_bg_color }};{% endif %}
+        {% if section.settings.variant_badge_bg_color %}--variant-badge-bg-color: {{ section.settings.variant_badge_bg_color }};{% endif %}
+        {% if section.settings.variant_badge_text_color %}--variant-badge-text-color: {{ section.settings.variant_badge_text_color }};{% endif %}
+        {% if section.settings.save_badge_bg_color %}--save-badge-bg-color: {{ section.settings.save_badge_bg_color }};{% endif %}
+        {% if section.settings.save_badge_text_color %}--save-badge-text-color: {{ section.settings.save_badge_text_color }};{% endif %}
+        {% if section.settings.variant_title_color %}--variant-title-color: {{ section.settings.variant_title_color }};{% endif %}
+        {% if section.settings.variant_description_color %}--variant-description-color: {{ section.settings.variant_description_color }};{% endif %}
+        {% if section.settings.variant_original_price_color %}--variant-original-price-color: {{ section.settings.variant_original_price_color }};{% endif %}
+        {% if section.settings.variant_current_price_color %}--variant-current-price-color: {{ section.settings.variant_current_price_color }};{% endif %}
+        --card-padding: {{ section.settings.card_padding | default: 12 }}px;
+        --card-border-width: 2px;
+        --selected-card-border-width: 2px;
+        --card-gap: 8px;
+        --border-radius: 8px;
+        --image-border-radius: 6px;
+      {% endif %}
+    "
+  >
+    {%- liquid
+      if block
+        if block.settings.show_variant_images == false
+          assign show_images = false
+        else
+          assign show_images = true
+        endif
+        if block.settings.show_variant_title == false
+          assign show_variant_title = false
+        else
+          assign show_variant_title = true
+        endif
+        assign show_compare_price = block.settings.show_compare_price
+        assign show_variant_description = block.settings.show_variant_description
+        if block.settings.save_badge_below_price == true
+          assign save_badge_below_price = true
+        else
+          assign save_badge_below_price = false
+        endif
+        assign description_mode = block.settings.description_mode
+        assign show_badge_1 = block.settings.show_badge_1
+        assign badge_text_1 = block.settings.badge_text_1 | default: 'BEST VALUE'
+        assign show_badge_2 = block.settings.show_badge_2
+        assign badge_text_2 = block.settings.badge_text_2 | default: 'POPULAR'
+        assign show_badge_3 = block.settings.show_badge_3
+        assign badge_text_3 = block.settings.badge_text_3 | default: 'SALE'
+        assign badge_bg_color_1 = block.settings.badge_bg_color_1 | default: '#3b82f6'
+        assign badge_text_color_1 = block.settings.badge_text_color_1 | default: '#ffffff'
+        assign badge_bg_color_2 = block.settings.badge_bg_color_2 | default: '#10b981'
+        assign badge_text_color_2 = block.settings.badge_text_color_2 | default: '#ffffff'
+        assign badge_bg_color_3 = block.settings.badge_bg_color_3 | default: '#f59e0b'
+        assign badge_text_color_3 = block.settings.badge_text_color_3 | default: '#ffffff'
+        assign enable_hover_effects = block.settings.enable_hover_effects | default: true
+        assign show_sold_out_overlay = block.settings.show_sold_out_overlay | default: true
+      else
+        assign show_images = section.settings.show_variant_images | default: true
+        assign show_variant_title = true
+        assign show_compare_price = section.settings.show_compare_price
+        assign show_variant_description = section.settings.show_variant_description
+        assign save_badge_below_price = false
+        assign description_mode = section.settings.description_mode
+        assign show_badge_1 = false
+        assign badge_text_1 = 'BEST VALUE'
+        assign show_badge_2 = false
+        assign badge_text_2 = 'POPULAR'
+        assign show_badge_3 = false
+        assign badge_text_3 = 'SALE'
+        assign badge_bg_color_1 = '#3b82f6'
+        assign badge_text_color_1 = '#ffffff'
+        assign badge_bg_color_2 = '#10b981'
+        assign badge_text_color_2 = '#ffffff'
+        assign badge_bg_color_3 = '#f59e0b'
+        assign badge_text_color_3 = '#ffffff'
+        assign enable_hover_effects = true
+        assign show_sold_out_overlay = true
+      endif
+    -%}
+
+    <div
+      class="variant-products-container variant-layout-{{ layout }}"
+      {% if layout == 'vertical' %}style="display: flex; flex-direction: column;"{% endif %}
+      data-variants-count="{{ current_product.variants.size | at_most: 3 }}"
+      data-image-padding-style="{{ block.settings.image_padding_style | default: 'full_width' }}"
+      data-image-width-desktop="{{ block.settings.image_width_desktop | default: 'auto' }}"
+      data-image-width-mobile="{{ block.settings.image_width_mobile | default: 'auto' }}"
+      data-hover-effects="{{ enable_hover_effects }}"
+      data-show-sold-out-overlay="{{ show_sold_out_overlay }}"
+      data-show-images="{{ show_images }}"
+    >
+      {% for variant in current_product.variants limit: 3 %}
+        {%- liquid
+          assign variant_image = variant.featured_media | default: current_product.featured_media
+          if variant_image == blank and variant.image
+            assign variant_image = variant.image
+          endif
+          if variant_image == blank and current_product.featured_image
+            assign variant_image = current_product.featured_image
+          endif
+          assign variant_title = variant.title
+        -%}
+
+        <div
+          class="variant-product-card"
+          data-variant-id="{{ variant.id }}"
+          data-variant-price="{{ variant.price }}"
+          data-variant-compare-price="{{ variant.compare_at_price | default: '' }}"
+          data-variant-available="{{ variant.available }}"
+          data-variant-title="{{ variant_title | escape }}"
+          {% if layout == 'vertical' %}style="display: flex; flex-direction: row;"{% endif %}
+        >
+          {% liquid
+            assign show_badge = false
+            assign badge_text = ''
+            assign badge_bg_color = ''
+            assign badge_text_color = ''
+            assign badge_enabled_for_variant = false
+            
+            comment
+              Check for free shipping first
+            endcomment
+            assign free_shipping_threshold = 50.00
+            assign show_free_shipping_badge = false
+            if variant.price >= free_shipping_threshold
+              assign show_free_shipping_badge = true
+            endif
+
+            case forloop.index
+              when 1
+                assign badge_enabled_for_variant = show_badge_1
+                assign badge_text = badge_text_1
+                assign badge_bg_color = badge_bg_color_1
+                assign badge_text_color = badge_text_color_1
+              when 2
+                assign badge_enabled_for_variant = show_badge_2
+                assign badge_text = badge_text_2
+                assign badge_bg_color = badge_bg_color_2
+                assign badge_text_color = badge_text_color_2
+              when 3
+                assign badge_enabled_for_variant = show_badge_3
+                assign badge_text = badge_text_3
+                assign badge_bg_color = badge_bg_color_3
+                assign badge_text_color = badge_text_color_3
+            endcase
+            
+            comment
+              Only show badge if it's enabled for this variant
+              Free shipping badge only shows if badge is enabled but no custom text is set
+            endcomment
+            if badge_enabled_for_variant
+              assign show_badge = true
+              if badge_text == blank and show_free_shipping_badge
+                assign badge_text = 'FREE SHIPPING'
+              endif
+            endif
+          %}
+
+          {% if show_badge %}
+            <div
+              class="variant-best-value-badge"
+              style="background: {{ badge_bg_color }}; color: {{ badge_text_color }};"
+            >
+              {{ badge_text }}
+            </div>
+          {% endif %}
+          
+          {% if show_images %}
+            <div class="variant-product-image-wrapper">
+              <div class="variant-product-image">
+                {% if variant_image %}
+                  <div
+                    class="variant-product-visual"
+                    style="background-image: url('{{ variant_image | image_url: width: 200 }}');">
+                  </div>
+                {% else %}
+                  <div class="variant-product-visual"></div>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% liquid
+            assign show_save_badge = false
+            assign save_amount = 0
+            assign save_percentage = 0
+            assign save_badge_text = ''
+            
+            if variant.compare_at_price and variant.compare_at_price > variant.price
+              assign save_amount = variant.compare_at_price | minus: variant.price
+              assign save_percentage = save_amount | times: 100 | divided_by: variant.compare_at_price
+              if save_percentage > 0
+                assign show_save_badge = true
+                      case forloop.index
+                        when 1
+                          if block.settings.custom_save_badge_text_1 != blank
+                            assign save_badge_text = block.settings.custom_save_badge_text_1
+                          else
+                            assign save_badge_text = 'SAVE ' | append: save_percentage | append: '%'
+                          endif
+                        when 2
+                          if block.settings.custom_save_badge_text_2 != blank
+                            assign save_badge_text = block.settings.custom_save_badge_text_2
+                          else
+                            assign save_badge_text = 'SAVE ' | append: save_percentage | append: '%'
+                          endif
+                        when 3
+                          if block.settings.custom_save_badge_text_3 != blank
+                            assign save_badge_text = block.settings.custom_save_badge_text_3
+                          else
+                            assign save_badge_text = 'SAVE ' | append: save_percentage | append: '%'
+                          endif
+                        else
+                          assign save_badge_text = 'SAVE ' | append: save_percentage | append: '%'
+                endcase
+              endif
+            endif
+          %}
+          
+          <div class="variant-product-content">
+            <div class="variant-content-main">
+              {% if show_variant_title %}
+                <div class="variant-title-container">
+                  <h3 class="variant-product-title">{{ variant_title }}</h3>
+                </div>
+              {% endif %}
+              
+              <div class="variant-save-badge-container">
+                {% if show_save_badge and save_badge_below_price == false %}
+                  <div class="variant-save-badge">
+                    {{ save_badge_text }}
+                  </div>
+                {% endif %}
+              </div>
+
+
+              {% liquid
+                assign show_desc = false
+                assign variant_description = ''
+
+                if show_variant_description
+                  assign show_desc = true
+
+                  if description_mode == 'custom'
+                    case forloop.index
+                      when 1
+                        assign variant_description = block.settings.desc_var_1
+                      when 2
+                        assign variant_description = block.settings.desc_var_2
+                      when 3
+                        assign variant_description = block.settings.desc_var_3
+                      when 4
+                        assign variant_description = block.settings.desc_var_4
+                    endcase
+                  else
+                    assign variant_description = ''
+                    for option in variant.options
+                      assign option_name = product.options[forloop.index0]
+                      if variant_description != blank
+                        assign variant_description = variant_description | append: ', '
+                      endif
+                      assign variant_description = variant_description | append: option_name | append: ': ' | append: option
+                    endfor
+                  endif
+                endif
+              %}
+
+              {% if show_desc and variant_description != blank %}
+                <p class="variant-product-description">{{ variant_description }}</p>
+              {% endif %}
+
+              <div class="variant-pricing-container">
+                <div class="variant-pricing">
+                  <span class="variant-current-price">
+                    {{ variant.price | money }}
+                  </span>
+                  {% if show_compare_price and variant.compare_at_price and variant.compare_at_price > variant.price %}
+                    <span class="variant-original-price">
+                      {{ variant.compare_at_price | money }}
+                    </span>
+                  {% endif %}
+                </div>
+                
+                {% if layout == 'horizontal' and save_badge_below_price and show_save_badge %}
+                  <div class="variant-save-badge-below-container">
+                    <div class="variant-save-badge variant-save-badge-below-price">
+                      {{ save_badge_text }}
+                    </div>
+                  </div>
+                {% endif %}
+
+                {% unless variant.available %}
+                  <div class="variant-sold-out">
+                    {{ 'products.product.sold_out' | t | default: 'Sold out' }}
+                  </div>
+                {% endunless %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<style>
+  /* Variant Selector Styles */
+  .variant-selector-container {
+    margin: 20px 0;
+    width: 100%;
+    --card-gap: 8px;
+    --card-padding: 12px;
+    --border-radius: 8px;
+    --image-border-radius: 6px;
+    --card-background: white;
+    --title-font-size: 14px;
+    --description-font-size: 11px;
+    --current-price-font-size: 16px;
+    --original-price-font-size: 11px;
+    --variant-border-color: #e5e7eb;
+    --variant-hover-border-color: #3b82f6;
+    --variant-selected-border-color: #3b82f6;
+    --variant-selected-bg-color: #eff6ff;
+    --variant-badge-bg-color: #3b82f6;
+    --variant-badge-text-color: white;
+    --variant-title-color: #1f2937;
+    --variant-description-color: #6b7280;
+    --variant-original-price-color: #9ca3af;
+    --variant-current-price-color: #3b82f6;
+    font-display: swap;
+  }
+
+  .variant-products-container {
+    display: flex;
+    gap: var(--card-gap, 8px);
+    width: 100%;
+    overflow: visible;
+    margin-top: 20px;
+  }
+
+  .variant-layout-horizontal {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .variant-layout-vertical {
+    flex-direction: column;
+    width: 100%;
+    gap: var(--card-gap, 8px);
+  }
+
+  .variant-products-container[data-variants-count="3"] {
+    display: flex;
+    flex-direction: row;
+    gap: var(--card-gap, 8px);
+  }
+
+  .variant-product-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--card-background);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0;
+    text-align: left !important;
+    flex: 1 1 0%;
+    position: relative;
+    min-width: 0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    overflow: visible;
+    box-sizing: border-box;
+  }
+  
+  .variant-product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: var(--card-border-width, 2px) var(--variant-border-style, solid) var(--variant-border-color);
+    border-radius: var(--border-radius);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .variant-products-container[data-image-padding-style="with_padding"] .variant-product-card {
+    padding: var(--card-padding);
+    gap: 4px;
+  }
+
+  .variant-products-container[data-show-images="false"] .variant-product-image-wrapper {
+    display: none !important;
+  }
+
+  .variant-product-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    {% if layout == 'vertical' %}
+      width: 70px;
+      height: 70px;
+      flex-shrink: 0;
+      border-radius: var(--border-radius) 0 0 var(--border-radius);
+    {% else %}
+      width: 100%;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    {% endif %}
+  }
+  
+  @media (max-width: 768px) {
+    {% if layout == 'vertical' %}
+      .variant-product-image-wrapper {
+        width: 60px;
+        height: 60px;
+      }
+    {% endif %}
+  }
+
+  .variant-products-container[data-image-padding-style="with_padding"] .variant-product-image-wrapper {
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+
+  .variant-products-container[data-image-padding-style="with_padding"] .variant-product-content {
+    padding: 0;
+  }
+
+  .variant-product-card:hover:not(.selected) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  .variant-product-card:hover:not(.selected)::before {
+    border-color: var(--variant-hover-border-color);
+  }
+
+  .variant-product-card.selected {
+    background: var(--variant-selected-bg-color);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    transform: scale(1.005);
+  }
+  
+  .variant-product-card.selected::before {
+    display: none;
+  }
+  
+  .variant-product-card.selected::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: var(--selected-card-border-width, 2px) solid var(--variant-selected-border-color);
+    border-radius: var(--border-radius);
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .variant-product-card:active {
+    transform: scale(0.98);
+    transition-duration: 0.15s;
+  }
+
+  .variant-best-value-badge {
+    position: absolute;
+    top: var(--badge-offset-top, -10px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: -webkit-max-content;
+    width: -moz-max-content;
+    width: fit-content;
+    box-sizing: border-box;
+    line-height: 1;
+    background: var(--variant-badge-bg-color, #3b82f6);
+    color: var(--variant-badge-text-color, white);
+    padding: var(--badge-padding-y, 4px) var(--badge-padding-x, 8px);
+    border-radius: var(--badge-radius, 4px);
+    font-size: var(--badge-font-size, 10px);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-body);
+    text-transform: uppercase;
+    z-index: 10;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: var(--badge-border-width, 0) solid var(--badge-border-color, transparent);
+    
+    {% assign badge_position = block.settings.badge_position | default: 'top-right' %}
+    
+    {% comment %} Preset positioning based on layout {% endcomment %}
+    {% if layout == 'vertical' %}
+      {% comment %} Vertical layout: image on left, content on right {% endcomment %}
+      {% if badge_position == 'top-left' %}
+        left: 8px !important;
+        right: auto !important;
+        transform: none !important;
+      {% elsif badge_position == 'top-center' %}
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        right: auto !important;
+      {% else %}
+        right: 8px !important;
+        left: auto !important;
+        transform: none !important;
+      {% endif %}
+    {% else %}
+      {% comment %} Horizontal layout: Always center badge on top border {% endcomment %}
+      left: 50% !important;
+        right: auto !important;
+      transform: translate(-50%, -50%) !important;
+      top: var(--badge-offset-top, -10px) !important;
+      margin: 0 !important;
+        width: fit-content !important;
+        max-width: 100%;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    {% endif %}
+  }
+
+  .variant-product-image {
+    {% if layout == 'vertical' %}
+      width: 70px;
+      height: 70px;
+      flex-shrink: 0;
+    {% else %}
+      width: 100%;
+      height: 0;
+      padding-bottom: 100%;
+    {% endif %}
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  @media (max-width: 768px) {
+    {% if layout == 'vertical' %}
+      .variant-product-image {
+        width: 60px;
+        height: 60px;
+      }
+    {% endif %}
+  }
+
+  .variant-product-visual {
+    {% if layout == 'vertical' %}
+      width: 100%;
+      height: 100%;
+    {% else %}
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    {% endif %}
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border-radius: var(--image-border-radius, 6px);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .variant-product-content {
+    padding: var(--card-padding);
+    display: flex;
+    position: relative;
+    z-index: 1;
+    flex-direction: column;
+    margin-top: 0px;
+    flex-grow: 1;
+    contain: layout style;
+  }
+
+  .variant-content-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--content-gap, 6px);
+    {% if layout == 'vertical' %}
+      align-items: flex-start;
+    {% else %}
+      align-items: center;
+    {% endif %}
+    width: 100%;
+  }
+
+  .variant-content-main > * {
+    flex-shrink: 0;
+    will-change: auto;
+  }
+
+  /* Prevent layout shift on load */
+  .variant-save-badge-container {
+    contain: layout;
+  }
+
+  .variant-pricing-container {
+    display: flex;
+    flex-direction: column;
+    {% if layout == 'vertical' %}
+      align-items: flex-start;
+    {% else %}
+      align-items: center;
+    {% endif %}
+    width: 100%;
+    position: relative;
+    overflow: visible;
+  }
+
+  .variant-pricing-container:empty {
+    display: none;
+  }
+
+  .variant-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: {% if layout == 'vertical' %}flex-start{% else %}center{% endif %} !important;
+    gap: 8px;
+    margin: 0 !important;
+    max-width: 400px;
+    overflow: hidden;
+  }
+
+  .variant-product-title {
+    font-size: var(--title-font-size) !important;
+    font-weight: bold !important;
+    color: var(--variant-title-color, #1f2937) !important;
+    margin: 0 !important;
+    font-family: inherit !important;
+    flex-shrink: 1;
+    margin-top: 0px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    text-align: {% if layout == 'vertical' %}left{% else %}center{% endif %} !important;
+  }
+
+  .variant-save-badge-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .variant-save-badge-container:empty {
+    display: none;
+  }
+
+  .variant-save-badge {
+    background: var(--save-badge-bg-color, #ef4444);
+    color: var(--save-badge-text-color, white);
+    font-size: var(--save-badge-font-size, 10px);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-body);
+    padding: var(--save-badge-padding-y, 3px) var(--save-badge-padding-x, 6px);
+    border-radius: var(--save-badge-border-radius, 12px);
+    text-transform: uppercase;
+    white-space: nowrap;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+  }
+  
+  .variant-save-badge-below-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .variant-save-badge-below-container:empty {
+    display: none;
+    margin-top: 0;
+  }
+  
+  .variant-save-badge-below-price {
+    background: var(--save-badge-bg-color, #ef4444);
+    color: var(--save-badge-text-color, white);
+    font-size: var(--save-badge-font-size, 10px);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-body);
+    padding: var(--save-badge-padding-y, 3px) var(--save-badge-padding-x, 6px);
+    border-radius: var(--save-badge-border-radius, 12px);
+    text-transform: uppercase;
+    white-space: nowrap;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+
+  .variant-product-description {
+    font-size: var(--description-font-size);
+    color: var(--variant-description-color);
+    {% if layout == 'vertical' %}
+      text-align: left;
+    {% else %}
+      text-align: center;
+    {% endif %}
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .variant-pricing {
+    display: flex;
+    {% if layout == 'vertical' %}
+      flex-direction: column;
+      align-items: flex-start;
+    {% else %}
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    {% endif %}
+    gap: 4px;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+
+  .variant-original-price {
+    font-size: var(--original-price-font-size);
+    color: var(--variant-original-price-color);
+    text-decoration: line-through;
+  }
+
+  .variant-current-price {
+    font-size: var(--current-price-font-size);
+    font-weight: bold;
+    color: var(--variant-current-price-color);
+    transition: all 0.3s ease;
+  }
+
+  .variant-sold-out {
+    margin-top: 8px;
+    color: #ef4444;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .variant-product-card[data-variant-available="false"] {
+    opacity: 0.6;
+    pointer-events: auto;
+    position: relative;
+  }
+
+  .variant-product-card[data-variant-available="false"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: inherit;
+  }
+
+  {% comment %} Desktop Image Width - Only for Horizontal Layout {% endcomment %}
+  {% if layout == 'horizontal' %}
+    .variant-products-container[data-image-width-desktop="auto"] .variant-product-card {
+      flex: 1 1 0%;
+      width: auto;
+    }
+    
+    .variant-selector-container[style*="--variant-image-width-desktop"] .variant-product-card {
+      flex: 0 0 auto;
+      width: calc(var(--variant-image-width-desktop) + 4px);
+    }
+    
+    .variant-selector-container[style*="--variant-image-width-desktop"]
+      .variant-products-container[data-image-padding-style="with_padding"]
+      .variant-product-card {
+      width: calc(var(--variant-image-width-desktop) + (var(--card-padding) * 2) + 4px);
+    }
+  {% endif %}
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    {% if layout == 'horizontal' %}
+      .variant-products-container[data-image-width-mobile="auto"] .variant-product-card {
+        flex: 1 1 0 !important;
+        width: auto !important;
+        min-width: auto !important;
+      }
+      
+      .variant-selector-container[style*="--variant-image-width-mobile"] .variant-product-card {
+        flex: 0 0 auto !important;
+        width: calc(var(--variant-image-width-mobile) + 4px) !important;
+      }
+      
+      .variant-selector-container[style*="--variant-image-width-mobile"]
+        .variant-products-container[data-image-padding-style="with_padding"]
+        .variant-product-card {
+        width: calc(var(--variant-image-width-mobile) + (var(--card-padding) * 2) + 4px) !important;
+      }
+    {% endif %}
+  }
+
+  @media (max-width: 480px) {
+    .variant-products-container {
+      gap: 6px;
+      padding: 0;
+    }
+
+    .variant-product-content {
+      padding: calc(var(--card-padding) - 4px);
+    }
+
+    .variant-title-container {
+      max-width: 220px;
+    }
+
+    .variant-product-title {
+      font-size: calc(var(--title-font-size) - 2px) !important;
+    }
+
+    .variant-product-description {
+      font-size: calc(var(--description-font-size) - 1px);
+    }
+
+    .variant-current-price {
+      font-size: calc(var(--current-price-font-size) - 2px);
+    }
+
+    .variant-original-price {
+      font-size: calc(var(--original-price-font-size) - 1px);
+    }
+
+    .variant-best-value-badge {
+      font-size: calc(var(--badge-font-size, 10px) * 0.8);
+      padding: calc(var(--badge-padding-y, 4px) * 0.5) calc(var(--badge-padding-x, 8px) * 0.75);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .variant-product-card,
+    .variant-pricing,
+    .variant-current-price,
+    .variant-best-value-badge {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  class VariantSelector {
+    constructor(container) {
+      this.container = container;
+      this.productCards = container.querySelectorAll('.variant-product-card');
+      this.selectedVariant = null;
+      this.callbacks = { onVariantSelect: [] };
+      this.init();
+    }
+
+    init() {
+      this.productCards.forEach((card, index) => {
+        card.addEventListener('click', () => {
+          this.selectVariant(index);
+        });
+      });
+
+      const selectedCard = this.container.querySelector('.variant-product-card.selected');
+      if (!selectedCard && this.productCards.length > 0) {
+        this.selectVariant(0);
+      } else if (selectedCard) {
+        const selectedIndex = Array.from(this.productCards).indexOf(selectedCard);
+        this.selectedVariant = selectedIndex;
+      }
+    }
+
+    selectVariant(index) {
+      this.productCards.forEach(card => {
+        card.classList.remove('selected');
+      });
+
+      if (this.productCards[index]) {
+        this.productCards[index].classList.add('selected');
+        this.selectedVariant = index;
+
+        const variantData = this.getVariantData(index);
+        this.callbacks.onVariantSelect.forEach(callback => {
+          callback(variantData, index);
+        });
+
+        const event = new CustomEvent('variantSelected', {
+          detail: {
+            variant: variantData,
+            index: index,
+            element: this.productCards[index]
+          }
+        });
+        this.container.dispatchEvent(event);
+      }
+    }
+
+    getVariantData(index) {
+      const card = this.productCards[index];
+      if (!card) return null;
+
+      return {
+        title: card.querySelector('.variant-product-title')?.textContent?.trim() || '',
+        description: card.querySelector('.variant-product-description')?.textContent?.trim() || '',
+        originalPrice: card.querySelector('.variant-original-price')?.textContent?.trim() || '',
+        currentPrice: card.querySelector('.variant-current-price')?.textContent?.trim() || '',
+        hasBadge: !!card.querySelector('.variant-best-value-badge'),
+        badgeText: card.querySelector('.variant-best-value-badge')?.textContent?.trim() || '',
+        variantId: card.dataset.variantId || null,
+        variantPrice: card.dataset.variantPrice || null,
+        variantComparePrice: card.dataset.variantComparePrice || null,
+        variantAvailable: card.dataset.variantAvailable === 'true'
+      };
+    }
+
+    getSelectedVariant() {
+      if (this.selectedVariant !== null) {
+        return this.getVariantData(this.selectedVariant);
+      }
+      return null;
+    }
+
+    onVariantSelect(callback) {
+      this.callbacks.onVariantSelect.push(callback);
+    }
+
+    updateVariantColors(colors) {
+      if (!colors) return;
+      const root = this.container;
+      Object.entries(colors).forEach(([property, value]) => {
+        if (value) {
+          root.style.setProperty(`--variant-${property.replace(/_/g, '-')}`, value);
+        }
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const variantContainers = document.querySelectorAll('.variant-selector-container');
+
+    variantContainers.forEach(container => {
+      if (container.variantSelector) return;
+
+      const variantSelector = new VariantSelector(container);
+      container.variantSelector = variantSelector;
+
+      variantSelector.onVariantSelect((variantData, index) => {
+        console.log('Variant selected:', variantData);
+
+        if (variantData.variantId) {
+          let productForm = (typeof Elixir_GetProductForm === 'function' && Elixir_GetProductForm()) || document.querySelector('.shop-add-to-cart-wrapper form[action*="/cart/add"]');
+          if (productForm) {
+            const variantInput = productForm.querySelector('input[name="id"], select[name="id"]');
+            if (variantInput) {
+              variantInput.value = variantData.variantId;
+              variantInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+
+          if (window.history && window.history.replaceState) {
+            const url = new URL(window.location);
+            url.searchParams.set('variant', variantData.variantId);
+            window.history.replaceState({}, '', url);
+          }
+
+          const priceElements = document.querySelectorAll('.price, .product-price, [data-price]');
+          priceElements.forEach(el => {
+            if (variantData.currentPrice) {
+              el.textContent = variantData.currentPrice;
+            }
+          });
+
+          window.dispatchEvent(new CustomEvent('variantChanged', {
+            detail: variantData
+          }));
+        }
+
+        // Update add to cart button
+        const addToCartBtn =
+          document.querySelector('.product-form__submit .button__text') ||
+          document.querySelector('.shop-add-to-cart-button .button-text') ||
+          document.querySelector('[data-add-to-cart-text]');
+
+        if (addToCartBtn) {
+          const baseText = 'Add to cart';
+          const currentPrice = variantData.currentPrice;
+
+          if (currentPrice) {
+            addToCartBtn.textContent = `${baseText} - ${currentPrice}`;
+          } else {
+            addToCartBtn.textContent = baseText;
+          }
+        }
+      });
+    });
+  });
+
+  window.createVariantSelector = function(container, options = {}) {
+    const variantSelector = new VariantSelector(container);
+
+    if (options.colors) {
+      variantSelector.updateVariantColors(options.colors);
+    }
+
+    if (options.onSelect) {
+      variantSelector.onVariantSelect(options.onSelect);
+    }
+
+    return variantSelector;
+  };
+</script>

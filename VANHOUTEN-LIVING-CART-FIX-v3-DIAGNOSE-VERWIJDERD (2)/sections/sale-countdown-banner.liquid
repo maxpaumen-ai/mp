@@ -1,0 +1,292 @@
+{{ 'sale-countdown-banner.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sale-countdown-banner.js' | asset_url }}" defer></script>
+
+<style>
+  .sale-countdown-banner {
+    --banner-bg-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_accent_1_color }}{% else %}{{ section.settings.background_color }}{% endif %};
+    --banner-text-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.text_color }}{% endif %};
+    --banner-border-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color | color_darken: 10 }}{% else %}{{ section.settings.border_color }}{% endif %};
+    --highlight-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.highlight_color }}{% endif %};
+    --highlight-decoration: {% if section.settings.highlight_underline %}underline{% else %}none{% endif %};
+    --countdown-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.countdown_color }}{% endif %};
+    --countdown-label-color: {% if section.settings.use_theme_colors %}{{ settings.global_section_background_color }}{% else %}{{ section.settings.countdown_label_color }}{% endif %};
+  }
+</style>
+
+<script>
+  window.saleCountdownOptions = {
+    showDays: {{ section.settings.show_days }},
+    customEndTime: {{ section.settings.custom_end_time }},
+    endYear: {{ section.settings.end_year }},
+    endMonth: {{ section.settings.end_month }},
+    endDay: {{ section.settings.end_day }},
+    endHour: {{ section.settings.end_hour }},
+    endMinute: {{ section.settings.end_minute }},
+    daysLabel: "{{ section.settings.days_label | default: 'DAYS' }}",
+    hoursLabel: "{{ section.settings.hours_label | default: 'HRS' }}",
+    minutesLabel: "{{ section.settings.minutes_label | default: 'MIN' }}",
+    secondsLabel: "{{ section.settings.seconds_label | default: 'SEC' }}",
+    timeFormatSingleDigit: "{{ section.settings.time_format_single_digit | default: '0' }}",
+    zeroValue: "{{ section.settings.zero_value | default: '00' }}"
+  };
+</script>
+
+<div id="sale-countdown-banner" class="sale-countdown-banner{% if section.settings.sticky %} sticky{% endif %} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  <div class="sale-countdown-content">
+    <div class="sale-countdown-text">
+      <p>
+        {% if section.settings.show_icon %}{{ section.settings.icon_text }}{% endif %}
+        <span class="sale-countdown-bold">{{ section.settings.heading_text }}</span>
+        <span class="sale-countdown-highlight">{{ section.settings.highlight_text }}</span>
+        {%- if section.settings.show_colon %}:{% endif %}
+      </p>
+    </div>
+    <div class="sale-countdown-timer">
+      {% if section.settings.show_days %}
+        <div class="sale-countdown-item">
+          <div id="sale-countdown-days" class="sale-countdown-value">00</div>
+          <div id="days-label" class="sale-countdown-label">{{ section.settings.days_label | default: 'DAYS' }}</div>
+        </div>
+      {% endif %}
+      <div class="sale-countdown-item">
+        <div id="sale-countdown-hours" class="sale-countdown-value">00</div>
+        <div id="hours-label" class="sale-countdown-label">{{ section.settings.hours_label | default: 'HRS' }}</div>
+      </div>
+      <div class="sale-countdown-item">
+        <div id="sale-countdown-minutes" class="sale-countdown-value">00</div>
+        <div id="minutes-label" class="sale-countdown-label">{{ section.settings.minutes_label | default: 'MIN' }}</div>
+      </div>
+      <div class="sale-countdown-item">
+        <div id="sale-countdown-seconds" class="sale-countdown-value">00</div>
+        <div id="seconds-label" class="sale-countdown-label">{{ section.settings.seconds_label | default: 'SEC' }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Sale Countdown Banner",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true,
+      "info": "Apply the global theme colors to this section"
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "text",
+      "id": "heading_text",
+      "label": "Heading Text",
+      "default": "SPRING SALE"
+    },
+    {
+      "type": "text",
+      "id": "highlight_text",
+      "label": "Highlight Text",
+      "default": "30% OFF"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_colon",
+      "label": "Show colon after highlight text",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_icon",
+      "label": "Show icon",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "icon_text",
+      "label": "Icon Text (emoji)",
+      "default": "🌼"
+    },
+    {
+      "type": "header",
+      "content": "Countdown Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_days",
+      "label": "Show days counter",
+      "default": true,
+      "info": "Display days remaining in the countdown"
+    },
+    {
+      "type": "checkbox",
+      "id": "custom_end_time",
+      "label": "Use custom end date",
+      "default": true,
+      "info": "If unchecked, countdown will reset at midnight EST"
+    },
+    {
+      "type": "header",
+      "content": "End Date & Time"
+    },
+    {
+      "type": "range",
+      "id": "end_year",
+      "min": 2023,
+      "max": 2030,
+      "step": 1,
+      "label": "Year",
+      "default": 2024
+    },
+    {
+      "type": "range",
+      "id": "end_month",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "label": "Month",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "end_day",
+      "min": 1,
+      "max": 31,
+      "step": 1,
+      "label": "Day",
+      "default": 31
+    },
+    {
+      "type": "range",
+      "id": "end_hour",
+      "min": 0,
+      "max": 23,
+      "step": 1,
+      "label": "Hour (24-hour format)",
+      "default": 23
+    },
+    {
+      "type": "range",
+      "id": "end_minute",
+      "min": 0,
+      "max": 59,
+      "step": 1,
+      "label": "Minute",
+      "default": 59
+    },
+    {
+      "type": "header",
+      "content": "Display Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky",
+      "label": "Make banner sticky",
+      "default": false,
+      "info": "Banner will stick to the top of the screen when scrolling"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffeaee"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ef4a65"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "highlight_underline",
+      "label": "Underline highlighted text",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "countdown_color",
+      "label": "Countdown Numbers Color",
+      "default": "#ef4a65"
+    },
+    {
+      "type": "color",
+      "id": "countdown_label_color",
+      "label": "Countdown Labels Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#ef4a65"
+    },
+    {
+      "type": "header",
+      "content": "Countdown Label Customization"
+    },
+    {
+      "type": "text",
+      "id": "days_label",
+      "label": "Days label",
+      "default": "DAYS",
+      "info": "Customize the label for days (for different languages)"
+    },
+    {
+      "type": "text",
+      "id": "hours_label",
+      "label": "Hours label",
+      "default": "HRS",
+      "info": "Customize the label for hours (for different languages)"
+    },
+    {
+      "type": "text",
+      "id": "minutes_label",
+      "label": "Minutes label",
+      "default": "MIN",
+      "info": "Customize the label for minutes (for different languages)"
+    },
+    {
+      "type": "text",
+      "id": "seconds_label",
+      "label": "Seconds label",
+      "default": "SEC",
+      "info": "Customize the label for seconds (for different languages)"
+    },
+    {
+      "type": "header",
+      "content": "Time Format Settings"
+    },
+    {
+      "type": "text",
+      "id": "time_format_single_digit",
+      "label": "Single-digit prefix",
+      "default": "0",
+      "info": "Character to prefix single-digit numbers (e.g., '0' turns 1 into 01)"
+    },
+    {
+      "type": "text",
+      "id": "zero_value",
+      "label": "Zero time display",
+      "default": "00",
+      "info": "How to display zero values when countdown is complete"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sale Countdown Banner",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}

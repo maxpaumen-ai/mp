@@ -1,0 +1,2298 @@
+{{ 'product-comparison.css' | asset_url | stylesheet_tag }}
+
+{% comment %} Google Fonts for accent text customization {% endcomment %}
+{% if section.settings.override_global_accent %}
+  {% if section.settings.accent_font_family != 'inherit' and section.settings.accent_font_family != 'serif' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% case section.settings.accent_font_family %}
+      {% when 'Georgia Pro' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Georgia+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Bodoni Moda' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Instrument Serif' %}
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'DM Serif Text' %}
+        <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'Nothing You Could Do' %}
+        <link href="https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+    {% endcase %}
+  {% endif %}
+{% endif %}
+
+{%- liquid
+  assign column_count = section.settings.column_count | default: '2' | plus: 0
+-%}
+
+<div
+  class="comparison-section section-{{ section.id }}  {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}"
+  style="{% if section.settings.use_theme_colors %}{% if settings.global_section_use_gradient_background %}background: {{ settings.global_section_gradient_background }};{% else %}background-color: {{ settings.global_section_background_color }};{% endif %}{% else %}background-color: {{ section.settings.background_color }};{% endif %}"
+>
+  <div class="comparison-container">
+    {% if section.settings.show_heading %}
+      <div class="comparison-header">
+        <h2
+          class="comparison-heading"
+          style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_part_1_color }}{% endif %} !important;"
+        >
+          {{- section.settings.title_part_1 -}}
+          <span class="accent-text {% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+            {{- section.settings.title_part_2 -}}
+          </span>
+        </h2>
+        {% if section.settings.subheading != blank %}
+          <div
+            class="comparison-subheading"
+            style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subheading_color }}{% endif %} !important;"
+          >
+            {{ section.settings.subheading }}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- Desktop Layout: Two-column layout with text content and table -->
+    <div class="comparison-layout">
+      <!-- Text Column (Desktop: Left, Mobile: Above) -->
+      {% if section.settings.show_heading %}
+        <div class="comparison-text-column-wrapper">
+          <div class="comparison-text-column">
+            <h2
+              class="comparison-heading"
+              style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.title_part_1_color }}{% endif %} !important;"
+            >
+              {{- section.settings.title_part_1 -}}
+              <span class="accent-text {% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+                {{- section.settings.title_part_2 -}}
+              </span>
+            </h2>
+            {% if section.settings.subheading != blank %}
+              <div
+                class="comparison-subheading"
+                style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subheading_color }}{% endif %} !important;"
+              >
+                {{ section.settings.subheading }}
+              </div>
+            {% endif %}
+            {% if section.settings.desktop_description != blank %}
+              <div
+                class="comparison-desktop-description"
+                style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.subheading_color }}{% endif %} !important;"
+              >
+                {{ section.settings.desktop_description }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Table Column -->
+      <div class="comparison-table-column">
+        <div class="table-wrapper">
+          <table class="comparison-table">
+            <!-- Header Row -->
+            <thead>
+              <tr class="table-header">
+                <th class="feature-header"></th>
+                {% for block in section.blocks %}
+                  {% if block.type == 'product_column' and forloop.index <= column_count %}
+                    <th
+                      class="product-header column-{{ forloop.index }} {% if block.settings.highlight_column %}highlighted{% endif %}"
+                      data-column="{{ forloop.index }}"
+                    >
+                      {% if block.settings.product_image != blank %}
+                        <div class="comparison-img-wrapper">
+                          <img
+                            src="{{ block.settings.product_image | img_url: '150x' }}"
+                            alt="{{ block.settings.product_name }}"
+                            class="comparison-img column-{{ forloop.index }}-img"
+                            width="auto"
+                            height="auto"
+                            loading="lazy"
+                          >
+                        </div>
+                      {% endif %}
+                      <div
+                        class="comparison-product-title"
+                        style="color: {% if section.settings.use_theme_colors %}{% if block.settings.highlight_column %}{{ settings.global_section_background_color }}{% else %}{{ settings.global_section_text_color }}{% endif %}{% else %}{% if block.settings.highlight_column %}{{ section.settings.highlighted_text_color }}{% else %}{{ section.settings.unhighlighted_text_color }}{% endif %}{% endif %} !important;"
+                      >
+                        {{ block.settings.product_name }}
+                      </div>
+                      {% if block.settings.product_subtitle != blank %}
+                        <div
+                          class="product-subtitle {% if block.settings.use_subtitle_background != true %}no-background{% endif %}"
+                          style="color: {% if section.settings.use_theme_colors %}{% if block.settings.highlight_column %}{{ settings.global_section_background_color }}{% else %}{{ settings.global_section_text_color }}{% endif %}{% else %}{% if block.settings.highlight_column %}{{ section.settings.highlighted_subtitle_color }}{% else %}{{ section.settings.unhighlighted_subtitle_color }}{% endif %}{% endif %} !important;"
+                        >
+                          {% if block.settings.show_subtitle_icon != false %}
+                            {% if block.settings.subtitle_custom_icon != blank %}
+                              <span class="subtitle-icon">{{ block.settings.subtitle_custom_icon }}</span>
+                            {% else %}
+                              {% if block.settings.highlight_column %}
+                                <span class="subtitle-icon">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 256 256"
+                                    width="16"
+                                    height="16"
+                                    fill="currentColor"
+                                  >
+                                    <path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-52.2,6.84-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/>
+                                  </svg>
+                                </span>
+                              {% endif %}
+                            {% endif %}
+                          {% endif %}
+                          {{ block.settings.product_subtitle }}
+                        </div>
+                      {% endif %}
+                    </th>
+                  {% endif %}
+                {% endfor %}
+              </tr>
+            </thead>
+
+            <!-- Feature Rows -->
+            <tbody>
+              {% for block in section.blocks %}
+                {% if block.type == 'feature_row' %}
+                  <tr class="feature-row">
+                    <td class="feature-cell">
+                      <div class="feature-content">
+                        {% if block.settings.show_icon %}
+                          {% if block.settings.feature_image != blank %}
+                            <div class="feature-icon">
+                              <img
+                                src="{{ block.settings.feature_image | img_url: '48x' }}"
+                                alt="{{ block.settings.feature_name }}"
+                                width="24"
+                                height="24"
+                              >
+                            </div>
+                          {% elsif block.settings.feature_icon != blank %}
+                            <div class="feature-icon">{{ block.settings.feature_icon }}</div>
+                          {% endif %}
+                        {% endif %}
+                        <div
+                          class="feature-name"
+                          style="color: {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color }}{% else %}{{ section.settings.unhighlighted_text_color }}{% endif %} !important;"
+                        >
+                          {{ block.settings.feature_name }}
+                        </div>
+                      </div>
+                    </td>
+
+                    {% for i in (1..column_count) %}
+                      {% assign value_setting = 'value_' | append: i %}
+                      {% assign text_value_setting = 'text_value_' | append: i %}
+
+                      {% comment %} Check if this column should be highlighted by finding the corresponding product_column block {% endcomment %}
+                      {% assign column_highlighted = false %}
+                      {% for product_block in section.blocks %}
+                        {% if product_block.type == 'product_column'
+                          and forloop.index == i
+                          and product_block.settings.highlight_column
+                        %}
+                          {% assign column_highlighted = true %}
+                          {% break %}
+                        {% endif %}
+                      {% endfor %}
+
+                      <td
+                        class="value-cell column-{{ i }} {% if column_highlighted %}highlighted{% endif %}"
+                        data-column="{{ i }}"
+                      >
+                        {% if block.settings.value_type == 'checkmark' %}
+                          {% if block.settings[value_setting] == 'yes' %}
+                            <span class="check-yes">
+                              {% if section.settings.use_custom_check_icons
+                                and section.settings.custom_checkmark_icon != blank
+                              %}
+                                <img
+                                  src="{{ section.settings.custom_checkmark_icon | image_url: width: 96 }}"
+                                  srcset="{{ section.settings.custom_checkmark_icon | image_url: width: 48 }} 1x, {{ section.settings.custom_checkmark_icon | image_url: width: 96 }} 2x"
+                                  alt="Yes"
+                                  loading="lazy"
+                                  width="{{ section.settings.icon_size_desktop | default: 24 }}"
+                                  height="{{ section.settings.icon_size_desktop | default: 24 }}"
+                                  class="custom-check-icon"
+                                >
+                              {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="24" height="24">
+                                  <rect width="256" height="256" fill="none"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z" fill="currentColor"/>
+                                </svg>
+                              {% endif %}
+                            </span>
+                          {% else %}
+                            <span class="check-no">
+                              {% if section.settings.use_custom_check_icons
+                                and section.settings.custom_x_icon != blank
+                              %}
+                                <img
+                                  src="{{ section.settings.custom_x_icon | image_url: width: 96 }}"
+                                  srcset="{{ section.settings.custom_x_icon | image_url: width: 48 }} 1x, {{ section.settings.custom_x_icon | image_url: width: 96 }} 2x"
+                                  alt="No"
+                                  loading="lazy"
+                                  width="{{ section.settings.icon_size_desktop | default: 24 }}"
+                                  height="{{ section.settings.icon_size_desktop | default: 24 }}"
+                                  class="custom-check-icon"
+                                >
+                              {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="24" height="24">
+                                  <rect width="256" height="256" fill="none"/><path d="M128,24A104,104,0,1,0,232,128,104.12,104.12,0,0,0,128,24Zm36.44,132.88a8,8,0,0,1,0,11.31,8.17,8.17,0,0,1-11.31,0L128,143.31l-25.13,24.88a8.17,8.17,0,0,1-11.31,0,8,8,0,0,1,0-11.31L116.69,132,91.56,107.13a8,8,0,0,1,11.31-11.32L128,120.69l25.13-24.88a8,8,0,0,1,11.31,11.32L139.31,132Z" fill="currentColor"/>
+                                </svg>
+                              {% endif %}
+                            </span>
+                          {% endif %}
+                        {% else %}
+                          {% assign is_highlighted_column = false %}
+                          {% for product_block in section.blocks %}
+                            {% if product_block.type == 'product_column'
+                              and product_block.settings.highlight_column
+                              and forloop.index == i
+                            %}
+                              {% assign is_highlighted_column = true %}
+                            {% endif %}
+                          {% endfor %}
+
+                          <span
+                            class="text-value"
+                            style="color: {% if section.settings.use_theme_colors %}{% if is_highlighted_column %}{{ settings.global_section_background_color }}{% else %}{{ settings.global_section_text_color }}{% endif %}{% else %}{% if is_highlighted_column %}{{ section.settings.highlighted_check_color }}{% else %}{{ section.settings.unhighlighted_text_color }}{% endif %}{% endif %} !important; letter-spacing: var(--letter-spacing-body);"
+                          >
+                            {{- block.settings[text_value_setting] -}}
+                          </span>
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Dynamic styles that use Liquid variables */
+  .section-{{ section.id }} {
+    {% if section.settings.use_background_image and section.settings.background_image_desktop != blank %}
+      /* Background image mode */
+      {% if section.settings.use_theme_colors %}
+        background-image: url('{{ section.settings.background_image_desktop | image_url: width: 1920 }}');
+        background-color: {{ settings.global_section_background_color }};
+      {% elsif section.settings.use_gradient_background %}
+        background: url('{{ section.settings.background_image_desktop | image_url: width: 1920 }}'), {{ section.settings.background_gradient }};
+      {% else %}
+        background-image: url('{{ section.settings.background_image_desktop | image_url: width: 1920 }}');
+        background-color: {{ section.settings.background_color }};
+      {% endif %}
+      background-size: {{ section.settings.background_image_size | default: 'cover' }};
+      background-position: {{ section.settings.background_image_position | default: 'center center' }};
+      background-repeat: {{ section.settings.background_image_repeat | default: 'no-repeat' }};
+      {% if section.settings.background_overlay_enable %}
+        position: relative;
+      {% endif %}
+    {% elsif section.settings.use_gradient_background and section.settings.use_theme_colors != true %}
+      background: {{ section.settings.background_gradient }};
+    {% elsif section.settings.use_theme_colors != true %}
+      background-color: {{ section.settings.background_color }};
+    {% endif %}
+    /* Theme color for background is handled by the div's inline style */
+
+    padding-top: {{ section.settings.padding_top }}px !important;
+    padding-bottom: {{ section.settings.padding_bottom }}px !important;
+    padding-left: {{ section.settings.padding_horizontal }}px !important;
+    padding-right: {{ section.settings.padding_horizontal }}px !important;
+
+    /* Section borders */
+    {% if section.settings.enable_section_top_border %}
+      border-top: {{ section.settings.section_top_border_width | default: 1 }}px {{ section.settings.section_top_border_style | default: 'solid' }} {{ section.settings.section_top_border_color | default: '#E5E5E5' }};
+    {% endif %}
+
+    {% if section.settings.enable_section_bottom_border %}
+      border-bottom: {{ section.settings.section_bottom_border_width | default: 1 }}px {{ section.settings.section_bottom_border_style | default: 'solid' }} {{ section.settings.section_bottom_border_color | default: '#E5E5E5' }};
+    {% endif %}
+  }
+
+  @media screen and (max-width: 767px) {
+    .section-{{ section.id }} {
+      padding-top: {{ section.settings.mobile_padding_top }}px !important;
+      padding-bottom: {{ section.settings.mobile_padding_bottom }}px !important;
+      padding-left: {{ section.settings.mobile_padding_horizontal }}px !important;
+      padding-right: {{ section.settings.mobile_padding_horizontal }}px !important;
+      {% if section.settings.use_background_image %}
+        {% if section.settings.background_image_mobile != blank %}
+          background-image: url('{{ section.settings.background_image_mobile | image_url: width: 768 }}') !important;
+        {% elsif section.settings.background_image_desktop != blank %}
+          background-image: url('{{ section.settings.background_image_desktop | image_url: width: 768 }}') !important;
+        {% endif %}
+      {% endif %}
+    }
+  }
+
+  /* Background overlay */
+  {% if section.settings.use_background_image and section.settings.background_overlay_enable %}
+  .section-{{ section.id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: {{ section.settings.background_overlay_color | default: '#000000' }};
+    opacity: {{ section.settings.background_overlay_opacity | default: 30 | divided_by: 100.0 }};
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .section-{{ section.id }} .comparison-container {
+    position: relative;
+    z-index: 1;
+  }
+  {% endif %}
+
+  .section-{{ section.id }} .comparison-container {
+    {% if section.settings.column_count == '3' %}
+      max-width: {{ section.settings.table_width | at_least: 1400 }}px;
+    {% else %}
+      max-width: {{ section.settings.table_width }}px;
+    {% endif %}
+    padding-top: {{ section.settings.container_padding_vertical_desktop | default: 0 }}px;
+    padding-bottom: {{ section.settings.container_padding_vertical_desktop | default: 0 }}px;
+    padding-left: {{ section.settings.container_padding_horizontal_desktop | default: 0 }}px;
+    padding-right: {{ section.settings.container_padding_horizontal_desktop | default: 0 }}px;
+  }
+
+  @media (max-width: 991px) {
+    .section-{{ section.id }} .comparison-container {
+      padding-top: {{ section.settings.container_padding_vertical_mobile | default: 0 }}px;
+      padding-bottom: {{ section.settings.container_padding_vertical_mobile | default: 0 }}px;
+      padding-left: {{ section.settings.container_padding_horizontal_mobile | default: 15 }}px;
+      padding-right: {{ section.settings.container_padding_horizontal_mobile | default: 15 }}px;
+    }
+  }
+
+  /* Column count layout adjustments */
+  {% if section.settings.column_count == '3' %}
+    .section-{{ section.id }} .comparison-table {
+      table-layout: fixed;
+      width: 100%;
+    }
+    .section-{{ section.id }} .feature-header,
+    .section-{{ section.id }} .feature-cell {
+      width: 22%;
+    }
+    .section-{{ section.id }} .product-header,
+    .section-{{ section.id }} .value-cell {
+      width: 26%;
+    }
+    @media (max-width: 991px) {
+      .section-{{ section.id }} .comparison-container {
+        max-width: 100%;
+      }
+      .section-{{ section.id }} .feature-header,
+      .section-{{ section.id }} .feature-cell {
+        width: 25%;
+        font-size: 11px;
+      }
+      .section-{{ section.id }} .product-header,
+      .section-{{ section.id }} .value-cell {
+        width: 25%;
+      }
+      .section-{{ section.id }} .comparison-product-title {
+        font-size: 11px;
+      }
+      .section-{{ section.id }} .product-subtitle {
+        font-size: 9px;
+      }
+      .section-{{ section.id }} .comparison-img {
+        max-height: 50px !important;
+      }
+    }
+    @media (max-width: 600px) {
+      .section-{{ section.id }} .feature-header,
+      .section-{{ section.id }} .feature-cell {
+        width: 28%;
+        font-size: 10px;
+        padding: 8px 5px;
+      }
+      .section-{{ section.id }} .product-header,
+      .section-{{ section.id }} .value-cell {
+        width: 24%;
+        padding: 8px 5px;
+      }
+      .section-{{ section.id }} .comparison-product-title {
+        font-size: 10px;
+      }
+      .section-{{ section.id }} .product-subtitle {
+        font-size: 8px;
+        padding: 2px 4px;
+      }
+      .section-{{ section.id }} .comparison-img {
+        max-height: 40px !important;
+      }
+    }
+  {% endif %}
+
+  /* Two-Column Layout for Desktop Text Column */
+  .section-{{ section.id }} .comparison-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+  }
+
+  .section-{{ section.id }} .comparison-text-column-wrapper {
+    width: 100%;
+  }
+
+  .section-{{ section.id }} .comparison-text-column {
+    width: 100%;
+    text-align: center;
+    padding-left: {{ section.settings.text_column_padding_mobile | default: 20 }}px;
+    padding-right: {{ section.settings.text_column_padding_mobile | default: 20 }}px;
+  }
+
+  .section-{{ section.id }} .comparison-text-column .comparison-heading {
+    margin-bottom: 15px;
+  }
+
+  .section-{{ section.id }} .comparison-text-column .comparison-subheading {
+    margin-bottom: 0;
+  }
+
+  .section-{{ section.id }} .comparison-desktop-description {
+    {% if section.settings.show_description_on_mobile %}
+      display: block; /* Show on mobile when enabled */
+    {% else %}
+      display: none; /* Hidden on mobile by default */
+    {% endif %}
+    margin-top: 15px;
+    letter-spacing: var(--letter-spacing-body);
+    font-size: {{ section.settings.desktop_description_size_mobile | default: 14 }}px;
+    line-height: 1.5;
+  }
+
+  .section-{{ section.id }} .comparison-table-column {
+    width: 100%;
+    flex: 1;
+  }
+
+  @media screen and (min-width: 990px) {
+    .section-{{ section.id }} .comparison-table-column {
+      width: auto;
+    }
+
+    .section-{{ section.id }} .table-wrapper {
+      width: 100%;
+    }
+  }
+
+  /* Desktop Layout */
+  @media screen and (min-width: 990px) {
+    .section-{{ section.id }} .comparison-layout {
+      flex-direction: row;
+      align-items: stretch;
+      gap: 4rem;
+      min-height: 400px; /* Ensure minimum height for centering to work */
+    }
+
+    .section-{{ section.id }} .comparison-text-column-wrapper {
+      flex: 1;
+      max-width: {{ 100 | minus: section.settings.table_column_width | default: 53 }}%;
+      {% if section.settings.table_column_position == 'left' %}
+        order: 2;
+      {% else %}
+        order: 1;
+      {% endif %}
+      align-self: stretch; /* Force the wrapper to stretch to parent height */
+      {% if section.settings.center_text_column_desktop %}
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      {% endif %}
+    }
+
+    .section-{{ section.id }} .comparison-text-column {
+      {% if section.settings.center_text_column_desktop %}
+        width: auto;
+      {% else %}
+        width: 100%;
+      {% endif %}
+      padding-left: {{ section.settings.text_column_padding_desktop | default: 40 }}px;
+      padding-right: {{ section.settings.text_column_padding_desktop | default: 40 }}px;
+    }
+
+    .section-{{ section.id }} .comparison-desktop-description {
+      display: block; /* Show on desktop */
+      font-size: {{ section.settings.desktop_description_size_desktop | default: 16 }}px;
+    }
+
+    .section-{{ section.id }} .comparison-table-column {
+      {% if section.settings.table_column_position == 'left' %}
+        order: 1;
+      {% else %}
+        order: 2;
+      {% endif %}
+      flex: 0 0 {{ section.settings.table_column_width | default: 47 }}%;
+      max-width: {{ section.settings.table_column_width | default: 47 }}%;
+    }
+
+  }
+
+  /* Hide the original header when text column is present */
+  .section-{{ section.id }} .comparison-header {
+    display: none;
+  }
+
+  /* Reduce spacing in comparison table on desktop */
+  @media screen and (min-width: 990px) {
+    /* Reduce vertical spacing */
+    .section-{{ section.id }} .product-header {
+      padding: 12px 6px; /* Much smaller horizontal padding */
+      width: {{ section.settings.product_header_width_desktop | default: 80 }}px;
+    }
+
+    .section-{{ section.id }} .feature-cell {
+      padding: 10px 6px; /* Much smaller horizontal padding */
+    }
+
+    .section-{{ section.id }} .feature-header {
+      width: 100px; /* Much narrower - reduced from 180px to 100px */
+      padding: 10px 6px; /* Much smaller horizontal padding */
+    }
+
+    .section-{{ section.id }} .value-cell {
+      padding: 10px 6px; /* Much smaller horizontal padding */
+      width: {{ section.settings.product_header_width_desktop | default: 80 }}px;
+    }
+
+    .section-{{ section.id }} .comparison-img-wrapper {
+      margin-bottom: 8px; /* Reduced from 15px */
+    }
+
+    .section-{{ section.id }} .comparison-product-title {
+      margin-bottom: 4px; /* Reduced from 6px */
+    }
+  }
+
+  /* Text Colors - Conditional */
+  {% if section.settings.use_theme_colors %}
+    .section-{{ section.id }} .comparison-subheading,
+    .section-{{ section.id }} .comparison-product-title,
+    .section-{{ section.id }} .product-subtitle,
+    .section-{{ section.id }} .feature-name,
+    .section-{{ section.id }} .text-value {
+      color: {{ settings.global_section_text_color }};
+    }
+
+    /* Enhanced accent text styling with global and local customization options */
+    .section-{{ section.id }} .comparison-heading .accent-text {
+      display: inline-block;
+      line-height: inherit;
+      vertical-align: baseline;
+      margin-left: {{ section.settings.accent_text_margin_left }}px !important;
+
+      /* 1. Apply Color or Gradient */
+      {% if section.settings.use_theme_colors %}
+        {% comment %} Use global dark gradient when theme colors are enabled {% endcomment %}
+        background: {{ settings.global_accent_text_gradient_dark }} !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        color: transparent !important;
+      {% elsif section.settings.use_accent_gradient %}
+        background: {{ section.settings.accent_text_gradient }} !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        color: transparent !important;
+      {% else %}
+        {% comment %} Apply solid color {% endcomment %}
+        color: {{ section.settings.title_part_2_color }} !important;
+      {% endif %}
+
+      {% if section.settings.override_global_accent %}
+        /* Use section-specific fonts */
+        {% if section.settings.accent_font_family != 'inherit' %}
+          {% case section.settings.accent_font_family %}
+            {% when 'serif' %}
+              font-family: serif !important;
+            {% when 'Georgia Pro' %}
+              font-family: 'Georgia Pro', Georgia, serif !important;
+            {% when 'Bodoni Moda' %}
+              font-family: 'Bodoni Moda', Georgia, serif !important;
+            {% when 'Instrument Serif' %}
+              font-family: 'Instrument Serif', Georgia, serif !important;
+            {% when 'DM Serif Text' %}
+              font-family: 'DM Serif Text', Georgia, serif !important;
+            {% when 'Nothing You Could Do' %}
+              font-family: 'Nothing You Could Do', cursive !important;
+          {% endcase %}
+        {% endif %}
+        font-style: {% if section.settings.accent_font_style != 'normal' %}{{ section.settings.accent_font_style }}{% else %}var(--font-accent-style, normal){% endif %} !important;
+        font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+      {% else %}
+        /* Use global accent fonts */
+        font-family: var(--font-accent-family) !important;
+        font-style: var(--font-accent-style) !important;
+        font-weight: var(--font-accent-weight) !important;
+        letter-spacing: var(--font-accent-letter-spacing) !important;
+        text-transform: var(--font-accent-text-transform) !important;
+      {% endif %}
+    }
+
+    .section-{{ section.id }} .feature-icon {
+      color: {{ settings.global_section_accent_1_color }};
+    }
+
+    .section-{{ section.id }} .check-yes {
+      color: {{ settings.global_section_accent_1_color }};
+    }
+    .section-{{ section.id }} .check-no {
+      color: {{ settings.global_section_text_color }};
+    }
+    /* Highlighted column under theme colors */
+    .section-{{ section.id }} .product-header.highlighted .comparison-product-title,
+    .section-{{ section.id }} .product-header.highlighted .product-subtitle,
+    .section-{{ section.id }} .value-cell.highlighted .text-value,
+    .section-{{ section.id }} .value-cell.highlighted .check-yes,
+    .section-{{ section.id }} .value-cell.highlighted .check-no {
+      color: {{ settings.global_section_background_color }} !important; /* Important to override general text color */
+    }
+
+  {% else %} /* Custom Colors when use_theme_colors is false */
+
+    .section-{{ section.id }} .global-accent-text { /* Title Part 2 with custom color */
+      {% if section.settings.use_accent_gradient %}
+        background: linear-gradient({{ section.settings.accent_gradient_angle }}deg, {{ section.settings.accent_gradient_start_color }} 0%, {{ section.settings.accent_gradient_end_color }} 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        color: transparent !important;
+      {% else %}
+        color: {{ section.settings.title_part_2_color }};
+      {% endif %}
+      font-weight: {{ section.settings.title_part_2_weight | default: 'bold' }};
+      font-style: {{ section.settings.title_part_2_style | default: 'normal' }};
+      margin-left: {{ section.settings.accent_text_margin_left }}px;
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% if section.settings.accent_font_family == 'serif' %}
+          font-family: serif !important;
+        {% elsif section.settings.accent_font_family == 'Georgia Pro' %}
+          font-family: 'Georgia Pro', Georgia, serif !important;
+        {% elsif section.settings.accent_font_family == 'Bodoni Moda' %}
+          font-family: 'Bodoni Moda', Georgia, serif !important;
+        {% endif %}
+      {% endif %}
+      {% if section.settings.accent_font_style != 'inherit' %}
+        font-style: {{ section.settings.accent_font_style }} !important;
+      {% endif %}
+      {% if section.settings.accent_font_weight != 'inherit' %}
+        font-weight: {{ section.settings.accent_font_weight }} !important;
+      {% endif %}
+      padding-right: 4px !important;
+      display: inline-block !important;
+      line-height: inherit !important;
+      vertical-align: baseline !important;
+    }
+
+    /* Enhanced specificity for custom accent text */
+    .section-{{ section.id }} .custom-accent-text {
+      {% if section.settings.use_theme_colors %}
+        {% comment %} Use global dark gradient when theme colors are enabled {% endcomment %}
+        background: {{ settings.global_accent_text_gradient_dark }} !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        color: transparent !important;
+      {% elsif section.settings.use_accent_gradient %}
+        background: linear-gradient({{ section.settings.accent_gradient_angle }}deg, {{ section.settings.accent_gradient_start_color }} 0%, {{ section.settings.accent_gradient_end_color }} 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        color: transparent !important;
+      {% else %}
+        color: {{ section.settings.accent_color | default: settings.accent_text_color }} !important;
+      {% endif %}
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% if section.settings.accent_font_family == 'serif' %}
+          font-family: serif !important;
+        {% elsif section.settings.accent_font_family == 'Georgia Pro' %}
+          font-family: 'Georgia Pro', Georgia, serif !important;
+        {% elsif section.settings.accent_font_family == 'Bodoni Moda' %}
+          font-family: 'Bodoni Moda', Georgia, serif !important;
+        {% endif %}
+      {% endif %}
+      {% if section.settings.accent_font_style != 'normal' %}
+        font-style: {{ section.settings.accent_font_style }} !important;
+      {% endif %}
+      {% if section.settings.accent_font_weight != 'inherit' %}
+        font-weight: {{ section.settings.accent_font_weight }} !important;
+      {% endif %}
+      padding-right: 4px !important;
+      display: inline-block !important;
+      line-height: inherit !important;
+      vertical-align: baseline !important;
+    }
+
+    /* .section-{{ section.id }} .comparison-subheading {
+      color: {{ section.settings.subheading_color }};
+    } */
+
+    /* Unhighlighted Product Column Text */
+    /* .section-{{ section.id }} .product-header:not(.highlighted) .comparison-product-title {
+      color: {{ section.settings.unhighlighted_text_color | default: section.settings.text_color }};
+    }
+    .section-{{ section.id }} .product-header:not(.highlighted) .product-subtitle {
+      color: {{ section.settings.unhighlighted_subtitle_color | default: section.settings.subtitle_color }};
+    } */
+
+    /* Highlighted Product Column Text */
+    /* .section-{{ section.id }} .product-header.highlighted .comparison-product-title {
+      color: {{ section.settings.highlighted_text_color }} !important;
+    }
+    .section-{{ section.id }} .product-header.highlighted .product-subtitle {
+      color: {{ section.settings.highlighted_subtitle_color }} !important;
+    } */
+
+    /* Feature Row - Feature Name (general, not column specific) */
+    /* .section-{{ section.id }} .feature-name {
+      color: {{ section.settings.unhighlighted_text_color | default: section.settings.text_color }}; /* Or a more general feature_name_color if added */
+    } */
+
+    /* Feature Row Icons (general, not column specific) */
+    .section-{{ section.id }} .feature-icon {
+      color: {{ section.settings.unhighlighted_icon_color | default: section.settings.icon_color }};
+    }
+
+    /* Feature Row Values - Unhighlighted Column */
+    .section-{{ section.id }} .value-cell:not(.highlighted) .check-yes {
+      color: {{ section.settings.unhighlighted_check_color | default: section.settings.check_color }};
+    }
+    .section-{{ section.id }} .value-cell:not(.highlighted) .check-no {
+      color: {{ section.settings.unhighlighted_x_color | default: section.settings.x_color }};
+    }
+
+    /* Feature Row Values - Highlighted Column */
+    .section-{{ section.id }} .value-cell.highlighted .check-yes {
+      color: {{ section.settings.highlighted_check_color }} !important;
+    }
+    .section-{{ section.id }} .value-cell.highlighted .check-no {
+      color: {{ section.settings.highlighted_x_color }} !important;
+    }
+
+  {% endif %}
+
+  /* General Sizing - Not color dependent */
+  .section-{{ section.id }} .comparison-heading {
+    font-size: {{ section.settings.heading_size_mobile }}px;
+    font-family: var(--font-heading-family);
+    font-weight: var(--font-weight-bold);
+    font-style: var(--font-heading-style);
+    letter-spacing: var(--font-heading-letter-spacing);
+    text-transform: var(--font-heading-text-transform);
+    line-height: {{ section.settings.heading_line_height }};
+  }
+
+  @media screen and (min-width: 990px) {
+    .section-{{ section.id }} .comparison-heading {
+      font-size: {{ section.settings.heading_size_desktop }}px;
+    }
+  }
+
+  /* --- ACCENT TEXT STYLING --- */
+
+  .section-{{ section.id }} .comparison-heading .accent-text {
+    display: inline-block !important;
+    line-height: 1 !important;
+    margin-left: {{ section.settings.accent_text_margin_left }}px !important;
+
+    /* 1. Apply Color or Gradient */
+    {% if section.settings.use_theme_colors %}
+      {% comment %} Use global dark gradient when theme colors are enabled {% endcomment %}
+      background: {{ settings.global_accent_text_gradient_dark }} !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      color: transparent !important;
+    {% elsif section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }} !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      color: transparent !important;
+    {% else %}
+      color: {{ section.settings.title_part_2_color }} !important;
+    {% endif %}
+
+    /* 2. Apply Typography */
+    {% if section.settings.override_global_accent %}
+      /* Use section-specific fonts */
+      {% if section.settings.accent_font_family != 'inherit' %}
+        {% case section.settings.accent_font_family %}
+          {% when 'serif' %}
+            font-family: serif !important;
+          {% when 'Georgia Pro' %}
+            font-family: 'Georgia Pro', Georgia, serif !important;
+          {% when 'Bodoni Moda' %}
+            font-family: 'Bodoni Moda', Georgia, serif !important;
+          {% when 'Instrument Serif' %}
+            font-family: 'Instrument Serif', Georgia, serif !important;
+          {% when 'DM Serif Text' %}
+            font-family: 'DM Serif Text', Georgia, serif !important;
+          {% when 'Nothing You Could Do' %}
+            font-family: 'Nothing You Could Do', cursive !important;
+        {% endcase %}
+      {% endif %}
+      font-style: {% if section.settings.accent_font_style != 'normal' %}{{ section.settings.accent_font_style }}{% else %}var(--font-accent-style, normal){% endif %} !important;
+      font-weight: {% if section.settings.accent_font_weight != 'inherit' %}{{ section.settings.accent_font_weight }}{% else %}var(--font-accent-weight, inherit){% endif %} !important;
+    {% else %}
+      /* Use global accent fonts */
+      font-family: var(--font-accent-family) !important;
+      font-style: var(--font-accent-style) !important;
+      font-weight: var(--font-accent-weight) !important;
+      letter-spacing: var(--font-accent-letter-spacing) !important;
+      text-transform: var(--font-accent-text-transform) !important;
+    {% endif %}
+  }
+
+  .section-{{ section.id }} .comparison-subheading {
+    font-size: {{ section.settings.subheading_size }}px;
+  }
+
+  .section-{{ section.id }} .comparison-product-title {
+    font-size: {{ section.settings.product_title_size }}px;
+  }
+
+  .section-{{ section.id }} .product-subtitle {
+    font-size: {{ section.settings.subtitle_size }}px;
+  }
+
+  .section-{{ section.id }} .feature-name {
+    font-size: {{ section.settings.feature_name_size }}px;
+  }
+
+  .section-{{ section.id }} .text-value {
+    font-size: {{ section.settings.text_value_size }}px;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  /* Checkmark/X Icon Sizing */
+  .section-{{ section.id }} .check-yes svg,
+  .section-{{ section.id }} .check-no svg {
+    width: {{ section.settings.icon_size_desktop | default: 24 }}px;
+    height: {{ section.settings.icon_size_desktop | default: 24 }}px;
+  }
+
+  /* Custom Icon Images */
+  .section-{{ section.id }} .check-yes .custom-check-icon,
+  .section-{{ section.id }} .check-no .custom-check-icon {
+    width: {{ section.settings.icon_size_desktop | default: 24 }}px;
+    height: {{ section.settings.icon_size_desktop | default: 24 }}px;
+    object-fit: contain;
+  }
+
+  /* Borders and Highlight Background - Mostly independent of text color logic but uses theme colors for BG */
+  .section-{{ section.id }} .table-header th,
+  .section-{{ section.id }} .feature-row td {
+    border-bottom: 1px solid {% if section.settings.use_theme_colors %}{{ settings.global_section_text_color | color_modify: 'alpha', 0.15 }}{% else %}{{ section.settings.border_color }}{% endif %};
+  }
+
+  .section-{{ section.id }} .product-header.highlighted:before,
+  .section-{{ section.id }} .value-cell.highlighted:before {
+    {% if section.settings.use_highlight_border %}
+      {% if section.settings.use_theme_colors %}
+        border: {{ section.settings.highlight_border_width }}px solid {{ settings.global_section_accent_1_color }};
+      {% else %}
+        border: {{ section.settings.highlight_border_width }}px solid {{ section.settings.highlight_border_color }};
+      {% endif %}
+    {% endif %}
+    {% if section.settings.use_theme_colors %}
+      background: {{ settings.global_accent_text_gradient_dark }};
+    {% else %}
+      {% for block in section.blocks %}
+        {% if block.type == 'product_column' and block.settings.highlight_column %}
+          {% if block.settings.use_highlight_gradient %}
+            background: linear-gradient({{ block.settings.highlight_gradient_angle }}deg, {{ block.settings.highlight_gradient_start_color }} 0%, {{ block.settings.highlight_gradient_end_color }} 100%);
+          {% else %}
+            background-color: {{ block.settings.highlight_color }};
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  }
+
+  /* Border radius for highlighted column */
+  .section-{{ section.id }} .product-header.highlighted:before {
+    border-radius: {{ section.settings.highlight_border_radius }}px {{ section.settings.highlight_border_radius }}px 0 0;
+  }
+
+  .section-{{ section.id }} tr:last-child .value-cell.highlighted:before {
+    border-radius: 0 0 {{ section.settings.highlight_border_radius }}px {{ section.settings.highlight_border_radius }}px;
+  }
+
+  .section-{{ section.id }} .product-header.highlighted:after { /* Assuming :after is used for overlay or similar, ensure radius matches */
+    border-radius: {{ section.settings.highlight_border_radius }}px {{ section.settings.highlight_border_radius }}px 0 0;
+  }
+
+  .section-{{ section.id }} tr:last-child .value-cell.highlighted:after {
+    border-radius: 0 0 {{ section.settings.highlight_border_radius }}px {{ section.settings.highlight_border_radius }}px;
+  }
+
+  /* Highlight column shadow */
+  {% if section.settings.enable_highlight_shadow %}
+  .section-{{ section.id }} .product-header.highlighted:after,
+  .section-{{ section.id }} .value-cell.highlighted:after {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08) !important;
+  }
+  {% else %}
+  .section-{{ section.id }} .product-header.highlighted:after,
+  .section-{{ section.id }} .value-cell.highlighted:after {
+    box-shadow: none !important;
+  }
+  {% endif %}
+
+  /* Column-specific styles - These may have their own color logic */
+  {% for block in section.blocks %}
+    {% if block.type == 'product_column' %}
+      .section-{{ section.id }} .column-{{ forloop.index }}-img {
+        max-height: {{ block.settings.product_image_size | default: 80 }}px;
+      }
+
+      .section-{{ section.id }} .column-{{ forloop.index }} .subtitle-icon {
+        {% comment %} Conditional icon color based on column and theme settings {% endcomment %}
+        {% if section.settings.use_theme_colors %}
+          color: {% if block.settings.highlight_column %}{{ settings.global_section_background_color }}{% else %}{{ settings.global_section_text_color }}{% endif %} !important;
+        {% else %}
+          color: {% if block.settings.highlight_column %}{{ section.settings.highlighted_subtitle_color }}{% else %}{{ section.settings.unhighlighted_subtitle_color | default: section.settings.subtitle_color }}{% endif %} !important;
+        {% endif %}
+      }
+
+      .section-{{ section.id }} .column-{{ forloop.index }} .product-subtitle {
+        {% if block.settings.use_subtitle_background != false %}
+          background: {% if block.settings.subtitle_glass_color != blank %}{{ block.settings.subtitle_glass_color | color_modify: 'alpha', 0.2 }}{% else %}rgba(255, 255, 255, 0.2){% endif %};
+          border: 1px solid {% if block.settings.subtitle_border_color != blank %}{{ block.settings.subtitle_border_color | color_modify: 'alpha', 0.3 }}{% else %}{% if block.settings.subtitle_glass_color != blank %}{{ block.settings.subtitle_glass_color | color_modify: 'alpha', 0.3 }}{% else %}rgba(255, 255, 255, 0.3){% endif %}{% endif %};
+        {% endif %}
+      }
+    {% endif %}
+  {% endfor %}
+
+  /* Mobile text sizes - These use !important, so they will override previous font-size rules */
+  @media (max-width: 767px) {
+    .section-{{ section.id }} .comparison-product-title {
+      font-size: {{ section.settings.product_title_size_mobile }}px !important;
+    }
+
+    .section-{{ section.id }} .product-subtitle {
+      font-size: {{ section.settings.subtitle_size_mobile }}px !important;
+    }
+
+    .section-{{ section.id }} .feature-name {
+      font-size: {{ section.settings.feature_name_size_mobile }}px !important;
+    }
+
+    .section-{{ section.id }} .text-value {
+      font-size: {{ section.settings.text_value_size_mobile }}px !important;
+    }
+
+    /* Checkmark/X Icon Sizing - Mobile */
+    .section-{{ section.id }} .check-yes svg,
+    .section-{{ section.id }} .check-no svg {
+      width: {{ section.settings.icon_size_mobile | default: 20 }}px !important;
+      height: {{ section.settings.icon_size_mobile | default: 20 }}px !important;
+    }
+
+    /* Custom Icon Images - Mobile */
+    .section-{{ section.id }} .check-yes .custom-check-icon,
+    .section-{{ section.id }} .check-no .custom-check-icon {
+      width: {{ section.settings.icon_size_mobile | default: 20 }}px !important;
+      height: {{ section.settings.icon_size_mobile | default: 20 }}px !important;
+    }
+
+    /* Column-specific mobile image sizes */
+    {% for block in section.blocks %}
+      {% if block.type == 'product_column' %}
+        .section-{{ section.id }} .column-{{ forloop.index }}-img {
+          max-height: {{ block.settings.product_image_size_mobile | default: 50 }}px;
+        }
+      {% endif %}
+    {% endfor %}
+  }
+
+  /* Tablet-specific styles */
+  {% comment %} @media (max-width: 991px) {
+    /* Column-specific tablet image sizes */
+    {% for block in section.blocks %}
+      {% if block.type == 'product_column' %}
+        .section-{{ section.id }} .column-{{ forloop.index }}-img {
+          max-height: {{ block.settings.product_image_size_tablet | default: 60 }}px;
+        }
+      {% endif %}
+    {% endfor %}
+  } {% endcomment %}
+</style>
+
+{% schema %}
+{
+  "name": "Product Comparison",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_theme_colors",
+      "label": "Use Theme Colors",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "column_count",
+      "label": "Number of Product Columns",
+      "options": [
+        {
+          "value": "2",
+          "label": "2 Columns"
+        },
+        {
+          "value": "3",
+          "label": "3 Columns"
+        }
+      ],
+      "default": "2",
+      "info": "Choose how many product columns to display in the comparison table"
+    },
+    {
+      "type": "header",
+      "content": "Heading & Subheading"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading",
+      "label": "Show Heading & Subheading",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title_part_1",
+      "label": "Title Text Part 1",
+      "default": "Us Vs."
+    },
+    {
+      "type": "text",
+      "id": "title_part_2",
+      "label": "Title Text Part 2",
+      "default": "Them"
+    },
+    {
+      "type": "color",
+      "id": "title_part_1_color",
+      "label": "Title Part 1 Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "title_part_2_color",
+      "label": "Title Part 2 Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>Here's why we're the industry leader</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "desktop_description",
+      "label": "Additional Description (Optional)",
+      "info": "Additional rich text content that appears below the subtitle"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description_on_mobile",
+      "label": "Show Description on Mobile",
+      "default": false,
+      "info": "When enabled, the additional description will also appear on mobile devices"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "default": 28,
+      "label": "Heading Size (Mobile)",
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "min": 20,
+      "max": 80,
+      "step": 2,
+      "default": 40,
+      "label": "Heading Size (Desktop)",
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "subheading_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 16,
+      "label": "Subheading Size"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "min": 0.8,
+      "max": 2.0,
+      "step": 0.1,
+      "default": 1.2,
+      "label": "Heading Line Height",
+      "info": "Adjust the line spacing for the heading text"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "desktop_description_size_mobile",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "default": 14,
+      "label": "Additional Description Size (Mobile)",
+      "info": "Font size for the additional description text on mobile screens"
+    },
+    {
+      "type": "range",
+      "id": "desktop_description_size_desktop",
+      "min": 11,
+      "max": 24,
+      "step": 1,
+      "default": 16,
+      "label": "Additional Description Size (Desktop)",
+      "info": "Font size for the additional description text on desktop screens"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin_left",
+      "min": -10,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "header",
+      "content": "Section-Specific Accent Font Settings"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Section Accent Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Section Accent Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Section Accent Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "header",
+      "content": "Desktop Layout Settings"
+    },
+    {
+      "type": "select",
+      "id": "table_column_position",
+      "label": "Table Column Position",
+      "options": [
+        {
+          "value": "right",
+          "label": "Right (Text Left, Table Right)"
+        },
+        {
+          "value": "left",
+          "label": "Left (Table Left, Text Right)"
+        }
+      ],
+      "default": "right",
+      "info": "Choose which side the comparison table appears on desktop"
+    },
+    {
+      "type": "range",
+      "id": "product_header_width_desktop",
+      "min": 30,
+      "max": 160,
+      "step": 5,
+      "unit": "px",
+      "label": "Product Column Width (Desktop)",
+      "default": 80,
+      "info": "Width of each product column header on desktop"
+    },
+    {
+      "type": "range",
+      "id": "table_column_width",
+      "min": 40,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "label": "Table Column Width",
+      "default": 47,
+      "info": "Set the width of the comparison table column on desktop. The text column will adjust automatically."
+    },
+    {
+      "type": "checkbox",
+      "id": "center_text_column_desktop",
+      "label": "Center Text Column on Desktop",
+      "default": false,
+      "info": "When enabled, the text column will be vertically centered with the comparison table on desktop"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing (Outer)"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Top Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Bottom Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Horizontal Padding (Desktop)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Top Padding (Mobile)",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Bottom Padding (Mobile)",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_horizontal",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Horizontal Padding (Mobile)",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Container Spacing (Inner)"
+    },
+    {
+      "type": "range",
+      "id": "container_padding_vertical_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Container Vertical Padding - Desktop",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "container_padding_horizontal_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Container Horizontal Padding - Desktop",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "container_padding_vertical_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Container Vertical Padding - Mobile",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "container_padding_horizontal_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Container Horizontal Padding - Mobile",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "table_width",
+      "min": 600,
+      "max": 1800,
+      "step": 50,
+      "unit": "px",
+      "label": "Container Max Width",
+      "default": 1200,
+      "info": "Maximum width of the entire comparison section container. Increase for 3 columns."
+    },
+    {
+      "type": "range",
+      "id": "text_column_padding_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Text Column Horizontal Padding - Mobile",
+      "default": 20,
+      "info": "Left and right padding for the text column on mobile devices"
+    },
+    {
+      "type": "range",
+      "id": "text_column_padding_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Text Column Horizontal Padding - Desktop",
+      "default": 40,
+      "info": "Left and right padding for the text column on desktop devices"
+    },
+    {
+      "type": "header",
+      "content": "Text Sizing (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "product_title_size",
+      "min": 14,
+      "max": 36,
+      "step": 1,
+      "default": 21,
+      "label": "Product Title Size - Desktop (px)"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "default": 12,
+      "label": "Product Subtitle Size - Desktop (px)"
+    },
+    {
+      "type": "range",
+      "id": "feature_name_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "default": 16,
+      "label": "Feature Name Size - Desktop (px)"
+    },
+    {
+      "type": "range",
+      "id": "text_value_size",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "default": 14,
+      "label": "Text Value Size - Desktop (px)"
+    },
+    {
+      "type": "header",
+      "content": "Text Sizing (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "product_title_size_mobile",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "default": 16,
+      "label": "Product Title Size - Mobile (px)"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size_mobile",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "default": 10,
+      "label": "Product Subtitle Size - Mobile (px)"
+    },
+    {
+      "type": "range",
+      "id": "feature_name_size_mobile",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "default": 12,
+      "label": "Feature Name Size - Mobile (px)"
+    },
+    {
+      "type": "range",
+      "id": "text_value_size_mobile",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "default": 11,
+      "label": "Text Value Size - Mobile (px)"
+    },
+    {
+      "type": "header",
+      "content": "Icon Sizing"
+    },
+    {
+      "type": "range",
+      "id": "icon_size_desktop",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "default": 24,
+      "unit": "px",
+      "label": "Checkmark/X Icon Size - Desktop"
+    },
+    {
+      "type": "range",
+      "id": "icon_size_mobile",
+      "min": 14,
+      "max": 36,
+      "step": 2,
+      "default": 20,
+      "unit": "px",
+      "label": "Checkmark/X Icon Size - Mobile"
+    },
+    {
+      "type": "header",
+      "content": "Custom Icons (Optional)"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_check_icons",
+      "label": "Use custom icons for checkmarks and X",
+      "default": false,
+      "info": "When enabled, uploaded images will replace the default SVG icons"
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_checkmark_icon",
+      "label": "Custom Checkmark Icon",
+      "info": "Upload an image to use as the checkmark (Yes) icon"
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_x_icon",
+      "label": "Custom X Icon",
+      "info": "Upload an image to use as the X (No) icon"
+    },
+    {
+      "type": "header",
+      "content": "Colors & Background"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_background",
+      "label": "Use Gradient Background",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background Gradient",
+      "default": "linear-gradient(90deg, #ffffff 0%, #f5f5f5 100%)",
+      "info": "Choose a gradient background for the section"
+    },
+    {
+      "type": "header",
+      "content": "Background Image"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_background_image",
+      "label": "Use Background Image",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_desktop",
+      "label": "Background Image (Desktop)"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Background Image (Mobile)",
+      "info": "Optional. Falls back to desktop image if not set."
+    },
+    {
+      "type": "select",
+      "id": "background_image_size",
+      "label": "Background Size",
+      "options": [
+        { "value": "cover", "label": "Cover" },
+        { "value": "contain", "label": "Contain" },
+        { "value": "auto", "label": "Auto" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "background_image_position",
+      "label": "Background Position",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "top center", "label": "Top Center" },
+        { "value": "bottom center", "label": "Bottom Center" },
+        { "value": "left center", "label": "Left Center" },
+        { "value": "right center", "label": "Right Center" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "background_image_repeat",
+      "label": "Background Repeat",
+      "options": [
+        { "value": "no-repeat", "label": "No Repeat" },
+        { "value": "repeat", "label": "Repeat" },
+        { "value": "repeat-x", "label": "Repeat X" },
+        { "value": "repeat-y", "label": "Repeat Y" }
+      ],
+      "default": "no-repeat"
+    },
+    {
+      "type": "checkbox",
+      "id": "background_overlay_enable",
+      "label": "Enable Overlay",
+      "default": false,
+      "info": "Add a color overlay on top of the background image"
+    },
+    {
+      "type": "color",
+      "id": "background_overlay_color",
+      "label": "Overlay Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "background_overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Overlay Opacity",
+      "default": 30
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Default Text Color (Fallback for Unhighlighted)",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Default Subtitle Color (Fallback for Unhighlighted)",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Highlighted Column Settings"
+    },
+    {
+      "type": "color",
+      "id": "highlighted_text_color",
+      "label": "Highlighted Text Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "highlighted_subtitle_color",
+      "label": "Highlighted Subtitle Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "highlighted_check_color",
+      "label": "Highlighted Checkmark Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "highlighted_x_color",
+      "label": "Highlighted X Mark Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Regular Column Settings"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#EEEEEE"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Default Feature Icon Color (Fallback for Unhighlighted)",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "color",
+      "id": "check_color",
+      "label": "Default Checkmark Color (Fallback for Unhighlighted)",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "color",
+      "id": "x_color",
+      "label": "Default X Mark Color (Fallback for Unhighlighted)",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "highlight_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "default": 8,
+      "label": "Border Radius for Highlight"
+    },
+    {
+      "type": "header",
+      "content": "Highlighted Column Border Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_highlight_border",
+      "label": "Use Highlight Border",
+      "default": false,
+      "info": "Add a border around the highlighted column"
+    },
+    {
+      "type": "color",
+      "id": "highlight_border_color",
+      "label": "Highlight Border Color",
+      "default": "#71e293"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_highlight_shadow",
+      "label": "Enable Highlight Column Shadow",
+      "default": true,
+      "info": "Show drop shadow behind the highlighted column"
+    },
+    {
+      "type": "range",
+      "id": "highlight_border_width",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "label": "Highlight Border Width"
+    },
+    {
+      "type": "header",
+      "content": "Unhighlighted Column Colors"
+    },
+    {
+      "type": "color",
+      "id": "unhighlighted_text_color",
+      "label": "Unhighlighted Column - Text Color",
+      "default": "#000000",
+      "info": "Color for general text in unhighlighted columns if not using theme colors."
+    },
+    {
+      "type": "color",
+      "id": "unhighlighted_subtitle_color",
+      "label": "Unhighlighted Column - Subtitle Color",
+      "default": "#000000",
+      "info": "Color for product subtitles in unhighlighted columns if not using theme colors."
+    },
+    {
+      "type": "color",
+      "id": "unhighlighted_icon_color",
+      "label": "Unhighlighted Column - Feature Icon Color",
+      "default": "#EF4A65",
+      "info": "Color for feature icons in unhighlighted rows/columns if not using theme colors."
+    },
+    {
+      "type": "color",
+      "id": "unhighlighted_check_color",
+      "label": "Unhighlighted Column - Checkmark Color",
+      "default": "#EF4A65",
+      "info": "Color for 'Yes' checkmarks in unhighlighted columns if not using theme colors."
+    },
+    {
+      "type": "color",
+      "id": "unhighlighted_x_color",
+      "label": "Unhighlighted Column - X Mark Color",
+      "default": "#000000",
+      "info": "Color for 'No' X marks in unhighlighted columns if not using theme colors."
+    },
+    {
+      "type": "header",
+      "content": "Section Border"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_section_top_border",
+      "label": "Enable Top Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "section_top_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "section_top_border_style",
+      "label": "Top Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "section_top_border_color",
+      "label": "Top Border Color",
+      "default": "#E5E5E5"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_section_bottom_border",
+      "label": "Enable Bottom Border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "section_bottom_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Border Width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "section_bottom_border_style",
+      "label": "Bottom Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "section_bottom_border_color",
+      "label": "Bottom Border Color",
+      "default": "#E5E5E5"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product_column",
+      "name": "Product Column",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "product_name",
+          "label": "Product Name",
+          "default": "Your Product"
+        },
+        {
+          "type": "text",
+          "id": "product_subtitle",
+          "label": "Product Subtitle",
+          "default": "Premium"
+        },
+        {
+          "type": "image_picker",
+          "id": "product_image",
+          "label": "Product Image",
+          "info": "Optional image to display above the product title"
+        },
+        {
+          "type": "range",
+          "id": "product_image_size",
+          "min": 40,
+          "max": 200,
+          "step": 10,
+          "default": 80,
+          "label": "Image Size - Desktop (px)",
+          "info": "Maximum height of product image in desktop view"
+        },
+        {
+          "type": "range",
+          "id": "product_image_size_mobile",
+          "min": 30,
+          "max": 100,
+          "step": 5,
+          "default": 50,
+          "label": "Image Size - Mobile (px)",
+          "info": "Maximum height of product image in mobile view"
+        },
+        {
+          "type": "html",
+          "id": "subtitle_custom_icon",
+          "label": "Custom Subtitle Icon (SVG)",
+          "info": "Paste SVG code here to replace the default icon"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_subtitle_icon",
+          "label": "Show Subtitle Icon",
+          "default": true,
+          "info": "Toggle to show or hide the icon in the product subtitle"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_subtitle_background",
+          "label": "Use Subtitle Background",
+          "default": true,
+          "info": "Toggle to enable or disable the glass background effect"
+        },
+        {
+          "type": "color",
+          "id": "subtitle_border_color",
+          "label": "Subtitle Border Color",
+          "default": "#FFFFFF",
+          "info": "Border color for the glass effect (will be applied with transparency)"
+        },
+        {
+          "type": "checkbox",
+          "id": "highlight_column",
+          "label": "Highlight This Column",
+          "default": true
+        },
+        {
+          "type": "color",
+          "id": "highlight_color",
+          "label": "Highlight Color",
+          "default": "#EF4A65"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_highlight_gradient",
+          "label": "Use Highlight Gradient",
+          "default": false,
+          "info": "Apply gradient effect to the highlighted column background"
+        },
+        {
+          "type": "color",
+          "id": "highlight_gradient_start_color",
+          "label": "Highlight Gradient Start Color",
+          "default": "#EF4A65"
+        },
+        {
+          "type": "color",
+          "id": "highlight_gradient_end_color",
+          "label": "Highlight Gradient End Color",
+          "default": "#FF6B9D"
+        },
+        {
+          "type": "range",
+          "id": "highlight_gradient_angle",
+          "min": 0,
+          "max": 360,
+          "step": 5,
+          "unit": "deg",
+          "label": "Highlight Gradient Angle",
+          "default": 45
+        },
+        {
+          "type": "color",
+          "id": "subtitle_glass_color",
+          "label": "Subtitle Glass Background",
+          "default": "#FFFFFF",
+          "info": "This color will be used with transparency for the glass effect"
+        },
+        {
+          "type": "color",
+          "id": "subtitle_icon_color",
+          "label": "Subtitle Icon Color",
+          "default": "#000000",
+          "info": "Color for the icon in this column's subtitle"
+        }
+      ]
+    },
+    {
+      "type": "feature_row",
+      "name": "Feature Row",
+      "settings": [
+        {
+          "type": "text",
+          "id": "feature_name",
+          "label": "Feature Name",
+          "default": "Feature"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_icon",
+          "label": "Show Icon",
+          "default": true,
+          "info": "Toggle to show or hide the feature icon"
+        },
+        {
+          "type": "image_picker",
+          "id": "feature_image",
+          "label": "Feature Image",
+          "info": "Alternative to using SVG code. Will be used instead of SVG if provided."
+        },
+        {
+          "type": "html",
+          "id": "feature_icon",
+          "label": "Feature Icon (SVG)",
+          "default": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><path d='M12 8v8'></path><path d='M8 12h8'></path></svg>",
+          "info": "To ensure your custom SVG icon adopts the theme color settings, include 'stroke=\"currentColor\"' and/or 'fill=\"currentColor\"' attributes in your SVG code. This will make your icon automatically match the icon color setting."
+        },
+        {
+          "type": "select",
+          "id": "value_type",
+          "label": "Value Type",
+          "options": [
+            {
+              "value": "checkmark",
+              "label": "Checkmark/X"
+            },
+            {
+              "value": "text",
+              "label": "Text"
+            }
+          ],
+          "default": "checkmark"
+        },
+        {
+          "type": "select",
+          "id": "value_1",
+          "label": "Column 1 Value",
+          "options": [
+            {
+              "value": "yes",
+              "label": "Yes"
+            },
+            {
+              "value": "no",
+              "label": "No"
+            }
+          ],
+          "default": "yes"
+        },
+        {
+          "type": "text",
+          "id": "text_value_1",
+          "label": "Column 1 Text Value",
+          "default": "Yes",
+          "info": "Used when Value Type is Text"
+        },
+        {
+          "type": "select",
+          "id": "value_2",
+          "label": "Column 2 Value",
+          "options": [
+            {
+              "value": "yes",
+              "label": "Yes"
+            },
+            {
+              "value": "no",
+              "label": "No"
+            }
+          ],
+          "default": "no"
+        },
+        {
+          "type": "text",
+          "id": "text_value_2",
+          "label": "Column 2 Text Value",
+          "default": "No",
+          "info": "Used when Value Type is Text"
+        },
+        {
+          "type": "header",
+          "content": "Column 3 (when 3 columns enabled)"
+        },
+        {
+          "type": "select",
+          "id": "value_3",
+          "label": "Column 3 Value",
+          "options": [
+            {
+              "value": "yes",
+              "label": "Yes"
+            },
+            {
+              "value": "no",
+              "label": "No"
+            }
+          ],
+          "default": "no"
+        },
+        {
+          "type": "text",
+          "id": "text_value_3",
+          "label": "Column 3 Text Value",
+          "default": "No",
+          "info": "Used when Value Type is Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Comparison",
+      "blocks": [
+        {
+          "type": "product_column",
+          "settings": {
+            "product_name": "Our Product",
+            "product_subtitle": "Original",
+            "highlight_column": true,
+            "highlight_color": "#EF4A65"
+          }
+        },
+        {
+          "type": "product_column",
+          "settings": {
+            "product_name": "Others",
+            "product_subtitle": "Knock-off",
+            "highlight_column": false,
+            "subtitle_custom_icon": "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 461 461' fill='currentColor'><path d='M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z'/></svg>"
+          }
+        },
+        {
+          "type": "feature_row",
+          "settings": {
+            "feature_name": "Core feature",
+            "feature_icon": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><path d='M12 8v8'></path><path d='M8 12h8'></path></svg>",
+            "value_1": "yes",
+            "value_2": "yes"
+          }
+        },
+        {
+          "type": "feature_row",
+          "settings": {
+            "feature_name": "Advanced feature",
+            "feature_icon": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'></polygon></svg>",
+            "value_1": "yes",
+            "value_2": "no"
+          }
+        },
+        {
+          "type": "feature_row",
+          "settings": {
+            "feature_name": "Premium feature",
+            "feature_icon": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'></path></svg>",
+            "value_type": "text",
+            "text_value_1": "Yes",
+            "text_value_2": "No"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

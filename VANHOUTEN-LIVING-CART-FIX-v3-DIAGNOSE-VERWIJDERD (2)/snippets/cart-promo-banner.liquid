@@ -1,0 +1,407 @@
+<style>
+  @keyframes marquee-horizontal-left-{{ block.id }} {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-25%);
+    }
+  }
+
+  @keyframes marquee-horizontal-right-{{ block.id }} {
+    0% {
+      transform: translateX(-25%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  .cart-promo-banner-{{ block.id }} {
+    position: relative;
+    width: 100%;
+    margin-bottom: {{ block.settings.margin_bottom | default: 10 }}px;
+  }
+
+  .cart-promo-banner-{{ block.id }} .promo-banner-main {
+    position: relative;
+    width: 100%;
+    min-height: {{ block.settings.banner_height | default: 120 }}px;
+    overflow: hidden;
+    {% if block.settings.banner_background %}
+    background: {{ block.settings.banner_background }};
+    {% endif %}
+  }
+
+  .cart-promo-banner-{{ block.id }} .promo-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: {{ block.settings.banner_height | default: 120 }}px;
+  }
+
+  .cart-promo-banner-{{ block.id }} .promo-text-section {
+    position: absolute;
+    left: {{ block.settings.text_position_left | default: 10 }}px;
+    top: {{ block.settings.text_position_top | default: 20 }}px;
+    z-index: 2;
+    max-width: {{ block.settings.text_max_width | default: 50 }}%;
+  }
+
+  .cart-promo-banner-{{ block.id }} .promo-main-heading {
+    font-size: {{ block.settings.main_heading_font_size | default: 24 }}px !important;
+    font-weight: {{ block.settings.main_heading_font_weight | default: 700 }} !important;
+    color: {{ block.settings.main_heading_color | default: '#ffffff' }} !important;
+    margin: 0 0 {{ block.settings.heading_spacing | default: 8 }}px 0 !important;
+    line-height: 1.1 !important;
+    text-transform: {{ block.settings.main_heading_text_transform | default: 'uppercase' }} !important;
+    letter-spacing: {{ block.settings.main_heading_letter_spacing | default: 0 }}px !important;
+  }
+
+  .cart-promo-banner-{{ block.id }} .promo-subheading {
+    display: inline-block;
+    font-size: {{ block.settings.subheading_font_size_desktop | default: 18 }}px !important;
+    font-weight: 700 !important;
+    color: {{ block.settings.subheading_text_color | default: '#000000' }} !important;
+    {% if block.settings.subheading_background %}
+    background: {{ block.settings.subheading_background }} !important;
+    {% endif %}
+    padding: {{ block.settings.subheading_vertical_padding_desktop | default: 8 }}px {{ block.settings.subheading_horizontal_padding_desktop | default: 14 }}px !important;
+    text-transform: {{ block.settings.subheading_text_transform | default: 'uppercase' }} !important;
+    letter-spacing: {{ block.settings.subheading_letter_spacing | default: 0 }}px !important;
+    border-radius: {{ block.settings.subheading_border_radius_desktop | default: 0 }}px !important;
+  }
+
+  .cart-drawer .cart-promo-banner-{{ block.id }} .promo-price-badge,
+  #shopify-section-cart-drawer .cart-promo-banner-{{ block.id }} .promo-price-badge,
+  .cart-promo-banner-{{ block.id }} .promo-price-badge {
+    position: absolute !important;
+    right: {{ block.settings.badge_position_right_desktop | default: 10 }}px;
+    bottom: {{ block.settings.badge_position_bottom_desktop | default: 10 }}px;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: {{ block.settings.price_badge_size | default: 80 }}px !important;
+    height: {{ block.settings.price_badge_size | default: 80 }}px !important;
+    min-width: {{ block.settings.price_badge_size | default: 80 }}px !important;
+    min-height: {{ block.settings.price_badge_size | default: 80 }}px !important;
+    max-width: {{ block.settings.price_badge_size | default: 80 }}px !important;
+    max-height: {{ block.settings.price_badge_size | default: 80 }}px !important;
+    border-radius: {{ block.settings.price_badge_border_radius | default: 50 }}% !important;
+    {% if block.settings.price_badge_bg_color %}
+    background: {{ block.settings.price_badge_bg_color }} !important;
+    {% endif %}
+    z-index: 3;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+    {% if block.settings.price_badge_enable_border %}
+    border: {{ block.settings.price_badge_border_width | default: 2 }}px {{ block.settings.price_badge_border_style | default: 'solid' }} {{ block.settings.price_badge_border_color | default: '#ffffff' }} !important;
+    {% endif %}
+  }
+
+  .cart-promo-banner-{{ block.id }} .price-badge-label {
+    font-size: {{ block.settings.price_badge_label_font_size | default: 11 }}px;
+    font-weight: {{ block.settings.price_badge_label_font_weight | default: 700 }};
+    color: {{ block.settings.price_badge_text_color | default: '#000000' }} !important;
+    text-transform: 0px;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .cart-promo-banner-{{ block.id }} .price-badge-amount {
+    font-size: {{ block.settings.price_badge_amount_font_size | default: 22 }}px;
+    font-weight: {{ block.settings.price_badge_amount_font_weight | default: 700 }};
+    color: {{ block.settings.price_badge_text_color | default: '#000000' }} !important;
+    line-height: 1;
+  }
+
+  /* Product Image */
+  {% if block.settings.show_custom_image and block.settings.custom_image != blank %}
+  .cart-promo-banner-{{ block.id }} .promo-custom-image {
+    position: absolute;
+    right: {{ block.settings.image_position_right_desktop | default: 35 }}px;
+    {% if block.settings.image_center_vertically_desktop == true %}
+    top: 50%;
+    transform: translateY(-50%);
+    {% else %}
+    top: {{ block.settings.image_position_top_desktop | default: 30 }}px;
+    {% endif %}
+    width: {{ block.settings.image_width_desktop | default: 180 }}px;
+    height: {{ block.settings.image_height_desktop | default: 100 }}px;
+    object-fit: {{ block.settings.image_object_fit | default: 'contain' }};
+    z-index: 1;
+    opacity: {{ block.settings.image_opacity | default: 100 | divided_by: 100.0 }};
+  }
+  {% endif %}
+
+  /* Scrolling Banners */
+  {% if block.settings.enable_top_scrolling_banner %}
+  .cart-promo-banner-{{ block.id }} .scrolling-banner-top {
+    width: 100%;
+    height: {{ block.settings.top_scrolling_height_desktop | default: 25 }}px;
+    {% if block.settings.top_scrolling_background %}
+    background: {{ block.settings.top_scrolling_background }};
+    {% endif %}
+    overflow: hidden;
+  }
+
+  .cart-promo-banner-{{ block.id }} .scrolling-banner-top .scrolling-track {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    {% if block.settings.top_scrolling_enable_animation != false %}
+    animation: marquee-horizontal-{{ block.settings.top_scrolling_direction_desktop | default: 'left' }}-{{ block.id }} {{ block.settings.top_scrolling_speed_desktop | default: 15 }}s linear infinite;
+    {% else %}
+    justify-content: center;
+    {% endif %}
+  }
+
+  .cart-promo-banner-{{ block.id }} .scrolling-banner-top .scrolling-text {
+    display: inline-block;
+    white-space: nowrap;
+    letter-spacing: var(--letter-spacing-body);
+    padding: 0 {{ block.settings.top_scrolling_spacing_desktop | default: 20 }}px;
+    font-size: {{ block.settings.top_scrolling_font_size_desktop | default: 10 }}px;
+    font-weight: {{ block.settings.top_scrolling_font_weight_desktop | default: 700 }};
+    color: {{ block.settings.top_scrolling_text_color | default: '#ffffff' }} !important;
+    text-transform: {{ block.settings.top_scrolling_text_transform_desktop | default: 'uppercase' }};
+  }
+  {% endif %}
+
+  {% if block.settings.enable_bottom_scrolling_banner %}
+  .cart-promo-banner-{{ block.id }} .scrolling-banner-bottom {
+    width: 100%;
+    height: {{ block.settings.bottom_scrolling_height_desktop | default: 25 }}px;
+    {% if block.settings.bottom_scrolling_background %}
+    background: {{ block.settings.bottom_scrolling_background }};
+    {% endif %}
+    overflow: hidden;
+  }
+
+  .cart-promo-banner-{{ block.id }} .scrolling-banner-bottom .scrolling-track {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    {% if block.settings.bottom_scrolling_enable_animation != false %}
+    animation: marquee-horizontal-{{ block.settings.bottom_scrolling_direction_desktop | default: 'left' }}-{{ block.id }} {{ block.settings.bottom_scrolling_speed_desktop | default: 15 }}s linear infinite;
+    {% else %}
+    justify-content: center;
+    {% endif %}
+  }
+
+  .cart-promo-banner-{{ block.id }} .scrolling-banner-bottom .scrolling-text {
+    display: inline-block;
+    white-space: nowrap;
+    letter-spacing: var(--letter-spacing-body);
+    padding: 0 {{ block.settings.bottom_scrolling_spacing_desktop | default: 20 }}px;
+    font-size: {{ block.settings.bottom_scrolling_font_size_desktop | default: 10 }}px;
+    font-weight: {{ block.settings.bottom_scrolling_font_weight_desktop | default: 700 }};
+    color: {{ block.settings.bottom_scrolling_text_color | default: '#ffffff' }} !important;
+    text-transform: {{ block.settings.bottom_scrolling_text_transform_desktop | default: 'uppercase' }};
+  }
+  {% endif %}
+
+  /* Link Wrapper */
+  {% if block.settings.banner_link != blank %}
+  .cart-promo-banner-{{ block.id }} {
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+  }
+
+  .cart-promo-banner-{{ block.id }}:hover {
+    opacity: 0.95;
+  }
+  {% endif %}
+
+  /* Tablet and Mobile Responsive */
+  @media screen and (max-width: 989px) {
+    .cart-drawer .cart-promo-banner-{{ block.id }} .promo-price-badge,
+    #shopify-section-cart-drawer .cart-promo-banner-{{ block.id }} .promo-price-badge,
+    .cart-promo-banner-{{ block.id }} .promo-price-badge {
+      width: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      height: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      min-width: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      min-height: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      max-width: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      max-height: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      right: {{ block.settings.badge_position_right_mobile | default: 10 }}px !important;
+      bottom: {{ block.settings.badge_position_bottom_mobile | default: 10 }}px !important;
+      padding: 8px !important;
+      box-sizing: border-box !important;
+    }
+  }
+
+  /* Mobile Responsive */
+  @media screen and (max-width: 749px) {
+    .cart-promo-banner-{{ block.id }} .promo-main-heading {
+      font-size: {{ block.settings.main_heading_font_size | times: 0.7 | round }}px !important;
+    }
+
+    .cart-promo-banner-{{ block.id }} .promo-subheading {
+      font-size: {{ block.settings.subheading_font_size_mobile | default: 14 }}px !important;
+      padding: {{ block.settings.subheading_vertical_padding_mobile | default: 6 }}px {{ block.settings.subheading_horizontal_padding_mobile | default: 10 }}px !important;
+      border-radius: {{ block.settings.subheading_border_radius_mobile | default: 0 }}px !important;
+    }
+
+    .cart-drawer .cart-promo-banner-{{ block.id }} .promo-price-badge,
+    #shopify-section-cart-drawer .cart-promo-banner-{{ block.id }} .promo-price-badge,
+    .cart-promo-banner-{{ block.id }} .promo-price-badge {
+      width: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      height: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      min-width: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      min-height: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      max-width: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      max-height: {{ block.settings.price_badge_size_mobile | default: 70 }}px !important;
+      right: {{ block.settings.badge_position_right_mobile | default: 10 }}px !important;
+      bottom: {{ block.settings.badge_position_bottom_mobile | default: 10 }}px !important;
+      padding: 8px !important;
+      box-sizing: border-box !important;
+    }
+
+    .cart-promo-banner-{{ block.id }} .price-badge-label {
+      font-size: {{ block.settings.price_badge_label_font_size | times: 0.8 | round }}px;
+    }
+
+    .cart-promo-banner-{{ block.id }} .price-badge-amount {
+      font-size: {{ block.settings.price_badge_amount_font_size | times: 0.75 | round }}px;
+    }
+
+    {% if block.settings.show_custom_image and block.settings.custom_image != blank %}
+    .cart-promo-banner-{{ block.id }} .promo-custom-image {
+      width: {{ block.settings.image_width_mobile | default: 130 }}px;
+      height: {{ block.settings.image_height_mobile | default: 100 }}px;
+      right: {{ block.settings.image_position_right_mobile | default: 20 }}px;
+      {% if block.settings.image_center_vertically_mobile == true %}
+      top: 50%;
+      transform: translateY(-50%);
+      {% else %}
+      top: {{ block.settings.image_position_top_mobile | default: 20 }}px;
+      {% endif %}
+    }
+    {% endif %}
+
+    /* Mobile scrolling banner adjustments */
+    {% if block.settings.enable_top_scrolling_banner %}
+    .cart-promo-banner-{{ block.id }} .scrolling-banner-top {
+      height: auto !important;
+      min-height: {{ block.settings.top_scrolling_height_mobile | default: 20 }}px;
+      padding: 5px 0;
+      overflow: visible !important;
+    }
+
+    .cart-promo-banner-{{ block.id }} .scrolling-banner-top .scrolling-track {
+      {% if block.settings.top_scrolling_enable_animation != false %}
+      animation: marquee-horizontal-{{ block.settings.top_scrolling_direction_mobile | default: 'left' }}-{{ block.id }} {{ block.settings.top_scrolling_speed_mobile | default: 15 }}s linear infinite;
+      {% endif %}
+    }
+
+    .cart-promo-banner-{{ block.id }} .scrolling-banner-top .scrolling-text {
+      font-size: {{ block.settings.top_scrolling_font_size_mobile | default: 10 }}px;
+      font-weight: {{ block.settings.top_scrolling_font_weight_mobile | default: 700 }};
+      text-transform: {{ block.settings.top_scrolling_text_transform_mobile | default: 'uppercase' }};
+      padding: 0 {{ block.settings.top_scrolling_spacing_mobile | default: 20 }}px;
+      color: {{ block.settings.top_scrolling_text_color | default: '#ffffff' }} !important;
+      line-height: 1.4;
+    }
+    {% endif %}
+
+    {% if block.settings.enable_bottom_scrolling_banner %}
+    .cart-promo-banner-{{ block.id }} .scrolling-banner-bottom {
+      height: auto !important;
+      min-height: {{ block.settings.bottom_scrolling_height_mobile | default: 20 }}px;
+      padding: 5px 0;
+      overflow: visible !important;
+    }
+
+    .cart-promo-banner-{{ block.id }} .scrolling-banner-bottom .scrolling-track {
+      {% if block.settings.bottom_scrolling_enable_animation != false %}
+      animation: marquee-horizontal-{{ block.settings.bottom_scrolling_direction_mobile | default: 'left' }}-{{ block.id }} {{ block.settings.bottom_scrolling_speed_mobile | default: 15 }}s linear infinite;
+      {% endif %}
+    }
+
+    .cart-promo-banner-{{ block.id }} .scrolling-banner-bottom .scrolling-text {
+      font-size: {{ block.settings.bottom_scrolling_font_size_mobile | default: 10 }}px;
+      font-weight: {{ block.settings.bottom_scrolling_font_weight_mobile | default: 700 }};
+      text-transform: {{ block.settings.bottom_scrolling_text_transform_mobile | default: 'uppercase' }};
+      padding: 0 {{ block.settings.bottom_scrolling_spacing_mobile | default: 20 }}px;
+      color: {{ block.settings.bottom_scrolling_text_color | default: '#ffffff' }} !important;
+      line-height: 1.4;
+    }
+    {% endif %}
+  }
+</style>
+
+{% if block.settings.show_promo_banner %}
+  {% if block.settings.banner_link != blank %}
+    <a href="{{ block.settings.banner_link }}" class="cart-promo-banner-{{ block.id }}" target="{{ block.settings.link_target }}">
+  {% else %}
+    <div class="cart-promo-banner-{{ block.id }}">
+  {% endif %}
+
+    {% comment %} Top Scrolling Banner {% endcomment %}
+    {% if block.settings.enable_top_scrolling_banner and block.settings.top_scrolling_text != blank %}
+      <div class="scrolling-banner-top">
+        <div class="scrolling-track">
+          {% for i in (1..4) %}
+            <span class="scrolling-text">{{ block.settings.top_scrolling_text }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="promo-banner-main">
+      {% if block.settings.show_custom_image and block.settings.custom_image != blank %}
+        <img
+          src="{{ block.settings.custom_image | image_url: width: block.settings.image_width }}"
+          alt="{{ block.settings.main_heading | escape }}"
+          class="promo-custom-image"
+          width="{{ block.settings.image_width | default: 300 }}"
+          height="{{ block.settings.image_height | default: 200 }}"
+          loading="lazy"
+        >
+      {% endif %}
+
+      <div class="promo-content">
+      <div class="promo-text-section">
+        {% if block.settings.main_heading != blank %}
+          <h2 class="promo-main-heading">{{ block.settings.main_heading }}</h2>
+        {% endif %}
+        
+        {% if block.settings.subheading != blank %}
+          <div class="promo-subheading">{{ block.settings.subheading }}</div>
+        {% endif %}
+      </div>
+
+      {% if block.settings.show_price_badge %}
+        <div class="promo-price-badge">
+          {% if block.settings.price_badge_label != blank %}
+            <span class="price-badge-label">{{ block.settings.price_badge_label }}</span>
+          {% endif %}
+          {% if block.settings.price_badge_amount != blank %}
+            <span class="price-badge-amount">{{ block.settings.price_badge_amount }}</span>
+          {% endif %}
+        </div>
+      {% endif %}
+      </div>
+    </div>
+
+    {% comment %} Bottom Scrolling Banner {% endcomment %}
+    {% if block.settings.enable_bottom_scrolling_banner and block.settings.bottom_scrolling_text != blank %}
+      <div class="scrolling-banner-bottom">
+        <div class="scrolling-track">
+          {% for i in (1..4) %}
+            <span class="scrolling-text">{{ block.settings.bottom_scrolling_text }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+  {% if block.settings.banner_link != blank %}
+    </a>
+  {% else %}
+    </div>
+  {% endif %}
+{% endif %}
+

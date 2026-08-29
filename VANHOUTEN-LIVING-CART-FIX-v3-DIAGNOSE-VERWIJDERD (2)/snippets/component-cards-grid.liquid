@@ -1,0 +1,66 @@
+{% comment %}
+  Component: Cards Grid
+  
+  Usage: 
+  {% render 'component-cards-grid', 
+     cards: section.blocks,
+     heading: 'Our Features',
+     subtitle: 'What we offer',
+     layout: 'grid',
+     hide_description: false %}
+  
+  Parameters:
+  - cards: array of card blocks (required)
+  - heading: string (optional)
+  - subtitle: string (optional)
+  - accent_text: string (optional) 
+  - layout: 'grid', 'horizontal', 'pyramid' (default: 'grid')
+  - hide_description: boolean (default: false)
+  - section_id: string for unique styling (optional)
+{% endcomment %}
+
+{{ 'component-cards-grid.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign cards_count = cards.size | at_most: 4
+  assign section_id = section_id | default: 'cards'
+  assign layout = layout | default: 'grid'
+  assign hide_description = hide_description | default: false
+-%}
+
+<div class="cards-grid {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}" 
+     data-component="cards-grid" 
+     data-layout="{{ layout }}" 
+     data-cards-count="{{ cards_count }}"
+     id="cards-{{ section_id }}">
+  <div class="cards-grid__container">
+    
+    <!-- Header -->
+    {% if heading != blank or subtitle != blank %}
+      <div class="cards-grid__header">
+        {% if heading != blank %}
+          <h2 class="cards-grid__heading">
+            {{ heading }}
+            {% if accent_text != blank %}
+              <span class="{% if override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %} cards-grid__accent">{{ accent_text }}</span>
+            {% endif %}
+          </h2>
+        {% endif %}
+        {% if subtitle != blank %}
+          <p class="cards-grid__subtitle">{{ subtitle }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- Cards Grid -->
+    <div class="cards-grid__items" data-layout="{{ layout }}">
+      {% for card in cards limit: 4 %}
+        {% render 'component-card-item', 
+           card: card, 
+           layout: layout,
+           hide_description: hide_description,
+           index: forloop.index %}
+      {% endfor %}
+    </div>
+  </div>
+</div>

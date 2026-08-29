@@ -1,0 +1,504 @@
+{% liquid
+  assign use_metafields = block.settings.use_metafields
+  assign mf_namespace = block.settings.metafield_namespace | default: 'custom'
+
+  if use_metafields and product != blank
+    assign bar1_key = block.settings.bar1_metafield_key
+    assign bar2_key = block.settings.bar2_metafield_key
+    assign bar3_key = block.settings.bar3_metafield_key
+
+    # CHECK IF THE VALUE EXISTS BEFORE ASSIGNING
+    if bar1_key != blank 
+       assign temp_bar1 = product.metafields[mf_namespace][bar1_key].value
+       if temp_bar1 != blank
+         assign bar1_mf_value = temp_bar1 | plus: 0
+       endif
+    endif
+
+    if bar2_key != blank
+       assign temp_bar2 = product.metafields[mf_namespace][bar2_key].value
+       if temp_bar2 != blank
+         assign bar2_mf_value = temp_bar2 | plus: 0
+       endif
+    endif
+
+    if bar3_key != blank
+       assign temp_bar3 = product.metafields[mf_namespace][bar3_key].value
+       if temp_bar3 != blank
+         assign bar3_mf_value = temp_bar3 | plus: 0
+       endif
+    endif
+  endif
+
+  if use_metafields
+    assign bar1_pct = bar1_mf_value | default: block.settings.bar1_percentage | default: 0
+    assign bar2_pct = bar2_mf_value | default: block.settings.bar2_percentage | default: 0
+    assign bar3_pct = bar3_mf_value | default: block.settings.bar3_percentage | default: 0
+    assign single_pct = bar1_mf_value | default: block.settings.progress_percentage | default: 0
+  else
+    assign bar1_pct = block.settings.bar1_percentage | default: 0
+    assign bar2_pct = block.settings.bar2_percentage | default: 0
+    assign bar3_pct = block.settings.bar3_percentage | default: 0
+    assign single_pct = block.settings.progress_percentage | default: 0
+  endif
+%}
+
+<div
+  class="selling-out-fast-block"
+  id="block-{{ block.id }}"
+  {{ block.shopify_attributes }}
+  style="
+    margin-top: {{ block.settings.margin_top }}px;
+    margin-bottom: {{ block.settings.margin_bottom }}px;
+    {% if block.settings.show_background %}
+      background-color: {{ block.settings.background_color }};
+      padding: {{ block.settings.padding }}px;
+    {% else %}
+      background: transparent;
+      padding: 0;
+    {% endif %}
+    border-radius: {{ block.settings.block_border_radius | default: 8 }}px;
+    color: {{ block.settings.text_color }};
+    width: 100%;
+    box-sizing: border-box;
+    {% if block.settings.show_block_border %}
+      border: {{ block.settings.block_border_width | default: 2 }}px solid {{ block.settings.block_border_color | default: '#000000' }};
+    {% endif %}
+  "
+>
+  <!-- Main Text -->
+  {% if block.settings.main_text != blank or block.settings.show_icon %}
+    <div
+      class="selling-out-fast-main-text"
+      style="
+        font-size: {{ block.settings.main_text_size }}px;
+        font-weight: var(--font-weight-bold) !important;
+        text-align: {{ block.settings.text_alignment | default: 'center' }};
+        margin-bottom: 6px;
+        letter-spacing: var(--letter-spacing-body);
+        display: flex;
+        align-items: center;
+        {% case block.settings.text_alignment %}
+          {% when 'left' %}
+            justify-content: flex-start;
+          {% when 'right' %}
+            justify-content: flex-end;
+          {% else %}
+            justify-content: center;
+        {% endcase %}
+        gap: 8px;
+      "
+    >
+      {% if block.settings.show_icon %}
+        <span
+          class="selling-out-fast-icon"
+          style="
+            display: inline-flex;
+            align-items: center;
+            width: {{ block.settings.icon_size | default: 18 }}px;
+            height: {{ block.settings.icon_size | default: 18 }}px;
+            color: {{ block.settings.icon_color | default: '#FF3C16' }};
+          "
+        >
+          {% case block.settings.icon_type %}
+            {% when 'fire' %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%">
+                <path fill-rule="evenodd" d="M11.1758045,11.5299649 C11.7222481,10.7630248 11.6612694,9.95529555 11.2823626,8.50234466 C10.5329929,5.62882187 10.8313891,4.05382867 13.4147321,2.18916004 L14.6756139,1.27904986 L14.9805807,2.80388386 C15.3046861,4.42441075 15.8369398,5.42670671 17.2035766,7.35464078 C17.2578735,7.43122022 17.2578735,7.43122022 17.3124108,7.50814226 C19.2809754,10.2854144 20,11.9596204 20,15 C20,18.6883517 16.2713564,22 12,22 C7.72840879,22 4,18.6888043 4,15 C4,14.9310531 4.00007066,14.9331427 3.98838852,14.6284506 C3.89803284,12.2718054 4.33380946,10.4273676 6.09706666,8.43586022 C6.46961415,8.0150872 6.8930834,7.61067534 7.36962714,7.22370749 L8.42161802,6.36945926 L8.9276612,7.62657706 C9.30157948,8.55546878 9.73969716,9.28566491 10.2346078,9.82150804 C10.6537848,10.2753538 10.9647401,10.8460665 11.1758045,11.5299649 Z M7.59448531,9.76165711 C6.23711779,11.2947332 5.91440928,12.6606068 5.98692012,14.5518252 C6.00041903,14.9039019 6,14.8915108 6,15 C6,17.5278878 8.78360021,20 12,20 C15.2161368,20 18,17.527472 18,15 C18,12.4582072 17.4317321,11.1350292 15.6807305,8.66469725 C15.6264803,8.58818014 15.6264803,8.58818014 15.5719336,8.51124844 C14.5085442,7.0111098 13.8746802,5.96758691 13.4553336,4.8005211 C12.7704786,5.62117775 12.8107447,6.43738988 13.2176374,7.99765534 C13.9670071,10.8711781 13.6686109,12.4461713 11.0852679,14.31084 L9.61227259,15.3740546 L9.50184911,13.5607848 C9.43129723,12.4022487 9.16906461,11.6155508 8.76539217,11.178492 C8.36656566,10.7466798 8.00646835,10.2411426 7.68355027,9.66278925 C7.65342985,9.69565638 7.62374254,9.72861259 7.59448531,9.76165711 Z"/>
+              </svg>
+            {% when 'info' %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%">
+                <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-.696-3.534c.63 0 1.332-.288 2.196-1.458l.911-1.22a.334.334 0 0 0-.074-.472.38.38 0 0 0-.505.06l-1.475 1.679a.241.241 0 0 1-.279.061.211.211 0 0 1-.12-.244l1.858-7.446a.499.499 0 0 0-.575-.613l-3.35.613a.35.35 0 0 0-.276.258l-.086.334a.25.25 0 0 0 .243.312h1.73l-1.476 5.922c-.054.234-.144.63-.144.918 0 .666.396 1.296 1.422 1.296zm1.83-10.536c.702 0 1.242-.414 1.386-1.044.036-.144.054-.306.054-.414 0-.504-.396-.972-1.134-.972-.702 0-1.242.414-1.386 1.044a1.868 1.868 0 0 0-.054.414c0 .504.396.972 1.134.972z"/>
+              </svg>
+            {% when 'custom' %}
+              {% if block.settings.custom_icon_svg != blank %}
+                {{ block.settings.custom_icon_svg }}
+              {% endif %}
+          {% endcase %}
+        </span>
+      {% endif %}
+      <span>{{ block.settings.main_text }}</span>
+    </div>
+  {% endif %}
+
+  <!-- Subtitle Text -->
+  {% if block.settings.subtitle_text != blank %}
+    <div
+      class="selling-out-fast-subtitle"
+      style="
+        font-size: {{ block.settings.subtitle_text_size }}px;
+        text-align: {{ block.settings.text_alignment | default: 'center' }};
+        margin-bottom: 12px;
+        opacity: 0.8;
+        letter-spacing: var(--letter-spacing-body);
+      "
+    >
+      {{ block.settings.subtitle_text }}
+    </div>
+  {% endif %}
+
+  <!-- Multiple Progress Bars -->
+  {% if block.settings.enable_multiple_bars %}
+    <div
+      class="selling-out-fast-multiple-bars"
+      style="display: flex; flex-direction: column; gap: {{ block.settings.bars_gap | default: 8 }}px;"
+    >
+      <!-- Bar 1 -->
+      {% if block.settings.bar1_title != blank %}
+        <div class="selling-out-fast-bar-item">
+          <div
+            class="selling-out-fast-bar-title"
+            style="
+              font-size: {{ block.settings.bar_title_size | default: 12 }}px;
+              font-weight: var(--font-weight-semibold);
+              margin-bottom: 4px;
+              text-align: {{ block.settings.text_alignment | default: 'center' }};
+              letter-spacing: var(--letter-spacing-body);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <span>{{ block.settings.bar1_title }}</span>
+            <span
+              style="
+                {% if bar1_pct == 0 %}
+                  color: {{ block.settings.bar1_status_color | default: '#666666' }};
+                {% elsif bar1_pct == 100 %}
+                  color: {{ block.settings.bar1_status_color | default: '#FF0000' }};
+                {% else %}
+                  color: {{ block.settings.bar1_status_color | default: '#FF8C00' }};
+                {% endif %}
+                font-weight: var(--font-weight-bold);
+              "
+            >
+              {{- block.settings.bar1_status -}}
+            </span>
+          </div>
+          <div
+            class="selling-out-fast-progress-container"
+            style="
+              position: relative;
+              height: {{ block.settings.progress_bar_height | default: 20 }}px;
+              background-color: {{ block.settings.progress_background_color }};
+              border-radius: {{ block.settings.border_radius | default: 8 }}px;
+              overflow: hidden;
+              width: 100%;
+              box-sizing: border-box;
+              {% if block.settings.show_progress_border %}
+                border: {{ block.settings.progress_border_width | default: 2 }}px solid {{ block.settings.progress_border_color | default: '#000000' }};
+              {% endif %}
+            "
+          >
+            <div
+              class="selling-out-fast-progress-bar"
+              style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: {{ bar1_pct }}%;
+                {% if block.settings.progress_bar_gradient %}
+                  background: linear-gradient(135deg, {{ block.settings.progress_bar_gradient_start | default: '#000000' }}, {{ block.settings.progress_bar_gradient_end | default: '#333333' }}) !important;
+                {% else %}
+                  background-color: {{ block.settings.progress_bar_color }} !important;
+                {% endif %}
+                border-radius: 0px;
+                transition: width 0.3s ease;
+                z-index: 2;
+                display: block;
+                min-height: {{ block.settings.progress_bar_height | default: 20 }}px;
+              "
+            ></div>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Bar 2 -->
+      {% if block.settings.bar2_title != blank %}
+        <div class="selling-out-fast-bar-item">
+          <div
+            class="selling-out-fast-bar-title"
+            style="
+              font-size: {{ block.settings.bar_title_size | default: 12 }}px;
+              font-weight: var(--font-weight-semibold);
+              margin-bottom: 4px;
+              text-align: {{ block.settings.text_alignment | default: 'center' }};
+              letter-spacing: var(--letter-spacing-body);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <span>{{ block.settings.bar2_title }}</span>
+            <span
+              style="
+                {% if bar2_pct == 0 %}
+                  color: {{ block.settings.bar2_status_color | default: '#666666' }};
+                {% elsif bar2_pct == 100 %}
+                  color: {{ block.settings.bar2_status_color | default: '#FF0000' }};
+                {% else %}
+                  color: {{ block.settings.bar2_status_color | default: '#FF8C00' }};
+                {% endif %}
+                font-weight: var(--font-weight-bold);
+              "
+            >
+              {{- block.settings.bar2_status -}}
+            </span>
+          </div>
+          <div
+            class="selling-out-fast-progress-container"
+            style="
+              position: relative;
+              height: {{ block.settings.progress_bar_height | default: 20 }}px;
+              background-color: {{ block.settings.progress_background_color }};
+              border-radius: {{ block.settings.border_radius | default: 8 }}px;
+              overflow: hidden;
+              width: 100%;
+              box-sizing: border-box;
+              {% if block.settings.show_progress_border %}
+                border: {{ block.settings.progress_border_width | default: 2 }}px solid {{ block.settings.progress_border_color | default: '#000000' }};
+              {% endif %}
+            "
+          >
+            <div
+              class="selling-out-fast-progress-bar"
+              style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: {{ bar2_pct }}%;
+                {% if block.settings.progress_bar_gradient %}
+                  background: linear-gradient(135deg, {{ block.settings.progress_bar_gradient_start | default: '#000000' }}, {{ block.settings.progress_bar_gradient_end | default: '#333333' }}) !important;
+                {% else %}
+                  background-color: {{ block.settings.progress_bar_color }} !important;
+                {% endif %}
+                border-radius: 0px;
+                transition: width 0.3s ease;
+                z-index: 2;
+                display: block;
+                min-height: {{ block.settings.progress_bar_height | default: 20 }}px;
+              "
+            ></div>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Bar 3 -->
+      {% if block.settings.bar3_title != blank %}
+        <div class="selling-out-fast-bar-item">
+          <div
+            class="selling-out-fast-bar-title"
+            style="
+              font-size: {{ block.settings.bar_title_size | default: 12 }}px;
+              font-weight: var(--font-weight-semibold);
+              margin-bottom: 4px;
+              text-align: {{ block.settings.text_alignment | default: 'center' }};
+              letter-spacing: var(--letter-spacing-body);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <span>{{ block.settings.bar3_title }}</span>
+            <span
+              style="
+                {% if bar3_pct == 0 %}
+                  color: {{ block.settings.bar3_status_color | default: '#666666' }};
+                {% elsif bar3_pct == 100 %}
+                  color: {{ block.settings.bar3_status_color | default: '#FF0000' }};
+                {% else %}
+                  color: {{ block.settings.bar3_status_color | default: '#FF8C00' }};
+                {% endif %}
+                font-weight: var(--font-weight-bold);
+              "
+            >
+              {{- block.settings.bar3_status -}}
+            </span>
+          </div>
+          <div
+            class="selling-out-fast-progress-container"
+            style="
+              position: relative;
+              height: {{ block.settings.progress_bar_height | default: 20 }}px;
+              background-color: {{ block.settings.progress_background_color }};
+              border-radius: {{ block.settings.border_radius | default: 8 }}px;
+              overflow: hidden;
+              width: 100%;
+              box-sizing: border-box;
+              {% if block.settings.show_progress_border %}
+                border: {{ block.settings.progress_border_width | default: 2 }}px solid {{ block.settings.progress_border_color | default: '#000000' }};
+              {% endif %}
+            "
+          >
+            <div
+              class="selling-out-fast-progress-bar"
+              style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: {{ bar3_pct }}%;
+                {% if block.settings.progress_bar_gradient %}
+                  background: linear-gradient(135deg, {{ block.settings.progress_bar_gradient_start | default: '#000000' }}, {{ block.settings.progress_bar_gradient_end | default: '#333333' }}) !important;
+                {% else %}
+                  background-color: {{ block.settings.progress_bar_color }} !important;
+                {% endif %}
+                border-radius: 0px;
+                transition: width 0.3s ease;
+                z-index: 2;
+                display: block;
+                min-height: {{ block.settings.progress_bar_height | default: 20 }}px;
+              "
+            ></div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  {% else %}
+    <!-- Single Progress Bar (Original) -->
+    <div
+      class="selling-out-fast-progress-container"
+      style="
+        position: relative;
+        height: {{ block.settings.progress_bar_height | default: 20 }}px;
+        background-color: {{ block.settings.progress_background_color }};
+        border-radius: {{ block.settings.border_radius | default: 8 }}px;
+        overflow: hidden;
+        {% unless block.settings.progress_text_overlay %}margin-bottom: 8px;{% endunless %}
+        width: 100%;
+        box-sizing: border-box;
+        z-index: 0;
+        {% if block.settings.show_progress_border %}
+          border: {{ block.settings.progress_border_width | default: 2 }}px solid {{ block.settings.progress_border_color | default: '#000000' }};
+        {% endif %}
+      "
+    >
+      <div
+        class="selling-out-fast-progress-bar"
+        style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: {{ single_pct }}%;
+          {% if block.settings.progress_bar_gradient %}
+            background: linear-gradient(135deg, {{ block.settings.progress_bar_gradient_start | default: '#000000' }}, {{ block.settings.progress_bar_gradient_end | default: '#333333' }}) !important;
+          {% else %}
+            background-color: {{ block.settings.progress_bar_color }} !important;
+          {% endif %}
+          border-radius: 0px;
+          transition: width 0.3s ease;
+          z-index: 2;
+          display: block;
+          min-height: {{ block.settings.progress_bar_height | default: 20 }}px;
+        "
+      ></div>
+
+      {% if block.settings.progress_text_overlay %}
+        <!-- Progress Text Overlay -->
+        <div
+          class="selling-out-fast-progress-text-overlay"
+          style="
+            position: absolute;
+            top: 50%;
+            left: 8px;
+            transform: translateY(-50%);
+            font-size: {{ block.settings.overlay_text_size | default: 11 }}px;
+            {% case block.settings.overlay_text_weight %}
+              {% when 'normal' %}
+                font-weight: var(--font-weight-normal);
+              {% when 'bold' %}
+                font-weight: var(--font-weight-bold);
+              {% else %}
+                font-weight: var(--font-weight-semibold);
+            {% endcase %}
+            letter-spacing: var(--letter-spacing-body);
+            color: {{ block.settings.overlay_text_color | default: '#FFFFFF' }};
+            z-index: 3;
+            white-space: nowrap;
+          "
+        >
+          {% if block.settings.progress_text != blank %}
+            {{ single_pct }}% {{ block.settings.progress_text }}
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    {% unless block.settings.progress_text_overlay %}
+      {% if block.settings.progress_text != blank %}
+        <!-- Progress Text Below -->
+        <div
+          class="selling-out-fast-progress-text"
+          style="
+            font-size: {{ block.settings.progress_text_size }}px;
+            text-align: {{ block.settings.text_alignment | default: 'center' }};
+            font-weight: var(--font-weight-semibold);
+            letter-spacing: var(--letter-spacing-body);
+          "
+        >
+          {{ single_pct }}% {{ block.settings.progress_text }}
+        </div>
+      {% endif %}
+    {% endunless %}
+  {% endif %}
+</div>
+
+<!-- Ensure styling takes precedence -->
+<style>
+  #block-{{ block.id }} .selling-out-fast-progress-container {
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  #block-{{ block.id }} .selling-out-fast-progress-bar {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100% !important;
+    display: block !important;
+    z-index: 2 !important;
+  }
+
+  /* Ensure proper height for progress bar */
+  #block-{{ block.id }} .selling-out-fast-progress-container {
+    height: {{ block.settings.progress_bar_height | default: 20 }}px !important;
+  }
+
+  #block-{{ block.id }} .selling-out-fast-progress-bar {
+    min-height: {{ block.settings.progress_bar_height | default: 20 }}px !important;
+  }
+
+  /* Icon styling */
+  #block-{{ block.id }} .selling-out-fast-icon svg {
+    width: 100% !important;
+    height: 100% !important;
+    fill: currentColor !important;
+  }
+
+  /* Progress text overlay styling */
+  #block-{{ block.id }} .selling-out-fast-progress-text-overlay {
+    position: absolute !important;
+    top: 50% !important;
+    left: 8px !important;
+    transform: translateY(-50%) !important;
+    z-index: 3 !important;
+    white-space: nowrap !important;
+    pointer-events: none;
+  }
+
+  /* Border styling for sold indicator */
+  {% if block.settings.show_progress_border %}
+    #block-{{ block.id }} .selling-out-fast-progress-container {
+      border: {{ block.settings.progress_border_width | default: 2 }}px solid {{ block.settings.progress_border_color | default: '#000000' }} !important;
+    }
+  {% endif %}
+
+  /* Block border styling */
+  {% if block.settings.show_block_border %}
+    #block-{{ block.id }} .selling-out-fast-block {
+      border: {{ block.settings.block_border_width | default: 2 }}px solid {{ block.settings.block_border_color | default: '#000000' }} !important;
+    }
+  {% endif %}
+</style>

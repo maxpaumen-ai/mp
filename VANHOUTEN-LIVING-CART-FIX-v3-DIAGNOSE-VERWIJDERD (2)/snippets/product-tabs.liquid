@@ -1,0 +1,1078 @@
+{% comment %} Parameter declarations {% endcomment %}
+{% liquid
+    assign block_heading = block_heading
+    assign block_heading_color = block_heading_color
+    assign block_heading_size = block_heading_size
+    assign block_heading_weight = block_heading_weight
+    assign block_background = block_background
+    assign block_margin_top = block_margin_top
+    assign block_margin_bottom = block_margin_bottom
+    assign padding_top = padding_top
+    assign padding_bottom = padding_bottom
+    assign border_radius = border_radius
+    assign tab_background = tab_background
+    assign tab_text_color = tab_text_color
+    assign tab_font_size = tab_font_size
+    assign tab_active_background = tab_active_background
+    assign tab_active_color = tab_active_color
+    assign tab_border_color = tab_border_color
+    if tab_divider_color == blank or tab_divider_color == nil
+      assign tab_divider_color = tab_border_color
+    endif
+    assign content_text_color = content_text_color
+    assign content_text_size = content_text_size
+    assign tab1_title = tab1_title
+    assign tab1_star_rating = tab1_star_rating
+    assign tab1_star_color = tab1_star_color
+    assign tab1_star_size = tab1_star_size
+    assign tab1_quote = tab1_quote
+    assign tab1_author_image = tab1_author_image
+    assign tab1_author_name = tab1_author_name
+    assign tab1_author_title = tab1_author_title
+    assign tab1_author_title_font_size = tab1_author_title_font_size
+    assign tab1_author_title_color = tab1_author_title_color
+    assign tab1_author_title_background = tab1_author_title_background
+    assign tab1_author_title_padding_v = tab1_author_title_padding_v
+    assign tab1_author_title_padding_h = tab1_author_title_padding_h
+    assign tab1_author_title_border_radius = tab1_author_title_border_radius
+    assign tab1_author_date = tab1_author_date
+    assign tab2_title = tab2_title
+    assign tab2_show_icons = tab2_show_icons
+    assign tab2_brand_background = tab2_brand_background
+    assign tab2_brand_logo = tab2_brand_logo
+    assign tab2_brand_name = tab2_brand_name
+    assign tab2_others_label = tab2_others_label
+    assign tab2_item_1_name = tab2_item_1_name
+    assign tab2_item_1_description = tab2_item_1_description
+    assign tab2_item_1_brand_has = tab2_item_1_brand_has
+    assign tab2_item_1_others_has = tab2_item_1_others_has
+    assign tab2_item_2_name = tab2_item_2_name
+    assign tab2_item_2_description = tab2_item_2_description
+    assign tab2_item_2_brand_has = tab2_item_2_brand_has
+    assign tab2_item_2_others_has = tab2_item_2_others_has
+    assign tab2_item_3_name = tab2_item_3_name
+    assign tab2_item_3_description = tab2_item_3_description
+    assign tab2_item_3_brand_has = tab2_item_3_brand_has
+    assign tab2_item_3_others_has = tab2_item_3_others_has
+    assign tab2_item_4_name = tab2_item_4_name
+    assign tab2_item_4_description = tab2_item_4_description
+    assign tab2_item_4_brand_has = tab2_item_4_brand_has
+    assign tab2_item_4_others_has = tab2_item_4_others_has
+    assign tab2_description_color = tab2_description_color
+    assign tab2_description_font_size = tab2_description_font_size
+    assign tab2_item_name_font_size = tab2_item_name_font_size
+    assign tab2_column_header_font_size = tab2_column_header_font_size
+    assign tab2_item_name_color = tab2_item_name_color
+    assign tab2_brand_header_color = tab2_brand_header_color
+    assign tab2_others_header_color = tab2_others_header_color
+    assign tab3_title = tab3_title
+    assign tab3_header_background = tab3_header_background
+    assign tab3_column1_header = tab3_column1_header
+    assign tab3_column2_header = tab3_column2_header
+    assign tab3_row_1_image = tab3_row_1_image
+    assign tab3_row_1_label = tab3_row_1_label
+    assign tab3_row_1_sublabel = tab3_row_1_sublabel
+    assign tab3_row_1_value = tab3_row_1_value
+    assign tab3_row_2_image = tab3_row_2_image
+    assign tab3_row_2_label = tab3_row_2_label
+    assign tab3_row_2_sublabel = tab3_row_2_sublabel
+    assign tab3_row_2_value = tab3_row_2_value
+    assign tab3_row_3_image = tab3_row_3_image
+    assign tab3_row_3_label = tab3_row_3_label
+    assign tab3_row_3_sublabel = tab3_row_3_sublabel
+    assign tab3_row_3_value = tab3_row_3_value
+    assign tab3_row_4_image = tab3_row_4_image
+    assign tab3_row_4_label = tab3_row_4_label
+    assign tab3_row_4_sublabel = tab3_row_4_sublabel
+    assign tab3_row_4_value = tab3_row_4_value
+    assign tab3_row_5_image = tab3_row_5_image
+    assign tab3_row_5_label = tab3_row_5_label
+    assign tab3_row_5_sublabel = tab3_row_5_sublabel
+    assign tab3_row_5_value = tab3_row_5_value
+    assign tab3_row_6_image = tab3_row_6_image
+    assign tab3_row_6_label = tab3_row_6_label
+    assign tab3_row_6_sublabel = tab3_row_6_sublabel
+    assign tab3_row_6_value = tab3_row_6_value
+    assign tab3_disclaimer_text = tab3_disclaimer_text
+    assign tab3_header_font_size = tab3_header_font_size
+    assign tab3_label_font_size = tab3_label_font_size
+    assign tab3_sublabel_font_size = tab3_sublabel_font_size
+    assign tab3_value_font_size = tab3_value_font_size
+    assign tab3_disclaimer_font_size = tab3_disclaimer_font_size
+    assign tab3_hide_table_borders = tab3_hide_table_borders
+    assign tab3_header_text_color = tab3_header_text_color
+    assign tab3_row_background_color = tab3_row_background_color
+    assign tab3_border_color = tab3_border_color | default: '#e0e0e0'
+    assign tab3_label_color = tab3_label_color
+    assign tab3_sublabel_color = tab3_sublabel_color
+    assign tab3_value_color = tab3_value_color
+    assign tab3_disclaimer_color = tab3_disclaimer_color
+    assign tab4_title = tab4_title
+    assign tab4_heading = tab4_heading
+    assign tab4_heading_font_size = tab4_heading_font_size
+    assign tab4_benefit_font_size = tab4_benefit_font_size
+    assign tab4_icon_size = tab4_icon_size
+    assign tab4_heading_color = tab4_heading_color
+    assign tab4_benefit_text_color = tab4_benefit_text_color
+    assign tab4_icon_bg_color = tab4_icon_bg_color
+    assign tab4_icon_check_color = tab4_icon_check_color
+    assign tab4_show_benefit_border = tab4_show_benefit_border
+    assign tab4_benefit_1_icon = tab4_benefit_1_icon
+    assign tab4_benefit_1 = tab4_benefit_1
+    assign tab4_benefit_2_icon = tab4_benefit_2_icon
+    assign tab4_benefit_2 = tab4_benefit_2
+    assign tab4_benefit_3_icon = tab4_benefit_3_icon
+    assign tab4_benefit_3 = tab4_benefit_3
+    assign tab4_benefit_4_icon = tab4_benefit_4_icon
+    assign tab4_benefit_4 = tab4_benefit_4
+    assign tab4_benefit_5_icon = tab4_benefit_5_icon
+    assign tab4_benefit_5 = tab4_benefit_5
+    assign tab4_benefit_6_icon = tab4_benefit_6_icon
+    assign tab4_benefit_6 = tab4_benefit_6
+    assign tab4_benefit_7_icon = tab4_benefit_7_icon
+    assign tab4_benefit_7 = tab4_benefit_7
+    assign tab4_benefit_8_icon = tab4_benefit_8_icon
+    assign tab4_benefit_8 = tab4_benefit_8
+    assign number_of_tabs = num_tabs | default: 4
+  %}
+  
+  <div class="product-tabs-{{ block.id }}" {{ block.shopify_attributes }} style="background-color: {{ block_background }}; padding-top: {{ padding_top }}px; padding-bottom: {{ padding_bottom }}px; margin-top: {{ block_margin_top | default: 0 }}px; margin-bottom: {{ block_margin_bottom | default: 0 }}px;">
+          {% if block_heading != blank %}
+              <h2 class="product-tabs-main-heading" style="color: {{ block_heading_color | default: '#000000' }} !important;">{{ block_heading }}</h2>
+          {% endif %}
+          <div class="product-tabs-container-{{ block.id }}" >
+              
+            <!-- Tab Navigation -->
+            <div class="product-tabs-nav">
+              <button 
+                class="product-tab-btn active" 
+                data-tab="tab1-{{ block.id }}"
+              >
+                 <span>{{ tab1_title }} </span>
+              </button>
+              <button 
+                class="product-tab-btn" 
+                data-tab="tab2-{{ block.id }}"
+              >
+                <span>{{ tab2_title }}</span>
+              </button>
+              <button 
+                class="product-tab-btn" 
+                data-tab="tab3-{{ block.id }}"
+              >
+                 <span {% if number_of_tabs == 3 or number_of_tabs == '3' %}style="border-right:none;"{% endif %}>{{ tab3_title }} </span>
+              </button>
+              {% if number_of_tabs == 4 or number_of_tabs == '4' %}
+                <button 
+                  class="product-tab-btn" 
+                  data-tab="tab4-{{ block.id }}"
+                >
+                   <span style="border-right:none;">{{ tab4_title }} </span>
+                </button>
+              {% endif %}
+            </div>
+  
+            <!-- Tab Content -->
+            <div class="product-tabs-content">
+              
+              <!-- Tab 1 Content -->
+              <div class="product-tab-panel active" id="tab1-{{ block.id }}">
+                <div class="tab-content-inner">
+                  {% if tab1_star_rating and tab1_star_rating > 0 %}
+                    <div class="tab1-star-rating" style="margin-bottom: 1rem;">
+                      {% for i in (1..5) %}
+                        {% if i <= tab1_star_rating %}
+                          <svg class="star-icon star-filled" width="{{ tab1_star_size }}" height="{{ tab1_star_size }}" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle;">
+                            <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z" fill="{{ tab1_star_color }}"/>
+                          </svg>
+                        {% else %}
+                          <svg class="star-icon star-empty" width="{{ tab1_star_size }}" height="{{ tab1_star_size }}" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle;">
+                            <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z" fill="#e0e0e0"/>
+                          </svg>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                  
+                  {% if tab1_quote != blank %}
+                    <blockquote class="tab-quote" style="color: {{ content_text_color }}; font-size: {{ content_text_size }}px; letter-spacing: var(--letter-spacing-body);">
+                      {{ tab1_quote }}
+                    </blockquote>
+                  {% endif %}
+                  
+                  <div class="tab-author">
+                    {% if tab1_author_image != blank %}
+                      <img src="{{ tab1_author_image | image_url }}" width="80px" height="80px" alt="Reviewer" class="author-image">
+                    {% endif %}
+                    <div class="author-info">
+                      <div class="author-name-date-row">
+                        {% if tab1_author_name != blank %}
+                          <span class="author-name">{{ tab1_author_name }}</span>
+                        {% endif %}
+                        {% if tab1_author_date != blank %}
+                          <span class="author-date">{{ tab1_author_date }}</span>
+                        {% endif %}
+                      </div>
+                      {% if tab1_author_title != blank %}
+                        <div class="author-title">
+                          {{ tab1_author_title }}
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Tab 2 Content -->
+              <div class="product-tab-panel" id="tab2-{{ block.id }}">
+                <div class="tab-content-inner">
+                  <div class="comparison-table">
+                    
+                    <!-- Header Row -->
+                    <div class="comparison-header-row">
+                      <div class="comparison-col-name"></div>
+                      <div class="comparison-col-brand" style="padding:0 8px; height:50px;border-radius:10px 10px 0 0;background: {{ tab2_brand_background }};">
+                        {% if tab2_brand_logo != blank %}
+                          <img src="{{ tab2_brand_logo | image_url }}" width="100px" height="100px" alt="{{ tab2_brand_name }}" class="brand-logo">
+                        {% else %}
+                          <span style="color: {% if tab2_brand_header_color != blank %}{{ tab2_brand_header_color }}{% else %}#fff{% endif %} !important; font-size: {{ tab2_column_header_font_size | default: 14 }}px !important; font-weight: 600; letter-spacing: var(--letter-spacing-body);">{{ tab2_brand_name }}</span>
+                        {% endif %}
+                      </div>
+                      <div class="comparison-col-others">
+                        <span style="color: {% if tab2_others_header_color != blank %}{{ tab2_others_header_color }}{% else %}{{ content_text_color }}{% endif %} !important; font-size: {{ tab2_column_header_font_size | default: 14 }}px !important; font-weight: 600; letter-spacing: var(--letter-spacing-body);">{{ tab2_others_label }}</span>
+                      </div>
+                    </div>
+  
+                    <!-- Comparison Rows -->
+                    {% assign items = 'tab2_item_1_name,tab2_item_2_name,tab2_item_3_name,tab2_item_4_name' | split: ',' %}
+                    {% for item_key in items %}
+                      {% assign index = forloop.index %}
+                      {% case index %}
+                        {% when 1 %}
+                          {% assign item_name = tab2_item_1_name %}
+                          {% assign item_desc = tab2_item_1_description %}
+                          {% assign item_brand = tab2_item_1_brand_has %}
+                          {% assign item_others = tab2_item_1_others_has %}
+                        {% when 2 %}
+                          {% assign item_name = tab2_item_2_name %}
+                          {% assign item_desc = tab2_item_2_description %}
+                          {% assign item_brand = tab2_item_2_brand_has %}
+                          {% assign item_others = tab2_item_2_others_has %}
+                        {% when 3 %}
+                          {% assign item_name = tab2_item_3_name %}
+                          {% assign item_desc = tab2_item_3_description %}
+                          {% assign item_brand = tab2_item_3_brand_has %}
+                          {% assign item_others = tab2_item_3_others_has %}
+                        {% when 4 %}
+                          {% assign item_name = tab2_item_4_name %}
+                          {% assign item_desc = tab2_item_4_description %}
+                          {% assign item_brand = tab2_item_4_brand_has %}
+                          {% assign item_others = tab2_item_4_others_has %}
+                      {% endcase %}
+  
+                      {% if item_name != blank %}
+                        <div class="comparison-row">
+                          <div class="comparison-col-name">
+                            <div class="comparison-text">
+                              <div class="comparison-item-name" style="color: {% if tab2_item_name_color != blank %}{{ tab2_item_name_color }}{% else %}{{ content_text_color }}{% endif %} !important; font-size: {{ tab2_item_name_font_size | default: 16 }}px !important; font-weight: 600; letter-spacing: var(--letter-spacing-body);">
+                                {{ item_name }}
+                              </div>
+                              {% if item_desc != blank %}
+                                <div class="comparison-description" style="color: {{ tab2_description_color }} !important; font-size: {{ tab2_description_font_size }}px !important; letter-spacing: var(--letter-spacing-body);">
+                                  {{ item_desc }}
+                                </div>
+                              {% endif %}
+                            </div>
+                          </div>
+                          <div class="comparison-col-brand">
+                            {% if item_brand %}
+                              <svg class="check-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17L4 12" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                            {% else %}
+                              <svg class="x-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="#F44336" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                            {% endif %}
+                          </div>
+                          <div class="comparison-col-others">
+                            {% if item_others %}
+                              <svg class="check-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17L4 12" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                            {% else %}
+                              <svg class="x-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="#F44336" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                            {% endif %}
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+  
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Tab 3 Content -->
+              <div class="product-tab-panel" id="tab3-{{ block.id }}">
+                <div class="tab-content-inner">
+                  <div class="directions-table">
+                    
+                    <!-- Header Row -->
+                    <div class="directions-header-row" style="background-color: {{ tab3_header_background | default: '#f5f5f5' }} !important;">
+                      <div class="directions-col-size" style="color: {% if tab3_header_text_color != blank %}{{ tab3_header_text_color }}{% else %}{{ content_text_color }}{% endif %} !important; font-size: {{ tab3_header_font_size | default: 16 }}px !important; font-weight: 600 !important; letter-spacing: var(--letter-spacing-body);">
+                        {{ tab3_column1_header }}
+                      </div>
+                      <div class="directions-col-dosage" style="color: {% if tab3_header_text_color != blank %}{{ tab3_header_text_color }}{% else %}{{ content_text_color }}{% endif %} !important; font-size: {{ tab3_header_font_size | default: 16 }}px !important; font-weight: 600 !important; letter-spacing: var(--letter-spacing-body);">
+                        {{ tab3_column2_header }}
+                      </div>
+                    </div>
+  
+                    <!-- Direction Rows -->
+                    {% assign rows = 'row_1,row_2,row_3,row_4,row_5,row_6' | split: ',' %}
+                    {% for row_key in rows %}
+                      {% assign index = forloop.index %}
+                      {% case index %}
+                        {% when 1 %}
+                          {% assign row_image = tab3_row_1_image %}
+                          {% assign row_label = tab3_row_1_label %}
+                          {% assign row_sublabel = tab3_row_1_sublabel %}
+                          {% assign row_value = tab3_row_1_value %}
+                        {% when 2 %}
+                          {% assign row_image = tab3_row_2_image %}
+                          {% assign row_label = tab3_row_2_label %}
+                          {% assign row_sublabel = tab3_row_2_sublabel %}
+                          {% assign row_value = tab3_row_2_value %}
+                        {% when 3 %}
+                          {% assign row_image = tab3_row_3_image %}
+                          {% assign row_label = tab3_row_3_label %}
+                          {% assign row_sublabel = tab3_row_3_sublabel %}
+                          {% assign row_value = tab3_row_3_value %}
+                        {% when 4 %}
+                          {% assign row_image = tab3_row_4_image %}
+                          {% assign row_label = tab3_row_4_label %}
+                          {% assign row_sublabel = tab3_row_4_sublabel %}
+                          {% assign row_value = tab3_row_4_value %}
+                        {% when 5 %}
+                          {% assign row_image = tab3_row_5_image %}
+                          {% assign row_label = tab3_row_5_label %}
+                          {% assign row_sublabel = tab3_row_5_sublabel %}
+                          {% assign row_value = tab3_row_5_value %}
+                        {% when 6 %}
+                          {% assign row_image = tab3_row_6_image %}
+                          {% assign row_label = tab3_row_6_label %}
+                          {% assign row_sublabel = tab3_row_6_sublabel %}
+                          {% assign row_value = tab3_row_6_value %}
+                      {% endcase %}
+  
+                      {% if row_label != blank %}
+                        <div class="directions-row">
+                          <div class="directions-col-image">
+                            {% if row_image != blank %}
+                              <img src="{{ row_image | image_url: width: 80 }}" alt="{{ row_label }}" width="60" height="60" class="directions-image" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
+                            {% endif %}
+                          </div>
+                          <div class="directions-col-size">
+                            <div class="directions-label" style="color: {% if tab3_label_color != blank %}{{ tab3_label_color }}{% else %}{{ content_text_color }}{% endif %} !important; font-size: {{ tab3_label_font_size | default: 16 }}px !important; font-weight: 600; letter-spacing: var(--letter-spacing-body);">
+                              {{ row_label }}
+                            </div>
+                            {% if row_sublabel != blank %}
+                              <div class="directions-sublabel" style="color: {% if tab3_sublabel_color != blank %}{{ tab3_sublabel_color }}{% else %}{{ content_text_color }}{% endif %} !important; font-size: {{ tab3_sublabel_font_size | default: 14 }}px !important; letter-spacing: var(--letter-spacing-body);">
+                                {{ row_sublabel }}
+                              </div>
+                            {% endif %}
+                          </div>
+                          <div class="directions-col-dosage" style="color: {% if tab3_value_color != blank %}{{ tab3_value_color }}{% else %}{{ content_text_color }}{% endif %} !important; font-size: {{ tab3_value_font_size | default: 16 }}px !important; letter-spacing: var(--letter-spacing-body);">
+                            {{ row_value }}
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Disclaimer Text -->
+                    {% if tab3_disclaimer_text != blank %}
+                      <div class="directions-disclaimer" style="margin-top: 0.5rem; padding-top: 1rem;">
+                        <div class="disclaimer-content" style="color: {% if tab3_disclaimer_color != blank %}{{ tab3_disclaimer_color }}{% else %}{{ content_text_color }}{% endif %} !important; font-size: {{ tab3_disclaimer_font_size | default: 15 }}px !important; line-height: 1.6; letter-spacing: var(--letter-spacing-body);">
+                          {{ tab3_disclaimer_text }}
+                        </div>
+                      </div>
+                    {% endif %}
+  
+                  </div>
+                </div>
+              </div>
+  
+              {% if number_of_tabs == 4 or number_of_tabs == '4' %}
+                <!-- Tab 4 Content -->
+                <div class="product-tab-panel" id="tab4-{{ block.id }}">
+                  <div class="tab-content-inner">
+                    {% if tab4_heading != blank %}
+                      <h3 class="tab4-heading" style="color: {% if tab4_heading_color != blank %}{{ tab4_heading_color }}{% else %}{{ content_text_color }}{% endif %} !important; font-size: {{ tab4_heading_font_size | default: 20 }}px !important; font-weight: 700; margin-bottom: 2rem; letter-spacing: var(--letter-spacing-body);">
+                        {{ tab4_heading }}
+                      </h3>
+                    {% endif %}
+                    
+                    <div class="benefits-list">
+                      {% assign benefits = 'benefit_1,benefit_2,benefit_3,benefit_4,benefit_5,benefit_6,benefit_7,benefit_8' | split: ',' %}
+                      {% for benefit_key in benefits %}
+                        {% assign index = forloop.index %}
+                        {% case index %}
+                          {% when 1 %}
+                            {% assign benefit_icon = tab4_benefit_1_icon %}
+                            {% assign benefit = tab4_benefit_1 %}
+                          {% when 2 %}
+                            {% assign benefit_icon = tab4_benefit_2_icon %}
+                            {% assign benefit = tab4_benefit_2 %}
+                          {% when 3 %}
+                            {% assign benefit_icon = tab4_benefit_3_icon %}
+                            {% assign benefit = tab4_benefit_3 %}
+                          {% when 4 %}
+                            {% assign benefit_icon = tab4_benefit_4_icon %}
+                            {% assign benefit = tab4_benefit_4 %}
+                          {% when 5 %}
+                            {% assign benefit_icon = tab4_benefit_5_icon %}
+                            {% assign benefit = tab4_benefit_5 %}
+                          {% when 6 %}
+                            {% assign benefit_icon = tab4_benefit_6_icon %}
+                            {% assign benefit = tab4_benefit_6 %}
+                          {% when 7 %}
+                            {% assign benefit_icon = tab4_benefit_7_icon %}
+                            {% assign benefit = tab4_benefit_7 %}
+                          {% when 8 %}
+                            {% assign benefit_icon = tab4_benefit_8_icon %}
+                            {% assign benefit = tab4_benefit_8 %}
+                        {% endcase %}
+    
+                        {% if benefit != blank %}
+                          {%- liquid
+                            assign icon_size = tab4_icon_size | default: 24
+                            assign icon_bg = tab4_icon_bg_color | default: '#000000'
+                            assign icon_check = tab4_icon_check_color | default: '#ffffff'
+                            assign benefit_color = tab4_benefit_text_color
+                            if benefit_color == blank
+                              assign benefit_color = content_text_color
+                            endif
+                          -%}
+                          <div class="benefit-item">
+                            {% if benefit_icon != blank %}
+                              <img src="{{ benefit_icon | image_url: width: 96 }}" alt="{{ benefit }}" width="{{ icon_size }}" height="{{ icon_size }}" class="benefit-custom-icon" style="width: {{ icon_size }}px; height: {{ icon_size }}px; object-fit: contain; flex-shrink: 0;">
+                            {% else %}
+                              <svg class="benefit-check-icon" width="{{ icon_size }}" height="{{ icon_size }}" viewBox="0 0 24 24" fill="none" style="width: {{ icon_size }}px; height: {{ icon_size }}px; flex-shrink: 0;">
+                                <circle cx="12" cy="12" r="11" fill="{{ icon_bg }}"/>
+                                <path d="M17 8.5L10 15.5L7 12.5" stroke="{{ icon_check }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                            {% endif %}
+                            <span style="color: {{ benefit_color }} !important; font-size: {{ tab4_benefit_font_size | default: 14 }}px !important; letter-spacing: var(--letter-spacing-body);">
+                              {{ benefit }}
+                            </span>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+  
+            </div>
+          </div>
+        </div>
+          <style>
+            .product-tabs-{{ block.id }} {
+              width:100%;  
+            }
+            .product-tabs-{{ block.id }} h2,
+            .product-tabs-{{ block.id }} .product-tabs-main-heading,
+            .product-tabs-{{ block.id }} h2.product-tabs-main-heading {
+              color: {{ block_heading_color | default: '#000000' }} !important; 
+              font-size: {{ block_heading_size }}px !important; 
+              font-weight: {{ block_heading_weight }} !important;
+              margin-bottom:25px;
+              letter-spacing: var(--letter-spacing-body);
+              }
+            .product-tabs-{{ block.id }} .product-tabs-nav {
+              display: flex;
+              width: 100%;
+              border: 1px solid {{ tab_border_color }};
+              border-bottom: none;
+              border-radius: {{ border_radius }}px {{ border_radius }}px 0 0;
+              overflow: hidden;
+              background-color: {{ tab_background }};
+              position: relative;
+            }
+  
+            .product-tabs-{{ block.id }} .product-tab-btn {
+              padding: 0;
+              border: none;
+              cursor: pointer;
+              font-weight: 500;
+              border-bottom: 1px solid {{ tab_border_color }};
+              flex: 1 1 0%;
+              min-width: 0;
+              height: 46.2px;
+              background-color: {{ tab_background }};
+              letter-spacing: var(--letter-spacing-body);
+              color: {{ tab_text_color }};
+              border-radius: 0;
+              position: relative;
+            }
+
+            /* Text-height divider between inactive tabs */
+            .product-tabs-{{ block.id }} .product-tab-btn::after {
+              content: '';
+              position: absolute;
+              right: 0;
+              top: 50%;
+              transform: translateY(-50%);
+              height: {{ tab_font_size | times: 1.2 }}px;
+              width: 1px;
+              background-color: {{ tab_divider_color }};
+            }
+
+            /* Remove divider from last tab */
+            .product-tabs-{{ block.id }} .product-tab-btn:last-child::after {
+              display: none;
+            }
+
+            /* Remove divider from active tab and tab before active */
+            .product-tabs-{{ block.id }} .product-tab-btn.active::after {
+              display: none;
+            }
+            .product-tabs-{{ block.id }} .product-tab-btn:has(+ .product-tab-btn.active)::after {
+              display: none;
+            }
+  
+            .product-tabs-{{ block.id }} .product-tab-btn span {
+              line-height: 1.1;
+              padding: 0 15px;
+              display: flex;
+              height: {{ tab_font_size | times:2 }}px;
+              align-items: center;
+              justify-content: center;
+              color: {{ tab_text_color }};
+              font-size: {{ tab_font_size }}px;
+              letter-spacing: var(--letter-spacing-body);
+            }
+  
+            .product-tabs-{{ block.id }} .product-tab-btn.active {
+              color: {{ tab_active_color }} !important;
+              background-color: {{ tab_active_background }} !important;
+              border: 1px solid {{ tab_border_color }};
+              border-bottom: none;
+              margin-top: -0.8px;
+              margin-bottom: -1px;
+              border-radius: {{ border_radius }}px {{ border_radius }}px 0 0 !important;
+              font-weight: 700;
+              position: relative;
+              z-index: 2;
+              width: calc(25% + 2px);
+              margin-left: 0px;
+              margin-right: 0px;
+              height: 47px;
+            }
+
+            /* First tab - hide left border to not interfere with container border */
+            .product-tabs-{{ block.id }} .product-tab-btn:first-child.active {
+              border-left: none !important;
+              border-radius: 0 {{ border_radius }}px 0 0 !important;
+            }
+
+            /* Last tab - hide right border to not interfere with container border */
+            .product-tabs-{{ block.id }} .product-tab-btn:last-child.active {
+              border-right: none !important;
+              border-radius: {{ border_radius }}px 0 0 0 !important;
+            }
+            
+            .product-tabs-{{ block.id }} .product-tab-btn.active span {
+              border-right: none;
+              color: {{ tab_active_color }} !important;
+            }
+            .product-tabs-{{ block.id }} .product-tabs-content {
+              position: relative;
+            }
+  
+            .product-tabs-{{ block.id }} .product-tab-panel {
+              border: 1px solid {{ tab_border_color }};
+              border-radius: 0 0 {{ border_radius }}px {{ border_radius }}px;
+              display: none;
+              border-top:none;
+              padding: 2rem;
+            }
+  
+            .product-tabs-{{ block.id }} .product-tab-panel.active {
+              display: block;
+              animation: fadeIn 0.3s ease;
+            }
+  
+            .product-tabs-{{ block.id }} .tab-content-text {
+              line-height: 1.6;
+            }
+  
+            .product-tabs-{{ block.id }} .tab1-star-rating {
+              display: flex;
+              align-items: center;
+              gap: 0px;
+              animation: fadeInUp .6s ease-out forwards;
+              animation-delay: calc(.1s * var(--index, 0));
+            }
+  
+            .product-tabs-{{ block.id }} .star-icon {
+              flex-shrink: 0;
+              display: inline-block;
+              vertical-align: middle;
+            }
+  
+            .product-tabs-{{ block.id }} .star-icon path {
+              transition: fill 0.2s ease;
+            }
+  
+            .product-tabs-{{ block.id }} .tab-quote {
+              margin: 0 0 1.5rem 0;
+              padding: 0;
+              line-height: 1.6;
+              font-weight: 400;
+              font-style: normal;
+              animation: fadeInUp .6s ease-out forwards;
+              animation-delay: calc(.1s * var(--index, 0));
+              letter-spacing: var(--letter-spacing-body);
+            }
+  
+            .product-tabs-{{ block.id }} .tab-author {
+              display: flex;
+              align-items: center;
+              gap: 1.5rem;
+              animation: fadeInUp .6s ease-out forwards;
+              animation-delay: calc(.1s * var(--index, 0));
+            }
+  
+            .product-tabs-{{ block.id }} .author-image {
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              object-fit: cover;
+              flex-shrink: 0;
+              background: #f5f8ff;
+            }
+  
+            .product-tabs-{{ block.id }} .author-info {
+              display: flex;
+              flex-direction: column;
+              gap: 0.25rem;
+            }
+  
+            .product-tabs-{{ block.id }} .author-name-date-row {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: center;
+              gap: 0.5rem;
+            }
+
+            .product-tabs-{{ block.id }} .author-name {
+              color: {{ content_text_color }};
+              font-size: {{ content_text_size }}px;
+              font-weight: 600 !important;
+              line-height: 1.3;
+              letter-spacing: var(--letter-spacing-body);
+            }
+
+            .product-tabs-{{ block.id }} .author-date {
+              color: {{ content_text_color }};
+              font-size: {{ content_text_size | minus: 2 }}px;
+              line-height: 1.3;
+              opacity: 0.7;
+              letter-spacing: var(--letter-spacing-body);
+            }
+            
+            .product-tabs-{{ block.id }} .author-name p,
+            .product-tabs-{{ block.id }} .author-date p {
+              margin: 0;
+              padding: 0;
+              color: inherit;
+              font-size: inherit;
+              font-weight: inherit;
+              line-height: inherit;
+              letter-spacing: inherit;
+              display: inline;
+            }
+            
+            .product-tabs-{{ block.id }} .author-name strong,
+            .product-tabs-{{ block.id }} .author-name b,
+            .product-tabs-{{ block.id }} .author-date strong,
+            .product-tabs-{{ block.id }} .author-date b {
+              font-weight: 700 !important;
+            }
+            
+            .product-tabs-{{ block.id }} .author-name em,
+            .product-tabs-{{ block.id }} .author-name i,
+            .product-tabs-{{ block.id }} .author-date em,
+            .product-tabs-{{ block.id }} .author-date i {
+              font-style: italic;
+            }
+            
+            .product-tabs-{{ block.id }} .author-name a,
+            .product-tabs-{{ block.id }} .author-date a {
+              color: inherit;
+              text-decoration: underline;
+            }
+            
+            .product-tabs-{{ block.id }} .author-title {
+              display: inline-block;
+              width: fit-content;
+              color: {{ tab1_author_title_color | default: content_text_color }} !important;
+              font-size: {{ tab1_author_title_font_size | default: content_text_size | minus: 2 }}px !important;
+              line-height: 1.4;
+              letter-spacing: var(--letter-spacing-body);
+              margin: 0;
+              padding: {{ tab1_author_title_padding_v | default: 4 }}px {{ tab1_author_title_padding_h | default: 8 }}px;
+              border-radius: {{ tab1_author_title_border_radius | default: 0 }}px;
+              {% if tab1_author_title_background != blank and tab1_author_title_background != 'transparent' %}
+              background-color: {{ tab1_author_title_background }};
+              {% endif %}
+            }
+            
+            .product-tabs-{{ block.id }} .author-title p {
+              margin: 0;
+              padding: 0;
+              color: inherit !important;
+              font-size: inherit;
+              font-weight: inherit;
+              line-height: inherit;
+              letter-spacing: inherit;
+            }
+            
+            .product-tabs-{{ block.id }} .author-title strong,
+            .product-tabs-{{ block.id }} .author-title b {
+              font-weight: 700 !important;
+              color: inherit !important;
+            }
+            
+            .product-tabs-{{ block.id }} .author-title em,
+            .product-tabs-{{ block.id }} .author-title i {
+              font-style: italic;
+              color: inherit !important;
+            }
+            
+            .product-tabs-{{ block.id }} .author-title a {
+              color: inherit !important;
+              text-decoration: underline;
+            }
+  
+            /* Comparison Table Styles */
+            .product-tabs-{{ block.id }} .comparison-table {
+              display: flex;
+              flex-direction: column;
+            }
+  
+            .product-tabs-{{ block.id }} .comparison-header-row {
+              display: grid;
+              grid-template-columns: 1fr 64px 64px;
+              align-items: center;
+              padding: 0;
+              gap: 1rem;
+              height:100%;
+              border-bottom: 1px solid {{ tab_border_color }};
+              animation: fadeInUp .6s ease-out forwards;
+              animation-delay: calc(.1s * var(--index, 0));
+            }
+  
+            .product-tabs-{{ block.id }} .comparison-col-brand,
+            .product-tabs-{{ block.id }} .comparison-col-others {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+            .product-tabs-{{ block.id }} .comparison-col-brand {
+              background: {{ tab2_brand_background }}12;
+              height: 100%;
+              }
+            .product-tabs-{{ block.id }} .brand-logo {
+              max-width: 60px;
+              max-height: 40px;
+              width:100%;
+              object-fit: contain;
+            }
+  
+            .product-tabs-{{ block.id }} .comparison-row {
+              display: grid;
+              grid-template-columns: 1fr 64px 64px;
+              align-items: center;
+              padding: 0;
+              border-bottom: 1px solid {{ tab_border_color }}c4;
+              gap: 1rem;
+              animation: fadeInUp .6s ease-out forwards;
+              animation-delay: calc(.1s * var(--index, 0));
+            }
+  
+            .product-tabs-{{ block.id }} .comparison-col-name {
+              display: flex;
+              align-items: center;
+              gap: 1rem;
+            }
+  
+            .product-tabs-{{ block.id }} .comparison-text {
+              flex: 1;
+              margin:7px 0;
+            }
+  
+            .product-tabs-{{ block.id }} .comparison-item-name {
+              margin-bottom: 0.25rem;
+              line-height: 1.3;
+              letter-spacing: var(--letter-spacing-body);
+            }
+  
+            .product-tabs-{{ block.id }} .comparison-description {
+              line-height: 1.2;
+              opacity: 0.85;
+              letter-spacing: var(--letter-spacing-body);
+            }
+  
+            .product-tabs-{{ block.id }} .check-icon,
+            .product-tabs-{{ block.id }} .x-icon {
+              display: block;
+              width:20px;
+              height:20px;
+            }
+  
+            /* Directions Table Styles */
+            .product-tabs-{{ block.id }} .directions-table {
+              display: flex;
+              flex-direction: column;
+            }
+  
+            .product-tabs-{{ block.id }} .directions-header-row {
+              display: grid;
+              grid-template-columns: 1fr 200px;
+              padding: 1rem;
+              background-color: {{ tab3_header_background | default: '#f5f5f5' }} !important;
+              {% unless tab3_hide_table_borders %}
+                border-bottom: 1px solid {{ tab3_border_color | default: tab_border_color }};
+              {% endunless %}
+              gap: 2rem;
+              animation: fadeInUp .6s ease-out forwards;
+              animation-delay: calc(.1s * var(--index, 0));
+              font-weight:700 !important;
+            }
+  
+            .product-tabs-{{ block.id }} .directions-row {
+              display: grid;
+              grid-template-columns: auto 1fr 200px;
+              padding: 1rem 0;
+              {% unless tab3_hide_table_borders %}
+                border-bottom: 1px solid {{ tab3_border_color | default: tab_border_color }};
+              {% endunless %}
+              {% if tab3_row_background_color != blank %}
+                background-color: {{ tab3_row_background_color }};
+              {% endif %}
+              gap: 1.5rem;
+              align-items: center;
+              animation: fadeInUp .6s ease-out forwards;
+              animation-delay: calc(.1s * var(--index, 0));
+            }
+            
+            .product-tabs-{{ block.id }} .directions-col-image {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            
+            .product-tabs-{{ block.id }} .directions-image {
+              display: block;
+            }
+  
+            .product-tabs-{{ block.id }} .directions-label {
+              margin-bottom: 0.25rem;
+              line-height: 1.3;
+              letter-spacing: var(--letter-spacing-body);
+            }
+  
+            .product-tabs-{{ block.id }} .directions-sublabel {
+              line-height: 1.4;
+              opacity: 0.85;
+              letter-spacing: var(--letter-spacing-body);
+            }
+            
+            .product-tabs-{{ block.id }} .disclaimer-content p {
+              margin: 0;
+              padding: 0;
+            }
+            
+            .product-tabs-{{ block.id }} .disclaimer-content a {
+              color: inherit;
+              text-decoration: underline;
+            }
+            
+            .product-tabs-{{ block.id }} .disclaimer-content strong,
+            .product-tabs-{{ block.id }} .disclaimer-content b {
+              font-weight: 700;
+            }
+            
+            .product-tabs-{{ block.id }} .disclaimer-content em,
+            .product-tabs-{{ block.id }} .disclaimer-content i {
+              font-style: italic;
+            }
+  
+            .product-tabs-{{ block.id }} .directions-col-dosage {
+              display: flex;
+              align-items: center;
+            }
+  
+            /* Benefits List Styles */
+            .product-tabs-{{ block.id }} .tab4-heading {
+              line-height: 1.3;
+              animation: fadeInUp .6s ease-out forwards;
+              animation-delay: calc(.1s * var(--index, 0));
+              letter-spacing: var(--letter-spacing-body);
+            }
+  
+            .product-tabs-{{ block.id }} .benefits-list {
+              display: flex;
+              flex-direction: column;
+              gap: 1.5rem;
+            }
+  
+            .product-tabs-{{ block.id }} .benefit-item {
+              display: flex;
+              align-items: flex-start;
+              gap: 1rem;
+              width: 100%;
+              max-width: 100%;
+              min-height: auto;
+              flex-direction: row;
+              animation: fadeInUp .6s ease-out forwards;
+              animation-delay: calc(.1s * var(--index, 0));
+            }
+  
+            .product-tabs-{{ block.id }} .benefit-check-icon {
+              flex-shrink: 0;
+            }
+            
+            .product-tabs-{{ block.id }} .benefit-custom-icon {
+              flex-shrink: 0;
+              display: block;
+            }
+  
+            .product-tabs-{{ block.id }} .benefit-item span {
+              {% if tab4_show_benefit_border %}
+                border-bottom: 1px solid {{ tab_border_color }}db;
+                padding-bottom: 12px;
+              {% else %}
+                border-bottom: none;
+                padding-bottom: 0;
+              {% endif %}
+              line-height: 1;
+              width: 100%;
+              text-align: left;
+              letter-spacing: var(--letter-spacing-body);
+            }
+  
+            @media screen and (max-width: 749px) {
+  
+              .product-tabs-{{ block.id }} .product-tab-btn span {
+              font-size: {{ tab_font_size | times: 0.90 }}px;
+              padding: 0 10px;
+              width: 100%;
+              display: flex;
+              justify-content: center;
+              }
+  
+              .product-tabs-{{ block.id }} .product-tab-panel {
+                padding: 1.5rem;
+              }
+  
+              .product-tabs-{{ block.id }} .tab-quote {
+                font-size: 15px !important;
+                font-style: normal;
+              }
+  
+              .product-tabs-{{ block.id }} .author-image {
+                width: 50px;
+                height: 50px;
+              }
+  
+              .product-tabs-{{ block.id }} .comparison-header-row,
+              .product-tabs-{{ block.id }} .comparison-row {
+                grid-template-columns: 64% 18% 18%;
+                gap: 0.5rem;
+              }
+  
+              .product-tabs-{{ block.id }} .comparison-header-row {
+                font-size: 12px; 
+                grid-template-columns: 64% 18% 18%;
+              }
+  
+              .product-tabs-{{ block.id }} .comparison-row {
+                grid-template-columns: 64% 18% 18%;
+              }
+  
+              .product-tabs-{{ block.id }} .comparison-col-name {
+                gap: 0.75rem;
+              }
+  
+              .product-tabs-{{ block.id }} .brand-logo {
+                max-width: 50px;
+                max-height: 30px;
+              }
+  
+              .product-tabs-{{ block.id }} .check-icon,
+              .product-tabs-{{ block.id }} .x-icon {
+                width: 20px;
+                height: 20px;
+              }
+  
+              .product-tabs-{{ block.id }} .directions-header-row {
+                grid-template-columns: 1fr 120px;
+                gap: 1rem;
+              }
+              
+              .product-tabs-{{ block.id }} .directions-row {
+                grid-template-columns: auto 1fr 120px;
+                gap: 1rem;
+              }
+              
+              .product-tabs-{{ block.id }} .directions-image {
+                width: 50px;
+                height: 50px;
+              }
+  
+              .product-tabs-{{ block.id }} .directions-header-row {
+                padding: 0.75rem;
+              }
+  
+              .product-tabs-{{ block.id }} .directions-row {
+                padding: 1rem 0;
+              }
+            }
+  
+            @keyframes fadeInUp {
+              0% {
+                opacity: 0;
+                transform: translateY(20px);
+              }
+              100% {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+          </style>
+  
+          <script>
+            (function() {
+              const blockId = '{{ block.id }}';
+              const tabButtons = document.querySelectorAll('.product-tabs-container-' + blockId + ' .product-tab-btn');
+              const tabPanels = document.querySelectorAll('.product-tabs-container-' + blockId + ' .product-tab-panel');
+  
+              tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                  const targetTab = button.getAttribute('data-tab');
+                  
+                  // Remove active class from all buttons and panels in this block
+                  tabButtons.forEach(btn => btn.classList.remove('active'));
+                  tabPanels.forEach(panel => panel.classList.remove('active'));
+                  
+                  // Add active class to clicked button and corresponding panel
+                  button.classList.add('active');
+                  document.getElementById(targetTab).classList.add('active');
+                });
+              });
+            })();
+          </script>

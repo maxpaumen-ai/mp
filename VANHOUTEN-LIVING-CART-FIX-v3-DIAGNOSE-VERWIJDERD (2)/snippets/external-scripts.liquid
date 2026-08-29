@@ -1,0 +1,24 @@
+{% comment %}
+  Component: External Scripts
+
+  Description: External JavaScript libraries and modern alternatives
+
+  Features:
+  - jQuery: load on demand via jqueryCheckAndLoad() in theme-loaders.js (in head, not global)
+  - Swiper.js: load on demand via swiperCheckAndLoad() in theme-loaders.js (in head)
+  - Vite build system integration
+
+  Usage:
+  {% render 'external-scripts' %}
+{% endcomment %}
+
+<!-- Custom Scripts -->
+<script src="{{ 'custom.js' | asset_url }}" defer></script>
+
+<!-- Vite Build System -->
+{% # theme-check-disable MissingTemplate %}
+{% liquid
+  render 'vite-tag' with 'elxr-styles.css'
+  render 'vite-tag' with 'elxr-core.ts'
+%}
+{% # theme-check-enable MissingTemplate %}

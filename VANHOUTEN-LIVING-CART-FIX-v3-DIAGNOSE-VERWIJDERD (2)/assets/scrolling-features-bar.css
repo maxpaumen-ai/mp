@@ -1,0 +1,88 @@
+.scrolling-features-bar {
+  padding: var(--vertical-padding) 0;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  font-family: var(--font-body-family-override);
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+.scrolling-features-bar .features-track-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+.scrolling-features-bar .features-track {
+  display: flex;
+  white-space: nowrap;
+  position: relative;
+}
+.scrolling-features-bar .feature-items {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+.scrolling-features-bar .feature-item {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: var(--font-size);
+  margin: 0;
+  font-weight: var(--font-weight-bold) !important;
+  letter-spacing: var(--letter-spacing-body);
+  padding: 0 calc(var(--item-gap) / 2);
+  text-transform: var(--text-transform);
+  color: var(--text-color);
+}
+.scrolling-features-bar .feature-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: var(--icon-spacing);
+  flex-shrink: 0;
+}
+.scrolling-features-bar .feature-icon svg {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  fill: var(--icon-color);
+  stroke: none !important;
+  display: block;
+}
+.scrolling-features-bar .feature-icon img.icon-image {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  object-fit: contain;
+  display: block;
+}
+.scrolling-features-bar .feature-item-separator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  opacity: 0.5;
+  margin: 0 calc(var(--item-gap) / 2);
+  flex-shrink: 0;
+}
+.scrolling-features-bar.pause-on-hover .features-track:hover {
+  animation-play-state: paused;
+}
+@media (max-width: 768px) {
+  .scrolling-features-bar .feature-item {
+    font-size: var(--mobile-font-size);
+    padding: 0 calc(var(--mobile-item-gap) / 2);
+  }
+  .scrolling-features-bar .feature-icon svg {
+    width: var(--mobile-icon-size) !important;
+    height: var(--mobile-icon-size) !important;
+  }
+  .scrolling-features-bar .feature-icon img.icon-image {
+    width: var(--mobile-icon-size) !important;
+    height: var(--mobile-icon-size) !important;
+  }
+  .scrolling-features-bar .feature-item-separator {
+    width: 4px;
+    height: 4px;
+    margin: 0 calc(var(--mobile-item-gap) / 2);
+  }
+}

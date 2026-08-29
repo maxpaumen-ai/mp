@@ -1,0 +1,100 @@
+.search__input.field__input {
+  padding-right: 9.8rem;
+  border-radius: var(--inputs-radius);
+}
+.search__button {
+  right: var(--inputs-border-width);
+  top: var(--inputs-border-width);
+  border-radius: 0 var(--inputs-radius) var(--inputs-radius) 0;
+  border-left-width: 0;
+}
+.reset__button {
+  right: calc(var(--inputs-border-width) + 4.4rem);
+  top: var(--inputs-border-width);
+}
+.reset__button:not(:focus-visible)::after {
+  border-right: 0.1rem solid rgba(var(--color-foreground), 0.08);
+  display: block;
+  height: calc(100% - 1.6rem);
+  content: "";
+  position: absolute;
+  right: 0;
+}
+.reset__button:not(:focus)::after {
+  border-right: 0.1rem solid rgba(var(--color-foreground), 0.08);
+  display: block;
+  height: calc(100% - 1.8rem);
+  content: "";
+  position: absolute;
+  right: 0;
+}
+.search__button:focus-visible,
+.reset__button:focus-visible {
+  background-color: rgb(var(--color-background));
+  z-index: 4;
+}
+.search__button:focus,
+.reset__button:focus {
+  background-color: rgb(var(--color-background));
+  z-index: 4;
+}
+.search__button:not(:focus-visible):not(.focused),
+.reset__button:not(:focus-visible):not(.focused) {
+  box-shadow: inherit;
+  background-color: inherit;
+}
+.search__button:hover .icon,
+.reset__button:hover .icon {
+  transform: scale(1.07);
+}
+.search__button .icon {
+  height: 1.8rem;
+  width: 1.8rem;
+}
+.reset__button .icon.icon-close {
+  height: 1.8rem;
+  width: 1.8rem;
+  stroke-width: 0.1rem;
+}
+input::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+.template-search__results {
+  position: relative;
+  padding: 0px 5rem !important;
+}
+.facets-vertical .template-search__results {
+  padding: 0px !important;
+}
+.template-search__results .product-grid .grid__item .product-hover-image-overlay {
+  display:none;
+}
+.template-search__results .product-grid .grid__item a {
+  text-decoration:none;
+  height: 100%;
+  display: grid;
+}
+.template-search__results .product-grid .grid__item .product-rating {
+  margin-bottom: 5px;
+  justify-content: center;
+}
+.template-search__results .product-grid .grid__item .collection-product-info {
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  display: grid;
+  align-items: end;
+}
+.template-search__results .product-grid .grid__item .product-title {
+  height: auto;
+  min-height: auto;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+.template-search__results .product-grid .grid__item .collection-product-price {
+  justify-content: center;
+}
+.template-search__results .product-grid .grid__item .collection-view-product a {
+  padding:12px 8px;
+}

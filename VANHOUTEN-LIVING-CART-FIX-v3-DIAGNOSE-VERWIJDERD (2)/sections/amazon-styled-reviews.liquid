@@ -1,0 +1,1361 @@
+<!-- amazon-style-reviews.liquid -->
+
+<style>
+  #shopify-section-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background-color: {{ section.settings.background_color }};
+  }
+  .amazon-reviews-section-{{ section.id }} {
+    padding:0;
+    letter-spacing: var(--letter-spacing-body);
+    }
+  .amazon-reviews-section-{{ section.id }} .amazon-reviews-container {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+    padding: 0 {{ section.settings.horizontal_padding }}px;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .amazon-reviews-header {
+    text-align: {{ section.settings.header_alignment }};
+    margin-bottom: {{ section.settings.header_spacing }}px;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .amazon-reviews-heading {
+    font-size: {{ section.settings.heading_size }}px;
+    color: {{ section.settings.heading_color }};
+    font-weight: {{ section.settings.heading_weight }};
+    margin-bottom: {{ section.settings.heading_margin }}px;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .amazon-reviews-subheading {
+    font-size: {{ section.settings.subheading_size }}px;
+    color: {{ section.settings.subheading_color }};
+    font-weight: {{ section.settings.subheading_weight }};
+    margin-top:0;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .amazon-review-item {
+    background-color: {{ section.settings.review_background }};
+    border: {{ section.settings.review_border_width }}px solid {{ section.settings.review_border_color }};
+    border-radius: {{ section.settings.review_border_radius }}px;
+    padding: {{ section.settings.review_padding }}px;
+    margin-bottom: {{ section.settings.review_spacing }}px;
+    box-shadow: {{ section.settings.review_shadow }};
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: {{ section.settings.review_header_spacing }}px;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .reviewer-avatar {
+    width: {{ section.settings.avatar_size }}px;
+    height: {{ section.settings.avatar_size }}px;
+    border-radius: 50%;
+    margin-right: {{ section.settings.avatar_spacing }}px;
+    object-fit: cover;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .reviewer-info {
+    flex: 1;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .reviewer-name {
+    font-size: {{ section.settings.name_size }}px;
+    color: {{ section.settings.name_color }};
+    font-weight: 700 !important;
+    margin-bottom: 4px;
+    display:inline;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-title {
+    font-size: {{ section.settings.title_size }}px;
+    color: {{ section.settings.title_color }};
+    font-weight: {{ section.settings.title_weight }};
+    margin:0;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-meta {
+    display: flex;
+    align-items: center;
+    gap: {{ section.settings.meta_spacing }}px;
+    margin-bottom: {{ section.settings.meta_margin }}px;
+    flex-wrap: wrap;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-stars {
+    display: flex;
+    gap: -2px;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .amazon-review-star {
+    width: {{ section.settings.star_size }}px;
+    height: {{ section.settings.star_size }}px;
+    color: {{ section.settings.star_color }};
+  }
+
+  .amazon-reviews-section-{{ section.id }} .amazon-review-star.empty {
+    color: {{ section.settings.star_empty_color }};
+  }
+
+  .amazon-reviews-section-{{ section.id }} .verified-badge {
+    background-color: {{ section.settings.badge_background }};
+    padding: {{ section.settings.badge_padding }};
+    border-radius: {{ section.settings.badge_radius }}px;
+    font-size: {{ section.settings.badge_size }}px;
+    font-weight: {{ section.settings.badge_weight }};
+    color: {{ section.settings.badge_color }} !important;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .verified-badge p {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline !important;
+    /* Removed color: inherit !important to allow span inline styles to work */
+  }
+
+  .amazon-reviews-section-{{ section.id }} .verified-badge .highlight-word {
+    /* Let inline styles take precedence - no CSS color override */
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-date {
+    color: {{ section.settings.date_color }};
+    font-size: {{ section.settings.date_size }}px;
+    display:inline;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .amazon-review-text {
+    font-size: {{ section.settings.content_size }}px;
+    color: {{ section.settings.content_color }};
+    line-height: {{ section.settings.content_line_height }};
+    margin-bottom: {{ section.settings.content_margin }}px;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-images {
+    display: flex;
+    gap: {{ section.settings.image_gap }}px;
+    margin-bottom: {{ section.settings.image_margin }}px;
+    flex-wrap: wrap;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-image {
+    width: auto;
+    height: {{ section.settings.review_image_height }}px;
+    object-fit: cover;
+    border-radius: {{ section.settings.image_border_radius }}px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-image.aspect-ratio-square {
+    aspect-ratio: 1/1;
+    width: {{ section.settings.review_image_height }}px;
+    height: {{ section.settings.review_image_height }}px;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-image.aspect-ratio-portrait {
+    aspect-ratio: 9/16;
+    width: auto;
+    height: {{ section.settings.review_image_height }}px;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-image:hover {
+    transform: scale(1.05);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-helpful {
+    color: {{ section.settings.helpful_color }};
+    font-size: {{ section.settings.helpful_size }}px;
+    margin-top: {{ section.settings.helpful_margin }}px;
+    font-weight: 700 !important;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .review-actions {
+    margin-top: {{ section.settings.action_buttons_margin }}px;
+    display: flex;
+    align-items: center;
+    gap: {{ section.settings.action_buttons_spacing }}px;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .helpful-button {
+    background: none;
+    border: none;
+    color: {{ section.settings.helpful_button_color }};
+    font-size: {{ section.settings.action_button_size }}px;
+    cursor: pointer;
+    padding: {{ section.settings.action_button_padding }};
+    text-decoration: underline;
+    transition: color 0.2s ease;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .report-button {
+    background: none;
+    border: none;
+    color: {{ section.settings.report_button_color }};
+    font-size: {{ section.settings.action_button_size }}px;
+    cursor: default;
+    padding: {{ section.settings.action_button_padding }};
+    text-decoration: underline;
+    transition: color 0.2s ease;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  .amazon-reviews-section-{{ section.id }} .helpful-button:hover {
+    color: {{ section.settings.helpful_button_hover_color }};
+  }
+
+  .amazon-reviews-section-{{ section.id }} .report-button:hover {
+    /* Hover effect disabled - button is non-functional */
+    color: {{ section.settings.report_button_color }};
+  }
+
+  .amazon-reviews-section-{{ section.id }} .helpful-button.clicked {
+    color: {{ section.settings.helpful_clicked_color }};
+    font-weight: bold;
+  }
+
+  .amazon-reviews-section-{{ section.id }} .action-divider {
+    color: {{ section.settings.divider_color }};
+    font-size: {{ section.settings.action_button_size }}px;
+    margin: 0 {{ section.settings.divider_spacing }}px;
+  }
+
+  @media (max-width: 768px) {
+    .amazon-reviews-section-{{ section.id }} .amazon-reviews-container {
+      padding: 0 20px;
+    }
+
+    .amazon-reviews-section-{{ section.id }} .amazon-reviews-heading {
+      font-size: calc({{ section.settings.heading_size }}px * 0.55);
+      line-height:1;
+    }
+
+    .amazon-reviews-section-{{ section.id }} .amazon-reviews-subheading {
+      font-size: calc({{ section.settings.subheading_size }}px * 0.85);
+      line-height: 1.3;
+    }
+  }
+</style>
+
+<div class="amazon-reviews-section-{{ section.id }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  <div class="amazon-reviews-container">
+    {% if section.settings.heading != blank or section.settings.subheading != blank %}
+      <div class="amazon-reviews-header">
+        {% if section.settings.heading != blank %}
+          <h2 class="amazon-reviews-heading">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="amazon-reviews-subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="amazon-reviews-list">
+      {% for block in section.blocks %}
+        <div class="amazon-review-item" {{ block.shopify_attributes }}>
+          <div class="review-header">
+            {% if block.settings.avatar != blank %}
+              <img
+                src="{{ block.settings.avatar | image_url: width: 100, height: 100 }}"
+                alt="{{ block.settings.reviewer_name }}"
+                width="100"
+                height="100"
+                class="reviewer-avatar"
+              >
+            {% else %}
+              <div
+                class="reviewer-avatar"
+                style="background-color: {{ section.settings.avatar_placeholder_bg }}; display: flex; align-items: center; justify-content: center;"
+              >
+                <span style="font-size: {{ section.settings.avatar_size | divided_by: 2 }}px; color: {{ section.settings.avatar_placeholder_text }};">
+                  {{ block.settings.reviewer_name | slice: 0 }}
+                </span>
+              </div>
+            {% endif %}
+            <div class="reviewer-info">
+              <h3 class="review-title">
+                <div class="reviewer-name">{{ block.settings.reviewer_name }}</div>
+                {% if block.settings.show_review_title and block.settings.review_title != blank %}
+                  - {{ block.settings.review_title -}}
+                {%- endif %}
+              </h3>
+            </div>
+          </div>
+
+          <div class="review-meta">
+            <div class="review-stars" role="img" aria-label="{{ block.settings.rating }} out of 5 stars">
+              {% for i in (1..5) %}
+                {% if i <= block.settings.rating %}
+                  <svg class="amazon-review-star" fill="currentColor" viewBox="0 0 32 32">
+                    <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+                  </svg>
+                {% else %}
+                  <svg class="amazon-review-star empty" fill="currentColor" viewBox="0 0 32 32">
+                    <path d="M16 4.588l2.833 8.719H28l-7.416 5.387 2.832 8.719L16 22.023l-7.417 5.389 2.833-8.719L4 13.307h9.167L16 4.588z"/>
+                  </svg>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            {% if block.settings.show_verified %}
+              <div class="verified-badge">
+                {% if block.settings.verified_badge_text != blank %}
+                  {% liquid
+                    assign verified_content = block.settings.verified_badge_text
+
+                    if block.settings.highlight_words != blank
+                      assign highlight_words = block.settings.highlight_words | split: ','
+                      assign highlighted_content = verified_content
+
+                      for word in highlight_words
+                        assign clean_word = word | strip
+                        if clean_word != blank
+                          assign highlight_color = block.settings.highlight_color | default: '#C45500'
+                          assign span_open = '<span class="highlight-word" style="color: ' | append: highlight_color | append: ' !important; font-weight: bold !important;">'
+                          assign span_close = '</span>'
+                          assign replacement = span_open | append: clean_word | append: span_close
+                          assign highlighted_content = highlighted_content | replace: clean_word, replacement
+                        endif
+                      endfor
+
+                      echo highlighted_content
+                    else
+                      echo verified_content
+                    endif
+                  %}
+                {% else %}
+                  <p>Verified Purchase</p>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="review-date">
+            Reviewed
+            {%- if block.settings.review_country != blank %}
+              in the
+              <div class="review-date">{{ block.settings.review_country }}</div>
+            {% endif -%}
+            {%- if block.settings.review_date != blank %}
+              on
+              <div class="review-date">{{ block.settings.review_date }}</div>
+            {% endif %}
+          </div>
+          {% if block.settings.review_content != blank %}
+            <div class="amazon-review-text">
+              {{ block.settings.review_content }}
+            </div>
+          {% endif %}
+
+          {% if block.settings.image_1 != blank
+            or block.settings.image_2 != blank
+            or block.settings.image_3 != blank
+            or block.settings.image_4 != blank
+          %}
+            <div class="review-images">
+              {% liquid
+                assign aspect_ratio_class = ''
+                assign img_width = 200
+                assign img_height = 200
+
+                if block.settings.image_aspect_ratio == '1/1'
+                  assign aspect_ratio_class = ' aspect-ratio-square'
+                  assign img_width = 200
+                  assign img_height = 200
+                elsif block.settings.image_aspect_ratio == '9/16'
+                  assign aspect_ratio_class = ' aspect-ratio-portrait'
+                  assign img_width = 180
+                  assign img_height = 320
+                endif
+              %}
+              {% if block.settings.image_1 != blank %}
+                <img
+                  src="{{ block.settings.image_1 | image_url: width: img_width, height: img_height }}"
+                  alt="Review image 1"
+                  width="{{ img_width }}"
+                  height="{{ img_height }}"
+                  class="review-image{{ aspect_ratio_class }}"
+                >
+              {% endif %}
+              {% if block.settings.image_2 != blank %}
+                <img
+                  src="{{ block.settings.image_2 | image_url: width: img_width, height: img_height }}"
+                  alt="Review image 2"
+                  width="{{ img_width }}"
+                  height="{{ img_height }}"
+                  class="review-image{{ aspect_ratio_class }}"
+                >
+              {% endif %}
+              {% if block.settings.image_3 != blank %}
+                <img
+                  src="{{ block.settings.image_3 | image_url: width: img_width, height: img_height }}"
+                  alt="Review image 3"
+                  width="{{ img_width }}"
+                  height="{{ img_height }}"
+                  class="review-image{{ aspect_ratio_class }}"
+                >
+              {% endif %}
+              {% if block.settings.image_4 != blank %}
+                <img
+                  src="{{ block.settings.image_4 | image_url: width: img_width, height: img_height }}"
+                  alt="Review image 4"
+                  width="{{ img_width }}"
+                  height="{{ img_height }}"
+                  class="review-image{{ aspect_ratio_class }}"
+                >
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if block.settings.helpful_count > 0 %}
+            <div class="review-helpful">
+              {{ block.settings.helpful_count }}
+              {{ block.settings.helpful_text }}
+            </div>
+          {% endif %}
+
+          {% if block.settings.show_helpful_report_buttons %}
+            <div class="review-actions">
+              <button class="helpful-button" onclick="markHelpful(this)" data-review-id="{{ block.id }}">
+                <span class="helpful-text">{{ block.settings.helpful_button_text | default: 'Helpful' }}</span>
+              </button>
+              <span class="action-divider">|</span>
+              <button class="report-button" onclick="return false;" data-review-id="{{ block.id }}">
+                <span class="report-text">{{ block.settings.report_button_text | default: 'Report' }}</span>
+              </button>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  function markHelpful(button) {
+    // Add clicked state
+    button.classList.add('clicked');
+
+    // Optional: Update text to show it was marked helpful
+    const helpfulText = button.querySelector('.helpful-text');
+    if (helpfulText) {
+      helpfulText.textContent = 'Helpful ✓';
+    }
+
+    // Disable the button to prevent multiple clicks
+    button.disabled = true;
+
+    // Here you could add AJAX call to save the helpful vote
+    // Example:
+    // const reviewId = button.dataset.reviewId;
+    // fetch('/mark-helpful', { method: 'POST', body: JSON.stringify({reviewId}) });
+  }
+
+  // Report button functionality disabled - button does nothing when clicked
+  function reportReview(button) {
+    // Function disabled - no action taken
+    return false;
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Amazon Style Reviews",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Amazon Style Reviews"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "See what our customers are saying about our products"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Header Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum Width",
+      "min": 600,
+      "max": 1600,
+      "step": 50,
+      "default": 950,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 50,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 50,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "horizontal_padding",
+      "label": "Horizontal Padding",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Typography - Heading"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading Size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "default": 52,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#0F1111"
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "range",
+      "id": "heading_margin",
+      "label": "Heading Bottom Margin",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 10,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Typography - Subheading"
+    },
+    {
+      "type": "range",
+      "id": "subheading_size",
+      "label": "Subheading Size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading Color",
+      "default": "#565959"
+    },
+    {
+      "type": "select",
+      "id": "subheading_weight",
+      "label": "Subheading Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "label": "Header Bottom Spacing",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "default": 30,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section Background",
+      "default": "#fff"
+    },
+    {
+      "type": "color",
+      "id": "review_background",
+      "label": "Review Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "review_border_color",
+      "label": "Review Border Color",
+      "default": "#D5D9D9"
+    },
+    {
+      "type": "header",
+      "content": "Review Card Styling"
+    },
+    {
+      "type": "range",
+      "id": "review_padding",
+      "label": "Review Padding",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "review_spacing",
+      "label": "Space Between Reviews",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "default": 35,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "review_border_width",
+      "label": "Border Width",
+      "min": 0,
+      "max": 3,
+      "step": 1,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "review_border_radius",
+      "label": "Border Radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "text",
+      "id": "review_shadow",
+      "label": "Box Shadow",
+      "default": "none",
+      "info": "CSS box-shadow value"
+    },
+    {
+      "type": "header",
+      "content": "Avatar Settings"
+    },
+    {
+      "type": "range",
+      "id": "avatar_size",
+      "label": "Avatar Size",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "avatar_spacing",
+      "label": "Avatar Right Spacing",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "avatar_placeholder_bg",
+      "label": "Avatar Placeholder Background",
+      "default": "#dddddd",
+      "info": "Background color when no avatar image is provided"
+    },
+    {
+      "type": "color",
+      "id": "avatar_placeholder_text",
+      "label": "Avatar Placeholder Text Color",
+      "default": "#666666",
+      "info": "Text color for initials when no avatar image is provided"
+    },
+    {
+      "type": "range",
+      "id": "review_header_spacing",
+      "label": "Review Header Bottom Spacing",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "default": 6,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Reviewer Name"
+    },
+    {
+      "type": "range",
+      "id": "name_size",
+      "label": "Name Font Size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "name_color",
+      "label": "Name Color",
+      "default": "#0F1111"
+    },
+    {
+      "type": "select",
+      "id": "name_weight",
+      "label": "Name Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "header",
+      "content": "Review Title"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title Font Size",
+      "min": 14,
+      "max": 22,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#0F1111"
+    },
+    {
+      "type": "select",
+      "id": "title_weight",
+      "label": "Title Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "header",
+      "content": "Meta Information"
+    },
+    {
+      "type": "range",
+      "id": "meta_spacing",
+      "label": "Meta Items Spacing",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "default": 6,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "meta_margin",
+      "label": "Meta Bottom Margin",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Star Rating"
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "Star Size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star Color",
+      "default": "#FFA41C"
+    },
+    {
+      "type": "color",
+      "id": "star_empty_color",
+      "label": "Empty Star Color",
+      "default": "#DDD"
+    },
+    {
+      "type": "header",
+      "content": "Verified Badge"
+    },
+    {
+      "type": "color",
+      "id": "badge_background",
+      "label": "Badge Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "badge_color",
+      "label": "Verified Purchase Text Color",
+      "default": "#C45500"
+    },
+    {
+      "type": "text",
+      "id": "badge_padding",
+      "label": "Badge Padding",
+      "default": "0",
+      "info": "CSS padding value"
+    },
+    {
+      "type": "range",
+      "id": "badge_radius",
+      "label": "Badge Border Radius",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "badge_size",
+      "label": "Badge Font Size",
+      "min": 10,
+      "max": 14,
+      "step": 1,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "badge_weight",
+      "label": "Badge Font Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "header",
+      "content": "Review Country & Date"
+    },
+    {
+      "type": "color",
+      "id": "date_color",
+      "label": "Color",
+      "default": "#565959"
+    },
+    {
+      "type": "range",
+      "id": "date_size",
+      "label": "Font Size",
+      "min": 10,
+      "max": 15,
+      "step": 1,
+      "default": 13,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Review Content"
+    },
+    {
+      "type": "range",
+      "id": "content_size",
+      "label": "Content Font Size",
+      "min": 13,
+      "max": 18,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "content_color",
+      "label": "Content Color",
+      "default": "#0F1111"
+    },
+    {
+      "type": "range",
+      "id": "content_line_height",
+      "label": "Line Height",
+      "min": 1.2,
+      "max": 2,
+      "step": 0.1,
+      "default": 1.5
+    },
+    {
+      "type": "range",
+      "id": "content_margin",
+      "label": "Content Bottom Margin",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Review Images"
+    },
+    {
+      "type": "range",
+      "id": "review_image_height",
+      "label": "Image Height",
+      "min": 60,
+      "max": 150,
+      "step": 5,
+      "default": 100,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "image_gap",
+      "label": "Image Gap",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "default": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "image_margin",
+      "label": "Images Bottom Margin",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image Border Radius",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Helpful Text"
+    },
+    {
+      "type": "color",
+      "id": "helpful_color",
+      "label": "Helpful Text Color",
+      "default": "#565959"
+    },
+    {
+      "type": "range",
+      "id": "helpful_size",
+      "label": "Helpful Font Size",
+      "min": 11,
+      "max": 24,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "helpful_weight",
+      "label": "Helpful Font Weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "range",
+      "id": "helpful_margin",
+      "label": "Helpful Top Margin",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "default": 10,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Action Buttons (Helpful | Report)"
+    },
+    {
+      "type": "range",
+      "id": "action_buttons_margin",
+      "label": "Action Buttons Top Margin",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "action_buttons_spacing",
+      "label": "Spacing Between Buttons",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "default": 8,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "action_button_size",
+      "label": "Button Font Size",
+      "min": 11,
+      "max": 16,
+      "step": 1,
+      "default": 13,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "helpful_button_color",
+      "label": "Helpful Button Color",
+      "default": "#767676"
+    },
+    {
+      "type": "color",
+      "id": "helpful_button_hover_color",
+      "label": "Helpful Button Hover Color",
+      "default": "#555555"
+    },
+    {
+      "type": "color",
+      "id": "helpful_clicked_color",
+      "label": "Helpful Button Clicked Color",
+      "default": "#00a652"
+    },
+    {
+      "type": "color",
+      "id": "report_button_color",
+      "label": "Report Button Color",
+      "default": "#767676"
+    },
+    {
+      "type": "color",
+      "id": "report_button_hover_color",
+      "label": "Report Button Hover Color",
+      "default": "#555555"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider Color",
+      "default": "#767676"
+    },
+    {
+      "type": "text",
+      "id": "action_button_padding",
+      "label": "Button Padding",
+      "default": "4px 0",
+      "info": "CSS padding value"
+    },
+    {
+      "type": "range",
+      "id": "divider_spacing",
+      "label": "Divider Spacing",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 6,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Customer Review",
+      "settings": [
+        {
+          "type": "text",
+          "id": "reviewer_name",
+          "label": "Reviewer Name",
+          "default": "John Doe"
+        },
+        {
+          "type": "image_picker",
+          "id": "avatar",
+          "label": "Avatar Image"
+        },
+
+        {
+          "type": "text",
+          "id": "review_title",
+          "label": "Review Title",
+          "default": "Great product!"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_review_title",
+          "label": "Show Review Title",
+          "default": true,
+          "info": "Display the review title after the reviewer name"
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Star Rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "show_verified",
+          "label": "Show Verified Badge",
+          "default": true
+        },
+        {
+          "type": "richtext",
+          "id": "verified_badge_text",
+          "label": "Verified Badge Text",
+          "default": "<p>Verified Purchase</p>",
+          "info": "Use rich text to format your verified badge. Include variant info and verification text."
+        },
+        {
+          "type": "text",
+          "id": "highlight_words",
+          "label": "Words to Highlight",
+          "default": "Verified Purchase",
+          "info": "Comma-separated list of words to highlight with custom color (e.g., 'Verified Purchase, Color, Style')"
+        },
+        {
+          "type": "color",
+          "id": "highlight_color",
+          "label": "Highlight Color",
+          "default": "#C45500",
+          "info": "Color for highlighted words"
+        },
+        {
+          "type": "text",
+          "id": "review_country",
+          "label": "Review Country",
+          "default": "United States"
+        },
+        {
+          "type": "text",
+          "id": "review_date",
+          "label": "Review Date",
+          "default": "January 1, 2024"
+        },
+        {
+          "type": "textarea",
+          "id": "review_content",
+          "label": "Review Content",
+          "default": "I've been using this product for a few weeks now and I'm really impressed with the quality. It exceeded my expectations and I would definitely recommend it to others."
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "Review Image 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Review Image 2"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_3",
+          "label": "Review Image 3"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_4",
+          "label": "Review Image 4"
+        },
+        {
+          "type": "select",
+          "id": "image_aspect_ratio",
+          "label": "Image Aspect Ratio",
+          "options": [
+            {
+              "value": "auto",
+              "label": "Auto (Original)"
+            },
+            {
+              "value": "1/1",
+              "label": "Square (1:1)"
+            },
+            {
+              "value": "9/16",
+              "label": "Portrait (9:16)"
+            }
+          ],
+          "default": "auto",
+          "info": "Choose the aspect ratio for review images in this block"
+        },
+        {
+          "type": "number",
+          "id": "helpful_count",
+          "label": "Helpful Count",
+          "default": 15,
+          "info": "Set to 0 to hide"
+        },
+        {
+          "type": "text",
+          "id": "helpful_text",
+          "label": "Helpful Text",
+          "default": "people found this helpful"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_helpful_report_buttons",
+          "label": "Show Helpful | Report Buttons",
+          "default": true,
+          "info": "Display interactive helpful and report buttons"
+        },
+        {
+          "type": "text",
+          "id": "helpful_button_text",
+          "label": "Helpful Button Text",
+          "default": "Helpful",
+          "info": "Text for the helpful button"
+        },
+        {
+          "type": "text",
+          "id": "report_button_text",
+          "label": "Report Button Text",
+          "default": "Report",
+          "info": "Text for the report button"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Amazon Style Reviews",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "reviewer_name": "John D.",
+            "review_title": "Excellent quality and fast shipping",
+            "rating": 5,
+            "verified_badge_text": "<p>Verified Purchase</p>",
+            "review_country": "United States",
+            "review_date": "October 15, 2024",
+            "review_content": "I was really impressed with the quality of this product. It arrived quickly and was exactly as described. I would definitely recommend this to anyone looking for a reliable solution.",
+            "helpful_count": 42
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "reviewer_name": "Sarah M.",
+            "review_title": "Great value for money",
+            "rating": 5,
+            "verified_badge_text": "<p>Verified Purchase</p>",
+            "review_country": "United States",
+            "review_date": "November 2, 2024",
+            "review_content": "This product exceeded my expectations. The customer service was excellent and the product itself is very well made. I've been using it daily and have had no issues whatsoever.",
+            "helpful_count": 28
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "reviewer_name": "Michael R.",
+            "review_title": "Exactly what I needed",
+            "rating": 4,
+            "verified_badge_text": "<p>Verified Purchase</p>",
+            "review_country": "United States",
+            "review_date": "November 10, 2024",
+            "review_content": "Good product overall. It does everything it claims to do. Setup was easy and it works perfectly for my needs. Would buy again.",
+            "helpful_count": 15
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

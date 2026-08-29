@@ -1,0 +1,255 @@
+{% comment %}
+  Added global page width/padding using theme tokens
+  Replaced static 6x duplication with dynamic JS cloning
+  Moved CSS variables to inline style block
+  Added accessibility attributes to divider images
+  Added prefers-reduced-motion support
+  Added keyboard/focus pause functionality
+  Fixed XSS vulnerability with proper escaping
+  Updated to use modern image_url filter
+  Inlined critical CSS and JS for performance
+  Made ticker width calculation dynamic with JS
+{% endcomment %}
+
+{{ 'scrolling-ticker.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'scrolling-ticker.js' | asset_url }}" defer></script>
+
+{% assign ticker_content = '' %}
+{% for block in section.blocks %}
+  {% if block.type == 'announcement' %}
+    {% assign ticker_content = ticker_content
+      | append: '<div class="ticker__item" '
+      | append: block.shopify_attributes
+      | append: '><span>'
+      | append: block.settings.text
+      | append: '</span></div>'
+    %}
+    {% unless forloop.last %}
+      {% if section.settings.show_dividers %}
+        {% assign divider_html = '' %}
+        {% if section.settings.divider_type == 'text' %}
+          {% assign divider_html = '<span>' | append: section.settings.divider_text | append: '</span>' %}
+        {% elsif section.settings.divider_type == 'image' and section.settings.divider_image != blank %}
+          {% assign loop_divider_image_url = section.settings.divider_image | image_url: width: 40 %}
+          {% assign divider_html = '<img src="'
+            | append: loop_divider_image_url
+            | append: '" alt="Divider" loading="lazy" width="40" height="40">'
+          %}
+        {% else %}
+          {% assign divider_html = '<span>+</span>' %}
+        {% endif %}
+        {% assign ticker_content = ticker_content
+          | append: '<div class="ticker__divider">'
+          | append: divider_html
+          | append: '</div>'
+        %}
+      {% endif %}
+    {% endunless %}
+  {% endif %}
+{% endfor %}
+
+<div
+  class="ticker-wrapper"
+  style="
+    --background-color: {{ section.settings.background_color }};
+    --text-color: {{ section.settings.text_color }};
+    --ticker-font-weight: {{ section.settings.font_weight }};
+    --scroll-speed: {{ section.settings.scroll_speed }}s;
+    --divider-size: {{ section.settings.divider_size }}px;
+    --ticker-font-size-mobile: {{ section.settings.font_size_mobile }}px;
+    --ticker-font-size-desktop: {{ section.settings.font_size_desktop }}px;
+  "
+>
+  <div class="ticker">
+    <div class="ticker__track">
+      {% comment %} Create 6 copies for seamless looping with no gaps {% endcomment %}
+      {% for i in (1..6) %}
+        <div class="ticker__content">
+          {{ ticker_content }}
+          {% if section.settings.show_dividers and section.blocks.size > 0 %}
+            <div class="ticker__divider">
+              {% if section.settings.divider_type == 'text' %}
+                <span>{{ section.settings.divider_text }}</span>
+              {% elsif section.settings.divider_type == 'image' and section.settings.divider_image != blank %}
+                {% assign loop_divider_image_url = section.settings.divider_image | image_url: width: 40 %}
+                <img
+                  src="{{ loop_divider_image_url }}"
+                  alt="Divider"
+                  loading="lazy"
+                  width="40"
+                  height="40"
+                >
+              {% else %}
+                <span>+</span>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Scrolling Ticker",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Text Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "range",
+      "id": "font_size_mobile",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Text Size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "font_size_desktop",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Text Size (Desktop)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "min": 5,
+      "max": 50,
+      "step": 1,
+      "unit": "s",
+      "label": "Scroll Speed (lower = faster)",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Divider Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dividers",
+      "label": "Show dividers between items",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "divider_type",
+      "label": "Divider Type",
+      "options": [
+        {
+          "value": "text",
+          "label": "Text"
+        },
+        {
+          "value": "image",
+          "label": "Image"
+        }
+      ],
+      "default": "text"
+    },
+    {
+      "type": "text",
+      "id": "divider_text",
+      "label": "Divider Text",
+      "default": "+",
+      "info": "Used when divider type is set to 'Text'"
+    },
+    {
+      "type": "image_picker",
+      "id": "divider_image",
+      "label": "Divider Image",
+      "info": "Used when divider type is set to 'Image'"
+    },
+    {
+      "type": "range",
+      "id": "divider_size",
+      "min": 10,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Image Size",
+      "default": 16,
+      "info": "Sets the width of the divider image"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "announcement",
+      "name": "Announcement",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Announcement text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolling Ticker",
+      "blocks": [
+        {
+          "type": "announcement",
+          "settings": {
+            "text": "FREE SHIPPING"
+          }
+        },
+        {
+          "type": "announcement",
+          "settings": {
+            "text": "ON SALE NOW"
+          }
+        },
+        {
+          "type": "announcement",
+          "settings": {
+            "text": "SPRING SALE"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,74 @@
+{% comment %}
+  CONTAINED SECTIONS IMPLEMENTATION EXAMPLE
+
+  To add contained sections support to any section:
+
+  1. Add the settings to your section schema:
+  In your section's schema, copy the JSON from snippets/contained-sections-settings.liquid
+  (Note: Don't use liquid render tags in schema - copy the actual JSON content)
+
+  2. Wrap your section content:
+  Option A - Wrap everything:
+
+  {% render 'contained-sections-wrapper', section: section %}
+    <div class="section">
+      <!-- Your existing section content -->
+    </div>
+  {% endrender %}
+
+  Option B - Open/close separately for more control:
+
+  {% render 'contained-sections-wrapper', section: section, action: 'open' %}
+  <div class="section">
+    <!-- Your existing section content -->
+  </div>
+  {% render 'contained-sections-wrapper', action: 'close' %}
+
+  3. Example section with contained sections:
+
+  <div class="section-{{ section.id }}-padding">
+    {% render 'contained-sections-wrapper', section: section, action: 'open' %}
+
+    <div class="page-width">
+      <div class="section-header">
+        {% if section.settings.title != blank %}
+          <h2 class="title">{{ section.settings.title }}</h2>
+        {% endif %}
+      </div>
+
+      <div class="section-content">
+        <!-- Your section content here -->
+      </div>
+    </div>
+
+    {% render 'contained-sections-wrapper', action: 'close' %}
+  </div>
+
+  4. Available variant classes (automatically applied based on settings):
+  - contained-section--compact (smaller padding/margin)
+  - contained-section--spacious (larger padding/margin)
+  - contained-section--full-width (no side margins)
+  - contained-section--light (light color theme)
+  - contained-section--dark (dark color theme)
+  - contained-section--accent (accent color theme)
+  - contained-section--no-border (removes border)
+  - contained-section--thick-border (thicker border)
+  - contained-section--dashed-border (dashed border style)
+  - contained-section--no-shadow (removes shadow)
+  - contained-section--heavy-shadow (stronger shadow)
+  - contained-section--sharp (no border radius)
+  - contained-section--rounded (extra border radius)
+  - contained-section--pill (pill-shaped)
+  - contained-section--no-hover (disables hover animation)
+
+  5. Manual class application (if not using snippets):
+
+  <div class="contained-section contained-section--spacious contained-section--accent">
+    <!-- Your content -->
+  </div>
+
+  Note: The contained sections system must be enabled in Theme Settings > Contained Sections
+  for any of these features to work.
+{% endcomment %}
+
+{% comment %} This is a documentation file - no actual output {% endcomment %}

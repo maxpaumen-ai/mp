@@ -1,0 +1,399 @@
+{% comment %}
+  Size Chart Block
+  Renders a customizable size chart trigger button and popup modal
+{% endcomment %}
+
+{{ 'size-chart.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  .size-chart-block .size-chart-trigger-{{ block.id }} {
+    {% if remove_background_container %}
+      /* Minimal style - no background or container */
+      background-color: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      width: auto !important;
+      height: auto !important;
+    {% else %}
+      /* Standard button style */
+      background-color: {{ trigger_bg_color | default: '#f0f0f0' }} !important;
+      border: {{ trigger_border_width | default: 1 }}px solid {{ trigger_border_color | default: '#ccc' }} !important;
+      border-radius: {{ trigger_border_radius | default: 4 }}px !important;
+      min-width: {{ trigger_width | default: 120 }}px !important;
+      min-height: {{ trigger_height | default: 40 }}px !important;
+      width: auto !important;
+      height: auto !important;
+      white-space: normal !important;
+      overflow: hidden !important;
+    {% endif %}
+    
+    color: {{ trigger_text_color | default: '#333' }} !important;
+    font-size: {{ trigger_font_size | default: 14 }}px !important;
+    display: inline-flex !important;
+    
+    {% if underline_text %}
+      text-decoration: underline !important;
+    {% else %}
+      text-decoration: none !important;
+    {% endif %}
+  }
+
+  .size-chart-block .size-chart-trigger-{{ block.id }}:hover {
+    {% unless remove_background_container %}
+      background-color: {{ trigger_hover_bg_color | default: '#e0e0e0' }} !important;
+      transform: translateY(-1px);
+    {% endunless %}
+    color: {{ trigger_hover_text_color | default: '#333' }} !important;
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-popup-content {
+    background-color: {{ popup_bg_color | default: '#fff' }};
+    border-radius: {{ popup_border_radius | default: 8 }}px !important;
+    max-width: {{ popup_max_width | default: 600 }}px;
+    overflow: hidden; /* Ensure child elements respect border radius */
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-popup-backdrop {
+    background-color: {{ popup_backdrop_color | default: 'rgba(0,0,0,0.5)' }};
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-popup-header {
+    background-color: {{ popup_header_bg_color | default: '#f8f9fa' }};
+    color: {{ popup_header_text_color | default: '#333' }};
+    font-size: {{ popup_header_font_size | default: 18 }}px;
+    padding: {{ popup_header_padding | default: 16 }}px;
+    border-bottom-color: {{ popup_border_color | default: '#dee2e6' }};
+    border-top-left-radius: {{ popup_border_radius | default: 8 }}px !important;
+    border-top-right-radius: {{ popup_border_radius | default: 8 }}px !important;
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-popup-close {
+    color: {{ close_button_color | default: '#666' }};
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-popup-close:hover {
+    color: {{ close_button_hover_color | default: '#000' }};
+    background-color: {{ close_button_hover_bg | default: '#f0f0f0' }};
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-popup-body {
+    padding: {{ popup_body_padding | default: 20 }}px;
+    color: {{ popup_body_text_color | default: '#333' }};
+    font-size: {{ popup_body_font_size | default: 14 }}px;
+    border-bottom-left-radius: {{ popup_border_radius | default: 8 }}px !important;
+    border-bottom-right-radius: {{ popup_border_radius | default: 8 }}px !important;
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-table th,
+  .size-chart-popup-{{ block.id }} .size-chart-table td {
+    border-bottom-color: {{ table_border_color | default: '#dee2e6' }};
+    color: {{ table_text_color | default: '#333' }};
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-table th {
+    background-color: {{ table_header_bg | default: '#f8f9fa' }};
+    color: {{ table_header_text_color | default: '#333' }};
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-table tbody tr:hover {
+    background-color: {{ table_row_hover_bg | default: '#f5f5f5' }};
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-note {
+    background-color: {{ note_bg_color | default: '#e3f2fd' }};
+    border-left-color: {{ note_border_color | default: '#2196f3' }};
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-note p {
+    color: {{ note_text_color | default: '#1976d2' }};
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-image {
+    border-radius: {{ popup_border_radius | default: 8 }}px !important;
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-popup-body::-webkit-scrollbar-track {
+    background: {{ scrollbar_track_color | default: '#f1f1f1' }};
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-popup-body::-webkit-scrollbar-thumb {
+    background: {{ scrollbar_thumb_color | default: '#c1c1c1' }};
+  }
+
+  .size-chart-popup-{{ block.id }} .size-chart-popup-body::-webkit-scrollbar-thumb:hover {
+    background: {{ scrollbar_thumb_hover_color | default: '#a8a8a8' }};
+  }
+
+  .size-chart-ruler-icon-{{ block.id }} {
+    width: {{ icon_size | default: 16 }}px;
+    height: {{ icon_size | default: 16 }}px;
+  }
+
+  .size-chart-icon-container-{{ block.id }} {
+    margin-right: {{ icon_margin | default: 8 }}px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .size-chart-icon-container-{{ block.id }} svg {
+    width: {{ icon_size | default: 16 }}px;
+    height: {{ icon_size | default: 16 }}px;
+    fill: currentColor;
+  }
+
+  #size-chart-block-{{ block.id }} {
+    margin-top: {{ margin_top | default: 0 }}px !important;
+    margin-bottom: {{ margin_bottom | default: 0 }}px !important;
+  }
+
+   /* Override default hover with block-specific styles - must come after default */
+  .size-chart-block .size-chart-trigger-{{ block.id }}:hover {
+    {% unless remove_background_container %}
+      background-color: {{ trigger_hover_bg_color | default: '#e0e0e0' }} !important;
+    {% endunless %}
+    color: {{ trigger_hover_text_color | default: '#333' }} !important;
+  }
+{% endstyle %}
+
+<div class="size-chart-block" id="size-chart-block-{{ block.id }}" {{ block.shopify_attributes }} style="margin-top: {{ margin_top | default: 0 }}px; margin-bottom: {{ margin_bottom | default: 0 }}px;">
+  <button 
+    class="size-chart-trigger size-chart-trigger-{{ block.id }}" 
+    data-size-chart-popup="size-chart-popup-{{ block.id }}"
+    type="button"
+  >
+    {% if show_icon != false %}
+      <div class="size-chart-icon-container-{{ block.id }}">
+        {% if use_custom_icon and custom_icon != blank %}
+          {{ custom_icon }}
+        {% else %}
+          <svg 
+            class="size-chart-ruler-icon size-chart-ruler-icon-{{ block.id }}" 
+            viewBox="0 0 256 256" 
+            fill="currentColor" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M236.68652,88A15.89677,15.89677,0,0,1,232,99.31348L99.31445,232a16.02252,16.02252,0,0,1-22.62793.001L24,179.31348a15.99888,15.99888,0,0,1,.001-22.62793L48.686,132l37.65673,37.65674a8.00018,8.00018,0,1,0,11.31446-11.31348L60,120.686,84.686,96l37.65673,37.65674a8.00018,8.00018,0,0,0,11.31446-11.31348L96,84.686,120.686,60l37.65673,37.65674a8.00018,8.00018,0,0,0,11.31446-11.31348L132,48.686,156.68555,24a16.02162,16.02162,0,0,1,22.62793-.001L232,76.68652A15.89427,15.89427,0,0,1,236.68652,88Z"/>
+          </svg>
+        {% endif %}
+      </div>
+    {% endif %}
+    {{ trigger_text | default: 'Size Chart' }}
+  </button>
+
+  <!-- Size Chart Popup -->
+  <!-- DEBUG: image_only_popup = "{{ image_only_popup }}" ({{ image_only_popup | json }}), popup_content_type = "{{ popup_content_type }}" -->
+  
+  {% comment %} Check for image-only mode with multiple condition formats {% endcomment %}
+  {% assign use_image_only = false %}
+  {% if popup_content_type == 'image' %}
+    {% if image_only_popup == true or image_only_popup == 'true' or image_only_popup == 1 %}
+      {% assign use_image_only = true %}
+    {% endif %}
+  {% endif %}
+  
+  <!-- DEBUG: use_image_only = {{ use_image_only }} -->
+  
+  <div class="size-chart-popup size-chart-popup-{{ block.id }}{% if use_image_only %} image-only-mode{% endif %}" id="size-chart-popup-{{ block.id }}">
+    <div class="size-chart-popup-backdrop"></div>
+    {% if use_image_only %}
+      <!-- Image Only Mode - Simplified popup -->
+      <div class="size-chart-image-only-content">
+        <button class="size-chart-image-only-close" type="button">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        {% if size_chart_image != blank %}
+          {{ size_chart_image | image_url: width: 1200 | image_tag: class: 'size-chart-image-only', loading: 'lazy', alt: 'Size Chart' }}
+        {% else %}
+          <div class="size-chart-no-image-simple">
+            <p>No size chart image selected.</p>
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <!-- Standard popup mode -->
+      <div class="size-chart-popup-content">
+        <div class="size-chart-popup-header">
+          <h3 class="size-chart-popup-title">{{ popup_title | default: 'Size Chart' }}</h3>
+          <button class="size-chart-popup-close" type="button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="size-chart-popup-body">
+        {% if popup_content_type == 'table' %}
+          <div class="size-chart-table-wrapper">
+            <table class="size-chart-table">
+              <thead>
+                <tr>
+                  <th>{{ table_header_1 | default: 'Size' }}</th>
+                  <th>{{ table_header_2 | default: 'Chest' }}</th>
+                  <th>{{ table_header_3 | default: 'Waist' }}</th>
+                  {% if table_header_4 != blank %}
+                    <th>{{ table_header_4 }}</th>
+                  {% endif %}
+                  {% if table_header_5 != blank %}
+                    <th>{{ table_header_5 }}</th>
+                  {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% if table_row_1_col_1 != blank %}
+                  <tr>
+                    <td>{{ table_row_1_col_1 }}</td>
+                    <td>{{ table_row_1_col_2 }}</td>
+                    <td>{{ table_row_1_col_3 }}</td>
+                    {% if table_row_1_col_4 != blank %}
+                      <td>{{ table_row_1_col_4 }}</td>
+                    {% endif %}
+                    {% if table_row_1_col_5 != blank %}
+                      <td>{{ table_row_1_col_5 }}</td>
+                    {% endif %}
+                  </tr>
+                {% endif %}
+                {% if table_row_2_col_1 != blank %}
+                  <tr>
+                    <td>{{ table_row_2_col_1 }}</td>
+                    <td>{{ table_row_2_col_2 }}</td>
+                    <td>{{ table_row_2_col_3 }}</td>
+                    {% if table_row_2_col_4 != blank %}
+                      <td>{{ table_row_2_col_4 }}</td>
+                    {% endif %}
+                    {% if table_row_2_col_5 != blank %}
+                      <td>{{ table_row_2_col_5 }}</td>
+                    {% endif %}
+                  </tr>
+                {% endif %}
+                {% if table_row_3_col_1 != blank %}
+                  <tr>
+                    <td>{{ table_row_3_col_1 }}</td>
+                    <td>{{ table_row_3_col_2 }}</td>
+                    <td>{{ table_row_3_col_3 }}</td>
+                    {% if table_row_3_col_4 != blank %}
+                      <td>{{ table_row_3_col_4 }}</td>
+                    {% endif %}
+                    {% if table_row_3_col_5 != blank %}
+                      <td>{{ table_row_3_col_5 }}</td>
+                    {% endif %}
+                  </tr>
+                {% endif %}
+                {% if table_row_4_col_1 != blank %}
+                  <tr>
+                    <td>{{ table_row_4_col_1 }}</td>
+                    <td>{{ table_row_4_col_2 }}</td>
+                    <td>{{ table_row_4_col_3 }}</td>
+                    {% if table_row_4_col_4 != blank %}
+                      <td>{{ table_row_4_col_4 }}</td>
+                    {% endif %}
+                    {% if table_row_4_col_5 != blank %}
+                      <td>{{ table_row_4_col_5 }}</td>
+                    {% endif %}
+                  </tr>
+                {% endif %}
+                {% if table_row_5_col_1 != blank %}
+                  <tr>
+                    <td>{{ table_row_5_col_1 }}</td>
+                    <td>{{ table_row_5_col_2 }}</td>
+                    <td>{{ table_row_5_col_3 }}</td>
+                    {% if table_row_5_col_4 != blank %}
+                      <td>{{ table_row_5_col_4 }}</td>
+                    {% endif %}
+                    {% if table_row_5_col_5 != blank %}
+                      <td>{{ table_row_5_col_5 }}</td>
+                    {% endif %}
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        {% elsif popup_content_type == 'image' %}
+          {% if size_chart_image != blank %}
+            <div class="size-chart-image-wrapper">
+              {{ size_chart_image | image_url: width: 800 | image_tag: class: 'size-chart-image', loading: 'lazy', alt: 'Size Chart' }}
+            </div>
+          {% else %}
+            <div class="size-chart-no-image">
+              <p style="text-align: center; color: #666; padding: 40px;">No size chart image selected. Please add an image in the block settings.</p>
+            </div>
+          {% endif %}
+        {% elsif popup_content_type == 'custom' %}
+          <div class="size-chart-custom-content">
+            {% if custom_content != blank %}
+              {{ custom_content }}
+            {% else %}
+              <p style="text-align: center; color: #666; padding: 40px;">No custom content added. Please add your HTML content in the block settings.</p>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="size-chart-debug">
+            <p style="text-align: center; color: #666; padding: 40px;">
+              Content type: "{{ popup_content_type }}"<br>
+              Please select a valid content type in the block settings.
+            </p>
+          </div>
+        {% endif %}
+        
+        {% if popup_note != blank %}
+          <div class="size-chart-note">
+            <p>{{ popup_note }}</p>
+          </div>
+        {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sizeChartTrigger = document.querySelector('[data-size-chart-popup="size-chart-popup-{{ block.id }}"]');
+  const sizeChartPopup = document.getElementById('size-chart-popup-{{ block.id }}');
+  const sizeChartClose = sizeChartPopup.querySelector('.size-chart-popup-close');
+  const sizeChartImageOnlyClose = sizeChartPopup.querySelector('.size-chart-image-only-close');
+  const sizeChartBackdrop = sizeChartPopup.querySelector('.size-chart-popup-backdrop');
+
+  // Ensure popup is a direct child of <body> so position: fixed works across all browsers/contexts
+  if (sizeChartPopup && sizeChartPopup.parentNode !== document.body) {
+    document.body.appendChild(sizeChartPopup);
+  }
+
+  function openSizeChart() {
+    sizeChartPopup.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSizeChart() {
+    sizeChartPopup.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (sizeChartTrigger) {
+    sizeChartTrigger.addEventListener('click', openSizeChart);
+  }
+
+  if (sizeChartClose) {
+    sizeChartClose.addEventListener('click', closeSizeChart);
+  }
+
+  if (sizeChartImageOnlyClose) {
+    sizeChartImageOnlyClose.addEventListener('click', closeSizeChart);
+  }
+
+  if (sizeChartBackdrop) {
+    sizeChartBackdrop.addEventListener('click', closeSizeChart);
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && sizeChartPopup.classList.contains('active')) {
+      closeSizeChart();
+    }
+  });
+});
+</script> 

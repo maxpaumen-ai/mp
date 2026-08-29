@@ -1,0 +1,1660 @@
+{% comment %} Google Fonts for accent text customization {% endcomment %}
+{% liquid
+  assign heading_tag = section.settings.heading_tag | default: 'h2'
+  assign subheading_tag = section.settings.subheading_tag | default: 'p'
+%}
+{% if section.settings.override_global_accent %}
+  {% if section.settings.accent_font_family != 'inherit' and section.settings.accent_font_family != 'serif' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% case section.settings.accent_font_family %}
+      {% when 'Georgia Pro' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Georgia+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Bodoni Moda' %}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600;1,6..96,700;1,6..96,800&display=swap"
+          rel="stylesheet"
+        >
+      {% when 'Instrument Serif' %}
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'DM Serif Text' %}
+        <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap" rel="stylesheet">
+      {% when 'Nothing You Could Do' %}
+        <link href="https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
+    {% endcase %}
+  {% endif %}
+{% endif %}
+
+<section
+  id="board-advisors-{{ section.id }}"
+  class="board-advisors-section{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}"
+  style="
+    padding-top: {{ section.settings.section_padding_top }}px;
+    padding-bottom: {{ section.settings.section_padding_bottom }}px;
+    {% if section.settings.section_background_gradient != blank %}
+      background: {{ section.settings.section_background_gradient }};
+    {% else %}
+      background-color: {{ section.settings.section_background }};
+    {% endif %}
+    {% if section.settings.enable_top_border %}
+      border-top: {{ section.settings.top_border_width | default: 1 }}px {{ section.settings.top_border_style | default: 'solid' }} {{ section.settings.top_border_color | default: '#e5e5e5' }};
+    {% endif %}
+    {% if section.settings.enable_bottom_border %}
+      border-bottom: {{ section.settings.bottom_border_width | default: 1 }}px {{ section.settings.bottom_border_style | default: 'solid' }} {{ section.settings.bottom_border_color | default: '#e5e5e5' }};
+    {% endif %}
+  "
+>
+  <div class="container">
+    <div class="board-advisors-header">
+      {% if section.settings.heading != blank %}
+        <{{ heading_tag }}
+          class="board-advisors-heading"
+          style="              color: {{ section.settings.heading_color }} !important;"
+        >
+          {{ section.settings.heading }}
+          {% if section.settings.heading_accent != blank %}
+            <span class="{% if section.settings.override_global_accent %}custom-accent-text{% else %}global-accent-text{% endif %}">
+              {{ section.settings.heading_accent }}
+            </span>
+          {% endif %}
+        </{{ heading_tag }}>
+      {% endif %}
+
+      {% if section.settings.subheading != blank %}
+        <{{ subheading_tag }}
+          class="board-advisors-subheading"
+          style="              color: {{ section.settings.subheading_color }} !important;"
+        >
+          {{ section.settings.subheading }}
+        </{{ subheading_tag }}>
+      {% endif %}
+    </div>
+
+    <div class="board-advisors-slider-wrapper">
+      <div class="board-advisors-grid" tabindex="0" role="region" aria-label="Board of advisors carousel">
+        {% for block in section.blocks %}
+          <div class="advisor-card" {{ block.shopify_attributes }}>
+            <div class="advisor-image-wrapper">
+              {% if block.settings.advisor_image != blank %}
+                {{
+                  block.settings.advisor_image
+                  | image_url: width: 600
+                  | image_tag: loading: 'lazy', alt: block.settings.advisor_name, class: 'advisor-image'
+                }}
+              {% else %}
+                <div class="advisor-image-placeholder">
+                  {{ 'image' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+
+              {% comment %} Testimonial overlay (shown when position is overlay) {% endcomment %}
+              {% if block.settings.advisor_testimonial != blank
+                and section.settings.testimonial_position == 'overlay'
+              %}
+                <div
+                  class="advisor-testimonial advisor-testimonial-overlay"
+                  id="testimonial-overlay-{{ block.id }}"
+                  style="
+                    color: {{ section.settings.testimonial_color }};
+                    font-size: {{ section.settings.testimonial_size }}px;
+                  "
+                >
+                  <p>{{ block.settings.advisor_testimonial }}</p>
+                </div>
+              {% endif %}
+
+              <div class="advisor-info">
+                {% if block.settings.advisor_name != blank %}
+                  <h3
+                    class="advisor-name"
+                    style="
+                      color: {{ section.settings.name_color }} !important;
+                      font-size: {{ section.settings.name_size }}px;
+                    "
+                  >
+                    {{ block.settings.advisor_name }}
+                  </h3>
+                {% endif %}
+
+                {% if block.settings.advisor_title != blank %}
+                  <p
+                    class="advisor-title"
+                    style="
+                      color: {{ section.settings.title_color }} !important;
+                      font-size: {{ section.settings.title_size }}px;
+                    "
+                  >
+                    {{ block.settings.advisor_title }}
+                  </p>
+                {% endif %}
+              </div>
+
+              <button
+                class="testimonial-toggle"
+                data-advisor-id="{{ block.id }}"
+                aria-label="Toggle testimonial"
+                style="
+                  background-color: {{ section.settings.button_background }};
+                  color: {{ section.settings.button_color }};
+                "
+              >
+                <span class="toggle-plus">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span class="toggle-minus">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </span>
+              </button>
+            </div>
+
+            {% comment %} Testimonial below image (shown when position is below) {% endcomment %}
+            {% if block.settings.advisor_testimonial != blank and section.settings.testimonial_position == 'below' %}
+              <div
+                class="advisor-testimonial advisor-testimonial-below"
+                id="testimonial-{{ block.id }}"
+                style="
+                  color: {{ section.settings.testimonial_color }};
+                  font-size: {{ section.settings.testimonial_size }}px;
+                "
+              >
+                <p>{{ block.settings.advisor_testimonial }}</p>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if section.settings.navigation_type == 'progress_bar' %}
+      <div class="board-progress-bar-wrapper">
+        <div class="board-progress-bar">
+          <div
+            class="board-progress-fill"
+            style="background-color: {{ section.settings.progress_bar_color | default: '#2563eb' }}; width: 0%;"
+          ></div>
+        </div>
+      </div>
+    {% else %}
+      <div class="slider-controls">
+        {% render 'global-nav-button',
+          direction: 'prev',
+          aria_label: 'Previous advisor',
+          use_global: section.settings.use_global_nav_buttons,
+          section_settings: section.settings
+        %}
+        <span class="slider-counter">
+          <span class="current-slide">1</span> / <span class="total-slides">{{ section.blocks.size }}</span>
+        </span>
+        {% render 'global-nav-button',
+          direction: 'next',
+          aria_label: 'Next advisor',
+          use_global: section.settings.use_global_nav_buttons,
+          section_settings: section.settings
+        %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+  #board-advisors-{{ section.id }} {
+    width: 100%;
+  }
+
+  #board-advisors-{{ section.id }} .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  #board-advisors-{{ section.id }} .board-advisors-header {
+    text-align: {{ section.settings.header_alignment }};
+    margin-bottom: 50px;
+  }
+
+  #board-advisors-{{ section.id }} .board-advisors-heading {
+    margin: 0 0 {{ section.settings.heading_margin_bottom }}px;
+    line-height: {{ section.settings.heading_line_height }};
+    letter-spacing: var(--letter-spacing-heading);
+    font-size: {{ section.settings.heading_size }}px !important;
+  }
+
+  /* Accent text styling */
+  #board-advisors-{{ section.id }} .board-advisors-heading .global-accent-text,
+  #board-advisors-{{ section.id }} .board-advisors-heading .custom-accent-text {
+    padding: 2px 4px !important;
+    margin: -2px -4px !important;
+    display: inline-block !important;
+    margin-left: {{ section.settings.accent_text_margin_left | default: 0 }}px !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Global accent text - uses theme settings */
+  #board-advisors-{{ section.id }} .board-advisors-header .board-advisors-heading .global-accent-text,
+  #board-advisors-{{ section.id }} .board-advisors-heading .global-accent-text {
+    {% comment %} Use global theme gradient for accent text {% endcomment %}
+    background: {{ settings.global_accent_text_gradient_light }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+    font-family: var(--font-accent-family) !important;
+    font-style: var(--font-accent-style) !important;
+    font-weight: var(--font-accent-weight) !important;
+    letter-spacing: var(--font-accent-letter-spacing) !important;
+    text-transform: var(--font-accent-text-transform) !important;
+  }
+
+  /* Override any body font on global accent */
+  #board-advisors-{{ section.id }} .global-accent-text * {
+    font-family: inherit !important;
+    font-style: inherit !important;
+    font-weight: inherit !important;
+  }
+
+  /* Custom accent text - uses section-specific settings */
+  #board-advisors-{{ section.id }} .board-advisors-heading .custom-accent-text {
+    {% if section.settings.use_accent_gradient %}
+      background: {{ section.settings.accent_text_gradient }} !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+    {% else %}
+      color: {{ section.settings.accent_color | default: '#EF4A65' }} !important;
+    {% endif %}
+
+    {% if section.settings.accent_font_family == 'Georgia Pro' %}
+      font-family: 'Georgia Pro', Georgia, serif !important;
+    {% elsif section.settings.accent_font_family == 'Bodoni Moda' %}
+      font-family: 'Bodoni Moda', Georgia, serif !important;
+    {% elsif section.settings.accent_font_family == 'Instrument Serif' %}
+      font-family: 'Instrument Serif', Georgia, serif !important;
+    {% elsif section.settings.accent_font_family == 'DM Serif Text' %}
+      font-family: 'DM Serif Text', Georgia, serif !important;
+    {% elsif section.settings.accent_font_family == 'Nothing You Could Do' %}
+      font-family: 'Nothing You Could Do', cursive, serif !important;
+    {% elsif section.settings.accent_font_family == 'serif' %}
+      font-family: Georgia, serif !important;
+    {% endif %}
+
+    {% if section.settings.accent_font_style == 'italic' %}
+      font-style: italic !important;
+    {% endif %}
+
+    {% if section.settings.accent_font_weight != 'inherit' %}
+      font-weight: {{ section.settings.accent_font_weight }} !important;
+    {% endif %}
+  }
+
+  /* Override any body font on custom accent */
+  #board-advisors-{{ section.id }} .custom-accent-text * {
+    font-family: inherit !important;
+    font-style: inherit !important;
+    font-weight: inherit !important;
+  }
+
+  #board-advisors-{{ section.id }} .board-advisors-subheading {
+    margin: 0{% if section.settings.header_alignment == 'center' %} auto{% endif %};
+    max-width: 800px;
+    line-height: {{ section.settings.subheading_line_height }};
+    letter-spacing: var(--letter-spacing-body);
+    font-size: {{ section.settings.subheading_size }}px !important;
+  }
+
+  #board-advisors-{{ section.id }} .board-advisors-slider-wrapper {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  #board-advisors-{{ section.id }} .board-advisors-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  #board-advisors-{{ section.id }} .advisor-card {
+    position: relative;
+    text-align: center;
+  }
+
+  #board-advisors-{{ section.id }} .advisor-image-wrapper {
+    position: relative;
+    border-radius: {{ section.settings.image_border_radius | default: 10 }}px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    isolation: isolate;
+    line-height: 0;
+    font-size: 0;
+    {% if section.settings.enable_image_background %}
+      {% if section.settings.use_gradient_background %}
+        background: {{ section.settings.image_gradient_background | default: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)' }};
+      {% else %}
+        background: {{ section.settings.image_background_color | default: '#f5f5f5' }};
+      {% endif %}
+    {% else %}
+      background: #f5f5f5;
+    {% endif %}
+    {% if section.settings.enable_image_border %}
+      border: {{ section.settings.image_border_width }}px solid {{ section.settings.image_border_color }};
+    {% endif %}
+  }
+
+  #board-advisors-{{ section.id }} .advisor-image-wrapper::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  width: 100%;
+  height: calc({{ section.settings.gradient_overlay_height | default: 60 }}% + 1px) !important;
+        {%- liquid
+            assign overlay_color = section.settings.overlay_color | color_to_rgb
+            assign overlay_rgb = overlay_color | replace: 'rgb(', '' | replace: ')', ''
+       assign overlay_opacity = section.settings.overlay_opacity | default: 0.5
+       assign mid_opacity = overlay_opacity | times: 0.5
+     -%}
+     background: linear-gradient(to top, rgba({{ overlay_rgb }}, {{ overlay_opacity }}) 0%, rgba({{ overlay_rgb }}, {{ mid_opacity }}) 50%, rgba({{ overlay_rgb }}, 0) 100%) !important;
+  }
+
+  #board-advisors-{{ section.id }} .advisor-image,
+  #board-advisors-{{ section.id }} .advisor-image-placeholder {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5/6;
+    object-fit: cover;
+    display: block;
+    vertical-align: bottom;
+    line-height: 0;
+  }
+
+  #board-advisors-{{ section.id }} .advisor-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    {% if section.settings.enable_image_background %}
+      {% if section.settings.use_gradient_background %}
+        background: {{ section.settings.image_gradient_background | default: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)' }};
+      {% else %}
+        background: {{ section.settings.image_background_color | default: '#f5f5f5' }};
+      {% endif %}
+    {% else %}
+      background: #f0f0f0;
+    {% endif %}
+  }
+
+  #board-advisors-{{ section.id }} .testimonial-toggle {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+    z-index:2;
+
+  }
+  #board-advisors-{{ section.id }} .testimonial-toggle span {
+    height:18px;
+    position: absolute;
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  #board-advisors-{{ section.id }} .testimonial-toggle .toggle-plus {
+    transition-delay: 0s;
+  }
+
+  #board-advisors-{{ section.id }} .testimonial-toggle .toggle-minus {
+    opacity: 0;
+    transform: scale(0.8) rotate(90deg);
+    transition-delay: 0.1s;
+  }
+
+  #board-advisors-{{ section.id }} .testimonial-toggle.active .toggle-plus {
+    opacity: 0;
+    transform: scale(0.8) rotate(-90deg);
+    transition-delay: 0s;
+  }
+
+  #board-advisors-{{ section.id }} .testimonial-toggle.active .toggle-minus {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    transition-delay: 0.1s;
+  }
+
+  #board-advisors-{{ section.id }} .testimonial-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  #board-advisors-{{ section.id }} .advisor-info {
+    padding: 0 0 16px 16px;
+    text-align:left;
+    width:80%;
+    position:absolute;
+    bottom:0;
+    z-index: 2;
+  }
+
+  #board-advisors-{{ section.id }} .advisor-name {
+    margin: 0 0 2px;
+    line-height: 1.3;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  #board-advisors-{{ section.id }} .advisor-title {
+    margin: 0;
+    line-height: 1.3;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  #board-advisors-{{ section.id }} .advisor-testimonial {
+    {% if section.settings.testimonial_position == 'overlay' %}
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: 0;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 3;
+      border-radius: {{ section.settings.image_border_radius | default: 10 }}px;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.9);
+      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    {% else %}
+      margin-top: 16px;
+      padding: 0 10px;
+      border-radius: 10px;
+      text-align: left;
+      opacity: 0;
+      visibility: hidden;
+      max-height: 0;
+      overflow: hidden;
+      transform: translateY(10px);
+      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    {% endif %}
+    line-height: 1.6;
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  #board-advisors-{{ section.id }} .advisor-testimonial.show {
+    opacity: 1;
+    visibility: visible;
+    {% if section.settings.testimonial_position == 'overlay' %}
+      transform: scale(1);
+    {% else %}
+      transform: translateY(0);
+      max-height: 200px;
+    {% endif %}
+  }
+
+  /* Hide advisor name and title when testimonial overlay is shown */
+  #board-advisors-{{ section.id }} .advisor-card:has(.advisor-testimonial-overlay.show) .advisor-info {
+    opacity: 0;
+    transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* Fallback for browsers that don't support :has() */
+  #board-advisors-{{ section.id }} .advisor-card.testimonial-active .advisor-info {
+    opacity: 0;
+    transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  #board-advisors-{{ section.id }} .advisor-testimonial p {
+    margin: 0;
+    line-height: 1.4;
+    letter-spacing: var(--letter-spacing-body);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition-delay: 0.1s;
+  }
+
+  #board-advisors-{{ section.id }} .advisor-testimonial.show p {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Slider Controls */
+  #board-advisors-{{ section.id }} .slider-controls {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 32px;
+  }
+
+  /* Navigation buttons now use global-nav-button snippet */
+
+  #board-advisors-{{ section.id }} .slider-counter {
+    font-size: 18px;
+    color: {{ section.settings.pagination_color }};
+    letter-spacing: var(--letter-spacing-body);
+  }
+
+  /* Progress Bar */
+  #board-advisors-{{ section.id }} .board-progress-bar-wrapper {
+    display: none;
+    width: 100%;
+    max-width: 100%;
+    margin-top: {{ section.settings.progress_bar_margin_top | default: 32 }}px;
+    padding: 0 20px;
+  }
+
+  #board-advisors-{{ section.id }} .board-progress-bar {
+    width: 100%;
+    height: {{ section.settings.progress_bar_height | default: 3 }}px;
+    background-color: {{ section.settings.progress_bar_background | default: '#e0e0e0' }} !important;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+  }
+
+  #board-advisors-{{ section.id }} .board-progress-fill {
+    height: 100%;
+    background-color: {{ section.settings.progress_bar_color | default: '#2563eb' }} !important;
+    border-radius: 10px;
+    width: 0%;
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Tablet Styles */
+  @media screen and (max-width: 1024px) {
+    #board-advisors-{{ section.id }} .board-advisors-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Mobile Styles - Slider Implementation */
+  @media screen and (max-width: 768px) {
+    #board-advisors-{{ section.id }} .container {
+      padding: 0;
+    }
+
+    #board-advisors-{{ section.id }} .board-advisors-header {
+      padding: 0 20px;
+      margin-bottom: 32px;
+    }
+
+    #board-advisors-{{ section.id }} .board-advisors-slider-wrapper {
+      overflow: hidden;
+      position: relative;
+    }
+
+    #board-advisors-{{ section.id }} .board-advisors-grid {
+      display: flex;
+      gap: 16px;
+      padding: 0 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      scroll-snap-stop: normal;
+      scroll-padding: 0 20px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    #board-advisors-{{ section.id }} .board-advisors-grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    #board-advisors-{{ section.id }} .board-advisors-grid.dragging {
+      cursor: grabbing;
+      user-select: none;
+    }
+
+    #board-advisors-{{ section.id }} .advisor-card {
+      flex: 0 0 calc(100vw - 100px);
+      max-width: 320px;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+    }
+
+    #board-advisors-{{ section.id }} .slider-controls {
+      display: {% if section.settings.navigation_type == 'arrows' %}flex{% else %}none{% endif %};
+      padding: 0 20px;
+    }
+
+    #board-advisors-{{ section.id }} .board-progress-bar-wrapper {
+      display: {% if section.settings.navigation_type == 'progress_bar' %}block{% else %}none{% endif %};
+      margin-top: {{ section.settings.progress_bar_margin_top | default: 32 }}px;
+    }
+
+    #board-advisors-{{ section.id }} .board-advisors-heading {
+      font-size: {{ section.settings.mobile_heading_size }}px !important;
+      line-height: {{ section.settings.heading_line_height }};
+    }
+
+    #board-advisors-{{ section.id }} .board-advisors-subheading {
+      font-size: {{ section.settings.mobile_subheading_size }}px !important;
+      line-height: {{ section.settings.subheading_line_height }};
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const sectionId = 'board-advisors-{{ section.id }}';
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+
+    function toggleCard(card) {
+      if (!card) return;
+      // Look for both overlay and below testimonials
+      const testimonialOverlay = card.querySelector('.advisor-testimonial-overlay');
+      const testimonialBelow = card.querySelector('.advisor-testimonial-below');
+      const testimonial = testimonialOverlay || testimonialBelow;
+
+      const toggleButton = card.querySelector('.testimonial-toggle');
+      const wrapper = card.querySelector('.advisor-image-wrapper');
+      if (!testimonial) return;
+
+      const isHidden = !testimonial.classList.contains('show');
+
+      if (isHidden) {
+        testimonial.classList.add('show');
+        toggleButton?.classList.add('active');
+      } else {
+        testimonial.classList.remove('show');
+        toggleButton?.classList.remove('active');
+      }
+
+      // Add/remove testimonial-active class for overlay testimonials
+      if (testimonialOverlay) {
+        if (isHidden) {
+          card.classList.add('testimonial-active');
+        } else {
+          card.classList.remove('testimonial-active');
+        }
+      }
+
+      if (wrapper) wrapper.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+    }
+
+    const wrappers = section.querySelectorAll('.advisor-image-wrapper');
+    const slider = section.querySelector('.board-advisors-grid');
+    wrappers.forEach((wrapper) => {
+      const card = wrapper.closest('.advisor-card');
+      const testimonial = card?.querySelector('.advisor-testimonial');
+      wrapper.style.cursor = 'pointer';
+      wrapper.setAttribute('tabindex', '0');
+      wrapper.setAttribute('role', 'button');
+      if (testimonial?.id) wrapper.setAttribute('aria-controls', testimonial.id);
+      wrapper.setAttribute('aria-expanded', testimonial && testimonial.classList.contains('show') ? 'true' : 'false');
+
+      wrapper.addEventListener('click', (e) => {
+        if (e.target.closest('.testimonial-toggle')) return;
+        if (sliderState.dragJustEnded) return;
+        toggleCard(card);
+      });
+      wrapper.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleCard(card);
+        }
+      });
+    });
+
+    const toggleButtons = section.querySelectorAll('.testimonial-toggle');
+    toggleButtons.forEach((button) => {
+      button.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const card = this.closest('.advisor-card');
+        toggleCard(card);
+      });
+    });
+
+    const prevBtn = section.querySelector('.nav-button.prev');
+    const nextBtn = section.querySelector('.nav-button.next');
+    const currentSlideSpan = section.querySelector('.current-slide');
+    const cards = section.querySelectorAll('.advisor-card');
+    if (!slider || cards.length === 0) return;
+
+    let currentIndex = 0;
+    let isDragging = false;
+
+    const sliderState = {
+      startX: 0,
+      scrollLeftAtStart: 0,
+      dragJustEnded: false,
+      movedPx: 0,
+    };
+
+    function isMobile() {
+      return window.innerWidth <= 768;
+    }
+
+    function cardWidthWithGap() {
+      const gap = 16;
+      return cards[0].offsetWidth + gap;
+    }
+
+    function nearestIndexFromScrollLeft(left) {
+      const idx = Math.round(left / cardWidthWithGap());
+      return Math.max(0, Math.min(cards.length - 1, idx));
+    }
+
+    let progressUpdatePending = false;
+    let progressFill = section.querySelector('.board-progress-fill');
+
+    function updateControls() {
+      if (!isMobile()) return;
+
+      // Update slide counter and buttons
+      currentIndex = nearestIndexFromScrollLeft(slider.scrollLeft);
+      if (currentSlideSpan) currentSlideSpan.textContent = currentIndex + 1;
+      if (prevBtn) prevBtn.disabled = currentIndex === 0;
+      if (nextBtn) nextBtn.disabled = currentIndex === cards.length - 1;
+
+      // Update progress bar smoothly using RAF
+      if (!progressUpdatePending && progressFill) {
+        progressUpdatePending = true;
+        requestAnimationFrame(() => {
+          if (progressFill && slider) {
+            const maxScroll = slider.scrollWidth - slider.clientWidth;
+            let scrollPercentage = 0;
+
+            if (maxScroll > 0) {
+              scrollPercentage = (slider.scrollLeft / maxScroll) * 100;
+            } else {
+              // If there's no scrollable area (all items fit), show full progress
+              scrollPercentage = 100;
+            }
+
+            const clampedPercentage = Math.min(100, Math.max(0, scrollPercentage));
+            progressFill.style.width = clampedPercentage + '%';
+          }
+          progressUpdatePending = false;
+        });
+      }
+    }
+
+    function scrollToSlide(index) {
+      if (!isMobile()) return;
+      const card = cards[index];
+      if (card) {
+        const cw = card.offsetWidth;
+        const gap = 16;
+        const targetScroll = (cw + gap) * index - (slider.offsetWidth - cw) / 2;
+        slider.scrollTo({ left: targetScroll, behavior: 'smooth' });
+      }
+    }
+
+    if (prevBtn)
+      prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) scrollToSlide(currentIndex - 1);
+      });
+    if (nextBtn)
+      nextBtn.addEventListener('click', () => {
+        if (currentIndex < cards.length - 1) scrollToSlide(currentIndex + 1);
+      });
+
+    slider.addEventListener('keydown', (e) => {
+      if (!isMobile()) return;
+      if (e.key === 'ArrowLeft' && currentIndex > 0) scrollToSlide(currentIndex - 1);
+      else if (e.key === 'ArrowRight' && currentIndex < cards.length - 1) scrollToSlide(currentIndex + 1);
+    });
+
+    slider.addEventListener(
+      'scroll',
+      () => {
+        updateControls();
+      },
+      { passive: true },
+    );
+
+    function onDragStart(e) {
+      if (!isMobile()) return;
+
+      isDragging = true;
+      slider.classList.add('dragging');
+
+      const pageX = 'touches' in e ? e.touches[0].pageX : e.pageX;
+      sliderState.startX = pageX;
+      sliderState.scrollLeftAtStart = slider.scrollLeft;
+      sliderState.movedPx = 0;
+      sliderState.dragJustEnded = false;
+    }
+
+    function onDragMove(e) {
+      if (!isDragging || !isMobile()) return;
+
+      const pageX = 'touches' in e ? e.touches[0].pageX : e.pageX;
+      const dx = pageX - sliderState.startX;
+      sliderState.movedPx = Math.abs(dx);
+
+      // Let browser handle the scroll naturally
+      // No manual scrollLeft manipulation
+    }
+
+    function onDragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      slider.classList.remove('dragging');
+
+      if (sliderState.movedPx > 5) {
+        sliderState.dragJustEnded = true;
+        setTimeout(() => {
+          sliderState.dragJustEnded = false;
+        }, 200);
+      }
+    }
+
+    // Touch events only (let native scrolling handle it)
+    slider.addEventListener('touchstart', onDragStart, { passive: true });
+    slider.addEventListener('touchmove', onDragMove, { passive: true });
+    slider.addEventListener('touchend', onDragEnd);
+
+    window.addEventListener('resize', () => {
+      if (!isMobile()) {
+        if (currentSlideSpan) currentSlideSpan.textContent = '1';
+        if (prevBtn) prevBtn.disabled = false;
+        if (nextBtn) nextBtn.disabled = false;
+      } else {
+        updateControls();
+      }
+    });
+
+    // Progress bar click/touch to navigate
+    const progressBar = section.querySelector('.board-progress-bar');
+    if (progressBar) {
+      const handleProgressBarInteraction = (e) => {
+        if (!isMobile()) return;
+        const rect = progressBar.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clickX = clientX - rect.left;
+        const percentage = Math.max(0, Math.min(1, clickX / rect.width));
+        const maxScroll = slider.scrollWidth - slider.clientWidth;
+        const targetScroll = percentage * maxScroll;
+        slider.scrollTo({ left: targetScroll, behavior: 'smooth' });
+      };
+
+      progressBar.addEventListener('click', handleProgressBarInteraction);
+      progressBar.addEventListener('touchstart', handleProgressBarInteraction);
+    }
+
+    // Initial update
+    if (isMobile()) {
+      // Ensure progressFill is found (might not exist on initial load)
+      if (!progressFill) {
+        progressFill = section.querySelector('.board-progress-fill');
+      }
+
+      updateControls();
+
+      // Initialize progress bar after a short delay to ensure layout is ready
+      setTimeout(() => {
+        if (!progressFill) {
+          progressFill = section.querySelector('.board-progress-fill');
+        }
+        updateControls();
+      }, 200);
+
+      // Also update after images load
+      setTimeout(() => {
+        updateControls();
+      }, 500);
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Board of Advisors",
+  "tag": "section",
+  "class": "board-advisors",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Settings"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Padding Top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Padding Bottom",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "section_background",
+      "label": "Section Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color_background",
+      "id": "section_background_gradient",
+      "label": "Section Background Gradient",
+      "info": "If set, this will override the background color"
+    },
+    {
+      "type": "header",
+      "content": "Section Borders"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_top_border",
+      "label": "Enable top border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "top_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Top border width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "top_border_style",
+      "label": "Top border style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "top_border_color",
+      "label": "Top border color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bottom_border",
+      "label": "Enable bottom border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "bottom_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom border width",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "bottom_border_style",
+      "label": "Bottom border style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "bottom_border_color",
+      "label": "Bottom border color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "header",
+      "content": "Heading Settings"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Header Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ],
+      "default": "center",
+      "info": "Alignment for the heading and subheading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Meet our board of advisors"
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heading Accent Text",
+      "info": "Optional accent text to appear after the heading"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#000"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 24,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Font Size (Desktop)",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "mobile_heading_size",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Font Size (Mobile)",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "min": 0.8,
+      "max": 2,
+      "step": 0.1,
+      "label": "Heading Line Height",
+      "default": 1.2,
+      "info": "Line height for the heading text"
+    },
+    {
+      "type": "range",
+      "id": "heading_margin_bottom",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Heading Bottom Margin",
+      "default": 16,
+      "info": "Space below the heading"
+    },
+    {
+      "type": "header",
+      "content": "Subheading Settings"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Meet our board of advisors subheading"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading Color",
+      "default": "#222"
+    },
+    {
+      "type": "range",
+      "id": "subheading_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Subheading Font Size (Desktop)",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "mobile_subheading_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Subheading Font Size (Mobile)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "subheading_line_height",
+      "min": 1,
+      "max": 2.5,
+      "step": 0.1,
+      "label": "Subheading Line Height",
+      "default": 1.6,
+      "info": "Line height for the subheading text"
+    },
+    {
+      "type": "header",
+      "content": "Accent Text Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_global_accent",
+      "label": "Override Global Accent Typography",
+      "default": false,
+      "info": "When enabled, use section-specific accent typography settings below. When disabled, use the global accent typography from Theme Settings > Typography > Accent Typography."
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#EF4A65"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_accent_gradient",
+      "label": "Use Accent Gradient",
+      "default": false,
+      "info": "Apply gradient effect to the accent text instead of solid color"
+    },
+    {
+      "type": "color_background",
+      "id": "accent_text_gradient",
+      "label": "Accent Text Gradient",
+      "default": "linear-gradient(45deg, #EF4A65, #FF6B9D)",
+      "info": "Choose a gradient for the accent text. This setting is only used when 'Use Accent Gradient' is enabled above."
+    },
+    {
+      "type": "range",
+      "id": "accent_text_margin_left",
+      "min": -10,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Accent Text Left Margin",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "accent_font_family",
+      "label": "Accent Font Family",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Use Global Setting"
+        },
+        {
+          "value": "serif",
+          "label": "System Serif"
+        },
+        {
+          "value": "Georgia Pro",
+          "label": "Georgia Pro"
+        },
+        {
+          "value": "Bodoni Moda",
+          "label": "Bodoni Moda"
+        },
+        {
+          "value": "Instrument Serif",
+          "label": "Instrument Serif"
+        },
+        {
+          "value": "DM Serif Text",
+          "label": "DM Serif Text"
+        },
+        {
+          "value": "Nothing You Could Do",
+          "label": "Nothing You Could Do"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose a custom font family for the accent text (only used when Override Global Accent Typography is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_style",
+      "label": "Accent Text Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal",
+      "info": "Choose the font style for the accent text"
+    },
+    {
+      "type": "select",
+      "id": "accent_font_weight",
+      "label": "Accent Text Font Weight",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Default (Inherit)"
+        },
+        {
+          "value": "300",
+          "label": "Light (300)"
+        },
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        },
+        {
+          "value": "800",
+          "label": "Extra Bold (800)"
+        },
+        {
+          "value": "900",
+          "label": "Black (900)"
+        }
+      ],
+      "default": "inherit",
+      "info": "Choose the font weight (boldness) for the accent text"
+    },
+    {
+      "type": "header",
+      "content": "Advisor Card Settings"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Image Border Radius",
+      "default": 10,
+      "info": "Controls the roundness of the image container corners"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_image_border",
+      "label": "Enable image border",
+      "default": false,
+      "info": "Add a border around advisor images"
+    },
+    {
+      "type": "range",
+      "id": "image_border_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Image border width",
+      "default": 2,
+      "info": "Width of the image border (only used when border is enabled)"
+    },
+    {
+      "type": "color",
+      "id": "image_border_color",
+      "label": "Image border color",
+      "default": "#000000",
+      "info": "Color of the image border (only used when border is enabled)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_image_background",
+      "label": "Enable custom image background",
+      "default": false,
+      "info": "Add a custom background color or gradient behind advisor images"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_background",
+      "label": "Use gradient background",
+      "default": false,
+      "info": "Use a gradient instead of solid color for image background"
+    },
+    {
+      "type": "color",
+      "id": "image_background_color",
+      "label": "Image background color",
+      "default": "#f5f5f5",
+      "info": "Solid background color for advisor images"
+    },
+    {
+      "type": "color_background",
+      "id": "image_gradient_background",
+      "label": "Image gradient background",
+      "info": "Gradient background for advisor images (only used when gradient is enabled)"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_position",
+      "label": "Testimonial position",
+      "options": [
+        {
+          "value": "below",
+          "label": "Below image"
+        },
+        {
+          "value": "overlay",
+          "label": "Overlay on image"
+        }
+      ],
+      "default": "below",
+      "info": "Choose where to display the testimonial text"
+    },
+    {
+      "type": "color",
+      "id": "name_color",
+      "label": "Name Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "name_size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Name Font Size",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Title Font Size",
+      "default": 17
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Card Overlay Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "label": "Card Overlay Opacity",
+      "default": 0.5
+    },
+    {
+      "type": "range",
+      "id": "gradient_overlay_height",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Card Overlay Height",
+      "default": 30,
+      "info": "Height of the gradient overlay from bottom of card (20% = subtle, 100% = full height)"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial Settings"
+    },
+    {
+      "type": "color",
+      "id": "testimonial_color",
+      "label": "Testimonial Text Color",
+      "default": "#4a4a4a"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Testimonial Font Size",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Button Settings"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Toggle Button Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Toggle Button Icon Color",
+      "default": "#2c2c2c"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Slider Controls"
+    },
+    {
+      "type": "select",
+      "id": "navigation_type",
+      "label": "Mobile Navigation Type",
+      "options": [
+        {
+          "value": "arrows",
+          "label": "Arrow Navigation"
+        },
+        {
+          "value": "progress_bar",
+          "label": "Progress Bar"
+        }
+      ],
+      "default": "arrows",
+      "info": "Choose between arrow navigation or swipable progress bar on mobile"
+    },
+    {
+      "type": "header",
+      "content": "Progress Bar Settings"
+    },
+    {
+      "type": "range",
+      "id": "progress_bar_margin_top",
+      "min": 10,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Progress Bar Top Margin",
+      "default": 32,
+      "info": "Space above the progress bar"
+    },
+    {
+      "type": "range",
+      "id": "progress_bar_height",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "Progress Bar Height",
+      "default": 3
+    },
+    {
+      "type": "color",
+      "id": "progress_bar_background",
+      "label": "Progress Bar Background",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "color",
+      "id": "progress_bar_color",
+      "label": "Progress Bar Fill Color",
+      "default": "#2563eb"
+    },
+    {
+      "type": "header",
+      "content": "Arrow Navigation Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_global_nav_buttons",
+      "label": "Use Global Navigation Button Styling",
+      "default": true,
+      "info": "Use global navigation button settings from theme settings. When disabled, use section-specific settings below."
+    },
+    {
+      "type": "paragraph",
+      "content": "Custom Navigation Button Styling (only applies when 'Use Global Navigation Button Styling' is disabled)"
+    },
+    {
+      "type": "color",
+      "id": "pagination_color",
+      "label": "Slider Controls Color",
+      "default": "#2c2c2c"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "advisor",
+      "name": "Advisor",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "advisor_image",
+          "label": "Advisor Image"
+        },
+        {
+          "type": "text",
+          "id": "advisor_name",
+          "label": "Advisor Name",
+          "default": "Advisor Name"
+        },
+        {
+          "type": "text",
+          "id": "advisor_title",
+          "label": "Advisor Title",
+          "default": "Advisor Title"
+        },
+        {
+          "type": "textarea",
+          "id": "advisor_testimonial",
+          "label": "Advisor Testimonial",
+          "default": "Advisor Testimonial"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Board of Advisors",
+      "blocks": [
+        {
+          "type": "advisor",
+          "settings": {
+            "advisor_name": "Advisor Name",
+            "advisor_title": "Advisor Title",
+            "advisor_testimonial": "Advisor Testimonial"
+          }
+        },
+        {
+          "type": "advisor",
+          "settings": {
+            "advisor_name": "Advisor Name",
+            "advisor_title": "Advisor Title",
+            "advisor_testimonial": "Advisor Testimonial"
+          }
+        },
+        {
+          "type": "advisor",
+          "settings": {
+            "advisor_name": "Advisor Name",
+            "advisor_title": "Advisor Title",
+            "advisor_testimonial": "Advisor Testimonial"
+          }
+        },
+        {
+          "type": "advisor",
+          "settings": {
+            "advisor_name": "Advisor Name",
+            "advisor_title": "Advisor Title",
+            "advisor_testimonial": "Advisor Testimonial"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

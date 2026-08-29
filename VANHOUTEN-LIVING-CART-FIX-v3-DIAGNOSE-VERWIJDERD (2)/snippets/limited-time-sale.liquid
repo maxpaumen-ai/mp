@@ -1,0 +1,204 @@
+{% comment %}
+  Snippet: Limited Time Sale Block (Desktop-first)
+  - Left: image only
+  - Right: centered text content + dynamic countdown
+  - Theme colors support with fallback to custom colors
+{% endcomment %}
+
+<section class="hero-wrap-{{ block.id }}">
+  <div class="hero-card-{{ block.id }}">
+    <div class="hero-chip-{{ block.id }}">{{ block.settings.chip_text }}</div>
+
+    <div class="hero-grid-{{ block.id }}">
+      <!-- Left: image only -->
+      <div class="hero-media-{{ block.id }}">
+        {% if block.settings.image != blank %}
+          {{
+            block.settings.image
+            | image_url: width: 380, height: 380
+            | image_tag: alt: block.settings.image.alt, width: 380, height: 380, loading: 'lazy', decoding: 'async'
+          }}
+        {% else %}
+          <div class="hero-media-placeholder-{{ block.id }}">Upload image</div>
+        {% endif %}
+      </div>
+
+      <!-- Right: text content -->
+      <div class="hero-content-{{ block.id }}">
+        <div class="eyebrow-{{ block.id }}">
+          <span class="dot-{{ block.id }}"></span>
+          <span class="eyebrow-text-{{ block.id }}">{{ block.settings.eyebrow_text }}</span>
+          <span class="dot-{{ block.id }}"></span>
+        </div>
+
+        <h1 class="headline-{{ block.id }}">
+          <span class="accent-{{ block.id }}">{{ block.settings.headline_accent }}</span>
+          <br>
+          <span class="strong-{{ block.id }}">{{ block.settings.headline_strong }}</span>
+        </h1>
+
+        {% if block.settings.description != blank %}
+          <p class="desc-{{ block.id }}">{{ block.settings.description }}</p>
+        {% endif %}
+
+        {% if block.settings.cta_label != blank %}
+          <a href="{{ block.settings.cta_link | default: '#' }}" class="cta-{{ block.id }}">
+            <span>{{ block.settings.cta_label }}</span>
+          </a>
+        {% endif %}
+
+        <div
+          class="deal-row-{{ block.id }}"
+          data-mode="{{ block.settings.deal_mode }}"
+          data-hours="{{ block.settings.duration_hours }}"
+          data-minutes="{{ block.settings.duration_minutes }}"
+          data-seconds="{{ block.settings.duration_seconds }}"
+          data-deadline="{{ block.settings.deadline | escape }}"
+        >
+          {% if block.settings.countdown_label != blank %}
+            <span class="deal-label-{{ block.id }}">{{ block.settings.countdown_label }}</span>
+          {% endif %}
+          <span class="deal-time-{{ block.id }}" id="deal-time-{{ block.id }}">02:33:53</span>
+        </div>
+
+        <div class="meta-box-{{ block.id }}">
+          <div class="meta-item-{{ block.id }}">
+            {% if block.settings.sellout_risk_label != blank %}
+              <span class="muted-{{ block.id }}">{{ block.settings.sellout_risk_label }}</span>
+            {% endif %}
+            {% if block.settings.sellout_risk != blank %}
+              <span class="risk-{{ block.id }}">{{ block.settings.sellout_risk }}</span>
+            {% endif %}
+          </div>
+          <div class="divider-{{ block.id }}" aria-hidden></div>
+          <div class="meta-item-{{ block.id }}">{{ block.settings.shipping_text }}</div>
+        </div>
+
+        <p class="fineprint-{{ block.id }}">{{ block.settings.guarantee_text }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{%- liquid
+  # Get the parent section to access use_theme_colors setting
+  assign parent_section = sections[section.id]
+  if parent_section == blank
+    for sect in sections
+      if sect.blocks contains block
+        assign parent_section = sect
+        break
+      endif
+    endfor
+  endif
+
+  # Set colors based on theme colors setting
+  if section.settings.use_theme_colors
+    assign navy_color = settings.global_section_accent_1_color | default: block.settings.navy_color
+    assign red_color = settings.global_section_accent_1_color | default: block.settings.accent_red
+    assign cream_color = settings.global_section_background_color | default: block.settings.bg_cream
+    assign text_color = settings.global_section_text_color | default: '#111'
+  else
+    assign navy_color = block.settings.navy_color
+    assign red_color = block.settings.accent_red
+    assign cream_color = block.settings.bg_cream
+    assign text_color = '#111'
+  endif
+-%}
+
+<style>
+  :root {
+    --navy-{{ block.id }}: {{ navy_color }};
+    --red-{{ block.id }}: {{ red_color }};
+    --cream-{{ block.id }}: {{ cream_color }};
+    --text-{{ block.id }}: {{ text_color }};
+  }
+  .hero-wrap-{{ block.id }}{background:var(--cream-{{ block.id }});padding:0px 0px;margin-top:{{ block.settings.margin_top }}px;margin-bottom:{{ block.settings.margin_bottom }}px}
+  .hero-card-{{ block.id }}{max-width:960px;margin:0 auto;background:#fff;border:2px dotted #1e1e1e;border-radius:8px;position:relative}
+  .hero-grid-{{ block.id }}{display:grid;grid-template-columns:1fr 1fr;align-items:center}
+
+  .hero-chip-{{ block.id }}{position:absolute;left:50%;transform:translate(-50%,-50%);top:0;background:var(--navy-{{ block.id }});color:#fff;font-weight:var(--font-weight-bold) !important;font-size:14px;padding:10px 18px; letter-spacing: var(--letter-spacing-body);border-radius:14px;white-space:nowrap;max-width:none}
+
+  .hero-media-{{ block.id }}{background:{{ block.settings.media_bg }};padding:0px 0px;display:flex;align-items:center;justify-content:center;height:100%}
+  .hero-media-{{ block.id }} img{width:380px;height:100%;object-fit:cover;border-radius:8px;min-height:380px}
+  .hero-media-placeholder-{{ block.id }}{width:380px;height:100%;display:flex;align-items:center;justify-content:center;background:#eee;color:#888;border:1px dashed #bbb;border-radius:8px;min-height:380px}
+  .hero-content-{{ block.id }}{padding:40px 18px 36px;text-align:center}
+
+  .eyebrow-{{ block.id }}{display:flex;justify-content:center;align-items:center;gap:14px;color:#666;letter-spacing:var(--letter-spacing-body);font-size:{{ block.settings.eyebrow_font_size }}px !important;font-weight:var(--font-weight-bold) !important;text-transform:uppercase}
+  .dot-{{ block.id }}{flex:1;height:1px;background:#ddd;max-width:40px}
+
+  .headline-{{ block.id }}{margin:4px 0 2px;font-size:{{ block.settings.headline_font_size }}px !important;line-height:1.15;color:var(--text-{{ block.id }});letter-spacing:var(--letter-spacing-heading);font-weight:var(--font-weight-bold) !important}
+  .headline-{{ block.id }} .accent-{{ block.id }}{color:var(--red-{{ block.id }});font-weight:var(--font-weight-bold) !important}
+  .headline-{{ block.id }} .strong-{{ block.id }}{font-weight:var(--font-weight-bold) !important}
+
+  .desc-{{ block.id }}{color:var(--text-{{ block.id }});margin:2px 0 4px;font-size:{{ block.settings.description_font_size }}px !important;line-height:1.5;max-width:32ch;margin-left:auto;margin-right:auto;letter-spacing:var(--letter-spacing-body);font-weight:var(--font-weight-regular) !important}
+
+  .cta-{{ block.id }}{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--navy-{{ block.id }});color:#fff;text-decoration:none;border-radius:10px;padding:16px 28px;font-weight:var(--font-weight-bold) !important;margin:4px auto 4px; width: 100% !important;letter-spacing:var(--letter-spacing-body);font-size:{{ block.settings.cta_font_size }}px !important}
+  .arrow-{{ block.id }}{font-size:18px}
+
+  .deal-row-{{ block.id }}{font-weight:var(--font-weight-bold) !important;margin:2px 0 4px;letter-spacing:var(--letter-spacing-body);font-size:{{ block.settings.deal_font_size }}px !important}
+  .deal-label-{{ block.id }}{color:var(--text-{{ block.id }});margin-right:8px}
+  .deal-time-{{ block.id }}{color:var(--red-{{ block.id }})}
+
+  .meta-box-{{ block.id }}{display:flex;justify-content:center;align-items:center;gap:18px;background:{{ block.settings.meta_box_bg }};border-radius:8px;padding:12px 16px;margin:2px auto 4px;border:1px solid {{ block.settings.meta_box_border }};max-width:420px}
+  .meta-item-{{ block.id }}{font-size:{{ block.settings.meta_font_size }}px !important;letter-spacing:var(--letter-spacing-body);font-weight:var(--font-weight-regular) !important}
+  .muted-{{ block.id }}{color:{{ block.settings.meta_label_color }};margin-right:6px}
+  .risk-{{ block.id }}{color:{{ block.settings.meta_risk_color }};font-weight:var(--font-weight-bold) !important}
+  .divider-{{ block.id }}{width:1px;height:18px;background:{{ block.settings.meta_divider_color }}}
+
+  .fineprint-{{ block.id }}{font-size:{{ block.settings.fineprint_font_size }}px !important;color:var(--text-{{ block.id }});max-width:46ch;margin:2px auto 0;letter-spacing:var(--letter-spacing-body);font-weight:var(--font-weight-regular) !important}
+
+  @media (max-width: 900px){
+    .hero-grid-{{ block.id }}{grid-template-columns:1fr}
+    .hero-media-{{ block.id }}{order:1}
+    .hero-content-{{ block.id }}{order:2;padding:18px}
+    .eyebrow-{{ block.id }}{font-size:{{ block.settings.mobile_eyebrow_font_size }}px !important}
+    .headline-{{ block.id }}{font-size:{{ block.settings.mobile_headline_font_size }}px !important}
+    .desc-{{ block.id }}{font-size:{{ block.settings.mobile_description_font_size }}px !important}
+    .cta-{{ block.id }}{font-size:{{ block.settings.mobile_cta_font_size }}px !important}
+    .deal-row-{{ block.id }}{font-size:{{ block.settings.mobile_deal_font_size }}px !important}
+    .meta-item-{{ block.id }}{font-size:{{ block.settings.mobile_meta_font_size }}px !important}
+    .fineprint-{{ block.id }}{font-size:{{ block.settings.mobile_fineprint_font_size }}px !important}
+  }
+</style>
+
+<script>
+  (function () {
+    var row = document.querySelector('.deal-row-{{ block.id }}');
+    if (!row) return;
+    var mode = row.getAttribute('data-mode');
+    var el = document.getElementById('deal-time-{{ block.id }}');
+
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    var end;
+    if (mode === 'deadline') {
+      var deadline = row.getAttribute('data-deadline');
+      var t = Date.parse(deadline);
+      if (!isNaN(t)) end = t;
+      else end = Date.now() + (2 * 60 * 60 + 33 * 60 + 53) * 1000;
+    } else {
+      var H = parseInt(row.getAttribute('data-hours') || '2', 10);
+      var M = parseInt(row.getAttribute('data-minutes') || '33', 10);
+      var S = parseInt(row.getAttribute('data-seconds') || '53', 10);
+      end = Date.now() + ((H * 60 + M) * 60 + S) * 1000;
+    }
+
+    function tick() {
+      var diff = Math.max(0, end - Date.now());
+      var total = Math.floor(diff / 1000);
+      var h = Math.floor(total / 3600);
+      var m = Math.floor((total % 3600) / 60);
+      var s = total % 60;
+      el.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+      if (diff <= 0) return;
+      else
+        window.requestAnimationFrame(function () {
+          setTimeout(tick, 1000);
+        });
+    }
+    tick();
+  })();
+</script>

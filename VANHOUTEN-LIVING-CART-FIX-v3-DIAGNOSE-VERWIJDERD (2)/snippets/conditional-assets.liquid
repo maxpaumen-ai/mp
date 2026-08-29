@@ -1,0 +1,76 @@
+{% comment %}
+  Component: Conditional Assets
+  
+  Description: Conditionally loaded CSS and JavaScript files based on theme settings and template
+  
+  Features:
+  - Cart drawer styles/scripts (when cart_type is drawer)
+  - RTL support styles
+  - Contained sections styles
+  - Global border styling
+  - Predictive search styles/scripts
+  - Localization styles/scripts
+  - Template-specific scripts (collection/product/customer pages)
+  
+  Usage:
+  {% render 'conditional-assets', is_rtl_locale: is_rtl_locale %}
+{% endcomment %}
+
+{% liquid
+  comment
+    Use passed RTL variable instead of calculating it again
+  endcomment
+  assign is_rtl = is_rtl_locale | default: false
+%}
+
+{% comment %} Conditional Stylesheets {% endcomment %}
+{%- if settings.cart_type == 'drawer' -%}
+  {{ 'component-cart-drawer.css' | asset_url | stylesheet_tag }}
+  {{ 'component-cart.css' | asset_url | stylesheet_tag }}
+  {{ 'component-totals.css' | asset_url | stylesheet_tag }}
+  {{ 'component-price.css' | asset_url | stylesheet_tag }}
+  {{ 'component-discounts.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+
+{% if settings.enable_global_border_styling %}
+  {{ 'global-border-styling.css' | asset_url | stylesheet_tag }}
+{% endif %}
+
+{% if settings.enable_contained_sections %}
+  {{ 'contained-sections.css' | asset_url | stylesheet_tag }}
+{% endif %}
+
+{% if settings.enable_rtl_support and is_rtl %}
+  {{ 'rtl-support.css' | asset_url | stylesheet_tag }}
+{% endif %}
+
+{%- if settings.predictive_search_enabled -%}
+  <link
+    rel="stylesheet"
+    href="{{ 'component-predictive-search.css' | asset_url }}"
+    media="print"
+    onload="this.media='all'"
+  >
+{%- endif -%}
+
+{%- if localization.available_countries.size > 1 or localization.available_languages.size > 1 -%}
+  {{ 'component-localization-form.css' | asset_url | stylesheet_tag: preload: true }}
+{%- endif -%}
+
+{% comment %} Conditional Scripts {% endcomment %}
+{%- if settings.predictive_search_enabled -%}
+  <script src="{{ 'predictive-search.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{% if template contains 'collection' or template contains 'product' %}
+  <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'swatch.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+
+{% if template contains 'customers' %}
+  <script src="{{ 'customer.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+
+{%- if localization.available_countries.size > 1 or localization.available_languages.size > 1 -%}
+  <script src="{{ 'localization-form.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}

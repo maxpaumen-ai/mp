@@ -1,0 +1,76 @@
+{{ 'product-faq.css' | asset_url | stylesheet_tag }}
+
+<div class="product-faq-section {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
+  {% for block in section.blocks %}
+    {% render 'product-faq', block: block, product: product %}
+  {% endfor %}
+</div>
+
+<script src="{{ 'product-faq.js' | asset_url }}" defer></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Sélectionne TOUS les containers FAQ
+    const faqContainers = document.querySelectorAll('.product-faq');
+
+    faqContainers.forEach((faqContainer) => {
+      const faqItems = faqContainer.querySelectorAll('.faq-item');
+
+      faqItems.forEach((item) => {
+        const question = item.querySelector('.faq-question');
+        if (!question) return;
+
+        question.addEventListener('click', function () {
+          item.classList.toggle('active');
+        });
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Product FAQ",
+  "tag": "section",
+  "class": "section",
+  "max_blocks": 10,
+  "blocks": [
+    {
+      "type": "faq_item",
+      "name": "FAQ Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question_1",
+          "label": "Question",
+          "default": "Question example"
+        },
+        {
+          "type": "richtext",
+          "id": "answer_1",
+          "label": "Answer"
+        },
+        {
+          "type": "image_picker",
+          "id": "question_1_image",
+          "label": "Question Image"
+        },
+        {
+          "type": "range",
+          "id": "image_size",
+          "min": 30,
+          "max": 200,
+          "step": 10,
+          "default": 120,
+          "label": "Image Size"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product FAQ"
+    }
+  ]
+}
+{% endschema %}
