@@ -232,6 +232,7 @@
                   </div>
               {% endcase %}
             {% endfor %}
+            {% render 'cart-reservation-notice' %}
             <div id="CartDrawer-CartItems" class="drawer__contents js-contents">
               {%- if cart != empty -%}
                 {% render 'cart-items',
@@ -1274,6 +1275,321 @@
   gift_icon_pixel: gift_icon_pixel
 %}
 
+<style>
+  /* =========================================================
+     VANHOUTEN LIVING — GYMSHARK-STYLE REDESIGN V1.0
+     Zuiver visuele presentatielaag, geladen als allerlaatste
+     <style>-blok van deze sectie zodat hij in de cascade wint
+     zonder bestaande functionele markup/selectors aan te raken.
+     Raakt GEEN id/name/data-attribuut/form-koppeling aan die
+     door assets/cart.js of assets/cart-drawer.js wordt gebruikt.
+  ========================================================= */
+
+  /* ---------- 1. Drawer: breedte + basis premium-look ---------- */
+  @media screen and (min-width: 750px) {
+    cart-drawer .drawer__inner,
+    .cart-drawer .drawer__inner {
+      max-width: min(500px, calc(100vw - 3rem)) !important;
+      width: min(500px, calc(100vw - 3rem)) !important;
+    }
+  }
+
+  cart-drawer .drawer__inner {
+    background: #ffffff !important;
+  }
+
+  /* ---------- 2. Header: dunne borders, compacte hoogte ---------- */
+  .cart-drawer .vhl-cart-header {
+    min-height: 56px !important;
+    padding: 0 16px !important;
+    background: #ffffff !important;
+    border-bottom-color: #e5e5e5 !important;
+  }
+
+  .cart-drawer .vhl-cart-header .drawer__heading {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #171717 !important;
+  }
+
+  .cart-drawer .vhl-cart-header .gb-cart-total-item {
+    background: #f2f2f2 !important;
+    color: #4a4a4a !important;
+  }
+
+  .cart-drawer .vhl-cart-header__action,
+  .cart-drawer .vhl-cart-header .drawer__close.vhl-cart-header__action {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    background: #ffffff !important;
+    border-color: #e5e5e5 !important;
+    color: #171717 !important;
+  }
+
+  .cart-drawer .vhl-cart-header__action:hover {
+    background: #f7f7f7 !important;
+    border-color: #d4d4d4 !important;
+  }
+
+  /* ---------- 3. Gratis-verzending progress bar: dun en strak ---------- */
+  .cart-drawer .free-product-progress-bar-main {
+    padding: 14px 16px 6px !important;
+  }
+
+  .cart-drawer .free-product-progress-bar-successfull {
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+    color: #4a4a4a !important;
+    margin-bottom: 9px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .cart-drawer .free-product-progress-bar {
+    position: relative;
+  }
+
+  .cart-drawer .free-product-progress-bar progress {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 4px !important;
+    border: none !important;
+    border-radius: 999px !important;
+    background: #e5e5e5 !important;
+    overflow: hidden;
+  }
+
+  .cart-drawer .free-product-progress-bar progress::-webkit-progress-bar {
+    background: #e5e5e5 !important;
+    border-radius: 999px !important;
+  }
+
+  .cart-drawer .free-product-progress-bar progress::-webkit-progress-value {
+    background: #171717 !important;
+    border-radius: 999px !important;
+    transition: width 0.4s ease;
+  }
+
+  .cart-drawer .free-product-progress-bar progress::-moz-progress-bar {
+    background: #171717 !important;
+    border-radius: 999px !important;
+  }
+
+  .cart-drawer .free-shipping-main .reward-name,
+  .cart-drawer .free-gift-main .reward-name {
+    font-size: 10.5px !important;
+    color: #6b6b6b !important;
+  }
+
+  /* ---------- 4. Reserverings-inforegel ---------- */
+  .cart-drawer .vhl-reservation-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 8px 16px 12px;
+    color: #6b6b6b;
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+
+  .cart-drawer .vhl-reservation-notice__icon {
+    flex: 0 0 14px;
+    width: 14px;
+    height: 14px;
+    margin-top: 1px;
+    color: #9a9a9a;
+  }
+
+  .cart-drawer .vhl-reservation-notice__icon svg {
+    width: 14px !important;
+    height: 14px !important;
+    display: block;
+  }
+
+  /* ---------- 5. Cart items: compact, dunne dividers, geen cards ---------- */
+  .cart-drawer .cart-items {
+    background: #ffffff !important;
+  }
+
+  .cart-drawer .cart-item {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e5e5e5 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .cart-drawer .cart-item:last-child {
+    border-bottom: none !important;
+  }
+
+  @media screen and (max-width: 749px) {
+    .cart-drawer .cart-item {
+      padding-bottom: 16px !important;
+      margin-bottom: 16px !important;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .cart-drawer .cart-items td {
+      border-bottom: 1px solid #e5e5e5 !important;
+      padding-bottom: 16px !important;
+      padding-top: 16px !important;
+    }
+
+    .cart-drawer .cart-item:last-child td {
+      border-bottom: none !important;
+    }
+  }
+
+  .cart-drawer .cart-item__image {
+    width: 68px !important;
+    height: 68px !important;
+    max-width: 68px !important;
+    object-fit: cover;
+    border-radius: 6px !important;
+  }
+
+  .cart-drawer .cart-item__name {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #171717 !important;
+    line-height: 1.3 !important;
+  }
+
+  .cart-drawer .product-option {
+    font-size: 11px !important;
+    color: #8a8a8a !important;
+  }
+
+  .cart-drawer .cart-item__final-price,
+  .cart-drawer .gb-price-drawer {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #171717 !important;
+  }
+
+  .cart-drawer .cart-item__old-price {
+    font-size: 11.5px !important;
+    color: #a0a0a0 !important;
+  }
+
+  .cart-drawer quantity-input.quantity.cart-quantity {
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+  }
+
+  .cart-drawer .quantity__button {
+    color: #171717 !important;
+  }
+
+  .cart-drawer .quantity__input {
+    font-size: 12.5px !important;
+    color: #171717 !important;
+  }
+
+  .cart-drawer .cart-remove-button {
+    border: none !important;
+    color: #a0a0a0 !important;
+  }
+
+  .cart-drawer .cart-remove-button:hover {
+    color: #171717 !important;
+  }
+
+  /* ---------- 6. Upsell: "MAAK JE BESTELLING COMPLEET" ---------- */
+  .cart-drawer .vhl-auto-upsells__heading,
+  .cart-drawer .upsell-header-text {
+    text-transform: uppercase !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
+    color: #171717 !important;
+  }
+
+  .cart-drawer .vhl-auto-upsells__discount-pill {
+    font-size: 11.5px !important;
+    color: #6b6b6b !important;
+  }
+
+  .cart-drawer .upsell-product-img {
+    border-radius: 8px !important;
+  }
+
+  .cart-drawer .upsell-button {
+    border-radius: 999px !important;
+  }
+
+  .cart-drawer .vhl-upsell-price-row {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 6px !important;
+  }
+
+  .cart-drawer .vhl-upsell-compare-at-price {
+    font-size: 0.85em;
+    color: #a0a0a0 !important;
+    font-weight: 400 !important;
+  }
+
+  /* ---------- 7. Kortingscode ---------- */
+  .cart-drawer .vhl-cart-discount-section__title {
+    text-transform: uppercase !important;
+    font-size: 12.5px !important;
+    letter-spacing: 0.03em !important;
+  }
+
+  .cart-drawer .cart-discount-code-input {
+    border-color: #e5e5e5 !important;
+  }
+
+  .cart-drawer .cart-discount-code-input:focus {
+    border-color: #171717 !important;
+  }
+
+  .cart-drawer .cart-discount-code-button {
+    background: #171717 !important;
+    color: #ffffff !important;
+    border-radius: 999px !important;
+  }
+
+  /* ---------- 8. Besteloverzicht ---------- */
+  .cart-drawer .vhl-order-summary-title {
+    text-transform: uppercase !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
+    color: #171717 !important;
+    margin: 18px 16px 10px !important;
+  }
+
+  .cart-drawer .totals__total-value,
+  .cart-drawer .total_count {
+    color: #171717 !important;
+  }
+
+  /* ---------- 9. Checkout ---------- */
+  .cart-drawer .cart__checkout-button {
+    background: #171717 !important;
+    color: #ffffff !important;
+    border-radius: 12px !important;
+    width: calc(100% - 32px) !important;
+    margin: 4px 16px 12px !important;
+    font-size: 13.5px !important;
+    letter-spacing: 0.02em !important;
+    box-shadow: none !important;
+  }
+
+  /* ---------- 10. Payment icons ---------- */
+  .cart-drawer .vhl-payment-methods {
+    justify-content: center !important;
+    padding-bottom: 14px !important;
+  }
+</style>
+
 {% schema %}
 {
   "name": "Cart Drawer",
@@ -1316,7 +1632,7 @@
       "type": "text",
       "id": "auto_upsell_heading",
       "label": "Titel automatische upsells",
-      "default": "Maak je badkamer compleet"
+      "default": "Maak je bestelling compleet"
     },
     {
       "type": "range",
