@@ -1525,15 +1525,23 @@ class CartItems extends HTMLElement {
       }, 4000);
     }
 
-    this.lineItemStatusElement.setAttribute("aria-hidden", true);
+    // Verse lookup: na een zone-innerHTML update (vhlUpdateDrawerZone) is een
+    // eerder gecachte referentie naar dit element een losgekoppelde DOM-node.
+    const lineItemStatusElement =
+      document.getElementById("shopping-cart-line-item-status") || document.getElementById("CartDrawer-LineItemStatus");
+    if (lineItemStatusElement) {
+      lineItemStatusElement.setAttribute("aria-hidden", true);
+    }
 
     const cartStatus =
       document.getElementById("cart-live-region-text") || document.getElementById("CartDrawer-LiveRegionText");
-    cartStatus.setAttribute("aria-hidden", false);
+    if (cartStatus) {
+      cartStatus.setAttribute("aria-hidden", false);
 
-    setTimeout(() => {
-      cartStatus.setAttribute("aria-hidden", true);
-    }, 1000);
+      setTimeout(() => {
+        cartStatus.setAttribute("aria-hidden", true);
+      }, 1000);
+    }
   }
 
   getSectionInnerHTML(html, selector) {
@@ -1542,7 +1550,9 @@ class CartItems extends HTMLElement {
 
   enableLoading(line) {
     const mainCartItems = document.getElementById("main-cart-items") || document.getElementById("CartDrawer-CartItems");
-    mainCartItems.classList.add("cart__items--disabled");
+    if (mainCartItems) {
+      mainCartItems.classList.add("cart__items--disabled");
+    }
 
     const cartItemElements = this.querySelectorAll(`#CartItem-${line} .loading__spinner`);
     const cartDrawerItemElements = this.querySelectorAll(`#CartDrawer-Item-${line} .loading__spinner`);
@@ -1550,12 +1560,21 @@ class CartItems extends HTMLElement {
     [...cartItemElements, ...cartDrawerItemElements].forEach((overlay) => overlay.classList.remove("hidden"));
 
     document.activeElement.blur();
-    this.lineItemStatusElement.setAttribute("aria-hidden", false);
+
+    // Verse lookup i.p.v. de in de constructor gecachte referentie (kan na
+    // een zone-innerHTML update losgekoppeld zijn van de document).
+    const lineItemStatusElement =
+      document.getElementById("shopping-cart-line-item-status") || document.getElementById("CartDrawer-LineItemStatus");
+    if (lineItemStatusElement) {
+      lineItemStatusElement.setAttribute("aria-hidden", false);
+    }
   }
 
   disableLoading(line) {
     const mainCartItems = document.getElementById("main-cart-items") || document.getElementById("CartDrawer-CartItems");
-    mainCartItems.classList.remove("cart__items--disabled");
+    if (mainCartItems) {
+      mainCartItems.classList.remove("cart__items--disabled");
+    }
 
     const cartItemElements = this.querySelectorAll(`#CartItem-${line} .loading__spinner`);
     const cartDrawerItemElements = this.querySelectorAll(`#CartDrawer-Item-${line} .loading__spinner`);
