@@ -776,6 +776,12 @@ function vhlUpdateDrawerZone(currentRoot, nextRoot, selector) {
   const currentZone = currentRoot?.querySelector?.(selector);
   const nextZone = nextRoot?.querySelector?.(selector);
 
+  console.log("[VHL CART DEBUG] vhlUpdateDrawerZone", {
+    selector,
+    currentZoneFound: !!currentZone,
+    nextZoneFound: !!nextZone,
+  });
+
   if (!currentZone || !nextZone) return false;
 
   currentZone.innerHTML = nextZone.innerHTML;
@@ -889,6 +895,7 @@ function vhlUpdateCartDrawerZones(cartDrawerContainer, newCartDrawer) {
 }
 
 function handleEmptyCart(cartDrawerContainer, cartDrawer, newCartDrawer, newTotalCount, callbackFn) {
+  console.log("[VHL CART DEBUG] update-route: handleEmptyCart", { newTotalCount });
   vhlUpdateCartDrawerZones(cartDrawerContainer, newCartDrawer);
   updateBubbleCount(newTotalCount);
 
@@ -896,6 +903,7 @@ function handleEmptyCart(cartDrawerContainer, cartDrawer, newCartDrawer, newTota
 }
 
 function handleCartBecameNonEmpty(cartDrawerContainer, cartDrawer, newCartDrawer, callbackFn) {
+  console.log("[VHL CART DEBUG] update-route: handleCartBecameNonEmpty");
   const {
     totalValue: newTotalValue,
     freeProduct: newFreeProduct,
@@ -922,6 +930,7 @@ function handleCartBecameNonEmpty(cartDrawerContainer, cartDrawer, newCartDrawer
 }
 
 function handleCartUpdate(cartDrawerContainer, cartDrawer, newCartDrawer, checkFreeProduct, callbackFn) {
+  console.log("[VHL CART DEBUG] update-route: handleCartUpdate", { checkFreeProduct });
   const {
     totalValue: newTotalValue,
     freeProductId,
@@ -990,6 +999,26 @@ function handleCartUpdate(cartDrawerContainer, cartDrawer, newCartDrawer, checkF
   helpers.safeCallback(callbackFn);
 }
 
+/* [VHL CART DEBUG] — tijdelijke, read-only runtime-diagnostiek.
+ * Verandert geen enkel gedrag; rapporteert alleen de huidige DOM-staat. */
+function vhlCartDebugSnapshot(label, extra) {
+  const cartDrawer = document.querySelector("cart-drawer");
+  const drawerInner = cartDrawer ? cartDrawer.querySelector(".drawer__inner") : null;
+  const cartDrawerStyle = cartDrawer ? getComputedStyle(cartDrawer) : null;
+  const innerStyle = drawerInner ? getComputedStyle(drawerInner) : null;
+
+  console.log("[VHL CART DEBUG]", label, {
+    cartDrawerPresent: !!cartDrawer,
+    classList: cartDrawer ? Array.from(cartDrawer.classList) : null,
+    hasOpenAttribute: cartDrawer ? cartDrawer.hasAttribute("open") : null,
+    cartDrawerVisibility: cartDrawerStyle ? cartDrawerStyle.visibility : null,
+    cartDrawerDisplay: cartDrawerStyle ? cartDrawerStyle.display : null,
+    drawerInnerVisibility: innerStyle ? innerStyle.visibility : null,
+    drawerInnerTransform: innerStyle ? innerStyle.transform : null,
+    ...(extra || {}),
+  });
+}
+
 function updateCartDrawer(oldCartDrawer, newCartDrawer, checkFreeProduct = true, callbackFn) {
   if (!oldCartDrawer || !newCartDrawer) {
     helpers.safeCallback(callbackFn);
@@ -1026,6 +1055,8 @@ function updateCartDrawer(oldCartDrawer, newCartDrawer, checkFreeProduct = true,
 
   const { totalCount: newTotalCount } =
     getCartMetadata(normalizedNewCartDrawer);
+
+  vhlCartDebugSnapshot("updateCartDrawer:entry", { oldTotalCount, newTotalCount, checkFreeProduct });
 
   if (newTotalCount === "" || newTotalCount === "0") {
     handleEmptyCart(
@@ -1143,6 +1174,7 @@ class CartRemoveButton extends HTMLElement {
 
   handleClick(event) {
     event.preventDefault();
+    console.log("[VHL CART DEBUG] CartRemoveButton:click", { index: this.dataset.index });
     const removeButton = event.target.closest("button.cart-remove-button") || event.target.closest(".cart-remove-button");
     startLoading(removeButton);
     const cartItems = this.closest("cart-items") || this.closest("cart-drawer-items");
@@ -1240,6 +1272,11 @@ class CartItems extends HTMLElement {
 
   onChange(event) {
     const buttonType = event.detail?.buttonType;
+    console.log("[VHL CART DEBUG] CartItems.onChange (quantity +/-)", {
+      buttonType,
+      targetTag: event.target?.tagName,
+      targetId: event.target?.id,
+    });
     const quantityInput = event.target.closest(".cart-quantity");
     if (!quantityInput) return;
     const curButton = quantityInput.querySelector(`[name='${buttonType}']`);
@@ -1308,6 +1345,8 @@ class CartItems extends HTMLElement {
       (cartDrawerBeforeUpdate.classList.contains("active") || cartDrawerBeforeUpdate.hasAttribute("open"))
     );
 
+    vhlCartDebugSnapshot(`updateQuantity:start line=${line} quantity=${quantity}`, { wasOpen });
+
     this.enableLoading(line);
 
     const body = JSON.stringify({
@@ -1325,6 +1364,11 @@ class CartItems extends HTMLElement {
       })
       .then((state) => {
         const parsedState = JSON.parse(state);
+        console.log("[VHL CART DEBUG] updateQuantity:response", {
+          line,
+          quantity,
+          item_count: parsedState.item_count,
+        });
         // Start processing gift adjustments in parallel (non-blocking)
         let needsGiftAdjustment = false;
         let linkedGiftsToHide = [];
@@ -1444,6 +1488,8 @@ class CartItems extends HTMLElement {
           // De buitenste cart-drawer wordt niet vervangen of aangepast.
           // Daardoor blijft de vooraf vastgelegde open-state vanzelf behouden.
           void wasOpen;
+
+          vhlCartDebugSnapshot(`updateQuantity:afterRender line=${line}`, { wasOpen });
 
           // Hide linked gift items immediately if they're being removed
           if (linkedGiftsToHide.length > 0) {
