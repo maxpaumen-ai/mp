@@ -18,6 +18,7 @@ class CartDrawer extends HTMLElement {
     });
 
     this.setHeaderCartIconAccessibility();
+    this.bindCartDrawerTriggers();
     this.bindUpsellButton();
     this.bindDiscountCode();
   }
@@ -37,6 +38,30 @@ class CartDrawer extends HTMLElement {
         event.preventDefault();
         this.open(cartLink);
       }
+    });
+  }
+
+  /**
+   * Desktop + mobiel header cart-icoon (sections/header.liquid,
+   * [data-cart-drawer-trigger]). Eén gedelegeerde document-level
+   * click-handler i.p.v. losse listeners per element, zodat beide
+   * triggers (die bewust geen gedeelde id hebben) dezelfde, al
+   * bestaande drawer-instance openen. Blijft normale /cart-navigatie
+   * toestaan (via de bestaande href) als deze cart-drawer instance
+   * niet (meer) in de DOM aanwezig is.
+   */
+  bindCartDrawerTriggers() {
+    document.addEventListener("click", (event) => {
+      const trigger = event.target.closest("[data-cart-drawer-trigger]");
+      if (!trigger) return;
+
+      // Alleen preventDefault + open() als deze cart-drawer instance
+      // daadwerkelijk (nog) in de DOM zit. Zo niet: gewone link-navigatie
+      // naar routes.cart_url blijft intact als fallback.
+      if (!this.isConnected) return;
+
+      event.preventDefault();
+      this.open(trigger);
     });
   }
 
