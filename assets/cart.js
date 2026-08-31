@@ -640,6 +640,23 @@ function removeFreeProduct(cartDrawer, callbackFn) {
       if (cartDrawerWrapper) cartDrawerWrapper.classList.toggle("is-empty", cartItemsCount === 0);
 
       cartSectionsToRenderList.forEach((section) => {
+        if (section.id === "cart-icon-bubble") {
+          // Uitsluitend het daadwerkelijke #cart-icon-bubble element gebruiken.
+          // NOOIT document.querySelector(section.selector) (".shopify-section")
+          // als fallback: die selector is niet uniek en matcht anders de eigen
+          // Shopify-sectiewrapper van de cart-drawer, wat <cart-drawer> zelf
+          // vernietigt. Ontbreekt #cart-icon-bubble, dan slaan we uitsluitend
+          // deze ene DOM-update over; de rest van de forEach (incl. de
+          // cart-drawer-update) gaat gewoon door.
+          const cartIconBubble = document.getElementById("cart-icon-bubble");
+          if (!cartIconBubble) return;
+
+          cartIconBubble.innerHTML = new DOMParser()
+            .parseFromString(parsedState.sections[section.section], "text/html")
+            .querySelector(section.selector).innerHTML;
+          return;
+        }
+
         const elementToReplace =
           document.getElementById(section.id) ||
           document.querySelector(section.selector) ||
@@ -1428,6 +1445,47 @@ class CartItems extends HTMLElement {
           if (cartDrawerWrapper) cartDrawerWrapper.classList.toggle("is-empty", parsedState.item_count === 0);
 
           this.getSectionsToRender().forEach((section) => {
+            if (section.id === "cart-icon-bubble") {
+              // Uitsluitend het daadwerkelijke #cart-icon-bubble element gebruiken.
+              // NOOIT document.querySelector(section.selector) (".shopify-section")
+              // als fallback: die selector is niet uniek en matcht anders de eigen
+              // Shopify-sectiewrapper van de cart-drawer, wat <cart-drawer> zelf
+              // vernietigt. Ontbreekt #cart-icon-bubble, dan slaan we uitsluitend
+              // deze ene DOM-update over; de rest van de forEach (incl. de
+              // cart-drawer-update) gaat gewoon door.
+              const cartIconBubble = document.getElementById("cart-icon-bubble");
+              if (!cartIconBubble) return;
+
+              const iconType = cartIconBubble.getAttribute("data-cart-icon-type");
+              cartIconBubble.innerHTML = this.getSectionInnerHTML(
+                parsedState.sections[section.section],
+                section.selector,
+              );
+              if (iconType) {
+                cartIconBubble.setAttribute("data-cart-icon-type", iconType);
+              }
+
+              const iconWrapper = cartIconBubble.querySelector(".svg-wrapper");
+              if (iconWrapper && iconType) {
+                const bagIcon = iconWrapper.querySelector(".cart-icon-bag");
+                const cartIcon = iconWrapper.querySelector(".cart-icon-cart");
+                const cartIconEmpty = iconWrapper.querySelector(".cart-icon-cart-empty");
+
+                if (iconType === "bag") {
+                  if (bagIcon) bagIcon.style.display = "flex";
+                }
+                else {
+                  const cartEmpty = parsedState.item_count === 0;
+                  if (cartEmpty && cartIconEmpty) {
+                    cartIconEmpty.style.display = "flex";
+                  } else if (cartIcon) {
+                    cartIcon.style.display = "flex";
+                  }
+                }
+              }
+              return;
+            }
+
             const elementToReplace =
               document.getElementById(section.id) ||
               document.querySelector(section.selector) ||
@@ -1443,35 +1501,7 @@ class CartItems extends HTMLElement {
 
               updateCartDrawer(cartDrawerContainer, newCartDrawer);
             } else {
-              if (section.id === "cart-icon-bubble") {
-                const iconType = elementToReplace.getAttribute("data-cart-icon-type");
-                elementToReplace.innerHTML = this.getSectionInnerHTML(
-                  parsedState.sections[section.section],
-                  section.selector,
-                );
-                if (iconType) {
-                  elementToReplace.setAttribute("data-cart-icon-type", iconType);
-                }
-                
-                const iconWrapper = elementToReplace.querySelector(".svg-wrapper");
-                if (iconWrapper && iconType) {
-                  const bagIcon = iconWrapper.querySelector(".cart-icon-bag");
-                  const cartIcon = iconWrapper.querySelector(".cart-icon-cart");
-                  const cartIconEmpty = iconWrapper.querySelector(".cart-icon-cart-empty");
-                  
-                  if (iconType === "bag") {
-                    if (bagIcon) bagIcon.style.display = "flex";
-                  } 
-                  else {
-                    const cartEmpty = parsedState.item_count === 0;
-                    if (cartEmpty && cartIconEmpty) {
-                      cartIconEmpty.style.display = "flex";
-                    } else if (cartIcon) {
-                      cartIcon.style.display = "flex";
-                    }
-                  }
-                }
-              } else if (section.id === "main-cart-footer") {
+              if (section.id === "main-cart-footer") {
                   elementToReplace.querySelector('.js-contents').innerHTML = this.getSectionInnerHTML(
                     parsedState.sections[section.section],
                     section.selector,
