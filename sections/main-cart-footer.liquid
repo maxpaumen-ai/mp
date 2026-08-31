@@ -149,6 +149,8 @@
                   {%- endif -%}
                 </div>
 
+                <div class="vhl-order-summary-title">Besteloverzicht</div>
+
                 <div
                   class="totals gb-discounts-cart-values"
                   role="status"
@@ -265,7 +267,23 @@
                   {% endif %}
                   form="cart"
                 >
-                  {{ 'sections.cart.checkout' | t }}
+                  <svg
+                    class="icon icon-lock"
+                    aria-hidden="true"
+                    focusable="false"
+                    role="presentation"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  <span class="button-text">VEILIG AFREKENEN</span>
                 </button>
               </div>
 
@@ -282,6 +300,118 @@
     </div>
   </div>
 </div>
+
+<style>
+  /* =========================================================
+     VANHOUTEN LIVING — /cart pagina in dezelfde stijl als de
+     cart drawer (Gymshark-redesign). Zuiver presentationeel,
+     geladen als laatste <style>-blok van deze sectie zodat hij
+     wint van de settings-gedreven kleuren hierboven. Raakt GEEN
+     id/name/form-koppeling van de checkout-knop aan.
+  ========================================================= */
+
+  #main-cart-footer .vhl-order-summary-title {
+    text-transform: uppercase !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
+    color: #171717 !important;
+    margin-bottom: 10px !important;
+  }
+
+  #main-cart-footer .totals__total,
+  #main-cart-footer .total_count {
+    color: #5f5f5f !important;
+    font-size: 13px !important;
+  }
+
+  #main-cart-footer .totals__total-value {
+    color: #171717 !important;
+    font-weight: 600 !important;
+  }
+
+  #main-cart-footer .discounts__discount {
+    color: #171717 !important;
+    font-size: 13px !important;
+  }
+
+  #main-cart-footer .discount_price-container,
+  #main-cart-footer .discount_discount-value,
+  #main-cart-footer .discount_discount-label {
+    color: #171717 !important;
+  }
+
+  #main-cart-footer .tax-note {
+    color: #5f5f5f !important;
+    font-size: 12px !important;
+  }
+
+  #main-cart-footer cart-note label {
+    color: #5f5f5f !important;
+  }
+
+  #main-cart-footer cart-note textarea {
+    border-color: #e5e5e5 !important;
+  }
+
+  /* "VEILIG AFREKENEN"-knop: dezelfde donkere stijl als de drawer.
+     Zelfde specificiteit als de settings-gedreven regel bovenin dit
+     bestand (#main-cart-footer .cart__checkout-button); wint door
+     later in de cascade te staan. Alleen kleur/vorm, geen enkel
+     functioneel attribuut aangeraakt. */
+  #main-cart-footer .cart__checkout-button {
+    background-color: #1f1f1f !important;
+    color: #ffffff !important;
+    border-color: #1f1f1f !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    min-height: 52px !important;
+    font-size: 13.5px !important;
+    letter-spacing: 0.02em !important;
+    box-shadow: none !important;
+  }
+
+  #main-cart-footer .cart__checkout-button,
+  #main-cart-footer .cart__checkout-button span,
+  #main-cart-footer .cart__checkout-button .button-text,
+  #main-cart-footer .cart__checkout-button * {
+    color: #ffffff !important;
+  }
+
+  #main-cart-footer .cart__checkout-button .icon-lock {
+    stroke: #ffffff !important;
+  }
+
+  #main-cart-footer .cart__checkout-button:hover:not([disabled]) {
+    background-color: #333333 !important;
+    border-color: #333333 !important;
+  }
+
+  #main-cart-footer .cart__checkout-button:disabled {
+    background-color: #6b6b6b !important;
+    border-color: #6b6b6b !important;
+    opacity: 1 !important;
+  }
+
+  #main-cart-footer .cart__checkout-button:disabled,
+  #main-cart-footer .cart__checkout-button:disabled span,
+  #main-cart-footer .cart__checkout-button:disabled * {
+    color: #ffffff !important;
+  }
+
+  /* Shopify's "unbranded" dynamic-checkout fallbackknop volgt
+     dezelfde stijl. Branded knoppen (PayPal/Apple Pay/etc.) worden
+     door Shopify zelf gerenderd en bewust niet aangeraakt. */
+  #main-cart-footer .additional-checkout-buttons .shopify-payment-button__button--unbranded {
+    background-color: #1f1f1f !important;
+    color: #ffffff !important;
+    border-radius: 12px !important;
+  }
+
+  #main-cart-footer .additional-checkout-buttons .shopify-payment-button__button--unbranded:hover {
+    background-color: #333333 !important;
+  }
+</style>
 
 {% schema %}
 {
