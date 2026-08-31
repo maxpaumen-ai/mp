@@ -80,7 +80,12 @@
             </div>
           {% endif %}
           {% unless upsell_show_price %}
-            <div class="upsell-product-price-{{ block_id }}">{{ upsell_product.price | money }}</div>
+            <div class="upsell-product-price-{{ block_id }} vhl-upsell-price-row">
+              {%- if upsell_product.compare_at_price > upsell_product.price -%}
+                <s class="vhl-upsell-compare-at-price">{{ upsell_product.compare_at_price | money }}</s>
+              {%- endif -%}
+              {{ upsell_product.price | money }}
+            </div>
           {% endunless %}
 
           {% unless upsell_product.has_only_default_variant %}
