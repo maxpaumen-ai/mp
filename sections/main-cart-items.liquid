@@ -246,7 +246,7 @@
 <cart-items class="isolate{% if cart == empty %} is-empty{% else %} section-{{ section.id }}-padding{% endif %}" style="{% if section.settings.use_theme_colors %}background-color: {{ settings.global_section_background_color }}; color: {{ settings.global_section_text_color }};{% else %}background-color: {{ section.settings.section_background_color }}; color: {{ section.settings.section_text_color }};{% endif %}">
   <div class="page-width">
     <div class="title-wrapper-with-link">
-      <h1 class="title title--primary">{{ 'sections.cart.title' | t }}</h1>
+      <h1 class="title title--primary">Winkelmand</h1>
       <a href="{{ continue_shopping_url }}" class="underlined-link">
         {{- 'general.continue_shopping' | t -}}
       </a>
@@ -333,7 +333,7 @@
           {%- if cart != empty -%}
             <table class="cart-items">
               <caption class="visually-hidden">
-                {{ 'sections.cart.title' | t }}
+                Winkelmand
               </caption>
               <thead>
                 <tr>
@@ -783,6 +783,130 @@
     </form>
   </div>
 </cart-items>
+
+<style>
+  /* =========================================================
+     VANHOUTEN LIVING — /cart pagina in dezelfde stijl als de
+     cart drawer (Gymshark-redesign). Zuiver presentationeel,
+     geladen als laatste <style>-blok van deze sectie. Raakt
+     GEEN id/name/data-attribuut/form-koppeling aan.
+  ========================================================= */
+
+  #main-cart-items .title-wrapper-with-link {
+    align-items: center !important;
+  }
+
+  #main-cart-items .title--primary {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: #171717 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  #main-cart-items .underlined-link {
+    font-size: 12.5px !important;
+    color: #5f5f5f !important;
+  }
+
+  #main-cart-items .cart-items {
+    border-collapse: collapse !important;
+  }
+
+  #main-cart-items .cart-items th {
+    color: #5f5f5f !important;
+    font-size: 11px !important;
+    border-bottom-color: #e5e5e5 !important;
+  }
+
+  #main-cart-items .cart-item {
+    border-bottom: 1px solid #e5e5e5 !important;
+  }
+
+  #main-cart-items .cart-item:last-child {
+    border-bottom: none !important;
+  }
+
+  #main-cart-items .cart-items td {
+    border-bottom: 1px solid #e5e5e5 !important;
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+  }
+
+  #main-cart-items .cart-item:last-child td {
+    border-bottom: none !important;
+  }
+
+  #main-cart-items .cart-item__image-container,
+  #main-cart-items .cart-item__image {
+    width: 100px !important;
+    max-width: 100px !important;
+    border-radius: 8px !important;
+  }
+
+  @media screen and (max-width: 749px) {
+    #main-cart-items .cart-item__image-container,
+    #main-cart-items .cart-item__image {
+      width: 84px !important;
+      max-width: 84px !important;
+    }
+  }
+
+  #main-cart-items .cart-item__name {
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    color: #171717 !important;
+    line-height: 1.35 !important;
+  }
+
+  #main-cart-items .product-option {
+    font-size: 12px !important;
+    color: #5f5f5f !important;
+    line-height: 1.45 !important;
+  }
+
+  #main-cart-items .cart-item__final-price {
+    color: #171717 !important;
+    font-weight: 600 !important;
+  }
+
+  #main-cart-items .cart-item__old-price {
+    color: #777777 !important;
+  }
+
+  #main-cart-items .gb-price-drawer-saving {
+    color: #171717 !important;
+    background: #f2f2f2 !important;
+  }
+
+  #main-cart-items .discount-tag {
+    border-color: #e5e5e5 !important;
+  }
+
+  #main-cart-items quantity-input.quantity.cart-quantity {
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+  }
+
+  #main-cart-items .quantity__button,
+  #main-cart-items .quantity__input {
+    color: #171717 !important;
+  }
+
+  #main-cart-items .cart-remove-button {
+    border: none !important;
+    color: #6b6b6b !important;
+  }
+
+  #main-cart-items .cart-remove-button:hover {
+    color: #171717 !important;
+  }
+
+  #main-cart-items .discount_price-container,
+  #main-cart-items .discount_discount-value {
+    color: #171717 !important;
+  }
+</style>
 
 {% schema %}
 {
