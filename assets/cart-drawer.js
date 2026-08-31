@@ -30,6 +30,7 @@ class CartDrawer extends HTMLElement {
     cartLink.setAttribute("role", "button");
     cartLink.setAttribute("aria-haspopup", "dialog");
     cartLink.addEventListener("click", (event) => {
+      console.log("[VHL CART DEBUG] #cart-icon-bubble clicked");
       event.preventDefault();
       this.open(cartLink);
     });
@@ -54,6 +55,10 @@ class CartDrawer extends HTMLElement {
     document.addEventListener("click", (event) => {
       const trigger = event.target.closest("[data-cart-drawer-trigger]");
       if (!trigger) return;
+
+      console.log("[VHL CART DEBUG] header data-cart-drawer-trigger clicked", {
+        connected: this.isConnected,
+      });
 
       // Alleen preventDefault + open() als deze cart-drawer instance
       // daadwerkelijk (nog) in de DOM zit. Zo niet: gewone link-navigatie
@@ -277,6 +282,14 @@ class CartDrawer extends HTMLElement {
   }
 
   open(triggeredBy) {
+    if (typeof vhlCartDebugSnapshot === "function") {
+      vhlCartDebugSnapshot("CartDrawer.open() called", {
+        triggeredByTag: triggeredBy ? triggeredBy.tagName : null,
+        triggeredById: triggeredBy ? triggeredBy.id : null,
+      });
+    } else {
+      console.log("[VHL CART DEBUG] CartDrawer.open() called");
+    }
     if (triggeredBy) this.setActiveElement(triggeredBy);
     const cartDrawerNote = this.querySelector('[id^="Details-"] summary');
     if (cartDrawerNote && !cartDrawerNote.hasAttribute("role")) this.setSummaryAccessibility(cartDrawerNote);
@@ -284,6 +297,9 @@ class CartDrawer extends HTMLElement {
     setTimeout(() => {
       this.classList.add("animate", "active");
       this.setAttribute("open", "");
+      if (typeof vhlCartDebugSnapshot === "function") {
+        vhlCartDebugSnapshot("CartDrawer.open():afterClassApplied");
+      }
     });
 
     this.addEventListener(
@@ -327,6 +343,12 @@ class CartDrawer extends HTMLElement {
   }
 
   close(explicit = false) {
+    if (typeof vhlCartDebugSnapshot === "function") {
+      vhlCartDebugSnapshot("CartDrawer.close() called", { explicit });
+    } else {
+      console.log("[VHL CART DEBUG] CartDrawer.close() called", { explicit });
+    }
+
     // Check if cart customization mode is active
     const cartCustomizationMode = document.querySelector("cart-drawer").classList.contains("customization-mode");
     if (cartCustomizationMode) {
@@ -342,6 +364,10 @@ class CartDrawer extends HTMLElement {
     // Clear the countdown timer when drawer closes
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
+    }
+
+    if (typeof vhlCartDebugSnapshot === "function") {
+      vhlCartDebugSnapshot("CartDrawer.close():afterClassRemoved");
     }
   }
 
