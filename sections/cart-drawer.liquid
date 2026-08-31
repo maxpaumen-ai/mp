@@ -1339,11 +1339,17 @@
   }
 
   .cart-drawer .free-product-progress-bar-successfull {
-    font-size: 12.5px !important;
-    line-height: 1.35 !important;
-    color: #4a4a4a !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    color: #444444 !important;
     margin-bottom: 9px !important;
     letter-spacing: 0 !important;
+  }
+
+  @media screen and (max-width: 749px) {
+    .cart-drawer .free-product-progress-bar-successfull {
+      font-size: 12px !important;
+    }
   }
 
   .cart-drawer .free-product-progress-bar {
@@ -1382,7 +1388,7 @@
   .cart-drawer .free-shipping-main .reward-name,
   .cart-drawer .free-gift-main .reward-name {
     font-size: 10.5px !important;
-    color: #6b6b6b !important;
+    color: #5f5f5f !important;
   }
 
   /* ---------- 4. Reserverings-inforegel ---------- */
@@ -1390,10 +1396,32 @@
     display: flex;
     align-items: flex-start;
     gap: 7px;
-    padding: 8px 16px 12px;
-    color: #6b6b6b;
-    font-size: 11.5px;
-    line-height: 1.4;
+    padding: 8px 20px 12px 16px;
+    color: #444444 !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    overflow: hidden;
+  }
+
+  @media screen and (max-width: 749px) {
+    .cart-drawer .vhl-reservation-notice {
+      font-size: 12px !important;
+      padding-right: 16px;
+    }
+  }
+
+  .cart-drawer .vhl-reservation-notice__text {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    color: #444444 !important;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   .cart-drawer .vhl-reservation-notice__icon {
@@ -1401,7 +1429,7 @@
     width: 14px;
     height: 14px;
     margin-top: 1px;
-    color: #9a9a9a;
+    color: #6b6b6b !important;
   }
 
   .cart-drawer .vhl-reservation-notice__icon svg {
@@ -1460,8 +1488,9 @@
   }
 
   .cart-drawer .product-option {
-    font-size: 11px !important;
-    color: #8a8a8a !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    color: #5f5f5f !important;
   }
 
   .cart-drawer .cart-item__final-price,
@@ -1473,7 +1502,7 @@
 
   .cart-drawer .cart-item__old-price {
     font-size: 11.5px !important;
-    color: #a0a0a0 !important;
+    color: #777777 !important;
   }
 
   .cart-drawer quantity-input.quantity.cart-quantity {
@@ -1493,7 +1522,7 @@
 
   .cart-drawer .cart-remove-button {
     border: none !important;
-    color: #a0a0a0 !important;
+    color: #6b6b6b !important;
   }
 
   .cart-drawer .cart-remove-button:hover {
@@ -1511,8 +1540,8 @@
   }
 
   .cart-drawer .vhl-auto-upsells__discount-pill {
-    font-size: 11.5px !important;
-    color: #6b6b6b !important;
+    font-size: 12px !important;
+    color: #5f5f5f !important;
   }
 
   .cart-drawer .upsell-product-img {
@@ -1523,6 +1552,13 @@
     border-radius: 999px !important;
   }
 
+  .cart-drawer .upsell-product-description,
+  .cart-drawer [class*="upsell-product-description-"] {
+    color: #5f5f5f !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+
   .cart-drawer .vhl-upsell-price-row {
     display: flex !important;
     align-items: baseline !important;
@@ -1531,7 +1567,7 @@
 
   .cart-drawer .vhl-upsell-compare-at-price {
     font-size: 0.85em;
-    color: #a0a0a0 !important;
+    color: #777777 !important;
     font-weight: 400 !important;
   }
 
@@ -1540,20 +1576,68 @@
     text-transform: uppercase !important;
     font-size: 12.5px !important;
     letter-spacing: 0.03em !important;
+    margin-bottom: 6px !important;
+  }
+
+  .cart-drawer .vhl-cart-discount-section__caption {
+    color: #5f5f5f !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    line-height: 1.45 !important;
+    margin-top: 4px !important;
+    margin-bottom: 10px !important;
+  }
+
+  @media screen and (max-width: 749px) {
+    .cart-drawer .vhl-cart-discount-section__caption {
+      font-size: 12px !important;
+    }
   }
 
   .cart-drawer .cart-discount-code-input {
     border-color: #e5e5e5 !important;
+    color: #171717 !important;
   }
 
   .cart-drawer .cart-discount-code-input:focus {
-    border-color: #171717 !important;
+    border-color: #1f1f1f !important;
   }
 
+  /* "Toepassen"-knop: achtergrond/tekst/border geforceerd, ook op
+     alle child-elementen (span/label), zodat geen enkele eerder
+     geladen regel (o.a. globale button-styling) de tekst onleesbaar
+     kan maken. */
   .cart-drawer .cart-discount-code-button {
-    background: #171717 !important;
+    background: #1f1f1f !important;
     color: #ffffff !important;
+    border: 1px solid #1f1f1f !important;
     border-radius: 999px !important;
+  }
+
+  .cart-drawer .cart-discount-code-button,
+  .cart-drawer .cart-discount-code-button span,
+  .cart-drawer .cart-discount-code-button .cart-discount-code-button-text,
+  .cart-drawer .cart-discount-code-button * {
+    color: #ffffff !important;
+  }
+
+  .cart-drawer .cart-discount-code-button:hover {
+    background: #333333 !important;
+    border-color: #333333 !important;
+    color: #ffffff !important;
+  }
+
+  .cart-drawer .cart-discount-code-button:disabled {
+    background: #6b6b6b !important;
+    border-color: #6b6b6b !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  .cart-drawer .cart-discount-code-button:disabled,
+  .cart-drawer .cart-discount-code-button:disabled span,
+  .cart-drawer .cart-discount-code-button:disabled * {
+    color: #ffffff !important;
   }
 
   /* ---------- 8. Besteloverzicht ---------- */
@@ -1573,14 +1657,43 @@
 
   /* ---------- 9. Checkout ---------- */
   .cart-drawer .cart__checkout-button {
-    background: #171717 !important;
+    background: #1f1f1f !important;
     color: #ffffff !important;
+    border-color: #1f1f1f !important;
     border-radius: 12px !important;
     width: calc(100% - 32px) !important;
     margin: 4px 16px 12px !important;
     font-size: 13.5px !important;
     letter-spacing: 0.02em !important;
     box-shadow: none !important;
+  }
+
+  .cart-drawer .cart__checkout-button,
+  .cart-drawer .cart__checkout-button span,
+  .cart-drawer .cart__checkout-button .button-text,
+  .cart-drawer .cart__checkout-button * {
+    color: #ffffff !important;
+  }
+
+  .cart-drawer .cart__checkout-button .icon-lock {
+    stroke: #ffffff !important;
+  }
+
+  .cart-drawer .cart__checkout-button:hover {
+    background: #333333 !important;
+    border-color: #333333 !important;
+  }
+
+  .cart-drawer .cart__checkout-button:disabled {
+    background: #6b6b6b !important;
+    border-color: #6b6b6b !important;
+    opacity: 1 !important;
+  }
+
+  .cart-drawer .cart__checkout-button:disabled,
+  .cart-drawer .cart__checkout-button:disabled span,
+  .cart-drawer .cart__checkout-button:disabled * {
+    color: #ffffff !important;
   }
 
   /* ---------- 10. Payment icons ---------- */
