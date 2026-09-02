@@ -110,8 +110,13 @@
           {% assign rating_decimal = 4.7 %}
         {% endif %}
 
-        {% if product.metafields.custom.rating_count %}
-          {% assign rating_count = product.metafields.custom.rating_count.value %}
+        {% comment %}
+          PDP Phase 1: geconsolideerd naar custom.review_count, dezelfde
+          metafield-key als de actieve VHL-sterrenweergave verderop in dit
+          bestand. Geen aparte custom.rating_count-key meer gebruiken.
+        {% endcomment %}
+        {% if product.metafields.custom.review_count %}
+          {% assign rating_count = product.metafields.custom.review_count.value %}
         {% else %}
           {% assign rating_count = 137 %}
         {% endif %}
@@ -3744,8 +3749,14 @@
     white-space: nowrap !important;
   }
 
+  /*
+    PDP Phase 1: verplaatst van binnen .shop-product-price-container
+    (waar margin-left: auto de rij naar rechts drukte) naar een eigen
+    rij direct onder de titel, vóór de prijs. Daarom nu een eigen
+    margin i.p.v. margin-left: auto.
+  */
   .vhl-jj-rating {
-    margin-left: auto !important;
+    margin: 0 0 16px !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 10px !important;
@@ -3995,16 +4006,16 @@
         info.appendChild(wishlist);
       }
 
-      /* Rating inside the existing price row */
-      const price = info.querySelector('.shop-product-price-container');
-      if (price && !price.querySelector('.vhl-jj-rating')) {
+      /* PDP Phase 1: rating direct onder de titel, vóór de prijs */
+      const title = info.querySelector('.shop-product-title');
+      if (title && !info.querySelector('.vhl-jj-rating')) {
         const rating = document.createElement('div');
         rating.className = 'vhl-jj-rating';
         rating.innerHTML = '<span class="vhl-jj-rating__count">(' + vhlReviewCount + ')</span>' +
           '<span class="vhl-jj-rating__stars" aria-label="' + vhlRatingValue.toFixed(1) + ' van 5 sterren">' +
           makeStar(0) + makeStar(1) + makeStar(2) + makeStar(3) + makeStar(4) +
           '</span>';
-        price.appendChild(rating);
+        title.insertAdjacentElement('afterend', rating);
       }
 
       /* Real quantity + add-to-cart row */
