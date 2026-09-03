@@ -346,6 +346,139 @@ body.overflow-hidden-mobile #stickyAddToCart {
   transform: translateY(100%) !important;
 }
 
+/* ============================================================
+   VANHOUTEN LIVING — Sticky ATC: variant + quantity (PDP Phase 2)
+   Generiek vanuit Shopify product.options / product.variants,
+   gesynchroniseerd met de hoofdvariant-picker en hoofdquantity
+   (zie het inline script in sections/sticky-add-to-cart.liquid).
+============================================================ */
+
+.sticky-add-to-cart__product-variant {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sticky-variant-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sticky-variant-option label {
+  font-size: 12px;
+  font-weight: var(--font-weight-medium, 500);
+  white-space: nowrap;
+}
+
+.sticky-variant-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-width: 0;
+  height: 36px;
+  padding: 0 26px 0 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23333333' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 6px;
+  font-family: inherit;
+  font-size: 13px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sticky-add-to-cart__quantity {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 36px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.sticky-atc-qty-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sticky-atc-qty-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.sticky-atc-qty-value {
+  min-width: 20px;
+  padding: 0 4px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: var(--font-weight-medium, 500);
+}
+
+.sticky-add-to-cart__mobile-controls {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .sticky-add-to-cart__mobile-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+  }
+
+  .sticky-add-to-cart__mobile-controls .sticky-add-to-cart__product-variant {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+
+  .sticky-add-to-cart__mobile-controls .sticky-variant-option {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .sticky-add-to-cart__mobile-controls .sticky-variant-select {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    font-size: 12px;
+    padding-left: 10px;
+  }
+
+  .sticky-add-to-cart__mobile-controls .sticky-add-to-cart__quantity {
+    flex: 0 0 auto;
+    height: 34px;
+  }
+
+  .sticky-add-to-cart__mobile-controls .sticky-atc-qty-btn {
+    width: 28px;
+    height: 34px;
+  }
+}
+
 /* Button base styles - allow global button styling to override */
 #stickyAddToCart .sticky-add-to-cart__button:hover:after,
 #stickyAddToCart .sticky-add-to-cart__button:after,
