@@ -654,30 +654,48 @@
             </h3>
           </div>
         </div>
-        {% if section.settings.satc_toggle_variant %}
-          <div class="sticky-add-to-cart__product-variant">
-            {% for option_index in (1..product.options.size) %}
-              {% assign option_index_minus_one = option_index | minus: 1 %}
-              <div class="sticky-variant-option">
-                <label for="sticky-variant-option-{{ option_index }}">
-                  {{ product.options[option_index_minus_one] }}
-                </label>
-                <select
-                  id="sticky-variant-option-{{ option_index }}"
-                  name="options[{{ option_index }}]"
-                  class="sticky-variant-select"
-                >
-                  {% assign values = '' %}
-                  {% for variant in product.variants %}
-                    {% assign value = variant.options[option_index_minus_one] %}
-                    {% unless values contains value %}
-                      <option value="{{ value }}">{{ value }}</option>
-                      {% assign values = values | append: value | append: ',' %}
-                    {% endunless %}
-                  {% endfor %}
-                </select>
-              </div>
-            {% endfor %}
+        {% if section.settings.select_button_behavior == 'atc' or section.settings.select_button_behavior == blank %}
+          {% if section.settings.satc_toggle_variant and product.has_only_default_variant == false %}
+            <div class="sticky-add-to-cart__product-variant">
+              {% for option_index in (1..product.options.size) %}
+                {% assign option_index_minus_one = option_index | minus: 1 %}
+                {% assign current_option_value = product.selected_or_first_available_variant.options[option_index_minus_one] %}
+                <div class="sticky-variant-option">
+                  <label for="sticky-variant-option-{{ option_index }}">
+                    {{ product.options[option_index_minus_one] }}
+                  </label>
+                  <select
+                    id="sticky-variant-option-{{ option_index }}"
+                    name="options[{{ option_index }}]"
+                    class="sticky-variant-select"
+                    data-option-position="{{ option_index }}"
+                  >
+                    {% assign values = '' %}
+                    {% for variant in product.variants %}
+                      {% assign value = variant.options[option_index_minus_one] %}
+                      {% unless values contains value %}
+                        <option value="{{ value }}"{% if value == current_option_value %} selected{% endif %}>{{ value }}</option>
+                        {% assign values = values | append: value | append: ',' %}
+                      {% endunless %}
+                    {% endfor %}
+                  </select>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="sticky-add-to-cart__quantity" data-sticky-quantity>
+            <button
+              type="button"
+              class="sticky-atc-qty-btn sticky-atc-qty-minus"
+              aria-label="Aantal verlagen"
+            >−</button>
+            <span class="sticky-atc-qty-value" aria-live="polite">1</span>
+            <button
+              type="button"
+              class="sticky-atc-qty-btn sticky-atc-qty-plus"
+              aria-label="Aantal verhogen"
+            >+</button>
           </div>
         {% endif %}
 
@@ -747,13 +765,6 @@
             <span class="button-text">{{ button_text }}</span>
           </a>
         {% else %}
-          <input
-            type="hidden"
-            name="id"
-            id="sticky-variant-id"
-            value="{{ product.variants.first.id }}"
-          >
-
           <button
             type="button"
             class="theme-button sticky-add-to-cart__button"
@@ -766,6 +777,52 @@
       </div>
 
       <div class="mobile-view{% if section.settings.mobile_style == 'full_width' %} mobile-view--full-width{% endif %}">
+        {% if section.settings.select_button_behavior == 'atc' or section.settings.select_button_behavior == blank %}
+            <div class="sticky-add-to-cart__mobile-controls">
+              {% if section.settings.satc_toggle_variant and product.has_only_default_variant == false %}
+                <div class="sticky-add-to-cart__product-variant">
+                  {% for option_index in (1..product.options.size) %}
+                    {% assign option_index_minus_one = option_index | minus: 1 %}
+                    {% assign current_option_value = product.selected_or_first_available_variant.options[option_index_minus_one] %}
+                    <div class="sticky-variant-option">
+                      <label class="visually-hidden" for="sticky-variant-option-mobile-{{ option_index }}">
+                        {{ product.options[option_index_minus_one] }}
+                      </label>
+                      <select
+                        id="sticky-variant-option-mobile-{{ option_index }}"
+                        class="sticky-variant-select"
+                        data-option-position="{{ option_index }}"
+                      >
+                        {% assign mobile_values = '' %}
+                        {% for variant in product.variants %}
+                          {% assign value = variant.options[option_index_minus_one] %}
+                          {% unless mobile_values contains value %}
+                            <option value="{{ value }}"{% if value == current_option_value %} selected{% endif %}>{{ value }}</option>
+                            {% assign mobile_values = mobile_values | append: value | append: ',' %}
+                          {% endunless %}
+                        {% endfor %}
+                      </select>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              <div class="sticky-add-to-cart__quantity" data-sticky-quantity>
+                <button
+                  type="button"
+                  class="sticky-atc-qty-btn sticky-atc-qty-minus"
+                  aria-label="Aantal verlagen"
+                >−</button>
+                <span class="sticky-atc-qty-value" aria-live="polite">1</span>
+                <button
+                  type="button"
+                  class="sticky-atc-qty-btn sticky-atc-qty-plus"
+                  aria-label="Aantal verhogen"
+                >+</button>
+              </div>
+            </div>
+        {% endif %}
+
         <div class="mobile-button-wrapper">
           {% if section.settings.select_button_behavior == 'scroll_to_section' or section.settings.select_button_behavior == 'scroll_to_percentage' %}
             <button
@@ -788,13 +845,6 @@
               <span class="button-text">{{ button_text }}</span>
             </a>
           {% else %}
-            <input
-              type="hidden"
-              name="id"
-              id="sticky-variant-id"
-              value="{{ product.variants.first.id }}"
-            >
-
             <button
               class="theme-button sticky-add-to-cart__button"
               id="stickyAddToCartBtnMobile"
@@ -858,45 +908,138 @@
 
 <script>
 
+  /*
+    PDP Phase 2 — sticky Add to Cart: variant- en quantity-sync.
+
+    Bewuste keuze: geen tweede, onafhankelijke variant- of quantity-
+    state. De sticky balk is uitsluitend een gesynchroniseerde weergave
+    bovenop de bestaande, echte productstate:
+      - variant: de sticky <select>-per-optie zet de bijbehorende
+        .simple-variant-picker__radio op "checked" en dispatcht een
+        native 'change'-event erop — exact dezelfde weg als een klik
+        op de hoofdvariant-picker. Alle bestaande logica daar (prijs,
+        media, variant-id, URL) blijft ongewijzigd de bron van de
+        waarheid. Terugsync (hoofd -> sticky) via het bestaande
+        'simple-variant-picker:variantChange'-event.
+      - quantity: er is precies één hidden input[name="quantity"] in
+        het echte productformulier (aangemaakt door de bestaande
+        buy-row-JS in de hero-sectie). De sticky stepper leest en
+        schrijft uitsluitend die ene input en dispatcht dezelfde
+        'input'/'change'-events die de hoofd-stepper ook al gebruikt.
+      - Add to Cart: de sticky-knop klikt het echte, bestaande submit-
+        knop van het productformulier aan (zelfde <product-form>-
+        afhandeling, dus precies één cart/add-request, geen los
+        tweede indienpad).
+  */
+
+  function getStickyRealForm() {
+    return document.querySelector('.shop-add-to-cart-wrapper form[data-type="add-to-cart-form"]');
+  }
+
   function addToCartSticky() {
-    const variantInput = document.getElementById("sticky-variant-id");
-    const cartDrawer = document.querySelector("cart-drawer");
-    
-    if (variantInput && cartDrawer) {
-      const variantId = variantInput.value;
-      if (variantId) {
-        cartDrawer.addItemToCart(variantId);
-      }
-    }
+    const realForm = getStickyRealForm();
+    const realSubmitButton = realForm ? realForm.querySelector('button[name="add"]') : null;
+
+    if (!realSubmitButton) return;
+    if (realSubmitButton.getAttribute('aria-disabled') === 'true') return;
+
+    realSubmitButton.click();
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    const selects = document.querySelectorAll('.sticky-variant-select');
-    const hiddenInput = document.getElementById('sticky-variant-id');
-    const variants = {{ product.variants | json }};
+    setTimeout(initStickyVariantAndQuantitySync, 300);
+  });
 
-    function updateStickyVariant() {
-      const selectedOptions = Array.from(selects).map(select => select.value);
-      const matchedVariant = variants.find(variant =>
-        variant.options.every((opt, idx) => opt === selectedOptions[idx])
-      );
-      if (matchedVariant) {
-        hiddenInput.value = matchedVariant.id;
+  function initStickyVariantAndQuantitySync() {
+    const realForm = getStickyRealForm();
+    if (!realForm) return;
+
+    /* ---------- Variant sync ---------- */
+    const stickySelects = document.querySelectorAll('.sticky-variant-select');
+
+    stickySelects.forEach(function (select) {
+      select.addEventListener('change', function () {
+        const position = select.dataset.optionPosition;
+        const value = select.value;
+        const radio = document.querySelector(
+          '.simple-variant-picker__radio[data-option-position="' + position + '"][value="' + CSS.escape(value) + '"]'
+        );
+        if (radio && !radio.checked) {
+          radio.checked = true;
+          radio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+    });
+
+    if (stickySelects.length) {
+      document.addEventListener('simple-variant-picker:variantChange', function (event) {
+        const variant = event.detail && event.detail.variant;
+        if (!variant) return;
+        stickySelects.forEach(function (select) {
+          const position = select.dataset.optionPosition;
+          const value = variant['option' + position];
+          if (value != null && select.value !== value) {
+            select.value = value;
+          }
+        });
+      });
+    }
+
+    /* ---------- Quantity sync ---------- */
+    const qtyMinusButtons = document.querySelectorAll('.sticky-atc-qty-minus');
+    const qtyPlusButtons = document.querySelectorAll('.sticky-atc-qty-plus');
+    const qtyValueElements = document.querySelectorAll('.sticky-atc-qty-value');
+
+    if (qtyMinusButtons.length && qtyPlusButtons.length && qtyValueElements.length) {
+      function getRealQuantityInput() {
+        return realForm.querySelector('input[name="quantity"]');
+      }
+
+      function readQuantity() {
+        const input = getRealQuantityInput();
+        const value = input ? parseInt(input.value, 10) : 1;
+        return isNaN(value) || value < 1 ? 1 : value;
+      }
+
+      function renderQuantity(value) {
+        qtyValueElements.forEach(function (el) {
+          el.textContent = value;
+        });
+      }
+
+      function writeQuantity(value) {
+        const input = getRealQuantityInput();
+        if (!input) return;
+        const next = Math.max(1, value);
+        input.value = next;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      renderQuantity(readQuantity());
+
+      qtyMinusButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          writeQuantity(readQuantity() - 1);
+        });
+      });
+      qtyPlusButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          writeQuantity(readQuantity() + 1);
+        });
+      });
+
+      const initialQuantityInput = getRealQuantityInput();
+      if (initialQuantityInput) {
+        initialQuantityInput.addEventListener('input', function () {
+          renderQuantity(readQuantity());
+        });
+        initialQuantityInput.addEventListener('change', function () {
+          renderQuantity(readQuantity());
+        });
       }
     }
-    selects.forEach(select => {
-      select.addEventListener('change', updateStickyVariant);
-    });
-    
-   
-      
-      
-
-
-      
-
-      
-  });
+  }
 
   document.addEventListener('DOMContentLoaded', function() {
     // Format delivery dates with proper localization
