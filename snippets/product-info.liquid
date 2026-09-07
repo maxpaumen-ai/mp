@@ -3750,43 +3750,10 @@
   }
 
   /*
-    PDP Phase 1: verplaatst van binnen .shop-product-price-container
-    (waar margin-left: auto de rij naar rechts drukte) naar een eigen
-    rij direct onder de titel, vóór de prijs. Daarom nu een eigen
-    margin i.p.v. margin-left: auto.
-    PDP Phase 2: marge iets verkleind voor een strakkere titel/
-    reviews/prijs-groep (was 16px).
+    Sterren/reviewindicator onder de titel verwijderd (was .vhl-jj-rating,
+    zie PDP Phase 1/2). Geen wijziging aan de reviewsectie lager op de
+    pagina of aan reviewmetafields zelf.
   */
-  .vhl-jj-rating {
-    margin: 0 0 12px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    color: #555552 !important;
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-  }
-
-  .vhl-jj-rating__count {
-    font-size: 14px !important;
-    line-height: 1 !important;
-    font-weight: 400 !important;
-  }
-
-  .vhl-jj-rating__stars {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 2px !important;
-  }
-
-  .vhl-jj-rating__stars svg {
-    width: 23px !important;
-    height: 23px !important;
-    fill: none !important;
-    stroke: currentColor !important;
-    stroke-width: 1.2 !important;
-    stroke-linejoin: round !important;
-  }
 
   /* Hide the old standalone review block when present */
   .shop-product-info .rating-component {
@@ -3921,23 +3888,6 @@
       font-size: 23px !important;
     }
 
-    .vhl-jj-rating {
-      gap: 5px !important;
-    }
-
-    .vhl-jj-rating__count {
-      font-size: 11px !important;
-    }
-
-    .vhl-jj-rating__stars {
-      gap: 0 !important;
-    }
-
-    .vhl-jj-rating__stars svg {
-      width: 17px !important;
-      height: 17px !important;
-    }
-
     .vhl-buy-row {
       grid-template-columns: 1fr !important;
       gap: 12px !important;
@@ -3960,25 +3910,6 @@
         current = current.parentElement;
       }
       return current && current.parentElement === info ? current : null;
-    }
-
-    const vhlRatingValue = Number({{ product.metafields.custom.rating.value | default: 0 | json }});
-    const vhlReviewCount = Number({{ product.metafields.custom.review_count.value | default: 0 | json }});
-
-    function makeStar(index) {
-      const rawFill = Math.max(0, Math.min(1, vhlRatingValue - index));
-      const fillPercent = Math.round(rawFill * 100);
-      const uid = 'vhl-star-' + index + '-' + Math.random().toString(36).slice(2, 8);
-
-      return '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-        '<defs><linearGradient id="' + uid + '" x1="0" x2="1" y1="0" y2="0">' +
-          '<stop offset="0%" stop-color="currentColor"></stop>' +
-          '<stop offset="' + fillPercent + '%" stop-color="currentColor"></stop>' +
-          '<stop offset="' + fillPercent + '%" stop-color="transparent"></stop>' +
-          '<stop offset="100%" stop-color="transparent"></stop>' +
-        '</linearGradient></defs>' +
-        '<path style="fill:url(#' + uid + ') !important;" d="M12 2.8l2.75 5.57 6.15.89-4.45 4.34 1.05 6.12L12 16.83l-5.5 2.89 1.05-6.12L3.1 9.26l6.15-.89L12 2.8z"></path>' +
-      '</svg>';
     }
 
     function initVHLProductBuyBox() {
@@ -4006,18 +3937,6 @@
         });
 
         info.appendChild(wishlist);
-      }
-
-      /* PDP Phase 1: rating direct onder de titel, vóór de prijs */
-      const title = info.querySelector('.shop-product-title');
-      if (title && !info.querySelector('.vhl-jj-rating')) {
-        const rating = document.createElement('div');
-        rating.className = 'vhl-jj-rating';
-        rating.innerHTML = '<span class="vhl-jj-rating__count">(' + vhlReviewCount + ')</span>' +
-          '<span class="vhl-jj-rating__stars" aria-label="' + vhlRatingValue.toFixed(1) + ' van 5 sterren">' +
-          makeStar(0) + makeStar(1) + makeStar(2) + makeStar(3) + makeStar(4) +
-          '</span>';
-        title.insertAdjacentElement('afterend', rating);
       }
 
       /* Real quantity + add-to-cart row */
