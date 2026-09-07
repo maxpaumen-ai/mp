@@ -346,7 +346,11 @@
             <div class="sidebar-filters__header">
               <span class="sidebar-filters__title">
                 <svg class="sidebar-filters__icon" width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g clip-path="url(#filter-icon-clip)"><path fill="currentColor" fill-rule="evenodd" d="M3.124 20.992c-.04.005-.082.008-.124.008H1a1 1 0 1 1 0-2h2c.042 0 .083.003.124.008a4.002 4.002 0 0 1 7.75-.008H23a1 1 0 1 1 0 2H10.874a4.002 4.002 0 0 1-7.75-.008ZM7 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM7 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm3.874-3a4.002 4.002 0 0 0-7.75.008A1.01 1.01 0 0 0 3 3H1a1 1 0 0 0 0 2h2c.042 0 .083-.003.124-.008a4.002 4.002 0 0 0 7.75.008H23a1 1 0 1 0 0-2H10.874ZM15 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0Zm2 4a4.002 4.002 0 0 1-3.874-3H1a1 1 0 1 1 0-2h12.126a4.002 4.002 0 0 1 7.75.008c.04-.005.082-.008.124-.008h2a1 1 0 1 1 0 2h-2c-.042 0-.083-.003-.124-.008A4.002 4.002 0 0 1 17 16Z" clip-rule="evenodd"/></g><defs><clipPath id="filter-icon-clip"><path fill="#fff" d="M0 0h24v24H0z"/></clipPath></defs></svg>
-                {{ 'products.facets.filter_by_label' | t | default: 'Filter' }}
+                {% if section.settings.filter_label != blank -%}
+                  {{- section.settings.filter_label -}}
+                {%- else -%}
+                  {{- 'products.facets.filter_by_label' | t -}}
+                {%- endif %}
               </span>
             </div>
 
@@ -1831,7 +1835,14 @@
       "type": "text",
       "id": "sort_label",
       "label": "Sort by label",
-      "default": "SORT BY:",
+      "default": "Sorteren op",
+      "info": "Leave blank to use theme default translation"
+    },
+    {
+      "type": "text",
+      "id": "filter_label",
+      "label": "Filter trigger label",
+      "default": "Filter op",
       "info": "Leave blank to use theme default translation"
     },
     {

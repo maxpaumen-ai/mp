@@ -687,30 +687,24 @@ class CollectionGridPage {
     // Restore filters from URL on page load
     this.restoreFiltersFromURL();
 
-    // Mobile/tablet dropdown functionality (matches CSS breakpoint at 990px)
-    const initMobileDropdown = () => {
-      if (window.innerWidth <= 990) {
-        this.sidebar.classList.add("collapsed");
-      } else {
-        this.sidebar.classList.remove("collapsed");
-      }
-    };
+    // Filter trigger: het paneel start altijd dichtgeklapt (niet
+    // alleen op mobiel/tablet) — "Filter op" is nu op elk
+    // schermformaat een echte trigger die het paneel opent, i.p.v.
+    // een altijd-open sidebar op desktop. Geen resize-listener meer
+    // nodig om dit opnieuw te bepalen (was voorheen viewport-
+    // afhankelijk); dat zou een open paneel bij een resize ook
+    // ongewenst weer dichtklappen.
+    this.sidebar.classList.add("collapsed");
 
-    // Toggle dropdown on header click (mobile/tablet only)
+    // Toggle dropdown on header click (alle schermformaten)
     if (header) {
       header.addEventListener("click", (e) => {
-        if (window.innerWidth <= 990) {
-          if (!e.target.matches(".sidebar-filters__clear") && !e.target.closest(".sidebar-filters__clear")) {
-            e.preventDefault();
-            this.sidebar.classList.toggle("collapsed");
-          }
+        if (!e.target.matches(".sidebar-filters__clear") && !e.target.closest(".sidebar-filters__clear")) {
+          e.preventDefault();
+          this.sidebar.classList.toggle("collapsed");
         }
       });
     }
-
-    // Initialize and handle resize
-    initMobileDropdown();
-    window.addEventListener("resize", initMobileDropdown);
 
     // Filter functionality
     const getActiveFilters = () => {

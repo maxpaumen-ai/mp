@@ -41,7 +41,7 @@
   width: var(--swatch-size, 24px);
   height: var(--swatch-size, 24px);
   border-radius: 50%;
-  border: 2px solid #e0e0e0;
+  border: 1px solid #e0e0e0;
   cursor: pointer;
   transition: all 0.2s ease;
   overflow: hidden;
@@ -49,8 +49,8 @@
 }
 
 .color-swatch:hover {
-  border-color: #333;
-  transform: scale(1.1);
+  border-color: #999;
+  transform: scale(1.06);
 }
 
 .color-swatch.active {
@@ -171,8 +171,8 @@
 }
 
 .product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .product-link {
@@ -439,8 +439,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .collection-filters {
@@ -579,12 +580,15 @@
   line-height: 1;
 }
 
-/* Sidebar layout */
+/* Sidebar layout — herzien: het filterpaneel is nu een horizontale,
+   inklapbare balk boven de productgrid (i.p.v. een linkerkolom), voor
+   een compacte, Joseph Joseph-achtige toolbar. "Filter op" is een
+   trigger die het paneel open/dicht klapt, op elk schermformaat
+   (assets/collection-grid-page.js's toggle is hiervoor verbreed van
+   "alleen ≤990px" naar "altijd"). De onderliggende filter-/sorteer-
+   logica (checkboxes, URL-sync, apply/clear) is ongewijzigd. */
 .collection-grid-with-sidebar {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 24px;
-  align-items: start;
+  display: block;
 }
 
 .collection-grid-with-sidebar .product-grid-wrapper {
@@ -592,18 +596,19 @@
 }
 
 .sidebar-filters {
-  position: sticky;
-  top: 80px;
-  align-self: start;
+  position: relative;
+  top: 0;
   width: 100%;
-  max-width: 260px;
+  max-width: 100%;
   min-width: 0;
-  overflow: hidden;
+  margin-bottom: 24px;
+  overflow: visible;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .sidebar-filters__inner {
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: 0;
+  padding: 0;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -613,8 +618,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  font-weight: var(--font-weight-bold);
+  padding: 12px 0;
+  margin-bottom: 0;
+  cursor: pointer;
+  font-weight: var(--font-weight-semibold);
   letter-spacing: var(--letter-spacing-body);
 }
 
@@ -622,15 +629,42 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 13px;
   letter-spacing: var(--letter-spacing-body);
 }
 
 .sidebar-filters__icon {
   flex-shrink: 0;
+  width: 15px;
+  height: 15px;
 }
 
-/* Hide mobile apply button on desktop */
+.sidebar-filters__content {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 4px 0 20px;
+}
+
+.sidebar-filters.collapsed .sidebar-filters__content {
+  max-height: 0;
+  padding: 0;
+}
+
+/* Eén zichtbare "Toepassen"-knop: de knop binnen .content (die
+   verschijnt zodra het paneel openstaat), niet de losse knop die
+   buiten .content altijd zichtbaar zou blijven. */
 .sidebar-filters__apply-btn.sidebar-filters__apply-btn--mobile {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  padding: 10px 16px;
+  font-size: 14px;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.sidebar-filters__apply {
   display: none;
 }
 
@@ -728,61 +762,9 @@
 }
 
 /* Responsive design */
-@media (max-width: 990px) {
-  .collection-grid-with-sidebar {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar-filters {
-    position: relative;
-    top: 0;
-    margin-bottom: 20px;
-    max-width: 100%;
-    overflow: visible;
-  }
-
-  .sidebar-filters__inner {
-    border-radius: 8px;
-    padding: 0;
-  }
-
-  .sidebar-filters__header {
-    padding: 16px;
-    margin-bottom: 0;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  /* Show mobile apply button in content */
-  .sidebar-filters__apply-btn.sidebar-filters__apply-btn--mobile {
-    display: block;
-    width: 100%;
-    padding: 10px 16px;
-    font-size: 14px;
-    margin-top: 16px;
-    text-align: center;
-  }
-
-  /* Hide desktop apply button section on mobile */
-  .sidebar-filters__apply {
-    display: none;
-  }
-
-  .sidebar-filters__content {
-    max-height: 1000px;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    padding: 0 16px 16px 16px;
-  }
-
-  .sidebar-filters.collapsed .sidebar-filters__content {
-    max-height: 0;
-    padding: 0 16px;
-  }
-}
+/* .collection-grid-with-sidebar / .sidebar-filters zijn nu op elk
+   schermformaat hetzelfde (horizontale, inklapbare balk) — zie de
+   basisregels hierboven. Geen aparte ≤990px-variant meer nodig. */
 
 @media (max-width: 767px) {
   .collection-search-bar.nav-search-bar {
