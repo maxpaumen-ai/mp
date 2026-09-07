@@ -759,6 +759,61 @@
                     elsif option_disabled == true
                       assign option_class = 'unavailable'
                     endif
+
+                    # VHL: per-waarde bepalen of een Kleur/Color-optiewaarde
+                    # daadwerkelijk een herkenbare kleur-/afwerkingsterm is.
+                    # Generieke, niet-productspecifieke termenlijst (mirror
+                    # van resolveSwatchColor()/COLOR_TERMS in de
+                    # custom_liquid_jka9hE-hero-block) — puur om te bepalen
+                    # of DEZE waarde als kleur-swatch/variant-afbeelding mag
+                    # renderen. Niet-herkende waarden (bv. "Zoals afgebeeld",
+                    # "As shown", "Default") renderen in plaats daarvan via
+                    # dezelfde structurele tak als een gewone tekstvariant
+                    # (bv. Diameter) — zie de drie takken hieronder.
+                    assign vhl_is_recognized_color_value = false
+                    if is_color_option
+                      assign vhl_value_check = value | downcase | strip
+                      assign vhl_color_terms = 'zwart,black,wit,white,chroom,chrome,zilver,silver,stainless steel,rvs,inox,nikkel,nickel,brushed nickel,geborsteld nikkel,brushed,geborsteld,gunmetal,gun metal,gun gray,gun grey,goud,gold,brushed gold,geborsteld goud,mat goud,matte gold,champagne gold,champagne,rosegold,rosegoud,rosé goud,rose goud,rose gold,koper,copper,messing,brass,antique brass,antique bronze,antique,brons,bronze,dark bronze,bruin,brown,beige,stone,grijs,grey,gray,groen,green,blauw,blue' | split: ','
+                      for vhl_term in vhl_color_terms
+                        if vhl_value_check contains vhl_term
+                          assign vhl_is_recognized_color_value = true
+                          break
+                        endif
+                      endfor
+                    endif
+
+                    assign vhl_force_text_value = false
+                    if is_color_option and vhl_is_recognized_color_value == false
+                      assign vhl_force_text_value = true
+                    endif
+
+                    # De drie "toon een afbeelding/swatch"-takken hieronder
+                    # worden alledrie uitgezet zodra vhl_force_text_value
+                    # true is, zodat de waarde in de gewone tekstvariant-tak
+                    # (dezelfde als bv. Diameter) terechtkomt. Liquid-if-tags
+                    # ondersteunen geen haakjes-groepering, dus de bestaande
+                    # or-conditie wordt hier vooraf naar één boolean herleid
+                    # i.p.v. inline aangepast.
+                    assign vhl_show_variant_image_branch = false
+                    if current_display_type == 'variant_image' or current_display_type == 'variant_image_grid_2' or current_display_type == 'variant_image_grid_3' or current_display_type == 'variant_image_list' or should_show_option_images
+                      assign vhl_show_variant_image_branch = true
+                    endif
+                    if vhl_force_text_value
+                      assign vhl_show_variant_image_branch = false
+                    endif
+
+                    assign vhl_show_color_swatch_branch = is_color_option
+                    if vhl_force_text_value
+                      assign vhl_show_color_swatch_branch = false
+                    endif
+
+                    assign vhl_show_legacy_image_branch = false
+                    if option_image_url != blank and block.settings.show_images_for_all_variants
+                      assign vhl_show_legacy_image_branch = true
+                    endif
+                    if vhl_force_text_value
+                      assign vhl_show_legacy_image_branch = false
+                    endif
                   -%}
 
                   <div class="simple-variant-picker__value-container{% if is_color_option %} value--color{% endif %}{% if is_size_option %} value--size{% endif %}">
@@ -781,12 +836,7 @@
                         data-image-url="{{ image_url }}"
                       {% endif %}
                     >
-                    {% if current_display_type == 'variant_image'
-                      or current_display_type == 'variant_image_grid_2'
-                      or current_display_type == 'variant_image_grid_3'
-                      or current_display_type == 'variant_image_list'
-                      or should_show_option_images
-                    %}
+                    {% if vhl_show_variant_image_branch %}
                       {%- comment -%} Variant Images display mode {%- endcomment -%}
 
                       {% if option_layout == 'list' %}
@@ -999,7 +1049,7 @@
                           {% endif %}
                         </label>
                       {% endif %}
-                    {% elsif is_color_option %}
+                    {% elsif vhl_show_color_swatch_branch %}
                       {%- comment -%} Color Swatch display mode {%- endcomment -%}
                       <label
                         for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
@@ -1016,7 +1066,7 @@
                       >
                         <span class="visually-hidden">{{ value }}</span>
                       </label>
-                    {% elsif option_image_url != blank and block.settings.show_images_for_all_variants %}
+                    {% elsif vhl_show_legacy_image_branch %}
                       {%- comment -%} Show images for all variants (legacy fallback) {%- endcomment -%}
                       <label
                         for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
