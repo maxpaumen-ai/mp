@@ -1,0 +1,36 @@
+{% comment %}
+  VANHOUTEN LIVING — mega-menu featured collectiekaart.
+
+  Losse snippet i.p.v. inline herhaald in sections/header.liquid,
+  puur omdat Liquid geen inline array-literal ondersteunt om de 2
+  kaarten in één for-loop te renderen (`{% for x in (a, b) %}` is
+  geen geldige Liquid-syntax) — dit wordt in plaats daarvan 2x
+  gerenderd vanuit header.liquid.
+
+  Accepteert:
+    collection - het Collection-object (section.settings.mega_menu_featured_collection_1/2)
+{% endcomment %}
+
+{% if collection %}
+  <a href="{{ collection.url }}" class="vhliso-mega-card">
+    <span class="vhliso-mega-card-image">
+      {% if collection.image %}
+        {{
+          collection.image
+          | image_url: width: 700
+          | image_tag:
+            loading: 'lazy',
+            widths: '350,500,700',
+            alt: collection.title
+        }}
+      {% endif %}
+    </span>
+    <span class="vhliso-mega-card-name">
+      {{ collection.title | escape }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </span>
+  </a>
+{% endif %}

@@ -25,6 +25,16 @@
     box-sizing: border-box;
   }
 
+  /*
+    Eigen, apart genaamde class (i.p.v. de "overflow-hidden" die
+    assets/cart-drawer.js al op body gebruikt) zodat het sluiten
+    van dit mobiele menu nooit de scroll-lock van een eventueel
+    gelijktijdig open cart-drawer kan wegnemen (en andersom).
+  */
+  body.vhliso-menu-open {
+    overflow: hidden;
+  }
+
   #vhliso-{{ section.id }} {
     width: 100%;
     background: #ffffff;
@@ -366,6 +376,300 @@
 
 
   /* =========================================================
+     MEGA MENU (DESKTOP)
+     Elk top-level menu-item met eigen sub-links
+     (section.settings.menu.links[].links) wordt automatisch
+     een mega-menu-trigger i.p.v. een gewone link — dit is niet
+     specifiek aan "Catalog" gekoppeld, maar werkt voor elk
+     menu-item dat in Shopify Admin (Navigation) submenu-items
+     heeft.
+  ========================================================= */
+
+  #vhliso-{{ section.id }} .vhliso-nav-item {
+    position: relative;
+    height: 54px;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-nav-trigger {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    height: 54px;
+
+    padding: 0;
+    margin: 0;
+
+    background: none;
+    border: 0;
+
+    color: inherit;
+    font-family: inherit;
+
+    font-size: 15px;
+    font-weight: 400;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-nav-trigger::after {
+    content: '';
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 1px;
+
+    background: #333330;
+
+    transform: scaleX(0);
+
+    transition: transform .18s ease;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-nav-trigger:hover::after,
+  #vhliso-{{ section.id }} .vhliso-nav-trigger[aria-expanded='true']::after {
+    transform: scaleX(1);
+  }
+
+  #vhliso-{{ section.id }} .vhliso-nav-chevron {
+    width: 9px;
+    height: 9px;
+
+    flex-shrink: 0;
+
+    color: #9a978f;
+
+    transition: transform .18s ease;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-nav-trigger[aria-expanded='true'] .vhliso-nav-chevron {
+    transform: rotate(180deg);
+  }
+
+  /*
+    position:fixed i.p.v. absolute: .vhliso-nav heeft
+    overflow-x:auto voor horizontaal scrollen bij veel
+    menu-items op smallere desktop-breedtes — een niet-visible
+    overflow-x dwingt overflow-y ook impliciet tot "auto" (CSS-
+    overflow-interactieregel), wat een absoluut gepositioneerd
+    paneel verticaal zou afsnijden. position:fixed ontsnapt aan
+    die clipping (blijft wel gewoon een DOM-kind van .vhliso-nav-
+    item, dus mouseenter/mouseleave op de <li> werkt nog gewoon
+    natuurlijk voor "cursor van trigger naar paneel bewegen").
+    De top-positie wordt via JS gezet (onder de navigatiebalk),
+    zodat dit ook correct blijft op de transparante homepage-
+    header en achter de announcement-bar.
+  */
+  #vhliso-{{ section.id }} .vhliso-mega {
+    position: fixed;
+    left: 0;
+    right: 0;
+
+    z-index: 60;
+
+    background: #ffffff;
+
+    border-top: 1px solid #e8e8e8;
+    border-bottom: 1px solid #e8e8e8;
+
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .06);
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-inner {
+    max-width: min(1400px, 94vw);
+    margin: 0 auto;
+
+    padding: 44px 32px 40px;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 460px);
+    gap: 56px;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-left {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-categories {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 32px;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-heading {
+    display: block;
+
+    margin: 0 0 16px;
+
+    color: #201f1d;
+
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  #vhliso-{{ section.id }} a.vhliso-mega-heading {
+    transition: color .15s ease;
+  }
+
+  #vhliso-{{ section.id }} a.vhliso-mega-heading:hover {
+    color: #777773;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-links {
+    list-style: none;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    padding: 0;
+    margin: 0;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-links a {
+    font-size: 14px;
+    color: #52504c;
+
+    transition: color .15s ease;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-links a:hover {
+    color: #141412;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-viewall-wrap {
+    margin-top: 28px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #e8e8e8;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-viewall {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+
+    color: #141412;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-viewall svg {
+    width: 13px;
+    height: 13px;
+
+    transition: transform .15s ease;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-viewall:hover svg {
+    transform: translateX(3px);
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-featured {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-card-image {
+    display: block;
+
+    aspect-ratio: 4 / 5;
+
+    background: #f5f4f2;
+
+    overflow: hidden;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-card-image img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    transition: transform .3s ease;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-card:hover .vhliso-mega-card-image img {
+    transform: scale(1.03);
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-card-name {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    color: #141412;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-card-name svg {
+    width: 14px;
+    height: 14px;
+
+    flex-shrink: 0;
+
+    color: #9a978f;
+
+    transition: transform .15s ease;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-card:hover .vhliso-mega-card-name svg {
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 1180px) {
+
+    #vhliso-{{ section.id }} .vhliso-mega-inner {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-mega-categories {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 28px;
+    }
+
+    #vhliso-{{ section.id }} .vhliso-mega-featured {
+      max-width: 460px;
+    }
+
+  }
+
+  /*
+    Beneden 990px verdwijnt .vhliso-nav sowieso (mobiel gebruikt
+    de aparte drawer/accordion, zie MOBILE MENU DRAWER hieronder)
+    — het mega-menu hoeft dus niet nog kleiner te worden dan 1180px.
+  */
+
+
+  /* =========================================================
      BREADCRUMB
   ========================================================= */
 
@@ -426,6 +730,7 @@
       display: grid;
 
       grid-template-columns:
+        40px
         44px
         1fr
         auto;
@@ -437,6 +742,7 @@
       background: #ffffff;
     }
 
+    #vhliso-{{ section.id }} .vhliso-mobile-menu-btn,
     #vhliso-{{ section.id }} .vhliso-mobile-search,
     #vhliso-{{ section.id }} .vhliso-mobile-icon {
       width: 40px;
@@ -445,8 +751,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
+
+      background: none;
+      border: 0;
+
+      color: inherit;
+
+      cursor: pointer;
     }
 
+    #vhliso-{{ section.id }} .vhliso-mobile-menu-btn svg,
     #vhliso-{{ section.id }} .vhliso-mobile-search svg,
     #vhliso-{{ section.id }} .vhliso-mobile-icon svg {
       width: 22px;
@@ -487,6 +801,218 @@
 
       font-size: 11px;
     }
+  }
+
+
+  /* =========================================================
+     MOBILE MENU DRAWER
+     Er bestond nog geen enkele mobiele navigatietoegang (de
+     desktop .vhliso-nav wordt op mobiel volledig display:none
+     gezet, zonder hamburger/drawer-alternatief) — dit is de
+     minimale, noodzakelijke aanvulling om Catalog (en de rest
+     van het menu) op mobiel bereikbaar te maken, met dezelfde
+     visuele taal (vhliso-*) als de rest van de header. Logo,
+     zoekicoon, wishlist en cart in .vhliso-mobile blijven
+     volledig ongewijzigd.
+  ========================================================= */
+
+  #vhliso-{{ section.id }} .vhliso-drawer[hidden] {
+    display: none;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer {
+    position: fixed;
+    inset: 0;
+
+    z-index: 80;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-backdrop {
+    position: absolute;
+    inset: 0;
+
+    background: rgba(20, 20, 18, .32);
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    width: min(360px, 88vw);
+
+    display: flex;
+    flex-direction: column;
+
+    background: #ffffff;
+
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    height: 60px;
+    flex-shrink: 0;
+
+    padding: 0 18px;
+
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+
+    color: #201f1d;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-close {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: none;
+    border: 0;
+
+    color: inherit;
+
+    cursor: pointer;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-close svg {
+    width: 20px;
+    height: 20px;
+
+    fill: none;
+
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-list {
+    list-style: none;
+
+    padding: 8px 0;
+    margin: 0;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-link,
+  #vhliso-{{ section.id }} .vhliso-drawer-toggle {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    min-height: 50px;
+
+    padding: 0 18px;
+
+    background: none;
+    border: 0;
+
+    color: #201f1d;
+    font-family: inherit;
+
+    font-size: 15px;
+    font-weight: 400;
+    text-align: left;
+
+    cursor: pointer;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-toggle--sub {
+    min-height: 44px;
+
+    padding-left: 30px;
+
+    font-size: 14px;
+    color: #52504c;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-chevron {
+    width: 11px;
+    height: 11px;
+
+    flex-shrink: 0;
+
+    color: #9a978f;
+
+    transition: transform .18s ease;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-toggle[aria-expanded='true'] .vhliso-drawer-chevron {
+    transform: rotate(180deg);
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-sub[hidden] {
+    display: none;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-sub {
+    background: #fafaf9;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-sub ul {
+    list-style: none;
+
+    padding: 0;
+    margin: 0;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-sub--nested a {
+    display: flex;
+
+    min-height: 42px;
+    align-items: center;
+
+    padding: 0 18px 0 42px;
+
+    font-size: 13.5px;
+    color: #52504c;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-sub--nested a:active {
+    color: #141412;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-viewall {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    min-height: 46px;
+
+    padding: 0 18px 0 30px;
+
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+
+    color: #141412;
+
+    border-top: 1px solid #e8e8e8;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-drawer-viewall svg {
+    width: 13px;
+    height: 13px;
+
+    flex-shrink: 0;
   }
 
 
@@ -892,6 +1418,11 @@
 
   {% if section.settings.menu != blank %}
 
+    {%- liquid
+      assign vhliso_mega_col_1 = section.settings.mega_menu_featured_collection_1
+      assign vhliso_mega_col_2 = section.settings.mega_menu_featured_collection_2
+    -%}
+
     <nav
       class="vhliso-nav"
       aria-label="Hoofdnavigatie"
@@ -904,19 +1435,116 @@
 
         {% for link in section.settings.menu.links %}
 
-          <li>
+          {% if link.links.size > 0 %}
 
-            <a
-              class="vhliso-nav-link"
-              href="{{ link.url }}"
-              {% if link.current %}
-                aria-current="page"
-              {% endif %}
-            >
-              {{ link.title | escape }}
-            </a>
+            {%- comment -%}
+              Elk top-level menu-item mét eigen sub-links in Shopify
+              Admin (Navigation) wordt automatisch een mega-menu —
+              niet hardgecodeerd aan "Catalog" gekoppeld. Zonder
+              sub-links (de {% else %} hieronder) blijft het simpelweg
+              de bestaande, ongewijzigde platte link.
+            {%- endcomment -%}
 
-          </li>
+            <li class="vhliso-nav-item">
+
+              <button
+                type="button"
+                class="vhliso-nav-trigger"
+                aria-expanded="false"
+                aria-controls="vhliso-mega-{{ forloop.index }}-{{ section.id }}"
+                data-vhliso-mega-trigger
+              >
+                {{ link.title | escape }}
+                <svg class="vhliso-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+
+              <div
+                class="vhliso-mega"
+                id="vhliso-mega-{{ forloop.index }}-{{ section.id }}"
+                data-vhliso-mega-panel
+                hidden
+              >
+
+                <div class="vhliso-mega-inner">
+
+                  <div class="vhliso-mega-left">
+
+                    <div class="vhliso-mega-categories">
+
+                      {% for category in link.links %}
+
+                        <div class="vhliso-mega-col">
+
+                          {% if category.url != blank and category.url != '#' %}
+                            <a href="{{ category.url }}" class="vhliso-mega-heading">{{ category.title | escape }}</a>
+                          {% else %}
+                            <p class="vhliso-mega-heading">{{ category.title | escape }}</p>
+                          {% endif %}
+
+                          {% if category.links.size > 0 %}
+                            <ul class="vhliso-mega-links">
+                              {% for sub in category.links %}
+                                <li>
+                                  <a href="{{ sub.url }}">{{ sub.title | escape }}</a>
+                                </li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
+
+                        </div>
+
+                      {% endfor %}
+
+                    </div>
+
+                    {% if link.url != blank %}
+                      <div class="vhliso-mega-viewall-wrap">
+                        <a href="{{ link.url }}" class="vhliso-mega-viewall">
+                          Bekijk alles
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                          </svg>
+                        </a>
+                      </div>
+                    {% endif %}
+
+                  </div>
+
+                  {% if vhliso_mega_col_1 or vhliso_mega_col_2 %}
+
+                    <div class="vhliso-mega-featured">
+                      {% render 'vhliso-mega-featured-card', collection: vhliso_mega_col_1 %}
+                      {% render 'vhliso-mega-featured-card', collection: vhliso_mega_col_2 %}
+                    </div>
+
+                  {% endif %}
+
+                </div>
+
+              </div>
+
+            </li>
+
+          {% else %}
+
+            <li>
+
+              <a
+                class="vhliso-nav-link"
+                href="{{ link.url }}"
+                {% if link.current %}
+                  aria-current="page"
+                {% endif %}
+              >
+                {{ link.title | escape }}
+              </a>
+
+            </li>
+
+          {% endif %}
 
         {% endfor %}
 
@@ -974,6 +1602,23 @@
   ====================================================== -->
 
   <div class="vhliso-mobile">
+
+    {% if section.settings.menu != blank %}
+      <button
+        type="button"
+        class="vhliso-mobile-menu-btn"
+        aria-label="Menu"
+        aria-expanded="false"
+        aria-controls="vhliso-drawer-{{ section.id }}"
+        data-vhliso-drawer-trigger
+      >
+        <svg viewBox="0 0 24 24">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    {% endif %}
 
     <a
       class="vhliso-mobile-search"
@@ -1077,6 +1722,176 @@
     </div>
 
   </div>
+
+
+  <!-- =====================================================
+       MOBILE MENU DRAWER
+  ====================================================== -->
+
+  {% if section.settings.menu != blank %}
+
+    <div
+      class="vhliso-drawer"
+      id="vhliso-drawer-{{ section.id }}"
+      data-vhliso-drawer
+      hidden
+    >
+
+      <div class="vhliso-drawer-backdrop" data-vhliso-drawer-close></div>
+
+      <div
+        class="vhliso-drawer-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu"
+      >
+
+        <div class="vhliso-drawer-head">
+          <span class="vhliso-drawer-title">Menu</span>
+          <button
+            type="button"
+            class="vhliso-drawer-close"
+            aria-label="Sluiten"
+            data-vhliso-drawer-close
+          >
+            <svg viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <nav class="vhliso-drawer-nav" aria-label="Mobiele navigatie">
+
+          <ul class="vhliso-drawer-list">
+
+            {% for link in section.settings.menu.links %}
+
+              {% liquid
+                assign top_i = forloop.index
+              %}
+
+              <li class="vhliso-drawer-item">
+
+                {% if link.links.size > 0 %}
+
+                  <button
+                    type="button"
+                    class="vhliso-drawer-toggle"
+                    aria-expanded="false"
+                    aria-controls="vhliso-drawer-panel-{{ top_i }}-{{ section.id }}"
+                    data-vhliso-accordion-toggle
+                  >
+                    <span>{{ link.title | escape }}</span>
+                    <svg class="vhliso-drawer-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+
+                  <div
+                    class="vhliso-drawer-sub"
+                    id="vhliso-drawer-panel-{{ top_i }}-{{ section.id }}"
+                    data-vhliso-accordion-panel
+                    hidden
+                  >
+
+                    <ul>
+
+                      {% for category in link.links %}
+
+                        {% liquid
+                          assign sub_i = forloop.index
+                        %}
+
+                        <li>
+
+                          {% if category.links.size > 0 %}
+
+                            <button
+                              type="button"
+                              class="vhliso-drawer-toggle vhliso-drawer-toggle--sub"
+                              aria-expanded="false"
+                              aria-controls="vhliso-drawer-panel-{{ top_i }}-{{ sub_i }}-{{ section.id }}"
+                              data-vhliso-accordion-toggle
+                            >
+                              <span>{{ category.title | escape }}</span>
+                              <svg class="vhliso-drawer-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                              </svg>
+                            </button>
+
+                            <div
+                              class="vhliso-drawer-sub vhliso-drawer-sub--nested"
+                              id="vhliso-drawer-panel-{{ top_i }}-{{ sub_i }}-{{ section.id }}"
+                              data-vhliso-accordion-panel
+                              hidden
+                            >
+                              <ul>
+                                {% for grand in category.links %}
+                                  <li>
+                                    <a href="{{ grand.url }}">{{ grand.title | escape }}</a>
+                                  </li>
+                                {% endfor %}
+                              </ul>
+                            </div>
+
+                          {% else %}
+
+                            <a
+                              href="{{ category.url }}"
+                              class="vhliso-drawer-toggle--sub"
+                              style="display: flex; cursor: default;"
+                            >
+                              {{ category.title | escape }}
+                            </a>
+
+                          {% endif %}
+
+                        </li>
+
+                      {% endfor %}
+
+                    </ul>
+
+                    {% if link.url != blank %}
+                      <a href="{{ link.url }}" class="vhliso-drawer-viewall">
+                        Bekijk alles
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    {% endif %}
+
+                  </div>
+
+                {% else %}
+
+                  <a
+                    href="{{ link.url }}"
+                    class="vhliso-drawer-link"
+                    {% if link.current %}
+                      aria-current="page"
+                    {% endif %}
+                  >
+                    {{ link.title | escape }}
+                  </a>
+
+                {% endif %}
+
+              </li>
+
+            {% endfor %}
+
+          </ul>
+
+        </nav>
+
+      </div>
+
+    </div>
+
+  {% endif %}
 
 </header>
 
@@ -1241,6 +2056,326 @@
   document.addEventListener(
     'vhl:favorites-updated',
     refreshFavorites
+  );
+
+
+  /* =====================================================
+     MEGA MENU (DESKTOP)
+     Event-driven open/close — geen setTimeout-hacks. Trigger
+     en paneel zitten in dezelfde <li>, dus mouseenter/mouseleave
+     op die <li> dekt zowel de trigger als het (fixed
+     gepositioneerde, maar nog steeds DOM-kind blijvende) paneel
+     zelf, waardoor de cursor probleemloos van trigger naar
+     paneel kan bewegen zonder dat het sluit.
+
+     Alle functies staan bewust op het top-level van deze IIFE
+     (niet genest in een if-block) zodat de Escape-handler
+     onderaan ze altijd veilig kan aanroepen, zonder afhankelijk
+     te zijn van function-hoisting-verschillen tussen browsers.
+  ====================================================== */
+
+  var vhlMegaTriggers =
+    root.querySelectorAll(
+      '[data-vhliso-mega-trigger]'
+    );
+
+  var vhlMegaEntries =
+    Array.prototype.map.call(
+      vhlMegaTriggers,
+      function (btn) {
+
+        var li = btn.closest('.vhliso-nav-item');
+        var panel = li
+          ? li.querySelector('[data-vhliso-mega-panel]')
+          : null;
+
+        return {
+          btn: btn,
+          li: li,
+          panel: panel
+        };
+
+      }
+    ).filter(function (entry) {
+      return entry.li && entry.panel;
+    });
+
+  function vhlPositionMega(panel) {
+
+    var navEl =
+      root.querySelector('.vhliso-nav');
+
+    if (!navEl) return;
+
+    var rect = navEl.getBoundingClientRect();
+
+    panel.style.top = rect.bottom + 'px';
+
+  }
+
+  function vhlCloseMega(entry) {
+
+    entry.panel.hidden = true;
+
+    entry.btn.setAttribute('aria-expanded', 'false');
+
+  }
+
+  function vhlCloseAllMega(except) {
+
+    vhlMegaEntries.forEach(function (entry) {
+
+      if (entry === except) return;
+
+      vhlCloseMega(entry);
+
+    });
+
+  }
+
+  function vhlOpenMega(entry) {
+
+    vhlCloseAllMega(entry);
+
+    vhlPositionMega(entry.panel);
+
+    entry.panel.hidden = false;
+
+    entry.btn.setAttribute('aria-expanded', 'true');
+
+  }
+
+  vhlMegaEntries.forEach(function (entry) {
+
+    entry.li.addEventListener(
+      'mouseenter',
+      function () {
+        vhlOpenMega(entry);
+      }
+    );
+
+    entry.li.addEventListener(
+      'mouseleave',
+      function () {
+        vhlCloseMega(entry);
+      }
+    );
+
+    entry.li.addEventListener(
+      'focusin',
+      function () {
+        vhlOpenMega(entry);
+      }
+    );
+
+    entry.li.addEventListener(
+      'focusout',
+      function (event) {
+
+        if (
+          !entry.li.contains(
+            event.relatedTarget
+          )
+        ) {
+          vhlCloseMega(entry);
+        }
+
+      }
+    );
+
+    entry.btn.addEventListener(
+      'click',
+      function (event) {
+        event.preventDefault();
+        vhlOpenMega(entry);
+      }
+    );
+
+  });
+
+  if (vhlMegaEntries.length) {
+
+    document.addEventListener(
+      'click',
+      function (event) {
+
+        vhlMegaEntries.forEach(function (entry) {
+
+          if (
+            !entry.panel.hidden &&
+            !entry.li.contains(event.target)
+          ) {
+            vhlCloseMega(entry);
+          }
+
+        });
+
+      }
+    );
+
+    window.addEventListener(
+      'resize',
+      function () {
+
+        vhlMegaEntries.forEach(function (entry) {
+
+          if (!entry.panel.hidden) {
+            vhlPositionMega(entry.panel);
+          }
+
+        });
+
+      }
+    );
+
+  }
+
+
+  /* =====================================================
+     MOBIELE MENU-DRAWER
+     Zelfde "geen timers"-aanpak: expliciete open/close-
+     functies, aangestuurd door click/Escape/backdrop-klik.
+  ====================================================== */
+
+  var vhlDrawerTrigger =
+    root.querySelector(
+      '[data-vhliso-drawer-trigger]'
+    );
+
+  var vhlDrawer =
+    root.querySelector(
+      '[data-vhliso-drawer]'
+    );
+
+  function vhlOpenDrawer() {
+
+    if (!vhlDrawer || !vhlDrawerTrigger) return;
+
+    vhlDrawer.hidden = false;
+
+    document.body.classList.add(
+      'vhliso-menu-open'
+    );
+
+    vhlDrawerTrigger.setAttribute(
+      'aria-expanded',
+      'true'
+    );
+
+  }
+
+  function vhlCloseDrawer() {
+
+    if (!vhlDrawer || !vhlDrawerTrigger) return;
+
+    vhlDrawer.hidden = true;
+
+    document.body.classList.remove(
+      'vhliso-menu-open'
+    );
+
+    vhlDrawerTrigger.setAttribute(
+      'aria-expanded',
+      'false'
+    );
+
+  }
+
+  if (vhlDrawerTrigger && vhlDrawer) {
+
+    var vhlDrawerClosers =
+      vhlDrawer.querySelectorAll(
+        '[data-vhliso-drawer-close]'
+      );
+
+    vhlDrawerTrigger.addEventListener(
+      'click',
+      function () {
+
+        if (vhlDrawer.hidden) {
+          vhlOpenDrawer();
+        }
+        else {
+          vhlCloseDrawer();
+        }
+
+      }
+    );
+
+    vhlDrawerClosers.forEach(function (el) {
+
+      el.addEventListener(
+        'click',
+        vhlCloseDrawer
+      );
+
+    });
+
+
+    /* Accordion-toggles: zowel de top-level "Catalog" als de
+       geneste categorie-koppen (Badkamer/Opbergen/...) delen
+       dezelfde eenvoudige toggle-logica. */
+
+    var vhlAccordionToggles =
+      vhlDrawer.querySelectorAll(
+        '[data-vhliso-accordion-toggle]'
+      );
+
+    vhlAccordionToggles.forEach(function (btn) {
+
+      var panelId =
+        btn.getAttribute('aria-controls');
+
+      var panel =
+        panelId
+          ? document.getElementById(panelId)
+          : null;
+
+      if (!panel) return;
+
+      btn.addEventListener(
+        'click',
+        function () {
+
+          var wasOpen = !panel.hidden;
+
+          panel.hidden = wasOpen;
+
+          btn.setAttribute(
+            'aria-expanded',
+            String(!wasOpen)
+          );
+
+        }
+      );
+
+    });
+
+  }
+
+
+  /* =====================================================
+     ESCAPE SLUIT MEGA MENU + MOBIELE DRAWER
+  ====================================================== */
+
+  document.addEventListener(
+    'keydown',
+    function (event) {
+
+      if (event.key !== 'Escape') return;
+
+      if (vhlMegaEntries.length) {
+        vhlCloseAllMega(null);
+      }
+
+      if (
+        vhlDrawer &&
+        !vhlDrawer.hidden
+      ) {
+        vhlCloseDrawer();
+      }
+
+    }
   );
 
 
@@ -1412,6 +2547,24 @@
       "id": "menu",
       "default": "main-menu",
       "label": "Menu"
+    },
+    {
+      "type": "header",
+      "content": "Mega-menu — uitgelichte collecties"
+    },
+    {
+      "type": "paragraph",
+      "content": "Elk menu-item met eigen sub-links (ingesteld bij Navigation in Shopify Admin) wordt automatisch een mega-menu. Deze twee collecties verschijnen als visuele kaarten rechts in dat mega-menu, met de collectie-afbeelding zoals ingesteld bij de collectie zelf."
+    },
+    {
+      "type": "collection",
+      "id": "mega_menu_featured_collection_1",
+      "label": "Uitgelichte collectie 1 (bv. AUREA™ Living)"
+    },
+    {
+      "type": "collection",
+      "id": "mega_menu_featured_collection_2",
+      "label": "Uitgelichte collectie 2 (bv. SPA Collection)"
     }
   ],
 
