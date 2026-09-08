@@ -33,7 +33,7 @@
 .product-color-swatches {
   display: flex;
   gap: 6px;
-  margin: 8px 0 12px 0;
+  margin: 10px 0 0;
   flex-wrap: wrap;
 }
 
@@ -41,7 +41,7 @@
   width: var(--swatch-size, 24px);
   height: var(--swatch-size, 24px);
   border-radius: 50%;
-  border: 2px solid #e0e0e0;
+  border: 1px solid #e0e0e0;
   cursor: pointer;
   transition: all 0.2s ease;
   overflow: hidden;
@@ -49,8 +49,8 @@
 }
 
 .color-swatch:hover {
-  border-color: #333;
-  transform: scale(1.1);
+  border-color: #999;
+  transform: scale(1.06);
 }
 
 .color-swatch.active {
@@ -133,25 +133,27 @@
   padding: 0 15px;
 }
 
-/* Product grid */
+/* Product grid — zonder kaart-border/schaduw (remove_card_styling) doet
+   de tussenruimte zelf het werk om producten van elkaar te scheiden, dus
+   iets royaler dan voorheen. */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 16px 14px;
   max-width: 100%;
 }
 
 @media (min-width: 768px) {
   .product-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 28px;
   }
 }
 
 @media (min-width: 800px) {
   .product-grid {
     grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+    gap: 32px;
   }
 }
 
@@ -171,8 +173,8 @@
 }
 
 .product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .product-link {
@@ -439,8 +441,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
+  gap: 20px;
+  margin-bottom: 0;
+  padding: 16px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .collection-filters {
@@ -470,6 +475,7 @@
   letter-spacing: var(--letter-spacing-body);
   text-transform: none !important;
   color: var(--sort-label-color, #000000);
+  white-space: nowrap;
 }
 
 .sort-by-dropdown {
@@ -579,12 +585,15 @@
   line-height: 1;
 }
 
-/* Sidebar layout */
+/* Sidebar layout — herzien: het filterpaneel is nu een horizontale,
+   inklapbare balk boven de productgrid (i.p.v. een linkerkolom), voor
+   een compacte, Joseph Joseph-achtige toolbar. "Filter op" is een
+   trigger die het paneel open/dicht klapt, op elk schermformaat
+   (assets/collection-grid-page.js's toggle is hiervoor verbreed van
+   "alleen ≤990px" naar "altijd"). De onderliggende filter-/sorteer-
+   logica (checkboxes, URL-sync, apply/clear) is ongewijzigd. */
 .collection-grid-with-sidebar {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 24px;
-  align-items: start;
+  display: block;
 }
 
 .collection-grid-with-sidebar .product-grid-wrapper {
@@ -592,45 +601,115 @@
 }
 
 .sidebar-filters {
-  position: sticky;
-  top: 80px;
-  align-self: start;
+  position: relative;
+  top: 0;
   width: 100%;
-  max-width: 260px;
+  max-width: 100%;
   min-width: 0;
-  overflow: hidden;
+  margin-bottom: 24px;
+  overflow: visible;
+}
+
+/* De balk zelf (.collection-nav-sort-bar) draagt de bovenste en
+   onderste "dunne border" van de toolbar-rij. Alleen wanneer het
+   filterpaneel openstaat krijgt .sidebar-filters een eigen
+   onderrand, zodat de balk nooit een dubbele lijn toont wanneer het
+   paneel is ingeklapt (de standaardstand). */
+.sidebar-filters:not(.collapsed) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .sidebar-filters__inner {
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: 0;
+  padding: 0;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
 
+/* De trigger-knop staat nu ín .collection-nav-sort-bar (naast
+   "Sorteren op") i.p.v. als volledige-breedte kop bovenaan het
+   filterpaneel — vandaar de reset van standaard button-chrome en de
+   compacte, inline layout in plaats van de oude space-between-balk. */
 .sidebar-filters__header {
-  display: flex;
-  justify-content: space-between;
+  display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
-  margin-bottom: 10px;
-  font-weight: var(--font-weight-bold);
+  gap: 8px;
+  padding: 4px 0;
+  margin: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: var(--font-weight-semibold);
   letter-spacing: var(--letter-spacing-body);
+  color: var(--sort-label-color, #000000);
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.sidebar-filters__header:hover {
+  color: var(--nav-active-color, #000000);
+  opacity: 0.75;
 }
 
 .sidebar-filters__title {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 14px;
+  white-space: nowrap;
   letter-spacing: var(--letter-spacing-body);
 }
 
 .sidebar-filters__icon {
   flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  opacity: 0.85;
 }
 
-/* Hide mobile apply button on desktop */
+/* Subtiele chevron i.p.v. een zwaar element: klein, gedempte kleur,
+   draait om aan te geven dat het paneel openstaat. */
+.sidebar-filters__chevron {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  color: #9a978f;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-filters__header[aria-expanded="true"] .sidebar-filters__chevron {
+  transform: rotate(180deg);
+}
+
+.sidebar-filters__content {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 4px 0 20px;
+}
+
+.sidebar-filters.collapsed .sidebar-filters__content {
+  max-height: 0;
+  padding: 0;
+}
+
+/* Eén zichtbare "Toepassen"-knop: de knop binnen .content (die
+   verschijnt zodra het paneel openstaat), niet de losse knop die
+   buiten .content altijd zichtbaar zou blijven. */
 .sidebar-filters__apply-btn.sidebar-filters__apply-btn--mobile {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  padding: 10px 16px;
+  font-size: 14px;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.sidebar-filters__apply {
   display: none;
 }
 
@@ -728,61 +807,9 @@
 }
 
 /* Responsive design */
-@media (max-width: 990px) {
-  .collection-grid-with-sidebar {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar-filters {
-    position: relative;
-    top: 0;
-    margin-bottom: 20px;
-    max-width: 100%;
-    overflow: visible;
-  }
-
-  .sidebar-filters__inner {
-    border-radius: 8px;
-    padding: 0;
-  }
-
-  .sidebar-filters__header {
-    padding: 16px;
-    margin-bottom: 0;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  /* Show mobile apply button in content */
-  .sidebar-filters__apply-btn.sidebar-filters__apply-btn--mobile {
-    display: block;
-    width: 100%;
-    padding: 10px 16px;
-    font-size: 14px;
-    margin-top: 16px;
-    text-align: center;
-  }
-
-  /* Hide desktop apply button section on mobile */
-  .sidebar-filters__apply {
-    display: none;
-  }
-
-  .sidebar-filters__content {
-    max-height: 1000px;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    padding: 0 16px 16px 16px;
-  }
-
-  .sidebar-filters.collapsed .sidebar-filters__content {
-    max-height: 0;
-    padding: 0 16px;
-  }
-}
+/* .collection-grid-with-sidebar / .sidebar-filters zijn nu op elk
+   schermformaat hetzelfde (horizontale, inklapbare balk) — zie de
+   basisregels hierboven. Geen aparte ≤990px-variant meer nodig. */
 
 @media (max-width: 767px) {
   .collection-search-bar.nav-search-bar {
@@ -799,10 +826,21 @@
     height: 18px;
   }
 
+  /* Filter op / Sorteren op blijven op één rij, ook op mobiel — een
+     compacte toolbar i.p.v. gestapelde balken, zonder rare
+     afbrekingen of horizontale overflow. */
   .collection-nav-sort-bar {
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
+    padding: 12px 0;
+    gap: 12px;
+  }
+
+  .sidebar-filters__header {
+    font-size: 13px;
+  }
+
+  .sidebar-filters__title {
+    font-size: 13px;
+    gap: 6px;
   }
 
   .collection-filters {
@@ -814,12 +852,23 @@
   }
 
   .sort-by-container {
-    width: 100%;
-    justify-content: space-between;
+    flex-shrink: 1;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .sort-by-label {
+    font-size: 13px;
   }
 
   .sort-by-dropdown {
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .sort-by-dropdown select {
+    padding: 8px 26px 8px 10px;
+    font-size: 13px;
   }
 
   .collection-product-info {

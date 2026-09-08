@@ -681,36 +681,33 @@ class CollectionGridPage {
 
     const clearBtn = this.sidebar.querySelector("[data-clear-filters]");
     const inputs = this.sidebar.querySelectorAll(".sf-input");
-    const header = this.sidebar.querySelector(".sidebar-filters__header");
+    // De trigger-knop staat nu, voor een echte Joseph Joseph-achtige
+    // enkele toolbar-rij, in .collection-nav-sort-bar (naast
+    // "Sorteren op") i.p.v. binnen .sidebar-filters zelf — vandaar
+    // this.element.querySelector i.p.v. this.sidebar.querySelector.
+    const header = this.element.querySelector("[data-filter-toggle]");
     const content = this.sidebar.querySelector(".sidebar-filters__content");
 
     // Restore filters from URL on page load
     this.restoreFiltersFromURL();
 
-    // Mobile/tablet dropdown functionality (matches CSS breakpoint at 990px)
-    const initMobileDropdown = () => {
-      if (window.innerWidth <= 990) {
-        this.sidebar.classList.add("collapsed");
-      } else {
-        this.sidebar.classList.remove("collapsed");
-      }
-    };
+    // Filter trigger: het paneel start altijd dichtgeklapt (niet
+    // alleen op mobiel/tablet) — "Filter op" is nu op elk
+    // schermformaat een echte trigger die het paneel opent, i.p.v.
+    // een altijd-open sidebar op desktop. Geen resize-listener meer
+    // nodig om dit opnieuw te bepalen (was voorheen viewport-
+    // afhankelijk); dat zou een open paneel bij een resize ook
+    // ongewenst weer dichtklappen.
+    this.sidebar.classList.add("collapsed");
 
-    // Toggle dropdown on header click (mobile/tablet only)
+    // Toggle dropdown on trigger click (alle schermformaten)
     if (header) {
       header.addEventListener("click", (e) => {
-        if (window.innerWidth <= 990) {
-          if (!e.target.matches(".sidebar-filters__clear") && !e.target.closest(".sidebar-filters__clear")) {
-            e.preventDefault();
-            this.sidebar.classList.toggle("collapsed");
-          }
-        }
+        e.preventDefault();
+        const isCollapsed = this.sidebar.classList.toggle("collapsed");
+        header.setAttribute("aria-expanded", String(!isCollapsed));
       });
     }
-
-    // Initialize and handle resize
-    initMobileDropdown();
-    window.addEventListener("resize", initMobileDropdown);
 
     // Filter functionality
     const getActiveFilters = () => {

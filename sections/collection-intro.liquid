@@ -1,0 +1,295 @@
+{% comment %}
+  VANHOUTEN LIVING — Compacte collection-intro.
+
+  Vervangt de zware split-hero (collection-hero.liquid) bovenaan de
+  collectiepagina door een compact, gecentreerd tekstblok: titel +
+  korte intro, direct gevolgd door de filter/sort-toolbar en de
+  productgrid (elders in het template). Geen hero-afbeelding, geen
+  donkere achtergrond, geen CTA-knop.
+
+  Generiek voor alle collecties. Hergebruikt dezelfde bestaande PDP-
+  storytelling-metafields als de vorige collection-hero (geen nieuwe
+  metafields):
+
+    titel    -> collection.title (altijd)
+    headline -> custom.pdp_functional_headline (optioneel, alleen
+                getoond indien aanwezig — geen fallback-tekst)
+    intro    -> custom.pdp_functional_body_1 + custom.pdp_functional_body_2,
+                anders (als beide leeg zijn) collection.description
+    eyebrow  -> custom.pdp_functional_eyebrow (optioneel, zeer subtiel)
+
+  "Lees meer" verschijnt alleen wanneer de intro-tekst daadwerkelijk
+  wordt afgekapt (puur presentationeel, geen invloed op collectie-
+  of productdata).
+{% endcomment %}
+
+{%- liquid
+  assign vhl_intro_eyebrow = collection.metafields.custom.pdp_functional_eyebrow.value
+  assign vhl_intro_headline = collection.metafields.custom.pdp_functional_headline.value
+
+  assign vhl_intro_text_1 = collection.metafields.custom.pdp_functional_body_1.value
+  assign vhl_intro_text_2 = collection.metafields.custom.pdp_functional_body_2.value
+
+  assign vhl_intro_has_body_text = false
+  if vhl_intro_text_1 != blank or vhl_intro_text_2 != blank
+    assign vhl_intro_has_body_text = true
+  endif
+
+  assign vhl_intro_description_fallback = collection.description
+  if vhl_intro_has_body_text
+    assign vhl_intro_description_fallback = blank
+  endif
+
+  assign vhl_intro_has_text = false
+  if vhl_intro_has_body_text or vhl_intro_description_fallback != blank
+    assign vhl_intro_has_text = true
+  endif
+-%}
+
+<section id="VHLCollectionIntro-{{ section.id }}" class="vhl-collection-intro">
+  <div class="vhl-collection-intro__inner">
+
+    {%- if vhl_intro_eyebrow != blank -%}
+      <p class="vhl-collection-intro__eyebrow">{{ vhl_intro_eyebrow | escape }}</p>
+    {%- endif -%}
+
+    <h1 class="vhl-collection-intro__title">{{ collection.title | escape }}</h1>
+
+    {%- if vhl_intro_headline != blank -%}
+      <p class="vhl-collection-intro__headline">{{ vhl_intro_headline | escape }}</p>
+    {%- endif -%}
+
+    {%- if vhl_intro_has_text -%}
+      <div class="vhl-collection-intro__text{% if vhl_intro_description_fallback != blank %} rte{% endif %}" data-vhl-readmore-text>
+        {%- if vhl_intro_has_body_text -%}
+          {%- if vhl_intro_text_1 != blank -%}<p>{{ vhl_intro_text_1 }}</p>{%- endif -%}
+          {%- if vhl_intro_text_2 != blank -%}<p>{{ vhl_intro_text_2 }}</p>{%- endif -%}
+        {%- else -%}
+          {{ vhl_intro_description_fallback }}
+        {%- endif -%}
+      </div>
+      <button type="button" class="vhl-collection-intro__readmore" data-vhl-readmore-toggle hidden>
+        <span data-vhl-readmore-label>Lees meer</span>
+      </button>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% style %}
+
+#VHLCollectionIntro-{{ section.id }},
+#VHLCollectionIntro-{{ section.id }} *,
+#VHLCollectionIntro-{{ section.id }} *::before,
+#VHLCollectionIntro-{{ section.id }} *::after {
+  box-sizing: border-box;
+}
+
+#VHLCollectionIntro-{{ section.id }} {
+  width: 100%;
+  background: #ffffff;
+  padding: 56px 24px 32px;
+  text-align: center;
+}
+
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__eyebrow {
+  margin: 0 0 12px;
+
+  color: #9a978f;
+
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__title {
+  margin: 0 0 10px;
+
+  color: #262625;
+
+  font-size: clamp(27px, 2.8vw, 36px);
+  font-weight: 500;
+  line-height: 1.15;
+
+  letter-spacing: -.01em;
+}
+
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__headline {
+  margin: 0 0 16px;
+
+  color: #55524e;
+
+  font-size: 15.5px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+/*
+  max-height-gebaseerde clamp i.p.v. -webkit-line-clamp: in recente
+  Chromium-versies is -webkit-line-clamp geherimplementeerd als
+  "echte" layout-fragmentatie, waardoor scrollHeight op een
+  geclampt element niet langer de volledige (ongeclampte) inhoud
+  rapporteert — de klassieke scrollHeight-vs-clientHeight-
+  overflowdetectie (hieronder in het script) werkt daardoor niet
+  meer betrouwbaar met -webkit-line-clamp. Een expliciete max-height
+  (3 regels: font-size × line-height × 3) blijft in alle browsers
+  gewoon standaard CSS-overflow, dus scrollHeight/clientHeight
+  blijven betrouwbaar vergelijkbaar.
+*/
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__text {
+  margin: 0 auto;
+  max-width: 560px;
+
+  color: #78766f;
+
+  font-size: 14.5px;
+  line-height: 1.65;
+
+  max-height: 72px;
+  overflow: hidden;
+}
+
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__text.is-expanded {
+  max-height: none;
+  overflow: visible;
+}
+
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__text p {
+  margin: 0 0 8px;
+}
+
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__text p:last-child {
+  margin-bottom: 0;
+}
+
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__readmore {
+  display: inline-block;
+
+  margin-top: 8px;
+  padding: 4px 2px;
+
+  background: none;
+  border: 0;
+
+  color: #262625;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  cursor: pointer;
+}
+
+/*
+  Zonder deze regel wint onze eigen display:inline-block hierboven
+  altijd van de standaard browserregel voor [hidden] (auteur-CSS gaat
+  vóór user-agent-CSS, ook bij gelijke specificiteit) — waardoor de
+  knop zichtbaar zou blijven ondanks het hidden-attribuut.
+*/
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__readmore[hidden] {
+  display: none;
+}
+
+#VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__readmore:hover {
+  color: #000000;
+}
+
+@media screen and (max-width: 749px) {
+
+  #VHLCollectionIntro-{{ section.id }} {
+    padding: 36px 20px 24px;
+  }
+
+  #VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__title {
+    font-size: 23px;
+  }
+
+  #VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__headline {
+    font-size: 14px;
+  }
+
+  #VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__text {
+    font-size: 13.5px;
+    max-height: 67px;
+  }
+
+  #VHLCollectionIntro-{{ section.id }} .vhl-collection-intro__text.is-expanded {
+    max-height: none;
+  }
+
+}
+
+{% endstyle %}
+
+<script>
+  (function () {
+
+    var root = document.getElementById('VHLCollectionIntro-{{ section.id }}');
+
+    if (!root) return;
+
+    var textEl = root.querySelector('[data-vhl-readmore-text]');
+    var toggle = root.querySelector('[data-vhl-readmore-toggle]');
+
+    if (!textEl || !toggle) return;
+
+    var label = toggle.querySelector('[data-vhl-readmore-label]');
+
+    function checkOverflow() {
+
+      if (textEl.classList.contains('is-expanded')) return;
+
+      var isOverflowing = textEl.scrollHeight > textEl.clientHeight + 2;
+
+      toggle.hidden = !isOverflowing;
+
+    }
+
+    toggle.addEventListener('click', function () {
+
+      var expanded = textEl.classList.toggle('is-expanded');
+
+      if (label) {
+        label.textContent = expanded ? 'Lees minder' : 'Lees meer';
+      }
+
+      if (!expanded) {
+        checkOverflow();
+      }
+
+    });
+
+    checkOverflow();
+
+    window.addEventListener('resize', checkOverflow);
+
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection Intro",
+  "class": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Compacte collection-intro (titel + korte tekst). Hergebruikt custom.pdp_functional_eyebrow / _headline / _body_1 / _body_2 van de huidige collectie, met fallback naar collection.title / collection.description. Geen afbeelding, geen CTA-knop."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Intro"
+    }
+  ]
+}
+{% endschema %}
