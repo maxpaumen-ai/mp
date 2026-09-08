@@ -332,13 +332,27 @@
             </div>
             <div class="sort-by-dropdown">
               <select aria-label="Sort products">
-                <option value="best-selling">{{ 'products.facets.sort_options.best_selling' | t }}</option>
-                <option value="price-ascending">{{ 'products.facets.sort_options.price_ascending' | t }}</option>
-                <option value="price-descending">{{ 'products.facets.sort_options.price_descending' | t }}</option>
-                <option value="title-ascending">{{ 'products.facets.sort_options.title_ascending' | t }}</option>
-                <option value="title-descending">{{ 'products.facets.sort_options.title_descending' | t }}</option>
-                <option value="created-descending">{{ 'products.facets.sort_options.created_descending' | t }}</option>
-                <option value="created-ascending">{{ 'products.facets.sort_options.created_ascending' | t }}</option>
+                {%- comment -%}
+                  Labels hier bewust hardcoded in het Nederlands i.p.v.
+                  via de gedeelde `products.facets.sort_options`-locale-
+                  sleutels (| t): die vertaling hangt af van de actief
+                  gepubliceerde winkeltaal in Shopify Admin, en viel in
+                  de live preview terug op de Engelse en.default.json-
+                  waarden ondanks correcte Nederlandse strings in
+                  nl.json. Deze collection-page-dropdown moet altijd
+                  Nederlands tonen, onafhankelijk van de winkeltaal-
+                  instelling — vandaar een directe, taal-onafhankelijke
+                  tekst i.p.v. de locale-lookup. De `value`-attributen
+                  (de daadwerkelijke sorteer-query-parameters) zijn
+                  ongewijzigd.
+                {%- endcomment -%}
+                <option value="best-selling">Bestverkopend</option>
+                <option value="price-ascending">Prijs: laag naar hoog</option>
+                <option value="price-descending">Prijs: hoog naar laag</option>
+                <option value="title-ascending">Alfabetisch: A-Z</option>
+                <option value="title-descending">Alfabetisch: Z-A</option>
+                <option value="created-descending">Datum: nieuwste eerst</option>
+                <option value="created-ascending">Datum: oudste eerst</option>
               </select>
               <svg
                 class="icon"
