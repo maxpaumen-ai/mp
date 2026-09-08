@@ -681,7 +681,11 @@ class CollectionGridPage {
 
     const clearBtn = this.sidebar.querySelector("[data-clear-filters]");
     const inputs = this.sidebar.querySelectorAll(".sf-input");
-    const header = this.sidebar.querySelector(".sidebar-filters__header");
+    // De trigger-knop staat nu, voor een echte Joseph Joseph-achtige
+    // enkele toolbar-rij, in .collection-nav-sort-bar (naast
+    // "Sorteren op") i.p.v. binnen .sidebar-filters zelf — vandaar
+    // this.element.querySelector i.p.v. this.sidebar.querySelector.
+    const header = this.element.querySelector("[data-filter-toggle]");
     const content = this.sidebar.querySelector(".sidebar-filters__content");
 
     // Restore filters from URL on page load
@@ -696,13 +700,12 @@ class CollectionGridPage {
     // ongewenst weer dichtklappen.
     this.sidebar.classList.add("collapsed");
 
-    // Toggle dropdown on header click (alle schermformaten)
+    // Toggle dropdown on trigger click (alle schermformaten)
     if (header) {
       header.addEventListener("click", (e) => {
-        if (!e.target.matches(".sidebar-filters__clear") && !e.target.closest(".sidebar-filters__clear")) {
-          e.preventDefault();
-          this.sidebar.classList.toggle("collapsed");
-        }
+        e.preventDefault();
+        const isCollapsed = this.sidebar.classList.toggle("collapsed");
+        header.setAttribute("aria-expanded", String(!isCollapsed));
       });
     }
 

@@ -177,9 +177,27 @@
       </div>
     {% endif %}
 
-    <!-- Collection Navigation and Sort by Bar -->
-    {% if section.settings.show_navigation or section.settings.show_sorting %}
+    <!-- Collection Navigation, Filter trigger and Sort by Bar -->
+    {% if section.settings.show_navigation or section.settings.show_sorting or section.settings.enable_side_filters %}
       <div class="collection-nav-sort-bar">
+        {% if section.settings.enable_side_filters %}
+          <button
+            type="button"
+            class="sidebar-filters__header"
+            data-filter-toggle
+            aria-expanded="false"
+          >
+            <span class="sidebar-filters__title">
+              <svg class="sidebar-filters__icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g clip-path="url(#filter-icon-clip)"><path fill="currentColor" fill-rule="evenodd" d="M3.124 20.992c-.04.005-.082.008-.124.008H1a1 1 0 1 1 0-2h2c.042 0 .083.003.124.008a4.002 4.002 0 0 1 7.75-.008H23a1 1 0 1 1 0 2H10.874a4.002 4.002 0 0 1-7.75-.008ZM7 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM7 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm3.874-3a4.002 4.002 0 0 0-7.75.008A1.01 1.01 0 0 0 3 3H1a1 1 0 0 0 0 2h2c.042 0 .083-.003.124-.008a4.002 4.002 0 0 0 7.75.008H23a1 1 0 1 0 0-2H10.874ZM15 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0Zm2 4a4.002 4.002 0 0 1-3.874-3H1a1 1 0 1 1 0-2h12.126a4.002 4.002 0 0 1 7.75.008c.04-.005.082-.008.124-.008h2a1 1 0 1 1 0 2h-2c-.042 0-.083-.003-.124-.008A4.002 4.002 0 0 1 17 16Z" clip-rule="evenodd"/></g><defs><clipPath id="filter-icon-clip"><path fill="#fff" d="M0 0h24v24H0z"/></clipPath></defs></svg>
+              {% if section.settings.filter_label != blank -%}
+                {{- section.settings.filter_label -}}
+              {%- else -%}
+                {{- 'products.facets.filter_by_label' | t -}}
+              {%- endif %}
+            </span>
+            <svg class="sidebar-filters__chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+        {% endif %}
         {% if section.settings.show_navigation and section.settings.enable_side_filters == false %}
           <div class="collection-filters">
             {% if section.settings.show_shop_all_tab %}
@@ -343,16 +361,6 @@
       <div class="collection-grid-with-sidebar section-{{ section.id }}">
         <aside class="sidebar-filters">
           <div class="sidebar-filters__inner">
-            <div class="sidebar-filters__header">
-              <span class="sidebar-filters__title">
-                <svg class="sidebar-filters__icon" width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g clip-path="url(#filter-icon-clip)"><path fill="currentColor" fill-rule="evenodd" d="M3.124 20.992c-.04.005-.082.008-.124.008H1a1 1 0 1 1 0-2h2c.042 0 .083.003.124.008a4.002 4.002 0 0 1 7.75-.008H23a1 1 0 1 1 0 2H10.874a4.002 4.002 0 0 1-7.75-.008ZM7 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM7 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm3.874-3a4.002 4.002 0 0 0-7.75.008A1.01 1.01 0 0 0 3 3H1a1 1 0 0 0 0 2h2c.042 0 .083-.003.124-.008a4.002 4.002 0 0 0 7.75.008H23a1 1 0 1 0 0-2H10.874ZM15 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0Zm2 4a4.002 4.002 0 0 1-3.874-3H1a1 1 0 1 1 0-2h12.126a4.002 4.002 0 0 1 7.75.008c.04-.005.082-.008.124-.008h2a1 1 0 1 1 0 2h-2c-.042 0-.083-.003-.124-.008A4.002 4.002 0 0 1 17 16Z" clip-rule="evenodd"/></g><defs><clipPath id="filter-icon-clip"><path fill="#fff" d="M0 0h24v24H0z"/></clipPath></defs></svg>
-                {% if section.settings.filter_label != blank -%}
-                  {{- section.settings.filter_label -}}
-                {%- else -%}
-                  {{- 'products.facets.filter_by_label' | t -}}
-                {%- endif %}
-              </span>
-            </div>
 
             <div class="sidebar-filters__content">
             {% comment %} Collect all unique variant options from ALL products sitewide {% endcomment %}
@@ -772,6 +780,18 @@
 
                 <h3 class="product-title">{{ product.title }}</h3>
 
+                <div class="collection-product-price">
+                  <span class="collection-current-price">{{ product.price | money }}</span>
+                  {% if product.compare_at_price > product.price %}
+                    <span class="collection-regular-price">{{ product.compare_at_price | money }}</span>
+                  {% endif %}
+                </div>
+
+                {% comment %}
+                  Swatches staan hier bewust ónder titel + prijs (i.p.v.
+                  ertussen zoals voorheen) — compact en rustig onder de
+                  productinfo, zoals de Joseph Joseph-referentie.
+                {% endcomment %}
                 {% if section.settings.show_color_swatches %}
                   {% assign color_option = null %}
                   {% assign color_option_name = null %}
@@ -833,13 +853,6 @@
                     </div>
                   {% endif %}
                 {% endif %}
-
-                <div class="collection-product-price">
-                  <span class="collection-current-price">{{ product.price | money }}</span>
-                  {% if product.compare_at_price > product.price %}
-                    <span class="collection-regular-price">{{ product.compare_at_price | money }}</span>
-                  {% endif %}
-                </div>
 
                 {% if section.settings.show_view_product %}
                   <div class="collection-view-product">
