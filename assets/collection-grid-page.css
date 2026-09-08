@@ -469,6 +469,16 @@
   gap: 10px;
 }
 
+/* Wanneer de filter-trigger niet gerenderd wordt (enable_side_filters
+   uit) is .sort-by-container het enige kind van .collection-nav-sort-bar
+   — met alleen justify-content:space-between zou het dan naar links
+   vallen. :only-child duwt het met een auto-marge naar rechts, puur via
+   CSS en zonder de balk te breken wanneer de filter-trigger elders wel
+   gerenderd wordt (space-between blijft dan gewoon werken). */
+.sort-by-container:only-child {
+  margin-left: auto;
+}
+
 .sort-by-label {
   font-size: 14px;
   font-weight: var(--font-weight-semibold);
