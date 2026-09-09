@@ -1418,10 +1418,28 @@
 
   {% if section.settings.menu != blank %}
 
-    {%- liquid
-      assign vhliso_mega_col_1 = section.settings.mega_menu_featured_collection_1
-      assign vhliso_mega_col_2 = section.settings.mega_menu_featured_collection_2
-    -%}
+    {%- comment -%}
+      De 2 featured-collectiekaarten komen uit section BLOCKS
+      (type "featured_collection", elk met 1 eigen collection-
+      picker-setting) i.p.v. 2 losse top-level collection-
+      settings — Shopify's eigen theme-validator staat maximaal
+      1 setting van type "collection" per settings-array toe
+      ("setting collection type can only be inserted once in the
+      settings"). Elk block heeft zijn EIGEN settings-array (met
+      precies 1 collection-setting erin), dus dat is wel geldig.
+      Hardgeknipt op de eerste 2 blocks van dit type, ongeacht
+      hoeveel de merchant er toevoegt.
+    {%- endcomment -%}
+
+    {%- capture vhliso_mega_featured_html -%}
+      {%- assign vhliso_mega_featured_shown = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'featured_collection' and vhliso_mega_featured_shown < 2 -%}
+          {%- assign vhliso_mega_featured_shown = vhliso_mega_featured_shown | plus: 1 -%}
+          {%- render 'vhliso-mega-featured-card', collection: block.settings.collection -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endcapture -%}
 
     <nav
       class="vhliso-nav"
@@ -1513,13 +1531,8 @@
 
                   </div>
 
-                  {% if vhliso_mega_col_1 or vhliso_mega_col_2 %}
-
-                    <div class="vhliso-mega-featured">
-                      {% render 'vhliso-mega-featured-card', collection: vhliso_mega_col_1 %}
-                      {% render 'vhliso-mega-featured-card', collection: vhliso_mega_col_2 %}
-                    </div>
-
+                  {% if vhliso_mega_featured_html != blank %}
+                    <div class="vhliso-mega-featured">{{ vhliso_mega_featured_html }}</div>
                   {% endif %}
 
                 </div>
@@ -2547,30 +2560,27 @@
       "id": "menu",
       "default": "main-menu",
       "label": "Menu"
-    },
-    {
-      "type": "header",
-      "content": "Mega-menu — uitgelichte collecties"
-    },
-    {
-      "type": "paragraph",
-      "content": "Elk menu-item met eigen sub-links (ingesteld bij Navigation in Shopify Admin) wordt automatisch een mega-menu. Deze twee collecties verschijnen als visuele kaarten rechts in dat mega-menu, met de collectie-afbeelding zoals ingesteld bij de collectie zelf."
-    },
-    {
-      "type": "collection",
-      "id": "mega_menu_featured_collection_1",
-      "label": "Uitgelichte collectie 1 (bv. AUREA™ Living)"
-    },
-    {
-      "type": "collection",
-      "id": "mega_menu_featured_collection_2",
-      "label": "Uitgelichte collectie 2 (bv. SPA Collection)"
     }
   ],
 
   "blocks": [
     {
       "type": "@app"
+    },
+    {
+      "type": "featured_collection",
+      "name": "Mega-menu — uitgelichte collectie",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Verschijnt als visuele kaart rechts in het mega-menu onder het menu-item dat submenu's heeft (bv. Catalogus). Voeg maximaal 2 van deze blocks toe — bv. één voor AUREA™ Living, één voor SPA Collection. Alleen de eerste 2 worden getoond."
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collectie"
+        }
+      ]
     }
   ]
 }
