@@ -305,7 +305,7 @@
   ========================================================= */
 
   #vhliso-{{ section.id }} .vhliso-nav {
-    height: 54px;
+    height: 50px;
 
     display: flex;
     align-items: center;
@@ -343,7 +343,7 @@
     display: flex;
     align-items: center;
 
-    height: 54px;
+    height: 50px;
 
     font-size: 15px;
     font-weight: 400;
@@ -387,7 +387,7 @@
 
   #vhliso-{{ section.id }} .vhliso-nav-item {
     position: relative;
-    height: 54px;
+    height: 50px;
   }
 
   #vhliso-{{ section.id }} .vhliso-nav-trigger {
@@ -397,7 +397,7 @@
     align-items: center;
     gap: 5px;
 
-    height: 54px;
+    height: 50px;
 
     padding: 0;
     margin: 0;
@@ -487,11 +487,24 @@
     max-width: min(1400px, 94vw);
     margin: 0 auto;
 
-    padding: 44px 32px 40px;
+    padding: 36px 32px 32px;
 
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 460px);
-    gap: 56px;
+    /*
+      Default: 1 kolom (categorieën gebruiken de volledige breedte).
+      Wanneer er daadwerkelijk featured-collectiekaarten gerenderd
+      worden (.vhliso-mega-inner--with-featured, alleen toegevoegd als
+      section.blocks minstens 1 geldig ingestelde featured_collection
+      bevat), splitst dit naar ±60/40 — géén vaste minimumbreedte meer
+      voor de rechterkolom, dus geen leeg gereserveerd vlak wanneer er
+      geen featured cards zijn.
+    */
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  #vhliso-{{ section.id }} .vhliso-mega-inner.vhliso-mega-inner--with-featured {
+    grid-template-columns: 3fr 2fr;
   }
 
   #vhliso-{{ section.id }} .vhliso-mega-left {
@@ -503,7 +516,7 @@
   #vhliso-{{ section.id }} .vhliso-mega-categories {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 32px;
+    gap: 28px;
   }
 
   #vhliso-{{ section.id }} .vhliso-mega-heading {
@@ -539,7 +552,10 @@
   }
 
   #vhliso-{{ section.id }} .vhliso-mega-links a {
+    display: block;
+
     font-size: 14px;
+    line-height: 1.7;
     color: #52504c;
 
     transition: color .15s ease;
@@ -550,9 +566,9 @@
   }
 
   #vhliso-{{ section.id }} .vhliso-mega-viewall-wrap {
-    margin-top: 28px;
+    margin-top: 24px;
 
-    padding-top: 20px;
+    padding-top: 16px;
 
     border-top: 1px solid #e8e8e8;
   }
@@ -583,8 +599,27 @@
 
   #vhliso-{{ section.id }} .vhliso-mega-featured {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /*
+      auto-fit i.p.v. een vaste repeat(2, ...): als er maar 1 geldige
+      featured_collection-block is (collectie ingesteld), bestaat er
+      dan ook maar 1 kaart in de DOM — auto-fit laat die dan de volle
+      breedte innemen i.p.v. een lege, ongebruikte 2e kolom te
+      reserveren (repeat(2, ...) zou dat wel doen). Met 2 kaarten
+      blijft dit gewoon 2 gelijke kolommen.
+    */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
+
+    /*
+      De kaarten hebben een vaste aspect-ratio (dus een vaste hoogte) en
+      strekken daardoor niet automatisch mee met de linkerkolom als die
+      (door een langere categorielijst) hoger uitvalt. Zonder deze regel
+      blijven de kaarten boven "plakken" met alle overgebleven ruimte als
+      één blok lege witruimte eronder. align-self: center verdeelt dat
+      verschil netjes boven/onder — rustiger en dichter bij het
+      editorial-gevoel van de Joseph Joseph-referentie.
+    */
+    align-self: center;
   }
 
   #vhliso-{{ section.id }} .vhliso-mega-card {
@@ -596,7 +631,8 @@
   #vhliso-{{ section.id }} .vhliso-mega-card-image {
     display: block;
 
-    aspect-ratio: 4 / 5;
+    /* Landscape/near-square i.p.v. het vorige, te "portret"-achtige 4:5 */
+    aspect-ratio: 4 / 3;
 
     background: #f5f4f2;
 
@@ -646,7 +682,16 @@
 
   @media (max-width: 1180px) {
 
-    #vhliso-{{ section.id }} .vhliso-mega-inner {
+    /*
+      Zelfde specificiteit (2 classes) als de
+      .vhliso-mega-inner--with-featured-regel hierboven nodig, anders
+      wint die regel alsnog ondanks dat hij "eerder" in het bestand
+      staat — CSS-specificiteit gaat vóór brondocumentvolgorde bij
+      ongelijke specificiteit, media queries geven geen automatische
+      voorrang.
+    */
+    #vhliso-{{ section.id }} .vhliso-mega-inner,
+    #vhliso-{{ section.id }} .vhliso-mega-inner.vhliso-mega-inner--with-featured {
       grid-template-columns: 1fr;
       gap: 32px;
     }
@@ -1576,7 +1621,7 @@
                 hidden
               >
 
-                <div class="vhliso-mega-inner">
+                <div class="vhliso-mega-inner{% if vhliso_mega_featured_html != blank %} vhliso-mega-inner--with-featured{% endif %}">
 
                   <div class="vhliso-mega-left">
 
