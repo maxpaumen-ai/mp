@@ -519,6 +519,21 @@
     gap: 28px;
   }
 
+  /*
+    "Platte" variant: gebruikt wanneer een trigger se eigen sub-links
+    zelf GEEN verdere kinderen hebben (bv. Badkamer > Wastafelkranen,
+    een 2-niveau-diepe tak na het "flatten" van de vorige 3-niveau-
+    structuur). Dan is er niets om als aparte kolom-koppen te tonen —
+    gewoon 1 nette verticale lijst, i.p.v. de 4-koloms grid hierboven
+    die voor "kop + eigen sublijst per kolom" bedoeld is. Zie
+    snippets/vhliso-mega-trigger.liquid voor de keuzelogica (puur op
+    nesting-diepte, geen namen).
+  */
+  #vhliso-{{ section.id }} .vhliso-mega-categories--flat {
+    display: block;
+    max-width: 260px;
+  }
+
   #vhliso-{{ section.id }} .vhliso-mega-heading {
     display: block;
 
@@ -600,14 +615,23 @@
   #vhliso-{{ section.id }} .vhliso-mega-featured {
     display: grid;
     /*
-      auto-fit i.p.v. een vaste repeat(2, ...): als er maar 1 geldige
-      featured_collection-block is (collectie ingesteld), bestaat er
-      dan ook maar 1 kaart in de DOM — auto-fit laat die dan de volle
-      breedte innemen i.p.v. een lege, ongebruikte 2e kolom te
-      reserveren (repeat(2, ...) zou dat wel doen). Met 2 kaarten
-      blijft dit gewoon 2 gelijke kolommen.
+      auto-fit i.p.v. een vaste repeat(N, ...): met 1 geldig ingestelde
+      featured_collection-block (voor deze trigger) is er dan ook maar
+      1 kaart in de DOM — auto-fit laat die dan de volle breedte
+      innemen i.p.v. lege, ongebruikte kolommen te reserveren
+      (repeat(N, ...) zou dat wel doen). Met 2 of 3 kaarten (max. per
+      trigger) blijft dit gewoon zoveel gelijke kolommen als passen.
+
+      minmax-ondergrens bewust op 150px i.p.v. 200px: bij 3 kaarten in
+      de ~40%-breedte rechterkolom (op 1440px desktop) is er ca.
+      150-165px per kaart beschikbaar — 200px zou auto-fit dwingen om
+      alsnog naar 2 kolommen te breken, wat de gevraagde "3 naast
+      elkaar wanneer ruimte dit toelaat" onmogelijk zou maken. Op
+      smallere desktopbreedtes breekt dit vanzelf netjes naar 2 kaarten
+      (en de bestaande media query hieronder breekt het paneel zelf
+      naar 1 kolom breedte onder 1180px).
     */
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 20px;
 
     /*
@@ -1555,27 +1579,30 @@
   {% if section.settings.menu != blank %}
 
     {%- comment -%}
-      De 2 featured-collectiekaarten komen uit section BLOCKS
-      (type "featured_collection", elk met 1 eigen collection-
-      picker-setting) i.p.v. 2 losse top-level collection-
-      settings — Shopify's eigen theme-validator staat maximaal
-      1 setting van type "collection" per settings-array toe
-      ("setting collection type can only be inserted once in the
-      settings"). Elk block heeft zijn EIGEN settings-array (met
-      precies 1 collection-setting erin), dus dat is wel geldig.
-      Hardgeknipt op de eerste 2 blocks van dit type, ongeacht
-      hoeveel de merchant er toevoegt.
+      Featured-collectiekaarten komen uit section BLOCKS (type
+      "featured_collection", elk met 1 eigen collection-picker-
+      setting) i.p.v. losse top-level collection-settings —
+      Shopify's eigen theme-validator staat maximaal 1 setting van
+      type "collection" per settings-array toe ("setting collection
+      type can only be inserted once in the settings"). Elk block
+      heeft zijn EIGEN settings-array (met precies 1 collection-
+      setting erin), dus dat is wel geldig.
+
+      Elk block heeft ook een "trigger"-tekstsetting die (hoofdletter-
+      ongevoelig) gematcht wordt tegen de titel van het navigatie-item
+      waaronder het moet verschijnen — zie snippets/vhliso-mega-trigger
+      .liquid. Zo kan elke hoofdcategorie zijn EIGEN featured cards
+      hebben i.p.v. één globale set die overal hetzelfde blijft.
+      Hardgeknipt op de eerste 3 bijpassende blocks per trigger.
     {%- endcomment -%}
 
-    {%- capture vhliso_mega_featured_html -%}
-      {%- assign vhliso_mega_featured_shown = 0 -%}
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'featured_collection' and vhliso_mega_featured_shown < 2 -%}
-          {%- assign vhliso_mega_featured_shown = vhliso_mega_featured_shown | plus: 1 -%}
-          {%- render 'vhliso-mega-featured-card', collection: block.settings.collection -%}
-        {%- endif -%}
-      {%- endfor -%}
-    {%- endcapture -%}
+    {%- comment -%}
+      Unieke, overkoepelende teller voor paneel-/aria-ids — niet
+      per-loop, want een top-level item kan "geflatten" worden naar
+      meerdere triggers (zie hieronder), dus 1 for-loop-iteratie kan
+      0, 1 of meerdere triggers opleveren.
+    {%- endcomment -%}
+    {%- assign vhliso_trigger_index = 0 -%}
 
     <nav
       class="vhliso-nav"
@@ -1593,89 +1620,65 @@
 
             {%- comment -%}
               Elk top-level menu-item mét eigen sub-links in Shopify
-              Admin (Navigation) wordt automatisch een mega-menu —
-              niet hardgecodeerd aan "Catalog" gekoppeld. Zonder
-              sub-links (de {% else %} hieronder) blijft het simpelweg
-              de bestaande, ongewijzigde platte link.
+              Admin (Navigation) wordt automatisch een mega-menu-
+              trigger — niet hardgecodeerd aan een naam als "Catalogus"
+              gekoppeld. Zonder sub-links (de {% else %} hieronder)
+              blijft het simpelweg de bestaande, ongewijzigde platte
+              link.
+
+              Generieke "flatten"-regel (alleen op nesting-diepte, geen
+              namen): als dit item zelf kinderen heeft die OOK weer
+              kinderen hebben (3 niveaus diep, bv. Catalogus > Badkamer
+              > Wastafelkranen), dan wordt dit item zelf NIET als 1
+              trigger gerenderd — in plaats daarvan wordt elk kind
+              (Badkamer, Opbergen, ...) gepromoveerd tot zijn EIGEN
+              permanente top-level trigger, met zijn eigen sub-links en
+              featured cards. Zo blijft de horizontale collectienav
+              altijd zichtbaar (laag 3) en toont het mega-menu alleen
+              nog de content van de actieve hoofdcategorie (laag 4),
+              i.p.v. één generiek menu met alle categorieën tegelijk.
+
+              Heeft dit item alleen platte kinderen (2 niveaus diep),
+              dan blijft de bestaande fallback intact: 1 trigger met
+              al zijn kinderen als kolommen — precies zoals vóór deze
+              wijziging.
+
+              Shopify Navigation blijft in beide gevallen de enige bron
+              van waarheid; er wordt niets herschreven of verplaatst in
+              de navigatiedata zelf, alleen anders doorlopen bij het
+              renderen.
             {%- endcomment -%}
 
-            <li class="vhliso-nav-item">
+            {%- assign vhliso_link_has_grandchildren = false -%}
+            {%- for child in link.links -%}
+              {%- if child.links.size > 0 -%}
+                {%- assign vhliso_link_has_grandchildren = true -%}
+              {%- endif -%}
+            {%- endfor -%}
 
-              <button
-                type="button"
-                class="vhliso-nav-trigger"
-                aria-expanded="false"
-                aria-controls="vhliso-mega-{{ forloop.index }}-{{ section.id }}"
-                data-vhliso-mega-trigger
-              >
-                {{ link.title | escape }}
-                <svg class="vhliso-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </button>
+            {% if vhliso_link_has_grandchildren %}
 
-              <div
-                class="vhliso-mega"
-                id="vhliso-mega-{{ forloop.index }}-{{ section.id }}"
-                data-vhliso-mega-panel
-                hidden
-              >
+              {% for child in link.links %}
+                {%- assign vhliso_trigger_index = vhliso_trigger_index | plus: 1 -%}
+                {%- render 'vhliso-mega-trigger',
+                  trigger: child,
+                  index: vhliso_trigger_index,
+                  section_id: section.id,
+                  blocks: section.blocks
+                -%}
+              {% endfor %}
 
-                <div class="vhliso-mega-inner{% if vhliso_mega_featured_html != blank %} vhliso-mega-inner--with-featured{% endif %}">
+            {% else %}
 
-                  <div class="vhliso-mega-left">
+              {%- assign vhliso_trigger_index = vhliso_trigger_index | plus: 1 -%}
+              {%- render 'vhliso-mega-trigger',
+                trigger: link,
+                index: vhliso_trigger_index,
+                section_id: section.id,
+                blocks: section.blocks
+              -%}
 
-                    <div class="vhliso-mega-categories">
-
-                      {% for category in link.links %}
-
-                        <div class="vhliso-mega-col">
-
-                          {% if category.url != blank and category.url != '#' %}
-                            <a href="{{ category.url }}" class="vhliso-mega-heading">{{ category.title | escape }}</a>
-                          {% else %}
-                            <p class="vhliso-mega-heading">{{ category.title | escape }}</p>
-                          {% endif %}
-
-                          {% if category.links.size > 0 %}
-                            <ul class="vhliso-mega-links">
-                              {% for sub in category.links %}
-                                <li>
-                                  <a href="{{ sub.url }}">{{ sub.title | escape }}</a>
-                                </li>
-                              {% endfor %}
-                            </ul>
-                          {% endif %}
-
-                        </div>
-
-                      {% endfor %}
-
-                    </div>
-
-                    {% if link.url != blank %}
-                      <div class="vhliso-mega-viewall-wrap">
-                        <a href="{{ link.url }}" class="vhliso-mega-viewall">
-                          Bekijk alles
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
-                          </svg>
-                        </a>
-                      </div>
-                    {% endif %}
-
-                  </div>
-
-                  {% if vhliso_mega_featured_html != blank %}
-                    <div class="vhliso-mega-featured">{{ vhliso_mega_featured_html }}</div>
-                  {% endif %}
-
-                </div>
-
-              </div>
-
-            </li>
+            {% endif %}
 
           {% else %}
 
@@ -2813,12 +2816,30 @@
       "settings": [
         {
           "type": "paragraph",
-          "content": "Verschijnt als visuele kaart rechts in het mega-menu onder het menu-item dat submenu's heeft (bv. Catalogus). Voeg maximaal 2 van deze blocks toe — bv. één voor AUREA™ Living, één voor SPA Collection. Alleen de eerste 2 worden getoond."
+          "content": "Verschijnt als visuele kaart rechts in het mega-menu van het navigatie-item waarvan de titel exact overeenkomt met 'Trigger' hieronder (bv. 'Badkamer'). Per trigger worden maximaal de eerste 3 bijpassende blocks getoond."
+        },
+        {
+          "type": "text",
+          "id": "trigger",
+          "label": "Trigger (naam navigatie-item)",
+          "info": "Moet exact overeenkomen met de titel van het navigatie-item waaronder deze kaart moet verschijnen (bv. 'Badkamer' of 'Opbergen'). Hoofdlettergevoeligheid maakt niet uit. Leeg = kaart wordt nergens getoond."
         },
         {
           "type": "collection",
           "id": "collection",
           "label": "Collectie"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Aangepaste afbeelding (optioneel)",
+          "info": "Leeg = gebruikt de afbeelding van de gekozen collectie."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Aangepaste titel (optioneel)",
+          "info": "Leeg = gebruikt de titel van de gekozen collectie."
         }
       ]
     }
