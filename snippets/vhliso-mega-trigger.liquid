@@ -1,0 +1,182 @@
+{% comment %}
+  VANHOUTEN LIVING — 1 permanente desktop nav-trigger + het bijbehorende
+  mega-menu-paneel.
+
+  Geëxtraheerd uit sections/header.liquid zodat dezelfde trigger+paneel-
+  markup herbruikt kan worden voor 2 generieke gevallen (bepaald door de
+  aanroeper, deze snippet weet zelf niet welk geval van toepassing is):
+
+    1. "Geflatten" kind-item: het bovenliggende Shopify Navigation-item
+       had zelf ook weer kinderen-met-kinderen (3 niveaus diep, bv.
+       Catalogus > Badkamer > Wastafelkranen) — elk kind (Badkamer,
+       Opbergen, ...) wordt dan gepromoveerd tot een eigen permanente
+       top-level trigger, met zijn EIGEN sub-links en featured cards.
+    2. 2-level fallback: een top-level item met alleen platte kinderen
+       (geen kleinkinderen) wordt zoals voorheen als 1 trigger gerenderd
+       met al zijn kinderen als kolommen.
+
+  Er wordt nergens op een naam (bv. "Catalogus" of "Badkamer") getest —
+  alleen op nesting-diepte in de bestaande Shopify Navigation-structuur.
+
+  Parameters:
+    trigger    - het link-object (title/url/links) waarvoor dit een
+                 trigger + paneel rendert.
+    index      - unieke, overkoepelende teller (niet per-loop) zodat
+                 paneel-/aria-ids uniek blijven over alle triggers heen.
+    section_id - section.id van de header ({% render %} isoleert scope,
+                 dus dit moet expliciet meegegeven worden).
+    blocks     - section.blocks; featured_collection-blocks waarvan
+                 settings.trigger (via handleize genormaliseerd —
+                 hoofdletterongevoelig, spatie-/leestekenongevoelig)
+                 overeenkomt met trigger.title worden hier gefilterd en
+                 gerenderd (max 3, in block-volgorde).
+{% endcomment %}
+
+{%- comment -%}
+  Nog een generieke, puur-op-nesting-diepte keuze (geen namen): heeft
+  minstens 1 van trigger.links zelf weer eigen kinderen (category.links),
+  dan is dit een "kop + eigen sublijst per kolom"-structuur (2-level-
+  fallback-pad, bv. het oude Catalogus-niveau) — de bestaande 4-koloms
+  grid hieronder blijft dan correct. Heeft GEEN van trigger.links eigen
+  kinderen (allemaal bladeren, zoals Badkamer > Wastafelkranen na het
+  "flatten" hierboven), dan is er niets om als aparte kolomkoppen te
+  tonen: gewoon 1 nette verticale lijst i.p.v. een 4-koloms grid met
+  kale, sublijstloze koppen erin.
+{%- endcomment -%}
+{%- assign vhliso_trigger_has_subcategory_lists = false -%}
+{%- for category in trigger.links -%}
+  {%- if category.links.size > 0 -%}
+    {%- assign vhliso_trigger_has_subcategory_lists = true -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- comment -%}
+  Trigger-matching via handleize i.p.v. handmatig downcase+strip: Shopify
+  heeft geen schema-settingtype om rechtstreeks naar 1 specifiek item
+  binnen een link_list te verwijzen (link_list kiest alleen een hele
+  Navigation-menu, geen los item; het link-object zelf heeft geen
+  bruikbaar los, van titel onafhankelijk ID — alleen title/url/handle,
+  en handle wordt zelf ook weer van de titel afgeleid). Een rechtstreekse,
+  stabiele object-koppeling is dus niet native mogelijk zonder nieuwe
+  Shopify Admin-data te vereisen — vandaar deze robuustere tekstmatch.
+
+  handleize is Shopify's EIGEN filter voor precies dit doel (hetzelfde
+  mechanisme waarmee Shopify zelf titels naar url-handles omzet):
+  lowercase, interne spaties/leestekens (ook meerdere achter elkaar)
+  worden naar één koppelteken genormaliseerd, voor-/achterspaties vallen
+  vanzelf weg. Dat maakt de match ongevoelig voor hoofdlettergebruik,
+  extra spaties EN kleine leestekenverschillen — zonder regex, zonder
+  URL-string-hacks, zonder categorieën hard te coderen.
+{%- endcomment -%}
+{%- capture vhliso_mega_featured_html -%}
+  {%- assign vhliso_mega_featured_shown = 0 -%}
+  {%- assign vhliso_trigger_title_norm = trigger.title | handleize -%}
+  {%- for block in blocks -%}
+    {%- if block.type == 'featured_collection' and vhliso_mega_featured_shown < 3 -%}
+      {%- assign vhliso_block_trigger_norm = block.settings.trigger | handleize -%}
+      {%- if vhliso_block_trigger_norm != blank and vhliso_block_trigger_norm == vhliso_trigger_title_norm -%}
+        {%- assign vhliso_mega_featured_shown = vhliso_mega_featured_shown | plus: 1 -%}
+        {%- render 'vhliso-mega-featured-card',
+          collection: block.settings.collection,
+          custom_image: block.settings.image,
+          custom_title: block.settings.title
+        -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+<li class="vhliso-nav-item">
+
+  <button
+    type="button"
+    class="vhliso-nav-trigger"
+    aria-expanded="false"
+    aria-controls="vhliso-mega-{{ index }}-{{ section_id }}"
+    data-vhliso-mega-trigger
+  >
+    {{ trigger.title | escape }}
+  </button>
+
+  <div
+    class="vhliso-mega"
+    id="vhliso-mega-{{ index }}-{{ section_id }}"
+    data-vhliso-mega-panel
+    hidden
+  >
+
+    <div class="vhliso-mega-inner{% if vhliso_mega_featured_html != blank %} vhliso-mega-inner--with-featured{% endif %}">
+
+      <div class="vhliso-mega-left">
+
+        {% if vhliso_trigger_has_subcategory_lists %}
+
+          <div class="vhliso-mega-categories">
+
+            {% for category in trigger.links %}
+
+              <div class="vhliso-mega-col">
+
+                {% if category.url != blank and category.url != '#' %}
+                  <a href="{{ category.url }}" class="vhliso-mega-heading">{{ category.title | escape }}</a>
+                {% else %}
+                  <p class="vhliso-mega-heading">{{ category.title | escape }}</p>
+                {% endif %}
+
+                {% if category.links.size > 0 %}
+                  <ul class="vhliso-mega-links">
+                    {% for sub in category.links %}
+                      <li>
+                        <a href="{{ sub.url }}">{{ sub.title | escape }}</a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+
+              </div>
+
+            {% endfor %}
+
+          </div>
+
+        {% else %}
+
+          <div class="vhliso-mega-categories vhliso-mega-categories--flat">
+
+            <p class="vhliso-mega-heading">Categorieën</p>
+
+            <ul class="vhliso-mega-links">
+              {% for category in trigger.links %}
+                <li>
+                  <a href="{{ category.url }}">{{ category.title | escape }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+
+          </div>
+
+        {% endif %}
+
+        {% if trigger.url != blank %}
+          <div class="vhliso-mega-viewall-wrap">
+            <a href="{{ trigger.url }}" class="vhliso-mega-viewall">
+              Bekijk alles
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
+        {% endif %}
+
+      </div>
+
+      {% if vhliso_mega_featured_html != blank %}
+        <div class="vhliso-mega-featured">{{ vhliso_mega_featured_html }}</div>
+      {% endif %}
+
+    </div>
+
+  </div>
+
+</li>
