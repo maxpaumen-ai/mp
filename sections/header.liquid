@@ -439,21 +439,6 @@
     transform: scaleX(1);
   }
 
-  #vhliso-{{ section.id }} .vhliso-nav-chevron {
-    width: 9px;
-    height: 9px;
-
-    flex-shrink: 0;
-
-    color: #9a978f;
-
-    transition: transform .18s ease;
-  }
-
-  #vhliso-{{ section.id }} .vhliso-nav-trigger[aria-expanded='true'] .vhliso-nav-chevron {
-    transform: rotate(180deg);
-  }
-
   /*
     position:fixed i.p.v. absolute: .vhliso-nav heeft
     overflow-x:auto voor horizontaal scrollen bij veel
@@ -1682,19 +1667,22 @@
 
           {% else %}
 
-            <li>
+            {%- comment -%}
+              Top-level items ZONDER kinderen (bv. Home, Contact) worden
+              op DESKTOP bewust niet meer in de permanente navigatiebalk
+              gerenderd — die balk moet puur een commerciële categorie-nav
+              zijn (elk zichtbaar item hierboven is een echte mega-menu-
+              trigger, met eigen sub-links). Home is al bereikbaar via het
+              logo, Favorieten via het hart-icoon in .vhliso-actions.
 
-              <a
-                class="vhliso-nav-link"
-                href="{{ link.url }}"
-                {% if link.current %}
-                  aria-current="page"
-                {% endif %}
-              >
-                {{ link.title | escape }}
-              </a>
-
-            </li>
+              Dit is UITSLUITEND een renderkeuze op dit ene punt: er wordt
+              niets verwijderd of herschreven in de Shopify Navigation-data
+              zelf (section.settings.menu blijft volledig intact), en de
+              mobiele drawer (verderop, een aparte, ongewijzigde for-loop
+              over dezelfde section.settings.menu.links) blijft
+              Home/Catalogus/Contact gewoon tonen zoals voorheen — alleen
+              dit ene else-pad binnen de DESKTOP-nav wordt overgeslagen.
+            {%- endcomment -%}
 
           {% endif %}
 
