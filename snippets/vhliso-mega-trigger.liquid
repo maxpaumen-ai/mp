@@ -26,7 +26,8 @@
     section_id - section.id van de header ({% render %} isoleert scope,
                  dus dit moet expliciet meegegeven worden).
     blocks     - section.blocks; featured_collection-blocks waarvan
-                 settings.trigger (hoofdletterongevoelig, getrimd)
+                 settings.trigger (via handleize genormaliseerd —
+                 hoofdletterongevoelig, spatie-/leestekenongevoelig)
                  overeenkomt met trigger.title worden hier gefilterd en
                  gerenderd (max 3, in block-volgorde).
 {% endcomment %}
@@ -49,13 +50,31 @@
   {%- endif -%}
 {%- endfor -%}
 
+{%- comment -%}
+  Trigger-matching via handleize i.p.v. handmatig downcase+strip: Shopify
+  heeft geen schema-settingtype om rechtstreeks naar 1 specifiek item
+  binnen een link_list te verwijzen (link_list kiest alleen een hele
+  Navigation-menu, geen los item; het link-object zelf heeft geen
+  bruikbaar los, van titel onafhankelijk ID — alleen title/url/handle,
+  en handle wordt zelf ook weer van de titel afgeleid). Een rechtstreekse,
+  stabiele object-koppeling is dus niet native mogelijk zonder nieuwe
+  Shopify Admin-data te vereisen — vandaar deze robuustere tekstmatch.
+
+  handleize is Shopify's EIGEN filter voor precies dit doel (hetzelfde
+  mechanisme waarmee Shopify zelf titels naar url-handles omzet):
+  lowercase, interne spaties/leestekens (ook meerdere achter elkaar)
+  worden naar één koppelteken genormaliseerd, voor-/achterspaties vallen
+  vanzelf weg. Dat maakt de match ongevoelig voor hoofdlettergebruik,
+  extra spaties EN kleine leestekenverschillen — zonder regex, zonder
+  URL-string-hacks, zonder categorieën hard te coderen.
+{%- endcomment -%}
 {%- capture vhliso_mega_featured_html -%}
   {%- assign vhliso_mega_featured_shown = 0 -%}
-  {%- assign vhliso_trigger_title_lower = trigger.title | downcase | strip -%}
+  {%- assign vhliso_trigger_title_norm = trigger.title | handleize -%}
   {%- for block in blocks -%}
     {%- if block.type == 'featured_collection' and vhliso_mega_featured_shown < 3 -%}
-      {%- assign vhliso_block_trigger_lower = block.settings.trigger | downcase | strip -%}
-      {%- if vhliso_block_trigger_lower != blank and vhliso_block_trigger_lower == vhliso_trigger_title_lower -%}
+      {%- assign vhliso_block_trigger_norm = block.settings.trigger | handleize -%}
+      {%- if vhliso_block_trigger_norm != blank and vhliso_block_trigger_norm == vhliso_trigger_title_norm -%}
         {%- assign vhliso_mega_featured_shown = vhliso_mega_featured_shown | plus: 1 -%}
         {%- render 'vhliso-mega-featured-card',
           collection: block.settings.collection,

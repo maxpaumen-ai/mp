@@ -1573,12 +1573,20 @@
       heeft zijn EIGEN settings-array (met precies 1 collection-
       setting erin), dus dat is wel geldig.
 
-      Elk block heeft ook een "trigger"-tekstsetting die (hoofdletter-
-      ongevoelig) gematcht wordt tegen de titel van het navigatie-item
-      waaronder het moet verschijnen — zie snippets/vhliso-mega-trigger
-      .liquid. Zo kan elke hoofdcategorie zijn EIGEN featured cards
-      hebben i.p.v. één globale set die overal hetzelfde blijft.
-      Hardgeknipt op de eerste 3 bijpassende blocks per trigger.
+      Elk block heeft ook een "trigger"-tekstsetting die (via handleize
+      genormaliseerd — hoofdletter-/spatie-/leestekenongevoelig)
+      gematcht wordt tegen de titel van het navigatie-item waaronder
+      het moet verschijnen — zie snippets/vhliso-mega-trigger.liquid.
+      Zo kan elke hoofdcategorie zijn EIGEN featured cards hebben
+      i.p.v. één globale set die overal hetzelfde blijft. Hardgeknipt
+      op de eerste 3 bijpassende blocks per trigger.
+
+      Shopify biedt geen schema-settingtype om rechtstreeks naar 1
+      specifiek item binnen een link_list te verwijzen (link_list kiest
+      alleen een hele Navigation-menu) en het link-object zelf heeft
+      geen van de titel onafhankelijk stabiel ID — een tekstmatch is
+      dus de enige Shopify-native optie hiervoor, zonder nieuwe Admin-
+      data te vereisen.
     {%- endcomment -%}
 
     {%- comment -%}
@@ -2810,7 +2818,7 @@
           "type": "text",
           "id": "trigger",
           "label": "Trigger (naam navigatie-item)",
-          "info": "Moet exact overeenkomen met de titel van het navigatie-item waaronder deze kaart moet verschijnen (bv. 'Badkamer' of 'Opbergen'). Hoofdlettergevoeligheid maakt niet uit. Leeg = kaart wordt nergens getoond."
+          "info": "Vul exact de naam in van de categorie uit de desktop-navigatie, bijvoorbeeld: Badkamer. Hoofdletters, en extra spaties voor/achter of tussen woorden maken niet uit. Leeg = kaart wordt nergens getoond."
         },
         {
           "type": "collection",
