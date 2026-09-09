@@ -126,7 +126,7 @@
     display: block;
 
     width: 100%;
-    height: 50px;
+    height: 54px;
 
     margin: 0;
 
@@ -329,7 +329,7 @@
     display: flex;
     align-items: center;
 
-    gap: 38px;
+    gap: 44px;
 
     min-width: max-content;
 
@@ -1135,7 +1135,8 @@
 
     #vhliso-{{ section.id }} .vhliso-icon,
     #vhliso-{{ section.id }} .vhliso-mobile-icon,
-    #vhliso-{{ section.id }} .vhliso-mobile-search {
+    #vhliso-{{ section.id }} .vhliso-mobile-search,
+    #vhliso-{{ section.id }} .vhliso-mobile-menu-btn {
       color: #ffffff !important;
     }
 
@@ -1205,6 +1206,96 @@
 
         color: #ffffff !important;
 
+        box-shadow: none !important;
+      }
+
+    }
+
+
+    /* =====================================================
+       SCROLLED STATE (homepage only)
+       Zodra de hero grotendeels gescrold is, wordt de header
+       "sticky" (position:fixed, blijft aan de bovenkant
+       hangen) en wisselt hij naar een normale, ondoorzichtige
+       witte balk met donkere tekst/iconen — dezelfde stijl die
+       op alle andere pagina's standaard al geldt (zie de
+       ongewijzigde basisregels bovenin dit bestand, die hier
+       gewoon opnieuw worden toegepast met !important, zodat ze
+       boven de transparante homepage-regels hierboven winnen).
+       Wordt aan-/uitgezet door een simpele scroll-listener
+       verderop in dit bestand — geen timers, geen
+       MutationObserver.
+    ========================================================= */
+
+    #shopify-section-{{ section.id }}.vhliso-header-fixed {
+      position: fixed !important;
+      top: 0 !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled {
+      background: #ffffff !important;
+      color: #444441 !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-main {
+      background: #ffffff !important;
+      border-bottom: 1px solid #f2f2f0 !important;
+      box-shadow: none !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-nav {
+      background: #ffffff !important;
+      border-bottom: 1px solid #efefed !important;
+      box-shadow: none !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-nav-link {
+      color: #444441 !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-nav-link::after {
+      background: #333330 !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-logo img,
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-mobile-logo img {
+      filter: none !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-icon,
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-mobile-icon,
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-mobile-search,
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-mobile-menu-btn {
+      color: #333330 !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-search-input {
+      background: #f5f5f4 !important;
+      color: #444441 !important;
+      border: 0 !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-search-input::placeholder {
+      color: #777773 !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-search-submit-link {
+      color: #333330 !important;
+    }
+
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-cart-count {
+      background: #8e9800 !important;
+      color: #fff !important;
+    }
+
+    @media (max-width: 989px) {
+
+      #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-mobile {
+        background: #ffffff !important;
+        border-bottom: 1px solid #efefed !important;
+        color: #444441 !important;
         box-shadow: none !important;
       }
 
@@ -2482,6 +2573,110 @@
       'shopify:section:select',
       updateVHLHeaderOffset
     );
+
+
+    /* =====================================================
+       SCROLLED STATE
+       Wisselt de transparante overlay-header naar een sticky,
+       ondoorzichtige witte balk zodra de hero grotendeels is
+       gescrold. Eén passive scroll-listener,
+       requestAnimationFrame-gethrottled (geen setTimeout/
+       setInterval, geen MutationObserver) — toggelt puur 2
+       classes, de daadwerkelijke stijlwissel gebeurt volledig
+       in CSS hierboven.
+    ====================================================== */
+
+    var vhlHeaderWrapper =
+      document.getElementById(
+        'shopify-section-{{ section.id }}'
+      );
+
+    if (vhlHeaderWrapper && root) {
+
+      var vhlScrollThreshold = 480;
+
+      function vhlComputeScrollThreshold() {
+
+        var heroEl =
+          document.querySelector('.vhl-video-hero');
+
+        if (!heroEl) return;
+
+        var heroRect =
+          heroEl.getBoundingClientRect();
+
+        var heroBottom =
+          heroRect.top + window.scrollY + heroRect.height;
+
+        var headerHeight =
+          root.getBoundingClientRect().height;
+
+        /*
+          Schakel over ruim vóór het einde van de hero (75%
+          ervan), zodat de sticky witte header al verschijnt
+          terwijl er nog paginacontent volgt — niet pas op de
+          allerlaatste pixel van de hero.
+        */
+
+        vhlScrollThreshold =
+          Math.max(
+            (heroRect.height * 0.75) - headerHeight,
+            80
+          );
+
+      }
+
+      var vhlScrollTicking = false;
+
+      function vhlUpdateScrolledState() {
+
+        var isScrolled =
+          window.scrollY > vhlScrollThreshold;
+
+        root.classList.toggle(
+          'vhliso-scrolled',
+          isScrolled
+        );
+
+        vhlHeaderWrapper.classList.toggle(
+          'vhliso-header-fixed',
+          isScrolled
+        );
+
+        vhlScrollTicking = false;
+
+      }
+
+      function vhlOnScroll() {
+
+        if (vhlScrollTicking) return;
+
+        vhlScrollTicking = true;
+
+        window.requestAnimationFrame(
+          vhlUpdateScrolledState
+        );
+
+      }
+
+      vhlComputeScrollThreshold();
+      vhlUpdateScrolledState();
+
+      window.addEventListener(
+        'scroll',
+        vhlOnScroll,
+        { passive: true }
+      );
+
+      window.addEventListener(
+        'resize',
+        function () {
+          vhlComputeScrollThreshold();
+          vhlUpdateScrolledState();
+        }
+      );
+
+    }
 
   {% endif %}
 
