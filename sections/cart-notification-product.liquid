@@ -56,41 +56,7 @@
           {%- if upsell_handle != blank -%}
             {%- assign upsell_product = all_products[upsell_handle] -%}
             {%- if upsell_product and upsell_product.available -%}
-              {%-
-                render 'cart-drawer-upsell',
-                block: block,
-                block_id: block.id,
-                product_form_id: 'cart-notification-upsell-' | append: block.id,
-                upsell_product: upsell_product,
-                show_description: block.settings.show_upsell_description,
-                description_text: block.settings.upsell_description_text,
-                upsell_button_text: block.settings.upsell_button_text,
-                button_text_color: block.settings.upsell_button_text_color,
-                upsell_custom_bestseller_svg: block.settings.upsell_custom_bestseller_svg,
-                title_color: block.settings.upsell_title_color,
-                description_color: block.settings.upsell_description_color,
-                show_best_seller_tag: block.settings.show_upsell_best_seller_tag,
-                best_seller_text: block.settings.upsell_best_seller_text,
-                best_seller_tag_color: block.settings.upsell_best_seller_tag_color,
-                best_seller_tag_text_color: block.settings.upsell_best_seller_tag_text_color,
-                show_price: block.settings.upsell_show_price,
-                card_bg_color: block.settings.upsell_card_background_color,
-                card_border_radius: block.settings.upsell_card_border_radius,
-                border_width: block.settings.upsell_border_width,
-                border_style: block.settings.upsell_border_style,
-                border_color: block.settings.upsell_border_color,
-                variant_border_color: block.settings.upsell_variant_border_color,
-                variant_bg_color: block.settings.upsell_variant_background_color,
-                variant_text_color: block.settings.upsell_variant_text_color,
-                button_bg_color: block.settings.upsell_button_bg_color,
-                button_border_radius: block.settings.upsell_button_border_radius,
-                button_text_color: block.settings.upsell_button_text_color,
-                upsell_show_price: block.settings.upsell_show_price,
-                product_image_bg_color: block.settings.upsell_product_image_background_color,
-                image_border_radius: block.settings.upsell_image_border_radius,
-                top_margin: 10,
-                bottom_margin: 10
-              -%}
+              {%- render 'cart-drawer-upsell', block: block, block_id: block.id, product_form_id: 'cart-notification-upsell-', append: block.id, upsell_product: upsell_product, show_description: block.settings.show_upsell_description, description_text: block.settings.upsell_description_text, upsell_button_text: block.settings.upsell_button_text, button_text_color: block.settings.upsell_button_text_color, upsell_custom_bestseller_svg: block.settings.upsell_custom_bestseller_svg, title_color: block.settings.upsell_title_color, description_color: block.settings.upsell_description_color, show_best_seller_tag: block.settings.show_upsell_best_seller_tag, best_seller_text: block.settings.upsell_best_seller_text, best_seller_tag_color: block.settings.upsell_best_seller_tag_color, best_seller_tag_text_color: block.settings.upsell_best_seller_tag_text_color, show_price: block.settings.upsell_show_price, card_bg_color: block.settings.upsell_card_background_color, card_border_radius: block.settings.upsell_card_border_radius, border_width: block.settings.upsell_border_width, border_style: block.settings.upsell_border_style, border_color: block.settings.upsell_border_color, variant_border_color: block.settings.upsell_variant_border_color, variant_bg_color: block.settings.upsell_variant_background_color, variant_text_color: block.settings.upsell_variant_text_color, button_bg_color: block.settings.upsell_button_bg_color, button_border_radius: block.settings.upsell_button_border_radius, upsell_show_price: block.settings.upsell_show_price, product_image_bg_color: block.settings.upsell_product_image_background_color, image_border_radius: block.settings.upsell_image_border_radius, top_margin: 10, bottom_margin: 10 -%}
             {%- endif -%}
           {%- endif -%}
         {%- endif -%}
@@ -280,3 +246,66 @@
   ]
 }
 {% endschema %}
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: |-
+    {%-
+                    render 'cart-drawer-upsell',
+                    block: block,
+                    block_id: block.id,
+                    product_form_id: 'cart-notification-upsell-' | append: block.id,
+                    upsell_product: upsell_product,
+                    show_description: block.settings.show_upsell_description,
+                    description_text: block.settings.upsell_description_text,
+                    upsell_button_text: block.settings.upsell_button_text,
+                    button_text_color: block.settings.upsell_button_text_color,
+                    upsell_custom_bestseller_svg: block.settings.upsell_custom_bestseller_svg,
+                    title_color: block.settings.upsell_title_color,
+                    description_color: block.settings.upsell_description_color,
+                    show_best_seller_tag: block.settings.show_upsell_best_seller_tag,
+                    best_seller_text: block.settings.upsell_best_seller_text,
+                    best_seller_tag_color: block.settings.upsell_best_seller_tag_color,
+                    best_seller_tag_text_color: block.settings.upsell_best_seller_tag_text_color,
+                    show_price: block.settings.upsell_show_price,
+                    card_bg_color: block.settings.upsell_card_background_color,
+                    card_border_radius: block.settings.upsell_card_border_radius,
+                    border_width: block.settings.upsell_border_width,
+                    border_style: block.settings.upsell_border_style,
+                    border_color: block.settings.upsell_border_color,
+                    variant_border_color: block.settings.upsell_variant_border_color,
+                    variant_bg_color: block.settings.upsell_variant_background_color,
+                    variant_text_color: block.settings.upsell_variant_text_color,
+                    button_bg_color: block.settings.upsell_button_bg_color,
+                    button_border_radius: block.settings.upsell_button_border_radius,
+                    button_text_color: block.settings.upsell_button_text_color,
+                    upsell_show_price: block.settings.upsell_show_price,
+                    product_image_bg_color: block.settings.upsell_product_image_background_color,
+                    image_border_radius: block.settings.upsell_image_border_radius,
+                    top_margin: 10,
+                    bottom_margin: 10
+                  -%}
+  to: "{%- render 'cart-drawer-upsell', block: block, block_id: block.id, product_form_id:
+    'cart-notification-upsell-', append: block.id, upsell_product: upsell_product,
+    show_description: block.settings.show_upsell_description, description_text: block.settings.upsell_description_text,
+    upsell_button_text: block.settings.upsell_button_text, button_text_color: block.settings.upsell_button_text_color,
+    upsell_custom_bestseller_svg: block.settings.upsell_custom_bestseller_svg, title_color:
+    block.settings.upsell_title_color, description_color: block.settings.upsell_description_color,
+    show_best_seller_tag: block.settings.show_upsell_best_seller_tag, best_seller_text:
+    block.settings.upsell_best_seller_text, best_seller_tag_color: block.settings.upsell_best_seller_tag_color,
+    best_seller_tag_text_color: block.settings.upsell_best_seller_tag_text_color,
+    show_price: block.settings.upsell_show_price, card_bg_color: block.settings.upsell_card_background_color,
+    card_border_radius: block.settings.upsell_card_border_radius, border_width: block.settings.upsell_border_width,
+    border_style: block.settings.upsell_border_style, border_color: block.settings.upsell_border_color,
+    variant_border_color: block.settings.upsell_variant_border_color, variant_bg_color:
+    block.settings.upsell_variant_background_color, variant_text_color: block.settings.upsell_variant_text_color,
+    button_bg_color: block.settings.upsell_button_bg_color, button_border_radius:
+    block.settings.upsell_button_border_radius, upsell_show_price: block.settings.upsell_show_price,
+    product_image_bg_color: block.settings.upsell_product_image_background_color,
+    image_border_radius: block.settings.upsell_image_border_radius, top_margin: 10,
+    bottom_margin: 10 -%}"
+  position: 2501..4214
+{% endcomment %}

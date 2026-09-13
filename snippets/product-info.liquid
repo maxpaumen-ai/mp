@@ -1366,18 +1366,7 @@
 
     {% when 'simple_variant_picker' %}
       {% assign product_form_id = 'product-form-' | append: section.id %}
-      {%
-        render 'simple-variant-picker',
-        product: product,
-        block: block,
-        product_form_id: product_form_id,
-        margin_top: block.settings.margin_top | default: 0,
-        margin_bottom: block.settings.margin_bottom | default: 0,
-        use_dropdown: block.settings.use_dropdown
-        hide_option_1: block.settings.hide_option_1,
-        hide_option_2: block.settings.hide_option_2,
-        hide_option_3: block.settings.hide_option_3,
-      %}
+      {% render 'simple-variant-picker', product: product, block: block, product_form_id: product_form_id, margin_top: block.settings.margin_top, default: 0, margin_bottom: block.settings.margin_bottom, use_dropdown: block.settings.use_dropdown, hide_option_1: block.settings.hide_option_1, hide_option_2: block.settings.hide_option_2, hide_option_3: block.settings.hide_option_3 %}
 
     {% when 'product_videos' %}
       {% render 'video-carousel-standalone',
@@ -3971,3 +3960,29 @@
     document.addEventListener('shopify:section:load', run);
   })();
 </script>
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: |-
+    {%
+            render 'simple-variant-picker',
+            product: product,
+            block: block,
+            product_form_id: product_form_id,
+            margin_top: block.settings.margin_top | default: 0,
+            margin_bottom: block.settings.margin_bottom | default: 0,
+            use_dropdown: block.settings.use_dropdown
+            hide_option_1: block.settings.hide_option_1,
+            hide_option_2: block.settings.hide_option_2,
+            hide_option_3: block.settings.hide_option_3,
+          %}
+  to: "{% render 'simple-variant-picker', product: product, block: block, product_form_id:
+    product_form_id, margin_top: block.settings.margin_top, default: 0, margin_bottom:
+    block.settings.margin_bottom, use_dropdown: block.settings.use_dropdown, hide_option_1:
+    block.settings.hide_option_1, hide_option_2: block.settings.hide_option_2, hide_option_3:
+    block.settings.hide_option_3 %}"
+  position: 65890..66266
+{% endcomment %}
