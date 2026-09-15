@@ -157,7 +157,26 @@
 
         {% endif %}
 
-        {% if trigger.url != blank %}
+        {%- comment -%}
+          BUGFIX: "#" is de placeholder-URL die Shopify Navigation geeft
+          aan een top-level item dat puur als groeperende dropdown-
+          ouder bestaat, zonder dat de merchant er zelf een echte
+          pagina aan gekoppeld heeft (zo staan Collecties/Accessoires
+          nu in de live Navigation — Badkamer/Opbergen hebben wél een
+          eigen collectie-URL). De oude check (`!= blank`) liet die
+          "#" gewoon door, dus rendere "Bekijk alles" dan wél zichtbaar
+          en klikbaar, maar als een dode link naar zichzelf (geen
+          navigatie, geen foutmelding — vandaar "zichtbaar maar werkt
+          niet correct"). Dezelfde `!= blank and != '#'`-guard wordt
+          hierboven al gebruikt voor exact dezelfde situatie bij de
+          categorie-kop-links (zie category.url-check) — hier nu ook
+          toegepast, puur voor consistentie, geen nieuwe logica.
+          Zodra de merchant in Shopify Admin → Navigation een echte
+          bestemming aan zo'n item geeft, verschijnt "Bekijk alles"
+          vanzelf weer en linkt hij automatisch naar die URL — er is
+          dan geen verdere codewijziging nodig.
+        {%- endcomment -%}
+        {% if trigger.url != blank and trigger.url != '#' %}
           <div class="vhliso-mega-viewall-wrap">
             <a href="{{ trigger.url }}" class="vhliso-mega-viewall">
               Bekijk alles
