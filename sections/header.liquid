@@ -408,7 +408,7 @@
     color: inherit;
     font-family: inherit;
 
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 400;
 
     white-space: nowrap;
@@ -453,14 +453,25 @@
     zodat dit ook correct blijft op de transparante homepage-
     header en achter de announcement-bar.
   */
+  /*
+    z-index en background hier bewust extra hard gezet: bij de
+    transparante homepage-header-state (zie de request.page_type ==
+    'index'-CSS verderop) is de hele #vhliso-{{ section.id }}-root
+    transparant gemaakt om de hero eronder te laten leven — dit paneel
+    zit daar als kind in, maar heeft zijn EIGEN expliciete achtergrond
+    en mag daar nooit door beïnvloed worden. z-index verhoogd (was 60)
+    en background-color met !important als extra zekerheid, zodat het
+    geopende mega-menu altijd 100% dekkend wit is, met de hero nergens
+    zichtbaar erdoorheen.
+  */
   #vhliso-{{ section.id }} .vhliso-mega {
     position: fixed;
     left: 0;
     right: 0;
 
-    z-index: 60;
+    z-index: 100;
 
-    background: #ffffff;
+    background-color: #ffffff !important;
 
     border-top: 1px solid #e8e8e8;
     border-bottom: 1px solid #e8e8e8;
@@ -468,11 +479,21 @@
     box-shadow: 0 12px 28px rgba(0, 0, 0, .06);
   }
 
+  /*
+    Links/rechts-padding bewust gelijk aan .vhliso-main en .vhliso-nav
+    (beide "padding: 0 24px", edge-to-edge, geen eigen max-width-cap) —
+    de vorige versie centreerde binnen max-width:min(1400px,94vw), wat
+    op een normale desktopbreedte (bv. 1440px) een linkerrand van
+    ~52px gaf (20px auto-margin + 32px padding) terwijl de nav-triggers
+    zelf op 24px van de viewportrand beginnen: het mega-menu stond dus
+    zichtbaar niet in lijn met "Badkamer" e.a. erboven. Door hier exact
+    dezelfde padding en GEEN aparte centrerende max-width te gebruiken,
+    lopen mega-menu-content en nav-balk op elke breedte pixel-perfect
+    in lijn — "content binnen dezelfde nette container" als de rest
+    van de header.
+  */
   #vhliso-{{ section.id }} .vhliso-mega-inner {
-    max-width: min(1400px, 94vw);
-    margin: 0 auto;
-
-    padding: 36px 32px 32px;
+    padding: 36px 24px 32px;
 
     display: grid;
     /*
@@ -554,8 +575,9 @@
   #vhliso-{{ section.id }} .vhliso-mega-links a {
     display: block;
 
-    font-size: 14px;
-    line-height: 1.7;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.6;
     color: #52504c;
 
     transition: color .15s ease;
@@ -600,23 +622,20 @@
   #vhliso-{{ section.id }} .vhliso-mega-featured {
     display: grid;
     /*
-      auto-fit i.p.v. een vaste repeat(N, ...): met 1 geldig ingestelde
+      auto-fit i.p.v. een vaste repeat(2, ...): met 1 geldig ingestelde
       featured_collection-block (voor deze trigger) is er dan ook maar
       1 kaart in de DOM — auto-fit laat die dan de volle breedte
-      innemen i.p.v. lege, ongebruikte kolommen te reserveren
-      (repeat(N, ...) zou dat wel doen). Met 2 of 3 kaarten (max. per
-      trigger) blijft dit gewoon zoveel gelijke kolommen als passen.
+      innemen i.p.v. een lege, ongebruikte 2e kolom te reserveren
+      (repeat(2, ...) zou dat wel doen). Met 2 kaarten (het maximum per
+      trigger) blijft dit gewoon 2 gelijke kolommen.
 
-      minmax-ondergrens bewust op 150px i.p.v. 200px: bij 3 kaarten in
-      de ~40%-breedte rechterkolom (op 1440px desktop) is er ca.
-      150-165px per kaart beschikbaar — 200px zou auto-fit dwingen om
-      alsnog naar 2 kolommen te breken, wat de gevraagde "3 naast
-      elkaar wanneer ruimte dit toelaat" onmogelijk zou maken. Op
-      smallere desktopbreedtes breekt dit vanzelf netjes naar 2 kaarten
-      (en de bestaande media query hieronder breekt het paneel zelf
-      naar 1 kolom breedte onder 1180px).
+      minmax-ondergrens verhoogd naar 220px (was 150px, uit een eerdere
+      ronde met een cap van 3 kaarten per trigger — die cap is nu
+      teruggebracht naar 2, dus is er weer ruimte voor grotere,
+      "editorial"-achtige kaarten zoals gevraagd, i.p.v. de compactere
+      kaarten die nodig waren om 3 naast elkaar te laten passen).
     */
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
 
     /*
@@ -1579,7 +1598,9 @@
       het moet verschijnen — zie snippets/vhliso-mega-trigger.liquid.
       Zo kan elke hoofdcategorie zijn EIGEN featured cards hebben
       i.p.v. één globale set die overal hetzelfde blijft. Hardgeknipt
-      op de eerste 3 bijpassende blocks per trigger.
+      op de eerste 2 bijpassende blocks per trigger (exact 2 grote
+      "editorial"-kaarten naast elkaar, zoals de Joseph Joseph-
+      referentie).
 
       Shopify biedt geen schema-settingtype om rechtstreeks naar 1
       specifiek item binnen een link_list te verwijzen (link_list kiest
@@ -2812,7 +2833,7 @@
       "settings": [
         {
           "type": "paragraph",
-          "content": "Verschijnt als visuele kaart rechts in het mega-menu van het navigatie-item waarvan de titel exact overeenkomt met 'Trigger' hieronder (bv. 'Badkamer'). Per trigger worden maximaal de eerste 3 bijpassende blocks getoond."
+          "content": "Verschijnt als visuele kaart rechts in het mega-menu van het navigatie-item waarvan de titel exact overeenkomt met 'Trigger' hieronder (bv. 'Badkamer'). Per trigger worden maximaal de eerste 2 bijpassende blocks getoond."
         },
         {
           "type": "text",
