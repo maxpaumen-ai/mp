@@ -29,7 +29,7 @@
                  settings.trigger (via handleize genormaliseerd —
                  hoofdletterongevoelig, spatie-/leestekenongevoelig)
                  overeenkomt met trigger.title worden hier gefilterd en
-                 gerenderd (max 3, in block-volgorde).
+                 gerenderd (max 2, in block-volgorde).
 {% endcomment %}
 
 {%- comment -%}
@@ -72,7 +72,7 @@
   {%- assign vhliso_mega_featured_shown = 0 -%}
   {%- assign vhliso_trigger_title_norm = trigger.title | handleize -%}
   {%- for block in blocks -%}
-    {%- if block.type == 'featured_collection' and vhliso_mega_featured_shown < 3 -%}
+    {%- if block.type == 'featured_collection' and vhliso_mega_featured_shown < 2 -%}
       {%- assign vhliso_block_trigger_norm = block.settings.trigger | handleize -%}
       {%- if vhliso_block_trigger_norm != blank and vhliso_block_trigger_norm == vhliso_trigger_title_norm -%}
         {%- assign vhliso_mega_featured_shown = vhliso_mega_featured_shown | plus: 1 -%}
