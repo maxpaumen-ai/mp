@@ -1298,6 +1298,24 @@
        Wordt aan-/uitgezet door een simpele scroll-listener
        verderop in dit bestand — geen timers, geen
        MutationObserver.
+
+       MEGA-MENU OPEN STATE (homepage only, desktop only):
+       exact dezelfde ondoorzichtige witte stijl moet ook gelden
+       zodra een desktop mega-menu openstaat — anders blijft de
+       hero zichtbaar door de logo/search/icon-rij én de nav-balk
+       heen, terwijl het mega-menu-paneel zelf al wit is (los,
+       inconsistent beeld). vhliso-mega-open wordt aan-/uitgezet
+       door de al bestaande vhlOpenMega/vhlCloseMega-functies
+       hierboven (root.classList.toggle, geen nieuwe event-
+       listeners) — dus hieronder simpelweg dezelfde selectors
+       hergebruikt/uitgebreid met die klasse, i.p.v. een tweede
+       stijlset te verzinnen. Bewust NIET toegevoegd aan de
+       .vhliso-mobile-*-selectors: die klasse wordt sowieso nooit
+       gezet door mobiele interacties (de mobiele drawer is een
+       volledig los systeem, raakt vhlMegaEntries nooit aan), en
+       .vhliso-main/.vhliso-nav zijn onder 989px toch al verborgen
+       — dit blijft dus zuiver desktop-only, ook zonder dat de
+       mobiele selectors hier expliciet worden meegenomen.
     ========================================================= */
 
     #shopify-section-{{ section.id }}.vhliso-header-fixed {
@@ -1305,44 +1323,52 @@
       top: 0 !important;
     }
 
-    #vhliso-{{ section.id }}.vhliso-scrolled {
+    #vhliso-{{ section.id }}.vhliso-scrolled,
+    #vhliso-{{ section.id }}.vhliso-mega-open {
       background: #ffffff !important;
       color: #444441 !important;
     }
 
-    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-main {
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-main,
+    #vhliso-{{ section.id }}.vhliso-mega-open .vhliso-main {
       background: #ffffff !important;
       border-bottom: 1px solid #f2f2f0 !important;
       box-shadow: none !important;
     }
 
-    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-nav {
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-nav,
+    #vhliso-{{ section.id }}.vhliso-mega-open .vhliso-nav {
       background: #ffffff !important;
       border-bottom: 1px solid #efefed !important;
       box-shadow: none !important;
     }
 
-    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-nav-link {
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-nav-link,
+    #vhliso-{{ section.id }}.vhliso-mega-open .vhliso-nav-link {
       color: #444441 !important;
     }
 
-    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-nav-link::after {
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-nav-link::after,
+    #vhliso-{{ section.id }}.vhliso-mega-open .vhliso-nav-link::after {
       background: #333330 !important;
     }
 
     #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-logo img,
+    #vhliso-{{ section.id }}.vhliso-mega-open .vhliso-logo img,
     #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-mobile-logo img {
       filter: none !important;
     }
 
     #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-icon,
+    #vhliso-{{ section.id }}.vhliso-mega-open .vhliso-icon,
     #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-mobile-icon,
     #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-mobile-search,
     #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-mobile-menu-btn {
       color: #333330 !important;
     }
 
-    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-search-input {
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-search-input,
+    #vhliso-{{ section.id }}.vhliso-mega-open .vhliso-search-input {
       background: #f5f5f4 !important;
       color: #444441 !important;
       border: 0 !important;
@@ -1350,15 +1376,18 @@
       backdrop-filter: none !important;
     }
 
-    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-search-input::placeholder {
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-search-input::placeholder,
+    #vhliso-{{ section.id }}.vhliso-mega-open .vhliso-search-input::placeholder {
       color: #777773 !important;
     }
 
-    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-search-submit-link {
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-search-submit-link,
+    #vhliso-{{ section.id }}.vhliso-mega-open .vhliso-search-submit-link {
       color: #333330 !important;
     }
 
-    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-cart-count {
+    #vhliso-{{ section.id }}.vhliso-scrolled .vhliso-cart-count,
+    #vhliso-{{ section.id }}.vhliso-mega-open .vhliso-cart-count {
       background: #8e9800 !important;
       color: #fff !important;
     }
@@ -2282,11 +2311,42 @@
 
   }
 
+  /*
+    Zet/verwijdert vhliso-mega-open op root (dezelfde stateklasse-
+    aanpak als vhliso-scrolled, zie de scroll-listener verderop —
+    root.classList.toggle(naam, boolean)). Dit is de ENIGE plek die
+    de klasse aanraakt; vhlCloseMega/vhlOpenMega roepen deze aan het
+    eind gewoon aan, ongeacht via welk pad ze aangeroepen worden
+    (hover, klik, focus, Escape, outside-click) — dus geen aparte
+    event-listeners, geen timers, geen MutationObserver nodig. Gebruikt
+    .some() i.p.v. een simpele boolean-vlag omdat vhlCloseAllMega bij
+    het wisselen tussen triggers eerst de oude sluit (zou de klasse
+    verkeerd verwijderen) vóórdat de nieuwe opent (zou hem weer
+    toevoegen) — met .some() wordt na elke wijziging gewoon opnieuw de
+    ECHTE huidige toestand gemeten, dus dat tussentijdse dipje is nooit
+    zichtbaar (alles synchroon, vóór de volgende repaint).
+  */
+  function vhlSyncMegaOpenState() {
+
+    var anyMegaOpen =
+      vhlMegaEntries.some(function (entry) {
+        return !entry.panel.hidden;
+      });
+
+    root.classList.toggle(
+      'vhliso-mega-open',
+      anyMegaOpen
+    );
+
+  }
+
   function vhlCloseMega(entry) {
 
     entry.panel.hidden = true;
 
     entry.btn.setAttribute('aria-expanded', 'false');
+
+    vhlSyncMegaOpenState();
 
   }
 
@@ -2311,6 +2371,8 @@
     entry.panel.hidden = false;
 
     entry.btn.setAttribute('aria-expanded', 'true');
+
+    vhlSyncMegaOpenState();
 
   }
 
