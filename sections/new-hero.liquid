@@ -1,3 +1,48 @@
+{%- liquid
+  comment
+    Collectie-bewuste fallback-keten, zodat EEN gedeelde hero-instance
+    (bv. de instance in templates/collection.json, hergebruikt door elke
+    "gewone" subcollectie) automatisch de juiste titel/afbeelding toont
+    zonder per-collectie configuratie. Expliciete section-settings winnen
+    altijd -- dit raakt dus nooit de homepage-instance (die alle velden
+    al expliciet vult) en nooit de 4 bestaande hoofdcategorie-templates
+    (heading/subheading daar al expliciet gezet).
+
+    Tekst:
+      heading    -> section.settings.heading, anders de bestaande PDP-
+                    storytelling-metafield custom.pdp_functional_headline,
+                    anders collection.title.
+      subheading -> section.settings.subheading, anders de metafield
+                    custom.pdp_functional_body_1
+                    (geen collection.description-fallback: dat is vaak te
+                    lang voor een 1-regelige hero-subtitel; ontbreekt de
+                    metafield, dan toont de hero gewoon geen subheading --
+                    al bestaand, geaccepteerd gedrag, geen kapotte layout).
+
+    Afbeelding (desktop):
+      1. section.settings.image (expliciet)
+      2. collection.image
+      3. (geen van beide) -> bestaande donkere fallback-achtergrond
+
+    Afbeelding (mobiel):
+      1. section.settings.mobile_image (expliciet)
+      2. section.settings.image (expliciete desktop-afbeelding hergebruikt
+         op mobiel -- veiliger dan direct naar collection.image springen
+         wanneer de merchant wél een eigen desktop-foto koos maar nog geen
+         aparte mobiele crop)
+      3. collection.image
+      4. (geen van alle) -> bestaande donkere fallback-achtergrond
+
+    Video's zijn hier bewust buiten gelaten: die behouden hun bestaande,
+    hoogste prioriteit als ze expliciet ingesteld zijn (collecties hebben
+    geen automatische video-bron).
+  endcomment
+
+  assign hero_heading = section.settings.heading | default: collection.metafields.custom.pdp_functional_headline.value | default: collection.title
+  assign hero_subheading = section.settings.subheading | default: collection.metafields.custom.pdp_functional_body_1.value
+  assign hero_desktop_image = section.settings.image | default: collection.image
+  assign hero_mobile_image = section.settings.mobile_image | default: section.settings.image | default: collection.image
+-%}
 <section id="VHLVideoHero-{{ section.id }}" class="vhl-video-hero{% if section.settings.mobile_heading_style == 'large' %} vhl-video-hero--mobile-heading-large{% endif %}">
 
   <div class="vhl-video-hero__media">
@@ -32,10 +77,10 @@
       </div>
     {% endif %}
 
-    {% if section.settings.video == blank and section.settings.image != blank %}
+    {% if section.settings.video == blank and hero_desktop_image != blank %}
       <div class="vhl-video-hero__desktop-media">
         {{
-          section.settings.image
+          hero_desktop_image
           | image_url: width: 2400
           | image_tag:
             loading: 'eager',
@@ -44,10 +89,10 @@
       </div>
     {% endif %}
 
-    {% if section.settings.mobile_video == blank and section.settings.mobile_image != blank %}
+    {% if section.settings.mobile_video == blank and hero_mobile_image != blank %}
       <div class="vhl-video-hero__mobile-media">
         {{
-          section.settings.mobile_image
+          hero_mobile_image
           | image_url: width: 1200
           | image_tag:
             loading: 'eager',
@@ -69,15 +114,15 @@
         </p>
       {% endif %}
 
-      {% if section.settings.heading != blank %}
+      {% if hero_heading != blank %}
         <h1 class="vhl-video-hero__heading">
-          {{ section.settings.heading | escape }}
+          {{ hero_heading | escape }}
         </h1>
       {% endif %}
 
-      {% if section.settings.subheading != blank %}
+      {% if hero_subheading != blank %}
         <p class="vhl-video-hero__subheading">
-          {{ section.settings.subheading | escape }}
+          {{ hero_subheading | escape }}
         </p>
       {% endif %}
 

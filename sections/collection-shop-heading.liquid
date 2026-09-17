@@ -1,0 +1,79 @@
+{% comment %}
+  VANHOUTEN LIVING — Dynamische "SHOP [COLLECTIENAAM]"-kop.
+
+  Klein, geïsoleerd sectiebestand: rendert uitsluitend een gecentreerde
+  kop op basis van de collectie van de huidige pagina (`collection.title`).
+  Bestaat specifiek om collection-grid-page.liquid (protected) niet te
+  hoeven wijzigen voor een dynamische, per-collectie titel — die sectie's
+  eigen `heading`-instelling blijft daarom overal leeg.
+
+  Geen eigen instellingen nodig voor de tekst zelf: er is niets om per
+  collectie te configureren (dat is precies het punt — dit moet voor
+  elke huidige én toekomstige collectie die dit template gebruikt
+  automatisch kloppen, zonder hardcoded namen).
+{% endcomment %}
+
+{%- if collection.title != blank -%}
+  <div id="VHLShopHeading-{{ section.id }}" class="vhl-shop-heading">
+    <h2 class="vhl-shop-heading__title">SHOP {{ collection.title | upcase }}</h2>
+  </div>
+{%- endif -%}
+
+{% style %}
+
+#VHLShopHeading-{{ section.id }} {
+  padding: {{ section.settings.padding_top }}px 24px {{ section.settings.padding_bottom }}px;
+
+  background: #ffffff;
+
+  text-align: center;
+}
+
+#VHLShopHeading-{{ section.id }} .vhl-shop-heading__title {
+  margin: 0;
+
+  color: #262625;
+
+  font-size: {{ section.settings.heading_size }}px;
+  font-weight: 600;
+
+  letter-spacing: -.01em;
+}
+
+@media screen and (max-width: 749px) {
+
+  #VHLShopHeading-{{ section.id }} {
+    padding: {{ section.settings.padding_top_mobile }}px 20px {{ section.settings.padding_bottom_mobile }}px;
+  }
+
+  #VHLShopHeading-{{ section.id }} .vhl-shop-heading__title {
+    font-size: {{ section.settings.heading_size_mobile }}px;
+  }
+
+}
+
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Shop-kop (automatisch)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Toont automatisch \"SHOP [COLLECTIENAAM]\" op basis van de collectie van de huidige pagina. Geen tekstinstelling nodig — werkt voor elke huidige én toekomstige collectie."
+    },
+    { "type": "range", "id": "heading_size", "label": "Titelgrootte desktop", "min": 18, "max": 40, "step": 1, "unit": "px", "default": 28 },
+    { "type": "range", "id": "heading_size_mobile", "label": "Titelgrootte mobiel", "min": 16, "max": 32, "step": 1, "unit": "px", "default": 22 },
+    { "type": "range", "id": "padding_top", "label": "Bovenruimte desktop", "min": 0, "max": 120, "step": 5, "unit": "px", "default": 65 },
+    { "type": "range", "id": "padding_bottom", "label": "Onderruimte desktop", "min": 0, "max": 120, "step": 5, "unit": "px", "default": 15 },
+    { "type": "range", "id": "padding_top_mobile", "label": "Bovenruimte mobiel", "min": 0, "max": 100, "step": 5, "unit": "px", "default": 40 },
+    { "type": "range", "id": "padding_bottom_mobile", "label": "Onderruimte mobiel", "min": 0, "max": 100, "step": 5, "unit": "px", "default": 10 }
+  ],
+  "presets": [
+    {
+      "name": "Shop-kop (automatisch)"
+    }
+  ]
+}
+{% endschema %}
