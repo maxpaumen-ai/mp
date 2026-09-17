@@ -75,6 +75,12 @@
         </h1>
       {% endif %}
 
+      {% if section.settings.subheading != blank %}
+        <p class="vhl-video-hero__subheading">
+          {{ section.settings.subheading | escape }}
+        </p>
+      {% endif %}
+
       {% if section.settings.button_label != blank %}
         <a
           class="vhl-video-hero__button"
@@ -227,6 +233,30 @@
   font-weight: 600;
 
   letter-spacing: -.035em;
+}
+
+
+/* =========================================================
+   SUBHEADING
+   Bewust GEEN white-space:nowrap / width:max-content zoals de
+   heading: dit is doorlopende zinstekst (bv. "Ontworpen voor
+   rust. Gemaakt voor elke dag.") die normaal moet kunnen
+   omwikkelen i.p.v. horizontaal af te snijden.
+========================================================= */
+
+#VHLVideoHero-{{ section.id }} .vhl-video-hero__subheading {
+  margin: 14px 0 0;
+
+  max-width: 480px;
+
+  color: rgba(255, 255, 255, .88);
+
+  font-size: 16px;
+  line-height: 1.5;
+
+  font-weight: 400;
+
+  letter-spacing: -.005em;
 }
 
 
@@ -448,6 +478,18 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
   }
 
 
+  /* SUBHEADING */
+
+  #VHLVideoHero-{{ section.id }} .vhl-video-hero__subheading {
+    margin-top: 10px;
+
+    max-width: calc(100vw - 40px);
+
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+
   /* CTA */
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__button {
@@ -644,6 +686,13 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
       "id": "heading",
       "label": "Titel",
       "default": "Rust begint in de badkamer."
+    },
+
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subtitel",
+      "info": "Optioneel. Leeg = niet getoond (geen wijziging op bestaande hero-instances)."
     },
 
     {

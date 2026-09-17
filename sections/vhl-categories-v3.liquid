@@ -1,7 +1,7 @@
 <section
   id="VHLCategoriesV3-{{ section.id }}"
   class="vhl-categories-v3"
-  style="--vhl-bg: {{ section.settings.background }}; --vhl-text: {{ section.settings.text_color }}; --vhl-radius: {{ section.settings.radius }}px; --vhl-height: {{ section.settings.desktop_height }}px; --vhl-mobile-height: {{ section.settings.mobile_height }}px;"
+  style="--vhl-bg: {{ section.settings.background }}; --vhl-text: {{ section.settings.text_color }}; --vhl-radius: {{ section.settings.radius }}px; --vhl-height: {{ section.settings.desktop_height }}px; --vhl-mobile-height: {{ section.settings.mobile_height }}px; --vhl-mobile-columns: {{ section.settings.mobile_columns | default: 1 }};"
 >
   <div class="vhl-categories-v3__inner">
     {% if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.intro != blank %}
@@ -80,12 +80,12 @@
   @media screen and (max-width: 749px) {
     #VHLCategoriesV3-{{ section.id }} { padding: {{ section.settings.padding_top_mobile }}px 0 {{ section.settings.padding_bottom_mobile }}px; }
     #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__inner { padding-inline: 16px; }
-    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__header, #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__grid { grid-template-columns: minmax(0,1fr); }
-    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__header { gap: 18px; margin-bottom: 32px; }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__header { grid-template-columns: minmax(0,1fr); gap: 18px; margin-bottom: 32px; }
     #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__heading { font-size: clamp(32px,10vw,46px); }
     #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__intro { justify-self: start; font-size: 14px; }
-    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__grid { gap: 16px; }
-    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__item, #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__item--wide { grid-column: 1; width: 100%; height: var(--vhl-mobile-height); }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__grid { grid-template-columns: repeat(var(--vhl-mobile-columns), minmax(0,1fr)); gap: 16px; }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__item { grid-column: auto; width: 100%; height: var(--vhl-mobile-height); }
+    #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__item--wide { grid-column: 1 / -1; width: 100%; height: var(--vhl-mobile-height); }
     #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__title { max-width: 100%; font-size: clamp(30px,9.5vw,44px); }
     #VHLCategoriesV3-{{ section.id }} .vhl-categories-v3__description { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: 14px; }
   }
@@ -106,6 +106,7 @@
     { "type": "color", "id": "text_color", "label": "Tekstkleur", "default": "#24211E" },
     { "type": "range", "id": "desktop_height", "label": "Kaarthoogte desktop", "min": 420, "max": 760, "step": 10, "unit": "px", "default": 620 },
     { "type": "range", "id": "mobile_height", "label": "Kaarthoogte mobiel", "min": 380, "max": 620, "step": 10, "unit": "px", "default": 500 },
+    { "type": "select", "id": "mobile_columns", "label": "Aantal kolommen mobiel", "options": [ { "value": "1", "label": "1 kolom" }, { "value": "2", "label": "2 kolommen" } ], "default": "1" },
     { "type": "range", "id": "radius", "label": "Afronding", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 24 },
     { "type": "range", "id": "padding_top", "label": "Bovenruimte desktop", "min": 30, "max": 160, "step": 5, "unit": "px", "default": 95 },
     { "type": "range", "id": "padding_bottom", "label": "Onderruimte desktop", "min": 30, "max": 160, "step": 5, "unit": "px", "default": 95 },
