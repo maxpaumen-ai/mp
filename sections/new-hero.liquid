@@ -1,4 +1,4 @@
-<section id="VHLVideoHero-{{ section.id }}" class="vhl-video-hero">
+<section id="VHLVideoHero-{{ section.id }}" class="vhl-video-hero{% if section.settings.mobile_heading_style == 'large' %} vhl-video-hero--mobile-heading-large{% endif %}">
 
   <div class="vhl-video-hero__media">
 
@@ -478,6 +478,28 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
   }
 
 
+  /* =====================================================
+     OPT-IN: GROTE MOBIELE HEADLINE
+     Alleen actief met mobile_heading_style = "large" (nieuwe
+     category-landingpagina's). Hogere specificiteit dan de
+     compacte basisregel hierboven (extra modifier-klasse), dus
+     wint ongeacht bronvolgorde -- de homepage-instance zet deze
+     klasse niet en blijft dus op de compacte 1-regelige stijl.
+  ===================================================== */
+
+  #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
+    white-space: normal !important;
+
+    font-size: clamp(32px, 11vw, 46px) !important;
+
+    line-height: 1.05 !important;
+
+    font-weight: 600 !important;
+
+    letter-spacing: -.03em !important;
+  }
+
+
   /* SUBHEADING */
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__subheading {
@@ -550,6 +572,18 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     white-space: nowrap !important;
   }
 
+  #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
+    font-size: clamp(26px, 10.5vw, 34px) !important;
+
+    line-height: 1.05 !important;
+
+    font-weight: 600 !important;
+
+    letter-spacing: -.02em !important;
+
+    white-space: normal !important;
+  }
+
 }
 
 
@@ -563,6 +597,12 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     font-size: 14px !important;
 
     font-weight: 300 !important;
+  }
+
+  #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
+    font-size: 24px !important;
+
+    font-weight: 600 !important;
   }
 
 }
@@ -693,6 +733,18 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
       "id": "subheading",
       "label": "Subtitel",
       "info": "Optioneel. Leeg = niet getoond (geen wijziging op bestaande hero-instances)."
+    },
+
+    {
+      "type": "select",
+      "id": "mobile_heading_style",
+      "label": "Titelstijl mobiel",
+      "options": [
+        { "value": "compact", "label": "Compact (huidig, dunne 1-regelige titel)" },
+        { "value": "large", "label": "Groot (premium, voor korte titels)" }
+      ],
+      "default": "compact",
+      "info": "\"Compact\" is het bestaande, ongewijzigde gedrag (o.a. de homepage-hero). \"Groot\" is bedoeld voor korte titels zoals categorienamen."
     },
 
     {
