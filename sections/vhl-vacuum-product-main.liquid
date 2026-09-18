@@ -1,0 +1,961 @@
+{%- comment -%}
+  VHL Vacuum Hook PDP — main section.
+
+  Geïsoleerde, product-specifieke PDP-sectie voor "RVS vacuümzuignap haak".
+  Alleen gebruikt door templates/product.vacuum-hook.json.
+
+  Herbruikte, ONGEWIJZIGDE bestaande componenten:
+  - snippets/product-gallery.liquid   (gallery + thumbnails + variant images)
+  - snippets/product-info.liquid      (title / price / variant picker / quantity / add-to-cart
+                                        blocks — dezelfde code die de standaard-PDP gebruikt,
+                                        dus hetzelfde, geteste cart-formulier)
+  - assets/shop-product-details.css   (basisstyling voor bovenstaande, alleen gelinkt, niet gewijzigd)
+  - assets/product-gallery.js, product-info.js, variant-selector.js,
+    product-form.js, shop-product-details.js (ongewijzigde, gedeelde scripts)
+
+  Alle eigen, nieuwe styling staat scoped onder .vhl-vacuum-pdp zodat niets
+  naar de bestaande PDP of andere pagina's kan lekken.
+{%- endcomment -%}
+
+{{ 'shop-product-details.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign has_rating = false
+  if product.metafields.reviews.rating.value != blank
+    assign has_rating = true
+  endif
+
+  assign short_intro = product.description | strip_html | truncatewords: 28
+
+  assign has_specs = false
+  if product.type != blank or product.tags.size > 0
+    assign has_specs = true
+  endif
+
+  assign has_shipping_info = false
+  if shop.policies.shipping_policy.body != blank or shop.policies.refund_policy.body != blank
+    assign has_shipping_info = true
+  endif
+-%}
+
+<div class="vhl-vacuum-pdp shop-product-section" {{ section.shopify_attributes }}>
+  <div class="vhl-vacuum-pdp__grid">
+
+    <div class="vhl-vacuum-pdp__gallery">
+      {% render 'product-gallery',
+        product: product,
+        show_product_variants: true,
+        current_variant: current_variant,
+        enable_image_zoom: true
+      %}
+    </div>
+
+    <div class="vhl-vacuum-pdp__buybox shop-product-info">
+
+      {% render 'product-info', product: product, section: section %}
+
+      {% if has_rating %}
+        <div
+          class="rating vhl-vacuum-pdp__rating"
+          role="img"
+          aria-label="{{ 'accessibility.star_reviews_info' | t: rating_value: product.metafields.reviews.rating.value, rating_max: product.metafields.reviews.rating.value.scale_max }}"
+        >
+          <span
+            aria-hidden="true"
+            class="rating-star"
+            style="--rating: {{ product.metafields.reviews.rating.value.rating | floor }}; --rating-max: {{ product.metafields.reviews.rating.value.scale_max }};"
+          ></span>
+          <span class="vhl-vacuum-pdp__rating-text">
+            {{- product.metafields.reviews.rating.value }} / {{ product.metafields.reviews.rating.value.scale_max -}}
+            {% if product.metafields.reviews.rating_count %}
+              ({{ product.metafields.reviews.rating_count }})
+            {% endif %}
+          </span>
+        </div>
+      {% endif %}
+
+      {% if short_intro != blank %}
+        <p class="vhl-vacuum-pdp__intro">{{ short_intro }}</p>
+      {% endif %}
+
+      <div class="vhl-vacuum-pdp__trust">
+        <span class="vhl-vacuum-pdp__trust-payments" aria-label="Betaalmethoden">
+          {{ 'master' | payment_type_svg_tag }}
+          {{ 'visa' | payment_type_svg_tag }}
+          {{ 'apple_pay' | payment_type_svg_tag }}
+          {{ 'shopify_pay' | payment_type_svg_tag }}
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="vhl-vacuum-pdp__accordions">
+    {% if product.description != blank %}
+      <details class="vhl-vacuum-pdp__accordion" open>
+        <summary>Details</summary>
+        <div class="vhl-vacuum-pdp__accordion-body">{{ product.description }}</div>
+      </details>
+    {% endif %}
+
+    {% if has_specs %}
+      <details class="vhl-vacuum-pdp__accordion">
+        <summary>Specificaties</summary>
+        <div class="vhl-vacuum-pdp__accordion-body">
+          <ul class="vhl-vacuum-pdp__spec-list">
+            {% if product.type != blank %}
+              <li><span>Type</span><span>{{ product.type }}</span></li>
+            {% endif %}
+            {% for tag in product.tags %}
+              <li><span>Kenmerk</span><span>{{ tag }}</span></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </details>
+    {% endif %}
+
+    {% if has_shipping_info %}
+      <details class="vhl-vacuum-pdp__accordion">
+        <summary>Verzending &amp; retourneren</summary>
+        <div class="vhl-vacuum-pdp__accordion-body">
+          {% if shop.policies.shipping_policy.body != blank %}
+            <p><a href="{{ shop.policies.shipping_policy.url }}">{{ shop.policies.shipping_policy.title }}</a></p>
+          {% endif %}
+          {% if shop.policies.refund_policy.body != blank %}
+            <p><a href="{{ shop.policies.refund_policy.url }}">{{ shop.policies.refund_policy.title }}</a></p>
+          {% endif %}
+        </div>
+      </details>
+    {% endif %}
+  </div>
+</div>
+
+{%- comment -%}
+  snippets/simple-variant-picker.liquid verwacht bij een variantwissel een
+  globale `originPrice` (zelfde patroon als sections/shop-product-details.liquid),
+  gebaseerd op de daadwerkelijk geselecteerde/eerste beschikbare variant.
+{%- endcomment -%}
+<script>
+  var originPrice = '{{ current_variant.price | money }}';
+</script>
+
+<script src="{{ 'product-gallery.js' | asset_url }}" defer></script>
+<script src="{{ 'product-info.js' | asset_url }}" defer></script>
+<script src="{{ 'variant-selector.js' | asset_url }}" defer></script>
+<script src="{{ 'product-form.js' | asset_url }}" defer></script>
+<script src="{{ 'shop-product-details.js' | asset_url }}" defer></script>
+
+{% style %}
+  .vhl-vacuum-pdp {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px 0;
+    background: #ffffff;
+  }
+
+  .vhl-vacuum-pdp__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  @media screen and (min-width: 990px) {
+    .vhl-vacuum-pdp {
+      padding: 48px 40px 0;
+    }
+    .vhl-vacuum-pdp__grid {
+      grid-template-columns: 58fr 42fr;
+      gap: 64px;
+      align-items: start;
+    }
+    .vhl-vacuum-pdp__buybox {
+      position: sticky;
+      top: 100px;
+    }
+  }
+
+  .vhl-vacuum-pdp .shop-main-image-wrapper,
+  .vhl-vacuum-pdp .shop-image-container {
+    border-radius: 10px !important;
+  }
+
+  .vhl-vacuum-pdp .shop-thumbnail {
+    border-radius: 8px !important;
+    overflow: hidden;
+  }
+
+  .vhl-vacuum-pdp__buybox {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vhl-vacuum-pdp .shop-product-title {
+    font-size: 28px !important;
+    letter-spacing: 0.2px;
+  }
+
+  @media screen and (min-width: 990px) {
+    .vhl-vacuum-pdp .shop-product-title {
+      font-size: 32px !important;
+    }
+  }
+
+  .vhl-vacuum-pdp__rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 0;
+  }
+
+  .vhl-vacuum-pdp__rating-text {
+    font-size: 13px;
+    color: #6b6b68;
+  }
+
+  .vhl-vacuum-pdp__intro {
+    margin: 12px 0 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #4a4a47;
+    max-width: 46ch;
+  }
+
+  /*
+    Vaste, expliciete volgorde in de buy-box (title -> price -> rating ->
+    intro -> USP's -> variant -> aantal -> ATC -> trust), onafhankelijk van
+    de render-volgorde van de herbruikte product-info blocks.
+  */
+  .vhl-vacuum-pdp .shop-product-title { order: 1; }
+  .vhl-vacuum-pdp .shop-product-price-container { order: 2; }
+  .vhl-vacuum-pdp__rating { order: 3; }
+  .vhl-vacuum-pdp__intro { order: 4; }
+  .vhl-vacuum-pdp .product-bullet-list { order: 5; }
+  .vhl-vacuum-pdp .simple-variant-picker { order: 6; margin-top: 16px; }
+  .vhl-vacuum-pdp .modern-quantity-selector { order: 7; margin-top: 4px; }
+  .vhl-vacuum-pdp .shop-add-to-cart-wrapper { order: 8; margin-top: 20px; }
+  .vhl-vacuum-pdp__trust { order: 9; }
+
+  .vhl-vacuum-pdp .shop-add-to-cart-button {
+    width: 100%;
+    min-height: 50px;
+    box-shadow: none !important;
+    text-transform: none !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .vhl-vacuum-pdp__trust {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid #eceae5;
+  }
+
+  .vhl-vacuum-pdp__trust-payments {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .vhl-vacuum-pdp__trust-payments svg {
+    height: 24px;
+    width: auto;
+  }
+
+  .vhl-vacuum-pdp__accordions {
+    max-width: 900px;
+    margin: 48px auto 0;
+    padding: 0 24px 56px;
+    border-top: 1px solid #eceae5;
+  }
+
+  @media screen and (min-width: 990px) {
+    .vhl-vacuum-pdp__accordions {
+      padding: 0 40px 72px;
+    }
+  }
+
+  .vhl-vacuum-pdp__accordion {
+    border-bottom: 1px solid #eceae5;
+  }
+
+  .vhl-vacuum-pdp__accordion summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 18px 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .vhl-vacuum-pdp__accordion summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .vhl-vacuum-pdp__accordion summary::after {
+    content: '+';
+    font-weight: 400;
+    font-size: 20px;
+    color: #6b6b68;
+  }
+
+  .vhl-vacuum-pdp__accordion[open] summary::after {
+    content: '\2212';
+  }
+
+  .vhl-vacuum-pdp__accordion-body {
+    padding: 0 4px 20px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #4a4a47;
+  }
+
+  .vhl-vacuum-pdp__accordion-body a {
+    color: #1a1a1a;
+    text-decoration: underline;
+  }
+
+  .vhl-vacuum-pdp__spec-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .vhl-vacuum-pdp__spec-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px dashed #eceae5;
+    padding-bottom: 6px;
+  }
+
+  .vhl-vacuum-pdp__spec-list li span:first-child {
+    color: #8a8a86;
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "VHL Vacuumhaak PDP",
+  "tag": "section",
+  "class": "vhl-vacuum-pdp-section",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "title",
+      "name": "Titel",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "range",
+          "id": "font_size",
+          "min": 16,
+          "max": 48,
+          "step": 1,
+          "default": 28,
+          "label": "Font size (px)"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": -20,
+          "max": 20,
+          "step": 1,
+          "default": 0,
+          "label": "Top margin (px)"
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": -20,
+          "max": 20,
+          "step": 1,
+          "default": 8,
+          "label": "Bottom margin (px)"
+        },
+        {
+          "type": "color",
+          "id": "title_color",
+          "label": "Title color",
+          "default": "#1a1a1a"
+        },
+        {
+          "type": "range",
+          "id": "line_height",
+          "min": 0.8,
+          "max": 2,
+          "step": 0.1,
+          "default": 1.2,
+          "label": "Line height"
+        }
+      ]
+    },
+    {
+      "type": "price",
+      "name": "Prijs",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "multiply_price_by_quantity",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "apply_selected_subscription_discount",
+          "default": true
+        },
+        {
+          "type": "color",
+          "id": "price_color",
+          "label": "Price color",
+          "default": "#1a1a1a"
+        },
+        {
+          "type": "color",
+          "id": "compare_price_color",
+          "label": "Compare price color",
+          "default": "#9c9c9c"
+        },
+        {
+          "type": "color",
+          "id": "sale_badge_bg_color",
+          "label": "Sale badge background",
+          "default": "#262625"
+        },
+        {
+          "type": "color",
+          "id": "sale_badge_text_color",
+          "label": "Sale badge text",
+          "default": "#ffffff"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_save_badge",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "price_font_size",
+          "min": 14,
+          "max": 36,
+          "step": 1,
+          "default": 26,
+          "label": "Price font size (px)"
+        },
+        {
+          "type": "range",
+          "id": "compare_price_font_size",
+          "min": 12,
+          "max": 24,
+          "step": 1,
+          "default": 16,
+          "label": "Compare price font size (px)"
+        },
+        {
+          "type": "range",
+          "id": "save_badge_font_size",
+          "min": 8,
+          "max": 16,
+          "step": 1,
+          "default": 12,
+          "label": "Save badge font size (px)"
+        },
+        {
+          "type": "select",
+          "id": "price_font_weight",
+          "options": [
+            { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" },
+            { "value": "600", "label": "Semibold" },
+            { "value": "700", "label": "Bold" }
+          ],
+          "default": "600"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_save_icon",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "save_icon_size_ratio",
+          "min": 0.5,
+          "max": 1.0,
+          "step": 0.1,
+          "default": 0.9
+        },
+        {
+          "type": "range",
+          "id": "save_icon_position_y",
+          "min": -10,
+          "max": 10,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "save_badge_padding_v",
+          "min": 0,
+          "max": 15,
+          "step": 1,
+          "default": 4
+        },
+        {
+          "type": "range",
+          "id": "save_badge_padding_h",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "default": 8
+        },
+        {
+          "type": "select",
+          "id": "save_badge_display_type",
+          "options": [
+            { "value": "percentage", "label": "Percentage off (%)" },
+            { "value": "dollar_amount", "label": "Dollar amount off" },
+            { "value": "custom_amount", "label": "Custom amount" }
+          ],
+          "default": "percentage"
+        },
+        {
+          "type": "range",
+          "id": "price_margin_top",
+          "min": -20,
+          "max": 20,
+          "step": 1,
+          "default": 6,
+          "label": "Top margin (px)"
+        },
+        {
+          "type": "range",
+          "id": "price_margin_bottom",
+          "min": -20,
+          "max": 20,
+          "step": 1,
+          "default": 0,
+          "label": "Bottom margin (px)"
+        }
+      ]
+    },
+    {
+      "type": "bullet_list",
+      "name": "USP's",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "use_theme_colors",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "bullet_1",
+          "label": "USP 1 (leeg = verborgen)",
+          "default": ""
+        },
+        {
+          "type": "text",
+          "id": "bullet_2",
+          "label": "USP 2 (leeg = verborgen)",
+          "default": ""
+        },
+        {
+          "type": "text",
+          "id": "bullet_3",
+          "label": "USP 3 (leeg = verborgen)",
+          "default": ""
+        },
+        {
+          "type": "select",
+          "id": "layout_style",
+          "options": [
+            { "value": "vertical", "label": "Vertical" },
+            { "value": "horizontal", "label": "Horizontal" }
+          ],
+          "default": "vertical"
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "default": "#262625"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "default": "#1a1a1a"
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "min": 10,
+          "max": 30,
+          "step": 1,
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "text_size",
+          "min": 10,
+          "max": 20,
+          "step": 1,
+          "default": 14
+        },
+        {
+          "type": "range",
+          "id": "spacing",
+          "min": 5,
+          "max": 30,
+          "step": 1,
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "icon_text_gap",
+          "min": 5,
+          "max": 25,
+          "step": 1,
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": -20,
+          "max": 20,
+          "step": 5,
+          "default": 15
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": -20,
+          "max": 20,
+          "step": 5,
+          "default": 0
+        }
+      ]
+    },
+    {
+      "type": "simple_variant_picker",
+      "name": "Variantkeuze",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "first_variant_auto_selected",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "use_dropdown",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_color_swatches",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_size_preset",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_labels",
+          "default": true
+        },
+        {
+          "type": "color",
+          "id": "label_color",
+          "default": "#1a1a1a"
+        },
+        {
+          "type": "range",
+          "id": "label_size",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "default": 13
+        },
+        {
+          "type": "color",
+          "id": "option_bg_color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "option_border_color",
+          "default": "#e5e0d8"
+        },
+        {
+          "type": "color",
+          "id": "option_text_color",
+          "default": "#1a1a1a"
+        },
+        {
+          "type": "range",
+          "id": "option_size",
+          "min": 8,
+          "max": 20,
+          "step": 1,
+          "default": 14
+        },
+        {
+          "type": "range",
+          "id": "option_border_radius",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "option_padding_vertical",
+          "min": 4,
+          "max": 20,
+          "step": 1,
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "option_padding_horizontal",
+          "min": 8,
+          "max": 30,
+          "step": 1,
+          "default": 18
+        },
+        {
+          "type": "range",
+          "id": "option_font_size",
+          "min": 10,
+          "max": 20,
+          "step": 1,
+          "default": 14
+        },
+        {
+          "type": "color",
+          "id": "selected_bg_color",
+          "default": "#262625"
+        },
+        {
+          "type": "color",
+          "id": "selected_text_color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "selected_border_color",
+          "default": "#262625"
+        },
+        {
+          "type": "range",
+          "id": "swatch_size",
+          "min": 20,
+          "max": 50,
+          "step": 2,
+          "default": 30
+        },
+        {
+          "type": "color",
+          "id": "swatch_bg_color",
+          "default": "#f5f3ef"
+        },
+        {
+          "type": "color",
+          "id": "outline_color",
+          "default": "#e5e0d8"
+        },
+        {
+          "type": "range",
+          "id": "grid_gap",
+          "min": 4,
+          "max": 24,
+          "step": 2,
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "container_margin_left",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "container_margin_right",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "default": 0
+        }
+      ]
+    },
+    {
+      "type": "quantity_selector",
+      "name": "Aantal",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "color",
+          "id": "background_color",
+          "default": "#f5f3ef"
+        },
+        {
+          "type": "color",
+          "id": "button_color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "default": "#1a1a1a"
+        },
+        {
+          "type": "range",
+          "id": "margin_top",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "default": 16
+        }
+      ]
+    },
+    {
+      "type": "add_to_cart",
+      "name": "Toevoegen aan winkelmand",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "use_theme_colors",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "use_global_button_styling",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_fast_payment",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "button_behavior",
+          "options": [
+            { "value": "skip_to_checkout", "label": "Skip to checkout" },
+            { "value": "add_to_cart", "label": "Add to cart" }
+          ],
+          "default": "add_to_cart"
+        },
+        {
+          "type": "text",
+          "id": "button_text_override",
+          "default": ""
+        },
+        {
+          "type": "checkbox",
+          "id": "show_price_in_button",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "multiply_values_by_quantity",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "apply_selected_subscription_discount",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "button_icon",
+          "options": [
+            { "value": "none", "label": "No icon" },
+            { "value": "cart", "label": "Cart" },
+            { "value": "bag", "label": "Shopping bag" },
+            { "value": "arrow", "label": "Arrow" }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "min": 12,
+          "max": 32,
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "color",
+          "id": "button_border_color",
+          "default": "#262625"
+        },
+        {
+          "type": "color",
+          "id": "buy_box_button_bg_color",
+          "label": "Button background",
+          "default": "#262625"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "buy_box_button_hover_color",
+          "default": "#1a1a1a"
+        },
+        {
+          "type": "color",
+          "id": "price_color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_padding_y",
+          "min": 5,
+          "max": 30,
+          "step": 1,
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "custom_button_font_size",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "default": 15
+        },
+        {
+          "type": "range",
+          "id": "button_border_radius",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "default": 8
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
