@@ -131,6 +131,15 @@
   </div>
 </div>
 
+{%- comment -%}
+  snippets/simple-variant-picker.liquid verwacht bij een variantwissel een
+  globale `originPrice` (zelfde patroon als sections/shop-product-details.liquid),
+  gebaseerd op de daadwerkelijk geselecteerde/eerste beschikbare variant.
+{%- endcomment -%}
+<script>
+  var originPrice = '{{ current_variant.price | money }}';
+</script>
+
 <script src="{{ 'product-gallery.js' | asset_url }}" defer></script>
 <script src="{{ 'product-info.js' | asset_url }}" defer></script>
 <script src="{{ 'variant-selector.js' | asset_url }}" defer></script>
