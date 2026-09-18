@@ -1,5 +1,5 @@
 {%- comment -%}
-  VHL Vacuum Hook PDP — main section.
+  VHL Vacuum Hook PDP — main above-the-fold section.
 
   Geïsoleerde, product-specifieke PDP-sectie voor "RVS vacuümzuignap haak".
   Alleen gebruikt door templates/product.vacuum-hook.json.
@@ -26,8 +26,6 @@
     assign has_rating = true
   endif
 
-  assign short_intro = product.description | strip_html | truncatewords: 28
-
   assign has_specs = false
   if product.type != blank or product.tags.size > 0
     assign has_specs = true
@@ -36,6 +34,11 @@
   assign has_shipping_info = false
   if shop.policies.shipping_policy.body != blank or shop.policies.refund_policy.body != blank
     assign has_shipping_info = true
+  endif
+
+  assign has_trust_block = false
+  if section.settings.trust_heading != blank or section.settings.trust_body != blank
+    assign has_trust_block = true
   endif
 -%}
 
@@ -53,8 +56,6 @@
 
     <div class="vhl-vacuum-pdp__buybox shop-product-info">
 
-      {% render 'product-info', product: product, section: section %}
-
       {% if has_rating %}
         <div
           class="rating vhl-vacuum-pdp__rating"
@@ -69,17 +70,15 @@
           <span class="vhl-vacuum-pdp__rating-text">
             {{- product.metafields.reviews.rating.value }} / {{ product.metafields.reviews.rating.value.scale_max -}}
             {% if product.metafields.reviews.rating_count %}
-              ({{ product.metafields.reviews.rating_count }})
+              &middot; {{ product.metafields.reviews.rating_count }} beoordelingen
             {% endif %}
           </span>
         </div>
       {% endif %}
 
-      {% if short_intro != blank %}
-        <p class="vhl-vacuum-pdp__intro">{{ short_intro }}</p>
-      {% endif %}
+      {% render 'product-info', product: product, section: section %}
 
-      <div class="vhl-vacuum-pdp__trust">
+      <div class="vhl-vacuum-pdp__trust-payments-row">
         <span class="vhl-vacuum-pdp__trust-payments" aria-label="Betaalmethoden">
           {{ 'master' | payment_type_svg_tag }}
           {{ 'visa' | payment_type_svg_tag }}
@@ -88,13 +87,27 @@
         </span>
       </div>
 
+      {% if has_trust_block %}
+        <div class="vhl-vacuum-pdp__trust-card">
+          {% if section.settings.trust_badge_text != blank %}
+            <span class="vhl-vacuum-pdp__trust-badge">{{ section.settings.trust_badge_text }}</span>
+          {% endif %}
+          {% if section.settings.trust_heading != blank %}
+            <p class="vhl-vacuum-pdp__trust-heading">{{ section.settings.trust_heading }}</p>
+          {% endif %}
+          {% if section.settings.trust_body != blank %}
+            <p class="vhl-vacuum-pdp__trust-body">{{ section.settings.trust_body }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+
     </div>
   </div>
 
   <div class="vhl-vacuum-pdp__accordions">
     {% if product.description != blank %}
       <details class="vhl-vacuum-pdp__accordion" open>
-        <summary>Details</summary>
+        <summary>Productdetails</summary>
         <div class="vhl-vacuum-pdp__accordion-body">{{ product.description }}</div>
       </details>
     {% endif %}
@@ -148,36 +161,38 @@
 
 {% style %}
   .vhl-vacuum-pdp {
-    max-width: 1400px;
+    max-width: 1480px;
     margin: 0 auto;
-    padding: 32px 24px 0;
+    padding: 24px 16px 0;
     background: #ffffff;
   }
 
   .vhl-vacuum-pdp__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 28px;
   }
 
   @media screen and (min-width: 990px) {
     .vhl-vacuum-pdp {
-      padding: 48px 40px 0;
+      padding: 40px 48px 0;
     }
     .vhl-vacuum-pdp__grid {
-      grid-template-columns: 58fr 42fr;
-      gap: 64px;
+      grid-template-columns: 60fr 40fr;
+      gap: 56px;
       align-items: start;
     }
     .vhl-vacuum-pdp__buybox {
       position: sticky;
-      top: 100px;
+      top: 96px;
+      padding-top: 4px;
     }
   }
 
   .vhl-vacuum-pdp .shop-main-image-wrapper,
   .vhl-vacuum-pdp .shop-image-container {
-    border-radius: 10px !important;
+    border-radius: 12px !important;
+    background: #f7f5f2;
   }
 
   .vhl-vacuum-pdp .shop-thumbnail {
@@ -190,22 +205,27 @@
     flex-direction: column;
   }
 
-  .vhl-vacuum-pdp .shop-product-title {
-    font-size: 28px !important;
-    letter-spacing: 0.2px;
-  }
-
-  @media screen and (min-width: 990px) {
-    .vhl-vacuum-pdp .shop-product-title {
-      font-size: 32px !important;
-    }
-  }
+  /*
+    Vaste, expliciete volgorde in de buy-box, onafhankelijk van de
+    render-volgorde van de herbruikte product-info blocks:
+    reviewsamenvatting -> titel -> prijs -> USP's -> variant -> aantal ->
+    ATC -> betaalvertrouwen -> trust/value card.
+  */
+  .vhl-vacuum-pdp__rating { order: 0; }
+  .vhl-vacuum-pdp .shop-product-title { order: 1; }
+  .vhl-vacuum-pdp .shop-product-price-container { order: 2; }
+  .vhl-vacuum-pdp .product-bullet-list { order: 3; }
+  .vhl-vacuum-pdp .simple-variant-picker { order: 4; }
+  .vhl-vacuum-pdp .modern-quantity-selector { order: 5; }
+  .vhl-vacuum-pdp .shop-add-to-cart-wrapper { order: 6; }
+  .vhl-vacuum-pdp__trust-payments-row { order: 7; }
+  .vhl-vacuum-pdp__trust-card { order: 8; }
 
   .vhl-vacuum-pdp__rating {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 4px 0 0;
+    margin: 0 0 10px;
   }
 
   .vhl-vacuum-pdp__rating-text {
@@ -213,46 +233,61 @@
     color: #6b6b68;
   }
 
-  .vhl-vacuum-pdp__intro {
-    margin: 12px 0 0;
-    font-size: 15px;
-    line-height: 1.6;
-    color: #4a4a47;
-    max-width: 46ch;
+  .vhl-vacuum-pdp .shop-product-title {
+    font-size: 26px !important;
+    letter-spacing: 0.2px;
+    margin-bottom: 6px !important;
   }
 
-  /*
-    Vaste, expliciete volgorde in de buy-box (title -> price -> rating ->
-    intro -> USP's -> variant -> aantal -> ATC -> trust), onafhankelijk van
-    de render-volgorde van de herbruikte product-info blocks.
-  */
-  .vhl-vacuum-pdp .shop-product-title { order: 1; }
-  .vhl-vacuum-pdp .shop-product-price-container { order: 2; }
-  .vhl-vacuum-pdp__rating { order: 3; }
-  .vhl-vacuum-pdp__intro { order: 4; }
-  .vhl-vacuum-pdp .product-bullet-list { order: 5; }
-  .vhl-vacuum-pdp .simple-variant-picker { order: 6; margin-top: 16px; }
-  .vhl-vacuum-pdp .modern-quantity-selector { order: 7; margin-top: 4px; }
-  .vhl-vacuum-pdp .shop-add-to-cart-wrapper { order: 8; margin-top: 20px; }
-  .vhl-vacuum-pdp__trust { order: 9; }
+  @media screen and (min-width: 990px) {
+    .vhl-vacuum-pdp .shop-product-title {
+      font-size: 30px !important;
+    }
+  }
+
+  .vhl-vacuum-pdp .shop-product-price-container {
+    margin-bottom: 4px !important;
+  }
+
+  .vhl-vacuum-pdp .product-bullet-list {
+    margin-top: 14px !important;
+    margin-bottom: 4px !important;
+    padding-top: 14px;
+    padding-bottom: 2px;
+    border-top: 1px solid #eceae5;
+  }
+
+  .vhl-vacuum-pdp .simple-variant-picker {
+    margin-top: 18px;
+  }
+
+  .vhl-vacuum-pdp .modern-quantity-selector {
+    margin-top: 14px;
+    max-width: 140px;
+  }
+
+  .vhl-vacuum-pdp .shop-add-to-cart-wrapper {
+    margin-top: 14px;
+  }
 
   .vhl-vacuum-pdp .shop-add-to-cart-button {
     width: 100%;
-    min-height: 50px;
+    min-height: 56px;
     box-shadow: none !important;
     text-transform: none !important;
     letter-spacing: 0.3px !important;
   }
 
-  .vhl-vacuum-pdp__trust {
-    margin-top: 22px;
-    padding-top: 18px;
+  .vhl-vacuum-pdp__trust-payments-row {
+    margin-top: 18px;
+    padding-top: 16px;
     border-top: 1px solid #eceae5;
   }
 
   .vhl-vacuum-pdp__trust-payments {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
   }
 
@@ -261,10 +296,48 @@
     width: auto;
   }
 
+  .vhl-vacuum-pdp__trust-card {
+    margin-top: 18px;
+    padding: 20px;
+    border: 1px solid #e5e0d8;
+    border-radius: 12px;
+    background: #faf8f5;
+    text-align: center;
+  }
+
+  .vhl-vacuum-pdp__trust-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e5e0d8;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b6b68;
+    margin-bottom: 10px;
+  }
+
+  .vhl-vacuum-pdp__trust-heading {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .vhl-vacuum-pdp__trust-body {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #6b6b68;
+  }
+
   .vhl-vacuum-pdp__accordions {
     max-width: 900px;
     margin: 48px auto 0;
-    padding: 0 24px 56px;
+    padding: 0 16px 56px;
     border-top: 1px solid #eceae5;
   }
 
@@ -344,7 +417,27 @@
   "name": "VHL Vacuumhaak PDP",
   "tag": "section",
   "class": "vhl-vacuum-pdp-section",
-  "settings": [],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Trust / value card (optioneel)"
+    },
+    {
+      "type": "text",
+      "id": "trust_badge_text",
+      "label": "Badge tekst (optioneel)"
+    },
+    {
+      "type": "text",
+      "id": "trust_heading",
+      "label": "Titel (optioneel, leeg = kaart verborgen)"
+    },
+    {
+      "type": "textarea",
+      "id": "trust_body",
+      "label": "Tekst (optioneel)"
+    }
+  ],
   "blocks": [
     {
       "type": "title",
@@ -474,22 +567,10 @@
           "id": "price_font_weight",
           "label": "Price font weight",
           "options": [
-            {
-              "value": "400",
-              "label": "Regular"
-            },
-            {
-              "value": "500",
-              "label": "Medium"
-            },
-            {
-              "value": "600",
-              "label": "Semibold"
-            },
-            {
-              "value": "700",
-              "label": "Bold"
-            }
+            { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" },
+            { "value": "600", "label": "Semibold" },
+            { "value": "700", "label": "Bold" }
           ],
           "default": "600"
         },
@@ -540,18 +621,9 @@
           "id": "save_badge_display_type",
           "label": "Save badge display type",
           "options": [
-            {
-              "value": "percentage",
-              "label": "Percentage off (%)"
-            },
-            {
-              "value": "dollar_amount",
-              "label": "Dollar amount off"
-            },
-            {
-              "value": "custom_amount",
-              "label": "Custom amount"
-            }
+            { "value": "percentage", "label": "Percentage off (%)" },
+            { "value": "dollar_amount", "label": "Dollar amount off" },
+            { "value": "custom_amount", "label": "Custom amount" }
           ],
           "default": "percentage"
         },
@@ -606,14 +678,8 @@
           "id": "layout_style",
           "label": "Layout Style",
           "options": [
-            {
-              "value": "vertical",
-              "label": "Vertical"
-            },
-            {
-              "value": "horizontal",
-              "label": "Horizontal"
-            }
+            { "value": "vertical", "label": "Vertical" },
+            { "value": "horizontal", "label": "Horizontal" }
           ],
           "default": "vertical"
         },
@@ -672,7 +738,7 @@
           "min": -20,
           "max": 20,
           "step": 5,
-          "default": 15
+          "default": 0
         },
         {
           "type": "range",
@@ -719,6 +785,18 @@
           "id": "show_labels",
           "label": "Show Option Labels",
           "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_selected_value_next_to_label",
+          "label": "Show Selected Value Next to Label",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "bold_selected_value",
+          "label": "Bold Selected Value",
+          "default": false
         },
         {
           "type": "color",
@@ -823,7 +901,7 @@
           "min": 20,
           "max": 50,
           "step": 2,
-          "default": 30
+          "default": 32
         },
         {
           "type": "color",
@@ -905,7 +983,7 @@
           "min": 0,
           "max": 40,
           "step": 2,
-          "default": 16
+          "default": 0
         }
       ]
     },
@@ -937,14 +1015,8 @@
           "id": "button_behavior",
           "label": "Button behavior",
           "options": [
-            {
-              "value": "skip_to_checkout",
-              "label": "Skip to checkout"
-            },
-            {
-              "value": "add_to_cart",
-              "label": "Add to cart"
-            }
+            { "value": "skip_to_checkout", "label": "Skip to checkout" },
+            { "value": "add_to_cart", "label": "Add to cart" }
           ],
           "default": "add_to_cart"
         },
@@ -976,22 +1048,10 @@
           "id": "button_icon",
           "label": "Button icon",
           "options": [
-            {
-              "value": "none",
-              "label": "No icon"
-            },
-            {
-              "value": "cart",
-              "label": "Cart"
-            },
-            {
-              "value": "bag",
-              "label": "Shopping bag"
-            },
-            {
-              "value": "arrow",
-              "label": "Arrow"
-            }
+            { "value": "none", "label": "No icon" },
+            { "value": "cart", "label": "Cart" },
+            { "value": "bag", "label": "Shopping bag" },
+            { "value": "arrow", "label": "Arrow" }
           ],
           "default": "none"
         },
@@ -1041,7 +1101,7 @@
           "min": 5,
           "max": 30,
           "step": 1,
-          "default": 16
+          "default": 18
         },
         {
           "type": "range",
@@ -1068,24 +1128,12 @@
     {
       "name": "VHL Vacuumhaak PDP",
       "blocks": [
-        {
-          "type": "title"
-        },
-        {
-          "type": "price"
-        },
-        {
-          "type": "bullet_list"
-        },
-        {
-          "type": "simple_variant_picker"
-        },
-        {
-          "type": "quantity_selector"
-        },
-        {
-          "type": "add_to_cart"
-        }
+        { "type": "title" },
+        { "type": "price" },
+        { "type": "bullet_list" },
+        { "type": "simple_variant_picker" },
+        { "type": "quantity_selector" },
+        { "type": "add_to_cart" }
       ]
     }
   ]

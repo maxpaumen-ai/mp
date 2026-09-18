@@ -1,0 +1,223 @@
+{%- comment -%}
+  VHL Vacuum Hook PDP — storytelling split/full-bleed block.
+  Geïsoleerd, herbruikbaar meerdere keren in templates/product.vacuum-hook.json
+  met eigen instellingen per instance (licht split, donker split, donker full-bleed).
+  Alle content (tekst/media) is merchant-editable; niets hardcoded.
+{%- endcomment -%}
+
+{%- liquid
+  assign has_text = false
+  if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.body != blank
+    assign has_text = true
+  endif
+
+  assign has_media = false
+  if section.settings.image != blank or section.settings.video != blank
+    assign has_media = true
+  endif
+
+  assign has_content = false
+  if has_text or has_media
+    assign has_content = true
+  endif
+-%}
+
+{% if has_content %}
+  <section
+    id="VHLStory-{{ section.id }}"
+    class="vhl-vacuum-story vhl-vacuum-story--{{ section.settings.theme }} vhl-vacuum-story--{{ section.settings.layout_style }} vhl-vacuum-story--media-{{ section.settings.media_position }}"
+    {{ section.shopify_attributes }}
+  >
+    <div class="vhl-vacuum-story__inner">
+      {% if has_text %}
+        <div class="vhl-vacuum-story__text">
+          {% if section.settings.eyebrow != blank %}
+            <p class="vhl-vacuum-story__eyebrow">{{ section.settings.eyebrow }}</p>
+          {% endif %}
+          {% if section.settings.heading != blank %}
+            <h2 class="vhl-vacuum-story__heading">{{ section.settings.heading }}</h2>
+          {% endif %}
+          {% if section.settings.body != blank %}
+            <div class="vhl-vacuum-story__body">{{ section.settings.body }}</div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if has_media %}
+        <div class="vhl-vacuum-story__media">
+          {% if section.settings.video != blank %}
+            {{ section.settings.video | video_tag: controls: true, class: 'vhl-vacuum-story__video' }}
+          {% elsif section.settings.image != blank %}
+            {{
+              section.settings.image
+              | image_url: width: 1600
+              | image_tag: loading: 'lazy', class: 'vhl-vacuum-story__image', widths: '600,900,1200,1600'
+            }}
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  {% style %}
+    #VHLStory-{{ section.id }} {
+      padding: 56px 16px;
+    }
+
+    @media screen and (min-width: 990px) {
+      #VHLStory-{{ section.id }} {
+        padding: 88px 48px;
+      }
+    }
+
+    #VHLStory-{{ section.id }}.vhl-vacuum-story--dark {
+      background: #1a1917;
+      color: #ffffff;
+    }
+
+    #VHLStory-{{ section.id }}.vhl-vacuum-story--light {
+      background: #faf8f5;
+      color: #1a1a1a;
+    }
+
+    #VHLStory-{{ section.id }} .vhl-vacuum-story__inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    #VHLStory-{{ section.id }}.vhl-vacuum-story--split .vhl-vacuum-story__inner {
+      grid-template-columns: 1fr;
+    }
+
+    @media screen and (min-width: 900px) {
+      #VHLStory-{{ section.id }}.vhl-vacuum-story--split .vhl-vacuum-story__inner {
+        grid-template-columns: 1fr 1fr;
+        gap: 56px;
+      }
+      #VHLStory-{{ section.id }}.vhl-vacuum-story--media-left .vhl-vacuum-story__media {
+        order: -1;
+      }
+    }
+
+    #VHLStory-{{ section.id }}.vhl-vacuum-story--full-bleed .vhl-vacuum-story__inner {
+      max-width: 1600px;
+    }
+
+    @media screen and (min-width: 900px) {
+      #VHLStory-{{ section.id }}.vhl-vacuum-story--full-bleed .vhl-vacuum-story__inner {
+        grid-template-columns: 0.85fr 1.15fr;
+        gap: 56px;
+      }
+    }
+
+    #VHLStory-{{ section.id }} .vhl-vacuum-story__eyebrow {
+      margin: 0 0 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.65;
+    }
+
+    #VHLStory-{{ section.id }} .vhl-vacuum-story__heading {
+      margin: 0 0 16px;
+      font-size: clamp(26px, 3.4vw, 40px);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+
+    #VHLStory-{{ section.id }} .vhl-vacuum-story__body {
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 46ch;
+      opacity: 0.85;
+    }
+
+    #VHLStory-{{ section.id }} .vhl-vacuum-story__media {
+      width: 100%;
+    }
+
+    #VHLStory-{{ section.id }} .vhl-vacuum-story__image,
+    #VHLStory-{{ section.id }} .vhl-vacuum-story__video {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 20px;
+      object-fit: cover;
+    }
+  {% endstyle %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "VHL Vacuumhaak — Storytelling",
+  "tag": "section",
+  "class": "vhl-vacuum-story-section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "theme",
+      "label": "Kleurthema",
+      "options": [
+        { "value": "light", "label": "Licht" },
+        { "value": "dark", "label": "Donker" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "select",
+      "id": "layout_style",
+      "label": "Layout",
+      "options": [
+        { "value": "split", "label": "Twee gelijke kolommen" },
+        { "value": "full-bleed", "label": "Breed, tekst smaller dan media" }
+      ],
+      "default": "split"
+    },
+    {
+      "type": "select",
+      "id": "media_position",
+      "label": "Positie media (bij twee kolommen)",
+      "options": [
+        { "value": "right", "label": "Rechts" },
+        { "value": "left", "label": "Links" }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Boventitel (optioneel)"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titel (optioneel)"
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Tekst (optioneel)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Afbeelding (optioneel)"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video (optioneel, heeft voorrang op afbeelding)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "VHL Vacuumhaak — Storytelling"
+    }
+  ]
+}
+{% endschema %}
