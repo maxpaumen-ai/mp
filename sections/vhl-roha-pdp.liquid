@@ -1,0 +1,985 @@
+{%- comment -%}
+  VHL ROHA-style PDP — clean, isolated rebuild of the above-the-fold area.
+  Alleen gebruikt door templates/product.vacuum-hook.json.
+
+  Dit is een volledig zelfstandige section. In tegenstelling tot de vorige
+  implementatie (sections/vhl-vacuum-product-main.liquid, nu verwijderd)
+  rendert deze section title, prijs, varianten, aantal en add-to-cart
+  rechtstreeks zelf, en gebruikt daarvoor GEEN van de volgende:
+  - snippets/product-info.liquid
+  - de standaard shop-product-layout / shop-product-details opmaak
+  - de bestaande percentage-based gallery/buybox wrappers
+  - CSS order-hacks om content visueel te herschikken
+
+  Alleen kleine, aantoonbaar veilige snippets/patterns worden hergebruikt,
+  zonder eigen layout/max-width/flex-basis:
+  - snippets/loading-spinner.liquid (een losse svg, geen wrapper-CSS)
+  - het bestaande <product-form> custom element uit assets/product-form.js
+    (verwacht alleen: een <form>, een [name=id] input, een [type=submit]
+    knop met een .button-text span, en een .loading__spinner element —
+    geen van die verwachtingen legt layout op)
+  - window.Elixir_FormatMoney (assets/theme-loaders.js, globaal geladen)
+    voor prijsweergave na een variantwissel, i.p.v. een eigen
+    geld-formatter te bouwen
+  - shop.enabled_payment_types (echte, door de winkel ingeschakelde
+    betaalmethoden — geen aangenomen vaste lijst)
+
+  Sticky ATC: bewust NIET opgenomen in deze rebuild. De oude
+  sections/vhl-vacuum-sticky-atc.liquid zoekt naar
+  ".vhl-vacuum-pdp .shop-add-to-cart-wrapper form[data-type=...]", klassen
+  die hier niet meer bestaan. Dat bestand blijft ongewijzigd (0 diff); het
+  is losgekoppeld door het uit templates/product.vacuum-hook.json te
+  verwijderen, niet door dit bestand er weer afhankelijk van te maken.
+
+  Alle eigen classes zijn scoped onder .vhl-roha-pdp met een eigen,
+  per-instantie root-id, zodat niets naar andere pagina's kan lekken.
+{%- endcomment -%}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign display_image = current_variant.featured_image | default: product.featured_media
+  assign active_media_id = display_image.id
+
+  assign has_rating = false
+  if product.metafields.reviews.rating.value != blank
+    assign has_rating = true
+  endif
+
+  assign has_usps = false
+  if section.settings.usp_1 != blank or section.settings.usp_2 != blank or section.settings.usp_3 != blank
+    assign has_usps = true
+  endif
+
+  assign has_shipping_info = false
+  if shop.policies.shipping_policy.body != blank or shop.policies.refund_policy.body != blank
+    assign has_shipping_info = true
+  endif
+
+  assign has_trust_block = false
+  if section.settings.trust_heading != blank or section.settings.trust_body != blank
+    assign has_trust_block = true
+  endif
+
+  assign root_id = 'VHLRohaPdp-' | append: section.id
+-%}
+
+<section id="{{ root_id }}" class="vhl-roha-pdp" {{ section.shopify_attributes }}>
+  <div class="vhl-roha-pdp__container">
+    <div class="vhl-roha-pdp__grid">
+
+      <div class="vhl-roha-pdp__gallery">
+        <div class="vhl-roha-pdp__main-image">
+          <img
+            data-vhl-roha-main-image
+            src="{{ display_image | image_url: width: 1600 }}"
+            alt="{{ display_image.alt | default: product.title | escape }}"
+            width="1200"
+            height="1200"
+            loading="eager"
+          >
+        </div>
+
+        {%- assign media_count = 0 -%}
+        {%- for media in product.media -%}
+          {%- if media.media_type == 'image' -%}{%- assign media_count = media_count | plus: 1 -%}{%- endif -%}
+        {%- endfor -%}
+
+        {%- if media_count > 1 -%}
+          <div class="vhl-roha-pdp__thumbs" data-vhl-roha-thumbs>
+            {%- for media in product.media -%}
+              {%- if media.media_type == 'image' -%}
+                {%- assign is_active_thumb = false -%}
+                {%- if active_media_id != blank and media.id == active_media_id -%}
+                  {%- assign is_active_thumb = true -%}
+                {%- elsif active_media_id == blank and forloop.first -%}
+                  {%- assign is_active_thumb = true -%}
+                {%- endif -%}
+                <button
+                  type="button"
+                  class="vhl-roha-pdp__thumb{% if is_active_thumb %} is-active{% endif %}"
+                  data-vhl-roha-thumb
+                  data-full-src="{{ media | image_url: width: 1600 }}"
+                  data-alt="{{ media.alt | default: product.title | escape }}"
+                  aria-label="{{ product.title | escape }} — afbeelding {{ forloop.index }}"
+                >
+                  <img src="{{ media | image_url: width: 160 }}" alt="" loading="lazy" width="68" height="68">
+                </button>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="vhl-roha-pdp__panel">
+
+        {%- if has_rating -%}
+          <div
+            class="vhl-roha-pdp__rating"
+            role="img"
+            aria-label="{{ 'accessibility.star_reviews_info' | t: rating_value: product.metafields.reviews.rating.value, rating_max: product.metafields.reviews.rating.value.scale_max }}"
+          >
+            <span
+              aria-hidden="true"
+              class="rating-star"
+              style="--rating: {{ product.metafields.reviews.rating.value.rating | floor }}; --rating-max: {{ product.metafields.reviews.rating.value.scale_max }};"
+            ></span>
+            <span class="vhl-roha-pdp__rating-text">
+              {{- product.metafields.reviews.rating.value }} / {{ product.metafields.reviews.rating.value.scale_max -}}
+              {% if product.metafields.reviews.rating_count %}
+                &middot; {{ product.metafields.reviews.rating_count }} beoordelingen
+              {% endif %}
+            </span>
+          </div>
+        {%- endif -%}
+
+        <h1 class="vhl-roha-pdp__title">{{ product.title }}</h1>
+
+        <div class="vhl-roha-pdp__price">
+          <span class="vhl-roha-pdp__price-current" data-vhl-roha-price-current>{{ current_variant.price | money }}</span>
+          {%- if current_variant.compare_at_price > current_variant.price -%}
+            <span class="vhl-roha-pdp__price-compare" data-vhl-roha-price-compare>{{ current_variant.compare_at_price | money }}</span>
+          {%- else -%}
+            <span class="vhl-roha-pdp__price-compare" data-vhl-roha-price-compare hidden></span>
+          {%- endif -%}
+        </div>
+
+        {%- if has_usps -%}
+          <ul class="vhl-roha-pdp__usps">
+            {%- if section.settings.usp_1 != blank -%}<li>{{ section.settings.usp_1 }}</li>{%- endif -%}
+            {%- if section.settings.usp_2 != blank -%}<li>{{ section.settings.usp_2 }}</li>{%- endif -%}
+            {%- if section.settings.usp_3 != blank -%}<li>{{ section.settings.usp_3 }}</li>{%- endif -%}
+          </ul>
+        {%- endif -%}
+
+        <product-form class="vhl-roha-pdp__form-wrapper">
+          {%- form 'product', product, data-type: 'add-to-cart-form', class: 'vhl-roha-pdp__form' -%}
+
+            <input
+              type="hidden"
+              name="id"
+              value="{{ current_variant.id }}"
+              data-vhl-roha-variant-id
+              disabled
+            >
+
+            {%- unless product.has_only_default_variant -%}
+              {%- for option in product.options_with_values -%}
+                {%- liquid
+                  assign current_option_value = ''
+                  case option.position
+                    when 1
+                      assign current_option_value = current_variant.option1
+                    when 2
+                      assign current_option_value = current_variant.option2
+                    when 3
+                      assign current_option_value = current_variant.option3
+                  endcase
+                -%}
+                <div class="vhl-roha-pdp__option" data-vhl-roha-option data-option-position="{{ option.position }}">
+                  <div class="vhl-roha-pdp__option-heading">
+                    <span class="vhl-roha-pdp__option-name">{{ option.name }}:</span>
+                    <span class="vhl-roha-pdp__option-selected" data-vhl-roha-option-selected>{{ current_option_value }}</span>
+                  </div>
+                  <div class="vhl-roha-pdp__option-values">
+                    {%- for value in option.values -%}
+                      {%- assign is_selected = false -%}
+                      {%- if value == current_option_value -%}{%- assign is_selected = true -%}{%- endif -%}
+                      {%- if value.swatch.color or value.swatch.image -%}
+                        <button
+                          type="button"
+                          class="vhl-roha-pdp__swatch"
+                          data-vhl-roha-option-value
+                          data-value="{{ value | escape }}"
+                          data-selected="{{ is_selected }}"
+                          aria-pressed="{{ is_selected }}"
+                          aria-label="{{ value | escape }}"
+                          {%- if value.swatch.color %}
+                            style="background-color: {{ value.swatch.color }};"
+                          {%- elsif value.swatch.image %}
+                            style="background-image: url({{ value.swatch.image | image_url: width: 64 }});"
+                          {%- endif %}
+                        ></button>
+                      {%- else -%}
+                        <button
+                          type="button"
+                          class="vhl-roha-pdp__pill"
+                          data-vhl-roha-option-value
+                          data-value="{{ value | escape }}"
+                          data-selected="{{ is_selected }}"
+                          aria-pressed="{{ is_selected }}"
+                        >{{ value }}</button>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- endfor -%}
+            {%- endunless -%}
+
+            <div class="vhl-roha-pdp__quantity-row">
+              <span class="vhl-roha-pdp__quantity-label">Aantal</span>
+              <div class="vhl-roha-pdp__quantity">
+                <button type="button" class="vhl-roha-pdp__quantity-btn" data-vhl-roha-qty-decrease aria-label="Verlaag aantal">&minus;</button>
+                <input
+                  type="number"
+                  class="vhl-roha-pdp__quantity-input"
+                  name="quantity"
+                  value="1"
+                  min="1"
+                  inputmode="numeric"
+                  data-vhl-roha-qty-input
+                  aria-label="Aantal"
+                >
+                <button type="button" class="vhl-roha-pdp__quantity-btn" data-vhl-roha-qty-increase aria-label="Verhoog aantal">+</button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              name="add"
+              class="vhl-roha-pdp__atc"
+              data-vhl-roha-atc
+              {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}
+            >
+              <span class="button-text">
+                {%- if current_variant.available -%}In winkelmand{%- else -%}Uitverkocht{%- endif -%}
+              </span>
+              {% render 'loading-spinner' %}
+            </button>
+
+            <div class="product-form__error-message-wrapper" role="alert" hidden>
+              <span class="product-form__error-message"></span>
+            </div>
+
+          {%- endform -%}
+        </product-form>
+
+        {%- assign payment_type_count = 0 -%}
+        {%- for type in shop.enabled_payment_types -%}{%- assign payment_type_count = payment_type_count | plus: 1 -%}{%- endfor -%}
+        {%- if payment_type_count > 0 -%}
+          <div class="vhl-roha-pdp__payments" aria-label="Betaalmethoden">
+            {%- for type in shop.enabled_payment_types -%}
+              {{ type | payment_type_svg_tag }}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- if has_trust_block -%}
+          <div class="vhl-roha-pdp__trust-card">
+            {%- if section.settings.trust_badge_text != blank -%}
+              <span class="vhl-roha-pdp__trust-badge">{{ section.settings.trust_badge_text }}</span>
+            {%- endif -%}
+            {%- if section.settings.trust_heading != blank -%}
+              <p class="vhl-roha-pdp__trust-heading">{{ section.settings.trust_heading }}</p>
+            {%- endif -%}
+            {%- if section.settings.trust_body != blank -%}
+              <p class="vhl-roha-pdp__trust-body">{{ section.settings.trust_body }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <div class="vhl-roha-pdp__accordions">
+          {%- if product.description != blank -%}
+            <details class="vhl-roha-pdp__accordion">
+              <summary>Productdetails</summary>
+              <div class="vhl-roha-pdp__accordion-body">{{ product.description }}</div>
+            </details>
+          {%- endif -%}
+
+          {%- if has_shipping_info -%}
+            <details class="vhl-roha-pdp__accordion">
+              <summary>Verzending &amp; retourneren</summary>
+              <div class="vhl-roha-pdp__accordion-body">
+                {%- if shop.policies.shipping_policy.body != blank -%}
+                  <p><a href="{{ shop.policies.shipping_policy.url }}">{{ shop.policies.shipping_policy.title }}</a></p>
+                {%- endif -%}
+                {%- if shop.policies.refund_policy.body != blank -%}
+                  <p><a href="{{ shop.policies.refund_policy.url }}">{{ shop.policies.refund_policy.title }}</a></p>
+                {%- endif -%}
+              </div>
+            </details>
+          {%- endif -%}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="application/json" data-vhl-roha-variants="{{ root_id }}">
+  [
+  {%- for variant in product.variants -%}
+    {%- liquid
+      assign v_image = 'null'
+      if variant.featured_image
+        assign v_image_url = variant.featured_image | image_url: width: 1600
+        assign v_image = v_image_url | json
+      endif
+      assign v_alt = variant.featured_image.alt | default: product.title
+    -%}
+    {
+      "id": {{ variant.id | json }},
+      "available": {{ variant.available | json }},
+      "price": {{ variant.price | json }},
+      "compare_at_price": {{ variant.compare_at_price | json }},
+      "option1": {{ variant.option1 | json }},
+      "option2": {{ variant.option2 | json }},
+      "option3": {{ variant.option3 | json }},
+      "image": {{ v_image }},
+      "imageAlt": {{ v_alt | json }}
+    }{%- unless forloop.last -%},{%- endunless -%}
+  {%- endfor -%}
+  ]
+</script>
+
+<script src="{{ 'product-form.js' | asset_url }}" defer></script>
+<script>
+  (function () {
+    var root = document.getElementById({{ root_id | json }});
+    if (!root) return;
+
+    var dataEl = root.parentElement.querySelector('script[data-vhl-roha-variants="{{ root_id }}"]');
+    var variants = [];
+    try {
+      variants = dataEl ? JSON.parse(dataEl.textContent) : [];
+    } catch (err) {
+      variants = [];
+    }
+
+    var variantIdInput = root.querySelector('[data-vhl-roha-variant-id]');
+    var atcButton = root.querySelector('[data-vhl-roha-atc]');
+    var atcButtonText = atcButton ? atcButton.querySelector('.button-text') : null;
+    var priceCurrentEl = root.querySelector('[data-vhl-roha-price-current]');
+    var priceCompareEl = root.querySelector('[data-vhl-roha-price-compare]');
+    var mainImage = root.querySelector('[data-vhl-roha-main-image]');
+    var optionGroups = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-option]'));
+    var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-thumb]'));
+    var qtyInput = root.querySelector('[data-vhl-roha-qty-input]');
+    var qtyDecrease = root.querySelector('[data-vhl-roha-qty-decrease]');
+    var qtyIncrease = root.querySelector('[data-vhl-roha-qty-increase]');
+
+    function formatMoney(cents) {
+      if (typeof window.Elixir_FormatMoney === 'function') {
+        return window.Elixir_FormatMoney(cents);
+      }
+      return (cents / 100).toFixed(2);
+    }
+
+    function currentSelection() {
+      var selection = { 1: null, 2: null, 3: null };
+      optionGroups.forEach(function (group) {
+        var position = parseInt(group.getAttribute('data-option-position'), 10);
+        var active = group.querySelector('[data-vhl-roha-option-value][data-selected="true"]');
+        selection[position] = active ? active.getAttribute('data-value') : null;
+      });
+      return selection;
+    }
+
+    function findVariant(selection) {
+      for (var i = 0; i < variants.length; i++) {
+        var v = variants[i];
+        var matches = true;
+        [1, 2, 3].forEach(function (position) {
+          var expected = selection[position];
+          var actual = v['option' + position];
+          if (expected !== null && actual !== expected) matches = false;
+        });
+        if (matches) return v;
+      }
+      return null;
+    }
+
+    function setActiveThumbBySrc(src) {
+      if (!src) return;
+      thumbs.forEach(function (thumb) {
+        var isMatch = thumb.getAttribute('data-full-src') === src;
+        thumb.classList.toggle('is-active', isMatch);
+      });
+    }
+
+    function updateVariant() {
+      var selection = currentSelection();
+      var variant = findVariant(selection);
+      if (!variant) return;
+
+      if (variantIdInput) variantIdInput.value = variant.id;
+
+      if (priceCurrentEl) priceCurrentEl.textContent = formatMoney(variant.price);
+      if (priceCompareEl) {
+        if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+          priceCompareEl.textContent = formatMoney(variant.compare_at_price);
+          priceCompareEl.hidden = false;
+        } else {
+          priceCompareEl.hidden = true;
+        }
+      }
+
+      if (mainImage && variant.image) {
+        mainImage.src = variant.image;
+        mainImage.alt = variant.imageAlt || mainImage.alt;
+        setActiveThumbBySrc(variant.image);
+      }
+
+      if (atcButton) {
+        if (variant.available) {
+          atcButton.removeAttribute('disabled');
+          atcButton.removeAttribute('aria-disabled');
+          if (atcButtonText) atcButtonText.textContent = 'In winkelmand';
+        } else {
+          atcButton.setAttribute('disabled', 'disabled');
+          atcButton.setAttribute('aria-disabled', 'true');
+          if (atcButtonText) atcButtonText.textContent = 'Uitverkocht';
+        }
+      }
+
+      document.dispatchEvent(new CustomEvent('variant:change', { detail: { variant: variant } }));
+    }
+
+    optionGroups.forEach(function (group) {
+      var buttons = Array.prototype.slice.call(group.querySelectorAll('[data-vhl-roha-option-value]'));
+      var selectedLabel = group.querySelector('[data-vhl-roha-option-selected]');
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          buttons.forEach(function (b) {
+            b.setAttribute('data-selected', 'false');
+            b.setAttribute('aria-pressed', 'false');
+          });
+          btn.setAttribute('data-selected', 'true');
+          btn.setAttribute('aria-pressed', 'true');
+          if (selectedLabel) selectedLabel.textContent = btn.getAttribute('data-value');
+          updateVariant();
+        });
+      });
+    });
+
+    thumbs.forEach(function (thumb) {
+      thumb.addEventListener('click', function () {
+        var fullSrc = thumb.getAttribute('data-full-src');
+        if (mainImage && fullSrc) {
+          mainImage.src = fullSrc;
+          mainImage.alt = thumb.getAttribute('data-alt') || mainImage.alt;
+        }
+        thumbs.forEach(function (t) { t.classList.remove('is-active'); });
+        thumb.classList.add('is-active');
+      });
+    });
+
+    function clampQuantity(value) {
+      var n = parseInt(value, 10);
+      if (isNaN(n) || n < 1) n = 1;
+      return n;
+    }
+
+    if (qtyInput) {
+      qtyInput.addEventListener('change', function () {
+        qtyInput.value = clampQuantity(qtyInput.value);
+      });
+    }
+    if (qtyDecrease && qtyInput) {
+      qtyDecrease.addEventListener('click', function () {
+        qtyInput.value = clampQuantity(qtyInput.value) - 1 < 1 ? 1 : clampQuantity(qtyInput.value) - 1;
+      });
+    }
+    if (qtyIncrease && qtyInput) {
+      qtyIncrease.addEventListener('click', function () {
+        qtyInput.value = clampQuantity(qtyInput.value) + 1;
+      });
+    }
+  })();
+</script>
+
+{% style %}
+  .vhl-roha-pdp {
+    background: #ffffff;
+  }
+
+  .vhl-roha-pdp__container {
+    max-width: 1440px;
+    width: calc(100% - 64px);
+    margin: 0 auto;
+    padding: 28px 0 48px;
+  }
+
+  .vhl-roha-pdp__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  @media screen and (min-width: 990px) {
+    .vhl-roha-pdp__grid {
+      grid-template-columns: 60fr 40fr;
+      gap: 72px;
+    }
+    .vhl-roha-pdp__panel {
+      position: sticky;
+      top: 100px;
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    .vhl-roha-pdp__container {
+      width: calc(100% - 36px);
+      padding: 20px 0 36px;
+    }
+  }
+
+  .vhl-roha-pdp__gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .vhl-roha-pdp__main-image {
+    background: #f7f5f2;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vhl-roha-pdp__main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .vhl-roha-pdp__thumbs {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .vhl-roha-pdp__thumb {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e5e0d8;
+    background: #f7f5f2;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .vhl-roha-pdp__thumb.is-active {
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 1px #1a1a1a;
+  }
+
+  .vhl-roha-pdp__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media screen and (min-width: 990px) {
+    .vhl-roha-pdp__gallery {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .vhl-roha-pdp__thumbs {
+      order: -1;
+      flex-direction: column;
+      flex: 0 0 auto;
+      width: 72px;
+      max-height: 560px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      gap: 12px;
+    }
+    .vhl-roha-pdp__thumb {
+      width: 68px;
+      height: 68px;
+    }
+    .vhl-roha-pdp__main-image {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+  }
+
+  .vhl-roha-pdp__panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .vhl-roha-pdp__rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+  }
+
+  .vhl-roha-pdp__rating-text {
+    font-size: 13px;
+    color: #6b6b68;
+  }
+
+  .vhl-roha-pdp__title {
+    font-size: 24px;
+    line-height: 1.2;
+    margin: 0 0 8px;
+    color: #1a1a1a;
+    font-weight: 600;
+  }
+
+  @media screen and (min-width: 990px) {
+    .vhl-roha-pdp__title {
+      font-size: 28px;
+    }
+  }
+
+  .vhl-roha-pdp__price {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 14px;
+  }
+
+  .vhl-roha-pdp__price-current {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .vhl-roha-pdp__price-compare {
+    font-size: 16px;
+    color: #9c9c9c;
+    text-decoration: line-through;
+  }
+
+  .vhl-roha-pdp__usps {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 14px 0;
+    border-top: 1px solid #eceae5;
+    border-bottom: 1px solid #eceae5;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .vhl-roha-pdp__usps li {
+    font-size: 14px;
+    color: #1a1a1a;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .vhl-roha-pdp__usps li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #262625;
+    margin-top: 7px;
+    flex: 0 0 auto;
+  }
+
+  .vhl-roha-pdp__option {
+    margin-bottom: 16px;
+  }
+
+  .vhl-roha-pdp__option-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+
+  .vhl-roha-pdp__option-name {
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .vhl-roha-pdp__option-selected {
+    color: #6b6b68;
+  }
+
+  .vhl-roha-pdp__option-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-width: 100%;
+  }
+
+  .vhl-roha-pdp__pill {
+    border: 1px solid #e5e0d8;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #1a1a1a;
+    cursor: pointer;
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+  }
+
+  .vhl-roha-pdp__pill[data-selected="true"] {
+    background: #262625;
+    border-color: #262625;
+    color: #ffffff;
+  }
+
+  .vhl-roha-pdp__swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #e5e0d8;
+    cursor: pointer;
+    padding: 0;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .vhl-roha-pdp__swatch[data-selected="true"] {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #262625;
+  }
+
+  .vhl-roha-pdp__quantity-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0 14px;
+  }
+
+  .vhl-roha-pdp__quantity-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .vhl-roha-pdp__quantity {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e5e0d8;
+    border-radius: 8px;
+    overflow: hidden;
+    width: fit-content;
+  }
+
+  .vhl-roha-pdp__quantity-btn {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    background: #f5f3ef;
+    color: #1a1a1a;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .vhl-roha-pdp__quantity-input {
+    width: 40px;
+    height: 34px;
+    border: 0;
+    border-left: 1px solid #e5e0d8;
+    border-right: 1px solid #e5e0d8;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .vhl-roha-pdp__quantity-input::-webkit-outer-spin-button,
+  .vhl-roha-pdp__quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .vhl-roha-pdp__atc {
+    width: 100%;
+    min-height: 58px;
+    border: 0;
+    border-radius: 999px;
+    background: #1a1a1a;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+  }
+
+  .vhl-roha-pdp__atc[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .vhl-roha-pdp__atc .loading__spinner {
+    position: absolute;
+    right: 20px;
+  }
+
+  .vhl-roha-pdp__payments {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #eceae5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .vhl-roha-pdp__payments svg {
+    height: 22px;
+    width: auto;
+  }
+
+  .vhl-roha-pdp__trust-card {
+    margin-top: 18px;
+    padding: 20px;
+    border: 1px solid #e5e0d8;
+    border-radius: 12px;
+    background: #faf8f5;
+    text-align: center;
+  }
+
+  .vhl-roha-pdp__trust-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e5e0d8;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b6b68;
+    margin-bottom: 10px;
+  }
+
+  .vhl-roha-pdp__trust-heading {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .vhl-roha-pdp__trust-body {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #6b6b68;
+  }
+
+  .vhl-roha-pdp__accordions {
+    margin-top: 22px;
+  }
+
+  .vhl-roha-pdp__accordion {
+    border-top: 1px solid #eceae5;
+  }
+
+  .vhl-roha-pdp__accordion:last-child {
+    border-bottom: 1px solid #eceae5;
+  }
+
+  .vhl-roha-pdp__accordion summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 14px 2px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .vhl-roha-pdp__accordion summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .vhl-roha-pdp__accordion summary::after {
+    content: '+';
+    font-weight: 400;
+    font-size: 18px;
+    color: #6b6b68;
+  }
+
+  .vhl-roha-pdp__accordion[open] summary::after {
+    content: '\2212';
+  }
+
+  .vhl-roha-pdp__accordion-body {
+    padding: 0 2px 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #4a4a47;
+  }
+
+  .vhl-roha-pdp__accordion-body a {
+    color: #1a1a1a;
+    text-decoration: underline;
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "VHL ROHA-style PDP",
+  "tag": "section",
+  "class": "vhl-roha-pdp-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "USP's (optioneel, max 3)"
+    },
+    {
+      "type": "text",
+      "id": "usp_1",
+      "label": "USP 1 (leeg = verborgen)"
+    },
+    {
+      "type": "text",
+      "id": "usp_2",
+      "label": "USP 2 (leeg = verborgen)"
+    },
+    {
+      "type": "text",
+      "id": "usp_3",
+      "label": "USP 3 (leeg = verborgen)"
+    },
+    {
+      "type": "header",
+      "content": "Trust card (optioneel)"
+    },
+    {
+      "type": "text",
+      "id": "trust_badge_text",
+      "label": "Badge tekst (optioneel)"
+    },
+    {
+      "type": "text",
+      "id": "trust_heading",
+      "label": "Titel (optioneel, leeg = kaart verborgen)"
+    },
+    {
+      "type": "textarea",
+      "id": "trust_body",
+      "label": "Tekst (optioneel)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "VHL ROHA-style PDP"
+    }
+  ]
+}
+{% endschema %}
