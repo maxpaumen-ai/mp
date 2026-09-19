@@ -20,11 +20,11 @@
     volledige swatch-dekking: een compacte, functionele <select> i.p.v.
     twaalf dominante tekstpills. Geen AliExpress-string-parser, geen
     kleur-uit-tekst-gokken.
-  - Quantity: blijft volledig functioneel, maar bewust NIET tussen de
-    swatches en de ATC-knop. De ATC-knop gebruikt altijd de huidige
-    waarde van het aantal-veld (standaard 1); een kleine, ondergeschikte
-    stepper staat direct ná de ATC-knop, buiten de primaire
-    rating->titel->prijs->USP's->variant->ATC-ritmiek.
+  - Quantity: de ROHA-referentie toont geen zichtbare aantal-stepper in
+    deze compositie. Aantal wordt als verborgen veld (waarde 1) met het
+    formulier meegestuurd; blijft daarna aanpasbaar in de (onaangeraakte)
+    cart drawer, zonder een extra blok in het rating->titel->prijs->
+    USP's->variant->ATC-ritmiek te introduceren dat TARGET niet heeft.
   - Hergebruikt, klein en aantoonbaar veilig (geen eigen layout):
     snippets/loading-spinner.liquid, het bestaande <product-form>
     custom element (assets/product-form.js), window.Elixir_FormatMoney
@@ -291,21 +291,15 @@
               {% render 'loading-spinner' %}
             </button>
 
-            <div class="vhl-roha-pdp__qty-inline">
-              <span class="vhl-roha-pdp__qty-inline-label">Aantal</span>
-              <button type="button" class="vhl-roha-pdp__qty-inline-btn" data-vhl-roha-qty-decrease aria-label="Verlaag aantal">&minus;</button>
-              <input
-                type="number"
-                class="vhl-roha-pdp__qty-inline-input"
-                name="quantity"
-                value="1"
-                min="1"
-                inputmode="numeric"
-                data-vhl-roha-qty-input
-                aria-label="Aantal"
-              >
-              <button type="button" class="vhl-roha-pdp__qty-inline-btn" data-vhl-roha-qty-increase aria-label="Verhoog aantal">+</button>
-            </div>
+            {%- comment -%}
+              TARGET (ROHA) toont geen zichtbare aantal-stepper in deze
+              compositie — aantal wordt altijd als 1 toegevoegd en is
+              daarna aan te passen in de (onaangeraakte) cart drawer.
+              Verborgen veld i.p.v. zichtbaar blok, zodat het formulier
+              functioneel identiek blijft zonder een extra rechterkolom-
+              blok te tonen dat TARGET niet heeft.
+            {%- endcomment -%}
+            <input type="hidden" name="quantity" value="1" data-vhl-roha-qty-input>
 
             <div class="product-form__error-message-wrapper" role="alert" hidden>
               <span class="product-form__error-message"></span>
@@ -427,9 +421,6 @@
     var mainImage = root.querySelector('[data-vhl-roha-main-image]');
     var optionGroups = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-option]'));
     var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-thumb]'));
-    var qtyInput = root.querySelector('[data-vhl-roha-qty-input]');
-    var qtyDecrease = root.querySelector('[data-vhl-roha-qty-decrease]');
-    var qtyIncrease = root.querySelector('[data-vhl-roha-qty-increase]');
 
     function formatMoney(cents) {
       if (typeof window.Elixir_FormatMoney === 'function') {
@@ -564,28 +555,6 @@
         thumb.classList.add('is-active');
       });
     });
-
-    function clampQuantity(value) {
-      var n = parseInt(value, 10);
-      if (isNaN(n) || n < 1) n = 1;
-      return n;
-    }
-
-    if (qtyInput) {
-      qtyInput.addEventListener('change', function () {
-        qtyInput.value = clampQuantity(qtyInput.value);
-      });
-    }
-    if (qtyDecrease && qtyInput) {
-      qtyDecrease.addEventListener('click', function () {
-        qtyInput.value = clampQuantity(clampQuantity(qtyInput.value) - 1);
-      });
-    }
-    if (qtyIncrease && qtyInput) {
-      qtyIncrease.addEventListener('click', function () {
-        qtyInput.value = clampQuantity(qtyInput.value) + 1;
-      });
-    }
   })();
 </script>
 
@@ -837,15 +806,29 @@
     cursor: pointer;
   }
 
+  {%- comment -%}
+    !important hier is bewust: snippets/global-button-fix.liquid (globaal
+    gerenderd door layout/theme.liquid op elke pagina) forceert met
+    !important een achtergrondkleur op ELKE button[type="submit"] via
+    var(--global-button-bg-color), die op deze site is ingesteld op
+    settings.global_button_background_color = #ff5801 (oranje) — vandaar
+    de oranje ATC-knop in de live runtime ondanks zwarte broncode hierboven.
+    Zonder !important wint die regel altijd, ongeacht CSS-specificiteit,
+    omdat !important-declaraties eerst op elkaar worden vergeleken.
+    Hetzelfde geldt voor border-radius (var(--global-button-radius), hier
+    12px, geen pil), border-kleur/-breedte en font-family. Deze regels
+    neutraliseren dat volledig, alleen voor deze geïsoleerde ATC-knop.
+  {%- endcomment -%}
   #{{ root_id }} .vhl-roha-pdp__atc {
     width: 100%;
     min-height: 56px;
-    border: 0;
-    border-radius: 999px;
-    background: #1a1a1a;
-    color: #ffffff;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: #1a1a1a !important;
+    color: #ffffff !important;
+    font-family: inherit !important;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 600 !important;
     letter-spacing: 0.4px;
     text-transform: uppercase;
     cursor: pointer;
@@ -858,8 +841,9 @@
     transition: background-color 0.15s ease;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__atc:hover {
-    background: #333130;
+  #{{ root_id }} .vhl-roha-pdp__atc:hover,
+  #{{ root_id }} .vhl-roha-pdp__atc:focus {
+    background: #333130 !important;
   }
 
   #{{ root_id }} .vhl-roha-pdp__atc[disabled] {
@@ -882,51 +866,6 @@
   #{{ root_id }} .vhl-roha-pdp__atc-sep {
     opacity: 0.6;
     font-weight: 400;
-  }
-
-  {%- comment -%}
-    Quantity: bewust NIET tussen swatches en ATC. Deze rij staat direct
-    ná de ATC-knop, klein en ondergeschikt (kleinere tekst, minder
-    padding, geen zware kadering) — buiten het primaire
-    rating->titel->prijs->USP's->variant->ATC-ritmiek van de ROHA-
-    compositie, maar wel volledig functioneel.
-  {%- endcomment -%}
-  #{{ root_id }} .vhl-roha-pdp__qty-inline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  #{{ root_id }} .vhl-roha-pdp__qty-inline-label {
-    font-size: 12px;
-    color: #6b6b68;
-  }
-
-  #{{ root_id }} .vhl-roha-pdp__qty-inline-btn {
-    width: 26px;
-    height: 26px;
-    border: 1px solid #e5e0d8;
-    border-radius: 6px;
-    background: #ffffff;
-    color: #1a1a1a;
-    font-size: 13px;
-    cursor: pointer;
-  }
-
-  #{{ root_id }} .vhl-roha-pdp__qty-inline-input {
-    width: 32px;
-    height: 26px;
-    border: 1px solid #e5e0d8;
-    border-radius: 6px;
-    text-align: center;
-    font-size: 12px;
-  }
-
-  #{{ root_id }} .vhl-roha-pdp__qty-inline-input::-webkit-outer-spin-button,
-  #{{ root_id }} .vhl-roha-pdp__qty-inline-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
   }
 
   #{{ root_id }} .vhl-roha-pdp__payments {
