@@ -200,6 +200,53 @@
     overflow: hidden;
   }
 
+  /*
+    Verticale thumbnailkolom links van de hoofdafbeelding op desktop.
+    Geactiveerd via de bestaande, ongewijzigde
+    snippets/product-gallery.liquid + assets/shop-product-details.css
+    (section.settings.thumbnails_left_column_desktop), hier alleen
+    scoped aangevuld met de daadwerkelijke naast-elkaar-layout.
+  */
+  @media screen and (min-width: 990px) {
+    .vhl-vacuum-pdp .shop-main-image-wrapper.shop-image-thumbnails-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .vhl-vacuum-pdp .shop-thumbnails-outer {
+      flex: 0 0 auto;
+      width: 76px;
+      margin: 0 !important;
+    }
+
+    .vhl-vacuum-pdp .shop-thumbnails-wrapper.left-column-layout {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vhl-vacuum-pdp .shop-thumbnails-wrapper.left-column-layout .shop-thumbnails {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      gap: 10px;
+      max-height: 520px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .vhl-vacuum-pdp .shop-thumbnails-wrapper.left-column-layout .shop-thumbnail {
+      width: 64px;
+      height: 64px;
+    }
+
+    .vhl-vacuum-pdp .shop-image-container {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+  }
+
   .vhl-vacuum-pdp__buybox {
     display: flex;
     flex-direction: column;
@@ -259,6 +306,23 @@
 
   .vhl-vacuum-pdp .simple-variant-picker {
     margin-top: 18px;
+    max-width: 100%;
+  }
+
+  /*
+    Bescherming tegen lange, geïmporteerde variantnamen: laat opties
+    wrappen i.p.v. de rechterkolom horizontaal te forceren.
+  */
+  .vhl-vacuum-pdp .simple-variant-picker__values {
+    flex-wrap: wrap !important;
+    max-width: 100%;
+  }
+
+  .vhl-vacuum-pdp .simple-variant-picker__value-container,
+  .vhl-vacuum-pdp .simple-variant-picker label {
+    max-width: 100%;
+    white-space: normal !important;
+    word-break: break-word;
   }
 
   .vhl-vacuum-pdp .modern-quantity-selector {
@@ -418,6 +482,16 @@
   "tag": "section",
   "class": "vhl-vacuum-pdp-section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Gallery"
+    },
+    {
+      "type": "checkbox",
+      "id": "thumbnails_left_column_desktop",
+      "label": "Thumbnails verticaal links (desktop)",
+      "default": true
+    },
     {
       "type": "header",
       "content": "Trust / value card (optioneel)"
