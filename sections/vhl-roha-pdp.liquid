@@ -43,6 +43,13 @@
   assign has_rating = false
   if product.metafields.reviews.rating.value != blank
     assign has_rating = true
+    assign rating_decimal = 0
+    assign rating_fraction = product.metafields.reviews.rating.value.rating | modulo: 1
+    if rating_fraction >= 0.3 and rating_fraction <= 0.7
+      assign rating_decimal = 0.5
+    elsif rating_fraction > 0.7
+      assign rating_decimal = 1
+    endif
   endif
 
   assign has_usps = false
@@ -69,6 +76,8 @@
 
   assign root_id = 'VHLRohaPdp-' | append: section.id
 -%}
+
+{{ 'component-rating.css' | asset_url | stylesheet_tag }}
 
 <section id="{{ root_id }}" class="vhl-roha-pdp" {{ section.shopify_attributes }}>
   <div class="vhl-roha-pdp__container">
@@ -121,12 +130,12 @@
             <span
               aria-hidden="true"
               class="rating-star"
-              style="--rating: {{ product.metafields.reviews.rating.value.rating | floor }}; --rating-max: {{ product.metafields.reviews.rating.value.scale_max }};"
+              style="--rating: {{ product.metafields.reviews.rating.value.rating | floor }}; --rating-max: {{ product.metafields.reviews.rating.value.scale_max }}; --rating-decimal: {{ rating_decimal }};"
             ></span>
             <span class="vhl-roha-pdp__rating-text">
               {{- product.metafields.reviews.rating.value }} / {{ product.metafields.reviews.rating.value.scale_max -}}
               {% if product.metafields.reviews.rating_count %}
-                &middot; {{ product.metafields.reviews.rating_count }} beoordelingen
+                &middot; <strong>{{ product.metafields.reviews.rating_count }} beoordelingen</strong>
               {% endif %}
             </span>
           </div>
@@ -267,6 +276,11 @@
               data-vhl-roha-atc
               {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}
             >
+              <svg class="vhl-roha-pdp__atc-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 4h2l1.6 9.6a2 2 0 0 0 2 1.7h7.6a2 2 0 0 0 2-1.6L19.5 8H6.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="9.5" cy="19.5" r="1.4" fill="currentColor"></circle>
+                <circle cx="17" cy="19.5" r="1.4" fill="currentColor"></circle>
+              </svg>
               <span class="button-text">
                 {%- if current_variant.available -%}
                   In winkelwagen <span class="vhl-roha-pdp__atc-sep">&bull;</span> <span data-vhl-roha-atc-price>{{ current_variant.price | money }}</span>
@@ -303,11 +317,20 @@
         {%- assign payment_type_count = 0 -%}
         {%- for type in shop.enabled_payment_types -%}{%- assign payment_type_count = payment_type_count | plus: 1 -%}{%- endfor -%}
         {%- if payment_type_count > 0 -%}
-          <div class="vhl-roha-pdp__payments" aria-label="Betaalmethoden">
-            {%- for type in shop.enabled_payment_types -%}
-              {{ type | payment_type_svg_tag }}
-            {%- endfor -%}
-          </div>
+          <details class="vhl-roha-pdp__payments">
+            <summary class="vhl-roha-pdp__payments-summary">
+              <svg class="vhl-roha-pdp__payments-lock" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <rect x="4" y="9" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"></rect>
+                <path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+              </svg>
+              <span>Betaal veilig met <span class="vhl-roha-pdp__payments-link">deze betaalmogelijkheden</span>.</span>
+            </summary>
+            <div class="vhl-roha-pdp__payments-icons" aria-label="Betaalmethoden">
+              {%- for type in shop.enabled_payment_types -%}
+                {{ type | payment_type_svg_tag }}
+              {%- endfor -%}
+            </div>
+          </details>
         {%- endif -%}
 
         {%- if has_trust_block -%}
@@ -330,7 +353,7 @@
         <div class="vhl-roha-pdp__accordions">
           {%- if product.description != blank -%}
             <details class="vhl-roha-pdp__accordion">
-              <summary>Productdetails</summary>
+              <summary>Product details</summary>
               <div class="vhl-roha-pdp__accordion-body">{{ product.description }}</div>
             </details>
           {%- endif -%}
@@ -573,8 +596,8 @@
   }
 
   #{{ root_id }} .vhl-roha-pdp__container {
-    max-width: 1400px;
-    width: calc(100% - 56px);
+    max-width: 1800px;
+    width: 90%;
     margin: 0 auto;
     padding: 14px 0 48px;
   }
@@ -625,8 +648,7 @@
   }
 
   #{{ root_id }} .vhl-roha-pdp__media {
-    background: #f7f5f2;
-    border-radius: 12px;
+    background: #ffffff;
     overflow: hidden;
     aspect-ratio: 1 / 1;
     display: flex;
@@ -648,13 +670,12 @@
   @media screen and (min-width: 990px) {
     #{{ root_id }} .vhl-roha-pdp__row {
       flex-direction: row;
-      align-items: flex-start;
+      align-items: stretch;
     }
     #{{ root_id }} .vhl-roha-pdp__thumbs {
       flex: 0 0 4.5%;
       margin-right: 3%;
       flex-direction: column;
-      max-height: 620px;
       overflow-y: auto;
       overflow-x: hidden;
       gap: 12px;
@@ -683,9 +704,19 @@
     margin: 0 0 14px;
   }
 
+  #{{ root_id }} .vhl-roha-pdp__rating .rating-star {
+    --letter-spacing: 0.8;
+    --font-size: 1.5;
+    --color-rating-star: #1a1a1a;
+  }
+
   #{{ root_id }} .vhl-roha-pdp__rating-text {
     font-size: 13px;
     color: #6b6b68;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__rating-text strong {
+    color: #1a1a1a;
   }
 
   #{{ root_id }} .vhl-roha-pdp__title {
@@ -808,7 +839,7 @@
 
   #{{ root_id }} .vhl-roha-pdp__atc {
     width: 100%;
-    min-height: 60px;
+    min-height: 56px;
     border: 0;
     border-radius: 999px;
     background: #1a1a1a;
@@ -834,6 +865,13 @@
   #{{ root_id }} .vhl-roha-pdp__atc[disabled] {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__atc-icon {
+    width: 19px;
+    height: 19px;
+    flex: 0 0 auto;
+    color: #ffffff;
   }
 
   #{{ root_id }} .vhl-roha-pdp__atc .loading__spinner {
@@ -893,16 +931,48 @@
 
   #{{ root_id }} .vhl-roha-pdp__payments {
     margin-top: 14px;
-    padding-top: 12px;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__payments-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    list-style: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: #6b6b68;
+    text-align: center;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__payments-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__payments-lock {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+    color: #6b6b68;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__payments-link {
+    color: #1a1a1a;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__payments-icons {
+    margin-top: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     flex-wrap: wrap;
-    opacity: 0.75;
+    opacity: 0.85;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__payments svg {
+  #{{ root_id }} .vhl-roha-pdp__payments-icons svg {
     height: 15px;
     width: auto;
   }
@@ -968,9 +1038,11 @@
   #{{ root_id }} .vhl-roha-pdp__accordion summary {
     cursor: pointer;
     list-style: none;
-    padding: 12px 2px;
-    font-size: 13px;
+    padding: 14px 2px;
+    font-size: 12.5px;
     font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     color: #1a1a1a;
     display: flex;
     align-items: center;
@@ -982,14 +1054,19 @@
   }
 
   #{{ root_id }} .vhl-roha-pdp__accordion summary::after {
-    content: '+';
-    font-weight: 400;
-    font-size: 17px;
-    color: #6b6b68;
+    content: '';
+    flex: 0 0 auto;
+    width: 9px;
+    height: 9px;
+    margin-left: 12px;
+    border-right: 1.5px solid #1a1a1a;
+    border-bottom: 1.5px solid #1a1a1a;
+    transform: rotate(45deg);
+    transition: transform 0.15s ease;
   }
 
   #{{ root_id }} .vhl-roha-pdp__accordion[open] summary::after {
-    content: '\2212';
+    transform: rotate(225deg);
   }
 
   #{{ root_id }} .vhl-roha-pdp__accordion-body {
