@@ -1,0 +1,238 @@
+{%- comment -%}
+  VHL Vacuum Hook PDP — geïsoleerde sticky add-to-cart bar.
+
+  Duplicaat-cart-request-vrij "real-form-proxy"-patroon (zelfde principe als
+  het bestaande, ongewijzigde sections/sticky-add-to-cart.liquid): deze bar
+  heeft GEEN eigen cart-state en doet GEEN eigen fetch. Bij klikken zoekt hij
+  de echte, bestaande form (`.shop-add-to-cart-wrapper form[data-type="add-to-cart-form"]`)
+  op deze pagina en klikt op de echte submit-knop, zodat de bestaande
+  cart-drawer-flow (product-form.js) ongewijzigd de toevoeging afhandelt.
+
+  Zichtbaarheid via IntersectionObserver op de echte ATC-knop-wrapper.
+  Geen MutationObserver, geen timers/polling.
+{%- endcomment -%}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+-%}
+
+<div id="VHLVacuumStickyATC-{{ section.id }}" class="vhl-vacuum-sticky-atc" aria-hidden="true">
+  <div class="vhl-vacuum-sticky-atc__inner">
+    <div class="vhl-vacuum-sticky-atc__media">
+      {% if current_variant.featured_image %}
+        {{ current_variant.featured_image | image_url: width: 120 | image_tag: loading: 'lazy', alt: product.title }}
+      {% elsif product.featured_image %}
+        {{ product.featured_image | image_url: width: 120 | image_tag: loading: 'lazy', alt: product.title }}
+      {% endif %}
+    </div>
+    <div class="vhl-vacuum-sticky-atc__info">
+      <p class="vhl-vacuum-sticky-atc__title">{{ product.title }}</p>
+      <p class="vhl-vacuum-sticky-atc__price">
+        {% if current_variant.compare_at_price > current_variant.price %}
+          <span class="vhl-vacuum-sticky-atc__compare-price">{{ current_variant.compare_at_price | money }}</span>
+        {% endif %}
+        <span class="vhl-vacuum-sticky-atc__current-price">{{ current_variant.price | money }}</span>
+      </p>
+    </div>
+    <button type="button" class="vhl-vacuum-sticky-atc__button" data-vhl-sticky-atc-button>
+      {{ 'products.product.add_to_cart' | t }}
+    </button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    function init() {
+      var bar = document.getElementById('VHLVacuumStickyATC-{{ section.id }}');
+      var mainAtcWrapper = document.querySelector('.vhl-vacuum-pdp .shop-add-to-cart-wrapper');
+      if (!bar || !mainAtcWrapper) return;
+
+      function getRealForm() {
+        return document.querySelector('.vhl-vacuum-pdp .shop-add-to-cart-wrapper form[data-type="add-to-cart-form"]');
+      }
+
+      var button = bar.querySelector('[data-vhl-sticky-atc-button]');
+      button.addEventListener('click', function () {
+        var realForm = getRealForm();
+        var realSubmitButton = realForm ? realForm.querySelector('button[name="add"]') : null;
+        if (realSubmitButton) {
+          realSubmitButton.click();
+        }
+      });
+
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              bar.classList.toggle('is-visible', !entry.isIntersecting);
+              bar.setAttribute('aria-hidden', entry.isIntersecting ? 'true' : 'false');
+            });
+          },
+          { rootMargin: '0px 0px -10% 0px' }
+        );
+        observer.observe(mainAtcWrapper);
+      }
+
+      var priceEl = bar.querySelector('.vhl-vacuum-sticky-atc__current-price');
+      var comparePriceEl = bar.querySelector('.vhl-vacuum-sticky-atc__compare-price');
+      var mediaEl = bar.querySelector('.vhl-vacuum-sticky-atc__media img');
+
+      function formatMoney(cents) {
+        if (typeof Shopify !== 'undefined' && typeof Shopify.formatMoney === 'function') {
+          return Shopify.formatMoney(cents, Shopify.money_format);
+        }
+        return cents;
+      }
+
+      document.addEventListener('simple-variant-picker:variantChange', function (e) {
+        var variant = e.detail && e.detail.variant;
+        if (!variant) return;
+
+        if (priceEl) priceEl.textContent = formatMoney(variant.price);
+
+        if (comparePriceEl) {
+          if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+            comparePriceEl.textContent = formatMoney(variant.compare_at_price);
+            comparePriceEl.style.display = '';
+          } else {
+            comparePriceEl.style.display = 'none';
+          }
+        }
+
+        if (mediaEl && variant.featured_image && variant.featured_image.src) {
+          var src = variant.featured_image.src;
+          if (src.indexOf('//') === 0) src = 'https:' + src;
+          mediaEl.src = src;
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+</script>
+
+{% style %}
+  .vhl-vacuum-sticky-atc {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: -100px;
+    z-index: 40;
+    background: #ffffff;
+    border-top: 1px solid #e5e0d8;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.06);
+    transition: bottom 0.25s ease;
+    padding: 10px 16px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .vhl-vacuum-sticky-atc.is-visible {
+    bottom: 0;
+  }
+
+  .vhl-vacuum-sticky-atc__inner {
+    max-width: 1480px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .vhl-vacuum-sticky-atc__media {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f7f5f2;
+  }
+
+  .vhl-vacuum-sticky-atc__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .vhl-vacuum-sticky-atc__info {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .vhl-vacuum-sticky-atc__title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .vhl-vacuum-sticky-atc__price {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: #4a4a47;
+    display: flex;
+    gap: 8px;
+  }
+
+  .vhl-vacuum-sticky-atc__compare-price {
+    text-decoration: line-through;
+    color: #9c9c9c;
+  }
+
+  .vhl-vacuum-sticky-atc__button {
+    flex: 0 0 auto;
+    background: #262625;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .vhl-vacuum-sticky-atc__button:hover {
+    background: #1a1a1a;
+  }
+
+  @media screen and (min-width: 990px) {
+    .vhl-vacuum-sticky-atc {
+      padding: 14px 48px;
+    }
+    .vhl-vacuum-sticky-atc__inner {
+      justify-content: flex-end;
+    }
+    .vhl-vacuum-sticky-atc__media,
+    .vhl-vacuum-sticky-atc__info {
+      flex: 0 0 auto;
+      max-width: 280px;
+    }
+    .vhl-vacuum-sticky-atc__button {
+      padding: 14px 32px;
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "VHL Vacuumhaak — Sticky ATC",
+  "tag": "section",
+  "class": "vhl-vacuum-sticky-atc-section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "VHL Vacuumhaak — Sticky ATC"
+    }
+  ]
+}
+{% endschema %}
