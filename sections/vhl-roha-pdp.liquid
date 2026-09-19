@@ -145,9 +145,24 @@
 
         {%- if has_usps -%}
           <ul class="vhl-roha-pdp__usps">
-            {%- if section.settings.usp_1 != blank -%}<li>{{ section.settings.usp_1 }}</li>{%- endif -%}
-            {%- if section.settings.usp_2 != blank -%}<li>{{ section.settings.usp_2 }}</li>{%- endif -%}
-            {%- if section.settings.usp_3 != blank -%}<li>{{ section.settings.usp_3 }}</li>{%- endif -%}
+            {%- if section.settings.usp_1 != blank -%}
+              <li>
+                <svg class="vhl-roha-pdp__usp-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#1a1a1a"></circle><path d="M6 10.3l2.6 2.6L14 7.3" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>{{ section.settings.usp_1 }}</span>
+              </li>
+            {%- endif -%}
+            {%- if section.settings.usp_2 != blank -%}
+              <li>
+                <svg class="vhl-roha-pdp__usp-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#1a1a1a"></circle><path d="M6 10.3l2.6 2.6L14 7.3" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>{{ section.settings.usp_2 }}</span>
+              </li>
+            {%- endif -%}
+            {%- if section.settings.usp_3 != blank -%}
+              <li>
+                <svg class="vhl-roha-pdp__usp-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#1a1a1a"></circle><path d="M6 10.3l2.6 2.6L14 7.3" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>{{ section.settings.usp_3 }}</span>
+              </li>
+            {%- endif -%}
           </ul>
         {%- endif -%}
 
@@ -175,43 +190,53 @@
                       assign current_option_value = current_variant.option3
                   endcase
                 -%}
-                <div class="vhl-roha-pdp__option" data-vhl-roha-option data-option-position="{{ option.position }}">
-                  <div class="vhl-roha-pdp__option-heading">
-                    <span class="vhl-roha-pdp__option-name">{{ option.name }}:</span>
-                    <span class="vhl-roha-pdp__option-selected" data-vhl-roha-option-selected>{{ current_option_value }}</span>
+                {%- comment -%}
+                  Een optie met precies 1 mogelijke waarde biedt de klant geen
+                  echte keuze (elke variant deelt toch dezelfde waarde) — dat
+                  toch als los kiezer-blok tonen is pure ruis. Puur UI, geen
+                  productdata gewijzigd of verborgen.
+                {%- endcomment -%}
+                {%- if option.values.size > 1 -%}
+                  <div class="vhl-roha-pdp__option" data-vhl-roha-option data-option-position="{{ option.position }}">
+                    <div class="vhl-roha-pdp__option-heading">
+                      <span class="vhl-roha-pdp__option-name">{{ option.name }}:</span>
+                      <span class="vhl-roha-pdp__option-selected" data-vhl-roha-option-selected>{{ current_option_value }}</span>
+                    </div>
+                    <div class="vhl-roha-pdp__option-values">
+                      {%- for value in option.values -%}
+                        {%- assign is_selected = false -%}
+                        {%- if value == current_option_value -%}{%- assign is_selected = true -%}{%- endif -%}
+                        {%- if value.swatch.color or value.swatch.image -%}
+                          <button
+                            type="button"
+                            class="vhl-roha-pdp__swatch"
+                            data-vhl-roha-option-value
+                            data-value="{{ value | escape }}"
+                            data-selected="{{ is_selected }}"
+                            aria-pressed="{{ is_selected }}"
+                            aria-label="{{ value | escape }}"
+                            title="{{ value | escape }}"
+                            {%- if value.swatch.color %}
+                              style="background-color: {{ value.swatch.color }};"
+                            {%- elsif value.swatch.image %}
+                              style="background-image: url({{ value.swatch.image | image_url: width: 64 }});"
+                            {%- endif %}
+                          ></button>
+                        {%- else -%}
+                          <button
+                            type="button"
+                            class="vhl-roha-pdp__pill"
+                            data-vhl-roha-option-value
+                            data-value="{{ value | escape }}"
+                            data-selected="{{ is_selected }}"
+                            aria-pressed="{{ is_selected }}"
+                            title="{{ value | escape }}"
+                          ><span class="vhl-roha-pdp__pill-text">{{ value }}</span></button>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </div>
                   </div>
-                  <div class="vhl-roha-pdp__option-values">
-                    {%- for value in option.values -%}
-                      {%- assign is_selected = false -%}
-                      {%- if value == current_option_value -%}{%- assign is_selected = true -%}{%- endif -%}
-                      {%- if value.swatch.color or value.swatch.image -%}
-                        <button
-                          type="button"
-                          class="vhl-roha-pdp__swatch"
-                          data-vhl-roha-option-value
-                          data-value="{{ value | escape }}"
-                          data-selected="{{ is_selected }}"
-                          aria-pressed="{{ is_selected }}"
-                          aria-label="{{ value | escape }}"
-                          {%- if value.swatch.color %}
-                            style="background-color: {{ value.swatch.color }};"
-                          {%- elsif value.swatch.image %}
-                            style="background-image: url({{ value.swatch.image | image_url: width: 64 }});"
-                          {%- endif %}
-                        ></button>
-                      {%- else -%}
-                        <button
-                          type="button"
-                          class="vhl-roha-pdp__pill"
-                          data-vhl-roha-option-value
-                          data-value="{{ value | escape }}"
-                          data-selected="{{ is_selected }}"
-                          aria-pressed="{{ is_selected }}"
-                        >{{ value }}</button>
-                      {%- endif -%}
-                    {%- endfor -%}
-                  </div>
-                </div>
+                {%- endif -%}
               {%- endfor -%}
             {%- endunless -%}
 
@@ -241,7 +266,11 @@
               {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}
             >
               <span class="button-text">
-                {%- if current_variant.available -%}In winkelwagen{%- else -%}Uitverkocht{%- endif -%}
+                {%- if current_variant.available -%}
+                  In winkelwagen <span class="vhl-roha-pdp__atc-sep">&bull;</span> <span data-vhl-roha-atc-price>{{ current_variant.price | money }}</span>
+                {%- else -%}
+                  Uitverkocht
+                {%- endif -%}
               </span>
               {% render 'loading-spinner' %}
             </button>
@@ -348,6 +377,7 @@
     var variantIdInput = root.querySelector('[data-vhl-roha-variant-id]');
     var atcButton = root.querySelector('[data-vhl-roha-atc]');
     var atcButtonText = atcButton ? atcButton.querySelector('.button-text') : null;
+    var atcPriceEl = atcButton ? atcButton.querySelector('[data-vhl-roha-atc-price]') : null;
     var priceCurrentEl = root.querySelector('[data-vhl-roha-price-current]');
     var priceCompareEl = root.querySelector('[data-vhl-roha-price-compare]');
     var mainImage = root.querySelector('[data-vhl-roha-main-image]');
@@ -419,15 +449,28 @@
         setActiveThumbBySrc(variant.image);
       }
 
-      if (atcButton) {
+      if (atcButton && atcButtonText) {
         if (variant.available) {
           atcButton.removeAttribute('disabled');
           atcButton.removeAttribute('aria-disabled');
-          if (atcButtonText) atcButtonText.textContent = 'In winkelwagen';
+          atcButtonText.textContent = '';
+          var label = document.createTextNode('In winkelwagen ');
+          var sep = document.createElement('span');
+          sep.className = 'vhl-roha-pdp__atc-sep';
+          sep.textContent = '•';
+          var priceSpan = document.createElement('span');
+          priceSpan.setAttribute('data-vhl-roha-atc-price', '');
+          priceSpan.textContent = formatMoney(variant.price);
+          atcButtonText.appendChild(label);
+          atcButtonText.appendChild(sep);
+          atcButtonText.appendChild(document.createTextNode(' '));
+          atcButtonText.appendChild(priceSpan);
+          atcPriceEl = priceSpan;
         } else {
           atcButton.setAttribute('disabled', 'disabled');
           atcButton.setAttribute('aria-disabled', 'true');
-          if (atcButtonText) atcButtonText.textContent = 'Uitverkocht';
+          atcButtonText.textContent = 'Uitverkocht';
+          atcPriceEl = null;
         }
       }
 
@@ -509,8 +552,8 @@
 
   @media screen and (min-width: 990px) {
     #{{ root_id }} .vhl-roha-pdp__grid {
-      grid-template-columns: 58fr 42fr;
-      gap: 56px;
+      grid-template-columns: 59fr 41fr;
+      gap: 64px;
     }
     #{{ root_id }} .vhl-roha-pdp__panel {
       position: sticky;
@@ -605,7 +648,7 @@
     #{{ root_id }} .vhl-roha-pdp__main-image {
       flex: 1 1 auto;
       min-width: 0;
-      max-width: 620px;
+      max-height: 620px;
     }
   }
 
@@ -632,7 +675,8 @@
     line-height: 1.2;
     margin: 0 0 8px;
     color: #1a1a1a;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
   @media screen and (min-width: 990px) {
@@ -650,7 +694,7 @@
 
   #{{ root_id }} .vhl-roha-pdp__price-current {
     font-size: 24px;
-    font-weight: 600;
+    font-weight: 700;
     color: #1a1a1a;
   }
 
@@ -675,17 +719,13 @@
     font-size: 14px;
     color: #1a1a1a;
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: center;
+    gap: 9px;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__usps li::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #262625;
-    margin-top: 7px;
+  #{{ root_id }} .vhl-roha-pdp__usp-icon {
+    width: 17px;
+    height: 17px;
     flex: 0 0 auto;
   }
 
@@ -711,24 +751,36 @@
   }
 
   #{{ root_id }} .vhl-roha-pdp__option-values {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 7px;
+    max-width: 100%;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__option-values:has(.vhl-roha-pdp__swatch) {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    max-width: 100%;
   }
 
   #{{ root_id }} .vhl-roha-pdp__pill {
     border: 1px solid #e5e0d8;
     background: #ffffff;
     border-radius: 7px;
-    padding: 6px 12px;
+    padding: 7px 10px;
     font-size: 12px;
     color: #1a1a1a;
     cursor: pointer;
     max-width: 100%;
-    white-space: normal;
-    word-break: break-word;
+    width: 100%;
     line-height: 1.3;
+    text-align: center;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__pill-text {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   #{{ root_id }} .vhl-roha-pdp__pill[data-selected="true"] {
@@ -834,6 +886,11 @@
     right: 20px;
   }
 
+  #{{ root_id }} .vhl-roha-pdp__atc-sep {
+    opacity: 0.6;
+    font-weight: 400;
+  }
+
   #{{ root_id }} .vhl-roha-pdp__payments {
     margin-top: 12px;
     padding-top: 10px;
@@ -853,7 +910,7 @@
   #{{ root_id }} .vhl-roha-pdp__trust-card {
     margin-top: 18px;
     padding: 20px;
-    border: 1px solid #e5e0d8;
+    border: 1px dashed #d8d2c6;
     border-radius: 12px;
     background: #faf8f5;
     text-align: center;
