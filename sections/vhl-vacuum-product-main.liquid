@@ -161,7 +161,7 @@
 
 {% style %}
   .vhl-vacuum-pdp {
-    max-width: 1480px;
+    max-width: 1460px;
     margin: 0 auto;
     padding: 24px 16px 0;
     background: #ffffff;
@@ -175,11 +175,11 @@
 
   @media screen and (min-width: 990px) {
     .vhl-vacuum-pdp {
-      padding: 40px 48px 0;
+      padding: 40px 32px 0;
     }
     .vhl-vacuum-pdp__grid {
       grid-template-columns: 60fr 40fr;
-      gap: 56px;
+      gap: 64px;
       align-items: start;
     }
     .vhl-vacuum-pdp__buybox {
@@ -187,6 +187,44 @@
       top: 96px;
       padding-top: 4px;
     }
+  }
+
+  /*
+    ROOT CAUSE van de te smalle gallery/rechterkolom + enorme lege ruimte:
+    snippets/product-gallery.liquid rendert zelf een .shop-carousel-container
+    wrapper, en onze buy-box gebruikt (voor overige, wel gewenste styling)
+    de klasse .shop-product-info. Beide klassen krijgen via het gedeelde,
+    ongewijzigde assets/shop-product-details.css een EIGEN, vaste
+    max-width/flex-basis van 45-55% (o.a. regel ~410 en ~1320), ontworpen
+    voor de situatie waarin ze DIRECTE flex-children zijn van
+    .shop-product-layout op 100% breedte. In onze sectie zitten ze één
+    niveau dieper, ín onze eigen 60/40 CSS-grid-kolommen — waardoor die
+    45-55% een TWEEDE keer werd toegepast, bovenop onze grid-kolombreedte
+    (dus bv. ±55% van ±60% van de container: de daadwerkelijke oorzaak van
+    de te kleine hoofdafbeelding en de lege ruimte ernaast).
+    Fix: de breedte van onze eigen grid-kolom is de enige breedte-bron;
+    deze twee regels neutraliseren expliciet de overgeërfde percentages
+    (hogere selector-specificiteit door de extra .vhl-vacuum-pdp-klasse,
+    dus geen !important nodig).
+  */
+  .vhl-vacuum-pdp .shop-carousel-container {
+    max-width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .vhl-vacuum-pdp .shop-product-info {
+    max-width: 100%;
+    flex: 1 1 auto;
+  }
+
+  /*
+    Zelfde reden: .shop-product-carousel (binnen .shop-carousel-container)
+    heeft in het gedeelde stylesheet een vaste width:90%, ontworpen voor
+    de oorspronkelijke lay-out. Daardoor bleef ook na de fix hierboven nog
+    10% van onze eigen, al correct berekende gallery-kolom ongebruikt.
+  */
+  .vhl-vacuum-pdp .shop-product-carousel {
+    width: 100%;
   }
 
   .vhl-vacuum-pdp .shop-main-image-wrapper,
