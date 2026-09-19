@@ -13,8 +13,15 @@
   - assets/product-gallery.js, product-info.js, variant-selector.js,
     product-form.js, shop-product-details.js (ongewijzigde, gedeelde scripts)
 
-  Alle eigen, nieuwe styling staat scoped onder .vhl-vacuum-pdp zodat niets
-  naar de bestaande PDP of andere pagina's kan lekken.
+  BELANGRIJK: de root-div behoudt de klasse `vhl-vacuum-pdp` (naast de
+  nieuwe, semantische `vhl-vacuum-above-fold`) omdat
+  sections/vhl-vacuum-sticky-atc.liquid zijn echte-formulier-proxy hierop
+  baseert (`.vhl-vacuum-pdp .shop-add-to-cart-wrapper`). Die sectie wordt
+  in deze wijziging niet aangeraakt (0 diff), dus deze klasse blijft
+  staan zodat de sticky-ATC-koppeling intact blijft.
+
+  Alle eigen styling staat scoped onder .vhl-vacuum-pdp zodat niets naar
+  de bestaande PDP of andere pagina's kan lekken.
 {%- endcomment -%}
 
 {{ 'shop-product-details.css' | asset_url | stylesheet_tag }}
@@ -24,11 +31,6 @@
   assign has_rating = false
   if product.metafields.reviews.rating.value != blank
     assign has_rating = true
-  endif
-
-  assign has_specs = false
-  if product.type != blank or product.tags.size > 0
-    assign has_specs = true
   endif
 
   assign has_shipping_info = false
@@ -42,10 +44,10 @@
   endif
 -%}
 
-<div class="vhl-vacuum-pdp shop-product-section" {{ section.shopify_attributes }}>
-  <div class="vhl-vacuum-pdp__grid">
+<div class="vhl-vacuum-pdp vhl-vacuum-above-fold shop-product-section" {{ section.shopify_attributes }}>
+  <div class="vhl-vacuum-above-fold__grid">
 
-    <div class="vhl-vacuum-pdp__gallery">
+    <div class="vhl-vacuum-above-fold__gallery">
       {% render 'product-gallery',
         product: product,
         show_product_variants: true,
@@ -54,7 +56,7 @@
       %}
     </div>
 
-    <div class="vhl-vacuum-pdp__buybox shop-product-info">
+    <div class="vhl-vacuum-above-fold__panel shop-product-info">
 
       {% if has_rating %}
         <div
@@ -101,46 +103,30 @@
         </div>
       {% endif %}
 
+      <div class="vhl-vacuum-pdp__accordions">
+        {% if product.description != blank %}
+          <details class="vhl-vacuum-pdp__accordion">
+            <summary>Productdetails</summary>
+            <div class="vhl-vacuum-pdp__accordion-body">{{ product.description }}</div>
+          </details>
+        {% endif %}
+
+        {% if has_shipping_info %}
+          <details class="vhl-vacuum-pdp__accordion">
+            <summary>Verzending &amp; retourneren</summary>
+            <div class="vhl-vacuum-pdp__accordion-body">
+              {% if shop.policies.shipping_policy.body != blank %}
+                <p><a href="{{ shop.policies.shipping_policy.url }}">{{ shop.policies.shipping_policy.title }}</a></p>
+              {% endif %}
+              {% if shop.policies.refund_policy.body != blank %}
+                <p><a href="{{ shop.policies.refund_policy.url }}">{{ shop.policies.refund_policy.title }}</a></p>
+              {% endif %}
+            </div>
+          </details>
+        {% endif %}
+      </div>
+
     </div>
-  </div>
-
-  <div class="vhl-vacuum-pdp__accordions">
-    {% if product.description != blank %}
-      <details class="vhl-vacuum-pdp__accordion" open>
-        <summary>Productdetails</summary>
-        <div class="vhl-vacuum-pdp__accordion-body">{{ product.description }}</div>
-      </details>
-    {% endif %}
-
-    {% if has_specs %}
-      <details class="vhl-vacuum-pdp__accordion">
-        <summary>Specificaties</summary>
-        <div class="vhl-vacuum-pdp__accordion-body">
-          <ul class="vhl-vacuum-pdp__spec-list">
-            {% if product.type != blank %}
-              <li><span>Type</span><span>{{ product.type }}</span></li>
-            {% endif %}
-            {% for tag in product.tags %}
-              <li><span>Kenmerk</span><span>{{ tag }}</span></li>
-            {% endfor %}
-          </ul>
-        </div>
-      </details>
-    {% endif %}
-
-    {% if has_shipping_info %}
-      <details class="vhl-vacuum-pdp__accordion">
-        <summary>Verzending &amp; retourneren</summary>
-        <div class="vhl-vacuum-pdp__accordion-body">
-          {% if shop.policies.shipping_policy.body != blank %}
-            <p><a href="{{ shop.policies.shipping_policy.url }}">{{ shop.policies.shipping_policy.title }}</a></p>
-          {% endif %}
-          {% if shop.policies.refund_policy.body != blank %}
-            <p><a href="{{ shop.policies.refund_policy.url }}">{{ shop.policies.refund_policy.title }}</a></p>
-          {% endif %}
-        </div>
-      </details>
-    {% endif %}
   </div>
 </div>
 
@@ -161,13 +147,13 @@
 
 {% style %}
   .vhl-vacuum-pdp {
-    max-width: 1460px;
+    max-width: 1420px;
     margin: 0 auto;
-    padding: 24px 16px 0;
+    padding: 20px 16px 40px;
     background: #ffffff;
   }
 
-  .vhl-vacuum-pdp__grid {
+  .vhl-vacuum-above-fold__grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 28px;
@@ -175,37 +161,31 @@
 
   @media screen and (min-width: 990px) {
     .vhl-vacuum-pdp {
-      padding: 40px 32px 0;
+      padding: 36px 32px 56px;
     }
-    .vhl-vacuum-pdp__grid {
-      grid-template-columns: 60fr 40fr;
+    .vhl-vacuum-above-fold__grid {
+      grid-template-columns: 59fr 41fr;
       gap: 64px;
       align-items: start;
     }
-    .vhl-vacuum-pdp__buybox {
+    .vhl-vacuum-above-fold__panel {
       position: sticky;
       top: 96px;
-      padding-top: 4px;
     }
   }
 
   /*
-    ROOT CAUSE van de te smalle gallery/rechterkolom + enorme lege ruimte:
-    snippets/product-gallery.liquid rendert zelf een .shop-carousel-container
-    wrapper, en onze buy-box gebruikt (voor overige, wel gewenste styling)
-    de klasse .shop-product-info. Beide klassen krijgen via het gedeelde,
-    ongewijzigde assets/shop-product-details.css een EIGEN, vaste
-    max-width/flex-basis van 45-55% (o.a. regel ~410 en ~1320), ontworpen
-    voor de situatie waarin ze DIRECTE flex-children zijn van
-    .shop-product-layout op 100% breedte. In onze sectie zitten ze één
-    niveau dieper, ín onze eigen 60/40 CSS-grid-kolommen — waardoor die
-    45-55% een TWEEDE keer werd toegepast, bovenop onze grid-kolombreedte
-    (dus bv. ±55% van ±60% van de container: de daadwerkelijke oorzaak van
-    de te kleine hoofdafbeelding en de lege ruimte ernaast).
-    Fix: de breedte van onze eigen grid-kolom is de enige breedte-bron;
-    deze twee regels neutraliseren expliciet de overgeërfde percentages
-    (hogere selector-specificiteit door de extra .vhl-vacuum-pdp-klasse,
-    dus geen !important nodig).
+    ROOT CAUSE (nog steeds van toepassing na de hernoeming): het gedeelde,
+    ongewijzigde assets/shop-product-details.css geeft .shop-carousel-container
+    (gerenderd door het herbruikte snippets/product-gallery.liquid) en
+    .shop-product-info (klasse op ons purchase-panel, nodig voor overige
+    geërfde styling) een EIGEN, vaste max-width/flex-basis van 45-55%,
+    ontworpen voor de situatie waarin ze DIRECTE flex-children zijn van
+    .shop-product-layout op 100% breedte. Eén niveau dieper, ín onze eigen
+    grid-kolommen, werd die 45-55% een TWEEDE keer toegepast bovenop de
+    kolombreedte. Deze drie regels maken onze eigen grid-kolombreedte de
+    enige breedtebron (hogere selector-specificiteit dan de gedeelde
+    single-class-regels, dus geen !important nodig).
   */
   .vhl-vacuum-pdp .shop-carousel-container {
     max-width: 100%;
@@ -217,12 +197,6 @@
     flex: 1 1 auto;
   }
 
-  /*
-    Zelfde reden: .shop-product-carousel (binnen .shop-carousel-container)
-    heeft in het gedeelde stylesheet een vaste width:90%, ontworpen voor
-    de oorspronkelijke lay-out. Daardoor bleef ook na de fix hierboven nog
-    10% van onze eigen, al correct berekende gallery-kolom ongebruikt.
-  */
   .vhl-vacuum-pdp .shop-product-carousel {
     width: 100%;
   }
@@ -243,14 +217,15 @@
     Geactiveerd via de bestaande, ongewijzigde
     snippets/product-gallery.liquid + assets/shop-product-details.css
     (section.settings.thumbnails_left_column_desktop), hier alleen
-    scoped aangevuld met de daadwerkelijke naast-elkaar-layout.
+    scoped aangevuld met de daadwerkelijke naast-elkaar-layout. Behouden
+    ongewijzigd t.o.v. de vorige, werkende versie.
   */
   @media screen and (min-width: 990px) {
     .vhl-vacuum-pdp .shop-main-image-wrapper.shop-image-thumbnails-row {
       display: flex;
       flex-direction: row;
       align-items: flex-start;
-      gap: 14px;
+      gap: 22px;
     }
 
     .vhl-vacuum-pdp .shop-thumbnails-outer {
@@ -269,7 +244,7 @@
       flex-direction: column;
       flex-wrap: nowrap;
       gap: 10px;
-      max-height: 520px;
+      max-height: 560px;
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -285,26 +260,22 @@
     }
   }
 
-  .vhl-vacuum-pdp__buybox {
+  /*
+    Purchase panel: EÉN vlakke kolom. De volgorde komt nu uitsluitend uit
+    de brontekst (DOM), niet meer uit CSS `order`:
+    - de reviewsamenvatting staat vóór de {% render 'product-info' %}-call;
+    - title/price/USP's/variant/aantal/ATC komen, in die volgorde, uit
+      block_order in templates/product.vacuum-hook.json (title_main,
+      price_main, usps_main, variant_picker_main, quantity_main,
+      add_to_cart_main) — dezelfde volgorde die hier gewenst is, dus geen
+      CSS-truc meer nodig om dit recht te zetten;
+    - betaalregel/trust-card/accordions staan ná die render-call.
+    Dit is bewust minder fragiel dan de eerdere flexbox `order`-aanpak.
+  */
+  .vhl-vacuum-above-fold__panel {
     display: flex;
     flex-direction: column;
   }
-
-  /*
-    Vaste, expliciete volgorde in de buy-box, onafhankelijk van de
-    render-volgorde van de herbruikte product-info blocks:
-    reviewsamenvatting -> titel -> prijs -> USP's -> variant -> aantal ->
-    ATC -> betaalvertrouwen -> trust/value card.
-  */
-  .vhl-vacuum-pdp__rating { order: 0; }
-  .vhl-vacuum-pdp .shop-product-title { order: 1; }
-  .vhl-vacuum-pdp .shop-product-price-container { order: 2; }
-  .vhl-vacuum-pdp .product-bullet-list { order: 3; }
-  .vhl-vacuum-pdp .simple-variant-picker { order: 4; }
-  .vhl-vacuum-pdp .modern-quantity-selector { order: 5; }
-  .vhl-vacuum-pdp .shop-add-to-cart-wrapper { order: 6; }
-  .vhl-vacuum-pdp__trust-payments-row { order: 7; }
-  .vhl-vacuum-pdp__trust-card { order: 8; }
 
   .vhl-vacuum-pdp__rating {
     display: flex;
@@ -349,7 +320,8 @@
 
   /*
     Bescherming tegen lange, geïmporteerde variantnamen: laat opties
-    wrappen i.p.v. de rechterkolom horizontaal te forceren.
+    wrappen i.p.v. de rechterkolom horizontaal te forceren, en houd de
+    opties compact (kleine pills/swatches i.p.v. grote losse knoppen).
   */
   .vhl-vacuum-pdp .simple-variant-picker__values {
     flex-wrap: wrap !important;
@@ -363,18 +335,25 @@
     word-break: break-word;
   }
 
+  /*
+    Aantal: bewust compact en smal, direct boven de ATC — geen los, groot
+    blok bovenaan de kolom. De brontekst-volgorde (block_order) plaatst
+    dit element al na de variantkeuze en vóór de ATC-knop.
+  */
   .vhl-vacuum-pdp .modern-quantity-selector {
     margin-top: 14px;
-    max-width: 140px;
+    margin-bottom: 0;
+    max-width: 130px;
   }
 
   .vhl-vacuum-pdp .shop-add-to-cart-wrapper {
-    margin-top: 14px;
+    margin-top: 12px;
   }
 
   .vhl-vacuum-pdp .shop-add-to-cart-button {
     width: 100%;
     min-height: 56px;
+    border-radius: 999px !important;
     box-shadow: none !important;
     text-transform: none !important;
     letter-spacing: 0.3px !important;
@@ -436,28 +415,28 @@
     color: #6b6b68;
   }
 
+  /*
+    Accordions staan nu IN de rechterkolom, direct onder de trust-zone —
+    niet meer als los, open, volle-breedte blok onder de gallery.
+    Standaard dichtgeklapt (geen `open`-attribuut meer).
+  */
   .vhl-vacuum-pdp__accordions {
-    max-width: 900px;
-    margin: 48px auto 0;
-    padding: 0 16px 56px;
-    border-top: 1px solid #eceae5;
-  }
-
-  @media screen and (min-width: 990px) {
-    .vhl-vacuum-pdp__accordions {
-      padding: 0 40px 72px;
-    }
+    margin-top: 22px;
   }
 
   .vhl-vacuum-pdp__accordion {
+    border-top: 1px solid #eceae5;
+  }
+
+  .vhl-vacuum-pdp__accordion:last-child {
     border-bottom: 1px solid #eceae5;
   }
 
   .vhl-vacuum-pdp__accordion summary {
     cursor: pointer;
     list-style: none;
-    padding: 18px 4px;
-    font-size: 15px;
+    padding: 14px 2px;
+    font-size: 14px;
     font-weight: 600;
     color: #1a1a1a;
     display: flex;
@@ -472,7 +451,7 @@
   .vhl-vacuum-pdp__accordion summary::after {
     content: '+';
     font-weight: 400;
-    font-size: 20px;
+    font-size: 18px;
     color: #6b6b68;
   }
 
@@ -481,8 +460,8 @@
   }
 
   .vhl-vacuum-pdp__accordion-body {
-    padding: 0 4px 20px;
-    font-size: 14px;
+    padding: 0 2px 16px;
+    font-size: 13px;
     line-height: 1.7;
     color: #4a4a47;
   }
@@ -490,27 +469,6 @@
   .vhl-vacuum-pdp__accordion-body a {
     color: #1a1a1a;
     text-decoration: underline;
-  }
-
-  .vhl-vacuum-pdp__spec-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .vhl-vacuum-pdp__spec-list li {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    border-bottom: 1px dashed #eceae5;
-    padding-bottom: 6px;
-  }
-
-  .vhl-vacuum-pdp__spec-list li span:first-child {
-    color: #8a8a86;
   }
 {% endstyle %}
 
@@ -950,7 +908,7 @@
           "min": 8,
           "max": 20,
           "step": 1,
-          "default": 14
+          "default": 13
         },
         {
           "type": "range",
@@ -968,7 +926,7 @@
           "min": 4,
           "max": 20,
           "step": 1,
-          "default": 12
+          "default": 9
         },
         {
           "type": "range",
@@ -977,7 +935,7 @@
           "min": 8,
           "max": 30,
           "step": 1,
-          "default": 18
+          "default": 15
         },
         {
           "type": "range",
@@ -986,7 +944,7 @@
           "min": 10,
           "max": 20,
           "step": 1,
-          "default": 14
+          "default": 13
         },
         {
           "type": "color",
@@ -1013,7 +971,7 @@
           "min": 20,
           "max": 50,
           "step": 2,
-          "default": 32
+          "default": 28
         },
         {
           "type": "color",
@@ -1034,7 +992,7 @@
           "min": 4,
           "max": 24,
           "step": 2,
-          "default": 10
+          "default": 8
         },
         {
           "type": "range",
@@ -1231,7 +1189,7 @@
           "min": 0,
           "max": 50,
           "step": 1,
-          "default": 8
+          "default": 28
         }
       ]
     }
