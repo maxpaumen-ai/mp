@@ -13,13 +13,15 @@
     ROHA-verhoudingen (±4.5% / 49% / 37.5%, gaps ±3% / 6%) op elke
     desktopbreedte behouden blijven — geen vaste px-breedtes voor de
     hoofdafbeelding, geen max-height-truc.
-  - Hoofdafbeelding-vlak: aspect-ratio komt van de échte foto
-    (image.aspect_ratio), niet van een vaste 1:1-aanname. Een vierkante
-    ROHA-achtige foto vult het vlak dus edge-to-edge zoals TARGET; een
-    niet-vierkante eigen foto krijgt een vlak dat zijn eigen verhouding
-    volgt i.p.v. te worden bijgesneden of te "zwemmen" in een te groot
-    vierkant kader. object-fit blijft contain — nooit cover — zodat de
-    volledige eigen productfoto zichtbaar blijft.
+  - Hoofdafbeelding-vlak: VAST vierkant (aspect-ratio 1/1), zoals
+    gemeten op de TARGET-gallery — dit vlak verandert NIET van vorm
+    wanneer een andere thumbnail/variant-foto wordt getoond, anders zou
+    de gallery-geometrie zelf verspringen tussen productmedia (iets wat
+    TARGET niet doet). Binnen dat vaste vlak blijft object-fit: contain
+    (nooit cover) zodat de volledige eigen productfoto professioneel
+    zichtbaar blijft, ook als de bronfoto zelf niet perfect vierkant is
+    — liever nette witruimte rond de foto dan bijsnijden of een
+    meebewegend kader.
   - Varianten: ALLEEN echte Shopify option-value swatches
     (value.swatch.color / .image) worden als ronde swatches getoond,
     en alleen wanneer ALLE waarden van die optie swatch-data hebben
@@ -46,7 +48,6 @@
   assign current_variant = product.selected_or_first_available_variant
   assign display_image = current_variant.featured_image | default: product.featured_media
   assign active_media_id = display_image.id
-  assign display_aspect_ratio = display_image.aspect_ratio | default: 1.0
 
   assign has_rating = false
   if product.metafields.reviews.rating.value != blank
@@ -107,7 +108,6 @@
                 data-vhl-roha-thumb
                 data-full-src="{{ media | image_url: width: 1600 }}"
                 data-alt="{{ media.alt | default: product.title | escape }}"
-                data-aspect-ratio="{{ media.aspect_ratio | default: 1.0 }}"
                 aria-label="{{ product.title | escape }} — afbeelding {{ forloop.index }}"
               >
                 <img src="{{ media | image_url: width: 160 }}" alt="" loading="lazy" width="64" height="64">
@@ -117,13 +117,13 @@
         </div>
       {%- endif -%}
 
-      <div class="vhl-roha-pdp__media" data-vhl-roha-media style="aspect-ratio: {{ display_aspect_ratio }};">
+      <div class="vhl-roha-pdp__media">
         <img
           data-vhl-roha-main-image
           src="{{ display_image | image_url: width: 1600 }}"
           alt="{{ display_image.alt | default: product.title | escape }}"
-          width="{{ display_image.width | default: 1200 }}"
-          height="{{ display_image.height | default: 1200 }}"
+          width="1200"
+          height="1200"
           loading="eager"
         >
       </div>
@@ -391,7 +391,6 @@
         assign v_image = v_image_url | json
       endif
       assign v_alt = variant.featured_image.alt | default: product.title
-      assign v_aspect_ratio = variant.featured_image.aspect_ratio | default: display_aspect_ratio
     -%}
     {
       "id": {{ variant.id | json }},
@@ -402,8 +401,7 @@
       "option2": {{ variant.option2 | json }},
       "option3": {{ variant.option3 | json }},
       "image": {{ v_image }},
-      "imageAlt": {{ v_alt | json }},
-      "imageAspectRatio": {{ v_aspect_ratio | json }}
+      "imageAlt": {{ v_alt | json }}
     }{%- unless forloop.last -%},{%- endunless -%}
   {%- endfor -%}
   ]
@@ -430,7 +428,6 @@
     var priceCurrentEl = root.querySelector('[data-vhl-roha-price-current]');
     var priceCompareEl = root.querySelector('[data-vhl-roha-price-compare]');
     var mainImage = root.querySelector('[data-vhl-roha-main-image]');
-    var mediaBox = root.querySelector('[data-vhl-roha-media]');
     var optionGroups = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-option]'));
     var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-thumb]'));
 
@@ -499,9 +496,6 @@
         mainImage.src = variant.image;
         mainImage.alt = variant.imageAlt || mainImage.alt;
         setActiveThumbBySrc(variant.image);
-        if (mediaBox && variant.imageAspectRatio) {
-          mediaBox.style.aspectRatio = variant.imageAspectRatio;
-        }
       }
 
       if (atcButton && atcButtonText) {
@@ -565,10 +559,6 @@
         if (mainImage && fullSrc) {
           mainImage.src = fullSrc;
           mainImage.alt = thumb.getAttribute('data-alt') || mainImage.alt;
-        }
-        var thumbRatio = thumb.getAttribute('data-aspect-ratio');
-        if (mediaBox && thumbRatio) {
-          mediaBox.style.aspectRatio = thumbRatio;
         }
         thumbs.forEach(function (t) { t.classList.remove('is-active'); });
         thumb.classList.add('is-active');
@@ -714,6 +704,7 @@
     color: #1a1a1a;
     font-weight: 700;
     letter-spacing: -0.01em;
+    text-transform: uppercase;
   }
 
   @media screen and (min-width: 990px) {
