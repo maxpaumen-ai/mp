@@ -117,6 +117,11 @@
           height="1200"
           loading="eager"
         >
+        {%- if media_count > 1 -%}
+          <button type="button" class="vhl-roha-pdp__media-nav" data-vhl-roha-media-next aria-label="Volgende productafbeelding">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
+        {%- endif -%}
       </div>
 
       <div class="vhl-roha-pdp__panel">
@@ -419,6 +424,7 @@
     var priceCurrentEl = root.querySelector('[data-vhl-roha-price-current]');
     var priceCompareEl = root.querySelector('[data-vhl-roha-price-compare]');
     var mainImage = root.querySelector('[data-vhl-roha-main-image]');
+    var mediaNextButton = root.querySelector('[data-vhl-roha-media-next]');
     var optionGroups = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-option]'));
     var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-thumb]'));
 
@@ -555,6 +561,14 @@
         thumb.classList.add('is-active');
       });
     });
+
+    if (mediaNextButton && thumbs.length > 1) {
+      mediaNextButton.addEventListener('click', function () {
+        var activeIndex = thumbs.findIndex(function (t) { return t.classList.contains('is-active'); });
+        var nextIndex = activeIndex > -1 ? (activeIndex + 1) % thumbs.length : 0;
+        thumbs[nextIndex].click();
+      });
+    }
   })();
 </script>
 
@@ -616,13 +630,25 @@
     display: block;
   }
 
+  {%- comment -%}
+    border/box-shadow: none hier is een bewuste, lokale defensieve
+    tegenmaatregel: op de runtime-screenshot van deze galerij was een
+    horizontale lijn zichtbaar onder het vlak die niet in de broncode
+    van deze section staat en waarvan de exacte globale bron (via
+    statische code-search) niet met zekerheid kon worden vastgesteld.
+    Dit neutraliseert elke eventuele geërfde rand/schaduw uitsluitend
+    op dit element, zonder een globale selector aan te raken.
+  {%- endcomment -%}
   #{{ root_id }} .vhl-roha-pdp__media {
+    position: relative;
     background: #ffffff;
     overflow: hidden;
     aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
+    box-shadow: none;
   }
 
   #{{ root_id }} .vhl-roha-pdp__media img {
@@ -630,6 +656,30 @@
     height: 100%;
     object-fit: contain;
     display: block;
+    border: none;
+    box-shadow: none;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__media-nav {
+    position: absolute;
+    top: 6%;
+    right: 6%;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  #{{ root_id }} .vhl-roha-pdp__media-nav svg {
+    width: 18px;
+    height: 18px;
   }
 
   #{{ root_id }} .vhl-roha-pdp__panel {
