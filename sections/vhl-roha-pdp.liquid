@@ -1479,76 +1479,115 @@
 
 
 <style>
-  /* V11 — ROHA-style sticky ATC proportions */
+  /* V12 — ROHA sticky ATC, passend op bestaande HTML-structuur */
   @media screen and (min-width: 990px) {
     #{{ root_id }} .vhl-roha-sticky {
       right: 24px !important;
       bottom: 24px !important;
       width: min(1120px, calc(100vw - 48px)) !important;
       max-width: 1120px !important;
-      min-height: 226px !important;
-      padding: 32px 32px !important;
+      min-height: 0 !important;
+      padding: 0 !important;
       border: 1px solid #d8d8d8 !important;
       border-radius: 16px !important;
       background: #fff !important;
       box-shadow: 0 12px 32px rgba(0,0,0,.10) !important;
-      grid-template-columns: 160px minmax(330px, 1fr) 420px !important;
-      gap: 48px !important;
+      overflow: hidden !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__inner {
+      min-height: 224px !important;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) 420px !important;
       align-items: center !important;
+      gap: 54px !important;
+      padding: 32px !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__product {
+      display: grid !important;
+      grid-template-columns: 160px minmax(0, 1fr) !important;
+      align-items: center !important;
+      gap: 48px !important;
+      min-width: 0 !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__image {
       width: 160px !important;
       height: 160px !important;
+      min-width: 160px !important;
+      flex: none !important;
       border-radius: 9px !important;
       object-fit: cover !important;
+      background: #f4f4f4 !important;
     }
 
-    #{{ root_id }} .vhl-roha-sticky__info {
-      align-self: center !important;
+    #{{ root_id }} .vhl-roha-sticky__meta {
+      display: block !important;
       min-width: 0 !important;
+      color: #171717 !important;
     }
 
-    #{{ root_id }} .vhl-roha-sticky__title {
+    #{{ root_id }} .vhl-roha-sticky__meta strong {
+      display: block !important;
+      max-width: none !important;
       margin: 0 0 20px !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      white-space: normal !important;
       font-size: 25px !important;
       line-height: 1.12 !important;
       font-weight: 800 !important;
       letter-spacing: -.02em !important;
+      text-transform: uppercase !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__prices {
       display: flex !important;
       flex-direction: column !important;
       align-items: flex-start !important;
-      gap: 7px !important;
+      gap: 8px !important;
+      font-size: inherit !important;
       line-height: 1 !important;
     }
 
-    #{{ root_id }} .vhl-roha-sticky__compare {
+    #{{ root_id }} .vhl-roha-sticky__prices s {
+      display: block !important;
+      color: #555 !important;
       font-size: 28px !important;
       line-height: 1.05 !important;
-      color: #555 !important;
+      font-weight: 400 !important;
       text-decoration-thickness: 2px !important;
     }
 
-    #{{ root_id }} .vhl-roha-sticky__price {
+    #{{ root_id }} .vhl-roha-sticky__prices span {
+      display: block !important;
+      color: #171717 !important;
       font-size: 30px !important;
       line-height: 1.05 !important;
       font-weight: 400 !important;
-      color: #171717 !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__button {
       width: 100% !important;
+      min-width: 0 !important;
       height: 92px !important;
       min-height: 92px !important;
-      border-radius: 16px !important;
+      margin: 0 !important;
       padding: 0 34px !important;
+      border: 0 !important;
+      border-radius: 16px !important;
+      background: #1b1b1b !important;
+      color: #fff !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 20px !important;
       font-size: 24px !important;
+      line-height: 1 !important;
       font-weight: 800 !important;
       letter-spacing: .01em !important;
-      gap: 20px !important;
+      white-space: nowrap !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__button svg {
