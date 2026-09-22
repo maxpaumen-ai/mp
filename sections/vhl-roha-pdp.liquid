@@ -423,20 +423,6 @@
     var thumbRail = root.querySelector('.vhl-roha-gallery__thumbs');
     var galleryStage = root.querySelector('.vhl-roha-gallery__stage');
 
-    function syncThumbRailHeight() {
-      if (!thumbRail || !galleryStage) return;
-      if (window.matchMedia('(max-width: 749px)').matches) {
-        thumbRail.style.removeProperty('height');
-        thumbRail.style.removeProperty('max-height');
-        return;
-      }
-      var stageHeight = Math.round(galleryStage.getBoundingClientRect().height);
-      if (stageHeight > 0) {
-        thumbRail.style.height = stageHeight + 'px';
-        thumbRail.style.maxHeight = stageHeight + 'px';
-      }
-    }
-
     function keepThumbVisible(thumb, behavior) {
       if (!thumbRail || !thumb || window.matchMedia('(max-width: 749px)').matches) return;
 
@@ -454,8 +440,6 @@
       }
     }
 
-    syncThumbRailHeight();
-    window.addEventListener('resize', syncThumbRailHeight);
 
     function formatMoney(cents) {
       if (typeof window.Elixir_FormatMoney === 'function') {
@@ -649,7 +633,6 @@
     var initiallyActiveThumb = thumbs.find(function (t) { return t.classList.contains('is-active'); });
     if (initiallyActiveThumb) {
       requestAnimationFrame(function () {
-        syncThumbRailHeight();
         keepThumbVisible(initiallyActiveThumb, 'auto');
       });
     }
@@ -694,6 +677,7 @@
      BLOK 1 — ROHA GALLERY
      ========================================================= */
   #{{ root_id }} .vhl-roha-gallery {
+    position: relative;
     display: grid;
     grid-template-columns: 58px minmax(0, 1fr);
     column-gap: 42px;
@@ -703,12 +687,17 @@
   }
 
   #{{ root_id }} .vhl-roha-gallery__thumbs {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
     display: flex;
     flex-direction: column;
     gap: 14px;
     width: 58px;
     min-width: 58px;
-    max-height: var(--vhl-gallery-stage-height, none);
+    height: auto !important;
+    max-height: none !important;
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
@@ -754,6 +743,7 @@
   }
 
   #{{ root_id }} .vhl-roha-gallery__stage {
+    grid-column: 2;
     position: relative;
     width: 100%;
     height: auto;
@@ -847,6 +837,11 @@
 
     #{{ root_id }} .vhl-roha-gallery__thumbs {
       display: none;
+      position: static;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__stage {
+      grid-column: auto;
     }
 
     #{{ root_id }} .vhl-roha-gallery__stage {
