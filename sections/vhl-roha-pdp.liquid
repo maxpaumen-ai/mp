@@ -420,6 +420,42 @@
     var mediaNextButton = root.querySelector('[data-vhl-gallery-next]');
     var optionGroups = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-option]'));
     var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-gallery-thumb]'));
+    var thumbRail = root.querySelector('.vhl-roha-gallery__thumbs');
+    var galleryStage = root.querySelector('.vhl-roha-gallery__stage');
+
+    function syncThumbRailHeight() {
+      if (!thumbRail || !galleryStage) return;
+      if (window.matchMedia('(max-width: 749px)').matches) {
+        thumbRail.style.removeProperty('height');
+        thumbRail.style.removeProperty('max-height');
+        return;
+      }
+      var stageHeight = Math.round(galleryStage.getBoundingClientRect().height);
+      if (stageHeight > 0) {
+        thumbRail.style.height = stageHeight + 'px';
+        thumbRail.style.maxHeight = stageHeight + 'px';
+      }
+    }
+
+    function keepThumbVisible(thumb, behavior) {
+      if (!thumbRail || !thumb || window.matchMedia('(max-width: 749px)').matches) return;
+
+      var railTop = thumbRail.scrollTop;
+      var railBottom = railTop + thumbRail.clientHeight;
+      var thumbTop = thumb.offsetTop;
+      var thumbBottom = thumbTop + thumb.offsetHeight;
+
+      if (thumbTop < railTop || thumbBottom > railBottom) {
+        var target = thumbTop - Math.max(0, (thumbRail.clientHeight - thumb.offsetHeight) / 2);
+        thumbRail.scrollTo({
+          top: Math.max(0, target),
+          behavior: behavior || 'smooth'
+        });
+      }
+    }
+
+    syncThumbRailHeight();
+    window.addEventListener('resize', syncThumbRailHeight);
 
     function formatMoney(cents) {
       if (typeof window.Elixir_FormatMoney === 'function') {
@@ -606,8 +642,17 @@
         }
         thumbs.forEach(function (t) { t.classList.remove('is-active'); });
         thumb.classList.add('is-active');
+        keepThumbVisible(thumb, 'smooth');
       });
     });
+
+    var initiallyActiveThumb = thumbs.find(function (t) { return t.classList.contains('is-active'); });
+    if (initiallyActiveThumb) {
+      requestAnimationFrame(function () {
+        syncThumbRailHeight();
+        keepThumbVisible(initiallyActiveThumb, 'auto');
+      });
+    }
 
     if (mediaNextButton && thumbs.length > 1) {
       mediaNextButton.addEventListener('click', function () {
@@ -663,6 +708,17 @@
     gap: 14px;
     width: 58px;
     min-width: 58px;
+    max-height: var(--vhl-gallery-stage-height, none);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+  }
+
+  #{{ root_id }} .vhl-roha-gallery__thumbs::-webkit-scrollbar {
+    display: none;
   }
 
   #{{ root_id }} .vhl-roha-gallery__thumb {
