@@ -8,11 +8,14 @@
   - GEEN snippets/product-info.liquid, GEEN shop-product-layout/-details
     opmaak, GEEN CSS order-hacks. Alle DOM-volgorde is de echte
     visuele volgorde.
-  - Desktop: .vhl-roha-pdp__row is ÉÉN flex-rij met drie directe
-    kinderen (thumbs / media / panel), percentagegebaseerd zodat de
-    ROHA-verhoudingen (±4.5% / 49% / 37.5%, gaps ±3% / 6%) op elke
-    desktopbreedte behouden blijven — geen vaste px-breedtes voor de
-    hoofdafbeelding, geen max-height-truc.
+  - Desktop: .vhl-roha-pdp__row is ÉÉN flex-rij met twee directe
+    kinderen: .vhl-roha-gallery (BLOK 1 — aangeleverde thumbnails+
+    hoofdafbeelding-component, intern een eigen CSS-grid van 58px
+    thumb-kolom + 1fr stage) en .vhl-roha-pdp__panel (rechterkolom,
+    ongewijzigd 37.5% flex-basis). .vhl-roha-gallery vult zelf de
+    resterende ruimte (flex: 1 1 auto) met dezelfde 6% gap naar het
+    paneel als voorheen — het paneel is dus niet verschoven of
+    herschaald door de BLOK 1-wijziging.
   - Varianten: ALLEEN echte Shopify option-value swatches
     (value.swatch.color / .image) worden als ronde swatches getoond,
     en alleen wanneer ALLE waarden van die optie swatch-data hebben
@@ -83,8 +86,17 @@
   <div class="vhl-roha-pdp__container">
     <div class="vhl-roha-pdp__row">
 
-      {%- if media_count > 1 -%}
-        <div class="vhl-roha-pdp__thumbs" data-vhl-roha-thumbs>
+      {%- comment -%}
+        BLOK 1 — aangeleverde gallery/thumbnail-markup, technisch
+        geïntegreerd: echte product.media (behouden), en de
+        "actieve thumbnail"-bepaling hergebruikt de al bestaande,
+        correcte active_media_id-logica hierboven (matcht de
+        daadwerkelijk geselecteerde variant-afbeelding i.p.v. altijd
+        de eerste), zodat dit ook correct werkt bij binnenkomst op een
+        niet-eerste variant (?variant=...-links).
+      {%- endcomment -%}
+      <div class="vhl-roha-gallery">
+        <div class="vhl-roha-gallery__thumbs">
           {%- for media in product.media -%}
             {%- if media.media_type == 'image' -%}
               {%- assign is_active_thumb = false -%}
@@ -95,33 +107,49 @@
               {%- endif -%}
               <button
                 type="button"
-                class="vhl-roha-pdp__thumb{% if is_active_thumb %} is-active{% endif %}"
-                data-vhl-roha-thumb
-                data-full-src="{{ media | image_url: width: 1600 }}"
+                class="vhl-roha-gallery__thumb{% if is_active_thumb %} is-active{% endif %}"
+                data-vhl-gallery-thumb
+                data-image="{{ media.preview_image | image_url: width: 1600 }}"
                 data-alt="{{ media.alt | default: product.title | escape }}"
-                aria-label="{{ product.title | escape }} — afbeelding {{ forloop.index }}"
+                aria-label="Bekijk afbeelding {{ forloop.index }}"
               >
-                <img src="{{ media | image_url: width: 160 }}" alt="" loading="lazy" width="64" height="64">
+                {{
+                  media.preview_image
+                  | image_url: width: 160
+                  | image_tag:
+                    loading: 'lazy',
+                    widths: '80, 120, 160',
+                    alt: media.alt
+                }}
               </button>
             {%- endif -%}
           {%- endfor -%}
         </div>
-      {%- endif -%}
 
-      <div class="vhl-roha-pdp__media">
-        <img
-          data-vhl-roha-main-image
-          src="{{ display_image | image_url: width: 1600 }}"
-          alt="{{ display_image.alt | default: product.title | escape }}"
-          width="1200"
-          height="1200"
-          loading="eager"
-        >
-        {%- if media_count > 1 -%}
-          <button type="button" class="vhl-roha-pdp__media-nav" data-vhl-roha-media-next aria-label="Volgende productafbeelding">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          </button>
-        {%- endif -%}
+        <div class="vhl-roha-gallery__stage">
+          {%- if display_image -%}
+            {{
+              display_image
+              | image_url: width: 1800
+              | image_tag:
+                class: 'vhl-roha-gallery__main-image',
+                loading: 'eager',
+                widths: '700, 1000, 1400, 1800',
+                alt: display_image.alt
+            }}
+          {%- endif -%}
+
+          {%- if media_count > 1 -%}
+            <button
+              type="button"
+              class="vhl-roha-gallery__next"
+              aria-label="Volgende afbeelding"
+              data-vhl-gallery-next
+            >
+              <span aria-hidden="true">&rsaquo;</span>
+            </button>
+          {%- endif -%}
+        </div>
       </div>
 
       <div class="vhl-roha-pdp__panel">
@@ -423,10 +451,10 @@
     var atcPriceEl = atcButton ? atcButton.querySelector('[data-vhl-roha-atc-price]') : null;
     var priceCurrentEl = root.querySelector('[data-vhl-roha-price-current]');
     var priceCompareEl = root.querySelector('[data-vhl-roha-price-compare]');
-    var mainImage = root.querySelector('[data-vhl-roha-main-image]');
-    var mediaNextButton = root.querySelector('[data-vhl-roha-media-next]');
+    var mainImage = root.querySelector('.vhl-roha-gallery__main-image');
+    var mediaNextButton = root.querySelector('[data-vhl-gallery-next]');
     var optionGroups = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-option]'));
-    var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-thumb]'));
+    var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-gallery-thumb]'));
 
     function formatMoney(cents) {
       if (typeof window.Elixir_FormatMoney === 'function') {
@@ -467,7 +495,7 @@
     function setActiveThumbBySrc(src) {
       if (!src) return;
       thumbs.forEach(function (thumb) {
-        var isMatch = thumb.getAttribute('data-full-src') === src;
+        var isMatch = thumb.getAttribute('data-image') === src;
         thumb.classList.toggle('is-active', isMatch);
       });
     }
@@ -490,6 +518,7 @@
       }
 
       if (mainImage && variant.image) {
+        mainImage.removeAttribute('srcset');
         mainImage.src = variant.image;
         mainImage.alt = variant.imageAlt || mainImage.alt;
         setActiveThumbBySrc(variant.image);
@@ -552,9 +581,10 @@
 
     thumbs.forEach(function (thumb) {
       thumb.addEventListener('click', function () {
-        var fullSrc = thumb.getAttribute('data-full-src');
-        if (mainImage && fullSrc) {
-          mainImage.src = fullSrc;
+        var image = thumb.getAttribute('data-image');
+        if (mainImage && image) {
+          mainImage.removeAttribute('srcset');
+          mainImage.src = image;
           mainImage.alt = thumb.getAttribute('data-alt') || mainImage.alt;
         }
         thumbs.forEach(function (t) { t.classList.remove('is-active'); });
@@ -598,88 +628,118 @@
     }
   }
 
-  #{{ root_id }} .vhl-roha-pdp__thumbs {
+  {%- comment -%}
+    BLOK 1 — aangeleverde gallery-CSS, 1:1 overgenomen en uitsluitend
+    onder #{{ root_id }} gescoped voor isolatie (geen eigen
+    waarde-wijzigingen t.o.v. de aangeleverde code).
+  {%- endcomment -%}
+  #{{ root_id }} .vhl-roha-gallery {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    column-gap: 34px;
+    align-items: start;
+    width: 100%;
+    min-width: 0;
+  }
+
+  #{{ root_id }} .vhl-roha-gallery__thumbs {
     display: flex;
-    flex-direction: row;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 2px;
+    flex-direction: column;
+    gap: 14px;
+    width: 58px;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__thumb {
-    flex: 0 0 auto;
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #e5e0d8;
-    background: #f7f5f2;
+  #{{ root_id }} .vhl-roha-gallery__thumb {
+    display: block;
+    width: 58px;
+    height: 58px;
+    margin: 0;
     padding: 0;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: #f4f4f4;
+    overflow: hidden;
     cursor: pointer;
+    appearance: none;
+    box-shadow: none;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__thumb.is-active {
-    border-color: #1a1a1a;
-    box-shadow: 0 0 0 1px #1a1a1a;
+  #{{ root_id }} .vhl-roha-gallery__thumb.is-active {
+    border: 1.5px solid #111;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__thumb img {
+  #{{ root_id }} .vhl-roha-gallery__thumb img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
   }
 
-  {%- comment -%}
-    border/box-shadow: none hier is een bewuste, lokale defensieve
-    tegenmaatregel: op de runtime-screenshot van deze galerij was een
-    horizontale lijn zichtbaar onder het vlak die niet in de broncode
-    van deze section staat en waarvan de exacte globale bron (via
-    statische code-search) niet met zekerheid kon worden vastgesteld.
-    Dit neutraliseert elke eventuele geërfde rand/schaduw uitsluitend
-    op dit element, zonder een globale selector aan te raken.
-  {%- endcomment -%}
-  #{{ root_id }} .vhl-roha-pdp__media {
+  #{{ root_id }} .vhl-roha-gallery__stage {
     position: relative;
-    background: #ffffff;
-    overflow: hidden;
+    width: 100%;
     aspect-ratio: 1 / 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
+    min-width: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 12px;
+    background: #f5f5f3;
     box-shadow: none;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__media img {
+  #{{ root_id }} .vhl-roha-gallery__main-image {
+    position: absolute;
+    inset: 0;
+    display: block;
     width: 100%;
     height: 100%;
+    padding: 8%;
     object-fit: contain;
-    display: block;
-    border: none;
-    box-shadow: none;
+    object-position: center;
+    box-sizing: border-box;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__media-nav {
+  #{{ root_id }} .vhl-roha-gallery__next {
     position: absolute;
-    top: 6%;
-    right: 6%;
-    width: 44px;
-    height: 44px;
-    border: 0;
-    border-radius: 50%;
-    background: #ffffff;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    top: 50%;
+    right: 18px;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    width: 42px;
+    height: 42px;
+    margin: 0;
     padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,.94);
+    color: #111;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    cursor: pointer;
+    appearance: none;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__media-nav svg {
-    width: 18px;
-    height: 18px;
+  #{{ root_id }} .vhl-roha-gallery__next span {
+    display: block;
+    font-size: 28px;
+    font-weight: 300;
+    line-height: 1;
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 749px) {
+    #{{ root_id }} .vhl-roha-gallery {
+      display: block;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__thumbs {
+      display: none;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__stage {
+      width: 100%;
+    }
   }
 
   #{{ root_id }} .vhl-roha-pdp__panel {
@@ -691,21 +751,16 @@
       flex-direction: row;
       align-items: stretch;
     }
-    #{{ root_id }} .vhl-roha-pdp__thumbs {
-      flex: 0 0 4.5%;
-      margin-right: 3%;
-      flex-direction: column;
-      overflow-y: auto;
-      overflow-x: hidden;
-      gap: 12px;
-    }
-    #{{ root_id }} .vhl-roha-pdp__thumb {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 1 / 1;
-    }
-    #{{ root_id }} .vhl-roha-pdp__media {
-      flex: 1 1 49%;
+    {%- comment -%}
+      .vhl-roha-gallery vult hier de ruimte die voorheen door thumbs+
+      media+onderlinge gap samen werd ingenomen (flex: 1 1 auto), met
+      dezelfde margin-right: 6% als voorheen tussen gallery en paneel.
+      .vhl-roha-pdp__panel zelf is niet gewijzigd (blok 1 raakt de
+      rechterkolom niet aan): dezelfde 37.5% flex-basis en sticky
+      positionering als voorheen.
+    {%- endcomment -%}
+    #{{ root_id }} .vhl-roha-gallery {
+      flex: 1 1 auto;
       margin-right: 6%;
       min-width: 0;
     }
