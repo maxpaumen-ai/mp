@@ -109,6 +109,7 @@
                 type="button"
                 class="vhl-roha-gallery__thumb{% if is_active_thumb %} is-active{% endif %}"
                 data-vhl-gallery-thumb
+                data-media-id="{{ media.id }}"
                 data-image="{{ media.preview_image | image_url: width: 1600 }}"
                 data-alt="{{ media.alt | default: product.title | escape }}"
                 aria-label="Bekijk afbeelding {{ forloop.index }}"
@@ -182,20 +183,45 @@
           {%- form 'product', product, data-type: 'add-to-cart-form', class: 'vhl-roha-pdp__form' -%}
             <input type="hidden" name="id" value="{{ current_variant.id }}" data-vhl-roha-variant-id>
 
-            <div class="vhl-roha-pdp__option vhl-roha-pdp__option--reference">
-              <div class="vhl-roha-pdp__option-heading">
-                <span class="vhl-roha-pdp__option-name">Kleur:</span>
-                <span class="vhl-roha-pdp__option-selected">Mat Zwart</span>
-              </div>
-              <div class="vhl-roha-pdp__swatches vhl-roha-pdp__swatches--reference" aria-label="Kleur">
-                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--black" data-selected="true" aria-label="Mat Zwart"></button>
-                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--silver" aria-label="Zilver"></button>
-                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--gold" aria-label="Goud"></button>
-                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--white" aria-label="Wit"></button>
-                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--grey" aria-label="Grijs"></button>
-                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--mixed" aria-label="Goud zilver"></button>
-              </div>
-            </div>
+            {%- comment -%}
+              Echte Shopify kleurvariant-koppeling. De zichtbare labels/kleuren blijven
+              ROHA/VHL-stijl, maar data-value gebruikt exact Shopify option.value zodat
+              de gekoppelde variant + featured media correct wordt geselecteerd.
+            {%- endcomment -%}
+            {%- for option in product.options_with_values -%}
+              {%- assign option_name_down = option.name | downcase -%}
+              {%- if option_name_down contains 'kleur' or option_name_down contains 'color' -%}
+                <div class="vhl-roha-pdp__option vhl-roha-pdp__option--reference" data-vhl-roha-option data-option-position="{{ option.position }}">
+                  <div class="vhl-roha-pdp__option-heading">
+                    <span class="vhl-roha-pdp__option-name">Kleur:</span>
+                    <span class="vhl-roha-pdp__option-selected" data-vhl-roha-option-selected>{{ option.selected_value }}</span>
+                  </div>
+                  <div class="vhl-roha-pdp__swatches vhl-roha-pdp__swatches--reference" aria-label="Kleur">
+                    {%- for value in option.values -%}
+                      {%- assign swatch_class = 'vhl-roha-pdp__swatch--grey' -%}
+                      {%- case forloop.index -%}
+                        {%- when 1 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--black' -%}
+                        {%- when 2 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--silver' -%}
+                        {%- when 3 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--gold' -%}
+                        {%- when 4 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--white' -%}
+                        {%- when 5 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--grey' -%}
+                        {%- when 6 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--mixed' -%}
+                      {%- endcase -%}
+                      <button
+                        type="button"
+                        class="vhl-roha-pdp__swatch {{ swatch_class }}"
+                        data-vhl-roha-option-value
+                        data-value="{{ value | escape }}"
+                        data-selected="{% if value.selected %}true{% else %}false{% endif %}"
+                        aria-pressed="{% if value.selected %}true{% else %}false{% endif %}"
+                        aria-label="{{ value | escape }}"
+                        title="{{ value | escape }}"
+                      ></button>
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
 
             <button type="submit" name="add" class="vhl-roha-pdp__atc" data-vhl-roha-atc {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}>
               <svg class="vhl-roha-pdp__atc-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -342,6 +368,7 @@
       "option2": {{ variant.option2 | json }},
       "option3": {{ variant.option3 | json }},
       "image": {{ v_image }},
+      "imageId": {% if variant.featured_image %}{{ variant.featured_image.id | json }}{% else %}null{% endif %},
       "imageAlt": {{ v_alt | json }}
     }{%- unless forloop.last -%},{%- endunless -%}
   {%- endfor -%}
@@ -409,11 +436,13 @@
       return null;
     }
 
-    function setActiveThumbBySrc(src) {
-      if (!src) return;
+    function setActiveThumbForVariant(variant) {
+      if (!variant) return;
       thumbs.forEach(function (thumb) {
-        var isMatch = thumb.getAttribute('data-image') === src;
-        thumb.classList.toggle('is-active', isMatch);
+        var thumbMediaId = thumb.getAttribute('data-media-id');
+        var idMatch = variant.imageId && String(variant.imageId) === String(thumbMediaId);
+        var srcMatch = variant.image && thumb.getAttribute('data-image') === variant.image;
+        thumb.classList.toggle('is-active', Boolean(idMatch || srcMatch));
       });
     }
 
@@ -423,6 +452,11 @@
       if (!variant) return;
 
       if (variantIdInput) variantIdInput.value = variant.id;
+      if (window.history && window.history.replaceState) {
+        var nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.set('variant', variant.id);
+        window.history.replaceState({}, '', nextUrl.toString());
+      }
 
       if (priceCurrentEl) priceCurrentEl.textContent = formatMoney(variant.price);
       if (priceCompareEl) {
@@ -438,7 +472,7 @@
         mainImage.removeAttribute('srcset');
         mainImage.src = variant.image;
         mainImage.alt = variant.imageAlt || mainImage.alt;
-        setActiveThumbBySrc(variant.image);
+        setActiveThumbForVariant(variant);
       }
 
       if (atcButton && atcButtonText) {
@@ -1186,6 +1220,86 @@
     #{{ root_id }} .vhl-roha-sticky__meta strong { max-width:125px; font-size:10px; }
     #{{ root_id }} .vhl-roha-sticky__prices { font-size:11px; }
     #{{ root_id }} .vhl-roha-sticky__button { min-width:132px; min-height:46px; padding:0 12px; font-size:10px; }
+  }
+
+
+  /* BLOK 2 V2 — ROHA reference proportions */
+  @media screen and (min-width: 990px) {
+    #{{ root_id }} .vhl-roha-b2 {
+      width: 88%;
+      max-width: 1545px;
+      margin: 76px auto 120px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy,
+    #{{ root_id }} .vhl-roha-b2__story-media {
+      min-height: 0;
+      height: 428px;
+      border-radius: 14px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy {
+      padding: 58px 76px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy h2 {
+      font-size: 24px;
+      margin-bottom: 28px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy p {
+      font-size: 14px;
+      line-height: 1.32;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-image {
+      width: 100%;
+      height: 428px;
+      min-height: 0;
+      object-fit: cover;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech {
+      margin-top: 78px;
+      height: 520px;
+      min-height: 0;
+      grid-template-columns: 52% 48%;
+      border-radius: 14px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-media {
+      height: 520px;
+      padding: 54px 70px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-image {
+      width: 78%;
+      height: 360px;
+      object-fit: contain;
+      mix-blend-mode: screen;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy {
+      padding: 62px 86px 62px 20px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy h2 {
+      color: #fff !important;
+      font-size: 25px;
+      margin-bottom: 28px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy p {
+      color: #fff !important;
+      font-size: 14px;
+      line-height: 1.35;
+      max-width: 610px;
+    }
   }
 
 {% endstyle %}
