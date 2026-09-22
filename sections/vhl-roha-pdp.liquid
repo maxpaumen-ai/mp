@@ -212,6 +212,11 @@
                         class="vhl-roha-pdp__swatch {{ swatch_class }}"
                         data-vhl-roha-option-value
                         data-value="{{ value | escape }}"
+                        {%- assign fallback_image = product.images[forloop.index0] -%}
+                        {% if fallback_image %}
+                          data-fallback-image="{{ fallback_image | image_url: width: 1600 }}"
+                          data-fallback-image-alt="{{ fallback_image.alt | default: product.title | escape }}"
+                        {% endif %}
                         data-selected="{% if value.selected %}true{% else %}false{% endif %}"
                         aria-pressed="{% if value.selected %}true{% else %}false{% endif %}"
                         aria-label="{{ value | escape }}"
@@ -446,7 +451,7 @@
       });
     }
 
-    function updateVariant() {
+    function updateVariant(sourceButton) {
       var selection = currentSelection();
       var variant = findVariant(selection);
       if (!variant) return;
@@ -468,11 +473,22 @@
         }
       }
 
-      if (mainImage && variant.image) {
+      var fallbackImage = sourceButton ? sourceButton.getAttribute('data-fallback-image') : null;
+      var fallbackAlt = sourceButton ? sourceButton.getAttribute('data-fallback-image-alt') : null;
+      var targetImage = variant.image || fallbackImage;
+
+      if (mainImage && targetImage) {
         mainImage.removeAttribute('srcset');
-        mainImage.src = variant.image;
-        mainImage.alt = variant.imageAlt || mainImage.alt;
-        setActiveThumbForVariant(variant);
+        mainImage.src = targetImage;
+        mainImage.alt = variant.image ? (variant.imageAlt || mainImage.alt) : (fallbackAlt || mainImage.alt);
+
+        if (variant.image) {
+          setActiveThumbForVariant(variant);
+        } else {
+          thumbs.forEach(function (thumb) {
+            thumb.classList.toggle('is-active', thumb.getAttribute('data-image') === fallbackImage);
+          });
+        }
       }
 
       if (atcButton && atcButtonText) {
@@ -525,7 +541,7 @@
           btn.setAttribute('data-selected', 'true');
           btn.setAttribute('aria-pressed', 'true');
           if (selectedLabel) selectedLabel.textContent = btn.getAttribute('data-value');
-          updateVariant();
+          updateVariant(btn);
         });
       });
     });
