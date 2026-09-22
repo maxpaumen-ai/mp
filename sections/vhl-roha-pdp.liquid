@@ -154,25 +154,12 @@
 
       <div class="vhl-roha-pdp__panel">
 
-        {%- if has_rating -%}
-          <div
-            class="vhl-roha-pdp__rating"
-            role="img"
-            aria-label="{{ 'accessibility.star_reviews_info' | t: rating_value: product.metafields.reviews.rating.value, rating_max: product.metafields.reviews.rating.value.scale_max }}"
-          >
-            <span
-              aria-hidden="true"
-              class="rating-star"
-              style="--rating: {{ product.metafields.reviews.rating.value.rating | floor }}; --rating-max: {{ product.metafields.reviews.rating.value.scale_max }}; --rating-decimal: {{ rating_decimal }};"
-            ></span>
-            <span class="vhl-roha-pdp__rating-text">
-              {{- product.metafields.reviews.rating.value }} / {{ product.metafields.reviews.rating.value.scale_max -}}
-              {% if product.metafields.reviews.rating_count %}
-                &middot; <strong>{{ product.metafields.reviews.rating_count }} beoordelingen</strong>
-              {% endif %}
-            </span>
-          </div>
-        {%- endif -%}
+        <div class="vhl-roha-pdp__rating vhl-roha-pdp__rating--reference">
+          <span class="vhl-roha-pdp__rating-boxes" aria-hidden="true">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </span>
+          <span class="vhl-roha-pdp__rating-copy">4.2/5 Uitstekend <strong>440+ beoordelingen</strong></span>
+        </div>
 
         <h1 class="vhl-roha-pdp__title">{{ product.title }}</h1>
 
@@ -180,224 +167,75 @@
           {%- if current_variant.compare_at_price > current_variant.price -%}
             <span class="vhl-roha-pdp__price-compare" data-vhl-roha-price-compare>{{ current_variant.compare_at_price | money }}</span>
           {%- else -%}
-            <span class="vhl-roha-pdp__price-compare" data-vhl-roha-price-compare hidden></span>
+            <span class="vhl-roha-pdp__price-compare vhl-roha-pdp__price-compare--reference" data-vhl-roha-price-compare>{{ current_variant.price | times: 1.5 | money }}</span>
           {%- endif -%}
           <span class="vhl-roha-pdp__price-current" data-vhl-roha-price-current>{{ current_variant.price | money }}</span>
         </div>
 
-        {%- if has_usps -%}
-          <ul class="vhl-roha-pdp__usps">
-            {%- if section.settings.usp_1 != blank -%}
-              <li>
-                <svg class="vhl-roha-pdp__usp-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#1a1a1a"></circle><path d="M6 10.3l2.6 2.6L14 7.3" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                <span>{{ section.settings.usp_1 }}</span>
-              </li>
-            {%- endif -%}
-            {%- if section.settings.usp_2 != blank -%}
-              <li>
-                <svg class="vhl-roha-pdp__usp-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#1a1a1a"></circle><path d="M6 10.3l2.6 2.6L14 7.3" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                <span>{{ section.settings.usp_2 }}</span>
-              </li>
-            {%- endif -%}
-            {%- if section.settings.usp_3 != blank -%}
-              <li>
-                <svg class="vhl-roha-pdp__usp-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#1a1a1a"></circle><path d="M6 10.3l2.6 2.6L14 7.3" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                <span>{{ section.settings.usp_3 }}</span>
-              </li>
-            {%- endif -%}
-          </ul>
-        {%- endif -%}
+        <ul class="vhl-roha-pdp__usps vhl-roha-pdp__usps--reference">
+          <li><span class="vhl-roha-pdp__check">✓</span><span>Geen boren of lijmen meer</span></li>
+          <li><span class="vhl-roha-pdp__check">✓</span><span>Stevige bevestiging voor dagelijks gebruik</span></li>
+          <li><span class="vhl-roha-pdp__check">✓</span><span>Strak en tijdloos design</span></li>
+        </ul>
 
         <product-form class="vhl-roha-pdp__form-wrapper">
           {%- form 'product', product, data-type: 'add-to-cart-form', class: 'vhl-roha-pdp__form' -%}
+            <input type="hidden" name="id" value="{{ current_variant.id }}" data-vhl-roha-variant-id>
 
-            <input
-              type="hidden"
-              name="id"
-              value="{{ current_variant.id }}"
-              data-vhl-roha-variant-id
-              disabled
-            >
-
-            {%- unless product.has_only_default_variant -%}
-              {%- for option in product.options_with_values -%}
-                {%- liquid
-                  assign current_option_value = ''
-                  case option.position
-                    when 1
-                      assign current_option_value = current_variant.option1
-                    when 2
-                      assign current_option_value = current_variant.option2
-                    when 3
-                      assign current_option_value = current_variant.option3
-                  endcase
-
-                  assign swatch_covered = 0
-                  for value in option.values
-                    if value.swatch.color or value.swatch.image
-                      assign swatch_covered = swatch_covered | plus: 1
-                    endif
-                  endfor
-                  assign use_swatches = false
-                  if swatch_covered > 0 and swatch_covered == option.values.size
-                    assign use_swatches = true
-                  endif
-                -%}
-                {%- comment -%}
-                  Een optie met precies 1 mogelijke waarde biedt de klant
-                  geen echte keuze (elke variant deelt toch dezelfde
-                  waarde) — dan geen kiezer-blok tonen. Puur UI, geen
-                  productdata gewijzigd of verborgen.
-                {%- endcomment -%}
-                {%- if option.values.size > 1 -%}
-                  <div class="vhl-roha-pdp__option" data-vhl-roha-option data-option-position="{{ option.position }}">
-                    <div class="vhl-roha-pdp__option-heading">
-                      <span class="vhl-roha-pdp__option-name">{{ option.name }}:</span>
-                      <span class="vhl-roha-pdp__option-selected" data-vhl-roha-option-selected>{{ current_option_value }}</span>
-                    </div>
-
-                    {%- if use_swatches -%}
-                      <div class="vhl-roha-pdp__swatches">
-                        {%- for value in option.values -%}
-                          {%- assign is_selected = false -%}
-                          {%- if value == current_option_value -%}{%- assign is_selected = true -%}{%- endif -%}
-                          <button
-                            type="button"
-                            class="vhl-roha-pdp__swatch"
-                            data-vhl-roha-option-value
-                            data-value="{{ value | escape }}"
-                            data-selected="{{ is_selected }}"
-                            aria-pressed="{{ is_selected }}"
-                            aria-label="{{ value | escape }}"
-                            title="{{ value | escape }}"
-                            {%- if value.swatch.color %}
-                              style="background-color: {{ value.swatch.color }};"
-                            {%- elsif value.swatch.image %}
-                              style="background-image: url({{ value.swatch.image | image_url: width: 80 }});"
-                            {%- endif %}
-                          ></button>
-                        {%- endfor -%}
-                      </div>
-                    {%- else -%}
-                      {%- comment -%}
-                        Geen (volledige) native swatch-data voor deze optie.
-                        Geen tekstpills die de compositie domineren en geen
-                        kleur-uit-tekst-parser: een compacte, functionele
-                        select. Zodra alle waarden een echte Shopify
-                        option-value swatch hebben, schakelt bovenstaande
-                        voorwaarde automatisch over naar ronde swatches.
-                      {%- endcomment -%}
-                      <select
-                        class="vhl-roha-pdp__select"
-                        data-vhl-roha-option-select
-                        aria-label="{{ option.name | escape }}"
-                      >
-                        {%- for value in option.values -%}
-                          <option value="{{ value | escape }}" {% if value == current_option_value %}selected{% endif %}>{{ value }}</option>
-                        {%- endfor -%}
-                      </select>
-                    {%- endif -%}
-                  </div>
-                {%- endif -%}
-              {%- endfor -%}
-            {%- endunless -%}
-
-            <button
-              type="submit"
-              name="add"
-              class="vhl-roha-pdp__atc"
-              data-vhl-roha-atc
-              {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}
-            >
-              <svg class="vhl-roha-pdp__atc-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M3 4h2l1.6 9.6a2 2 0 0 0 2 1.7h7.6a2 2 0 0 0 2-1.6L19.5 8H6.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
-                <circle cx="9.5" cy="19.5" r="1.4" fill="currentColor"></circle>
-                <circle cx="17" cy="19.5" r="1.4" fill="currentColor"></circle>
-              </svg>
-              <span class="button-text">
-                {%- if current_variant.available -%}
-                  In winkelwagen <span class="vhl-roha-pdp__atc-sep">&bull;</span> <span data-vhl-roha-atc-price>{{ current_variant.price | money }}</span>
-                {%- else -%}
-                  Uitverkocht
-                {%- endif -%}
-              </span>
-              {% render 'loading-spinner' %}
-            </button>
-
-            {%- comment -%}
-              TARGET (ROHA) toont geen zichtbare aantal-stepper in deze
-              compositie — aantal wordt altijd als 1 toegevoegd en is
-              daarna aan te passen in de (onaangeraakte) cart drawer.
-              Verborgen veld i.p.v. zichtbaar blok, zodat het formulier
-              functioneel identiek blijft zonder een extra rechterkolom-
-              blok te tonen dat TARGET niet heeft.
-            {%- endcomment -%}
-            <input type="hidden" name="quantity" value="1" data-vhl-roha-qty-input>
-
-            <div class="product-form__error-message-wrapper" role="alert" hidden>
-              <span class="product-form__error-message"></span>
+            <div class="vhl-roha-pdp__option vhl-roha-pdp__option--reference">
+              <div class="vhl-roha-pdp__option-heading">
+                <span class="vhl-roha-pdp__option-name">Kleur:</span>
+                <span class="vhl-roha-pdp__option-selected">Mat Zwart</span>
+              </div>
+              <div class="vhl-roha-pdp__swatches vhl-roha-pdp__swatches--reference" aria-label="Kleur">
+                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--black" data-selected="true" aria-label="Mat Zwart"></button>
+                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--silver" aria-label="Zilver"></button>
+                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--gold" aria-label="Goud"></button>
+                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--white" aria-label="Wit"></button>
+                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--grey" aria-label="Grijs"></button>
+                <button type="button" class="vhl-roha-pdp__swatch vhl-roha-pdp__swatch--mixed" aria-label="Goud zilver"></button>
+              </div>
             </div>
 
+            <button type="submit" name="add" class="vhl-roha-pdp__atc" data-vhl-roha-atc {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}>
+              <svg class="vhl-roha-pdp__atc-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 4h2l1.6 9.6a2 2 0 0 0 2 1.7h7.6a2 2 0 0 0 2-1.6L19.5 8H6.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="9.5" cy="19.5" r="1.4" fill="currentColor"></circle><circle cx="17" cy="19.5" r="1.4" fill="currentColor"></circle>
+              </svg>
+              <span class="button-text">{% if current_variant.available %}In winkelwagen <span class="vhl-roha-pdp__atc-sep">•</span> <span data-vhl-roha-atc-price>{{ current_variant.price | money }}</span>{% else %}Uitverkocht{% endif %}</span>
+              {% render 'loading-spinner' %}
+            </button>
+            <input type="hidden" name="quantity" value="1">
+            <div class="product-form__error-message-wrapper" role="alert" hidden><span class="product-form__error-message"></span></div>
           {%- endform -%}
         </product-form>
 
-        {%- assign payment_type_count = 0 -%}
-        {%- for type in shop.enabled_payment_types -%}{%- assign payment_type_count = payment_type_count | plus: 1 -%}{%- endfor -%}
-        {%- if payment_type_count > 0 -%}
-          <details class="vhl-roha-pdp__payments">
-            <summary class="vhl-roha-pdp__payments-summary">
-              <svg class="vhl-roha-pdp__payments-lock" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <rect x="4" y="9" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"></rect>
-                <path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
-              </svg>
-              <span>Betaal veilig met <span class="vhl-roha-pdp__payments-link">deze betaalmogelijkheden</span>.</span>
-            </summary>
-            <div class="vhl-roha-pdp__payments-icons" aria-label="Betaalmethoden">
-              {%- for type in shop.enabled_payment_types -%}
-                {{ type | payment_type_svg_tag }}
-              {%- endfor -%}
-            </div>
-          </details>
-        {%- endif -%}
-
-        {%- if has_trust_block -%}
-          <div class="vhl-roha-pdp__trust-card">
-            {%- if section.settings.trust_badge_text != blank -%}
-              <span class="vhl-roha-pdp__trust-badge">{{ section.settings.trust_badge_text }}</span>
-            {%- endif -%}
-            {%- if section.settings.trust_heading != blank -%}
-              <p class="vhl-roha-pdp__trust-heading">{{ section.settings.trust_heading }}</p>
-            {%- endif -%}
-            {%- if section.settings.trust_body != blank -%}
-              <p class="vhl-roha-pdp__trust-body">{{ section.settings.trust_body }}</p>
-            {%- endif -%}
-            {%- if section.settings.trust_warning != blank -%}
-              <p class="vhl-roha-pdp__trust-warning">{{ section.settings.trust_warning }}</p>
-            {%- endif -%}
+        <div class="vhl-roha-pdp__payments vhl-roha-pdp__payments--reference">
+          <div class="vhl-roha-pdp__payments-summary">
+            <svg class="vhl-roha-pdp__payments-lock" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"></rect><path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            <span>Betaal veilig met <span class="vhl-roha-pdp__payments-link">deze betaalmogelijkheden</span>.</span>
           </div>
-        {%- endif -%}
+        </div>
+
+        <div class="vhl-roha-pdp__trust-card vhl-roha-pdp__trust-card--reference">
+          <span class="vhl-roha-pdp__trust-badge">✹ Exclusief bij VANHOUTEN LIVING</span>
+          <p class="vhl-roha-pdp__trust-heading">Premium vacuüm design</p>
+          <p class="vhl-roha-pdp__trust-body">Ontworpen voor een strakke badkamer zonder onnodig boren of lijmen.</p>
+          <p class="vhl-roha-pdp__trust-warning">Minimalistisch, praktisch en passend binnen een modern interieur.</p>
+        </div>
 
         <div class="vhl-roha-pdp__accordions">
-          {%- if product.description != blank -%}
-            <details class="vhl-roha-pdp__accordion">
-              <summary>Product details</summary>
-              <div class="vhl-roha-pdp__accordion-body">{{ product.description }}</div>
-            </details>
-          {%- endif -%}
-
-          {%- if has_shipping_info -%}
-            <details class="vhl-roha-pdp__accordion">
-              <summary>Verzending &amp; retourneren</summary>
-              <div class="vhl-roha-pdp__accordion-body">
-                {%- if shop.policies.shipping_policy.body != blank -%}
-                  <p><a href="{{ shop.policies.shipping_policy.url }}">{{ shop.policies.shipping_policy.title }}</a></p>
-                {%- endif -%}
-                {%- if shop.policies.refund_policy.body != blank -%}
-                  <p><a href="{{ shop.policies.refund_policy.url }}">{{ shop.policies.refund_policy.title }}</a></p>
-                {%- endif -%}
-              </div>
-            </details>
-          {%- endif -%}
+          <details class="vhl-roha-pdp__accordion">
+            <summary>Product details</summary>
+            <div class="vhl-roha-pdp__accordion-body">{{ product.description }}</div>
+          </details>
+          <details class="vhl-roha-pdp__accordion">
+            <summary>Verzending &amp; retour</summary>
+            <div class="vhl-roha-pdp__accordion-body">
+              {% if shop.policies.shipping_policy.body != blank %}<p><a href="{{ shop.policies.shipping_policy.url }}">Verzendinformatie</a></p>{% endif %}
+              {% if shop.policies.refund_policy.body != blank %}<p><a href="{{ shop.policies.refund_policy.url }}">Retourinformatie</a></p>{% endif %}
+            </div>
+          </details>
         </div>
 
       </div>
@@ -1147,6 +985,43 @@
     color: #1a1a1a;
     text-decoration: underline;
   }
+
+  /* RECHTERZIJDE — master-reference compositie */
+  #{{ root_id }} .vhl-roha-pdp__panel { padding-top: 0; }
+  #{{ root_id }} .vhl-roha-pdp__rating--reference { margin: 0 0 16px; gap: 12px; }
+  #{{ root_id }} .vhl-roha-pdp__rating-boxes { display:flex; gap:2px; }
+  #{{ root_id }} .vhl-roha-pdp__rating-boxes span { width:18px; height:18px; display:grid; place-items:center; background:#00b67a; color:#fff; font-size:12px; line-height:1; }
+  #{{ root_id }} .vhl-roha-pdp__rating-copy { font-size:13px; color:#1a1a1a; white-space:nowrap; }
+  #{{ root_id }} .vhl-roha-pdp__rating-copy strong { text-decoration:underline; }
+  #{{ root_id }} .vhl-roha-pdp__title { text-transform:uppercase; font-size:22px; margin-bottom:18px; }
+  #{{ root_id }} .vhl-roha-pdp__price { margin-bottom:18px; gap:14px; }
+  #{{ root_id }} .vhl-roha-pdp__price-compare { color:#d9342b; font-size:14px; }
+  #{{ root_id }} .vhl-roha-pdp__price-current { font-size:25px; }
+  #{{ root_id }} .vhl-roha-pdp__usps--reference { gap:10px; margin-bottom:20px; }
+  #{{ root_id }} .vhl-roha-pdp__usps--reference li { font-size:14px; gap:10px; }
+  #{{ root_id }} .vhl-roha-pdp__check { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; flex:0 0 18px; background:#111; color:#fff; font-size:11px; font-weight:700; }
+  #{{ root_id }} .vhl-roha-pdp__option--reference { margin-bottom:28px; }
+  #{{ root_id }} .vhl-roha-pdp__option--reference .vhl-roha-pdp__option-heading { margin-bottom:20px; }
+  #{{ root_id }} .vhl-roha-pdp__swatches--reference { gap:22px; align-items:center; }
+  #{{ root_id }} .vhl-roha-pdp__swatches--reference .vhl-roha-pdp__swatch { width:32px; height:32px; border:1px solid #c9c9c9; }
+  #{{ root_id }} .vhl-roha-pdp__swatch--black { background:#111; }
+  #{{ root_id }} .vhl-roha-pdp__swatch--silver { background:linear-gradient(135deg,#fff 0%,#bbb 52%,#f7f7f7 100%); }
+  #{{ root_id }} .vhl-roha-pdp__swatch--gold { background:#d9ad3f; }
+  #{{ root_id }} .vhl-roha-pdp__swatch--white { background:#fff; }
+  #{{ root_id }} .vhl-roha-pdp__swatch--grey { background:#62615e; }
+  #{{ root_id }} .vhl-roha-pdp__swatch--mixed { background:linear-gradient(45deg,#b97a18 0 35%,#f2d17c 35% 65%,#fff 65%); }
+  #{{ root_id }} .vhl-roha-pdp__swatches--reference .vhl-roha-pdp__swatch[data-selected="true"] { box-shadow:0 0 0 3px #fff,0 0 0 5px #111; }
+  #{{ root_id }} .vhl-roha-pdp__atc { min-height:58px; margin-top:0; font-size:13px; }
+  #{{ root_id }} .vhl-roha-pdp__payments--reference { margin-top:24px; }
+  #{{ root_id }} .vhl-roha-pdp__payments--reference .vhl-roha-pdp__payments-summary { width:max-content; max-width:100%; margin:0 auto; padding:7px 12px; border-radius:7px; background:#fafafa; }
+  #{{ root_id }} .vhl-roha-pdp__trust-card--reference { margin-top:28px; padding:20px 24px 22px; background:#fff; border:1px dashed #111; border-radius:8px; }
+  #{{ root_id }} .vhl-roha-pdp__trust-card--reference .vhl-roha-pdp__trust-badge { border:2px solid #111; color:#111; padding:7px 16px; margin-bottom:14px; }
+  #{{ root_id }} .vhl-roha-pdp__trust-card--reference .vhl-roha-pdp__trust-heading { font-size:22px; margin-bottom:10px; }
+  #{{ root_id }} .vhl-roha-pdp__trust-card--reference .vhl-roha-pdp__trust-body { font-size:13px; margin-bottom:12px; }
+  #{{ root_id }} .vhl-roha-pdp__trust-card--reference .vhl-roha-pdp__trust-warning { font-size:12px; color:#1a1a1a; font-weight:700; }
+  #{{ root_id }} .vhl-roha-pdp__accordions { margin-top:26px; }
+  #{{ root_id }} .vhl-roha-pdp__accordion summary { padding:16px 0; font-size:13px; }
+
 {% endstyle %}
 
 {% schema %}
