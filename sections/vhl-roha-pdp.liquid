@@ -1045,18 +1045,28 @@
   /* Betaalmethoden modal + productdetails */
   #{{ root_id }} .vhl-roha-pdp__payments-summary { border:0; color:inherit; cursor:pointer; font:inherit; }
   #{{ root_id }} .vhl-roha-paymodal[hidden] { display:none !important; }
-  #{{ root_id }} .vhl-roha-paymodal { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; }
+  #{{ root_id }} .vhl-roha-paymodal { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:20px; }
   #{{ root_id }} .vhl-roha-paymodal__backdrop { position:absolute; inset:0; background:rgba(0,0,0,.48); backdrop-filter:blur(5px); }
-  #{{ root_id }} .vhl-roha-paymodal__dialog { position:relative; z-index:1; width:min(795px,calc(100vw - 48px)); padding:40px 36px 36px; border-radius:14px; background:#fff; box-shadow:0 18px 60px rgba(0,0,0,.18); }
-  #{{ root_id }} .vhl-roha-paymodal__title { margin:0 0 26px; text-align:center; font-size:22px; line-height:1.25; color:#222; }
-  #{{ root_id }} .vhl-roha-paymodal__methods { display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:36px; }
-  #{{ root_id }} .vhl-roha-paymodal__method { display:flex; align-items:center; justify-content:center; width:52px; height:34px; padding:0; border:0; border-radius:4px; background:transparent; overflow:hidden; }
-  #{{ root_id }} .vhl-roha-paymodal__method svg { display:block; width:52px; height:auto; max-height:34px; }
-  #{{ root_id }} .vhl-roha-paymodal__close { width:100%; min-height:68px; border:0; border-radius:12px; background:#1b1b1b !important; color:#fff !important; font-size:20px; font-weight:800; cursor:pointer; }
+  #{{ root_id }} .vhl-roha-paymodal__dialog { position:relative; z-index:1; width:min(640px,calc(100vw - 40px)); padding:28px 30px 30px; border-radius:12px; background:#fff; box-shadow:0 14px 44px rgba(0,0,0,.16); }
+  #{{ root_id }} .vhl-roha-paymodal__title { margin:0 0 20px; text-align:center; font-size:17px; line-height:1.25; font-weight:400; color:#222; }
+  #{{ root_id }} .vhl-roha-paymodal__methods { display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:nowrap; margin-bottom:26px; }
+  #{{ root_id }} .vhl-roha-paymodal__method { display:flex; align-items:center; justify-content:center; width:46px; height:30px; padding:0; border:0; border-radius:4px; background:transparent; overflow:hidden; flex:0 0 46px; }
+  #{{ root_id }} .vhl-roha-paymodal__method svg { display:block; width:46px; height:30px; max-height:30px; }
+  #{{ root_id }} .vhl-roha-paymodal__close { width:100%; min-height:56px; border:0; border-radius:10px; background:#1b1b1b !important; color:#fff !important; font-size:16px; font-weight:800; cursor:pointer; }
   #{{ root_id }} .vhl-roha-pdp__accordion-body--product { padding:4px 0 22px; font-size:15px; line-height:1.55; color:#222; }
   #{{ root_id }} .vhl-roha-pdp__accordion-body--product p { margin:0 0 22px; }
   #{{ root_id }} .vhl-roha-pdp__accordion-body--product p:last-child { margin-bottom:0; }
   #{{ root_id }} .vhl-roha-pdp__accordion-body--product strong { font-weight:700; }
+
+
+  @media screen and (max-width: 749px) {
+    #{{ root_id }} .vhl-roha-paymodal__dialog { width:min(520px,calc(100vw - 28px)); padding:24px 18px 20px; }
+    #{{ root_id }} .vhl-roha-paymodal__title { font-size:16px; margin-bottom:18px; }
+    #{{ root_id }} .vhl-roha-paymodal__methods { gap:7px; margin-bottom:22px; }
+    #{{ root_id }} .vhl-roha-paymodal__method { width:43px; height:28px; flex-basis:43px; }
+    #{{ root_id }} .vhl-roha-paymodal__method svg { width:43px; height:28px; max-height:28px; }
+    #{{ root_id }} .vhl-roha-paymodal__close { min-height:52px; font-size:15px; }
+  }
 
 {% endstyle %}
 
