@@ -1068,6 +1068,14 @@
     #{{ root_id }} .vhl-roha-paymodal__close { min-height:52px; font-size:15px; }
   }
 
+
+  /* Gallery-pijl mag nooit boven de betaalmodal verschijnen */
+  #{{ root_id }}.vhl-payment-modal-open .vhl-roha-gallery__next {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
 {% endstyle %}
 
 
@@ -1078,8 +1086,8 @@
   const modal = root.querySelector('[data-vhl-payment-modal]');
   const opener = root.querySelector('[data-vhl-payment-open]');
   if (!modal || !opener) return;
-  const close = () => { modal.hidden = true; document.documentElement.style.overflow = ''; };
-  opener.addEventListener('click', () => { modal.hidden = false; document.documentElement.style.overflow = 'hidden'; });
+  const close = () => { modal.hidden = true; root.classList.remove('vhl-payment-modal-open'); document.documentElement.style.overflow = ''; };
+  opener.addEventListener('click', () => { modal.hidden = false; root.classList.add('vhl-payment-modal-open'); document.documentElement.style.overflow = 'hidden'; });
   root.querySelectorAll('[data-vhl-payment-close]').forEach(el => el.addEventListener('click', close));
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
 })();
