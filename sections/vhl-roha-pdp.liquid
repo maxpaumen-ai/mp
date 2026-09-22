@@ -426,15 +426,30 @@
     function keepThumbVisible(thumb, behavior) {
       if (!thumbRail || !thumb || window.matchMedia('(max-width: 749px)').matches) return;
 
+      var index = thumbs.indexOf(thumb);
+      if (index < 0) return;
+
+      /* ROHA-style vooruit scrollen:
+         houd ongeveer 2 thumbnails onder de actieve thumbnail zichtbaar.
+         Daardoor beweegt de rail al vóór de actieve thumbnail de onderkant raakt. */
+      var lookAhead = 2;
+      var targetIndex = Math.min(thumbs.length - 1, index + lookAhead);
+      var targetThumb = thumbs[targetIndex];
+
       var railTop = thumbRail.scrollTop;
       var railBottom = railTop + thumbRail.clientHeight;
       var thumbTop = thumb.offsetTop;
-      var thumbBottom = thumbTop + thumb.offsetHeight;
+      var targetBottom = targetThumb.offsetTop + targetThumb.offsetHeight;
 
-      if (thumbTop < railTop || thumbBottom > railBottom) {
-        var target = thumbTop - Math.max(0, (thumbRail.clientHeight - thumb.offsetHeight) / 2);
+      if (thumbTop < railTop) {
         thumbRail.scrollTo({
-          top: Math.max(0, target),
+          top: Math.max(0, thumbTop - 14),
+          behavior: behavior || 'smooth'
+        });
+      } else if (targetBottom > railBottom) {
+        var targetScroll = targetBottom - thumbRail.clientHeight;
+        thumbRail.scrollTo({
+          top: Math.max(0, targetScroll),
           behavior: behavior || 'smooth'
         });
       }
