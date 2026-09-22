@@ -311,20 +311,28 @@
         </div>
       </div>
       <div class="vhl-roha-b2__story-media">
-        {%- assign b2_story_media = product.media[3] | default: product.featured_media -%}
-        {%- if b2_story_media and b2_story_media.media_type == 'image' -%}
-          {{ b2_story_media.preview_image | image_url: width: 1400 | image_tag: loading: 'lazy', class: 'vhl-roha-b2__story-image', widths: '500, 800, 1100, 1400' }}
-        {%- elsif product.featured_image -%}
-          {{ product.featured_image | image_url: width: 1400 | image_tag: loading: 'lazy', class: 'vhl-roha-b2__story-image', widths: '500, 800, 1100, 1400' }}
+        {%- assign b2_story_image = section.settings.block2_story_image -%}
+        {%- if b2_story_image != blank -%}
+          {{ b2_story_image | image_url: width: 1800 | image_tag: loading: 'lazy', class: 'vhl-roha-b2__story-image', widths: '600, 900, 1200, 1500, 1800' }}
+        {%- else -%}
+          {%- assign b2_story_media = product.media[3] | default: product.featured_media -%}
+          {%- if b2_story_media and b2_story_media.media_type == 'image' -%}
+            {{ b2_story_media.preview_image | image_url: width: 1800 | image_tag: loading: 'lazy', class: 'vhl-roha-b2__story-image', widths: '600, 900, 1200, 1500, 1800' }}
+          {%- endif -%}
         {%- endif -%}
       </div>
     </div>
 
     <div class="vhl-roha-b2__tech">
       <div class="vhl-roha-b2__tech-media">
-        {%- assign b2_tech_media = product.media[1] | default: product.featured_media -%}
-        {%- if b2_tech_media and b2_tech_media.media_type == 'image' -%}
-          {{ b2_tech_media.preview_image | image_url: width: 1400 | image_tag: loading: 'lazy', class: 'vhl-roha-b2__tech-image', widths: '500, 800, 1100, 1400' }}
+        {%- assign b2_tech_image = section.settings.block2_tech_image -%}
+        {%- if b2_tech_image != blank -%}
+          {{ b2_tech_image | image_url: width: 1800 | image_tag: loading: 'lazy', class: 'vhl-roha-b2__tech-image', widths: '600, 900, 1200, 1500, 1800' }}
+        {%- else -%}
+          {%- assign b2_tech_media = product.media[1] | default: product.featured_media -%}
+          {%- if b2_tech_media and b2_tech_media.media_type == 'image' -%}
+            {{ b2_tech_media.preview_image | image_url: width: 1800 | image_tag: loading: 'lazy', class: 'vhl-roha-b2__tech-image', widths: '600, 900, 1200, 1500, 1800' }}
+          {%- endif -%}
         {%- endif -%}
       </div>
       <div class="vhl-roha-b2__tech-copy">
@@ -1434,6 +1442,128 @@
     }
   }
 
+
+  /* BLOK 2 V3 — exact ROHA desktop composition */
+  @media screen and (min-width: 990px) {
+    #{{ root_id }} .vhl-roha-b2 {
+      width: 90% !important;
+      max-width: none !important;
+      margin: 76px auto 120px !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+      gap: 26px !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy,
+    #{{ root_id }} .vhl-roha-b2__story-media {
+      width: 100% !important;
+      height: 515px !important;
+      min-height: 515px !important;
+      border-radius: 14px !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy {
+      display: flex !important;
+      align-items: center !important;
+      padding: 70px 94px !important;
+      background: #f3f3f3 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy h2 {
+      margin: 0 0 36px !important;
+      font-size: 29px !important;
+      line-height: 1.12 !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.025em !important;
+      color: #333 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy p {
+      margin: 0 !important;
+      max-width: 690px !important;
+      font-size: 16px !important;
+      line-height: 1.28 !important;
+      font-weight: 400 !important;
+      color: #333 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-image {
+      display: block !important;
+      width: 100% !important;
+      height: 515px !important;
+      min-height: 515px !important;
+      object-fit: cover !important;
+      object-position: center !important;
+      border-radius: 14px !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech {
+      width: 100% !important;
+      height: 520px !important;
+      min-height: 520px !important;
+      margin-top: 76px !important;
+      display: grid !important;
+      grid-template-columns: 52% 48% !important;
+      align-items: center !important;
+      overflow: hidden !important;
+      border-radius: 14px !important;
+      background: #000 !important;
+      color: #fff !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-media {
+      width: 100% !important;
+      height: 520px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 44px 70px !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-image {
+      display: block !important;
+      width: 78% !important;
+      max-width: 560px !important;
+      height: 390px !important;
+      object-fit: contain !important;
+      object-position: center !important;
+      mix-blend-mode: screen !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy {
+      display: flex !important;
+      align-items: center !important;
+      height: 520px !important;
+      padding: 60px 92px 60px 20px !important;
+      box-sizing: border-box !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy h2 {
+      margin: 0 0 38px !important;
+      font-size: 29px !important;
+      line-height: 1.12 !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.025em !important;
+      color: #fff !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy p {
+      margin: 0 !important;
+      max-width: 700px !important;
+      font-size: 16px !important;
+      line-height: 1.28 !important;
+      font-weight: 400 !important;
+      color: #fff !important;
+    }
+  }
+
 {% endstyle %}
 
 
@@ -1602,6 +1732,20 @@
   "tag": "section",
   "class": "vhl-roha-pdp-section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Blok 2 afbeeldingen"
+    },
+    {
+      "type": "image_picker",
+      "id": "block2_story_image",
+      "label": "Bovenste lifestyle afbeelding"
+    },
+    {
+      "type": "image_picker",
+      "id": "block2_tech_image",
+      "label": "TWIST & LOCK afbeelding"
+    },
     {
       "type": "header",
       "content": "USP's (optioneel, max 3)"
