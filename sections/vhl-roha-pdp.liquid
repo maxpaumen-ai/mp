@@ -212,6 +212,19 @@
                         class="vhl-roha-pdp__swatch {{ swatch_class }}"
                         data-vhl-roha-option-value
                         data-value="{{ value | escape }}"
+                        {% if value.variant %}
+                          data-shopify-variant-id="{{ value.variant.id }}"
+                          {% if value.variant.featured_image %}
+                            data-shopify-variant-image="{{ value.variant.featured_image | image_url: width: 1600 }}"
+                            data-shopify-variant-alt="{{ value.variant.featured_image.alt | default: product.title | escape }}"
+                            {%- for media in product.media -%}
+                              {%- if media.media_type == 'image' and media.preview_image.id == value.variant.featured_image.id -%}
+                                data-shopify-media-id="{{ media.id }}"
+                                {%- break -%}
+                              {%- endif -%}
+                            {%- endfor -%}
+                          {% endif %}
+                        {% endif %}
                         data-selected="{% if value.selected %}true{% else %}false{% endif %}"
                         aria-pressed="{% if value.selected %}true{% else %}false{% endif %}"
                         aria-label="{{ value | escape }}"
@@ -547,6 +560,37 @@
           btn.setAttribute('data-selected', 'true');
           btn.setAttribute('aria-pressed', 'true');
           if (selectedLabel) selectedLabel.textContent = btn.getAttribute('data-value');
+
+          /* Shopify-native directe koppeling vanaf product_option_value.
+             Geen hardcoded kleur- of afbeeldingsvolgorde. */
+          var directVariantId = btn.getAttribute('data-shopify-variant-id');
+          var directImage = btn.getAttribute('data-shopify-variant-image');
+          var directAlt = btn.getAttribute('data-shopify-variant-alt');
+          var directMediaId = btn.getAttribute('data-shopify-media-id');
+
+          if (directVariantId && variantIdInput) {
+            variantIdInput.value = directVariantId;
+          }
+
+          if (directImage && mainImage) {
+            var directThumb = directMediaId ? thumbs.find(function (thumb) {
+              return String(thumb.getAttribute('data-media-id')) === String(directMediaId);
+            }) : null;
+
+            if (directThumb) {
+              directThumb.click();
+            } else {
+              mainImage.removeAttribute('srcset');
+              mainImage.src = directImage;
+              mainImage.alt = directAlt || mainImage.alt;
+              thumbs.forEach(function (thumb) {
+                var thumbSrc = (thumb.getAttribute('data-image') || '').split('?')[0];
+                var imageSrc = directImage.split('?')[0];
+                thumb.classList.toggle('is-active', thumbSrc === imageSrc);
+              });
+            }
+          }
+
           updateVariant();
         });
       });
