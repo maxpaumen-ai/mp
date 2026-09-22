@@ -212,11 +212,6 @@
                         class="vhl-roha-pdp__swatch {{ swatch_class }}"
                         data-vhl-roha-option-value
                         data-value="{{ value | escape }}"
-                        {%- assign fallback_image = product.images[forloop.index0] -%}
-                        {% if fallback_image %}
-                          data-fallback-image="{{ fallback_image | image_url: width: 1600 }}"
-                          data-fallback-image-alt="{{ fallback_image.alt | default: product.title | escape }}"
-                        {% endif %}
                         data-selected="{% if value.selected %}true{% else %}false{% endif %}"
                         aria-pressed="{% if value.selected %}true{% else %}false{% endif %}"
                         aria-label="{{ value | escape }}"
@@ -358,11 +353,14 @@
   {%- for variant in product.variants -%}
     {%- liquid
       assign v_image = 'null'
-      if variant.featured_image
-        assign v_image_url = variant.featured_image | image_url: width: 1600
+      assign v_media_id = 'null'
+      assign v_alt = product.title
+      if variant.featured_media
+        assign v_image_url = variant.featured_media.preview_image | image_url: width: 1600
         assign v_image = v_image_url | json
+        assign v_media_id = variant.featured_media.id | json
+        assign v_alt = variant.featured_media.alt | default: product.title
       endif
-      assign v_alt = variant.featured_image.alt | default: product.title
     -%}
     {
       "id": {{ variant.id | json }},
@@ -373,7 +371,7 @@
       "option2": {{ variant.option2 | json }},
       "option3": {{ variant.option3 | json }},
       "image": {{ v_image }},
-      "imageId": {% if variant.featured_image %}{{ variant.featured_image.id | json }}{% else %}null{% endif %},
+      "imageId": {{ v_media_id }},
       "imageAlt": {{ v_alt | json }}
     }{%- unless forloop.last -%},{%- endunless -%}
   {%- endfor -%}
@@ -441,17 +439,26 @@
       return null;
     }
 
-    function setActiveThumbForVariant(variant) {
-      if (!variant) return;
-      thumbs.forEach(function (thumb) {
-        var thumbMediaId = thumb.getAttribute('data-media-id');
-        var idMatch = variant.imageId && String(variant.imageId) === String(thumbMediaId);
-        var srcMatch = variant.image && thumb.getAttribute('data-image') === variant.image;
-        thumb.classList.toggle('is-active', Boolean(idMatch || srcMatch));
+    function showVariantMedia(variant) {
+      if (!variant || !variant.imageId) return;
+
+      var targetThumb = thumbs.find(function (thumb) {
+        return String(thumb.getAttribute('data-media-id')) === String(variant.imageId);
       });
+
+      if (targetThumb) {
+        targetThumb.click();
+        return;
+      }
+
+      if (mainImage && variant.image) {
+        mainImage.removeAttribute('srcset');
+        mainImage.src = variant.image;
+        mainImage.alt = variant.imageAlt || mainImage.alt;
+      }
     }
 
-    function updateVariant(sourceButton) {
+    function updateVariant() {
       var selection = currentSelection();
       var variant = findVariant(selection);
       if (!variant) return;
@@ -473,23 +480,7 @@
         }
       }
 
-      var fallbackImage = sourceButton ? sourceButton.getAttribute('data-fallback-image') : null;
-      var fallbackAlt = sourceButton ? sourceButton.getAttribute('data-fallback-image-alt') : null;
-      var targetImage = variant.image || fallbackImage;
-
-      if (mainImage && targetImage) {
-        mainImage.removeAttribute('srcset');
-        mainImage.src = targetImage;
-        mainImage.alt = variant.image ? (variant.imageAlt || mainImage.alt) : (fallbackAlt || mainImage.alt);
-
-        if (variant.image) {
-          setActiveThumbForVariant(variant);
-        } else {
-          thumbs.forEach(function (thumb) {
-            thumb.classList.toggle('is-active', thumb.getAttribute('data-image') === fallbackImage);
-          });
-        }
-      }
+      showVariantMedia(variant);
 
       if (atcButton && atcButtonText) {
         if (variant.available) {
@@ -541,7 +532,7 @@
           btn.setAttribute('data-selected', 'true');
           btn.setAttribute('aria-pressed', 'true');
           if (selectedLabel) selectedLabel.textContent = btn.getAttribute('data-value');
-          updateVariant(btn);
+          updateVariant();
         });
       });
     });
