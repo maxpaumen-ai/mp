@@ -355,11 +355,16 @@
       assign v_image = 'null'
       assign v_media_id = 'null'
       assign v_alt = product.title
-      if variant.featured_media
-        assign v_image_url = variant.featured_media.preview_image | image_url: width: 1600
+      if variant.featured_image
+        assign v_image_url = variant.featured_image | image_url: width: 1600
         assign v_image = v_image_url | json
-        assign v_media_id = variant.featured_media.id | json
-        assign v_alt = variant.featured_media.alt | default: product.title
+        assign v_alt = variant.featured_image.alt | default: product.title
+        for media in product.media
+          if media.media_type == 'image' and media.preview_image.id == variant.featured_image.id
+            assign v_media_id = media.id | json
+            break
+          endif
+        endfor
       endif
     -%}
     {
@@ -440,21 +445,31 @@
     }
 
     function showVariantMedia(variant) {
-      if (!variant || !variant.imageId) return;
+      if (!variant || !variant.image) return;
 
-      var targetThumb = thumbs.find(function (thumb) {
-        return String(thumb.getAttribute('data-media-id')) === String(variant.imageId);
-      });
+      var targetThumb = null;
+
+      if (variant.imageId) {
+        targetThumb = thumbs.find(function (thumb) {
+          return String(thumb.getAttribute('data-media-id')) === String(variant.imageId);
+        });
+      }
+
+      if (!targetThumb) {
+        targetThumb = thumbs.find(function (thumb) {
+          var thumbImage = thumb.getAttribute('data-image') || '';
+          var variantImage = variant.image || '';
+          return thumbImage.split('?')[0] === variantImage.split('?')[0];
+        });
+      }
 
       if (targetThumb) {
         targetThumb.click();
-        return;
-      }
-
-      if (mainImage && variant.image) {
+      } else if (mainImage) {
         mainImage.removeAttribute('srcset');
         mainImage.src = variant.image;
         mainImage.alt = variant.imageAlt || mainImage.alt;
+        thumbs.forEach(function (thumb) { thumb.classList.remove('is-active'); });
       }
     }
 
