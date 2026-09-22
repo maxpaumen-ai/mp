@@ -1479,54 +1479,57 @@
 
 
 <style>
-  /* V16 — final ROHA sticky proportion tune */
+  /* V17 — ROHA reference match */
   @media screen and (min-width: 990px) {
     #{{ root_id }} .vhl-roha-sticky {
       right: 24px !important;
       bottom: 24px !important;
-      width: min(440px, calc(100vw - 48px)) !important;
-      max-width: 440px !important;
+      width: min(66.2vw, 1120px) !important;
+      max-width: 1120px !important;
       min-height: 0 !important;
       padding: 0 !important;
       border: 1px solid #d7d7d7 !important;
-      border-radius: 8px !important;
+      border-radius: 14px !important;
       background: #fff !important;
-      box-shadow: 0 6px 18px rgba(0,0,0,.08) !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08) !important;
       overflow: hidden !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__inner {
-      min-height: 98px !important;
+      height: clamp(150px, 13.5vw, 228px) !important;
+      min-height: 0 !important;
       display: grid !important;
-      grid-template-columns: minmax(0, 1fr) 154px !important;
+      grid-template-columns: minmax(0, 1fr) 420px !important;
       align-items: center !important;
-      gap: 15px !important;
-      padding: 12px 14px !important;
+      gap: 42px !important;
+      padding: 32px !important;
+      box-sizing: border-box !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__product {
       display: grid !important;
-      grid-template-columns: 68px minmax(0, 1fr) !important;
+      grid-template-columns: 160px minmax(0, 1fr) !important;
       align-items: center !important;
-      gap: 14px !important;
+      gap: 48px !important;
       min-width: 0 !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__image {
-      width: 68px !important;
-      height: 68px !important;
-      min-width: 68px !important;
-      border-radius: 5px !important;
+      width: 160px !important;
+      height: 160px !important;
+      min-width: 160px !important;
+      border-radius: 8px !important;
       object-fit: cover !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__meta strong {
       display: block !important;
-      margin: 0 0 8px !important;
+      margin: 0 0 20px !important;
       white-space: normal !important;
-      font-size: 11px !important;
-      line-height: 1.12 !important;
+      font-size: 25px !important;
+      line-height: 1.1 !important;
       font-weight: 800 !important;
+      letter-spacing: -.02em !important;
       text-transform: uppercase !important;
     }
 
@@ -1534,19 +1537,20 @@
       display: flex !important;
       flex-direction: column !important;
       align-items: flex-start !important;
-      gap: 4px !important;
+      gap: 8px !important;
       line-height: 1 !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__prices s {
-      font-size: 11px !important;
+      font-size: 28px !important;
       line-height: 1 !important;
       color: #555 !important;
-      text-decoration-thickness: 1px !important;
+      font-weight: 400 !important;
+      text-decoration-thickness: 2px !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__prices span {
-      font-size: 13px !important;
+      font-size: 30px !important;
       line-height: 1 !important;
       font-weight: 400 !important;
       color: #171717 !important;
@@ -1554,28 +1558,64 @@
 
     #{{ root_id }} .vhl-roha-sticky__button {
       width: 100% !important;
-      height: 50px !important;
-      min-height: 50px !important;
+      height: 92px !important;
+      min-height: 92px !important;
       margin: 0 !important;
-      padding: 0 11px !important;
+      padding: 0 32px !important;
       border: 0 !important;
-      border-radius: 8px !important;
+      border-radius: 16px !important;
       background: #242424 !important;
       color: #fff !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      gap: 7px !important;
-      font-size: 10px !important;
+      gap: 20px !important;
+      font-size: 24px !important;
       line-height: 1 !important;
       font-weight: 800 !important;
       white-space: nowrap !important;
     }
 
     #{{ root_id }} .vhl-roha-sticky__button svg {
-      width: 14px !important;
-      height: 14px !important;
-      flex: 0 0 14px !important;
+      width: 30px !important;
+      height: 30px !important;
+      flex: 0 0 30px !important;
+    }
+  }
+
+  /* Keep the same ROHA proportions on ordinary desktop widths. */
+  @media screen and (min-width: 990px) and (max-width: 1400px) {
+    #{{ root_id }} .vhl-roha-sticky {
+      width: 66.2vw !important;
+    }
+    #{{ root_id }} .vhl-roha-sticky__inner {
+      grid-template-columns: minmax(0, 1fr) 37.5% !important;
+      gap: 2.5vw !important;
+      padding: 1.9vw !important;
+    }
+    #{{ root_id }} .vhl-roha-sticky__product {
+      grid-template-columns: 9.45vw minmax(0, 1fr) !important;
+      gap: 2.84vw !important;
+    }
+    #{{ root_id }} .vhl-roha-sticky__image {
+      width: 9.45vw !important;
+      height: 9.45vw !important;
+      min-width: 9.45vw !important;
+    }
+    #{{ root_id }} .vhl-roha-sticky__meta strong { font-size: 1.48vw !important; margin-bottom: 1.18vw !important; }
+    #{{ root_id }} .vhl-roha-sticky__prices s { font-size: 1.65vw !important; }
+    #{{ root_id }} .vhl-roha-sticky__prices span { font-size: 1.77vw !important; }
+    #{{ root_id }} .vhl-roha-sticky__button {
+      height: 5.44vw !important;
+      min-height: 5.44vw !important;
+      font-size: 1.42vw !important;
+      gap: 1.18vw !important;
+      border-radius: .95vw !important;
+    }
+    #{{ root_id }} .vhl-roha-sticky__button svg {
+      width: 1.77vw !important;
+      height: 1.77vw !important;
+      flex-basis: 1.77vw !important;
     }
   }
 </style>
