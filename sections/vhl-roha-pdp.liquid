@@ -211,9 +211,22 @@
         </product-form>
 
         <div class="vhl-roha-pdp__payments vhl-roha-pdp__payments--reference">
-          <div class="vhl-roha-pdp__payments-summary">
+          <button type="button" class="vhl-roha-pdp__payments-summary" data-vhl-payment-open>
             <svg class="vhl-roha-pdp__payments-lock" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"></rect><path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
             <span>Betaal veilig met <span class="vhl-roha-pdp__payments-link">deze betaalmogelijkheden</span>.</span>
+          </button>
+        </div>
+        <div class="vhl-roha-paymodal" data-vhl-payment-modal hidden>
+          <div class="vhl-roha-paymodal__backdrop" data-vhl-payment-close></div>
+          <div class="vhl-roha-paymodal__dialog" role="dialog" aria-modal="true" aria-label="Betaalmethoden">
+            <p class="vhl-roha-paymodal__title">Betaal veilig met de volgende betaalmethoden</p>
+            <div class="vhl-roha-paymodal__methods">
+              <span class="vhl-roha-paymodal__method">WERO</span>
+              <span class="vhl-roha-paymodal__method">Mastercard</span>
+              <span class="vhl-roha-paymodal__method">Apple Pay</span>
+              <span class="vhl-roha-paymodal__method">VISA</span>
+            </div>
+            <button type="button" class="vhl-roha-paymodal__close" data-vhl-payment-close>SLUITEN</button>
           </div>
         </div>
 
@@ -227,7 +240,13 @@
         <div class="vhl-roha-pdp__accordions">
           <details class="vhl-roha-pdp__accordion">
             <summary>Product details</summary>
-            <div class="vhl-roha-pdp__accordion-body">{{ product.description }}</div>
+            <div class="vhl-roha-pdp__accordion-body vhl-roha-pdp__accordion-body--product">
+              <p><strong>Geschikt voor:</strong> Glas, spiegels, glanzende porseleinen tegels, acryl- en kunststof douchegarnituren, glad roestvrij staal, kwarts, laminaat en andere gladde, niet-poreuze oppervlakken.</p>
+              <p><strong>Afmetingen &amp; Gewicht:</strong><br><strong>Hoogte:</strong> 2,5 cm<br><strong>Breedte:</strong> 6,1 cm<br><strong>Gewicht:</strong> 175 gram</p>
+              <p><strong>Materiaal:</strong> Een hoogwaardige mix van ABS, rubber en solide kunststof, zorgvuldig geselecteerd voor duurzaamheid en stevigheid.</p>
+              <p><strong>Verkrijgbare kleuren:</strong> Mat zwart - Mat goud - Chrome - Wit - Glossy Gold (binnenkort) - Gun Metal (binnenkort)</p>
+              <p><strong>Inhoud van de verpakking:</strong><br>1 complete set, bestaande uit <strong>4 stuks.</strong></p>
+            </div>
           </details>
           <details class="vhl-roha-pdp__accordion">
             <summary>Verzending &amp; retour</summary>
@@ -1022,7 +1041,38 @@
   #{{ root_id }} .vhl-roha-pdp__accordions { margin-top:26px; }
   #{{ root_id }} .vhl-roha-pdp__accordion summary { padding:16px 0; font-size:13px; }
 
+
+  /* Betaalmethoden modal + productdetails */
+  #{{ root_id }} .vhl-roha-pdp__payments-summary { border:0; color:inherit; cursor:pointer; font:inherit; }
+  #{{ root_id }} .vhl-roha-paymodal[hidden] { display:none !important; }
+  #{{ root_id }} .vhl-roha-paymodal { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; }
+  #{{ root_id }} .vhl-roha-paymodal__backdrop { position:absolute; inset:0; background:rgba(0,0,0,.48); backdrop-filter:blur(5px); }
+  #{{ root_id }} .vhl-roha-paymodal__dialog { position:relative; z-index:1; width:min(795px,calc(100vw - 48px)); padding:40px 36px 36px; border-radius:14px; background:#fff; box-shadow:0 18px 60px rgba(0,0,0,.18); }
+  #{{ root_id }} .vhl-roha-paymodal__title { margin:0 0 26px; text-align:center; font-size:22px; line-height:1.25; color:#222; }
+  #{{ root_id }} .vhl-roha-paymodal__methods { display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:36px; }
+  #{{ root_id }} .vhl-roha-paymodal__method { min-width:112px; height:42px; padding:0 14px; display:grid; place-items:center; border:1px solid #d8d8d8; border-radius:5px; background:#fff; font-size:15px; font-weight:700; color:#111; }
+  #{{ root_id }} .vhl-roha-paymodal__close { width:100%; min-height:68px; border:0; border-radius:12px; background:#1b1b1b !important; color:#fff !important; font-size:20px; font-weight:800; cursor:pointer; }
+  #{{ root_id }} .vhl-roha-pdp__accordion-body--product { padding:4px 0 22px; font-size:15px; line-height:1.55; color:#222; }
+  #{{ root_id }} .vhl-roha-pdp__accordion-body--product p { margin:0 0 22px; }
+  #{{ root_id }} .vhl-roha-pdp__accordion-body--product p:last-child { margin-bottom:0; }
+  #{{ root_id }} .vhl-roha-pdp__accordion-body--product strong { font-weight:700; }
+
 {% endstyle %}
+
+
+<script>
+(() => {
+  const root = document.getElementById('{{ root_id }}');
+  if (!root) return;
+  const modal = root.querySelector('[data-vhl-payment-modal]');
+  const opener = root.querySelector('[data-vhl-payment-open]');
+  if (!modal || !opener) return;
+  const close = () => { modal.hidden = true; document.documentElement.style.overflow = ''; };
+  opener.addEventListener('click', () => { modal.hidden = false; document.documentElement.style.overflow = 'hidden'; });
+  root.querySelectorAll('[data-vhl-payment-close]').forEach(el => el.addEventListener('click', close));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
+})();
+</script>
 
 {% schema %}
 {
