@@ -220,11 +220,11 @@
           <div class="vhl-roha-paymodal__backdrop" data-vhl-payment-close></div>
           <div class="vhl-roha-paymodal__dialog" role="dialog" aria-modal="true" aria-label="Betaalmethoden">
             <p class="vhl-roha-paymodal__title">Betaal veilig met de volgende betaalmethoden</p>
-            <div class="vhl-roha-paymodal__methods">
-              <span class="vhl-roha-paymodal__method">WERO</span>
-              <span class="vhl-roha-paymodal__method">Mastercard</span>
-              <span class="vhl-roha-paymodal__method">Apple Pay</span>
-              <span class="vhl-roha-paymodal__method">VISA</span>
+            <div class="vhl-roha-paymodal__methods" aria-label="Beschikbare betaalmethoden">
+              <span class="vhl-roha-paymodal__method" aria-label="Wero">{{ 'wero' | payment_type_svg_tag }}</span>
+              <span class="vhl-roha-paymodal__method" aria-label="Mastercard">{{ 'master' | payment_type_svg_tag }}</span>
+              <span class="vhl-roha-paymodal__method" aria-label="Apple Pay">{{ 'apple_pay' | payment_type_svg_tag }}</span>
+              <span class="vhl-roha-paymodal__method" aria-label="Visa">{{ 'visa' | payment_type_svg_tag }}</span>
             </div>
             <button type="button" class="vhl-roha-paymodal__close" data-vhl-payment-close>SLUITEN</button>
           </div>
@@ -1049,8 +1049,9 @@
   #{{ root_id }} .vhl-roha-paymodal__backdrop { position:absolute; inset:0; background:rgba(0,0,0,.48); backdrop-filter:blur(5px); }
   #{{ root_id }} .vhl-roha-paymodal__dialog { position:relative; z-index:1; width:min(795px,calc(100vw - 48px)); padding:40px 36px 36px; border-radius:14px; background:#fff; box-shadow:0 18px 60px rgba(0,0,0,.18); }
   #{{ root_id }} .vhl-roha-paymodal__title { margin:0 0 26px; text-align:center; font-size:22px; line-height:1.25; color:#222; }
-  #{{ root_id }} .vhl-roha-paymodal__methods { display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:36px; }
-  #{{ root_id }} .vhl-roha-paymodal__method { min-width:112px; height:42px; padding:0 14px; display:grid; place-items:center; border:1px solid #d8d8d8; border-radius:5px; background:#fff; font-size:15px; font-weight:700; color:#111; }
+  #{{ root_id }} .vhl-roha-paymodal__methods { display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:36px; }
+  #{{ root_id }} .vhl-roha-paymodal__method { display:flex; align-items:center; justify-content:center; width:52px; height:34px; padding:0; border:0; border-radius:4px; background:transparent; overflow:hidden; }
+  #{{ root_id }} .vhl-roha-paymodal__method svg { display:block; width:52px; height:auto; max-height:34px; }
   #{{ root_id }} .vhl-roha-paymodal__close { width:100%; min-height:68px; border:0; border-radius:12px; background:#1b1b1b !important; color:#fff !important; font-size:20px; font-weight:800; cursor:pointer; }
   #{{ root_id }} .vhl-roha-pdp__accordion-body--product { padding:4px 0 22px; font-size:15px; line-height:1.55; color:#222; }
   #{{ root_id }} .vhl-roha-pdp__accordion-body--product p { margin:0 0 22px; }
