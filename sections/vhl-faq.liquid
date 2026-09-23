@@ -34,10 +34,12 @@
                 Bekijk de
                 {% if section.settings.installation_page != blank %}
                   {% assign vhl_installation_handle = section.settings.installation_page.handle | default: section.settings.installation_page %}
-                  <a
+                  <button
+                    type="button"
                     class="vhl-faq__video-trigger"
-                    href="{{ routes.pages_url }}/{{ vhl_installation_handle }}"
-                  >video</a>
+                    data-vhl-installation-link
+                    data-url="{{ routes.pages_url }}/{{ vhl_installation_handle }}"
+                  >video</button>
                 {% else %}
                   <span class="vhl-faq__video-trigger vhl-faq__video-trigger--disabled">video</span>
                 {% endif %}
@@ -164,6 +166,10 @@
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__video-trigger {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    background: transparent;
     padding: 0;
     margin: 0;
     color: inherit;
@@ -220,6 +226,26 @@
   }
 </style>
 
+
+
+<script>
+  (() => {
+    const section = document.getElementById('VhlFaq-{{ section.id }}');
+    if (!section || section.dataset.vhlInstallationLinkReady === 'true') return;
+    section.dataset.vhlInstallationLinkReady = 'true';
+
+    section.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-vhl-installation-link]');
+      if (!trigger || !section.contains(trigger)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const url = trigger.dataset.url;
+      if (url) window.location.assign(url);
+    });
+  })();
+</script>
 
 {% schema %}
 {
