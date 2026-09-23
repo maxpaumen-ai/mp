@@ -1,6 +1,6 @@
 {% comment %}
   VHL FAQ
-  - FAQ accordion
+  - Compacte ROHA-style desktop compositie
   - Directe vaste link naar /pages/installatie
 {% endcomment %}
 
@@ -15,25 +15,21 @@
 
     <div class="vhl-faq__card">
       {% for block in section.blocks %}
-        <details class="vhl-faq__item" {% if forloop.first %}open{% endif %} {{ block.shopify_attributes }}>
+        <details class="vhl-faq__item" {{ block.shopify_attributes }}>
           <summary>
             <span>{{ block.settings.question | escape }}</span>
             <span class="vhl-faq__toggle" aria-hidden="true">
               <svg viewBox="0 0 20 20" fill="none">
-                <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </span>
           </summary>
 
           <div class="vhl-faq__answer rte">
             {{ block.settings.answer }}
-
             {% if block.settings.show_video_link %}
               <p class="vhl-faq__video-line">
-                <a
-                  href="/pages/installatie"
-                  class="vhl-faq__video-trigger"
-                >Bekijk de video voor instructies</a>
+                <a href="/pages/installatie" class="vhl-faq__video-trigger">Bekijk de video voor instructies</a>
               </p>
             {% endif %}
           </div>
@@ -49,48 +45,47 @@
     --vhl-faq-text: #171717;
     --vhl-faq-line: #d6d6d6;
     position: relative;
-    z-index: 100001;
+    z-index: 2;
     isolation: isolate;
-    pointer-events: auto !important;
     color: var(--vhl-faq-text);
-    padding: 92px 24px 110px;
+    padding: 92px 24px 104px;
   }
 
   #VhlFaq-{{ section.id }} * { box-sizing: border-box; }
 
   #VhlFaq-{{ section.id }} .vhl-faq__inner {
-    width: min(1320px, 100%);
+    width: 100%;
     margin: 0 auto;
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__header {
     text-align: center;
-    margin-bottom: 64px;
+    margin: 0 0 57px;
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__header h2 {
     margin: 0;
     color: #111;
-    font-size: clamp(46px, 4.3vw, 72px);
-    line-height: .95;
+    font-size: 50px;
+    line-height: 1;
     font-weight: 800;
-    letter-spacing: -2px;
+    letter-spacing: -1.6px;
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__header p {
-    margin: 48px 0 0;
+    margin: 42px 0 0;
     color: #222;
-    font-size: 25px;
+    font-size: 20px;
     line-height: 1.25;
+    font-weight: 400;
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__card {
-    position: relative;
-    z-index: 2;
-    pointer-events: auto !important;
+    width: min(914px, 100%);
+    margin: 0 auto;
     background: var(--vhl-faq-bg);
-    border-radius: 22px;
-    padding: 26px 72px;
+    border-radius: 15px;
+    padding: 17px 55px;
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__item {
@@ -106,9 +101,9 @@
     justify-content: space-between;
     gap: 24px;
     cursor: pointer;
-    padding: 27px 0;
+    padding: 17px 0;
     color: #181818;
-    font-size: 20px;
+    font-size: 15px;
     line-height: 1.3;
     font-weight: 700;
   }
@@ -116,19 +111,18 @@
   #VhlFaq-{{ section.id }} .vhl-faq__item summary::-webkit-details-marker { display: none; }
 
   #VhlFaq-{{ section.id }} .vhl-faq__toggle {
-    flex: 0 0 38px;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
     display: grid;
     place-items: center;
-    color: #fff;
-    background: #181818;
+    color: #111;
+    background: transparent;
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__toggle svg {
-    width: 15px;
-    height: 15px;
+    width: 11px;
+    height: 11px;
     transition: transform .2s ease;
   }
 
@@ -137,27 +131,20 @@
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__answer {
-    padding: 0 58px 28px 0;
+    padding: 0 36px 18px 0;
     color: #242424;
-    font-size: 18px;
+    font-size: 14px;
     line-height: 1.55;
   }
 
-  #VhlFaq-{{ section.id }} .vhl-faq__answer p { margin: 0 0 22px; }
+  #VhlFaq-{{ section.id }} .vhl-faq__answer p { margin: 0 0 14px; }
   #VhlFaq-{{ section.id }} .vhl-faq__answer p:last-child { margin-bottom: 0; }
 
   #VhlFaq-{{ section.id }} .vhl-faq__video-line {
-    position: relative;
-    z-index: 10;
-    margin-top: 30px !important;
-    pointer-events: auto;
+    margin-top: 20px !important;
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__video-trigger {
-    position: relative;
-    z-index: 11;
-    display: inline;
-    pointer-events: auto;
     color: inherit;
     font: inherit;
     font-weight: 700;
@@ -168,31 +155,35 @@
 
   @media screen and (max-width: 749px) {
     #VhlFaq-{{ section.id }} { padding: 58px 16px 72px; }
-    #VhlFaq-{{ section.id }} .vhl-faq__header { margin-bottom: 38px; }
+
+    #VhlFaq-{{ section.id }} .vhl-faq__header {
+      margin-bottom: 38px;
+    }
+
     #VhlFaq-{{ section.id }} .vhl-faq__header h2 {
-      font-size: 46px;
-      letter-spacing: -1.5px;
+      font-size: 42px;
+      letter-spacing: -1.3px;
     }
+
     #VhlFaq-{{ section.id }} .vhl-faq__header p {
-      margin-top: 25px;
-      font-size: 19px;
+      margin-top: 24px;
+      font-size: 18px;
     }
+
     #VhlFaq-{{ section.id }} .vhl-faq__card {
-      border-radius: 16px;
-      padding: 14px 22px;
+      width: 100%;
+      border-radius: 14px;
+      padding: 12px 22px;
     }
+
     #VhlFaq-{{ section.id }} .vhl-faq__item summary {
-      padding: 22px 0;
-      font-size: 16px;
-    }
-    #VhlFaq-{{ section.id }} .vhl-faq__toggle {
-      flex-basis: 32px;
-      width: 32px;
-      height: 32px;
-    }
-    #VhlFaq-{{ section.id }} .vhl-faq__answer {
-      padding: 0 0 24px;
+      padding: 20px 0;
       font-size: 15px;
+    }
+
+    #VhlFaq-{{ section.id }} .vhl-faq__answer {
+      padding: 0 0 22px;
+      font-size: 14px;
     }
   }
 </style>
@@ -203,81 +194,21 @@
   "tag": "section",
   "class": "section-vhl-faq",
   "settings": [
-    {
-      "type": "text",
-      "id": "heading",
-      "label": "Titel",
-      "default": "FAQ"
-    },
-    {
-      "type": "text",
-      "id": "subheading",
-      "label": "Ondertitel",
-      "default": "Vragen? Wij hebben het antwoord."
-    }
+    {"type":"text","id":"heading","label":"Titel","default":"FAQ"},
+    {"type":"text","id":"subheading","label":"Ondertitel","default":"Vragen? Wij hebben het antwoord."}
   ],
   "blocks": [
     {
       "type": "faq",
       "name": "FAQ vraag",
       "settings": [
-        {
-          "type": "text",
-          "id": "question",
-          "label": "Vraag",
-          "default": "Vraag"
-        },
-        {
-          "type": "richtext",
-          "id": "answer",
-          "label": "Antwoord",
-          "default": "<p>Antwoord</p>"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_video_link",
-          "label": "Toon installatievideo-link",
-          "default": false
-        }
+        {"type":"text","id":"question","label":"Vraag","default":"Vraag"},
+        {"type":"richtext","id":"answer","label":"Antwoord","default":"<p>Antwoord</p>"},
+        {"type":"checkbox","id":"show_video_link","label":"Toon installatievideo-link","default":false}
       ]
     }
   ],
   "max_blocks": 12,
-  "presets": [
-    {
-      "name": "VHL FAQ",
-      "blocks": [
-        {
-          "type": "faq",
-          "settings": {
-            "question": "Waar kan ik de zuignaphaak installeren?",
-            "answer": "<p>Je kan onze zuignaphaken op alle gladde oppervlaktes installeren. Denk aan: Glas, tegels, kastdeuren, ...</p>"
-          }
-        },
-        {
-          "type": "faq",
-          "settings": {
-            "question": "Hoeveel gewicht kan het dragen?",
-            "answer": "<p>De VHL zuignaphaak kan 7kg+ dragen door zijn gepatenteerde zuignaptechniek/montagesysteem.</p>"
-          }
-        },
-        {
-          "type": "faq",
-          "settings": {
-            "question": "Waarin verschilt deze haak van andere zuignaphaken?",
-            "answer": "<p>Onze gepatenteerde zuignappen werken op een manier waarbij de lucht draaiend gewijs weggezogen wordt.</p><p>Hierdoor ontstaat er een drukafdichting tussen de zwarte rubberen basis en het montageoppervlak.</p><p>Dit resulteert daarom ook in een opmerkelijke draagsterkte &amp; gepaard met het elegante design een must-have product!</p>"
-          }
-        },
-        {
-          "type": "faq",
-          "settings": {
-            "question": "Hoe installeer ik de zuignaphaak?",
-            "answer": "<p>Dankzij het innovatieve vacuümzuigsysteem is de installatie zo gebeurd. In tegenstelling tot andere muurbevestigde of zelfklevende haken, kunnen de VHL zuignaphaken gemakkelijk worden verwijderd zonder gaten, vlekken of kleverige resten achter te laten!</p><p>1) Kies het gewenste oppervlak voor jouw zuignaphaak</p><p>2) Maak het oppervlak schoon met een doekje (+alcohol)</p><p>3) Maak de 'schroef' los en bevestig de basis in een volle beweging op het oppervlak.</p><p>4) Druk de basis stevig aan tegen het oppervlak en schroef vast</p><p><strong><em>5) Eventuele stap:</em></strong> <em>Schroef geleidelijk aan voor de komende 24u zonder gewichtsdruk.</em></p>",
-            "show_video_link": true
-          }
-        }
-      ]
-    }
-  ]
+  "presets": [{"name":"VHL FAQ"}]
 }
 {% endschema %}
