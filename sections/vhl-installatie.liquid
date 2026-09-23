@@ -5,24 +5,17 @@
 
 <section id="VHLInstallatie-{{ section.id }}" class="vhl-installatie">
   <div class="vhl-installatie__media">
-    {% assign installatievideo = section.settings.installatievideo %}
-    {% if installatievideo != blank or installatievideo.sources.size > 0 %}
-      {{
-        installatievideo
-        | video_tag:
-          autoplay: true,
-          loop: true,
-          muted: true,
-          controls: false,
-          playsinline: true,
-          preload: 'metadata',
-          class: 'vhl-installatie__video'
-      }}
-    {% else %}
-      <div class="vhl-installatie__placeholder">
-        Selecteer de installatievideo in de theme-editor
-      </div>
-    {% endif %}
+    {{
+      section.settings.installatievideo
+      | video_tag:
+        autoplay: true,
+        loop: true,
+        muted: true,
+        controls: false,
+        playsinline: true,
+        preload: 'auto',
+        class: 'vhl-installatie__video'
+    }}
   </div>
 
   <div class="vhl-installatie__content">
