@@ -1,8 +1,7 @@
 {% comment %}
   VHL FAQ
   - FAQ accordion
-  - Directe link naar de VHL installatiepagina
-  - Selecteer de installatiepagina in de Shopify Theme Editor
+  - Directe vaste link naar /pages/installatie
 {% endcomment %}
 
 <section id="VhlFaq-{{ section.id }}" class="vhl-faq">
@@ -31,14 +30,10 @@
 
             {% if block.settings.show_video_link %}
               <p class="vhl-faq__video-line">
-                {% if section.settings.installation_page != blank %}
-                  <a
-                    href="/pages/{{ section.settings.installation_page.handle }}"
-                    class="vhl-faq__video-trigger"
-                  >Bekijk de video voor instructies</a>
-                {% else %}
-                  <span class="vhl-faq__video-trigger vhl-faq__video-trigger--disabled">Bekijk de video voor instructies</span>
-                {% endif %}
+                <a
+                  href="/pages/installatie"
+                  class="vhl-faq__video-trigger"
+                >Bekijk de video voor instructies</a>
               </p>
             {% endif %}
           </div>
@@ -61,9 +56,7 @@
     padding: 92px 24px 110px;
   }
 
-  #VhlFaq-{{ section.id }} * {
-    box-sizing: border-box;
-  }
+  #VhlFaq-{{ section.id }} * { box-sizing: border-box; }
 
   #VhlFaq-{{ section.id }} .vhl-faq__inner {
     width: min(1320px, 100%);
@@ -104,9 +97,7 @@
     border-bottom: 1px solid var(--vhl-faq-line);
   }
 
-  #VhlFaq-{{ section.id }} .vhl-faq__item:last-child {
-    border-bottom: 0;
-  }
+  #VhlFaq-{{ section.id }} .vhl-faq__item:last-child { border-bottom: 0; }
 
   #VhlFaq-{{ section.id }} .vhl-faq__item summary {
     list-style: none;
@@ -122,9 +113,7 @@
     font-weight: 700;
   }
 
-  #VhlFaq-{{ section.id }} .vhl-faq__item summary::-webkit-details-marker {
-    display: none;
-  }
+  #VhlFaq-{{ section.id }} .vhl-faq__item summary::-webkit-details-marker { display: none; }
 
   #VhlFaq-{{ section.id }} .vhl-faq__toggle {
     flex: 0 0 38px;
@@ -154,13 +143,8 @@
     line-height: 1.55;
   }
 
-  #VhlFaq-{{ section.id }} .vhl-faq__answer p {
-    margin: 0 0 22px;
-  }
-
-  #VhlFaq-{{ section.id }} .vhl-faq__answer p:last-child {
-    margin-bottom: 0;
-  }
+  #VhlFaq-{{ section.id }} .vhl-faq__answer p { margin: 0 0 22px; }
+  #VhlFaq-{{ section.id }} .vhl-faq__answer p:last-child { margin-bottom: 0; }
 
   #VhlFaq-{{ section.id }} .vhl-faq__video-line {
     position: relative;
@@ -182,45 +166,30 @@
     cursor: pointer;
   }
 
-  #VhlFaq-{{ section.id }} .vhl-faq__video-trigger--disabled {
-    cursor: default;
-  }
-
   @media screen and (max-width: 749px) {
-    #VhlFaq-{{ section.id }} {
-      padding: 58px 16px 72px;
-    }
-
-    #VhlFaq-{{ section.id }} .vhl-faq__header {
-      margin-bottom: 38px;
-    }
-
+    #VhlFaq-{{ section.id }} { padding: 58px 16px 72px; }
+    #VhlFaq-{{ section.id }} .vhl-faq__header { margin-bottom: 38px; }
     #VhlFaq-{{ section.id }} .vhl-faq__header h2 {
       font-size: 46px;
       letter-spacing: -1.5px;
     }
-
     #VhlFaq-{{ section.id }} .vhl-faq__header p {
       margin-top: 25px;
       font-size: 19px;
     }
-
     #VhlFaq-{{ section.id }} .vhl-faq__card {
       border-radius: 16px;
       padding: 14px 22px;
     }
-
     #VhlFaq-{{ section.id }} .vhl-faq__item summary {
       padding: 22px 0;
       font-size: 16px;
     }
-
     #VhlFaq-{{ section.id }} .vhl-faq__toggle {
       flex-basis: 32px;
       width: 32px;
       height: 32px;
     }
-
     #VhlFaq-{{ section.id }} .vhl-faq__answer {
       padding: 0 0 24px;
       font-size: 15px;
@@ -245,11 +214,6 @@
       "id": "subheading",
       "label": "Ondertitel",
       "default": "Vragen? Wij hebben het antwoord."
-    },
-    {
-      "type": "page",
-      "id": "installation_page",
-      "label": "Installatiepagina"
     }
   ],
   "blocks": [
@@ -301,7 +265,7 @@
           "type": "faq",
           "settings": {
             "question": "Waarin verschilt deze haak van andere zuignaphaken?",
-            "answer": "<p>Onze gepatenteerde zuignappen werken op een manier waarbij de lucht draaiend gewijs weggezogen wordt.</p><p>Hierdoor ontstaat er een drukafdichting tussen de zwarte rubberen basis en het montageoppervlak.</p><p>Dit resulteert daarom ook in een opmerkelijke draagsterkte & gepaard met het elegante design een must-have product!</p>"
+            "answer": "<p>Onze gepatenteerde zuignappen werken op een manier waarbij de lucht draaiend gewijs weggezogen wordt.</p><p>Hierdoor ontstaat er een drukafdichting tussen de zwarte rubberen basis en het montageoppervlak.</p><p>Dit resulteert daarom ook in een opmerkelijke draagsterkte &amp; gepaard met het elegante design een must-have product!</p>"
           }
         },
         {
