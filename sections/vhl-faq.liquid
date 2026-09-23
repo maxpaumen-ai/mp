@@ -1,8 +1,8 @@
 {% comment %}
   VHL FAQ
   - FAQ accordion
-  - Functional installation-video popup
-  - Upload/select the video in the Shopify Theme Editor
+  - Directe link naar de VHL installatiepagina
+  - Selecteer de installatiepagina in de Shopify Theme Editor
 {% endcomment %}
 
 <section id="VhlFaq-{{ section.id }}" class="vhl-faq">
@@ -32,13 +32,11 @@
             {% if block.settings.show_video_link %}
               <p class="vhl-faq__video-line">
                 Bekijk de
-                {% if section.settings.installation_video != blank %}
-                  <button
-                    type="button"
+                {% if section.settings.installation_page != blank %}
+                  <a
                     class="vhl-faq__video-trigger"
-                    data-vhl-video-open
-                    aria-haspopup="dialog"
-                  >video</button>
+                    href="{{ section.settings.installation_page.url }}"
+                  >video</a>
                 {% else %}
                   <span class="vhl-faq__video-trigger vhl-faq__video-trigger--disabled">video</span>
                 {% endif %}
@@ -51,46 +49,6 @@
     </div>
   </div>
 
-  {% if section.settings.installation_video != blank %}
-    <div class="vhl-video-modal" data-vhl-video-modal hidden>
-      <button
-        class="vhl-video-modal__backdrop"
-        type="button"
-        data-vhl-video-close
-        aria-label="Video sluiten"
-      ></button>
-
-      <div
-        class="vhl-video-modal__dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Installatievideo"
-      >
-        <button
-          class="vhl-video-modal__close"
-          type="button"
-          data-vhl-video-close
-          aria-label="Video sluiten"
-        >
-          <span aria-hidden="true">×</span>
-        </button>
-
-        <div class="vhl-video-modal__media">
-          {{
-            section.settings.installation_video
-            | video_tag:
-              autoplay: false,
-              loop: false,
-              muted: false,
-              controls: true,
-              playsinline: true,
-              preload: 'metadata',
-              class: 'vhl-video-modal__video'
-          }}
-        </div>
-      </div>
-    </div>
-  {% endif %}
 </section>
 
 <style>
@@ -205,11 +163,8 @@
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__video-trigger {
-    appearance: none;
-    border: 0;
     padding: 0;
     margin: 0;
-    background: transparent;
     color: inherit;
     font: inherit;
     font-weight: 700;
@@ -220,77 +175,6 @@
 
   #VhlFaq-{{ section.id }} .vhl-faq__video-trigger--disabled {
     cursor: default;
-  }
-
-  #VhlFaq-{{ section.id }} .vhl-video-modal[hidden] {
-    display: none !important;
-  }
-
-  #VhlFaq-{{ section.id }} .vhl-video-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 999999;
-    display: grid;
-    place-items: center;
-    padding: 28px;
-  }
-
-  #VhlFaq-{{ section.id }} .vhl-video-modal__backdrop {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    padding: 0;
-    background: rgba(0,0,0,.78);
-    cursor: pointer;
-  }
-
-  #VhlFaq-{{ section.id }} .vhl-video-modal__dialog {
-    position: relative;
-    z-index: 1;
-    width: min(1000px, 92vw);
-    max-height: 90vh;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #000;
-    box-shadow: 0 24px 80px rgba(0,0,0,.35);
-  }
-
-  #VhlFaq-{{ section.id }} .vhl-video-modal__close {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    z-index: 3;
-    width: 42px;
-    height: 42px;
-    display: grid;
-    place-items: center;
-    border: 0;
-    border-radius: 50%;
-    padding: 0 0 3px;
-    background: #fff;
-    color: #111;
-    font-size: 31px;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 3px 15px rgba(0,0,0,.2);
-  }
-
-  #VhlFaq-{{ section.id }} .vhl-video-modal__media {
-    width: 100%;
-    max-height: 90vh;
-    display: flex;
-    justify-content: center;
-    background: #000;
-  }
-
-  #VhlFaq-{{ section.id }} .vhl-video-modal__video {
-    display: block;
-    width: 100%;
-    max-height: 90vh;
-    object-fit: contain;
-    background: #000;
   }
 
   @media screen and (max-width: 749px) {
@@ -332,69 +216,9 @@
       padding: 0 0 24px;
       font-size: 15px;
     }
-
-    #VhlFaq-{{ section.id }} .vhl-video-modal {
-      padding: 14px;
-    }
-
-    #VhlFaq-{{ section.id }} .vhl-video-modal__dialog {
-      width: 100%;
-      border-radius: 12px;
-    }
   }
 </style>
 
-<script>
-  (() => {
-    const section = document.getElementById('VhlFaq-{{ section.id }}');
-    if (!section || section.dataset.vhlFaqReady === 'true') return;
-    section.dataset.vhlFaqReady = 'true';
-
-    const modal = section.querySelector('[data-vhl-video-modal]');
-    const openButton = section.querySelector('[data-vhl-video-open]');
-    if (!modal || !openButton) return;
-
-    const video = modal.querySelector('video');
-    const closeButtons = modal.querySelectorAll('[data-vhl-video-close]');
-    let previousFocus = null;
-
-    const openModal = () => {
-      previousFocus = document.activeElement;
-      modal.hidden = false;
-      document.documentElement.style.overflow = 'hidden';
-
-      if (video) {
-        video.currentTime = 0;
-        const playPromise = video.play();
-        if (playPromise && typeof playPromise.catch === 'function') {
-          playPromise.catch(() => {});
-        }
-      }
-
-      const closeButton = modal.querySelector('.vhl-video-modal__close');
-      if (closeButton) closeButton.focus();
-    };
-
-    const closeModal = () => {
-      if (video) video.pause();
-      modal.hidden = true;
-      document.documentElement.style.overflow = '';
-
-      if (previousFocus && typeof previousFocus.focus === 'function') {
-        previousFocus.focus();
-      }
-    };
-
-    openButton.addEventListener('click', openModal);
-    closeButtons.forEach((button) => button.addEventListener('click', closeModal));
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !modal.hidden) {
-        closeModal();
-      }
-    });
-  })();
-</script>
 
 {% schema %}
 {
@@ -415,9 +239,9 @@
       "default": "Vragen? Wij hebben het antwoord."
     },
     {
-      "type": "video",
-      "id": "installation_video",
-      "label": "Installatievideo"
+      "type": "page",
+      "id": "installation_page",
+      "label": "Installatiepagina"
     }
   ],
   "blocks": [
