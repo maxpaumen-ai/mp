@@ -33,13 +33,10 @@
               <p class="vhl-faq__video-line">
                 Bekijk de
                 {% if section.settings.installation_page != blank %}
-                  {% assign vhl_installation_handle = section.settings.installation_page.handle | default: section.settings.installation_page %}
-                  <button
-                    type="button"
+                  <a
+                    href="{{ section.settings.installation_page.url }}"
                     class="vhl-faq__video-trigger"
-                    data-vhl-installation-link
-                    data-url="{{ routes.pages_url }}/{{ vhl_installation_handle }}"
-                  >video</button>
+                  >video</a>
                 {% else %}
                   <span class="vhl-faq__video-trigger vhl-faq__video-trigger--disabled">video</span>
                 {% endif %}
@@ -51,7 +48,6 @@
       {% endfor %}
     </div>
   </div>
-
 </section>
 
 <style>
@@ -162,26 +158,17 @@
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__video-line {
-    margin-top: 30px !important;
-  }
-
-  #VhlFaq-{{ section.id }} .vhl-faq__video-line {
     position: relative;
-    z-index: 50;
-    pointer-events: auto !important;
+    z-index: 10;
+    margin-top: 30px !important;
+    pointer-events: auto;
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__video-trigger {
     position: relative;
-    z-index: 51;
-    pointer-events: auto !important;
-    touch-action: manipulation;
-    appearance: none;
-    -webkit-appearance: none;
-    border: 0;
-    background: transparent;
-    padding: 0;
-    margin: 0;
+    z-index: 11;
+    display: inline;
+    pointer-events: auto;
     color: inherit;
     font: inherit;
     font-weight: 700;
@@ -235,33 +222,6 @@
     }
   }
 </style>
-
-
-
-<script>
-  (() => {
-    const sectionId = 'VhlFaq-{{ section.id }}';
-    const readyKey = 'vhlInstallLink{{ section.id }}';
-    if (window[readyKey]) return;
-    window[readyKey] = true;
-
-    document.addEventListener('click', (event) => {
-      const trigger = event.target.closest
-        ? event.target.closest('#' + sectionId + ' [data-vhl-installation-link]')
-        : null;
-
-      if (!trigger) return;
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      const url = trigger.getAttribute('data-url');
-      if (url) {
-        window.location.href = url;
-      }
-    }, true);
-  })();
-</script>
 
 {% schema %}
 {
