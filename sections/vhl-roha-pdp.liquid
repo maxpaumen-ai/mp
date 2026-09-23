@@ -362,6 +362,30 @@
         </div>
       </div>
     </div>
+
+    <!-- BLOK 3: installatie zonder schade -->
+    <div class="vhl-roha-b2__install">
+      <div class="vhl-roha-b2__install-copy">
+        <div>
+          <h2>Installatie zonder schade</h2>
+          <p>Gedaan met gaten boren en je muren beschadigen! De zuighaken bieden de ideale oplossing met hun geavanceerde <strong>TWIST &amp; LOCK</strong> technologie. Deze haken kunnen eenvoudig worden bevestigd aan gladde oppervlakken zoals tegels, glas, spiegels, marmer, acryl, metaal, glad hout en laminaat (mits het oppervlak glad en vetvrij is) Geen schroeven of spijkers nodig.</p>
+        </div>
+      </div>
+      <div class="vhl-roha-b2__install-media">
+        {%- if section.settings.block3_install_video != blank -%}
+          {{ section.settings.block3_install_video | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            class: 'vhl-roha-b2__install-video'
+          }}
+        {%- else -%}
+          <div class="vhl-roha-b2__install-placeholder">Selecteer de installatievideo in de thema-editor</div>
+        {%- endif -%}
+      </div>
+    </div>
   </div>
 
   <!-- Sticky Add to Cart -->
@@ -1859,6 +1883,132 @@
 }
 </style>
 
+
+<style>
+/* V30 — grotere TWIST & LOCK animatie + extra installatievideoblok */
+#{{ root_id }} .vhl-roha-b2__tech-media {
+  overflow: hidden !important;
+}
+
+#{{ root_id }} .vhl-roha-b2__tech-video {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: scale(1.45) !important;
+  transform-origin: center center !important;
+}
+
+#{{ root_id }} .vhl-roha-b2__install {
+  margin-top: 98px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-copy,
+#{{ root_id }} .vhl-roha-b2__install-media {
+  height: 514px;
+  min-height: 514px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-copy {
+  display: flex;
+  align-items: center;
+  padding: 0 92px;
+  background: #000;
+  color: #fff;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-copy h2 {
+  margin: 0 0 34px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 29px;
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-copy p {
+  margin: 0;
+  max-width: 690px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 400;
+  color: #fff;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 30px;
+  background: #f1f2f4;
+  color: #555;
+  text-align: center;
+  font: 14px/1.4 Arial, Helvetica, sans-serif;
+}
+
+@media screen and (max-width: 749px) {
+  #{{ root_id }} .vhl-roha-b2__tech-video {
+    transform: scale(1.28) !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__install {
+    margin-top: 44px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+  }
+
+  /* Mobiel dezelfde contentlogica als ROHA: video eerst, tekst eronder */
+  #{{ root_id }} .vhl-roha-b2__install-media {
+    order: 1 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__install-copy {
+    order: 2 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 56px 32px 62px !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__install-copy h2 {
+    margin: 0 0 30px !important;
+    font-size: 28px !important;
+    line-height: 1.08 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__install-copy p {
+    font-size: 16px !important;
+    line-height: 1.32 !important;
+  }
+}
+</style>
+
 {% schema %}
 {
   "name": "VHL ROHA-style PDP",
@@ -1878,6 +2028,11 @@
       "type": "video",
       "id": "block2_tech_video",
       "label": "Video - TWIST & LOCK technologie"
+    },
+    {
+      "type": "video",
+      "id": "block3_install_video",
+      "label": "Video - installatie zonder schade"
     },
     {
       "type": "header",
