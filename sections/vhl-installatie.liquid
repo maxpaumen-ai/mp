@@ -5,15 +5,17 @@
 
 <section id="VHLInstallatie-{{ section.id }}" class="vhl-installatie">
   <div class="vhl-installatie__media">
-    {% if section.settings.installatievideo != blank %}
+    {% assign installatievideo = section.settings.installatievideo %}
+    {% if installatievideo != blank or installatievideo.sources.size > 0 %}
       {{
-        section.settings.installatievideo
+        installatievideo
         | video_tag:
           autoplay: true,
           loop: true,
           muted: true,
           controls: false,
           playsinline: true,
+          preload: 'metadata',
           class: 'vhl-installatie__video'
       }}
     {% else %}
