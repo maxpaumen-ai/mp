@@ -1,0 +1,487 @@
+{% comment %}
+  VHL FAQ
+  - FAQ accordion
+  - Functional installation-video popup
+  - Upload/select the video in the Shopify Theme Editor
+{% endcomment %}
+
+<section id="VhlFaq-{{ section.id }}" class="vhl-faq">
+  <div class="vhl-faq__inner">
+    <header class="vhl-faq__header">
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {% if section.settings.subheading != blank %}
+        <p>{{ section.settings.subheading | escape }}</p>
+      {% endif %}
+    </header>
+
+    <div class="vhl-faq__card">
+      {% for block in section.blocks %}
+        <details class="vhl-faq__item" {% if forloop.first %}open{% endif %} {{ block.shopify_attributes }}>
+          <summary>
+            <span>{{ block.settings.question | escape }}</span>
+            <span class="vhl-faq__toggle" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none">
+                <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </summary>
+
+          <div class="vhl-faq__answer rte">
+            {{ block.settings.answer }}
+
+            {% if block.settings.show_video_link %}
+              <p class="vhl-faq__video-line">
+                Bekijk de
+                {% if section.settings.installation_video != blank %}
+                  <button
+                    type="button"
+                    class="vhl-faq__video-trigger"
+                    data-vhl-video-open
+                    aria-haspopup="dialog"
+                  >video</button>
+                {% else %}
+                  <span class="vhl-faq__video-trigger vhl-faq__video-trigger--disabled">video</span>
+                {% endif %}
+                voor instructies
+              </p>
+            {% endif %}
+          </div>
+        </details>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if section.settings.installation_video != blank %}
+    <div class="vhl-video-modal" data-vhl-video-modal hidden>
+      <button
+        class="vhl-video-modal__backdrop"
+        type="button"
+        data-vhl-video-close
+        aria-label="Video sluiten"
+      ></button>
+
+      <div
+        class="vhl-video-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Installatievideo"
+      >
+        <button
+          class="vhl-video-modal__close"
+          type="button"
+          data-vhl-video-close
+          aria-label="Video sluiten"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+
+        <div class="vhl-video-modal__media">
+          {{
+            section.settings.installation_video
+            | video_tag:
+              autoplay: false,
+              loop: false,
+              muted: false,
+              controls: true,
+              playsinline: true,
+              preload: 'metadata',
+              class: 'vhl-video-modal__video'
+          }}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</section>
+
+<style>
+  #VhlFaq-{{ section.id }} {
+    --vhl-faq-bg: #f4f4f4;
+    --vhl-faq-text: #171717;
+    --vhl-faq-line: #d6d6d6;
+    color: var(--vhl-faq-text);
+    padding: 92px 24px 110px;
+  }
+
+  #VhlFaq-{{ section.id }} * {
+    box-sizing: border-box;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__inner {
+    width: min(1320px, 100%);
+    margin: 0 auto;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__header h2 {
+    margin: 0;
+    color: #111;
+    font-size: clamp(46px, 4.3vw, 72px);
+    line-height: .95;
+    font-weight: 800;
+    letter-spacing: -2px;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__header p {
+    margin: 48px 0 0;
+    color: #222;
+    font-size: 25px;
+    line-height: 1.25;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__card {
+    background: var(--vhl-faq-bg);
+    border-radius: 22px;
+    padding: 26px 72px;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__item {
+    border-bottom: 1px solid var(--vhl-faq-line);
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__item:last-child {
+    border-bottom: 0;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__item summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    cursor: pointer;
+    padding: 27px 0;
+    color: #181818;
+    font-size: 20px;
+    line-height: 1.3;
+    font-weight: 700;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__toggle {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: #181818;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__toggle svg {
+    width: 15px;
+    height: 15px;
+    transition: transform .2s ease;
+  }
+
+  #VhlFaq-{{ section.id }} details[open] .vhl-faq__toggle svg {
+    transform: rotate(180deg);
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__answer {
+    padding: 0 58px 28px 0;
+    color: #242424;
+    font-size: 18px;
+    line-height: 1.55;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__answer p {
+    margin: 0 0 22px;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__answer p:last-child {
+    margin-bottom: 0;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__video-line {
+    margin-top: 30px !important;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__video-trigger {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-faq__video-trigger--disabled {
+    cursor: default;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-video-modal[hidden] {
+    display: none !important;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-video-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: grid;
+    place-items: center;
+    padding: 28px;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-video-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 0;
+    background: rgba(0,0,0,.78);
+    cursor: pointer;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-video-modal__dialog {
+    position: relative;
+    z-index: 1;
+    width: min(1000px, 92vw);
+    max-height: 90vh;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 24px 80px rgba(0,0,0,.35);
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-video-modal__close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 3;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    padding: 0 0 3px;
+    background: #fff;
+    color: #111;
+    font-size: 31px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 3px 15px rgba(0,0,0,.2);
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-video-modal__media {
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    justify-content: center;
+    background: #000;
+  }
+
+  #VhlFaq-{{ section.id }} .vhl-video-modal__video {
+    display: block;
+    width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    background: #000;
+  }
+
+  @media screen and (max-width: 749px) {
+    #VhlFaq-{{ section.id }} {
+      padding: 58px 16px 72px;
+    }
+
+    #VhlFaq-{{ section.id }} .vhl-faq__header {
+      margin-bottom: 38px;
+    }
+
+    #VhlFaq-{{ section.id }} .vhl-faq__header h2 {
+      font-size: 46px;
+      letter-spacing: -1.5px;
+    }
+
+    #VhlFaq-{{ section.id }} .vhl-faq__header p {
+      margin-top: 25px;
+      font-size: 19px;
+    }
+
+    #VhlFaq-{{ section.id }} .vhl-faq__card {
+      border-radius: 16px;
+      padding: 14px 22px;
+    }
+
+    #VhlFaq-{{ section.id }} .vhl-faq__item summary {
+      padding: 22px 0;
+      font-size: 16px;
+    }
+
+    #VhlFaq-{{ section.id }} .vhl-faq__toggle {
+      flex-basis: 32px;
+      width: 32px;
+      height: 32px;
+    }
+
+    #VhlFaq-{{ section.id }} .vhl-faq__answer {
+      padding: 0 0 24px;
+      font-size: 15px;
+    }
+
+    #VhlFaq-{{ section.id }} .vhl-video-modal {
+      padding: 14px;
+    }
+
+    #VhlFaq-{{ section.id }} .vhl-video-modal__dialog {
+      width: 100%;
+      border-radius: 12px;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const section = document.getElementById('VhlFaq-{{ section.id }}');
+    if (!section || section.dataset.vhlFaqReady === 'true') return;
+    section.dataset.vhlFaqReady = 'true';
+
+    const modal = section.querySelector('[data-vhl-video-modal]');
+    const openButton = section.querySelector('[data-vhl-video-open]');
+    if (!modal || !openButton) return;
+
+    const video = modal.querySelector('video');
+    const closeButtons = modal.querySelectorAll('[data-vhl-video-close]');
+    let previousFocus = null;
+
+    const openModal = () => {
+      previousFocus = document.activeElement;
+      modal.hidden = false;
+      document.documentElement.style.overflow = 'hidden';
+
+      if (video) {
+        video.currentTime = 0;
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {});
+        }
+      }
+
+      const closeButton = modal.querySelector('.vhl-video-modal__close');
+      if (closeButton) closeButton.focus();
+    };
+
+    const closeModal = () => {
+      if (video) video.pause();
+      modal.hidden = true;
+      document.documentElement.style.overflow = '';
+
+      if (previousFocus && typeof previousFocus.focus === 'function') {
+        previousFocus.focus();
+      }
+    };
+
+    openButton.addEventListener('click', openModal);
+    closeButtons.forEach((button) => button.addEventListener('click', closeModal));
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !modal.hidden) {
+        closeModal();
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "VHL FAQ",
+  "tag": "section",
+  "class": "section-vhl-faq",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titel",
+      "default": "FAQ"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Ondertitel",
+      "default": "Vragen? Wij hebben het antwoord."
+    },
+    {
+      "type": "video",
+      "id": "installation_video",
+      "label": "Installatievideo"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ vraag",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Vraag",
+          "default": "Vraag"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Antwoord",
+          "default": "<p>Antwoord</p>"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_video_link",
+          "label": "Toon installatievideo-link",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "VHL FAQ",
+      "blocks": [
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Waar kan ik de zuignaphaak installeren?",
+            "answer": "<p>Je kan onze zuignaphaken op alle gladde oppervlaktes installeren. Denk aan: Glas, tegels, kastdeuren, ...</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Hoeveel gewicht kan het dragen?",
+            "answer": "<p>De VHL zuignaphaak kan 7kg+ dragen door zijn gepatenteerde zuignaptechniek/montagesysteem.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Waarin verschilt deze haak van andere zuignaphaken?",
+            "answer": "<p>Onze gepatenteerde zuignappen werken op een manier waarbij de lucht draaiend gewijs weggezogen wordt.</p><p>Hierdoor ontstaat er een drukafdichting tussen de zwarte rubberen basis en het montageoppervlak.</p><p>Dit resulteert daarom ook in een opmerkelijke draagsterkte & gepaard met het elegante design een must-have product!</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Hoe installeer ik de zuignaphaak?",
+            "answer": "<p>Dankzij het innovatieve vacuümzuigsysteem is de installatie zo gebeurd. In tegenstelling tot andere muurbevestigde of zelfklevende haken, kunnen de VHL zuignaphaken gemakkelijk worden verwijderd zonder gaten, vlekken of kleverige resten achter te laten!</p><p>1) Kies het gewenste oppervlak voor jouw zuignaphaak</p><p>2) Maak het oppervlak schoon met een doekje (+alcohol)</p><p>3) Maak de 'schroef' los en bevestig de basis in een volle beweging op het oppervlak.</p><p>4) Druk de basis stevig aan tegen het oppervlak en schroef vast</p><p><strong><em>5) Eventuele stap:</em></strong> <em>Schroef geleidelijk aan voor de komende 24u zonder gewichtsdruk.</em></p>",
+            "show_video_link": true
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
