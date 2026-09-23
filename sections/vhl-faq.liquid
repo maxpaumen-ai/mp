@@ -31,16 +31,14 @@
 
             {% if block.settings.show_video_link %}
               <p class="vhl-faq__video-line">
-                Bekijk de
                 {% if section.settings.installation_page != blank %}
                   <a
-                    href="{{ section.settings.installation_page.url }}"
+                    href="/pages/{{ section.settings.installation_page.handle }}"
                     class="vhl-faq__video-trigger"
-                  >video</a>
+                  >Bekijk de video voor instructies</a>
                 {% else %}
-                  <span class="vhl-faq__video-trigger vhl-faq__video-trigger--disabled">video</span>
+                  <span class="vhl-faq__video-trigger vhl-faq__video-trigger--disabled">Bekijk de video voor instructies</span>
                 {% endif %}
-                voor instructies
               </p>
             {% endif %}
           </div>
@@ -55,6 +53,10 @@
     --vhl-faq-bg: #f4f4f4;
     --vhl-faq-text: #171717;
     --vhl-faq-line: #d6d6d6;
+    position: relative;
+    z-index: 100001;
+    isolation: isolate;
+    pointer-events: auto !important;
     color: var(--vhl-faq-text);
     padding: 92px 24px 110px;
   }
@@ -90,6 +92,9 @@
   }
 
   #VhlFaq-{{ section.id }} .vhl-faq__card {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto !important;
     background: var(--vhl-faq-bg);
     border-radius: 22px;
     padding: 26px 72px;
