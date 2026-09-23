@@ -1,237 +1,204 @@
 {% comment %}
-  VHL Installatiepagina
-  Losse Shopify section voor een aparte installatiepagina.
-  Video is selecteerbaar in de Theme Editor.
+  VHL Installatiepagina V2
+  ROHA-style desktop composition, VHL content.
 {% endcomment %}
 
-<section id="VhlInstall-{{ section.id }}" class="vhl-install">
-  <div class="vhl-install__grid">
-    <div class="vhl-install__media">
-      {% if section.settings.video != blank %}
-        {{
-          section.settings.video
-          | video_tag:
-            autoplay: true,
-            loop: true,
-            muted: true,
-            controls: false,
-            playsinline: true,
-            preload: 'metadata',
-            class: 'vhl-install__video'
-        }}
-      {% else %}
-        <div class="vhl-install__placeholder">
-          Selecteer de installatievideo in de theme-editor
-        </div>
-      {% endif %}
-    </div>
+<section id="VHLInstallatie-{{ section.id }}" class="vhl-installatie">
+  <div class="vhl-installatie__media">
+    {% if section.settings.installatievideo != blank %}
+      {{
+        section.settings.installatievideo
+        | video_tag:
+          autoplay: true,
+          loop: true,
+          muted: true,
+          controls: false,
+          playsinline: true,
+          class: 'vhl-installatie__video'
+      }}
+    {% else %}
+      <div class="vhl-installatie__placeholder">
+        Selecteer de installatievideo in de theme-editor
+      </div>
+    {% endif %}
+  </div>
 
-    <div class="vhl-install__content">
-      <div class="vhl-install__content-inner">
-        <h1>{{ section.settings.heading | escape }}</h1>
+  <div class="vhl-installatie__content">
+    <div class="vhl-installatie__inner">
+      <h1>{{ section.settings.title | escape }}</h1>
 
-        <div class="vhl-install__text rte">
-          {{ section.settings.intro }}
+      <div class="vhl-installatie__intro rte">
+        {{ section.settings.intro }}
+      </div>
 
-          <p>1) Kies het gewenste oppervlak voor jouw zuignaphaak</p>
+      <div class="vhl-installatie__steps">
+        <p>1) Kies het gewenste oppervlak voor jouw zuignaphaak</p>
+        <p>2) Maak het oppervlak schoon met een doekje (+alcohol)</p>
+        <p>3) Maak de 'schroef' los en bevestig de basis in een volle beweging op het oppervlak.</p>
+        <p>4) Druk de basis stevig aan tegen het oppervlak en schroef vast</p>
+        <p><strong><em>5) Eventuele stap:</em></strong> <em>Schroef geleidelijk aan voor de komende 24u zonder gewichtsdruk.</em></p>
+      </div>
 
-          <p>2) Maak het oppervlak schoon met een doekje (+alcohol)</p>
-
-          <p>3) Maak de 'schroef' los en bevestig de basis in een volle beweging op het oppervlak.</p>
-
-          <p>4) Druk de basis stevig aan tegen het oppervlak en schroef vast</p>
-
-          <p><strong><em>5) Eventuele stap:</em></strong> <em>Schroef geleidelijk aan voor de komende 24u zonder gewichtsdruk.</em></p>
-
-          {% if section.settings.bottom_text != blank %}
-            <div class="vhl-install__bottom">
-              {{ section.settings.bottom_text }}
-            </div>
-          {% endif %}
-        </div>
+      <div class="vhl-installatie__bottom rte">
+        {{ section.settings.bottom_text }}
+        {% if section.settings.surface_link != blank %}
+          <span> Bekijk hier de </span><a href="{{ section.settings.surface_link }}"><strong>geschikte oppervlakken</strong></a>
+        {% endif %}
       </div>
     </div>
   </div>
 </section>
 
 <style>
-  #VhlInstall-{{ section.id }} {
+  #VHLInstallatie-{{ section.id }} {
     width: 100%;
+    max-width: none;
     margin: 0;
     padding: 0;
-    background: #2d2d2d;
-    color: #fff;
-  }
-
-  #VhlInstall-{{ section.id }} * {
-    box-sizing: border-box;
-  }
-
-  #VhlInstall-{{ section.id }} .vhl-install__grid {
     display: grid;
     grid-template-columns: 50% 50%;
-    width: 100%;
-    min-height: 570px;
-    border-bottom: 5px solid #fff;
+    min-height: 568px;
+    background: #2d2d2d;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
   }
 
-  #VhlInstall-{{ section.id }} .vhl-install__media {
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__media {
     position: relative;
+    width: 100%;
+    height: 568px;
     min-width: 0;
-    height: 570px;
     overflow: hidden;
     background: #ddd;
   }
 
-  #VhlInstall-{{ section.id }} .vhl-install__video,
-  #VhlInstall-{{ section.id }} .vhl-install__media video {
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__video,
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__media video {
     display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: cover !important;
+    object-position: center center;
   }
 
-  #VhlInstall-{{ section.id }} .vhl-install__placeholder {
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__placeholder {
     width: 100%;
     height: 100%;
     display: grid;
     place-items: center;
     padding: 30px;
-    background: #e7e7e7;
-    color: #333;
     text-align: center;
-    font-size: 18px;
+    background: #eee;
+    color: #222;
   }
 
-  #VhlInstall-{{ section.id }} .vhl-install__content {
-    min-width: 0;
-    min-height: 570px;
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__content {
+    height: 568px;
     display: flex;
     align-items: center;
     background: #2d2d2d;
+    color: #fff;
   }
 
-  #VhlInstall-{{ section.id }} .vhl-install__content-inner {
-    width: 100%;
-    max-width: 650px;
-    margin: 0 auto;
-    padding: 60px 68px;
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__inner {
+    width: min(650px, calc(100% - 110px));
+    margin-left: 88px;
+    margin-right: 22px;
   }
 
-  #VhlInstall-{{ section.id }} h1 {
-    margin: 0 0 36px;
+  #VHLInstallatie-{{ section.id }} h1 {
+    margin: 0 0 31px;
     color: #fff !important;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 25px;
+    font-size: 23px;
     line-height: 1.15;
-    font-weight: 800;
-    letter-spacing: -0.5px;
+    font-weight: 700;
+    letter-spacing: -0.35px;
   }
 
-  #VhlInstall-{{ section.id }} .vhl-install__text,
-  #VhlInstall-{{ section.id }} .vhl-install__text p,
-  #VhlInstall-{{ section.id }} .vhl-install__text strong,
-  #VhlInstall-{{ section.id }} .vhl-install__text em,
-  #VhlInstall-{{ section.id }} .vhl-install__text a {
+  #VHLInstallatie-{{ section.id }} p,
+  #VHLInstallatie-{{ section.id }} .rte,
+  #VHLInstallatie-{{ section.id }} .rte p {
+    color: #fff !important;
+    font-size: 13px;
+    line-height: 1.48;
+    font-weight: 400;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__intro {
+    margin: 0 0 25px;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__intro p {
+    margin: 0;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__steps p {
+    margin: 0 0 24px;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__steps p:last-child {
+    margin-bottom: 23px;
+  }
+
+  #VHLInstallatie-{{ section.id }} strong {
+    color: #fff !important;
+    font-weight: 700;
+  }
+
+  #VHLInstallatie-{{ section.id }} em {
     color: #fff !important;
   }
 
-  #VhlInstall-{{ section.id }} .vhl-install__text {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 15px;
-    line-height: 1.45;
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__bottom,
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__bottom p {
+    margin: 0;
+    color: #fff !important;
   }
 
-  #VhlInstall-{{ section.id }} .vhl-install__text p {
-    margin: 0 0 27px;
-  }
-
-  #VhlInstall-{{ section.id }} .vhl-install__text p:last-child {
-    margin-bottom: 0;
-  }
-
-  #VhlInstall-{{ section.id }} .vhl-install__text strong {
-    font-weight: 800;
-  }
-
-  #VhlInstall-{{ section.id }} .vhl-install__bottom {
-    margin-top: 5px;
-  }
-
-  #VhlInstall-{{ section.id }} .vhl-install__bottom p {
-    margin-bottom: 0;
-  }
-
-  #VhlInstall-{{ section.id }} .vhl-install__bottom a {
-    font-weight: 800;
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__bottom a {
+    color: #fff !important;
     text-decoration: underline;
     text-underline-offset: 2px;
-  }
-
-  @media screen and (min-width: 1500px) {
-    #VhlInstall-{{ section.id }} .vhl-install__grid,
-    #VhlInstall-{{ section.id }} .vhl-install__media,
-    #VhlInstall-{{ section.id }} .vhl-install__content {
-      min-height: 620px;
-    }
-
-    #VhlInstall-{{ section.id }} .vhl-install__media {
-      height: 620px;
-    }
-
-    #VhlInstall-{{ section.id }} .vhl-install__content-inner {
-      max-width: 720px;
-    }
+    font-weight: 700;
   }
 
   @media screen and (max-width: 989px) {
-    #VhlInstall-{{ section.id }} .vhl-install__grid {
-      grid-template-columns: 1fr;
+    #VHLInstallatie-{{ section.id }} {
+      display: block;
       min-height: 0;
-      border-bottom-width: 3px;
     }
 
-    #VhlInstall-{{ section.id }} .vhl-install__media {
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__media {
+      height: min(75vw, 520px);
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__content {
       height: auto;
-      aspect-ratio: 1 / 1;
-    }
-
-    #VhlInstall-{{ section.id }} .vhl-install__content {
       min-height: 0;
+      padding: 48px 24px 52px;
     }
 
-    #VhlInstall-{{ section.id }} .vhl-install__content-inner {
-      max-width: none;
-      padding: 50px 30px 58px;
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__inner {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
     }
 
-    #VhlInstall-{{ section.id }} h1 {
-      margin-bottom: 30px;
+    #VHLInstallatie-{{ section.id }} h1 {
+      margin-bottom: 24px;
       font-size: 25px;
     }
 
-    #VhlInstall-{{ section.id }} .vhl-install__text {
+    #VHLInstallatie-{{ section.id }} p,
+    #VHLInstallatie-{{ section.id }} .rte,
+    #VHLInstallatie-{{ section.id }} .rte p {
       font-size: 15px;
-    }
-
-    #VhlInstall-{{ section.id }} .vhl-install__text p {
-      margin-bottom: 24px;
-    }
-  }
-
-  @media screen and (max-width: 549px) {
-    #VhlInstall-{{ section.id }} .vhl-install__content-inner {
-      padding: 42px 24px 48px;
-    }
-
-    #VhlInstall-{{ section.id }} h1 {
-      font-size: 23px;
-    }
-
-    #VhlInstall-{{ section.id }} .vhl-install__text {
-      font-size: 14px;
       line-height: 1.5;
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__steps p {
+      margin-bottom: 20px;
     }
   }
 </style>
@@ -239,17 +206,15 @@
 {% schema %}
 {
   "name": "VHL Installatie",
-  "tag": "section",
-  "class": "section-vhl-installation",
   "settings": [
     {
       "type": "video",
-      "id": "video",
+      "id": "installatievideo",
       "label": "Installatievideo"
     },
     {
       "type": "text",
-      "id": "heading",
+      "id": "title",
       "label": "Titel",
       "default": "Hoe installeer ik mijn zuignaphaak?"
     },
@@ -264,6 +229,11 @@
       "id": "bottom_text",
       "label": "Onderste tekst",
       "default": "<p>Heb je moeite met het installeren van je zuignaphaak? Controleer of je het op een geschikt oppervlak plaatst.</p>"
+    },
+    {
+      "type": "url",
+      "id": "surface_link",
+      "label": "Link geschikte oppervlakken"
     }
   ],
   "presets": [
