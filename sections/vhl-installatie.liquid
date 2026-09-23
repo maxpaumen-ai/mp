@@ -1,0 +1,298 @@
+{% comment %}
+  VHL Installatiepagina
+  ROHA-style desktop composition, VHL content.
+{% endcomment %}
+
+<section id="VHLInstallatie-{{ section.id }}" class="vhl-installatie">
+  <div class="vhl-installatie__media">
+    {{
+      section.settings.installatievideo
+      | video_tag:
+        autoplay: true,
+        loop: true,
+        muted: true,
+        controls: false,
+        playsinline: true,
+        preload: 'auto',
+        class: 'vhl-installatie__video'
+    }}
+  </div>
+
+  <div class="vhl-installatie__content">
+    <div class="vhl-installatie__inner">
+      <h1>{{ section.settings.title | escape }}</h1>
+
+      <div class="vhl-installatie__intro rte">
+        {{ section.settings.intro }}
+      </div>
+
+      <div class="vhl-installatie__steps">
+        <p>1) Kies het gewenste oppervlak voor jouw zuignaphaak</p>
+        <p>2) Maak het oppervlak schoon met een doekje (+alcohol)</p>
+        <p>3) Maak de 'schroef' los en bevestig de basis in een volle beweging op het oppervlak.</p>
+        <p>4) Druk de basis stevig aan tegen het oppervlak en schroef vast</p>
+        <p><strong><em>5) Eventuele stap:</em></strong> <em>Schroef geleidelijk aan voor de komende 24u zonder gewichtsdruk.</em></p>
+      </div>
+
+      <div class="vhl-installatie__bottom rte">
+        {{ section.settings.bottom_text }}
+        {% if section.settings.surface_link != blank %}
+          <span> Bekijk hier de <a href="{{ section.settings.surface_link }}"><strong>geschikte oppervlakken</strong></a>.</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #VHLInstallatie-{{ section.id }} {
+    --vhl-dark: #2d2d2d;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    min-height: 565px;
+    background: var(--vhl-dark);
+    overflow: hidden;
+    border-top: 1px solid rgba(255,255,255,.8);
+    border-bottom: 1px solid rgba(255,255,255,.8);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  #VHLInstallatie-{{ section.id }} * {
+    box-sizing: border-box;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__media {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    height: 565px;
+    overflow: hidden;
+    background: #deddd9;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__video,
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__media video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 565px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    text-align: center;
+    background: #deddd9;
+    color: #333;
+    font-size: 16px;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__content {
+    min-width: 0;
+    height: 565px;
+    display: flex;
+    align-items: center;
+    background: var(--vhl-dark);
+    color: #fff;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__inner {
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 52px 58px 50px;
+  }
+
+  #VHLInstallatie-{{ section.id }} h1,
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__content h1 {
+    margin: 0 0 34px;
+    padding: 0;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-size: 25px;
+    line-height: 1.16;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__intro,
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__steps,
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__bottom {
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.48;
+    font-weight: 400;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__intro {
+    margin-bottom: 25px;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__intro p,
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__bottom p {
+    margin: 0;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__steps {
+    margin: 0 0 23px;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__steps p {
+    margin: 0 0 23px;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__steps p:last-child {
+    margin-bottom: 0;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__bottom {
+    margin: 0;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__bottom a {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  #VHLInstallatie-{{ section.id }} .vhl-installatie__bottom a:hover {
+    opacity: .8;
+  }
+
+  #VHLInstallatie-{{ section.id }} .rte,
+  #VHLInstallatie-{{ section.id }} .rte p,
+  #VHLInstallatie-{{ section.id }} .rte strong,
+  #VHLInstallatie-{{ section.id }} .rte em,
+  #VHLInstallatie-{{ section.id }} .rte a {
+    color: inherit;
+  }
+
+  @media screen and (min-width: 1400px) {
+    #VHLInstallatie-{{ section.id }} {
+      min-height: 570px;
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__media,
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__content {
+      height: 570px;
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__inner {
+      max-width: 690px;
+      padding-left: 64px;
+      padding-right: 64px;
+    }
+  }
+
+  @media screen and (max-width: 989px) {
+    #VHLInstallatie-{{ section.id }} {
+      display: block;
+      min-height: 0;
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__media {
+      height: auto;
+      aspect-ratio: 16 / 11;
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__content {
+      height: auto;
+      min-height: 0;
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__inner {
+      max-width: none;
+      padding: 42px 28px 46px;
+    }
+
+    #VHLInstallatie-{{ section.id }} h1 {
+      margin-bottom: 26px;
+      font-size: 25px;
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__intro,
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__steps,
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__bottom {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__steps p {
+      margin-bottom: 20px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__media {
+      aspect-ratio: 1 / 1;
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__inner {
+      padding: 34px 20px 40px;
+    }
+
+    #VHLInstallatie-{{ section.id }} h1 {
+      font-size: 23px;
+      line-height: 1.2;
+    }
+
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__intro,
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__steps,
+    #VHLInstallatie-{{ section.id }} .vhl-installatie__bottom {
+      font-size: 14px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "VHL Installatie",
+  "tag": "section",
+  "class": "section-vhl-installatie",
+  "settings": [
+    {
+      "type": "video",
+      "id": "installatievideo",
+      "label": "Installatievideo"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Titel",
+      "default": "Hoe installeer ik mijn zuignaphaak?"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Introductie",
+      "default": "<p>Dankzij het innovatieve vacuümzuigsysteem is de installatie zo gebeurd. In tegenstelling tot andere muurbevestigde of zelfklevende haken, kunnen de VHL zuignaphaken gemakkelijk worden verwijderd zonder gaten, vlekken of kleverige resten achter te laten!</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "bottom_text",
+      "label": "Onderste tekst",
+      "default": "<p>Heb je moeite met het installeren van je zuignaphaak? Controleer of je het op een geschikt oppervlak plaatst.</p>"
+    },
+    {
+      "type": "url",
+      "id": "surface_link",
+      "label": "Link geschikte oppervlakken"
+    }
+  ],
+  "presets": [
+    {
+      "name": "VHL Installatie"
+    }
+  ]
+}
+{% endschema %}
