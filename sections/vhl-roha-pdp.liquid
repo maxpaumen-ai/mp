@@ -379,6 +379,25 @@
         {%- endif -%}
       </div>
     </div>
+
+    <!-- BLOK 4: Ontdek de kracht -->
+    <div class="vhl-roha-b2__power">
+      {%- if section.settings.block4_power_image != blank -%}
+        {{
+          section.settings.block4_power_image
+          | image_url: width: 2400
+          | image_tag:
+            class: 'vhl-roha-b2__power-image',
+            loading: 'lazy',
+            widths: '750, 1100, 1500, 1900, 2400',
+            alt: section.settings.block4_power_image.alt
+        }}
+      {%- else -%}
+        <div class="vhl-roha-b2__power-placeholder">
+          Selecteer de afbeelding “Ontdek de kracht” in de thema-editor
+        </div>
+      {%- endif -%}
+    </div>
   </div>
 
   <!-- Sticky Add to Cart -->
@@ -2017,6 +2036,55 @@
 }
 </style>
 
+
+<style>
+/* BLOK 4 — Ontdek de kracht */
+#{{ root_id }} .vhl-roha-b2__power {
+  width: 100%;
+  margin-top: 98px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #f3f3f3;
+}
+
+#{{ root_id }} .vhl-roha-b2__power-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border: 0;
+}
+
+#{{ root_id }} .vhl-roha-b2__power-placeholder {
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #666;
+  background: #f3f3f3;
+}
+
+@media screen and (max-width: 989px) {
+  #{{ root_id }} .vhl-roha-b2__power {
+    margin-top: 48px;
+    border-radius: 12px;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__power-image {
+    width: 100%;
+    height: auto;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__power-placeholder {
+    min-height: 220px;
+  }
+}
+</style>
+
 {% schema %}
 {
   "name": "VHL ROHA-style PDP",
@@ -2041,6 +2109,15 @@
       "type": "video",
       "id": "block3_install_video",
       "label": "Video - installatie zonder schade"
+    },
+    {
+      "type": "header",
+      "content": "Blok 4 - Ontdek de kracht"
+    },
+    {
+      "type": "image_picker",
+      "id": "block4_power_image",
+      "label": "Afbeelding - Ontdek de kracht"
     },
     {
       "type": "header",
