@@ -165,7 +165,17 @@
     margin-top: 30px !important;
   }
 
+  #VhlFaq-{{ section.id }} .vhl-faq__video-line {
+    position: relative;
+    z-index: 50;
+    pointer-events: auto !important;
+  }
+
   #VhlFaq-{{ section.id }} .vhl-faq__video-trigger {
+    position: relative;
+    z-index: 51;
+    pointer-events: auto !important;
+    touch-action: manipulation;
     appearance: none;
     -webkit-appearance: none;
     border: 0;
@@ -230,20 +240,26 @@
 
 <script>
   (() => {
-    const section = document.getElementById('VhlFaq-{{ section.id }}');
-    if (!section || section.dataset.vhlInstallationLinkReady === 'true') return;
-    section.dataset.vhlInstallationLinkReady = 'true';
+    const sectionId = 'VhlFaq-{{ section.id }}';
+    const readyKey = 'vhlInstallLink{{ section.id }}';
+    if (window[readyKey]) return;
+    window[readyKey] = true;
 
-    section.addEventListener('click', (event) => {
-      const trigger = event.target.closest('[data-vhl-installation-link]');
-      if (!trigger || !section.contains(trigger)) return;
+    document.addEventListener('click', (event) => {
+      const trigger = event.target.closest
+        ? event.target.closest('#' + sectionId + ' [data-vhl-installation-link]')
+        : null;
+
+      if (!trigger) return;
 
       event.preventDefault();
-      event.stopPropagation();
+      event.stopImmediatePropagation();
 
-      const url = trigger.dataset.url;
-      if (url) window.location.assign(url);
-    });
+      const url = trigger.getAttribute('data-url');
+      if (url) {
+        window.location.href = url;
+      }
+    }, true);
   })();
 </script>
 
