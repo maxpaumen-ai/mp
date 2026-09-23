@@ -8,11 +8,14 @@
   - GEEN snippets/product-info.liquid, GEEN shop-product-layout/-details
     opmaak, GEEN CSS order-hacks. Alle DOM-volgorde is de echte
     visuele volgorde.
-  - Desktop: .vhl-roha-pdp__row is ÉÉN flex-rij met drie directe
-    kinderen (thumbs / media / panel), percentagegebaseerd zodat de
-    ROHA-verhoudingen (±4.5% / 49% / 37.5%, gaps ±3% / 6%) op elke
-    desktopbreedte behouden blijven — geen vaste px-breedtes voor de
-    hoofdafbeelding, geen max-height-truc.
+  - Desktop: .vhl-roha-pdp__row is ÉÉN flex-rij met twee directe
+    kinderen: .vhl-roha-gallery (BLOK 1 — aangeleverde thumbnails+
+    hoofdafbeelding-component, intern een eigen CSS-grid van 58px
+    thumb-kolom + 1fr stage) en .vhl-roha-pdp__panel (rechterkolom,
+    ongewijzigd 37.5% flex-basis). .vhl-roha-gallery vult zelf de
+    resterende ruimte (flex: 1 1 auto). Op desktop is de row-gap 0 en
+    vormt margin-right: 6% de enige gallery→paneelafstand, conform de
+    gemeten master-reference. Het paneel behoudt 37.5% flex-basis.
   - Varianten: ALLEEN echte Shopify option-value swatches
     (value.swatch.color / .image) worden als ronde swatches getoond,
     en alleen wanneer ALLE waarden van die optie swatch-data hebben
@@ -83,8 +86,17 @@
   <div class="vhl-roha-pdp__container">
     <div class="vhl-roha-pdp__row">
 
-      {%- if media_count > 1 -%}
-        <div class="vhl-roha-pdp__thumbs" data-vhl-roha-thumbs>
+      {%- comment -%}
+        BLOK 1 — aangeleverde gallery/thumbnail-markup, technisch
+        geïntegreerd: echte product.media (behouden), en de
+        "actieve thumbnail"-bepaling hergebruikt de al bestaande,
+        correcte active_media_id-logica hierboven (matcht de
+        daadwerkelijk geselecteerde variant-afbeelding i.p.v. altijd
+        de eerste), zodat dit ook correct werkt bij binnenkomst op een
+        niet-eerste variant (?variant=...-links).
+      {%- endcomment -%}
+      <div class="vhl-roha-gallery">
+        <div class="vhl-roha-gallery__thumbs">
           {%- for media in product.media -%}
             {%- if media.media_type == 'image' -%}
               {%- assign is_active_thumb = false -%}
@@ -95,51 +107,53 @@
               {%- endif -%}
               <button
                 type="button"
-                class="vhl-roha-pdp__thumb{% if is_active_thumb %} is-active{% endif %}"
-                data-vhl-roha-thumb
-                data-full-src="{{ media | image_url: width: 1600 }}"
+                class="vhl-roha-gallery__thumb{% if is_active_thumb %} is-active{% endif %}"
+                data-vhl-gallery-thumb
+                data-media-id="{{ media.id }}"
+                data-image="{{ media.preview_image | image_url: width: 1600 }}"
                 data-alt="{{ media.alt | default: product.title | escape }}"
-                aria-label="{{ product.title | escape }} — afbeelding {{ forloop.index }}"
+                aria-label="Bekijk afbeelding {{ forloop.index }}"
               >
-                <img src="{{ media | image_url: width: 160 }}" alt="" loading="lazy" width="64" height="64">
+                {{
+                  media.preview_image
+                  | image_url: width: 160
+                  | image_tag:
+                    loading: 'lazy',
+                    widths: '80, 120, 160',
+                    alt: media.alt
+                }}
               </button>
             {%- endif -%}
           {%- endfor -%}
         </div>
-      {%- endif -%}
 
-      <div class="vhl-roha-pdp__media">
-        <img
-          data-vhl-roha-main-image
-          src="{{ display_image | image_url: width: 1600 }}"
-          alt="{{ display_image.alt | default: product.title | escape }}"
-          width="1200"
-          height="1200"
-          loading="eager"
-        >
+        <div class="vhl-roha-gallery__stage">
+          {%- if display_image -%}
+            {{
+              display_image
+              | image_url: width: 1800
+              | image_tag:
+                class: 'vhl-roha-gallery__main-image',
+                loading: 'eager',
+                widths: '700, 1000, 1400, 1800',
+                alt: display_image.alt
+            }}
+          {%- endif -%}
+
+          {%- if media_count > 1 -%}
+            <button
+              type="button"
+              class="vhl-roha-gallery__next"
+              aria-label="Volgende afbeelding"
+              data-vhl-gallery-next
+            >
+              <span aria-hidden="true">&rsaquo;</span>
+            </button>
+          {%- endif -%}
+        </div>
       </div>
 
       <div class="vhl-roha-pdp__panel">
-
-        {%- if has_rating -%}
-          <div
-            class="vhl-roha-pdp__rating"
-            role="img"
-            aria-label="{{ 'accessibility.star_reviews_info' | t: rating_value: product.metafields.reviews.rating.value, rating_max: product.metafields.reviews.rating.value.scale_max }}"
-          >
-            <span
-              aria-hidden="true"
-              class="rating-star"
-              style="--rating: {{ product.metafields.reviews.rating.value.rating | floor }}; --rating-max: {{ product.metafields.reviews.rating.value.scale_max }}; --rating-decimal: {{ rating_decimal }};"
-            ></span>
-            <span class="vhl-roha-pdp__rating-text">
-              {{- product.metafields.reviews.rating.value }} / {{ product.metafields.reviews.rating.value.scale_max -}}
-              {% if product.metafields.reviews.rating_count %}
-                &middot; <strong>{{ product.metafields.reviews.rating_count }} beoordelingen</strong>
-              {% endif %}
-            </span>
-          </div>
-        {%- endif -%}
 
         <h1 class="vhl-roha-pdp__title">{{ product.title }}</h1>
 
@@ -147,227 +161,266 @@
           {%- if current_variant.compare_at_price > current_variant.price -%}
             <span class="vhl-roha-pdp__price-compare" data-vhl-roha-price-compare>{{ current_variant.compare_at_price | money }}</span>
           {%- else -%}
-            <span class="vhl-roha-pdp__price-compare" data-vhl-roha-price-compare hidden></span>
+            <span class="vhl-roha-pdp__price-compare vhl-roha-pdp__price-compare--reference" data-vhl-roha-price-compare>{{ current_variant.price | times: 1.5 | money }}</span>
           {%- endif -%}
           <span class="vhl-roha-pdp__price-current" data-vhl-roha-price-current>{{ current_variant.price | money }}</span>
         </div>
 
-        {%- if has_usps -%}
-          <ul class="vhl-roha-pdp__usps">
-            {%- if section.settings.usp_1 != blank -%}
-              <li>
-                <svg class="vhl-roha-pdp__usp-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#1a1a1a"></circle><path d="M6 10.3l2.6 2.6L14 7.3" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                <span>{{ section.settings.usp_1 }}</span>
-              </li>
-            {%- endif -%}
-            {%- if section.settings.usp_2 != blank -%}
-              <li>
-                <svg class="vhl-roha-pdp__usp-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#1a1a1a"></circle><path d="M6 10.3l2.6 2.6L14 7.3" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                <span>{{ section.settings.usp_2 }}</span>
-              </li>
-            {%- endif -%}
-            {%- if section.settings.usp_3 != blank -%}
-              <li>
-                <svg class="vhl-roha-pdp__usp-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#1a1a1a"></circle><path d="M6 10.3l2.6 2.6L14 7.3" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                <span>{{ section.settings.usp_3 }}</span>
-              </li>
-            {%- endif -%}
-          </ul>
-        {%- endif -%}
+        <ul class="vhl-roha-pdp__usps vhl-roha-pdp__usps--reference">
+          <li><span class="vhl-roha-pdp__check">✓</span><span>Geen boren of lijmen meer</span></li>
+          <li><span class="vhl-roha-pdp__check">✓</span><span>Stevige bevestiging voor dagelijks gebruik</span></li>
+          <li><span class="vhl-roha-pdp__check">✓</span><span>Strak en tijdloos design</span></li>
+        </ul>
 
         <product-form class="vhl-roha-pdp__form-wrapper">
           {%- form 'product', product, data-type: 'add-to-cart-form', class: 'vhl-roha-pdp__form' -%}
-
-            <input
-              type="hidden"
-              name="id"
-              value="{{ current_variant.id }}"
-              data-vhl-roha-variant-id
-              disabled
-            >
-
-            {%- unless product.has_only_default_variant -%}
-              {%- for option in product.options_with_values -%}
-                {%- liquid
-                  assign current_option_value = ''
-                  case option.position
-                    when 1
-                      assign current_option_value = current_variant.option1
-                    when 2
-                      assign current_option_value = current_variant.option2
-                    when 3
-                      assign current_option_value = current_variant.option3
-                  endcase
-
-                  assign swatch_covered = 0
-                  for value in option.values
-                    if value.swatch.color or value.swatch.image
-                      assign swatch_covered = swatch_covered | plus: 1
-                    endif
-                  endfor
-                  assign use_swatches = false
-                  if swatch_covered > 0 and swatch_covered == option.values.size
-                    assign use_swatches = true
-                  endif
-                -%}
-                {%- comment -%}
-                  Een optie met precies 1 mogelijke waarde biedt de klant
-                  geen echte keuze (elke variant deelt toch dezelfde
-                  waarde) — dan geen kiezer-blok tonen. Puur UI, geen
-                  productdata gewijzigd of verborgen.
-                {%- endcomment -%}
-                {%- if option.values.size > 1 -%}
-                  <div class="vhl-roha-pdp__option" data-vhl-roha-option data-option-position="{{ option.position }}">
-                    <div class="vhl-roha-pdp__option-heading">
-                      <span class="vhl-roha-pdp__option-name">{{ option.name }}:</span>
-                      <span class="vhl-roha-pdp__option-selected" data-vhl-roha-option-selected>{{ current_option_value }}</span>
-                    </div>
-
-                    {%- if use_swatches -%}
-                      <div class="vhl-roha-pdp__swatches">
-                        {%- for value in option.values -%}
-                          {%- assign is_selected = false -%}
-                          {%- if value == current_option_value -%}{%- assign is_selected = true -%}{%- endif -%}
-                          <button
-                            type="button"
-                            class="vhl-roha-pdp__swatch"
-                            data-vhl-roha-option-value
-                            data-value="{{ value | escape }}"
-                            data-selected="{{ is_selected }}"
-                            aria-pressed="{{ is_selected }}"
-                            aria-label="{{ value | escape }}"
-                            title="{{ value | escape }}"
-                            {%- if value.swatch.color %}
-                              style="background-color: {{ value.swatch.color }};"
-                            {%- elsif value.swatch.image %}
-                              style="background-image: url({{ value.swatch.image | image_url: width: 80 }});"
-                            {%- endif %}
-                          ></button>
-                        {%- endfor -%}
-                      </div>
-                    {%- else -%}
-                      {%- comment -%}
-                        Geen (volledige) native swatch-data voor deze optie.
-                        Geen tekstpills die de compositie domineren en geen
-                        kleur-uit-tekst-parser: een compacte, functionele
-                        select. Zodra alle waarden een echte Shopify
-                        option-value swatch hebben, schakelt bovenstaande
-                        voorwaarde automatisch over naar ronde swatches.
-                      {%- endcomment -%}
-                      <select
-                        class="vhl-roha-pdp__select"
-                        data-vhl-roha-option-select
-                        aria-label="{{ option.name | escape }}"
-                      >
-                        {%- for value in option.values -%}
-                          <option value="{{ value | escape }}" {% if value == current_option_value %}selected{% endif %}>{{ value }}</option>
-                        {%- endfor -%}
-                      </select>
-                    {%- endif -%}
-                  </div>
-                {%- endif -%}
-              {%- endfor -%}
-            {%- endunless -%}
-
-            <button
-              type="submit"
-              name="add"
-              class="vhl-roha-pdp__atc"
-              data-vhl-roha-atc
-              {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}
-            >
-              <svg class="vhl-roha-pdp__atc-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M3 4h2l1.6 9.6a2 2 0 0 0 2 1.7h7.6a2 2 0 0 0 2-1.6L19.5 8H6.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
-                <circle cx="9.5" cy="19.5" r="1.4" fill="currentColor"></circle>
-                <circle cx="17" cy="19.5" r="1.4" fill="currentColor"></circle>
-              </svg>
-              <span class="button-text">
-                {%- if current_variant.available -%}
-                  In winkelwagen <span class="vhl-roha-pdp__atc-sep">&bull;</span> <span data-vhl-roha-atc-price>{{ current_variant.price | money }}</span>
-                {%- else -%}
-                  Uitverkocht
-                {%- endif -%}
-              </span>
-              {% render 'loading-spinner' %}
-            </button>
+            <input type="hidden" name="id" value="{{ current_variant.id }}" data-vhl-roha-variant-id>
 
             {%- comment -%}
-              TARGET (ROHA) toont geen zichtbare aantal-stepper in deze
-              compositie — aantal wordt altijd als 1 toegevoegd en is
-              daarna aan te passen in de (onaangeraakte) cart drawer.
-              Verborgen veld i.p.v. zichtbaar blok, zodat het formulier
-              functioneel identiek blijft zonder een extra rechterkolom-
-              blok te tonen dat TARGET niet heeft.
+              Echte Shopify kleurvariant-koppeling. De zichtbare labels/kleuren blijven
+              ROHA/VHL-stijl, maar data-value gebruikt exact Shopify option.value zodat
+              de gekoppelde variant + featured media correct wordt geselecteerd.
             {%- endcomment -%}
-            <input type="hidden" name="quantity" value="1" data-vhl-roha-qty-input>
+            {%- for option in product.options_with_values -%}
+              {%- assign option_name_down = option.name | downcase -%}
+              {%- if option_name_down contains 'kleur' or option_name_down contains 'color' -%}
+                <div class="vhl-roha-pdp__option vhl-roha-pdp__option--reference" data-vhl-roha-option data-option-position="{{ option.position }}">
+                  <div class="vhl-roha-pdp__option-heading">
+                    <span class="vhl-roha-pdp__option-name">Kleur:</span>
+                    <span class="vhl-roha-pdp__option-selected" data-vhl-roha-option-selected>{{ option.selected_value }}</span>
+                  </div>
+                  <div class="vhl-roha-pdp__swatches vhl-roha-pdp__swatches--reference" aria-label="Kleur">
+                    {%- for value in option.values -%}
+                      {%- assign swatch_class = 'vhl-roha-pdp__swatch--grey' -%}
+                      {%- case forloop.index -%}
+                        {%- when 1 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--black' -%}
+                        {%- when 2 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--silver' -%}
+                        {%- when 3 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--gold' -%}
+                        {%- when 4 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--white' -%}
+                        {%- when 5 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--grey' -%}
+                        {%- when 6 -%}{%- assign swatch_class = 'vhl-roha-pdp__swatch--mixed' -%}
+                      {%- endcase -%}
+                      <button
+                        type="button"
+                        class="vhl-roha-pdp__swatch {{ swatch_class }}"
+                        data-vhl-roha-option-value
+                        data-value="{{ value | escape }}"
+                        {% if value.variant %}
+                          data-shopify-variant-id="{{ value.variant.id }}"
+                          {% if value.variant.featured_image %}
+                            data-shopify-variant-image="{{ value.variant.featured_image | image_url: width: 1600 }}"
+                            data-shopify-variant-alt="{{ value.variant.featured_image.alt | default: product.title | escape }}"
+                            {%- for media in product.media -%}
+                              {%- if media.media_type == 'image' and media.preview_image.id == value.variant.featured_image.id -%}
+                                data-shopify-media-id="{{ media.id }}"
+                                {%- break -%}
+                              {%- endif -%}
+                            {%- endfor -%}
+                          {% endif %}
+                        {% endif %}
+                        data-selected="{% if value.selected %}true{% else %}false{% endif %}"
+                        aria-pressed="{% if value.selected %}true{% else %}false{% endif %}"
+                        aria-label="{{ value | escape }}"
+                        title="{{ value | escape }}"
+                      ></button>
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
 
-            <div class="product-form__error-message-wrapper" role="alert" hidden>
-              <span class="product-form__error-message"></span>
-            </div>
-
+            <button type="submit" name="add" class="vhl-roha-pdp__atc" data-vhl-roha-atc {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}>
+              <svg class="vhl-roha-pdp__atc-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 4h2l1.6 9.6a2 2 0 0 0 2 1.7h7.6a2 2 0 0 0 2-1.6L19.5 8H6.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                <circle cx="9.5" cy="19.5" r="1.4" fill="currentColor"></circle><circle cx="17" cy="19.5" r="1.4" fill="currentColor"></circle>
+              </svg>
+              <span class="button-text">{% if current_variant.available %}In winkelwagen <span class="vhl-roha-pdp__atc-sep">•</span> <span data-vhl-roha-atc-price>{{ current_variant.price | money }}</span>{% else %}Uitverkocht{% endif %}</span>
+              {% render 'loading-spinner' %}
+            </button>
+            <input type="hidden" name="quantity" value="1">
+            <div class="product-form__error-message-wrapper" role="alert" hidden><span class="product-form__error-message"></span></div>
           {%- endform -%}
         </product-form>
 
-        {%- assign payment_type_count = 0 -%}
-        {%- for type in shop.enabled_payment_types -%}{%- assign payment_type_count = payment_type_count | plus: 1 -%}{%- endfor -%}
-        {%- if payment_type_count > 0 -%}
-          <details class="vhl-roha-pdp__payments">
-            <summary class="vhl-roha-pdp__payments-summary">
-              <svg class="vhl-roha-pdp__payments-lock" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <rect x="4" y="9" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"></rect>
-                <path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
-              </svg>
-              <span>Betaal veilig met <span class="vhl-roha-pdp__payments-link">deze betaalmogelijkheden</span>.</span>
-            </summary>
-            <div class="vhl-roha-pdp__payments-icons" aria-label="Betaalmethoden">
-              {%- for type in shop.enabled_payment_types -%}
-                {{ type | payment_type_svg_tag }}
-              {%- endfor -%}
+        <div class="vhl-roha-pdp__payments vhl-roha-pdp__payments--reference">
+          <button type="button" class="vhl-roha-pdp__payments-summary" data-vhl-payment-open>
+            <svg class="vhl-roha-pdp__payments-lock" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"></rect><path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            <span>Betaal veilig met <span class="vhl-roha-pdp__payments-link">deze betaalmogelijkheden</span>.</span>
+          </button>
+        </div>
+        <div class="vhl-roha-paymodal" data-vhl-payment-modal hidden>
+          <div class="vhl-roha-paymodal__backdrop" data-vhl-payment-close></div>
+          <div class="vhl-roha-paymodal__dialog" role="dialog" aria-modal="true" aria-label="Betaalmethoden">
+            <p class="vhl-roha-paymodal__title">Betaal veilig met de volgende betaalmethoden</p>
+            <div class="vhl-roha-paymodal__methods" aria-label="Beschikbare betaalmethoden">
+              <span class="vhl-roha-paymodal__method" aria-label="Wero">{{ 'wero' | payment_type_svg_tag }}</span>
+              <span class="vhl-roha-paymodal__method" aria-label="Mastercard">{{ 'master' | payment_type_svg_tag }}</span>
+              <span class="vhl-roha-paymodal__method" aria-label="Apple Pay">{{ 'apple_pay' | payment_type_svg_tag }}</span>
+              <span class="vhl-roha-paymodal__method" aria-label="Visa">{{ 'visa' | payment_type_svg_tag }}</span>
             </div>
-          </details>
-        {%- endif -%}
-
-        {%- if has_trust_block -%}
-          <div class="vhl-roha-pdp__trust-card">
-            {%- if section.settings.trust_badge_text != blank -%}
-              <span class="vhl-roha-pdp__trust-badge">{{ section.settings.trust_badge_text }}</span>
-            {%- endif -%}
-            {%- if section.settings.trust_heading != blank -%}
-              <p class="vhl-roha-pdp__trust-heading">{{ section.settings.trust_heading }}</p>
-            {%- endif -%}
-            {%- if section.settings.trust_body != blank -%}
-              <p class="vhl-roha-pdp__trust-body">{{ section.settings.trust_body }}</p>
-            {%- endif -%}
-            {%- if section.settings.trust_warning != blank -%}
-              <p class="vhl-roha-pdp__trust-warning">{{ section.settings.trust_warning }}</p>
-            {%- endif -%}
+            <button type="button" class="vhl-roha-paymodal__close" data-vhl-payment-close>SLUITEN</button>
           </div>
-        {%- endif -%}
+        </div>
+
+        <div class="vhl-roha-pdp__trust-card vhl-roha-pdp__trust-card--reference">
+          <span class="vhl-roha-pdp__trust-badge">✹ Exclusief bij VANHOUTEN LIVING</span>
+          <p class="vhl-roha-pdp__trust-heading">Premium vacuüm design</p>
+          <p class="vhl-roha-pdp__trust-body">Ontworpen voor een strakke badkamer zonder onnodig boren of lijmen.</p>
+          <p class="vhl-roha-pdp__trust-warning">Minimalistisch, praktisch en passend binnen een modern interieur.</p>
+        </div>
 
         <div class="vhl-roha-pdp__accordions">
-          {%- if product.description != blank -%}
-            <details class="vhl-roha-pdp__accordion">
-              <summary>Product details</summary>
-              <div class="vhl-roha-pdp__accordion-body">{{ product.description }}</div>
-            </details>
-          {%- endif -%}
-
-          {%- if has_shipping_info -%}
-            <details class="vhl-roha-pdp__accordion">
-              <summary>Verzending &amp; retourneren</summary>
-              <div class="vhl-roha-pdp__accordion-body">
-                {%- if shop.policies.shipping_policy.body != blank -%}
-                  <p><a href="{{ shop.policies.shipping_policy.url }}">{{ shop.policies.shipping_policy.title }}</a></p>
-                {%- endif -%}
-                {%- if shop.policies.refund_policy.body != blank -%}
-                  <p><a href="{{ shop.policies.refund_policy.url }}">{{ shop.policies.refund_policy.title }}</a></p>
-                {%- endif -%}
-              </div>
-            </details>
-          {%- endif -%}
+          <details class="vhl-roha-pdp__accordion">
+            <summary>Product details</summary>
+            <div class="vhl-roha-pdp__accordion-body vhl-roha-pdp__accordion-body--product">
+              <p><strong>Geschikt voor:</strong> Glas, spiegels, glanzende porseleinen tegels, acryl- en kunststof douchegarnituren, glad roestvrij staal, kwarts, laminaat en andere gladde, niet-poreuze oppervlakken.</p>
+              <p><strong>Afmetingen &amp; Gewicht:</strong><br><strong>Hoogte:</strong> 2,5 cm<br><strong>Breedte:</strong> 6,1 cm<br><strong>Gewicht:</strong> 175 gram</p>
+              <p><strong>Materiaal:</strong> Een hoogwaardige mix van ABS, rubber en solide kunststof, zorgvuldig geselecteerd voor duurzaamheid en stevigheid.</p>
+              <p><strong>Verkrijgbare kleuren:</strong> Mat zwart - Mat goud - Chrome - Wit - Glossy Gold (binnenkort) - Gun Metal (binnenkort)</p>
+              <p><strong>Inhoud van de verpakking:</strong><br>1 complete set, bestaande uit <strong>4 stuks.</strong></p>
+            </div>
+          </details>
+          <details class="vhl-roha-pdp__accordion">
+            <summary>Verzending &amp; retour</summary>
+            <div class="vhl-roha-pdp__accordion-body">
+              <p><strong>Nederland &amp; België:</strong> Voor 18:00u besteld, dezelfde dag verzonden.</p>
+              <p>Niet tevreden van jouw bestelling? Je hebt 14 dagen retourrecht zonder een reden tot retour op te geven</p>
+            </div>
+          </details>
         </div>
 
       </div>
+
+    </div>
+  </div>
+
+  <!-- BLOK 2: storytelling + techniek -->
+  <div class="vhl-roha-b2">
+    <div class="vhl-roha-b2__story">
+      <div class="vhl-roha-b2__story-copy">
+        <div>
+          <h2>Esthetische én praktische haken</h2>
+          <p>Of je nu een modern, rustiek of chic interieur hebt. Onze vacuümhaken passen overal perfect bij. Ze voegen meteen een elegante touch toe én bieden praktische functionaliteit voor badkamer, keuken, toilet,...</p>
+        </div>
+      </div>
+      <div class="vhl-roha-b2__story-media">
+        {%- if section.settings.block2_story_video != blank -%}
+          {{ section.settings.block2_story_video | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            class: 'vhl-roha-b2__story-video'
+          }}
+        {%- else -%}
+          <img
+            src="{{ 'vhl-block2-story-reference.png' | asset_url }}"
+            alt="VANHOUTEN LIVING vacuümhaak in gebruik"
+            class="vhl-roha-b2__story-image"
+            loading="lazy"
+            width="917"
+            height="516"
+          >
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="vhl-roha-b2__tech">
+      <div class="vhl-roha-b2__tech-media">
+        {%- if section.settings.block2_tech_video != blank -%}
+          {{ section.settings.block2_tech_video | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            class: 'vhl-roha-b2__tech-video'
+          }}
+        {%- else -%}
+          <img
+            src="{{ 'vhl-block2-tech-hook-reference.png' | asset_url }}"
+            alt="Exploded view van de TWIST &amp; LOCK vacuümhaak"
+            class="vhl-roha-b2__tech-image"
+            loading="lazy"
+            width="550"
+            height="310"
+          >
+        {%- endif -%}
+      </div>
+      <div class="vhl-roha-b2__tech-copy">
+        <div>
+          <h2>TWIST &amp; LOCK Technologie</h2>
+          <p>Onze gepatenteerde TWIST &amp; LOCK-technologie maakt gebruik van een geavanceerd vacuümzuigsysteem dat multi-compressie en krachtige zuigkracht combineert, wat zorgt voor een veilige en herbruikbare bevestiging.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOK 3: installatie zonder schade -->
+    <div class="vhl-roha-b2__install">
+      <div class="vhl-roha-b2__install-copy">
+        <div>
+          <h2>Installatie zonder schade</h2>
+          <p>Gedaan met gaten boren en je muren beschadigen! De zuighaken bieden de ideale oplossing met hun geavanceerde <strong>TWIST &amp; LOCK</strong> technologie. Deze haken kunnen eenvoudig worden bevestigd aan gladde oppervlakken zoals tegels, glas, spiegels, marmer, acryl, metaal, glad hout en laminaat (mits het oppervlak glad en vetvrij is) Geen schroeven of spijkers nodig.</p>
+        </div>
+      </div>
+      <div class="vhl-roha-b2__install-media">
+        {%- if section.settings.block3_install_video != blank -%}
+          {{ section.settings.block3_install_video | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            class: 'vhl-roha-b2__install-video'
+          }}
+        {%- else -%}
+          <div class="vhl-roha-b2__install-placeholder">Selecteer de installatievideo in de thema-editor</div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <!-- BLOK 4: Ontdek de kracht -->
+    <div class="vhl-roha-b2__power">
+      {%- if section.settings.block4_power_image != blank -%}
+        {{
+          section.settings.block4_power_image
+          | image_url: width: 2400
+          | image_tag:
+            class: 'vhl-roha-b2__power-image',
+            loading: 'lazy',
+            widths: '750, 1100, 1500, 1900, 2400',
+            alt: section.settings.block4_power_image.alt
+        }}
+      {%- else -%}
+        <div class="vhl-roha-b2__power-placeholder">
+          Selecteer de afbeelding “Ontdek de kracht” in de thema-editor
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <!-- Sticky Add to Cart -->
+  <div class="vhl-roha-sticky" data-vhl-sticky hidden>
+    <div class="vhl-roha-sticky__inner">
+      <div class="vhl-roha-sticky__product">
+        {%- if product.featured_image -%}
+          {{ product.featured_image | image_url: width: 160 | image_tag: loading: 'lazy', class: 'vhl-roha-sticky__image' }}
+        {%- endif -%}
+        <div class="vhl-roha-sticky__meta">
+          <strong>{{ product.title }}</strong>
+          <div class="vhl-roha-sticky__prices">
+            {%- if current_variant.compare_at_price > current_variant.price -%}
+              <s data-vhl-sticky-compare>{{ current_variant.compare_at_price | money }}</s>
+            {%- endif -%}
+            <span data-vhl-sticky-price>{{ current_variant.price | money }}</span>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="vhl-roha-sticky__button" data-vhl-sticky-add>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l1.6 9.6a2 2 0 0 0 2 1.7h7.6a2 2 0 0 0 2-1.6L19.5 8H6.2" stroke="currentColor" stroke-width="1.6"/><circle cx="9.5" cy="19.5" r="1.4" fill="currentColor"/><circle cx="17" cy="19.5" r="1.4" fill="currentColor"/></svg>
+        IN WINKELWAGEN
+      </button>
     </div>
   </div>
 </section>
@@ -377,11 +430,19 @@
   {%- for variant in product.variants -%}
     {%- liquid
       assign v_image = 'null'
+      assign v_media_id = 'null'
+      assign v_alt = product.title
       if variant.featured_image
         assign v_image_url = variant.featured_image | image_url: width: 1600
         assign v_image = v_image_url | json
+        assign v_alt = variant.featured_image.alt | default: product.title
+        for media in product.media
+          if media.media_type == 'image' and media.preview_image.id == variant.featured_image.id
+            assign v_media_id = media.id | json
+            break
+          endif
+        endfor
       endif
-      assign v_alt = variant.featured_image.alt | default: product.title
     -%}
     {
       "id": {{ variant.id | json }},
@@ -392,6 +453,7 @@
       "option2": {{ variant.option2 | json }},
       "option3": {{ variant.option3 | json }},
       "image": {{ v_image }},
+      "imageId": {{ v_media_id }},
       "imageAlt": {{ v_alt | json }}
     }{%- unless forloop.last -%},{%- endunless -%}
   {%- endfor -%}
@@ -418,9 +480,45 @@
     var atcPriceEl = atcButton ? atcButton.querySelector('[data-vhl-roha-atc-price]') : null;
     var priceCurrentEl = root.querySelector('[data-vhl-roha-price-current]');
     var priceCompareEl = root.querySelector('[data-vhl-roha-price-compare]');
-    var mainImage = root.querySelector('[data-vhl-roha-main-image]');
+    var mainImage = root.querySelector('.vhl-roha-gallery__main-image');
+    var mediaNextButton = root.querySelector('[data-vhl-gallery-next]');
     var optionGroups = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-option]'));
-    var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-roha-thumb]'));
+    var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-gallery-thumb]'));
+    var thumbRail = root.querySelector('.vhl-roha-gallery__thumbs');
+    var galleryStage = root.querySelector('.vhl-roha-gallery__stage');
+
+    function keepThumbVisible(thumb, behavior) {
+      if (!thumbRail || !thumb || window.matchMedia('(max-width: 749px)').matches) return;
+
+      var index = thumbs.indexOf(thumb);
+      if (index < 0) return;
+
+      /* ROHA-style vooruit scrollen:
+         houd ongeveer 2 thumbnails onder de actieve thumbnail zichtbaar.
+         Daardoor beweegt de rail al vóór de actieve thumbnail de onderkant raakt. */
+      var lookAhead = 2;
+      var targetIndex = Math.min(thumbs.length - 1, index + lookAhead);
+      var targetThumb = thumbs[targetIndex];
+
+      var railTop = thumbRail.scrollTop;
+      var railBottom = railTop + thumbRail.clientHeight;
+      var thumbTop = thumb.offsetTop;
+      var targetBottom = targetThumb.offsetTop + targetThumb.offsetHeight;
+
+      if (thumbTop < railTop) {
+        thumbRail.scrollTo({
+          top: Math.max(0, thumbTop - 14),
+          behavior: behavior || 'smooth'
+        });
+      } else if (targetBottom > railBottom) {
+        var targetScroll = targetBottom - thumbRail.clientHeight;
+        thumbRail.scrollTo({
+          top: Math.max(0, targetScroll),
+          behavior: behavior || 'smooth'
+        });
+      }
+    }
+
 
     function formatMoney(cents) {
       if (typeof window.Elixir_FormatMoney === 'function') {
@@ -458,12 +556,33 @@
       return null;
     }
 
-    function setActiveThumbBySrc(src) {
-      if (!src) return;
-      thumbs.forEach(function (thumb) {
-        var isMatch = thumb.getAttribute('data-full-src') === src;
-        thumb.classList.toggle('is-active', isMatch);
-      });
+    function showVariantMedia(variant) {
+      if (!variant || !variant.image) return;
+
+      var targetThumb = null;
+
+      if (variant.imageId) {
+        targetThumb = thumbs.find(function (thumb) {
+          return String(thumb.getAttribute('data-media-id')) === String(variant.imageId);
+        });
+      }
+
+      if (!targetThumb) {
+        targetThumb = thumbs.find(function (thumb) {
+          var thumbImage = thumb.getAttribute('data-image') || '';
+          var variantImage = variant.image || '';
+          return thumbImage.split('?')[0] === variantImage.split('?')[0];
+        });
+      }
+
+      if (targetThumb) {
+        targetThumb.click();
+      } else if (mainImage) {
+        mainImage.removeAttribute('srcset');
+        mainImage.src = variant.image;
+        mainImage.alt = variant.imageAlt || mainImage.alt;
+        thumbs.forEach(function (thumb) { thumb.classList.remove('is-active'); });
+      }
     }
 
     function updateVariant() {
@@ -472,6 +591,11 @@
       if (!variant) return;
 
       if (variantIdInput) variantIdInput.value = variant.id;
+      if (window.history && window.history.replaceState) {
+        var nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.set('variant', variant.id);
+        window.history.replaceState({}, '', nextUrl.toString());
+      }
 
       if (priceCurrentEl) priceCurrentEl.textContent = formatMoney(variant.price);
       if (priceCompareEl) {
@@ -483,11 +607,7 @@
         }
       }
 
-      if (mainImage && variant.image) {
-        mainImage.src = variant.image;
-        mainImage.alt = variant.imageAlt || mainImage.alt;
-        setActiveThumbBySrc(variant.image);
-      }
+      showVariantMedia(variant);
 
       if (atcButton && atcButtonText) {
         if (variant.available) {
@@ -539,6 +659,37 @@
           btn.setAttribute('data-selected', 'true');
           btn.setAttribute('aria-pressed', 'true');
           if (selectedLabel) selectedLabel.textContent = btn.getAttribute('data-value');
+
+          /* Shopify-native directe koppeling vanaf product_option_value.
+             Geen hardcoded kleur- of afbeeldingsvolgorde. */
+          var directVariantId = btn.getAttribute('data-shopify-variant-id');
+          var directImage = btn.getAttribute('data-shopify-variant-image');
+          var directAlt = btn.getAttribute('data-shopify-variant-alt');
+          var directMediaId = btn.getAttribute('data-shopify-media-id');
+
+          if (directVariantId && variantIdInput) {
+            variantIdInput.value = directVariantId;
+          }
+
+          if (directImage && mainImage) {
+            var directThumb = directMediaId ? thumbs.find(function (thumb) {
+              return String(thumb.getAttribute('data-media-id')) === String(directMediaId);
+            }) : null;
+
+            if (directThumb) {
+              directThumb.click();
+            } else {
+              mainImage.removeAttribute('srcset');
+              mainImage.src = directImage;
+              mainImage.alt = directAlt || mainImage.alt;
+              thumbs.forEach(function (thumb) {
+                var thumbSrc = (thumb.getAttribute('data-image') || '').split('?')[0];
+                var imageSrc = directImage.split('?')[0];
+                thumb.classList.toggle('is-active', thumbSrc === imageSrc);
+              });
+            }
+          }
+
           updateVariant();
         });
       });
@@ -546,15 +697,32 @@
 
     thumbs.forEach(function (thumb) {
       thumb.addEventListener('click', function () {
-        var fullSrc = thumb.getAttribute('data-full-src');
-        if (mainImage && fullSrc) {
-          mainImage.src = fullSrc;
+        var image = thumb.getAttribute('data-image');
+        if (mainImage && image) {
+          mainImage.removeAttribute('srcset');
+          mainImage.src = image;
           mainImage.alt = thumb.getAttribute('data-alt') || mainImage.alt;
         }
         thumbs.forEach(function (t) { t.classList.remove('is-active'); });
         thumb.classList.add('is-active');
+        keepThumbVisible(thumb, 'smooth');
       });
     });
+
+    var initiallyActiveThumb = thumbs.find(function (t) { return t.classList.contains('is-active'); });
+    if (initiallyActiveThumb) {
+      requestAnimationFrame(function () {
+        keepThumbVisible(initiallyActiveThumb, 'auto');
+      });
+    }
+
+    if (mediaNextButton && thumbs.length > 1) {
+      mediaNextButton.addEventListener('click', function () {
+        var activeIndex = thumbs.findIndex(function (t) { return t.classList.contains('is-active'); });
+        var nextIndex = activeIndex > -1 ? (activeIndex + 1) % thumbs.length : 0;
+        thumbs[nextIndex].click();
+      });
+    }
   })();
 </script>
 
@@ -584,52 +752,134 @@
     }
   }
 
-  #{{ root_id }} .vhl-roha-pdp__thumbs {
+  /* =========================================================
+     BLOK 1 — ROHA GALLERY
+     ========================================================= */
+  #{{ root_id }} .vhl-roha-gallery {
+    position: relative;
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    column-gap: 42px;
+    align-items: start;
+    width: 100%;
+    min-width: 0;
+  }
+
+  #{{ root_id }} .vhl-roha-gallery__thumbs {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
     display: flex;
-    flex-direction: row;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 2px;
+    flex-direction: column;
+    gap: 14px;
+    width: 58px;
+    min-width: 58px;
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__thumb {
-    flex: 0 0 auto;
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #e5e0d8;
-    background: #f7f5f2;
+  #{{ root_id }} .vhl-roha-gallery__thumbs::-webkit-scrollbar {
+    display: none;
+  }
+
+  #{{ root_id }} .vhl-roha-gallery__thumb {
+    display: block;
+    width: 58px;
+    height: 58px;
+    flex: 0 0 58px;
+    margin: 0;
     padding: 0;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: #f5f5f5;
+    overflow: hidden;
     cursor: pointer;
+    appearance: none;
+    box-shadow: none;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__thumb.is-active {
-    border-color: #1a1a1a;
-    box-shadow: 0 0 0 1px #1a1a1a;
+  #{{ root_id }} .vhl-roha-gallery__thumb.is-active {
+    border-color: #111111;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__thumb img {
+  #{{ root_id }} .vhl-roha-gallery__thumb img {
+    display: block;
     width: 100%;
     height: 100%;
+    margin: 0;
+    padding: 0;
     object-fit: cover;
-    display: block;
+    object-position: center;
+    border: 0;
+    border-radius: 6px;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__media {
-    background: #ffffff;
-    overflow: hidden;
+  #{{ root_id }} .vhl-roha-gallery__stage {
+    grid-column: 2;
+    position: relative;
+    width: 100%;
+    height: auto;
     aspect-ratio: 1 / 1;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: none;
+  }
+
+  #{{ root_id }} .vhl-roha-gallery__main-image {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    object-fit: cover;
+    object-position: center;
+    border: 0;
+    border-radius: 12px;
+    box-sizing: border-box;
+  }
+
+  #{{ root_id }} .vhl-roha-gallery__next {
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 38px;
+    height: 38px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,.94);
+    color: #111111;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    cursor: pointer;
+    appearance: none;
+    z-index: 2;
   }
 
-  #{{ root_id }} .vhl-roha-pdp__media img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+  #{{ root_id }} .vhl-roha-gallery__next span {
     display: block;
+    font-size: 24px;
+    font-weight: 300;
+    line-height: 1;
+    transform: translateY(-1px);
   }
 
   #{{ root_id }} .vhl-roha-pdp__panel {
@@ -639,30 +889,55 @@
   @media screen and (min-width: 990px) {
     #{{ root_id }} .vhl-roha-pdp__row {
       flex-direction: row;
-      align-items: stretch;
+      align-items: flex-start;
+      gap: 72px;
     }
-    #{{ root_id }} .vhl-roha-pdp__thumbs {
-      flex: 0 0 4.5%;
-      margin-right: 3%;
-      flex-direction: column;
-      overflow-y: auto;
-      overflow-x: hidden;
-      gap: 12px;
-    }
-    #{{ root_id }} .vhl-roha-pdp__thumb {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 1 / 1;
-    }
-    #{{ root_id }} .vhl-roha-pdp__media {
-      flex: 1 1 49%;
-      margin-right: 6%;
+
+    #{{ root_id }} .vhl-roha-gallery {
+      flex: 1 1 0;
+      margin-right: 0;
       min-width: 0;
+      grid-template-columns: 58px minmax(0, 1fr);
+      column-gap: 42px;
     }
+
     #{{ root_id }} .vhl-roha-pdp__panel {
       flex: 0 0 37.5%;
       position: sticky;
       top: 90px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    #{{ root_id }} .vhl-roha-gallery {
+      display: block;
+      width: 100%;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__thumbs {
+      display: none;
+      position: static;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__stage {
+      grid-column: auto;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__stage {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__main-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__next {
+      right: 12px;
+      width: 36px;
+      height: 36px;
     }
   }
 
@@ -1019,7 +1294,796 @@
     color: #1a1a1a;
     text-decoration: underline;
   }
+
+  /* RECHTERZIJDE — master-reference compositie */
+  #{{ root_id }} .vhl-roha-pdp__panel { padding-top: 0; }
+  #{{ root_id }} .vhl-roha-pdp__rating--reference { margin: 0 0 16px; gap: 12px; }
+  #{{ root_id }} .vhl-roha-pdp__rating-boxes { display:flex; gap:2px; }
+  #{{ root_id }} .vhl-roha-pdp__rating-boxes span { width:18px; height:18px; display:grid; place-items:center; background:#00b67a; color:#fff; font-size:12px; line-height:1; }
+  #{{ root_id }} .vhl-roha-pdp__rating-copy { font-size:13px; color:#1a1a1a; white-space:nowrap; }
+  #{{ root_id }} .vhl-roha-pdp__rating-copy strong { text-decoration:underline; }
+  #{{ root_id }} .vhl-roha-pdp__title { text-transform:uppercase; font-size:22px; margin-bottom:18px; }
+  #{{ root_id }} .vhl-roha-pdp__price { margin-bottom:18px; gap:14px; }
+  #{{ root_id }} .vhl-roha-pdp__price-compare { color:#d9342b; font-size:14px; }
+  #{{ root_id }} .vhl-roha-pdp__price-current { font-size:25px; }
+  #{{ root_id }} .vhl-roha-pdp__usps--reference { gap:10px; margin-bottom:20px; }
+  #{{ root_id }} .vhl-roha-pdp__usps--reference li { font-size:14px; gap:10px; }
+  #{{ root_id }} .vhl-roha-pdp__check { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; flex:0 0 18px; background:#111; color:#fff; font-size:11px; font-weight:700; }
+  #{{ root_id }} .vhl-roha-pdp__option--reference { margin-bottom:28px; }
+  #{{ root_id }} .vhl-roha-pdp__option--reference .vhl-roha-pdp__option-heading { margin-bottom:20px; }
+  #{{ root_id }} .vhl-roha-pdp__swatches--reference { gap:22px; align-items:center; }
+  #{{ root_id }} .vhl-roha-pdp__swatches--reference .vhl-roha-pdp__swatch { width:32px; height:32px; border:1px solid #c9c9c9; }
+  #{{ root_id }} .vhl-roha-pdp__swatch--black { background:#111; }
+  #{{ root_id }} .vhl-roha-pdp__swatch--silver { background:linear-gradient(135deg,#fff 0%,#bbb 52%,#f7f7f7 100%); }
+  #{{ root_id }} .vhl-roha-pdp__swatch--gold { background:#d9ad3f; }
+  #{{ root_id }} .vhl-roha-pdp__swatch--white { background:#fff; }
+  #{{ root_id }} .vhl-roha-pdp__swatch--grey { background:#62615e; }
+  #{{ root_id }} .vhl-roha-pdp__swatch--mixed { background:linear-gradient(45deg,#b97a18 0 35%,#f2d17c 35% 65%,#fff 65%); }
+  #{{ root_id }} .vhl-roha-pdp__swatches--reference .vhl-roha-pdp__swatch[data-selected="true"] { box-shadow:0 0 0 3px #fff,0 0 0 5px #111; }
+  #{{ root_id }} .vhl-roha-pdp__atc { min-height:58px; margin-top:0; font-size:13px; }
+  #{{ root_id }} .vhl-roha-pdp__payments--reference { margin-top:24px; }
+  #{{ root_id }} .vhl-roha-pdp__payments--reference .vhl-roha-pdp__payments-summary { width:max-content; max-width:100%; margin:0 auto; padding:7px 12px; border-radius:7px; background:#fafafa; }
+  #{{ root_id }} .vhl-roha-pdp__trust-card--reference { margin-top:28px; padding:20px 24px 22px; background:#fff; border:1px dashed #111; border-radius:8px; }
+  #{{ root_id }} .vhl-roha-pdp__trust-card--reference .vhl-roha-pdp__trust-badge { border:2px solid #111; color:#111; padding:7px 16px; margin-bottom:14px; }
+  #{{ root_id }} .vhl-roha-pdp__trust-card--reference .vhl-roha-pdp__trust-heading { font-size:22px; margin-bottom:10px; }
+  #{{ root_id }} .vhl-roha-pdp__trust-card--reference .vhl-roha-pdp__trust-body { font-size:13px; margin-bottom:12px; }
+  #{{ root_id }} .vhl-roha-pdp__trust-card--reference .vhl-roha-pdp__trust-warning { font-size:12px; color:#1a1a1a; font-weight:700; }
+  #{{ root_id }} .vhl-roha-pdp__accordions { margin-top:26px; }
+  #{{ root_id }} .vhl-roha-pdp__accordion summary { padding:16px 0; font-size:13px; }
+
+
+  /* Betaalmethoden modal + productdetails */
+  #{{ root_id }} .vhl-roha-pdp__payments-summary { border:0; color:inherit; cursor:pointer; font:inherit; }
+  #{{ root_id }} .vhl-roha-paymodal[hidden] { display:none !important; }
+  #{{ root_id }} .vhl-roha-paymodal { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:20px; }
+  #{{ root_id }} .vhl-roha-paymodal__backdrop { position:absolute; inset:0; background:rgba(0,0,0,.48); backdrop-filter:blur(5px); }
+  #{{ root_id }} .vhl-roha-paymodal__dialog { position:relative; z-index:1; width:min(640px,calc(100vw - 40px)); padding:28px 30px 30px; border-radius:12px; background:#fff; box-shadow:0 14px 44px rgba(0,0,0,.16); }
+  #{{ root_id }} .vhl-roha-paymodal__title { margin:0 0 20px; text-align:center; font-size:17px; line-height:1.25; font-weight:400; color:#222; }
+  #{{ root_id }} .vhl-roha-paymodal__methods { display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:nowrap; margin-bottom:26px; }
+  #{{ root_id }} .vhl-roha-paymodal__method { display:flex; align-items:center; justify-content:center; width:46px; height:30px; padding:0; border:0; border-radius:4px; background:transparent; overflow:hidden; flex:0 0 46px; }
+  #{{ root_id }} .vhl-roha-paymodal__method svg { display:block; width:46px; height:30px; max-height:30px; }
+  #{{ root_id }} .vhl-roha-paymodal__close { width:100%; min-height:56px; border:0; border-radius:10px; background:#1b1b1b !important; color:#fff !important; font-size:16px; font-weight:800; cursor:pointer; }
+  #{{ root_id }} .vhl-roha-pdp__accordion-body--product { padding:4px 0 22px; font-size:15px; line-height:1.55; color:#222; }
+  #{{ root_id }} .vhl-roha-pdp__accordion-body--product p { margin:0 0 22px; }
+  #{{ root_id }} .vhl-roha-pdp__accordion-body--product p:last-child { margin-bottom:0; }
+  #{{ root_id }} .vhl-roha-pdp__accordion-body--product strong { font-weight:700; }
+
+
+  @media screen and (max-width: 749px) {
+    #{{ root_id }} .vhl-roha-paymodal__dialog { width:min(520px,calc(100vw - 28px)); padding:24px 18px 20px; }
+    #{{ root_id }} .vhl-roha-paymodal__title { font-size:16px; margin-bottom:18px; }
+    #{{ root_id }} .vhl-roha-paymodal__methods { gap:7px; margin-bottom:22px; }
+    #{{ root_id }} .vhl-roha-paymodal__method { width:43px; height:28px; flex-basis:43px; }
+    #{{ root_id }} .vhl-roha-paymodal__method svg { width:43px; height:28px; max-height:28px; }
+    #{{ root_id }} .vhl-roha-paymodal__close { min-height:52px; font-size:15px; }
+  }
+
+
+  /* Gallery-pijl mag nooit boven de betaalmodal verschijnen */
+  #{{ root_id }}.vhl-payment-modal-open .vhl-roha-gallery__next {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+
+  /* BLOK 2 */
+  #{{ root_id }} .vhl-roha-b2 { width:90%; max-width:1800px; margin:72px auto 130px; }
+  #{{ root_id }} .vhl-roha-b2__story { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  #{{ root_id }} .vhl-roha-b2__story-copy,
+  #{{ root_id }} .vhl-roha-b2__story-media { min-height:430px; border-radius:14px; overflow:hidden; }
+  #{{ root_id }} .vhl-roha-b2__story-copy { display:flex; align-items:center; padding:72px 82px; background:#f3f3f3; }
+  #{{ root_id }} .vhl-roha-b2__story-copy h2 { margin:0 0 28px; font-size:27px; line-height:1.15; font-weight:700; color:#252525; }
+  #{{ root_id }} .vhl-roha-b2__story-copy p { margin:0; max-width:650px; font-size:15px; line-height:1.35; color:#333; }
+  #{{ root_id }} .vhl-roha-b2__story-image { width:100%; height:100%; min-height:430px; display:block; object-fit:cover; }
+
+  #{{ root_id }} .vhl-roha-b2__tech { margin-top:78px; min-height:520px; display:grid; grid-template-columns:1fr 1fr; align-items:center; overflow:hidden; border-radius:14px; background:#000; color:#fff; }
+  #{{ root_id }} .vhl-roha-b2__tech-media { height:100%; display:flex; align-items:center; justify-content:center; padding:55px 50px; }
+  #{{ root_id }} .vhl-roha-b2__tech-image { display:block; width:82%; height:390px; object-fit:contain; }
+  #{{ root_id }} .vhl-roha-b2__tech-copy { padding:70px 90px 70px 35px; }
+  #{{ root_id }} .vhl-roha-b2__tech-copy h2 { margin:0 0 30px; font-size:28px; line-height:1.15; font-weight:700; color:#fff; }
+  #{{ root_id }} .vhl-roha-b2__tech-copy p { margin:0; max-width:650px; font-size:15px; line-height:1.35; color:#fff; }
+
+  /* Sticky ATC */
+  #{{ root_id }} .vhl-roha-sticky[hidden] { display:none !important; }
+  #{{ root_id }} .vhl-roha-sticky { position:fixed; z-index:9000; right:22px; bottom:18px; width:min(540px,calc(100vw - 44px)); background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,.12); }
+  #{{ root_id }} .vhl-roha-sticky__inner { min-height:96px; display:flex; align-items:center; gap:18px; padding:12px 16px; }
+  #{{ root_id }} .vhl-roha-sticky__product { display:flex; align-items:center; gap:14px; min-width:0; flex:1; }
+  #{{ root_id }} .vhl-roha-sticky__image { width:68px; height:68px; flex:0 0 68px; object-fit:cover; border-radius:4px; background:#f4f4f4; }
+  #{{ root_id }} .vhl-roha-sticky__meta { min-width:0; font-size:12px; line-height:1.35; color:#222; }
+  #{{ root_id }} .vhl-roha-sticky__meta strong { display:block; margin-bottom:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px; text-transform:uppercase; }
+  #{{ root_id }} .vhl-roha-sticky__prices { display:flex; flex-direction:column; gap:2px; font-size:13px; }
+  #{{ root_id }} .vhl-roha-sticky__prices s { color:#555; }
+  #{{ root_id }} .vhl-roha-sticky__button { min-width:190px; min-height:48px; display:flex; align-items:center; justify-content:center; gap:10px; border:0; border-radius:8px; background:#1b1b1b !important; color:#fff !important; font-size:12px; font-weight:800; cursor:pointer; }
+  #{{ root_id }} .vhl-roha-sticky__button svg { width:17px; height:17px; }
+
+  @media screen and (max-width: 749px) {
+    #{{ root_id }} .vhl-roha-b2 { width:calc(100% - 28px); margin:42px auto 90px; }
+    #{{ root_id }} .vhl-roha-b2__story { grid-template-columns:1fr; gap:14px; }
+    #{{ root_id }} .vhl-roha-b2__story-copy,
+    #{{ root_id }} .vhl-roha-b2__story-media { min-height:320px; }
+    #{{ root_id }} .vhl-roha-b2__story-copy { padding:44px 30px; }
+    #{{ root_id }} .vhl-roha-b2__story-copy h2 { font-size:23px; margin-bottom:20px; }
+    #{{ root_id }} .vhl-roha-b2__story-image { min-height:320px; }
+    #{{ root_id }} .vhl-roha-b2__tech { margin-top:36px; min-height:0; grid-template-columns:1fr; }
+    #{{ root_id }} .vhl-roha-b2__tech-media { min-height:330px; padding:34px 20px 10px; }
+    #{{ root_id }} .vhl-roha-b2__tech-image { width:90%; height:300px; }
+    #{{ root_id }} .vhl-roha-b2__tech-copy { padding:30px 30px 48px; }
+    #{{ root_id }} .vhl-roha-b2__tech-copy h2 { font-size:23px; margin-bottom:18px; }
+    #{{ root_id }} .vhl-roha-sticky { right:10px; bottom:10px; width:calc(100vw - 20px); }
+    #{{ root_id }} .vhl-roha-sticky__inner { min-height:78px; padding:9px; gap:9px; }
+    #{{ root_id }} .vhl-roha-sticky__image { width:54px; height:54px; flex-basis:54px; }
+    #{{ root_id }} .vhl-roha-sticky__meta strong { max-width:125px; font-size:10px; }
+    #{{ root_id }} .vhl-roha-sticky__prices { font-size:11px; }
+    #{{ root_id }} .vhl-roha-sticky__button { min-width:132px; min-height:46px; padding:0 12px; font-size:10px; }
+  }
+
+
+  /* BLOK 2 V2 — ROHA reference proportions */
+  @media screen and (min-width: 990px) {
+    #{{ root_id }} .vhl-roha-b2 {
+      width: 88%;
+      max-width: 1545px;
+      margin: 76px auto 120px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy,
+    #{{ root_id }} .vhl-roha-b2__story-media {
+      min-height: 0;
+      height: 428px;
+      border-radius: 14px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy {
+      padding: 58px 76px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy h2 {
+      font-size: 24px;
+      margin-bottom: 28px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy p {
+      font-size: 14px;
+      line-height: 1.32;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-image {
+      width: 100%;
+      height: 428px;
+      min-height: 0;
+      object-fit: cover;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech {
+      margin-top: 78px;
+      height: 520px;
+      min-height: 0;
+      grid-template-columns: 52% 48%;
+      border-radius: 14px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-media {
+      height: 520px;
+      padding: 54px 70px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-image {
+      width: 78%;
+      height: 360px;
+      object-fit: contain;
+      mix-blend-mode: screen;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy {
+      padding: 62px 86px 62px 20px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy h2 {
+      color: #fff !important;
+      font-size: 25px;
+      margin-bottom: 28px;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy p {
+      color: #fff !important;
+      font-size: 14px;
+      line-height: 1.35;
+      max-width: 610px;
+    }
+  }
+
+
+  /* BLOK 2 V3 — exact ROHA desktop composition */
+  @media screen and (min-width: 990px) {
+    #{{ root_id }} .vhl-roha-b2 {
+      width: 90% !important;
+      max-width: none !important;
+      margin: 76px auto 120px !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+      gap: 26px !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy,
+    #{{ root_id }} .vhl-roha-b2__story-media {
+      width: 100% !important;
+      height: 515px !important;
+      min-height: 515px !important;
+      border-radius: 14px !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy {
+      display: flex !important;
+      align-items: center !important;
+      padding: 70px 94px !important;
+      background: #f3f3f3 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy h2 {
+      margin: 0 0 36px !important;
+      font-size: 29px !important;
+      line-height: 1.12 !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.025em !important;
+      color: #333 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-copy p {
+      margin: 0 !important;
+      max-width: 690px !important;
+      font-size: 16px !important;
+      line-height: 1.28 !important;
+      font-weight: 400 !important;
+      color: #333 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__story-image {
+      display: block !important;
+      width: 100% !important;
+      height: 515px !important;
+      min-height: 515px !important;
+      object-fit: cover !important;
+      object-position: center !important;
+      border-radius: 14px !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech {
+      width: 100% !important;
+      height: 520px !important;
+      min-height: 520px !important;
+      margin-top: 76px !important;
+      display: grid !important;
+      grid-template-columns: 52% 48% !important;
+      align-items: center !important;
+      overflow: hidden !important;
+      border-radius: 14px !important;
+      background: #000 !important;
+      color: #fff !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-media {
+      width: 100% !important;
+      height: 520px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 44px 70px !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-image {
+      display: block !important;
+      width: 78% !important;
+      max-width: 560px !important;
+      height: 390px !important;
+      object-fit: contain !important;
+      object-position: center !important;
+      mix-blend-mode: screen !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy {
+      display: flex !important;
+      align-items: center !important;
+      height: 520px !important;
+      padding: 60px 92px 60px 20px !important;
+      box-sizing: border-box !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy h2 {
+      margin: 0 0 38px !important;
+      font-size: 29px !important;
+      line-height: 1.12 !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.025em !important;
+      color: #fff !important;
+    }
+
+    #{{ root_id }} .vhl-roha-b2__tech-copy p {
+      margin: 0 !important;
+      max-width: 700px !important;
+      font-size: 16px !important;
+      line-height: 1.28 !important;
+      font-weight: 400 !important;
+      color: #fff !important;
+    }
+  }
+
 {% endstyle %}
+
+
+<script>
+(() => {
+  const root = document.getElementById('{{ root_id }}');
+  if (!root) return;
+  const modal = root.querySelector('[data-vhl-payment-modal]');
+  const opener = root.querySelector('[data-vhl-payment-open]');
+  if (!modal || !opener) return;
+  const close = () => { modal.hidden = true; root.classList.remove('vhl-payment-modal-open'); document.documentElement.style.overflow = ''; };
+  opener.addEventListener('click', () => { modal.hidden = false; root.classList.add('vhl-payment-modal-open'); document.documentElement.style.overflow = 'hidden'; });
+  root.querySelectorAll('[data-vhl-payment-close]').forEach(el => el.addEventListener('click', close));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
+})();
+</script>
+
+
+<script>
+(() => {
+  const root = document.getElementById('{{ root_id }}');
+  if (!root) return;
+  const mainAtc = root.querySelector('[data-vhl-roha-atc]');
+  const sticky = root.querySelector('[data-vhl-sticky]');
+  const stickyAdd = root.querySelector('[data-vhl-sticky-add]');
+  if (!mainAtc || !sticky || !stickyAdd) return;
+
+  const syncSticky = () => {
+    const rect = mainAtc.getBoundingClientRect();
+    const mainVisible = rect.bottom > 0 && rect.top < window.innerHeight;
+    sticky.hidden = mainVisible || window.scrollY < 250;
+  };
+
+  stickyAdd.addEventListener('click', () => {
+    if (!mainAtc.disabled) mainAtc.click();
+  });
+
+  syncSticky();
+  window.addEventListener('scroll', syncSticky, { passive: true });
+  window.addEventListener('resize', syncSticky);
+})();
+</script>
+
+
+<style>
+  /* V19 — sticky matched to full-screen ROHA reference */
+  @media screen and (min-width: 990px) {
+    #{{ root_id }} .vhl-roha-sticky {
+      position: fixed !important;
+      right: 16px !important;
+      bottom: 20px !important;
+      width: 550px !important;
+      max-width: calc(100vw - 32px) !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: 1px solid #d8d8d8 !important;
+      border-radius: 8px !important;
+      background: #fff !important;
+      box-shadow: 0 5px 16px rgba(0,0,0,.08) !important;
+      overflow: hidden !important;
+      z-index: 40 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__inner {
+      width: 100% !important;
+      height: 112px !important;
+      min-height: 112px !important;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) 207px !important;
+      align-items: center !important;
+      gap: 20px !important;
+      padding: 16px !important;
+      box-sizing: border-box !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__product {
+      display: grid !important;
+      grid-template-columns: 80px minmax(0, 1fr) !important;
+      align-items: center !important;
+      gap: 20px !important;
+      min-width: 0 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__image {
+      width: 80px !important;
+      height: 80px !important;
+      min-width: 80px !important;
+      border-radius: 5px !important;
+      object-fit: cover !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__meta {
+      min-width: 0 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__meta strong {
+      display: block !important;
+      margin: 0 0 8px !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+      font-size: 12px !important;
+      line-height: 1.1 !important;
+      font-weight: 800 !important;
+      letter-spacing: 0 !important;
+      text-transform: uppercase !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__prices {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 5px !important;
+      line-height: 1 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__prices s {
+      display: block !important;
+      color: #555 !important;
+      font-size: 12px !important;
+      line-height: 1 !important;
+      font-weight: 400 !important;
+      text-decoration-thickness: 1px !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__prices span {
+      display: block !important;
+      color: #171717 !important;
+      font-size: 15px !important;
+      line-height: 1 !important;
+      font-weight: 400 !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__button {
+      width: 100% !important;
+      height: 55px !important;
+      min-height: 55px !important;
+      margin: 0 !important;
+      padding: 0 14px !important;
+      border: 0 !important;
+      border-radius: 7px !important;
+      background: #242424 !important;
+      color: #fff !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 9px !important;
+      font-size: 12px !important;
+      line-height: 1 !important;
+      font-weight: 800 !important;
+      white-space: nowrap !important;
+    }
+
+    #{{ root_id }} .vhl-roha-sticky__button svg {
+      width: 14px !important;
+      height: 14px !important;
+      flex: 0 0 14px !important;
+    }
+  }
+</style>
+
+
+<style>
+/* V29 — Block 2 video + ROHA mobile order */
+@media screen and (min-width: 990px) {
+  #{{ root_id }} .vhl-roha-b2 {
+    width: calc(100% - 320px) !important;
+    max-width: 1600px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-video {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    object-fit: cover !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-video {
+    width: 82% !important;
+    max-width: 610px !important;
+    height: 390px !important;
+    display: block !important;
+    object-fit: contain !important;
+    background: transparent !important;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  #{{ root_id }} .vhl-roha-b2 {
+    width: calc(100% - 38px) !important;
+    margin: 20px auto 80px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+  }
+
+  /* ROHA mobile: video first, text card underneath */
+  #{{ root_id }} .vhl-roha-b2__story-media {
+    order: 1 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-copy {
+    order: 2 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 56px 32px 62px !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-video,
+  #{{ root_id }} .vhl-roha-b2__story-image {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: block !important;
+    object-fit: cover !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-copy h2 {
+    font-size: 28px !important;
+    line-height: 1.08 !important;
+    margin: 0 0 30px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-copy p {
+    font-size: 16px !important;
+    line-height: 1.32 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech {
+    margin-top: 44px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-media {
+    order: 1 !important;
+    width: 100% !important;
+    min-height: 300px !important;
+    height: 300px !important;
+    padding: 26px 18px 4px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-video,
+  #{{ root_id }} .vhl-roha-b2__tech-image {
+    width: 92% !important;
+    height: 270px !important;
+    display: block !important;
+    object-fit: contain !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-copy {
+    order: 2 !important;
+    width: 100% !important;
+    padding: 26px 32px 52px !important;
+  }
+}
+</style>
+
+
+<style>
+/* V30 — grotere TWIST & LOCK animatie + extra installatievideoblok */
+#{{ root_id }} .vhl-roha-b2__tech-media {
+  overflow: hidden !important;
+}
+
+#{{ root_id }} .vhl-roha-b2__tech-video {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: scale(1.45) !important;
+  transform-origin: center center !important;
+}
+
+#{{ root_id }} .vhl-roha-b2__install {
+  margin-top: 98px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-copy,
+#{{ root_id }} .vhl-roha-b2__install-media {
+  height: 514px;
+  min-height: 514px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-copy {
+  display: flex;
+  align-items: center;
+  padding: 0 92px;
+  background: #000;
+  color: #fff;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-copy h2 {
+  margin: 0 0 34px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 29px;
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-copy p {
+  margin: 0;
+  max-width: 690px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 400;
+  color: #fff;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+#{{ root_id }} .vhl-roha-b2__install-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 30px;
+  background: #f1f2f4;
+  color: #555;
+  text-align: center;
+  font: 14px/1.4 Arial, Helvetica, sans-serif;
+}
+
+@media screen and (max-width: 749px) {
+  #{{ root_id }} .vhl-roha-b2__tech-video {
+    transform: scale(1.28) !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__install {
+    margin-top: 44px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+  }
+
+  /* Mobiel dezelfde contentlogica als ROHA: video eerst, tekst eronder */
+  #{{ root_id }} .vhl-roha-b2__install-media {
+    order: 1 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__install-copy {
+    order: 2 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 56px 32px 62px !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__install-copy h2 {
+    margin: 0 0 30px !important;
+    font-size: 28px !important;
+    line-height: 1.08 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__install-copy p {
+    font-size: 16px !important;
+    line-height: 1.32 !important;
+  }
+}
+</style>
+
+
+<style>
+/* V31 — forceer alle tekst in 'Installatie zonder schade' volledig wit */
+#{{ root_id }} .vhl-roha-b2__install-copy,
+#{{ root_id }} .vhl-roha-b2__install-copy *,
+#{{ root_id }} .vhl-roha-b2__install-copy h2,
+#{{ root_id }} .vhl-roha-b2__install-copy p,
+#{{ root_id }} .vhl-roha-b2__install-copy strong,
+#{{ root_id }} .vhl-roha-b2__install-copy b {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+</style>
+
+
+<style>
+/* BLOK 4 — Ontdek de kracht */
+#{{ root_id }} .vhl-roha-b2__power {
+  width: 100%;
+  margin-top: 98px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #f3f3f3;
+}
+
+#{{ root_id }} .vhl-roha-b2__power-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border: 0;
+}
+
+#{{ root_id }} .vhl-roha-b2__power-placeholder {
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #666;
+  background: #f3f3f3;
+}
+
+@media screen and (max-width: 989px) {
+  #{{ root_id }} .vhl-roha-b2__power {
+    margin-top: 48px;
+    border-radius: 12px;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__power-image {
+    width: 100%;
+    height: auto;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__power-placeholder {
+    min-height: 220px;
+  }
+}
+</style>
 
 {% schema %}
 {
@@ -1027,6 +2091,34 @@
   "tag": "section",
   "class": "vhl-roha-pdp-section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Blok 2 video's"
+    },
+    {
+      "type": "video",
+      "id": "block2_story_video",
+      "label": "Video - haak in gebruik"
+    },
+    {
+      "type": "video",
+      "id": "block2_tech_video",
+      "label": "Video - TWIST & LOCK technologie"
+    },
+    {
+      "type": "video",
+      "id": "block3_install_video",
+      "label": "Video - installatie zonder schade"
+    },
+    {
+      "type": "header",
+      "content": "Blok 4 - Ontdek de kracht"
+    },
+    {
+      "type": "image_picker",
+      "id": "block4_power_image",
+      "label": "Afbeelding - Ontdek de kracht"
+    },
     {
       "type": "header",
       "content": "USP's (optioneel, max 3)"
@@ -1078,3 +2170,202 @@
   ]
 }
 {% endschema %}
+
+
+<style>
+@media screen and (min-width: 990px) {
+  #{{ root_id }} .vhl-roha-sticky__prices s {
+    font-size: 17px !important;
+    line-height: 1.05 !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+  }
+
+  #{{ root_id }} .vhl-roha-sticky__prices span {
+    font-size: 20px !important;
+    line-height: 1.05 !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+  }
+
+  #{{ root_id }} .vhl-roha-sticky__prices s::after,
+  #{{ root_id }} .vhl-roha-sticky__prices span::after {
+    content: " EUR";
+  }
+}
+</style>
+
+<style>
+@media screen and (min-width: 990px) {
+  #{{ root_id }} .vhl-roha-sticky {
+    border-radius: 11px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-sticky__image {
+    border-radius: 6px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-sticky__meta,
+  #{{ root_id }} .vhl-roha-sticky__meta strong,
+  #{{ root_id }} .vhl-roha-sticky__prices,
+  #{{ root_id }} .vhl-roha-sticky__prices s,
+  #{{ root_id }} .vhl-roha-sticky__prices span,
+  #{{ root_id }} .vhl-roha-sticky__button {
+    font-family: Arial, Helvetica, sans-serif !important;
+  }
+
+  #{{ root_id }} .vhl-roha-sticky__meta strong {
+    font-size: 14px !important;
+    line-height: 1.15 !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-sticky__prices s {
+    font-size: 17px !important;
+    line-height: 1.08 !important;
+    font-weight: 400 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-sticky__prices span {
+    font-size: 20px !important;
+    line-height: 1.08 !important;
+    font-weight: 400 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-sticky__button {
+    border-radius: 11px !important;
+    font-size: 15px !important;
+    line-height: 1 !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+  }
+}
+</style>
+
+<style>
+/* V24 — Block 2 ROHA reference geometry */
+@media screen and (min-width: 990px) {
+  #{{ root_id }} .vhl-roha-b2 {
+    width: calc(100% - 240px) !important;
+    max-width: 1680px !important;
+    margin: 76px auto 120px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 24px !important;
+    align-items: stretch !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-copy,
+  #{{ root_id }} .vhl-roha-b2__story-media {
+    height: 514px !important;
+    min-height: 514px !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-copy {
+    background: #f3f3f3 !important;
+    padding: 0 92px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-copy h2 {
+    margin: 0 0 34px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 29px !important;
+    line-height: 1.12 !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.5px !important;
+    color: #333 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-copy p {
+    margin: 0 !important;
+    max-width: 690px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 16px !important;
+    line-height: 1.25 !important;
+    font-weight: 400 !important;
+    color: #333 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-media img,
+  #{{ root_id }} .vhl-roha-b2__story-media video {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    object-fit: cover !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech {
+    margin-top: 98px !important;
+    height: 520px !important;
+    min-height: 520px !important;
+    display: grid !important;
+    grid-template-columns: 52% 48% !important;
+    align-items: center !important;
+    background: #000 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-media {
+    height: 520px !important;
+    min-height: 520px !important;
+    padding: 55px 55px 55px 90px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #000 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-media img {
+    display: block !important;
+    width: 82% !important;
+    max-width: 610px !important;
+    height: 390px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    background: transparent !important;
+    mix-blend-mode: normal !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-copy {
+    height: 100% !important;
+    padding: 0 92px 0 24px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    background: #000 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-copy h2 {
+    margin: 0 0 28px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 29px !important;
+    line-height: 1.1 !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.5px !important;
+    color: #fff !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-copy p {
+    margin: 0 !important;
+    max-width: 700px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 15px !important;
+    line-height: 1.25 !important;
+    font-weight: 400 !important;
+    color: #fff !important;
+  }
+}
+</style>
