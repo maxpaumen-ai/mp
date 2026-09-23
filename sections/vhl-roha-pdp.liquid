@@ -311,27 +311,49 @@
         </div>
       </div>
       <div class="vhl-roha-b2__story-media">
-        <img
-          src="{{ 'vhl-block2-story-reference.png' | asset_url }}"
-          alt="VANHOUTEN LIVING vacuümhaak in gebruik"
-          class="vhl-roha-b2__story-image"
-          loading="lazy"
-          width="917"
-          height="516"
-        >
+        {%- if section.settings.block2_story_video != blank -%}
+          {{ section.settings.block2_story_video | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            class: 'vhl-roha-b2__story-video'
+          }}
+        {%- else -%}
+          <img
+            src="{{ 'vhl-block2-story-reference.png' | asset_url }}"
+            alt="VANHOUTEN LIVING vacuümhaak in gebruik"
+            class="vhl-roha-b2__story-image"
+            loading="lazy"
+            width="917"
+            height="516"
+          >
+        {%- endif -%}
       </div>
     </div>
 
     <div class="vhl-roha-b2__tech">
       <div class="vhl-roha-b2__tech-media">
-        <img
-          src="{{ 'vhl-block2-tech-hook-reference.png' | asset_url }}"
-          alt="Exploded view van de TWIST &amp; LOCK vacuümhaak"
-          class="vhl-roha-b2__tech-image"
-          loading="lazy"
-          width="550"
-          height="310"
-        >
+        {%- if section.settings.block2_tech_video != blank -%}
+          {{ section.settings.block2_tech_video | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            class: 'vhl-roha-b2__tech-video'
+          }}
+        {%- else -%}
+          <img
+            src="{{ 'vhl-block2-tech-hook-reference.png' | asset_url }}"
+            alt="Exploded view van de TWIST &amp; LOCK vacuümhaak"
+            class="vhl-roha-b2__tech-image"
+            loading="lazy"
+            width="550"
+            height="310"
+          >
+        {%- endif -%}
       </div>
       <div class="vhl-roha-b2__tech-copy">
         <div>
@@ -1724,6 +1746,119 @@
   }
 </style>
 
+
+<style>
+/* V29 — Block 2 video + ROHA mobile order */
+@media screen and (min-width: 990px) {
+  #{{ root_id }} .vhl-roha-b2 {
+    width: calc(100% - 320px) !important;
+    max-width: 1600px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-video {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    object-fit: cover !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-video {
+    width: 82% !important;
+    max-width: 610px !important;
+    height: 390px !important;
+    display: block !important;
+    object-fit: contain !important;
+    background: transparent !important;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  #{{ root_id }} .vhl-roha-b2 {
+    width: calc(100% - 38px) !important;
+    margin: 20px auto 80px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+  }
+
+  /* ROHA mobile: video first, text card underneath */
+  #{{ root_id }} .vhl-roha-b2__story-media {
+    order: 1 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-copy {
+    order: 2 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 56px 32px 62px !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-video,
+  #{{ root_id }} .vhl-roha-b2__story-image {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: block !important;
+    object-fit: cover !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-copy h2 {
+    font-size: 28px !important;
+    line-height: 1.08 !important;
+    margin: 0 0 30px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__story-copy p {
+    font-size: 16px !important;
+    line-height: 1.32 !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech {
+    margin-top: 44px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    border-radius: 14px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-media {
+    order: 1 !important;
+    width: 100% !important;
+    min-height: 300px !important;
+    height: 300px !important;
+    padding: 26px 18px 4px !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-video,
+  #{{ root_id }} .vhl-roha-b2__tech-image {
+    width: 92% !important;
+    height: 270px !important;
+    display: block !important;
+    object-fit: contain !important;
+  }
+
+  #{{ root_id }} .vhl-roha-b2__tech-copy {
+    order: 2 !important;
+    width: 100% !important;
+    padding: 26px 32px 52px !important;
+  }
+}
+</style>
+
 {% schema %}
 {
   "name": "VHL ROHA-style PDP",
@@ -1732,17 +1867,17 @@
   "settings": [
     {
       "type": "header",
-      "content": "Blok 2 afbeeldingen"
+      "content": "Blok 2 video's"
     },
     {
-      "type": "image_picker",
-      "id": "block2_story_image",
-      "label": "Bovenste lifestyle afbeelding"
+      "type": "video",
+      "id": "block2_story_video",
+      "label": "Video - haak in gebruik"
     },
     {
-      "type": "image_picker",
-      "id": "block2_tech_image",
-      "label": "TWIST & LOCK afbeelding"
+      "type": "video",
+      "id": "block2_tech_video",
+      "label": "Video - TWIST & LOCK technologie"
     },
     {
       "type": "header",
