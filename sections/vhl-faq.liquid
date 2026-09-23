@@ -33,9 +33,10 @@
               <p class="vhl-faq__video-line">
                 Bekijk de
                 {% if section.settings.installation_page != blank %}
+                  {% assign vhl_installation_handle = section.settings.installation_page.handle | default: section.settings.installation_page %}
                   <a
                     class="vhl-faq__video-trigger"
-                    href="{{ section.settings.installation_page.url }}"
+                    href="{{ routes.pages_url }}/{{ vhl_installation_handle }}"
                   >video</a>
                 {% else %}
                   <span class="vhl-faq__video-trigger vhl-faq__video-trigger--disabled">video</span>
