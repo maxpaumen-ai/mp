@@ -90,16 +90,16 @@
   assign master_usp_2 = product.metafields.custom.vhl_usp_2.value | default: section.settings.usp_2
   assign master_usp_3 = product.metafields.custom.vhl_usp_3.value | default: section.settings.usp_3
 
-  assign master_story_1_title = product.metafields.custom.vhl_story_1_title.value | default: 'Esthetische én praktische haken'
-  assign master_story_1_text = product.metafields.custom.vhl_story_1_text.value | default: 'Of je nu een modern, rustiek of chic interieur hebt. Onze vacuümhaken passen overal perfect bij. Ze voegen meteen een elegante touch toe én bieden praktische functionaliteit voor badkamer, keuken, toilet,...'
-  assign master_story_2_title = product.metafields.custom.vhl_story_2_title.value | default: 'TWIST & LOCK Technologie'
-  assign master_story_2_text = product.metafields.custom.vhl_story_2_text.value | default: 'Onze gepatenteerde TWIST & LOCK-technologie maakt gebruik van een geavanceerd vacuümzuigsysteem dat multi-compressie en krachtige zuigkracht combineert, wat zorgt voor een veilige en herbruikbare bevestiging.'
-  assign master_story_3_title = product.metafields.custom.vhl_story_3_title.value | default: 'Installatie zonder schade'
-  assign master_story_3_text = product.metafields.custom.vhl_story_3_text.value | default: 'Gedaan met gaten boren en je muren beschadigen! De zuighaken bieden de ideale oplossing met hun geavanceerde TWIST & LOCK technologie. Deze haken kunnen eenvoudig worden bevestigd aan gladde oppervlakken zoals tegels, glas, spiegels, marmer, acryl, metaal, glad hout en laminaat (mits het oppervlak glad en vetvrij is) Geen schroeven of spijkers nodig.'
+  assign master_story_1_title = section.settings.story_1_title | default: product.metafields.custom.vhl_story_1_title.value | default: 'Esthetische én praktische haken'
+  assign master_story_1_text = section.settings.story_1_text | default: product.metafields.custom.vhl_story_1_text.value | default: 'Of je nu een modern, rustiek of chic interieur hebt. Onze vacuümhaken passen overal perfect bij. Ze voegen meteen een elegante touch toe én bieden praktische functionaliteit voor badkamer, keuken, toilet,...'
+  assign master_story_2_title = section.settings.story_2_title | default: product.metafields.custom.vhl_story_2_title.value | default: 'TWIST & LOCK Technologie'
+  assign master_story_2_text = section.settings.story_2_text | default: product.metafields.custom.vhl_story_2_text.value | default: 'Onze gepatenteerde TWIST & LOCK-technologie maakt gebruik van een geavanceerd vacuümzuigsysteem dat multi-compressie en krachtige zuigkracht combineert, wat zorgt voor een veilige en herbruikbare bevestiging.'
+  assign master_story_3_title = section.settings.story_3_title | default: product.metafields.custom.vhl_story_3_title.value | default: 'Installatie zonder schade'
+  assign master_story_3_text = section.settings.story_3_text | default: product.metafields.custom.vhl_story_3_text.value | default: 'Gedaan met gaten boren en je muren beschadigen! De zuighaken bieden de ideale oplossing met hun geavanceerde TWIST & LOCK technologie. Deze haken kunnen eenvoudig worden bevestigd aan gladde oppervlakken zoals tegels, glas, spiegels, marmer, acryl, metaal, glad hout en laminaat (mits het oppervlak glad en vetvrij is) Geen schroeven of spijkers nodig.'
 
-  assign master_story_1_video = product.metafields.custom.vhl_story_1_video.value | default: section.settings.block2_story_video
-  assign master_story_2_video = product.metafields.custom.vhl_story_2_video.value | default: section.settings.block2_tech_video
-  assign master_story_3_video = product.metafields.custom.vhl_story_3_video.value | default: section.settings.block3_install_video
+  assign master_story_1_video = section.settings.block2_story_video | default: product.metafields.custom.vhl_story_1_video.value
+  assign master_story_2_video = section.settings.block2_tech_video | default: product.metafields.custom.vhl_story_2_video.value
+  assign master_story_3_video = section.settings.block3_install_video | default: product.metafields.custom.vhl_story_3_video.value
   assign master_power_image = product.metafields.custom.vhl_power_image.value | default: section.settings.block4_power_image
 
   assign master_trust_badge = product.metafields.custom.vhl_trust_badge.value | default: section.settings.trust_badge_text | default: '✹ Exclusief bij VANHOUTEN LIVING'
@@ -307,7 +307,9 @@
           <details class="vhl-roha-pdp__accordion">
             <summary>Product details</summary>
             <div class="vhl-roha-pdp__accordion-body vhl-roha-pdp__accordion-body--product">
-              {%- if product.metafields.custom.vhl_product_details != blank -%}
+              {%- if section.settings.product_details != blank -%}
+                {{ section.settings.product_details }}
+              {%- elsif product.metafields.custom.vhl_product_details != blank -%}
                 {{ product.metafields.custom.vhl_product_details | metafield_tag }}
               {%- else -%}
                 <p><strong>Geschikt voor:</strong> Glas, spiegels, glanzende porseleinen tegels, acryl- en kunststof douchegarnituren, glad roestvrij staal, kwarts, laminaat en andere gladde, niet-poreuze oppervlakken.</p>
@@ -2135,6 +2137,43 @@
   "tag": "section",
   "class": "vhl-roha-pdp-section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Product details"
+    },
+    {
+      "type": "richtext",
+      "id": "product_details",
+      "label": "Product details per product"
+    },
+    {
+      "type": "header",
+      "content": "Contentblok 1"
+    },
+    {
+      "type": "text",
+      "id": "story_1_title",
+      "label": "Titel blok 1"
+    },
+    {
+      "type": "textarea",
+      "id": "story_1_text",
+      "label": "Tekst blok 1"
+    },
+    {
+      "type": "header",
+      "content": "Contentblok 2"
+    },
+    {
+      "type": "text",
+      "id": "story_2_title",
+      "label": "Titel blok 2"
+    },
+    {
+      "type": "textarea",
+      "id": "story_2_text",
+      "label": "Tekst blok 2"
+    },
     {
       "type": "header",
       "content": "Blok 2 video's"
