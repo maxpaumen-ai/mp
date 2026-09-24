@@ -85,9 +85,9 @@
     Existing section settings remain fallbacks, so the current vacuum-hook page keeps working.
   endcomment
 
-  assign master_usp_1 = product.metafields.custom.vhl_usp_1.value
-  assign master_usp_2 = product.metafields.custom.vhl_usp_2.value
-  assign master_usp_3 = product.metafields.custom.vhl_usp_3.value
+  assign master_usp_1 = product.metafields.custom.usp_1.value
+  assign master_usp_2 = product.metafields.custom.usp_2.value
+  assign master_usp_3 = product.metafields.custom.usp_3.value
 
   assign master_story_1_title = product.metafields.custom.vhl_story_1_title.value
   assign master_story_1_text = product.metafields.custom.vhl_story_1_text.value
@@ -97,7 +97,7 @@
   assign master_story_1_video = product.metafields.custom.vhl_story_1_video.value
   assign master_story_2_video = product.metafields.custom.vhl_story_2_video.value
 
-  assign master_product_details = product.metafields.custom.vhl_product_details
+  assign master_product_details = product.metafields.custom.specifications
 
   comment
     De vacuum-hook behoudt zijn bestaande extra blokken en section settings.
@@ -323,8 +323,8 @@
                 {{ master_product_details | metafield_tag }}
               {%- elsif template.suffix == 'vacuum-hook' and section.settings.product_details != blank -%}
                 {{ section.settings.product_details }}
-              {%- elsif product.metafields.custom.vhl_product_details != blank -%}
-                {{ product.metafields.custom.vhl_product_details | metafield_tag }}
+              {%- elsif product.metafields.custom.specifications != blank -%}
+                {{ product.metafields.custom.specifications | metafield_tag }}
               {%- else -%}
                 <p><strong>Geschikt voor:</strong> Glas, spiegels, glanzende porseleinen tegels, acryl- en kunststof douchegarnituren, glad roestvrij staal, kwarts, laminaat en andere gladde, niet-poreuze oppervlakken.</p>
                 <p><strong>Afmetingen &amp; Gewicht:</strong><br><strong>Hoogte:</strong> 2,5 cm<br><strong>Breedte:</strong> 6,1 cm<br><strong>Gewicht:</strong> 175 gram</p>
