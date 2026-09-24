@@ -85,19 +85,26 @@
     Existing section settings remain fallbacks, so the current vacuum-hook page keeps working.
   endcomment
 
-  assign master_usp_1 = product.metafields.custom.vhl_usp_1.value | default: section.settings.usp_1
-  assign master_usp_2 = product.metafields.custom.vhl_usp_2.value | default: section.settings.usp_2
-  assign master_usp_3 = product.metafields.custom.vhl_usp_3.value | default: section.settings.usp_3
+  assign master_usp_1 = product.metafields.custom.vhl_usp_1.value
+  assign master_usp_2 = product.metafields.custom.vhl_usp_2.value
+  assign master_usp_3 = product.metafields.custom.vhl_usp_3.value
 
-  assign master_story_1_title = section.settings.story_1_title
-  assign master_story_1_text = section.settings.story_1_text
-  assign master_story_2_title = section.settings.story_2_title
-  assign master_story_2_text = section.settings.story_2_text
+  assign master_story_1_title = product.metafields.custom.vhl_story_1_title.value
+  assign master_story_1_text = product.metafields.custom.vhl_story_1_text.value
+  assign master_story_2_title = product.metafields.custom.vhl_story_2_title.value
+  assign master_story_2_text = product.metafields.custom.vhl_story_2_text.value
+
+  assign master_story_1_video = product.metafields.custom.vhl_story_1_video.value
+  assign master_story_2_video = product.metafields.custom.vhl_story_2_video.value
+
+  assign master_product_details = product.metafields.custom.vhl_product_details
+
+  comment
+    De vacuum-hook behoudt zijn bestaande extra blokken en section settings.
+    De master-producten gebruiken uitsluitend productdata voor de twee standaardblokken.
+  endcomment
   assign master_story_3_title = section.settings.story_3_title | default: product.metafields.custom.vhl_story_3_title.value | default: 'Installatie zonder schade'
-  assign master_story_3_text = section.settings.story_3_text | default: product.metafields.custom.vhl_story_3_text.value | default: 'Gedaan met gaten boren en je muren beschadigen! De zuighaken bieden de ideale oplossing met hun geavanceerde TWIST & LOCK technologie. Deze haken kunnen eenvoudig worden bevestigd aan gladde oppervlakken zoals tegels, glas, spiegels, marmer, acryl, metaal, glad hout en laminaat (mits het oppervlak glad en vetvrij is) Geen schroeven of spijkers nodig.'
-
-  assign master_story_1_video = section.settings.block2_story_video | default: product.metafields.custom.vhl_story_1_video.value
-  assign master_story_2_video = section.settings.block2_tech_video | default: product.metafields.custom.vhl_story_2_video.value
+  assign master_story_3_text = section.settings.story_3_text | default: product.metafields.custom.vhl_story_3_text.value | default: 'Gedaan met gaten boren en je muren beschadigen! De zuighaken bieden de ideale oplossing met hun geavanceerde TWIST & LOCK technologie.'
   assign master_story_3_video = section.settings.block3_install_video | default: product.metafields.custom.vhl_story_3_video.value
   assign master_power_image = product.metafields.custom.vhl_power_image.value | default: section.settings.block4_power_image
 
@@ -312,7 +319,9 @@
           <details class="vhl-roha-pdp__accordion">
             <summary>Product details</summary>
             <div class="vhl-roha-pdp__accordion-body vhl-roha-pdp__accordion-body--product">
-              {%- if section.settings.product_details != blank -%}
+              {%- if template.suffix != 'vacuum-hook' and master_product_details != blank -%}
+                {{ master_product_details | metafield_tag }}
+              {%- elsif template.suffix == 'vacuum-hook' and section.settings.product_details != blank -%}
                 {{ section.settings.product_details }}
               {%- elsif product.metafields.custom.vhl_product_details != blank -%}
                 {{ product.metafields.custom.vhl_product_details | metafield_tag }}
@@ -341,6 +350,7 @@
 
   <!-- BLOK 2: storytelling + techniek -->
   <div class="vhl-roha-b2">
+    {%- if master_story_1_title != blank or master_story_1_text != blank or master_story_1_video != blank -%}
     <div class="vhl-roha-b2__story">
       <div class="vhl-roha-b2__story-copy">
         <div>
@@ -370,7 +380,9 @@
         {%- endif -%}
       </div>
     </div>
+    {%- endif -%}
 
+    {%- if master_story_2_title != blank or master_story_2_text != blank or master_story_2_video != blank -%}
     <div class="vhl-roha-b2__tech">
       <div class="vhl-roha-b2__tech-media">
         {%- if master_story_2_video != blank -%}
@@ -400,6 +412,7 @@
         </div>
       </div>
     </div>
+    {%- endif -%}
 
     {%- comment -%}
       BLOK 3 + BLOK 4 zijn uitsluitend voor de bestaande vacuum-hook producttemplate.
@@ -2144,41 +2157,41 @@
   "settings": [
     {
       "type": "header",
-      "content": "CONTENTBLOK 1 — HIER INVULLEN"
+      "content": "MASTER: inhoud komt per product uit metafields"
     },
     {
       "type": "text",
       "id": "story_1_title",
-      "label": "CONTENTBLOK 1 — TITEL"
+      "label": "Fallback titel blok 1 (alleen legacy)"
     },
     {
       "type": "textarea",
       "id": "story_1_text",
-      "label": "CONTENTBLOK 1 — TEKST"
+      "label": "Fallback tekst blok 1 (alleen legacy)"
     },
     {
       "type": "video",
       "id": "block2_story_video",
-      "label": "CONTENTBLOK 1 — VIDEO"
+      "label": "Fallback video blok 1 (alleen legacy)"
     },
     {
       "type": "header",
-      "content": "CONTENTBLOK 2 — HIER INVULLEN"
+      "content": "MASTER: blok 2 komt per product uit metafields"
     },
     {
       "type": "text",
       "id": "story_2_title",
-      "label": "CONTENTBLOK 2 — TITEL"
+      "label": "Fallback titel blok 2 (alleen legacy)"
     },
     {
       "type": "textarea",
       "id": "story_2_text",
-      "label": "CONTENTBLOK 2 — TEKST"
+      "label": "Fallback tekst blok 2 (alleen legacy)"
     },
     {
       "type": "video",
       "id": "block2_tech_video",
-      "label": "CONTENTBLOK 2 — VIDEO"
+      "label": "Fallback video blok 2 (alleen legacy)"
     },
     {
       "type": "header",
