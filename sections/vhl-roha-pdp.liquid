@@ -296,12 +296,18 @@
           </div>
         </div>
 
+        {%- comment -%}
+          Trust card is alleen zichtbaar op de bestaande vacuum-hook template.
+          Op vhl-master en toekomstige producttemplates wordt dit blok niet gerenderd.
+        {%- endcomment -%}
+        {%- if template.suffix == 'vacuum-hook' -%}
         <div class="vhl-roha-pdp__trust-card vhl-roha-pdp__trust-card--reference">
           <span class="vhl-roha-pdp__trust-badge">{{ master_trust_badge }}</span>
           <p class="vhl-roha-pdp__trust-heading">{{ master_trust_heading }}</p>
           <p class="vhl-roha-pdp__trust-body">{{ master_trust_body }}</p>
           <p class="vhl-roha-pdp__trust-warning">{{ master_trust_warning }}</p>
         </div>
+        {%- endif -%}
 
         <div class="vhl-roha-pdp__accordions">
           <details class="vhl-roha-pdp__accordion">
