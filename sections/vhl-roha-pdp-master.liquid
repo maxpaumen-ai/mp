@@ -361,12 +361,13 @@
       <div class="vhl-roha-b2__story-media">
         {%- if master_story_1_video != blank -%}
           {{ master_story_1_video | video_tag:
-            autoplay: true,
+            autoplay: false,
             loop: true,
             muted: true,
             controls: false,
             playsinline: true,
-            class: 'vhl-roha-b2__story-video'
+            preload: 'none',
+            class: 'vhl-roha-b2__story-video vhl-roha-lazy-video'
           }}
         {%- else -%}
           <img
@@ -387,12 +388,13 @@
       <div class="vhl-roha-b2__tech-media">
         {%- if master_story_2_video != blank -%}
           {{ master_story_2_video | video_tag:
-            autoplay: true,
+            autoplay: false,
             loop: true,
             muted: true,
             controls: false,
             playsinline: true,
-            class: 'vhl-roha-b2__tech-video'
+            preload: 'none',
+            class: 'vhl-roha-b2__tech-video vhl-roha-lazy-video'
           }}
         {%- else -%}
           <img
@@ -2148,6 +2150,59 @@
   }
 }
 </style>
+
+
+<script>
+(() => {
+  const root = document.getElementById({{ root_id | json }});
+  if (!root) return;
+
+  const videos = Array.from(root.querySelectorAll('.vhl-roha-lazy-video'));
+  if (!videos.length) return;
+
+  const pauseAll = () => {
+    videos.forEach((video) => {
+      if (!video.paused) video.pause();
+    });
+  };
+
+  if (!('IntersectionObserver' in window)) {
+    videos.forEach((video) => {
+      video.preload = 'metadata';
+      const playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(() => {});
+    });
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const video = entry.target;
+
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.15) {
+        if (video.preload === 'none') {
+          video.preload = 'metadata';
+          video.load();
+        }
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(() => {});
+      } else if (!video.paused) {
+        video.pause();
+      }
+    });
+  }, {
+    root: null,
+    rootMargin: '180px 0px',
+    threshold: [0, 0.15, 0.5]
+  });
+
+  videos.forEach((video) => observer.observe(video));
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) pauseAll();
+  }, { passive: true });
+})();
+</script>
 
 {% schema %}
 {
