@@ -1,3 +1,4 @@
+```
 {%- comment -%}
   VHL ROHA-style PDP — above-the-fold, rebuilt as a single 3-zone
   composition (thumbnail rail / main media / purchase panel) matching
@@ -78,6 +79,33 @@
   endfor
 
   assign root_id = 'VHLRohaPdp-' | append: section.id
+
+  comment
+    MASTER PRODUCT DATA
+    Per product can be filled through Shopify product metafields in namespace custom.
+    Existing section settings remain fallbacks, so the current vacuum-hook page keeps working.
+  endcomment
+
+  assign master_usp_1 = product.metafields.custom.vhl_usp_1.value | default: section.settings.usp_1
+  assign master_usp_2 = product.metafields.custom.vhl_usp_2.value | default: section.settings.usp_2
+  assign master_usp_3 = product.metafields.custom.vhl_usp_3.value | default: section.settings.usp_3
+
+  assign master_story_1_title = product.metafields.custom.vhl_story_1_title.value | default: 'Esthetische én praktische haken'
+  assign master_story_1_text = product.metafields.custom.vhl_story_1_text.value | default: 'Of je nu een modern, rustiek of chic interieur hebt. Onze vacuümhaken passen overal perfect bij. Ze voegen meteen een elegante touch toe én bieden praktische functionaliteit voor badkamer, keuken, toilet,...'
+  assign master_story_2_title = product.metafields.custom.vhl_story_2_title.value | default: 'TWIST & LOCK Technologie'
+  assign master_story_2_text = product.metafields.custom.vhl_story_2_text.value | default: 'Onze gepatenteerde TWIST & LOCK-technologie maakt gebruik van een geavanceerd vacuümzuigsysteem dat multi-compressie en krachtige zuigkracht combineert, wat zorgt voor een veilige en herbruikbare bevestiging.'
+  assign master_story_3_title = product.metafields.custom.vhl_story_3_title.value | default: 'Installatie zonder schade'
+  assign master_story_3_text = product.metafields.custom.vhl_story_3_text.value | default: 'Gedaan met gaten boren en je muren beschadigen! De zuighaken bieden de ideale oplossing met hun geavanceerde TWIST & LOCK technologie. Deze haken kunnen eenvoudig worden bevestigd aan gladde oppervlakken zoals tegels, glas, spiegels, marmer, acryl, metaal, glad hout en laminaat (mits het oppervlak glad en vetvrij is) Geen schroeven of spijkers nodig.'
+
+  assign master_story_1_video = product.metafields.custom.vhl_story_1_video.value | default: section.settings.block2_story_video
+  assign master_story_2_video = product.metafields.custom.vhl_story_2_video.value | default: section.settings.block2_tech_video
+  assign master_story_3_video = product.metafields.custom.vhl_story_3_video.value | default: section.settings.block3_install_video
+  assign master_power_image = product.metafields.custom.vhl_power_image.value | default: section.settings.block4_power_image
+
+  assign master_trust_badge = product.metafields.custom.vhl_trust_badge.value | default: section.settings.trust_badge_text | default: '✹ Exclusief bij VANHOUTEN LIVING'
+  assign master_trust_heading = product.metafields.custom.vhl_trust_heading.value | default: section.settings.trust_heading | default: 'Premium vacuüm design'
+  assign master_trust_body = product.metafields.custom.vhl_trust_body.value | default: section.settings.trust_body | default: 'Ontworpen voor een strakke badkamer zonder onnodig boren of lijmen.'
+  assign master_trust_warning = product.metafields.custom.vhl_trust_warning.value | default: section.settings.trust_warning | default: 'Minimalistisch, praktisch en passend binnen een modern interieur.'
 -%}
 
 {{ 'component-rating.css' | asset_url | stylesheet_tag }}
@@ -167,9 +195,15 @@
         </div>
 
         <ul class="vhl-roha-pdp__usps vhl-roha-pdp__usps--reference">
-          <li><span class="vhl-roha-pdp__check">✓</span><span>Geen boren of lijmen meer</span></li>
-          <li><span class="vhl-roha-pdp__check">✓</span><span>Stevige bevestiging voor dagelijks gebruik</span></li>
-          <li><span class="vhl-roha-pdp__check">✓</span><span>Strak en tijdloos design</span></li>
+          {%- if master_usp_1 != blank or master_usp_2 != blank or master_usp_3 != blank -%}
+            {%- if master_usp_1 != blank -%}<li><span class="vhl-roha-pdp__check">✓</span><span>{{ master_usp_1 }}</span></li>{%- endif -%}
+            {%- if master_usp_2 != blank -%}<li><span class="vhl-roha-pdp__check">✓</span><span>{{ master_usp_2 }}</span></li>{%- endif -%}
+            {%- if master_usp_3 != blank -%}<li><span class="vhl-roha-pdp__check">✓</span><span>{{ master_usp_3 }}</span></li>{%- endif -%}
+          {%- else -%}
+            <li><span class="vhl-roha-pdp__check">✓</span><span>Geen boren of lijmen meer</span></li>
+            <li><span class="vhl-roha-pdp__check">✓</span><span>Stevige bevestiging voor dagelijks gebruik</span></li>
+            <li><span class="vhl-roha-pdp__check">✓</span><span>Strak en tijdloos design</span></li>
+          {%- endif -%}
         </ul>
 
         <product-form class="vhl-roha-pdp__form-wrapper">
@@ -263,21 +297,25 @@
         </div>
 
         <div class="vhl-roha-pdp__trust-card vhl-roha-pdp__trust-card--reference">
-          <span class="vhl-roha-pdp__trust-badge">✹ Exclusief bij VANHOUTEN LIVING</span>
-          <p class="vhl-roha-pdp__trust-heading">Premium vacuüm design</p>
-          <p class="vhl-roha-pdp__trust-body">Ontworpen voor een strakke badkamer zonder onnodig boren of lijmen.</p>
-          <p class="vhl-roha-pdp__trust-warning">Minimalistisch, praktisch en passend binnen een modern interieur.</p>
+          <span class="vhl-roha-pdp__trust-badge">{{ master_trust_badge }}</span>
+          <p class="vhl-roha-pdp__trust-heading">{{ master_trust_heading }}</p>
+          <p class="vhl-roha-pdp__trust-body">{{ master_trust_body }}</p>
+          <p class="vhl-roha-pdp__trust-warning">{{ master_trust_warning }}</p>
         </div>
 
         <div class="vhl-roha-pdp__accordions">
           <details class="vhl-roha-pdp__accordion">
             <summary>Product details</summary>
             <div class="vhl-roha-pdp__accordion-body vhl-roha-pdp__accordion-body--product">
-              <p><strong>Geschikt voor:</strong> Glas, spiegels, glanzende porseleinen tegels, acryl- en kunststof douchegarnituren, glad roestvrij staal, kwarts, laminaat en andere gladde, niet-poreuze oppervlakken.</p>
-              <p><strong>Afmetingen &amp; Gewicht:</strong><br><strong>Hoogte:</strong> 2,5 cm<br><strong>Breedte:</strong> 6,1 cm<br><strong>Gewicht:</strong> 175 gram</p>
-              <p><strong>Materiaal:</strong> Een hoogwaardige mix van ABS, rubber en solide kunststof, zorgvuldig geselecteerd voor duurzaamheid en stevigheid.</p>
-              <p><strong>Verkrijgbare kleuren:</strong> Mat zwart - Mat goud - Chrome - Wit - Glossy Gold (binnenkort) - Gun Metal (binnenkort)</p>
-              <p><strong>Inhoud van de verpakking:</strong><br>1 complete set, bestaande uit <strong>4 stuks.</strong></p>
+              {%- if product.metafields.custom.vhl_product_details != blank -%}
+                {{ product.metafields.custom.vhl_product_details | metafield_tag }}
+              {%- else -%}
+                <p><strong>Geschikt voor:</strong> Glas, spiegels, glanzende porseleinen tegels, acryl- en kunststof douchegarnituren, glad roestvrij staal, kwarts, laminaat en andere gladde, niet-poreuze oppervlakken.</p>
+                <p><strong>Afmetingen &amp; Gewicht:</strong><br><strong>Hoogte:</strong> 2,5 cm<br><strong>Breedte:</strong> 6,1 cm<br><strong>Gewicht:</strong> 175 gram</p>
+                <p><strong>Materiaal:</strong> Een hoogwaardige mix van ABS, rubber en solide kunststof, zorgvuldig geselecteerd voor duurzaamheid en stevigheid.</p>
+                <p><strong>Verkrijgbare kleuren:</strong> Mat zwart - Mat goud - Chrome - Wit - Glossy Gold (binnenkort) - Gun Metal (binnenkort)</p>
+                <p><strong>Inhoud van de verpakking:</strong><br>1 complete set, bestaande uit <strong>4 stuks.</strong></p>
+              {%- endif -%}
             </div>
           </details>
           <details class="vhl-roha-pdp__accordion">
@@ -299,13 +337,13 @@
     <div class="vhl-roha-b2__story">
       <div class="vhl-roha-b2__story-copy">
         <div>
-          <h2>Esthetische én praktische haken</h2>
-          <p>Of je nu een modern, rustiek of chic interieur hebt. Onze vacuümhaken passen overal perfect bij. Ze voegen meteen een elegante touch toe én bieden praktische functionaliteit voor badkamer, keuken, toilet,...</p>
+          <h2>{{ master_story_1_title }}</h2>
+          <p>{{ master_story_1_text }}</p>
         </div>
       </div>
       <div class="vhl-roha-b2__story-media">
-        {%- if section.settings.block2_story_video != blank -%}
-          {{ section.settings.block2_story_video | video_tag:
+        {%- if master_story_1_video != blank -%}
+          {{ master_story_1_video | video_tag:
             autoplay: true,
             loop: true,
             muted: true,
@@ -328,8 +366,8 @@
 
     <div class="vhl-roha-b2__tech">
       <div class="vhl-roha-b2__tech-media">
-        {%- if section.settings.block2_tech_video != blank -%}
-          {{ section.settings.block2_tech_video | video_tag:
+        {%- if master_story_2_video != blank -%}
+          {{ master_story_2_video | video_tag:
             autoplay: true,
             loop: true,
             muted: true,
@@ -350,8 +388,8 @@
       </div>
       <div class="vhl-roha-b2__tech-copy">
         <div>
-          <h2>TWIST &amp; LOCK Technologie</h2>
-          <p>Onze gepatenteerde TWIST &amp; LOCK-technologie maakt gebruik van een geavanceerd vacuümzuigsysteem dat multi-compressie en krachtige zuigkracht combineert, wat zorgt voor een veilige en herbruikbare bevestiging.</p>
+          <h2>{{ master_story_2_title }}</h2>
+          <p>{{ master_story_2_text }}</p>
         </div>
       </div>
     </div>
@@ -360,13 +398,13 @@
     <div class="vhl-roha-b2__install">
       <div class="vhl-roha-b2__install-copy">
         <div>
-          <h2>Installatie zonder schade</h2>
-          <p>Gedaan met gaten boren en je muren beschadigen! De zuighaken bieden de ideale oplossing met hun geavanceerde <strong>TWIST &amp; LOCK</strong> technologie. Deze haken kunnen eenvoudig worden bevestigd aan gladde oppervlakken zoals tegels, glas, spiegels, marmer, acryl, metaal, glad hout en laminaat (mits het oppervlak glad en vetvrij is) Geen schroeven of spijkers nodig.</p>
+          <h2>{{ master_story_3_title }}</h2>
+          <p>{{ master_story_3_text }}</p>
         </div>
       </div>
       <div class="vhl-roha-b2__install-media">
-        {%- if section.settings.block3_install_video != blank -%}
-          {{ section.settings.block3_install_video | video_tag:
+        {%- if master_story_3_video != blank -%}
+          {{ master_story_3_video | video_tag:
             autoplay: true,
             loop: true,
             muted: true,
@@ -382,15 +420,15 @@
 
     <!-- BLOK 4: Ontdek de kracht -->
     <div class="vhl-roha-b2__power">
-      {%- if section.settings.block4_power_image != blank -%}
+      {%- if master_power_image != blank -%}
         {{
-          section.settings.block4_power_image
+          master_power_image
           | image_url: width: 2400
           | image_tag:
             class: 'vhl-roha-b2__power-image',
             loading: 'lazy',
             widths: '750, 1100, 1500, 1900, 2400',
-            alt: section.settings.block4_power_image.alt
+            alt: master_power_image.alt
         }}
       {%- else -%}
         <div class="vhl-roha-b2__power-placeholder">
@@ -2369,3 +2407,4 @@
   }
 }
 </style>
+```
