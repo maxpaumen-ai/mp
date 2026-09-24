@@ -1,37 +1,377 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
+{%- comment -%}
+  VHL Vacuum Hook PDP — ROHA-style review wall.
+  Alleen merchant-ingevulde reviews worden getoond.
+  Product rating/count komt uitsluitend uit product.metafields.reviews.
+{%- endcomment -%}
+
+{%- liquid
+  assign has_rating = false
+  if product.metafields.reviews.rating.value != blank
+    assign has_rating = true
+  endif
+
+  assign visible_blocks = 0
+  for block in section.blocks
+    if block.settings.quote != blank and block.settings.author != blank
+      assign visible_blocks = visible_blocks | plus: 1
+    endif
+  endfor
+
+  assign has_content = false
+  if has_rating or visible_blocks > 0
+    assign has_content = true
+  endif
+-%}
+
+{% if has_content %}
+<section id="VHLVacuumReviews-{{ section.id }}" class="vhl-reviews" {{ section.shopify_attributes }}>
+  <div class="vhl-reviews__inner">
+
+    <div class="vhl-reviews__toolbar">
+      <div class="vhl-reviews__summary">
+        {% if has_rating %}
+          <span class="vhl-reviews__summary-stars" aria-hidden="true">★★★★★</span>
+          {% if product.metafields.reviews.rating_count.value != blank %}
+            <span class="vhl-reviews__count">{{ product.metafields.reviews.rating_count.value }} Reviews</span>
+          {% elsif product.metafields.reviews.rating_count != blank %}
+            <span class="vhl-reviews__count">{{ product.metafields.reviews.rating_count }} Reviews</span>
+          {% endif %}
+        {% elsif visible_blocks > 0 %}
+          <span class="vhl-reviews__summary-stars" aria-hidden="true">★★★★★</span>
+          <span class="vhl-reviews__count">{{ visible_blocks }} Reviews</span>
+        {% endif %}
+      </div>
+
+      <div class="vhl-reviews__actions">
+        {% if section.settings.write_review_link != blank %}
+          <a class="vhl-reviews__write" href="{{ section.settings.write_review_link }}">Write a review</a>
+        {% endif %}
+        <span class="vhl-reviews__filter" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 7h16M7 12h10M10 17h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    {% if visible_blocks > 0 %}
+      <div class="vhl-reviews__masonry">
+        {% for block in section.blocks %}
+          {% if block.settings.quote != blank and block.settings.author != blank %}
+            <article class="vhl-reviews__card" {{ block.shopify_attributes }}>
+              {% if block.settings.image != blank %}
+                <div class="vhl-reviews__media">
+                  {{
+                    block.settings.image
+                    | image_url: width: 900
+                    | image_tag:
+                      loading: 'lazy',
+                      class: 'vhl-reviews__image',
+                      widths: '300,450,600,750,900',
+                      sizes: '(min-width: 990px) 25vw, (min-width: 600px) 50vw, 100vw'
+                  }}
+                </div>
+              {% endif %}
+
+              <div class="vhl-reviews__body">
+                <div class="vhl-reviews__identity">
+                  <span class="vhl-reviews__author">{{ block.settings.author | escape }}</span>
+                  {% if block.settings.verified %}
+                    <span class="vhl-reviews__verified">
+                      <span class="vhl-reviews__check">✓</span>
+                      Verified
+                    </span>
+                  {% endif %}
+                </div>
+
+                {% if block.settings.rating > 0 %}
+                  <div class="vhl-reviews__stars" aria-label="{{ block.settings.rating }} van 5 sterren">
+                    {% for i in (1..5) %}
+                      <span{% unless i <= block.settings.rating %} class="is-empty"{% endunless %}>★</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                <p class="vhl-reviews__quote">{{ block.settings.quote | escape | newline_to_br }}</p>
+              </div>
+            </article>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% style %}
+#VHLVacuumReviews-{{ section.id }} {
+  background: #fff;
+  padding: 52px 20px 84px;
+  color: #151515;
+}
+
+#VHLVacuumReviews-{{ section.id }} * {
+  box-sizing: border-box;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__inner {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 1px 18px;
+  border-bottom: 1px solid #dedede;
+  margin-bottom: 18px;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__summary,
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__actions {
+  display: flex;
+  align-items: center;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__summary {
+  gap: 9px;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__summary-stars {
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 1px;
+  color: #111;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__count {
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__actions {
+  gap: 13px;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__write {
+  color: #171717;
+  font-size: 13px;
+  line-height: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__filter {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #d8d8d8;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  color: #222;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__filter svg {
+  width: 16px;
+  height: 16px;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__masonry {
+  columns: 4;
+  column-gap: 12px;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__card {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 12px;
+  break-inside: avoid;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dedede;
+  border-radius: 3px;
+  vertical-align: top;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__media {
+  width: 100%;
+  overflow: hidden;
+  background: #f4f4f4;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__body {
+  padding: 13px 14px 16px;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__identity {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__author {
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #161616;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 500;
+  color: #777;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__check {
+  display: inline-grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #171717;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__stars {
+  display: flex;
+  gap: 1px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: .4px;
+  color: #111;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__stars .is-empty {
+  color: #d6d6d6;
+}
+
+#VHLVacuumReviews-{{ section.id }} .vhl-reviews__quote {
+  margin: 0;
+  color: #262626;
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+@media screen and (max-width: 989px) {
+  #VHLVacuumReviews-{{ section.id }} {
+    padding: 44px 16px 68px;
+  }
+
+  #VHLVacuumReviews-{{ section.id }} .vhl-reviews__masonry {
+    columns: 2;
+    column-gap: 12px;
+  }
+}
+
+@media screen and (max-width: 599px) {
+  #VHLVacuumReviews-{{ section.id }} {
+    padding: 38px 12px 56px;
+  }
+
+  #VHLVacuumReviews-{{ section.id }} .vhl-reviews__toolbar {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  #VHLVacuumReviews-{{ section.id }} .vhl-reviews__masonry {
+    columns: 1;
+  }
+
+  #VHLVacuumReviews-{{ section.id }} .vhl-reviews__write {
+    font-size: 12px;
+  }
+}
+{% endstyle %}
+{% endif %}
+
+{% schema %}
 {
-  "sections": {
-    "main": {
-      "type": "main-page",
-      "disabled": true,
-      "settings": {
-        "use_theme_colors": true,
-        "padding_top": 28,
-        "padding_bottom": 28
-      }
+  "name": "VHL Vacuumhaak — Reviews",
+  "tag": "section",
+  "class": "vhl-vacuum-reviews-section",
+  "max_blocks": 20,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Boventitel (niet gebruikt)"
     },
-    "vhl_installatie_6BPk7X": {
-      "type": "vhl-installatie",
-      "name": "VHL Installatie",
-      "settings": {
-        "installatievideo": "shopify://files/videos/437b0d4954f643e39b02c9e758647d07.HD-1080p-7.2Mbps-43862385.mp4",
-        "title": "Hoe installeer ik mijn zuignaphaak?",
-        "intro": "<p>Dankzij het innovatieve vacuümzuigsysteem is de installatie zo gebeurd. In tegenstelling tot andere muurbevestigde of zelfklevende haken, kunnen de VHL zuignaphaken gemakkelijk worden verwijderd zonder gaten, vlekken of kleverige resten achter te laten!</p>",
-        "bottom_text": "<p>Heb je moeite met het installeren van je zuignaphaak? Controleer of je het op een geschikt oppervlak plaatst.</p>",
-        "surface_link": ""
-      }
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titel (niet gebruikt)"
+    },
+    {
+      "type": "url",
+      "id": "write_review_link",
+      "label": "Link voor 'Write a review' (optioneel)"
     }
-  },
-  "order": [
-    "main",
-    "vhl_installatie_6BPk7X"
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review (echte klant)",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Vul alleen echte klantreviews in. Laat reviewtekst of naam leeg om de kaart niet te tonen."
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Reviewtekst"
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Naam klant"
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Sterren",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Reviewfoto"
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verified",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "VHL Vacuumhaak — Reviews"
+    }
   ]
 }
+{% endschema %}
