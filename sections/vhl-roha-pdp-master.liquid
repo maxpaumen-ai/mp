@@ -2204,42 +2204,84 @@
   const holders = Array.from(root.querySelectorAll('[data-vhl-deferred-video]'));
   if (!holders.length) return;
 
+  const visibleVideos = new Set();
+  let scrollResumeTimer = null;
+  let isScrolling = false;
+
+  const safePlay = (video) => {
+    if (!video || isScrolling || !visibleVideos.has(video)) return;
+    const promise = video.play();
+    if (promise && typeof promise.catch === 'function') {
+      promise.catch(() => {});
+    }
+  };
+
   const mountVideo = (holder) => {
-    if (holder.dataset.vhlLoaded === 'true') return;
+    if (holder.dataset.vhlLoaded === 'true') {
+      return holder.querySelector('video');
+    }
+
     const template = holder.querySelector('template');
-    if (!template) return;
+    if (!template) return null;
 
     const fragment = template.content.cloneNode(true);
     holder.dataset.vhlLoaded = 'true';
     holder.replaceChildren(fragment);
 
     const video = holder.querySelector('video');
-    if (!video) return;
-
-    const playPromise = video.play();
-    if (playPromise && typeof playPromise.catch === 'function') {
-      playPromise.catch(() => {});
+    if (video) {
+      video.pause();
     }
+    return video;
   };
 
-  if (!('IntersectionObserver' in window)) {
-    holders.forEach(mountVideo);
-    return;
-  }
-
-  const observer = new IntersectionObserver((entries) => {
+  const visibilityObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      observer.unobserve(entry.target);
-      mountVideo(entry.target);
+      const holder = entry.target;
+
+      if (entry.isIntersecting) {
+        const video = mountVideo(holder);
+        if (!video) return;
+        visibleVideos.add(video);
+        safePlay(video);
+      } else {
+        const video = holder.querySelector('video');
+        if (!video) return;
+        visibleVideos.delete(video);
+        video.pause();
+      }
     });
   }, {
     root: null,
-    rootMargin: '120px 0px',
-    threshold: 0.01
+    rootMargin: '100px 0px',
+    threshold: 0.05
   });
 
-  holders.forEach((holder) => observer.observe(holder));
+  holders.forEach((holder) => visibilityObserver.observe(holder));
+
+  const pauseVisibleVideos = () => {
+    visibleVideos.forEach((video) => video.pause());
+  };
+
+  const resumeVisibleVideos = () => {
+    visibleVideos.forEach((video) => safePlay(video));
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!isScrolling) {
+      isScrolling = true;
+      pauseVisibleVideos();
+    }
+
+    if (scrollResumeTimer) {
+      window.clearTimeout(scrollResumeTimer);
+    }
+
+    scrollResumeTimer = window.setTimeout(() => {
+      isScrolling = false;
+      resumeVisibleVideos();
+    }, 180);
+  }, { passive: true });
 })();
 </script>
 
