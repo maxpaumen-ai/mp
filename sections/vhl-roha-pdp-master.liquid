@@ -1708,24 +1708,50 @@
 (() => {
   const root = document.getElementById('{{ root_id }}');
   if (!root) return;
+
   const mainAtc = root.querySelector('[data-vhl-roha-atc]');
   const sticky = root.querySelector('[data-vhl-sticky]');
   const stickyAdd = root.querySelector('[data-vhl-sticky-add]');
   if (!mainAtc || !sticky || !stickyAdd) return;
 
-  const syncSticky = () => {
-    const rect = mainAtc.getBoundingClientRect();
-    const mainVisible = rect.bottom > 0 && rect.top < window.innerHeight;
-    sticky.hidden = mainVisible || window.scrollY < 250;
+  let mainAtcVisible = true;
+  let passedMainAtc = false;
+
+  const renderSticky = () => {
+    sticky.hidden = mainAtcVisible || !passedMainAtc;
   };
 
   stickyAdd.addEventListener('click', () => {
     if (!mainAtc.disabled) mainAtc.click();
   });
 
-  syncSticky();
-  window.addEventListener('scroll', syncSticky, { passive: true });
-  window.addEventListener('resize', syncSticky);
+  if (!('IntersectionObserver' in window)) {
+    sticky.hidden = true;
+    return;
+  }
+
+  const visibilityObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      mainAtcVisible = entry.isIntersecting;
+      renderSticky();
+    });
+  }, {
+    root: null,
+    threshold: 0.01
+  });
+
+  const positionObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      passedMainAtc = !entry.isIntersecting && entry.boundingClientRect.bottom < 0;
+      renderSticky();
+    });
+  }, {
+    root: null,
+    threshold: 0
+  });
+
+  visibilityObserver.observe(mainAtc);
+  positionObserver.observe(mainAtc);
 })();
 </script>
 
