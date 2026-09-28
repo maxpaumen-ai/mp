@@ -372,7 +372,7 @@
             {%- endif -%}
             <template>
               {{ master_story_1_video | video_tag:
-                autoplay: true,
+                autoplay: false,
                 loop: true,
                 muted: true,
                 controls: false,
@@ -412,7 +412,7 @@
             {%- endif -%}
             <template>
               {{ master_story_2_video | video_tag:
-                autoplay: true,
+                autoplay: false,
                 loop: true,
                 muted: true,
                 controls: false,
@@ -2205,31 +2205,27 @@
   if (!holders.length) return;
 
   const visibleVideos = new Set();
-  let scrollResumeTimer = null;
+  let resumeTimer = null;
   let isScrolling = false;
 
   const safePlay = (video) => {
     if (!video || isScrolling || !visibleVideos.has(video)) return;
     const promise = video.play();
-    if (promise && typeof promise.catch === 'function') {
-      promise.catch(() => {});
-    }
+    if (promise && typeof promise.catch === 'function') promise.catch(() => {});
   };
 
   const mountVideo = (holder) => {
-    if (holder.dataset.vhlLoaded === 'true') {
-      return holder.querySelector('video');
-    }
+    if (holder.dataset.vhlLoaded === 'true') return holder.querySelector('video');
 
     const template = holder.querySelector('template');
     if (!template) return null;
 
-    const fragment = template.content.cloneNode(true);
     holder.dataset.vhlLoaded = 'true';
-    holder.replaceChildren(fragment);
+    holder.replaceChildren(template.content.cloneNode(true));
 
     const video = holder.querySelector('video');
     if (video) {
+      video.autoplay = false;
       video.pause();
     }
     return video;
@@ -2238,15 +2234,13 @@
   const visibilityObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       const holder = entry.target;
+      const video = entry.isIntersecting ? mountVideo(holder) : holder.querySelector('video');
+      if (!video) return;
 
       if (entry.isIntersecting) {
-        const video = mountVideo(holder);
-        if (!video) return;
         visibleVideos.add(video);
         safePlay(video);
       } else {
-        const video = holder.querySelector('video');
-        if (!video) return;
         visibleVideos.delete(video);
         video.pause();
       }
@@ -2259,29 +2253,23 @@
 
   holders.forEach((holder) => visibilityObserver.observe(holder));
 
-  const pauseVisibleVideos = () => {
-    visibleVideos.forEach((video) => video.pause());
-  };
+  const stopForScroll = () => {
+    isScrolling = true;
 
-  const resumeVisibleVideos = () => {
-    visibleVideos.forEach((video) => safePlay(video));
-  };
+    visibleVideos.forEach((video) => {
+      if (!video.paused) video.pause();
+    });
 
-  window.addEventListener('scroll', () => {
-    if (!isScrolling) {
-      isScrolling = true;
-      pauseVisibleVideos();
-    }
-
-    if (scrollResumeTimer) {
-      window.clearTimeout(scrollResumeTimer);
-    }
-
-    scrollResumeTimer = window.setTimeout(() => {
+    if (resumeTimer) window.clearTimeout(resumeTimer);
+    resumeTimer = window.setTimeout(() => {
       isScrolling = false;
-      resumeVisibleVideos();
-    }, 180);
-  }, { passive: true });
+      visibleVideos.forEach(safePlay);
+    }, 500);
+  };
+
+  window.addEventListener('scroll', stopForScroll, { passive: true });
+  window.addEventListener('wheel', stopForScroll, { passive: true });
+  window.addEventListener('touchmove', stopForScroll, { passive: true });
 })();
 </script>
 
