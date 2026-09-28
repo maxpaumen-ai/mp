@@ -19,6 +19,8 @@
 {% # theme-check-disable MissingTemplate %}
 {% liquid
   render 'vite-tag' with 'elxr-styles.css'
-  render 'vite-tag' with 'elxr-core.ts'
+  unless template.suffix == 'vhl-master'
+    render 'vite-tag' with 'elxr-core.ts'
+  endunless
 %}
 {% # theme-check-enable MissingTemplate %}
