@@ -13,14 +13,16 @@
 {% endcomment %}
 
 <!-- Custom Scripts -->
-<script src="{{ 'custom.js' | asset_url }}" defer></script>
+{% comment %}
+  VHL DIAGNOSE: custom.js tijdelijk uitgeschakeld.
+  Reden: custom.js start KachingApp sitebreed en blijft iedere 300ms zoeken
+  naar <kaching-bundle> wanneer dit element niet bestaat.
+{% endcomment %}
 
 <!-- Vite Build System -->
 {% # theme-check-disable MissingTemplate %}
 {% liquid
   render 'vite-tag' with 'elxr-styles.css'
-  unless template.suffix == 'vhl-master'
-    render 'vite-tag' with 'elxr-core.ts'
-  endunless
+  render 'vite-tag' with 'elxr-core.ts'
 %}
 {% # theme-check-enable MissingTemplate %}
