@@ -95,7 +95,7 @@
   assign master_story_2_text = product.metafields.custom.vhl_story_2_text.value
 
   assign master_story_1_video = product.metafields.custom.vhl_story_1_video.value
-  assign master_story_2_video = product.metafields.custom.vhl_story_2_video.value
+  assign master_story_2_image = product.metafields.custom.vhl_story_2_image.value
 
   assign master_product_details = product.metafields.custom.specifications
 
@@ -360,9 +360,14 @@
       </div>
       <div class="vhl-roha-b2__story-media">
         {%- if master_story_1_video != blank -%}
-          <video class="vhl-roha-b2__story-video" autoplay loop muted playsinline preload="auto">
-            <source src="https://cdn.shopify.com/videos/c/o/v/5f5476a531854bb9b6fca0a82e491537.mp4" type="video/mp4">
-          </video>
+          {{ master_story_1_video | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            class: 'vhl-roha-b2__story-video'
+          }}
         {%- else -%}
           <img
             src="{{ 'vhl-block2-story-reference.png' | asset_url }}"
@@ -377,17 +382,21 @@
     </div>
     {%- endif -%}
 
-    {%- if master_story_2_title != blank or master_story_2_text != blank or master_story_2_video != blank -%}
+    {%- if master_story_2_title != blank or master_story_2_text != blank or master_story_2_image != blank -%}
     <div class="vhl-roha-b2__tech">
       <div class="vhl-roha-b2__tech-media">
-        {%- if master_story_2_video != blank -%}
-          <video class="vhl-roha-b2__tech-video" autoplay loop muted playsinline preload="auto">
-            <source src="https://cdn.shopify.com/videos/c/o/v/72c97980c8024815a33817ff18e2f97f.mp4" type="video/mp4">
-          </video>
+        {%- if master_story_2_image != blank -%}
+          {{ master_story_2_image | image_url: width: 1600 | image_tag:
+            class: 'vhl-roha-b2__tech-image',
+            loading: 'lazy',
+            widths: '550, 800, 1100, 1600',
+            sizes: '(max-width: 749px) 100vw, 50vw',
+            alt: master_story_2_title
+          }}
         {%- else -%}
           <img
             src="{{ 'vhl-block2-tech-hook-reference.png' | asset_url }}"
-            alt="Exploded view van de TWIST &amp; LOCK vacuümhaak"
+            alt="{{ master_story_2_title | escape }}"
             class="vhl-roha-b2__tech-image"
             loading="lazy"
             width="550"
@@ -2257,9 +2266,9 @@
       "label": "Fallback tekst blok 2 (alleen legacy)"
     },
     {
-      "type": "video",
-      "id": "block2_tech_video",
-      "label": "Fallback video blok 2 (alleen legacy)"
+      "type": "image_picker",
+      "id": "block2_tech_image",
+      "label": "Fallback afbeelding blok 2 (alleen legacy)"
     },
     {
       "type": "header",
