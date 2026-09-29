@@ -360,28 +360,14 @@
       </div>
       <div class="vhl-roha-b2__story-media">
         {%- if master_story_1_video != blank -%}
-          <div class="vhl-roha-deferred-video" data-vhl-deferred-video>
-            {%- if master_story_1_video.preview_image != blank -%}
-              {{ master_story_1_video.preview_image | image_url: width: 1200 | image_tag:
-                loading: 'lazy',
-                widths: '480, 720, 960, 1200',
-                sizes: '(min-width: 990px) 50vw, 100vw',
-                class: 'vhl-roha-b2__story-image vhl-roha-deferred-video__poster',
-                alt: master_story_1_title
-              }}
-            {%- endif -%}
-            <template>
-              {{ master_story_1_video | video_tag:
-                autoplay: false,
-                loop: true,
-                muted: true,
-                controls: false,
-                playsinline: true,
-                preload: 'metadata',
-                class: 'vhl-roha-b2__story-video'
-              }}
-            </template>
-          </div>
+          {{ master_story_1_video | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            class: 'vhl-roha-b2__story-video'
+          }}
         {%- else -%}
           <img
             src="{{ 'vhl-block2-story-reference.png' | asset_url }}"
@@ -400,28 +386,14 @@
     <div class="vhl-roha-b2__tech">
       <div class="vhl-roha-b2__tech-media">
         {%- if master_story_2_video != blank -%}
-          <div class="vhl-roha-deferred-video" data-vhl-deferred-video>
-            {%- if master_story_2_video.preview_image != blank -%}
-              {{ master_story_2_video.preview_image | image_url: width: 1200 | image_tag:
-                loading: 'lazy',
-                widths: '480, 720, 960, 1200',
-                sizes: '(min-width: 990px) 50vw, 100vw',
-                class: 'vhl-roha-b2__tech-image vhl-roha-deferred-video__poster',
-                alt: master_story_2_title
-              }}
-            {%- endif -%}
-            <template>
-              {{ master_story_2_video | video_tag:
-                autoplay: false,
-                loop: true,
-                muted: true,
-                controls: false,
-                playsinline: true,
-                preload: 'metadata',
-                class: 'vhl-roha-b2__tech-video'
-              }}
-            </template>
-          </div>
+          {{ master_story_2_video | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            class: 'vhl-roha-b2__tech-video'
+          }}
         {%- else -%}
           <img
             src="{{ 'vhl-block2-tech-hook-reference.png' | asset_url }}"
@@ -1734,24 +1706,50 @@
 (() => {
   const root = document.getElementById('{{ root_id }}');
   if (!root) return;
+
   const mainAtc = root.querySelector('[data-vhl-roha-atc]');
   const sticky = root.querySelector('[data-vhl-sticky]');
   const stickyAdd = root.querySelector('[data-vhl-sticky-add]');
   if (!mainAtc || !sticky || !stickyAdd) return;
 
-  const syncSticky = () => {
-    const rect = mainAtc.getBoundingClientRect();
-    const mainVisible = rect.bottom > 0 && rect.top < window.innerHeight;
-    sticky.hidden = mainVisible || window.scrollY < 250;
+  let mainAtcVisible = true;
+  let passedMainAtc = false;
+
+  const renderSticky = () => {
+    sticky.hidden = mainAtcVisible || !passedMainAtc;
   };
 
   stickyAdd.addEventListener('click', () => {
     if (!mainAtc.disabled) mainAtc.click();
   });
 
-  syncSticky();
-  window.addEventListener('scroll', syncSticky, { passive: true });
-  window.addEventListener('resize', syncSticky);
+  if (!('IntersectionObserver' in window)) {
+    sticky.hidden = true;
+    return;
+  }
+
+  const visibilityObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      mainAtcVisible = entry.isIntersecting;
+      renderSticky();
+    });
+  }, {
+    root: null,
+    threshold: 0.01
+  });
+
+  const positionObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      passedMainAtc = !entry.isIntersecting && entry.boundingClientRect.bottom < 0;
+      renderSticky();
+    });
+  }, {
+    root: null,
+    threshold: 0
+  });
+
+  visibilityObserver.observe(mainAtc);
+  positionObserver.observe(mainAtc);
 })();
 </script>
 
@@ -2179,99 +2177,6 @@
 
 
 
-
-
-<style>
-#{{ root_id }} .vhl-roha-deferred-video {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-#{{ root_id }} .vhl-roha-deferred-video > img,
-#{{ root_id }} .vhl-roha-deferred-video > video {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-</style>
-
-<script>
-(() => {
-  const root = document.getElementById({{ root_id | json }});
-  if (!root) return;
-
-  const holders = Array.from(root.querySelectorAll('[data-vhl-deferred-video]'));
-  if (!holders.length) return;
-
-  const visibleVideos = new Set();
-  let resumeTimer = null;
-  let isScrolling = false;
-
-  const safePlay = (video) => {
-    if (!video || isScrolling || !visibleVideos.has(video)) return;
-    const promise = video.play();
-    if (promise && typeof promise.catch === 'function') promise.catch(() => {});
-  };
-
-  const mountVideo = (holder) => {
-    if (holder.dataset.vhlLoaded === 'true') return holder.querySelector('video');
-
-    const template = holder.querySelector('template');
-    if (!template) return null;
-
-    holder.dataset.vhlLoaded = 'true';
-    holder.replaceChildren(template.content.cloneNode(true));
-
-    const video = holder.querySelector('video');
-    if (video) {
-      video.autoplay = false;
-      video.pause();
-    }
-    return video;
-  };
-
-  const visibilityObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      const holder = entry.target;
-      const video = entry.isIntersecting ? mountVideo(holder) : holder.querySelector('video');
-      if (!video) return;
-
-      if (entry.isIntersecting) {
-        visibleVideos.add(video);
-        safePlay(video);
-      } else {
-        visibleVideos.delete(video);
-        video.pause();
-      }
-    });
-  }, {
-    root: null,
-    rootMargin: '100px 0px',
-    threshold: 0.05
-  });
-
-  holders.forEach((holder) => visibilityObserver.observe(holder));
-
-  const stopForScroll = () => {
-    isScrolling = true;
-
-    visibleVideos.forEach((video) => {
-      if (!video.paused) video.pause();
-    });
-
-    if (resumeTimer) window.clearTimeout(resumeTimer);
-    resumeTimer = window.setTimeout(() => {
-      isScrolling = false;
-      visibleVideos.forEach(safePlay);
-    }, 500);
-  };
-
-  window.addEventListener('scroll', stopForScroll, { passive: true });
-  window.addEventListener('wheel', stopForScroll, { passive: true });
-  window.addEventListener('touchmove', stopForScroll, { passive: true });
-})();
-</script>
 
 {% schema %}
 {
