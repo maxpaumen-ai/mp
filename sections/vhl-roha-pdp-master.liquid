@@ -96,11 +96,12 @@
 
   assign master_story_1_video = product.metafields.custom.vhl_story_1_video.value
   assign master_story_2_video = product.metafields.custom.vhl_story_2_video.value
+
   assign master_product_details = product.metafields.custom.specifications
 
   comment
-    Master products use product metafields for the two standard story blocks.
-    Extra vacuum-hook-only blocks remain section-setting driven and are not changed here.
+    De vacuum-hook behoudt zijn bestaande extra blokken en section settings.
+    De master-producten gebruiken uitsluitend productdata voor de twee standaardblokken.
   endcomment
   assign master_story_3_title = section.settings.story_3_title | default: product.metafields.custom.vhl_story_3_title.value | default: 'Installatie zonder schade'
   assign master_story_3_text = section.settings.story_3_text | default: product.metafields.custom.vhl_story_3_text.value | default: 'Gedaan met gaten boren en je muren beschadigen! De zuighaken bieden de ideale oplossing met hun geavanceerde TWIST & LOCK technologie.'
@@ -318,10 +319,12 @@
           <details class="vhl-roha-pdp__accordion">
             <summary>Product details</summary>
             <div class="vhl-roha-pdp__accordion-body vhl-roha-pdp__accordion-body--product">
-              {%- if master_product_details != blank -%}
+              {%- if template.suffix != 'vacuum-hook' and master_product_details != blank -%}
                 {{ master_product_details | metafield_tag }}
-              {%- elsif section.settings.product_details != blank -%}
+              {%- elsif template.suffix == 'vacuum-hook' and section.settings.product_details != blank -%}
                 {{ section.settings.product_details }}
+              {%- elsif product.metafields.custom.specifications != blank -%}
+                {{ product.metafields.custom.specifications | metafield_tag }}
               {%- else -%}
                 <p><strong>Geschikt voor:</strong> Glas, spiegels, glanzende porseleinen tegels, acryl- en kunststof douchegarnituren, glad roestvrij staal, kwarts, laminaat en andere gladde, niet-poreuze oppervlakken.</p>
                 <p><strong>Afmetingen &amp; Gewicht:</strong><br><strong>Hoogte:</strong> 2,5 cm<br><strong>Breedte:</strong> 6,1 cm<br><strong>Gewicht:</strong> 175 gram</p>
@@ -347,6 +350,7 @@
 
   <!-- BLOK 2: storytelling + techniek -->
   <div class="vhl-roha-b2">
+    {%- if master_story_1_title != blank or master_story_1_text != blank or master_story_1_video != blank -%}
     <div class="vhl-roha-b2__story">
       <div class="vhl-roha-b2__story-copy">
         <div>
@@ -356,19 +360,9 @@
       </div>
       <div class="vhl-roha-b2__story-media">
         {%- if master_story_1_video != blank -%}
-          <div class="vhl-master-video-slot" data-vhl-video-slot="1">
-            <template class="vhl-master-video-template">
-              {{ master_story_1_video | video_tag:
-                autoplay: false,
-                loop: true,
-                muted: true,
-                controls: false,
-                playsinline: true,
-                preload: 'metadata',
-                class: 'vhl-roha-b2__story-video vhl-master-single-video'
-              }}
-            </template>
-          </div>
+          <video class="vhl-roha-b2__story-video" autoplay loop muted playsinline preload="auto">
+            <source src="https://cdn.shopify.com/videos/c/o/v/5f5476a531854bb9b6fca0a82e491537.mp4" type="video/mp4">
+          </video>
         {%- else -%}
           <img
             src="{{ 'vhl-block2-story-reference.png' | asset_url }}"
@@ -381,23 +375,15 @@
         {%- endif -%}
       </div>
     </div>
+    {%- endif -%}
 
+    {%- if master_story_2_title != blank or master_story_2_text != blank or master_story_2_video != blank -%}
     <div class="vhl-roha-b2__tech">
       <div class="vhl-roha-b2__tech-media">
         {%- if master_story_2_video != blank -%}
-          <div class="vhl-master-video-slot" data-vhl-video-slot="2">
-            <template class="vhl-master-video-template">
-              {{ master_story_2_video | video_tag:
-                autoplay: false,
-                loop: true,
-                muted: true,
-                controls: false,
-                playsinline: true,
-                preload: 'metadata',
-                class: 'vhl-roha-b2__tech-video vhl-master-single-video'
-              }}
-            </template>
-          </div>
+          <video class="vhl-roha-b2__tech-video" autoplay loop muted playsinline preload="auto">
+            <source src="https://cdn.shopify.com/videos/c/o/v/72c97980c8024815a33817ff18e2f97f.mp4" type="video/mp4">
+          </video>
         {%- else -%}
           <img
             src="{{ 'vhl-block2-tech-hook-reference.png' | asset_url }}"
@@ -416,6 +402,7 @@
         </div>
       </div>
     </div>
+    {%- endif -%}
 
     {%- comment -%}
       BLOK 3 + BLOK 4 zijn uitsluitend voor de bestaande vacuum-hook producttemplate.
@@ -970,8 +957,7 @@
 
     #{{ root_id }} .vhl-roha-pdp__panel {
       flex: 0 0 37.5%;
-      position: sticky;
-      top: 90px;
+      position: static;
     }
   }
 
@@ -1709,24 +1695,50 @@
 (() => {
   const root = document.getElementById('{{ root_id }}');
   if (!root) return;
+
   const mainAtc = root.querySelector('[data-vhl-roha-atc]');
   const sticky = root.querySelector('[data-vhl-sticky]');
   const stickyAdd = root.querySelector('[data-vhl-sticky-add]');
   if (!mainAtc || !sticky || !stickyAdd) return;
 
-  const syncSticky = () => {
-    const rect = mainAtc.getBoundingClientRect();
-    const mainVisible = rect.bottom > 0 && rect.top < window.innerHeight;
-    sticky.hidden = mainVisible || window.scrollY < 250;
+  let mainAtcVisible = true;
+  let passedMainAtc = false;
+
+  const renderSticky = () => {
+    sticky.hidden = mainAtcVisible || !passedMainAtc;
   };
 
   stickyAdd.addEventListener('click', () => {
     if (!mainAtc.disabled) mainAtc.click();
   });
 
-  syncSticky();
-  window.addEventListener('scroll', syncSticky, { passive: true });
-  window.addEventListener('resize', syncSticky);
+  if (!('IntersectionObserver' in window)) {
+    sticky.hidden = true;
+    return;
+  }
+
+  const visibilityObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      mainAtcVisible = entry.isIntersecting;
+      renderSticky();
+    });
+  }, {
+    root: null,
+    threshold: 0.01
+  });
+
+  const positionObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      passedMainAtc = !entry.isIntersecting && entry.boundingClientRect.bottom < 0;
+      renderSticky();
+    });
+  }, {
+    root: null,
+    threshold: 0
+  });
+
+  visibilityObserver.observe(mainAtc);
+  positionObserver.observe(mainAtc);
 })();
 </script>
 
@@ -2153,134 +2165,101 @@
 </style>
 
 
-
-<style>
-/* VHL single-video DOM test: behoudt exact dezelfde media-afmetingen. */
-#{{ root_id }} .vhl-master-video-slot {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-#{{ root_id }} .vhl-master-video-slot > video {
-  width: 100% !important;
-  height: 100% !important;
-  display: block !important;
-  object-fit: cover !important;
-}
-</style>
-
 <script>
 (() => {
-  const root = document.getElementById('{{ root_id }}');
-  if (!root || root.dataset.vhlSingleVideoInit === 'true') return;
-  root.dataset.vhlSingleVideoInit = 'true';
+  const root = document.getElementById({{ root_id | json }});
+  if (!root) return;
 
-  const slots = Array.from(root.querySelectorAll('.vhl-master-video-slot')).slice(0, 2);
-  if (!slots.length) return;
+  const videos = Array.from(root.querySelectorAll('.vhl-roha-lazy-video'));
+  if (!videos.length) return;
 
-  let activeSlot = null;
-  let activeVideo = null;
-
-  const destroyActiveVideo = () => {
-    if (!activeVideo) return;
-    try { activeVideo.pause(); } catch (e) {}
-    activeVideo.removeAttribute('src');
-    activeVideo.querySelectorAll('source').forEach((source) => source.removeAttribute('src'));
-    activeVideo.load();
-    activeVideo.remove();
-    activeVideo = null;
-    activeSlot = null;
+  const pauseAll = () => {
+    videos.forEach((video) => {
+      if (!video.paused) video.pause();
+    });
   };
 
-  const mountVideo = (slot) => {
-    if (!slot || activeSlot === slot) return;
-
-    /* Cruciaal: verwijder de vorige video volledig voordat de volgende bestaat. */
-    destroyActiveVideo();
-
-    const template = slot.querySelector('.vhl-master-video-template');
-    if (!template) return;
-
-    const fragment = template.content.cloneNode(true);
-    const video = fragment.querySelector('video');
-    if (!video) return;
-
-    video.muted = true;
-    video.playsInline = true;
-    slot.appendChild(fragment);
-    activeSlot = slot;
-    activeVideo = video;
-
-    const promise = video.play();
-    if (promise && typeof promise.catch === 'function') promise.catch(() => {});
-  };
+  if (!('IntersectionObserver' in window)) {
+    videos.forEach((video) => {
+      video.preload = 'metadata';
+      const playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(() => {});
+    });
+    return;
+  }
 
   const observer = new IntersectionObserver((entries) => {
-    const visible = entries
-      .filter((entry) => entry.isIntersecting)
-      .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+    entries.forEach((entry) => {
+      const video = entry.target;
 
-    if (visible.length) mountVideo(visible[0].target);
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.15) {
+        if (video.preload === 'none') {
+          video.preload = 'metadata';
+          video.load();
+        }
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(() => {});
+      } else if (!video.paused) {
+        video.pause();
+      }
+    });
   }, {
-    rootMargin: '250px 0px 250px 0px',
-    threshold: [0, 0.01, 0.25, 0.5]
+    root: null,
+    rootMargin: '180px 0px',
+    threshold: [0, 0.15, 0.5]
   });
 
-  slots.forEach((slot) => observer.observe(slot));
+  videos.forEach((video) => observer.observe(video));
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && activeVideo) activeVideo.pause();
-    else if (!document.hidden && activeVideo) {
-      const promise = activeVideo.play();
-      if (promise && typeof promise.catch === 'function') promise.catch(() => {});
-    }
-  });
+    if (document.hidden) pauseAll();
+  }, { passive: true });
 })();
 </script>
 
 {% schema %}
 {
-  "name": "VHL ROHA-style PDP",
+  "name": "VHL MASTER PDP",
   "tag": "section",
   "class": "vhl-roha-pdp-section",
   "settings": [
     {
       "type": "header",
-      "content": "CONTENTBLOK 1 — HIER INVULLEN"
+      "content": "MASTER: inhoud komt per product uit metafields"
     },
     {
       "type": "text",
       "id": "story_1_title",
-      "label": "CONTENTBLOK 1 — TITEL"
+      "label": "Fallback titel blok 1 (alleen legacy)"
     },
     {
       "type": "textarea",
       "id": "story_1_text",
-      "label": "CONTENTBLOK 1 — TEKST"
+      "label": "Fallback tekst blok 1 (alleen legacy)"
     },
     {
       "type": "video",
       "id": "block2_story_video",
-      "label": "CONTENTBLOK 1 — VIDEO"
+      "label": "Fallback video blok 1 (alleen legacy)"
     },
     {
       "type": "header",
-      "content": "CONTENTBLOK 2 — HIER INVULLEN"
+      "content": "MASTER: blok 2 komt per product uit metafields"
     },
     {
       "type": "text",
       "id": "story_2_title",
-      "label": "CONTENTBLOK 2 — TITEL"
+      "label": "Fallback titel blok 2 (alleen legacy)"
     },
     {
       "type": "textarea",
       "id": "story_2_text",
-      "label": "CONTENTBLOK 2 — TEKST"
+      "label": "Fallback tekst blok 2 (alleen legacy)"
     },
     {
       "type": "video",
       "id": "block2_tech_video",
-      "label": "CONTENTBLOK 2 — VIDEO"
+      "label": "Fallback video blok 2 (alleen legacy)"
     },
     {
       "type": "header",
