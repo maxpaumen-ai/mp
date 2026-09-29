@@ -96,12 +96,11 @@
 
   assign master_story_1_video = product.metafields.custom.vhl_story_1_video.value
   assign master_story_2_video = product.metafields.custom.vhl_story_2_video.value
-
   assign master_product_details = product.metafields.custom.specifications
 
   comment
-    De vacuum-hook behoudt zijn bestaande extra blokken en section settings.
-    De master-producten gebruiken uitsluitend productdata voor de twee standaardblokken.
+    Master products use product metafields for the two standard story blocks.
+    Extra vacuum-hook-only blocks remain section-setting driven and are not changed here.
   endcomment
   assign master_story_3_title = section.settings.story_3_title | default: product.metafields.custom.vhl_story_3_title.value | default: 'Installatie zonder schade'
   assign master_story_3_text = section.settings.story_3_text | default: product.metafields.custom.vhl_story_3_text.value | default: 'Gedaan met gaten boren en je muren beschadigen! De zuighaken bieden de ideale oplossing met hun geavanceerde TWIST & LOCK technologie.'
@@ -319,12 +318,10 @@
           <details class="vhl-roha-pdp__accordion">
             <summary>Product details</summary>
             <div class="vhl-roha-pdp__accordion-body vhl-roha-pdp__accordion-body--product">
-              {%- if template.suffix != 'vacuum-hook' and master_product_details != blank -%}
+              {%- if master_product_details != blank -%}
                 {{ master_product_details | metafield_tag }}
-              {%- elsif template.suffix == 'vacuum-hook' and section.settings.product_details != blank -%}
+              {%- elsif section.settings.product_details != blank -%}
                 {{ section.settings.product_details }}
-              {%- elsif product.metafields.custom.specifications != blank -%}
-                {{ product.metafields.custom.specifications | metafield_tag }}
               {%- else -%}
                 <p><strong>Geschikt voor:</strong> Glas, spiegels, glanzende porseleinen tegels, acryl- en kunststof douchegarnituren, glad roestvrij staal, kwarts, laminaat en andere gladde, niet-poreuze oppervlakken.</p>
                 <p><strong>Afmetingen &amp; Gewicht:</strong><br><strong>Hoogte:</strong> 2,5 cm<br><strong>Breedte:</strong> 6,1 cm<br><strong>Gewicht:</strong> 175 gram</p>
@@ -350,7 +347,6 @@
 
   <!-- BLOK 2: storytelling + techniek -->
   <div class="vhl-roha-b2">
-    {%- if master_story_1_title != blank or master_story_1_text != blank or master_story_1_video != blank -%}
     <div class="vhl-roha-b2__story">
       <div class="vhl-roha-b2__story-copy">
         <div>
@@ -380,9 +376,7 @@
         {%- endif -%}
       </div>
     </div>
-    {%- endif -%}
 
-    {%- if master_story_2_title != blank or master_story_2_text != blank or master_story_2_video != blank -%}
     <div class="vhl-roha-b2__tech">
       <div class="vhl-roha-b2__tech-media">
         {%- if master_story_2_video != blank -%}
@@ -412,7 +406,6 @@
         </div>
       </div>
     </div>
-    {%- endif -%}
 
     {%- comment -%}
       BLOK 3 + BLOK 4 zijn uitsluitend voor de bestaande vacuum-hook producttemplate.
@@ -1706,50 +1699,24 @@
 (() => {
   const root = document.getElementById('{{ root_id }}');
   if (!root) return;
-
   const mainAtc = root.querySelector('[data-vhl-roha-atc]');
   const sticky = root.querySelector('[data-vhl-sticky]');
   const stickyAdd = root.querySelector('[data-vhl-sticky-add]');
   if (!mainAtc || !sticky || !stickyAdd) return;
 
-  let mainAtcVisible = true;
-  let passedMainAtc = false;
-
-  const renderSticky = () => {
-    sticky.hidden = mainAtcVisible || !passedMainAtc;
+  const syncSticky = () => {
+    const rect = mainAtc.getBoundingClientRect();
+    const mainVisible = rect.bottom > 0 && rect.top < window.innerHeight;
+    sticky.hidden = mainVisible || window.scrollY < 250;
   };
 
   stickyAdd.addEventListener('click', () => {
     if (!mainAtc.disabled) mainAtc.click();
   });
 
-  if (!('IntersectionObserver' in window)) {
-    sticky.hidden = true;
-    return;
-  }
-
-  const visibilityObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      mainAtcVisible = entry.isIntersecting;
-      renderSticky();
-    });
-  }, {
-    root: null,
-    threshold: 0.01
-  });
-
-  const positionObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      passedMainAtc = !entry.isIntersecting && entry.boundingClientRect.bottom < 0;
-      renderSticky();
-    });
-  }, {
-    root: null,
-    threshold: 0
-  });
-
-  visibilityObserver.observe(mainAtc);
-  positionObserver.observe(mainAtc);
+  syncSticky();
+  window.addEventListener('scroll', syncSticky, { passive: true });
+  window.addEventListener('resize', syncSticky);
 })();
 </script>
 
@@ -2175,52 +2142,49 @@
 }
 </style>
 
-
-
-
 {% schema %}
 {
-  "name": "VHL MASTER PDP",
+  "name": "VHL ROHA-style PDP",
   "tag": "section",
   "class": "vhl-roha-pdp-section",
   "settings": [
     {
       "type": "header",
-      "content": "MASTER: inhoud komt per product uit metafields"
+      "content": "CONTENTBLOK 1 — HIER INVULLEN"
     },
     {
       "type": "text",
       "id": "story_1_title",
-      "label": "Fallback titel blok 1 (alleen legacy)"
+      "label": "CONTENTBLOK 1 — TITEL"
     },
     {
       "type": "textarea",
       "id": "story_1_text",
-      "label": "Fallback tekst blok 1 (alleen legacy)"
+      "label": "CONTENTBLOK 1 — TEKST"
     },
     {
       "type": "video",
       "id": "block2_story_video",
-      "label": "Fallback video blok 1 (alleen legacy)"
+      "label": "CONTENTBLOK 1 — VIDEO"
     },
     {
       "type": "header",
-      "content": "MASTER: blok 2 komt per product uit metafields"
+      "content": "CONTENTBLOK 2 — HIER INVULLEN"
     },
     {
       "type": "text",
       "id": "story_2_title",
-      "label": "Fallback titel blok 2 (alleen legacy)"
+      "label": "CONTENTBLOK 2 — TITEL"
     },
     {
       "type": "textarea",
       "id": "story_2_text",
-      "label": "Fallback tekst blok 2 (alleen legacy)"
+      "label": "CONTENTBLOK 2 — TEKST"
     },
     {
       "type": "video",
       "id": "block2_tech_video",
-      "label": "Fallback video blok 2 (alleen legacy)"
+      "label": "CONTENTBLOK 2 — VIDEO"
     },
     {
       "type": "header",
