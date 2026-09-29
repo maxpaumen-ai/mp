@@ -356,15 +356,19 @@
       </div>
       <div class="vhl-roha-b2__story-media">
         {%- if master_story_1_video != blank -%}
-          {{ master_story_1_video | video_tag:
-            autoplay: false,
-            loop: true,
-            muted: true,
-            controls: false,
-            playsinline: true,
-            preload: 'metadata',
-            class: 'vhl-roha-b2__story-video vhl-master-managed-video'
-          }}
+          <div class="vhl-master-video-slot" data-vhl-video-slot="1">
+            <template class="vhl-master-video-template">
+              {{ master_story_1_video | video_tag:
+                autoplay: false,
+                loop: true,
+                muted: true,
+                controls: false,
+                playsinline: true,
+                preload: 'metadata',
+                class: 'vhl-roha-b2__story-video vhl-master-single-video'
+              }}
+            </template>
+          </div>
         {%- else -%}
           <img
             src="{{ 'vhl-block2-story-reference.png' | asset_url }}"
@@ -381,15 +385,19 @@
     <div class="vhl-roha-b2__tech">
       <div class="vhl-roha-b2__tech-media">
         {%- if master_story_2_video != blank -%}
-          {{ master_story_2_video | video_tag:
-            autoplay: false,
-            loop: true,
-            muted: true,
-            controls: false,
-            playsinline: true,
-            preload: 'metadata',
-            class: 'vhl-roha-b2__tech-video vhl-master-managed-video'
-          }}
+          <div class="vhl-master-video-slot" data-vhl-video-slot="2">
+            <template class="vhl-master-video-template">
+              {{ master_story_2_video | video_tag:
+                autoplay: false,
+                loop: true,
+                muted: true,
+                controls: false,
+                playsinline: true,
+                preload: 'metadata',
+                class: 'vhl-roha-b2__tech-video vhl-master-single-video'
+              }}
+            </template>
+          </div>
         {%- else -%}
           <img
             src="{{ 'vhl-block2-tech-hook-reference.png' | asset_url }}"
@@ -2145,66 +2153,87 @@
 </style>
 
 
+
+<style>
+/* VHL single-video DOM test: behoudt exact dezelfde media-afmetingen. */
+#{{ root_id }} .vhl-master-video-slot {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+#{{ root_id }} .vhl-master-video-slot > video {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+}
+</style>
+
 <script>
 (() => {
   const root = document.getElementById('{{ root_id }}');
-  if (!root || root.dataset.vhlManagedVideoInit === 'true') return;
-  root.dataset.vhlManagedVideoInit = 'true';
+  if (!root || root.dataset.vhlSingleVideoInit === 'true') return;
+  root.dataset.vhlSingleVideoInit = 'true';
 
-  const videos = Array.from(root.querySelectorAll('.vhl-master-managed-video')).slice(0, 2);
-  if (!videos.length) return;
+  const slots = Array.from(root.querySelectorAll('.vhl-master-video-slot')).slice(0, 2);
+  if (!slots.length) return;
 
+  let activeSlot = null;
   let activeVideo = null;
 
-  const stop = (video) => {
-    if (!video || video.paused) return;
-    video.pause();
+  const destroyActiveVideo = () => {
+    if (!activeVideo) return;
+    try { activeVideo.pause(); } catch (e) {}
+    activeVideo.removeAttribute('src');
+    activeVideo.querySelectorAll('source').forEach((source) => source.removeAttribute('src'));
+    activeVideo.load();
+    activeVideo.remove();
+    activeVideo = null;
+    activeSlot = null;
   };
 
-  const activate = (video) => {
-    if (!video || activeVideo === video) return;
+  const mountVideo = (slot) => {
+    if (!slot || activeSlot === slot) return;
 
-    videos.forEach((item) => {
-      if (item !== video) stop(item);
-    });
+    /* Cruciaal: verwijder de vorige video volledig voordat de volgende bestaat. */
+    destroyActiveVideo();
 
+    const template = slot.querySelector('.vhl-master-video-template');
+    if (!template) return;
+
+    const fragment = template.content.cloneNode(true);
+    const video = fragment.querySelector('video');
+    if (!video) return;
+
+    video.muted = true;
+    video.playsInline = true;
+    slot.appendChild(fragment);
+    activeSlot = slot;
     activeVideo = video;
+
     const promise = video.play();
     if (promise && typeof promise.catch === 'function') promise.catch(() => {});
   };
 
   const observer = new IntersectionObserver((entries) => {
-    let best = null;
+    const visible = entries
+      .filter((entry) => entry.isIntersecting)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
 
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting || entry.intersectionRatio < 0.35) return;
-      if (!best || entry.intersectionRatio > best.intersectionRatio) best = entry;
-    });
-
-    if (best) {
-      activate(best.target);
-      return;
-    }
-
-    if (activeVideo) {
-      const rect = activeVideo.getBoundingClientRect();
-      if (rect.bottom <= 0 || rect.top >= window.innerHeight) {
-        stop(activeVideo);
-        activeVideo = null;
-      }
-    }
+    if (visible.length) mountVideo(visible[0].target);
   }, {
-    threshold: [0, 0.35, 0.6, 0.9]
+    rootMargin: '250px 0px 250px 0px',
+    threshold: [0, 0.01, 0.25, 0.5]
   });
 
-  videos.forEach((video) => {
-    video.muted = true;
-    video.playsInline = true;
-    observer.observe(video);
-  });
+  slots.forEach((slot) => observer.observe(slot));
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) videos.forEach(stop);
+    if (document.hidden && activeVideo) activeVideo.pause();
+    else if (!document.hidden && activeVideo) {
+      const promise = activeVideo.play();
+      if (promise && typeof promise.catch === 'function') promise.catch(() => {});
+    }
   });
 })();
 </script>
