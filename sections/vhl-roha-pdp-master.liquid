@@ -357,12 +357,13 @@
       <div class="vhl-roha-b2__story-media">
         {%- if master_story_1_video != blank -%}
           {{ master_story_1_video | video_tag:
-            autoplay: true,
+            autoplay: false,
             loop: true,
             muted: true,
             controls: false,
             playsinline: true,
-            class: 'vhl-roha-b2__story-video'
+            preload: 'metadata',
+            class: 'vhl-roha-b2__story-video vhl-master-managed-video'
           }}
         {%- else -%}
           <img
@@ -381,12 +382,13 @@
       <div class="vhl-roha-b2__tech-media">
         {%- if master_story_2_video != blank -%}
           {{ master_story_2_video | video_tag:
-            autoplay: true,
+            autoplay: false,
             loop: true,
             muted: true,
             controls: false,
             playsinline: true,
-            class: 'vhl-roha-b2__tech-video'
+            preload: 'metadata',
+            class: 'vhl-roha-b2__tech-video vhl-master-managed-video'
           }}
         {%- else -%}
           <img
@@ -2141,6 +2143,71 @@
   }
 }
 </style>
+
+
+<script>
+(() => {
+  const root = document.getElementById('{{ root_id }}');
+  if (!root || root.dataset.vhlManagedVideoInit === 'true') return;
+  root.dataset.vhlManagedVideoInit = 'true';
+
+  const videos = Array.from(root.querySelectorAll('.vhl-master-managed-video')).slice(0, 2);
+  if (!videos.length) return;
+
+  let activeVideo = null;
+
+  const stop = (video) => {
+    if (!video || video.paused) return;
+    video.pause();
+  };
+
+  const activate = (video) => {
+    if (!video || activeVideo === video) return;
+
+    videos.forEach((item) => {
+      if (item !== video) stop(item);
+    });
+
+    activeVideo = video;
+    const promise = video.play();
+    if (promise && typeof promise.catch === 'function') promise.catch(() => {});
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    let best = null;
+
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting || entry.intersectionRatio < 0.35) return;
+      if (!best || entry.intersectionRatio > best.intersectionRatio) best = entry;
+    });
+
+    if (best) {
+      activate(best.target);
+      return;
+    }
+
+    if (activeVideo) {
+      const rect = activeVideo.getBoundingClientRect();
+      if (rect.bottom <= 0 || rect.top >= window.innerHeight) {
+        stop(activeVideo);
+        activeVideo = null;
+      }
+    }
+  }, {
+    threshold: [0, 0.35, 0.6, 0.9]
+  });
+
+  videos.forEach((video) => {
+    video.muted = true;
+    video.playsInline = true;
+    observer.observe(video);
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) videos.forEach(stop);
+  });
+})();
+</script>
 
 {% schema %}
 {
