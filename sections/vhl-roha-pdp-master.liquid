@@ -98,6 +98,9 @@
   assign master_story_2_image = product.metafields.custom.vhl_story_2_image.value
 
   assign master_product_details = product.metafields.custom.vhl_product_details
+  assign master_benefit_1 = product.metafields.custom.vhl_benefit_1.value
+  assign master_benefit_2 = product.metafields.custom.vhl_benefit_2.value
+  assign master_benefit_3 = product.metafields.custom.vhl_benefit_3.value
 
   comment
     De vacuum-hook behoudt zijn bestaande extra blokken en section settings.
@@ -201,15 +204,9 @@
         </div>
 
         <ul class="vhl-roha-pdp__usps vhl-roha-pdp__usps--reference">
-          {%- if master_usp_1 != blank or master_usp_2 != blank or master_usp_3 != blank -%}
-            {%- if master_usp_1 != blank -%}<li><span class="vhl-roha-pdp__check">✓</span><span>{{ master_usp_1 }}</span></li>{%- endif -%}
-            {%- if master_usp_2 != blank -%}<li><span class="vhl-roha-pdp__check">✓</span><span>{{ master_usp_2 }}</span></li>{%- endif -%}
-            {%- if master_usp_3 != blank -%}<li><span class="vhl-roha-pdp__check">✓</span><span>{{ master_usp_3 }}</span></li>{%- endif -%}
-          {%- else -%}
-            <li><span class="vhl-roha-pdp__check">✓</span><span>Geen boren of lijmen meer</span></li>
-            <li><span class="vhl-roha-pdp__check">✓</span><span>Stevige bevestiging voor dagelijks gebruik</span></li>
-            <li><span class="vhl-roha-pdp__check">✓</span><span>Strak en tijdloos design</span></li>
-          {%- endif -%}
+          {%- if master_benefit_1 != blank -%}<li><span class="vhl-roha-pdp__check">✓</span><span>{{ master_benefit_1 }}</span></li>{%- endif -%}
+          {%- if master_benefit_2 != blank -%}<li><span class="vhl-roha-pdp__check">✓</span><span>{{ master_benefit_2 }}</span></li>{%- endif -%}
+          {%- if master_benefit_3 != blank -%}<li><span class="vhl-roha-pdp__check">✓</span><span>{{ master_benefit_3 }}</span></li>{%- endif -%}
         </ul>
 
         <product-form class="vhl-roha-pdp__form-wrapper">
@@ -382,27 +379,7 @@
     </div>
     {%- endif -%}
 
-    {%- if master_story_2_title != blank or master_story_2_text != blank or master_story_2_image != blank -%}
-    <div class="vhl-roha-b2__tech">
-      <div class="vhl-roha-b2__tech-media">
-        {%- if master_story_2_image != blank -%}
-          {{ master_story_2_image | image_url: width: 1600 | image_tag:
-            class: 'vhl-roha-b2__tech-image',
-            loading: 'lazy',
-            widths: '550, 800, 1100, 1600',
-            sizes: '(max-width: 749px) 100vw, 50vw',
-            alt: master_story_2_title
-          }}
-        {%- else -%}
-          <img
-            src="{{ 'vhl-block2-tech-hook-reference.png' | asset_url }}"
-            alt="{{ master_story_2_title | escape }}"
-            class="vhl-roha-b2__tech-image"
-            loading="lazy"
-            width="550"
-            height="310"
-          >
-        {%- endif -%}
+    
       </div>
       <div class="vhl-roha-b2__tech-copy">
         <div>
@@ -2424,7 +2401,7 @@
 
 {% schema %}
 {
-  "name": "VHL MASTER PDP",
+  "name": "VHL MASTER PDP — 1 BLOK",
   "tag": "section",
   "class": "vhl-roha-pdp-section",
   "settings": [
