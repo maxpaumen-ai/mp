@@ -2324,7 +2324,7 @@
 
     var rect = navEl.getBoundingClientRect();
 
-    panel.style.top = (rect.bottom - 1) + 'px';
+    panel.style.top = rect.bottom + 'px';
 
   }
 
@@ -2393,41 +2393,58 @@
 
   }
 
+  /*
+    HOVER FIX V3
+    ----------------
+    Sluit NIET meer op mouseleave van de <li>. Het mega-paneel is
+    position:fixed en beslaat vrijwel de hele viewportbreedte; daarom
+    behandelen we trigger + het VOLLEDIGE zichtbare paneel als één
+    hover-zone. Ook lege witte ruimte in het paneel telt dus mee.
+
+    We onthouden de laatste pointerpositie en sluiten alleen wanneer
+    die positie buiten zowel de trigger/nav-item als het paneel ligt.
+  */
+  var vhlPointerX = -9999;
+  var vhlPointerY = -9999;
+
+  function vhlPointInsideRect(x, y, rect, extra) {
+    extra = extra || 0;
+    return (
+      x >= rect.left - extra &&
+      x <= rect.right + extra &&
+      y >= rect.top - extra &&
+      y <= rect.bottom + extra
+    );
+  }
+
+  function vhlPointerInsideEntry(entry, x, y) {
+    if (!entry || !entry.li || !entry.panel || entry.panel.hidden) {
+      return false;
+    }
+
+    var liRect = entry.li.getBoundingClientRect();
+    var panelRect = entry.panel.getBoundingClientRect();
+
+    /* Kleine brug voorkomt 1px/subpixel-gaten tussen nav en paneel. */
+    return (
+      vhlPointInsideRect(x, y, liRect, 3) ||
+      vhlPointInsideRect(x, y, panelRect, 3)
+    );
+  }
+
   vhlMegaEntries.forEach(function (entry) {
 
-    entry.li.addEventListener(
+    entry.btn.addEventListener(
       'mouseenter',
       function () {
         vhlOpenMega(entry);
       }
     );
 
-    /*
-      Niet sluiten op mouseleave van de <li>. Het mega-menu is
-      position:fixed en kan daardoor visueel buiten de box van de <li>
-      liggen. Sluiten gebeurt hieronder op basis van de ECHTE
-      cursorpositie t.o.v. trigger + volledig mega-menu-paneel.
-    */
-
-    entry.li.addEventListener(
+    entry.btn.addEventListener(
       'focusin',
       function () {
         vhlOpenMega(entry);
-      }
-    );
-
-    entry.li.addEventListener(
-      'focusout',
-      function (event) {
-
-        if (
-          !entry.li.contains(
-            event.relatedTarget
-          )
-        ) {
-          vhlCloseMega(entry);
-        }
-
       }
     );
 
@@ -2442,53 +2459,25 @@
   });
 
   if (vhlMegaEntries.length) {
-
-    /*
-      ROBUUST HOVERGEBIED VOOR DESKTOP MEGA-MENU
-      -------------------------------------------
-      Het paneel gebruikt position:fixed. Daarom vertrouwen we niet op
-      mouseleave van de bovenliggende <li>, maar meten we bij iedere
-      muisbeweging of de cursor werkelijk buiten zowel de trigger als
-      het VOLLEDIGE zichtbare mega-menu-paneel staat. Ook lege witte
-      ruimte in het paneel telt hierdoor als hovergebied.
-    */
     document.addEventListener(
-      'mousemove',
+      'pointermove',
       function (event) {
+        vhlPointerX = event.clientX;
+        vhlPointerY = event.clientY;
 
         vhlMegaEntries.forEach(function (entry) {
-
           if (entry.panel.hidden) return;
 
-          var triggerRect =
-            entry.li.getBoundingClientRect();
-
-          var panelRect =
-            entry.panel.getBoundingClientRect();
-
-          var x = event.clientX;
-          var y = event.clientY;
-
-          var overTrigger =
-            x >= triggerRect.left &&
-            x <= triggerRect.right &&
-            y >= triggerRect.top &&
-            y <= triggerRect.bottom;
-
-          var overPanel =
-            x >= panelRect.left &&
-            x <= panelRect.right &&
-            y >= panelRect.top &&
-            y <= panelRect.bottom;
-
-          if (!overTrigger && !overPanel) {
+          if (!vhlPointerInsideEntry(entry, vhlPointerX, vhlPointerY)) {
             vhlCloseMega(entry);
           }
-
         });
-
-      }
+      },
+      { passive: true }
     );
+  }
+
+  if (vhlMegaEntries.length) {
 
     document.addEventListener(
       'click',
