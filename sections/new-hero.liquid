@@ -1,49 +1,32 @@
 {%- liquid
-  comment
-    Collectie-bewuste fallback-keten, zodat EEN gedeelde hero-instance
-    (bv. de instance in templates/collection.json, hergebruikt door elke
-    "gewone" subcollectie) automatisch de juiste titel/afbeelding toont
-    zonder per-collectie configuratie. Expliciete section-settings winnen
-    altijd -- dit raakt dus nooit de homepage-instance (die alle velden
-    al expliciet vult) en nooit de 4 bestaande hoofdcategorie-templates
-    (heading/subheading daar al expliciet gezet).
+  assign hero_heading = section.settings.heading
+  assign hero_subheading = section.settings.subheading
+  assign hero_desktop_image = section.settings.image
+  assign hero_mobile_image = section.settings.mobile_image | default: section.settings.image
 
-    Tekst:
-      heading    -> section.settings.heading, anders de bestaande PDP-
-                    storytelling-metafield custom.pdp_functional_headline,
-                    anders collection.title.
-      subheading -> section.settings.subheading, anders de metafield
-                    custom.pdp_functional_body_1
-                    (geen collection.description-fallback: dat is vaak te
-                    lang voor een 1-regelige hero-subtitel; ontbreekt de
-                    metafield, dan toont de hero gewoon geen subheading --
-                    al bestaand, geaccepteerd gedrag, geen kapotte layout).
+  if section.settings.use_collection_fallback
+    if hero_heading == blank
+      assign hero_heading = collection.metafields.custom.pdp_functional_headline.value | default: collection.title
+    endif
 
-    Afbeelding (desktop):
-      1. section.settings.image (expliciet)
-      2. collection.image
-      3. (geen van beide) -> bestaande donkere fallback-achtergrond
+    if hero_subheading == blank
+      assign hero_subheading = collection.metafields.custom.pdp_functional_body_1.value
+    endif
 
-    Afbeelding (mobiel):
-      1. section.settings.mobile_image (expliciet)
-      2. section.settings.image (expliciete desktop-afbeelding hergebruikt
-         op mobiel -- veiliger dan direct naar collection.image springen
-         wanneer de merchant wél een eigen desktop-foto koos maar nog geen
-         aparte mobiele crop)
-      3. collection.image
-      4. (geen van alle) -> bestaande donkere fallback-achtergrond
+    if hero_desktop_image == blank
+      assign hero_desktop_image = collection.image
+    endif
 
-    Video's zijn hier bewust buiten gelaten: die behouden hun bestaande,
-    hoogste prioriteit als ze expliciet ingesteld zijn (collecties hebben
-    geen automatische video-bron).
-  endcomment
-
-  assign hero_heading = section.settings.heading | default: collection.metafields.custom.pdp_functional_headline.value | default: collection.title
-  assign hero_subheading = section.settings.subheading | default: collection.metafields.custom.pdp_functional_body_1.value
-  assign hero_desktop_image = section.settings.image | default: collection.image
-  assign hero_mobile_image = section.settings.mobile_image | default: section.settings.image | default: collection.image
+    if hero_mobile_image == blank
+      assign hero_mobile_image = collection.image
+    endif
+  endif
 -%}
-<section id="VHLVideoHero-{{ section.id }}" class="vhl-video-hero{% if section.settings.mobile_heading_style == 'large' %} vhl-video-hero--mobile-heading-large{% endif %}">
+
+<section
+  id="VHLVideoHero-{{ section.id }}"
+  class="vhl-video-hero{% if section.settings.mobile_heading_style == 'large' %} vhl-video-hero--mobile-heading-large{% endif %}"
+>
 
   <div class="vhl-video-hero__media">
 
@@ -60,7 +43,22 @@
             class: 'vhl-video-hero__video'
         }}
       </div>
+
+    {% elsif hero_desktop_image != blank %}
+
+      <div class="vhl-video-hero__desktop-media">
+        {{
+          hero_desktop_image
+          | image_url: width: 2400
+          | image_tag:
+            loading: 'eager',
+            widths: '1000, 1400, 1800, 2200, 2400',
+            sizes: '100vw',
+            class: 'vhl-video-hero__image'
+        }}
+      </div>
     {% endif %}
+
 
     {% if section.settings.mobile_video != blank %}
       <div class="vhl-video-hero__mobile-media">
@@ -75,27 +73,17 @@
             class: 'vhl-video-hero__video'
         }}
       </div>
-    {% endif %}
 
-    {% if section.settings.video == blank and hero_desktop_image != blank %}
-      <div class="vhl-video-hero__desktop-media">
-        {{
-          hero_desktop_image
-          | image_url: width: 2400
-          | image_tag:
-            loading: 'eager',
-            class: 'vhl-video-hero__image'
-        }}
-      </div>
-    {% endif %}
+    {% elsif hero_mobile_image != blank %}
 
-    {% if section.settings.mobile_video == blank and hero_mobile_image != blank %}
       <div class="vhl-video-hero__mobile-media">
         {{
           hero_mobile_image
-          | image_url: width: 1200
+          | image_url: width: 1400
           | image_tag:
             loading: 'eager',
+            widths: '500, 750, 900, 1100, 1400',
+            sizes: '100vw',
             class: 'vhl-video-hero__image'
         }}
       </div>
@@ -103,87 +91,126 @@
 
   </div>
 
+
   <div class="vhl-video-hero__overlay"></div>
 
-  <div class="vhl-video-hero__inner">
-    <div class="vhl-video-hero__content">
 
-      {% if section.settings.eyebrow != blank %}
-        <p class="vhl-video-hero__eyebrow">
-          {{ section.settings.eyebrow | escape }}
-        </p>
-      {% endif %}
+  {% if section.settings.eyebrow != blank
+    or hero_heading != blank
+    or hero_subheading != blank
+    or section.settings.button_label != blank
+  %}
 
-      {% if hero_heading != blank %}
-        <h1 class="vhl-video-hero__heading">
-          {{ hero_heading | escape }}
-        </h1>
-      {% endif %}
+    <div class="vhl-video-hero__inner">
 
-      {% if hero_subheading != blank %}
-        <p class="vhl-video-hero__subheading">
-          {{ hero_subheading | escape }}
-        </p>
-      {% endif %}
+      <div class="vhl-video-hero__content">
 
-      {% if section.settings.button_label != blank %}
-        <a
-          class="vhl-video-hero__button"
-          href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
-        >
-          {{ section.settings.button_label | escape }}
-        </a>
-      {% endif %}
+        {% if section.settings.eyebrow != blank %}
+          <p class="vhl-video-hero__eyebrow">
+            {{ section.settings.eyebrow | escape }}
+          </p>
+        {% endif %}
+
+
+        {% if hero_heading != blank %}
+          <h1 class="vhl-video-hero__heading">
+            {{ hero_heading | escape }}
+          </h1>
+        {% endif %}
+
+
+        {% if hero_subheading != blank %}
+          <p class="vhl-video-hero__subheading">
+            {{ hero_subheading | escape }}
+          </p>
+        {% endif %}
+
+
+        {% if section.settings.button_label != blank %}
+          <a
+            class="vhl-video-hero__button"
+            href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
+          >
+            {{ section.settings.button_label | escape }}
+          </a>
+        {% endif %}
+
+      </div>
 
     </div>
-  </div>
+
+  {% endif %}
 
 </section>
+
 
 {% style %}
 
 /* =========================================================
-   HERO BASIS
-========================================================= */
+   VHL VIDEO / IMAGE HERO
+   ========================================================= */
 
 #VHLVideoHero-{{ section.id }} {
   position: relative;
+
   width: 100%;
   min-height: {{ section.settings.desktop_height }}px;
+
   overflow: hidden;
   isolation: isolate;
+
   background: #171614;
-  color: #fff;
+
+  color: #ffffff;
 }
 
 
 /* =========================================================
-   VIDEO
-========================================================= */
+   MEDIA
+   ========================================================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__media {
   position: absolute;
+
   inset: 0;
-  z-index: -2;
+
+  width: 100%;
+  height: 100%;
+
+  z-index: 0;
+
+  overflow: hidden;
 }
+
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__desktop-media,
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__mobile-media {
   position: absolute;
+
   inset: 0;
+
   width: 100%;
   height: 100%;
 }
+
+
+#VHLVideoHero-{{ section.id }} .vhl-video-hero__desktop-media {
+  display: block;
+}
+
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__mobile-media {
   display: none;
 }
 
+
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__video,
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__image {
   display: block;
+
   width: 100%;
   height: 100%;
+
   object-fit: cover;
   object-position: center center;
 }
@@ -191,30 +218,37 @@
 
 /* =========================================================
    OVERLAY
-========================================================= */
+   ========================================================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__overlay {
   position: absolute;
+
   inset: 0;
-  z-index: -1;
+
+  z-index: 1;
+
   pointer-events: none;
 
   background:
     linear-gradient(
       90deg,
-      rgba(7, 7, 7, 0.38) 0%,
+      rgba(7, 7, 7, {{ section.settings.overlay_opacity | divided_by: 100.0 }}) 0%,
       rgba(7, 7, 7, 0.18) 34%,
       rgba(7, 7, 7, 0.05) 62%,
-      rgba(7, 7, 7, 0.00) 100%
+      rgba(7, 7, 7, 0) 100%
     );
 }
 
 
 /* =========================================================
-   DESKTOP CONTENT
-========================================================= */
+   CONTENT
+   ========================================================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__inner {
+  position: relative;
+
+  z-index: 2;
+
   width: min(100%, 1600px);
   min-height: {{ section.settings.desktop_height }}px;
 
@@ -229,6 +263,7 @@
   align-items: center;
 }
 
+
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__content {
   width: auto;
   max-width: none;
@@ -239,12 +274,12 @@
 
 /* =========================================================
    EYEBROW
-========================================================= */
+   ========================================================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__eyebrow {
   margin: 0 0 15px;
 
-  color: #fff;
+  color: #ffffff;
 
   font-size: 11px;
   line-height: 1;
@@ -257,8 +292,8 @@
 
 
 /* =========================================================
-   HEADLINE — DESKTOP
-========================================================= */
+   HEADING
+   ========================================================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__heading {
   margin: 0;
@@ -268,7 +303,7 @@
 
   white-space: nowrap;
 
-  color: #fff !important;
+  color: #ffffff !important;
 
   font-family: var(--font-heading-family, sans-serif);
 
@@ -283,18 +318,14 @@
 
 /* =========================================================
    SUBHEADING
-   Bewust GEEN white-space:nowrap / width:max-content zoals de
-   heading: dit is doorlopende zinstekst (bv. "Ontworpen voor
-   rust. Gemaakt voor elke dag.") die normaal moet kunnen
-   omwikkelen i.p.v. horizontaal af te snijden.
-========================================================= */
+   ========================================================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__subheading {
   margin: 14px 0 0;
 
   max-width: 480px;
 
-  color: rgba(255, 255, 255, .88);
+  color: rgba(255,255,255,.88);
 
   font-size: 16px;
   line-height: 1.5;
@@ -306,8 +337,8 @@
 
 
 /* =========================================================
-   CTA
-========================================================= */
+   BUTTON
+   ========================================================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__button {
   display: inline-flex;
@@ -324,7 +355,7 @@
 
   border-radius: 999px;
 
-  background: #fff;
+  background: #ffffff;
   color: #2a2927;
 
   text-decoration: none;
@@ -342,8 +373,8 @@
 
 
 /* =========================================================
-   HEADER OVER HERO — HOMEPAGE ONLY
-========================================================= */
+   HOMEPAGE HEADER OVER HERO
+   ========================================================= */
 
 body.template-index .shopify-section-group-header-group {
   position: absolute !important;
@@ -395,16 +426,12 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
 }
 
 
-/* =========================================================
-   DESKTOP HEADER COLORS
-========================================================= */
-
 @media screen and (min-width: 750px) {
 
   body.template-index .shopify-section-group-header-group a,
   body.template-index .shopify-section-group-header-group button,
   body.template-index .shopify-section-group-header-group svg {
-    color: #fff !important;
+    color: #ffffff !important;
   }
 
   body.template-index .shopify-section-group-header-group svg {
@@ -415,8 +442,8 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
 
 
 /* =========================================================
-   MOBIEL
-========================================================= */
+   MOBILE
+   ========================================================= */
 
 @media screen and (max-width: 749px) {
 
@@ -425,15 +452,15 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
   }
 
 
-  /* VIDEO */
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__desktop-media {
     display: none;
   }
 
+
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__mobile-media {
     display: block;
   }
+
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__video,
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__image {
@@ -441,18 +468,14 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     height: 100%;
 
     object-fit: cover;
-
     object-position: center center;
   }
 
-
-  /* OVERLAY */
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__overlay {
     background:
       linear-gradient(
         180deg,
-
         rgba(8,7,6,0.00) 0%,
         rgba(8,7,6,0.00) 48%,
         rgba(8,7,6,0.10) 62%,
@@ -461,8 +484,6 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
       );
   }
 
-
-  /* CONTENT */
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__inner {
     min-height: {{ section.settings.mobile_height }}px;
@@ -475,6 +496,7 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     align-items: flex-end;
   }
 
+
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__content {
     width: 100%;
     max-width: none;
@@ -483,19 +505,12 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
   }
 
 
-  /* EYEBROW */
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__eyebrow {
     margin-bottom: 9px;
 
     font-size: 9px;
   }
 
-
-  /* =====================================================
-     MOBIELE HEADLINE
-     ÉÉN REGEL + DUNNER
-  ===================================================== */
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__heading {
     display: block !important;
@@ -511,10 +526,9 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     overflow: visible !important;
     text-overflow: clip !important;
 
-    color: #fff !important;
+    color: #ffffff !important;
 
     font-size: 16px !important;
-
     line-height: 1.1 !important;
 
     font-weight: 300 !important;
@@ -522,15 +536,6 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     letter-spacing: -0.01em !important;
   }
 
-
-  /* =====================================================
-     OPT-IN: GROTE MOBIELE HEADLINE
-     Alleen actief met mobile_heading_style = "large" (nieuwe
-     category-landingpagina's). Hogere specificiteit dan de
-     compacte basisregel hierboven (extra modifier-klasse), dus
-     wint ongeacht bronvolgorde -- de homepage-instance zet deze
-     klasse niet en blijft dus op de compacte 1-regelige stijl.
-  ===================================================== */
 
   #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
     white-space: normal !important;
@@ -545,8 +550,6 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
   }
 
 
-  /* SUBHEADING */
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__subheading {
     margin-top: 10px;
 
@@ -556,8 +559,6 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     line-height: 1.5;
   }
 
-
-  /* CTA */
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__button {
     min-width: 150px;
@@ -571,8 +572,6 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
   }
 
 
-  /* MOBIELE HEADER TRANSPARANT */
-
   body.template-index .shopify-section-group-header-group {
     position: absolute !important;
 
@@ -583,6 +582,7 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
 
     z-index: 50;
   }
+
 
   body.template-index .shopify-section-group-header-group .header-wrapper,
   body.template-index .shopify-section-group-header-group .header,
@@ -601,7 +601,7 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
 
 /* =========================================================
    SMALL PHONE
-========================================================= */
+   ========================================================= */
 
 @media screen and (max-width: 390px) {
 
@@ -616,6 +616,7 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
 
     white-space: nowrap !important;
   }
+
 
   #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
     font-size: clamp(26px, 10.5vw, 34px) !important;
@@ -634,7 +635,7 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
 
 /* =========================================================
    VERY SMALL PHONE
-========================================================= */
+   ========================================================= */
 
 @media screen and (max-width: 350px) {
 
@@ -643,6 +644,7 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
 
     font-weight: 300 !important;
   }
+
 
   #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
     font-size: 24px !important;
@@ -717,13 +719,20 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Fallback afbeelding"
+      "label": "Hero afbeelding desktop"
     },
 
     {
       "type": "image_picker",
       "id": "mobile_image",
-      "label": "Mobiele fallback-afbeelding"
+      "label": "Hero afbeelding mobiel"
+    },
+
+    {
+      "type": "checkbox",
+      "id": "use_collection_fallback",
+      "label": "Gebruik collectiegegevens als fallback",
+      "default": false
     },
 
     {
@@ -762,22 +771,19 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     {
       "type": "text",
       "id": "eyebrow",
-      "label": "Boventitel",
-      "default": "VANHOUTEN LIVING"
+      "label": "Boventitel"
     },
 
     {
       "type": "text",
       "id": "heading",
-      "label": "Titel",
-      "default": "Rust begint in de badkamer."
+      "label": "Titel"
     },
 
     {
       "type": "text",
       "id": "subheading",
-      "label": "Subtitel",
-      "info": "Optioneel. Leeg = niet getoond (geen wijziging op bestaande hero-instances)."
+      "label": "Subtitel"
     },
 
     {
@@ -785,18 +791,22 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
       "id": "mobile_heading_style",
       "label": "Titelstijl mobiel",
       "options": [
-        { "value": "compact", "label": "Compact (huidig, dunne 1-regelige titel)" },
-        { "value": "large", "label": "Groot (premium, voor korte titels)" }
+        {
+          "value": "compact",
+          "label": "Compact"
+        },
+        {
+          "value": "large",
+          "label": "Groot"
+        }
       ],
-      "default": "compact",
-      "info": "\"Compact\" is het bestaande, ongewijzigde gedrag (o.a. de homepage-hero). \"Groot\" is bedoeld voor korte titels zoals categorienamen."
+      "default": "compact"
     },
 
     {
       "type": "text",
       "id": "button_label",
-      "label": "Knoptekst",
-      "default": "Ontdek de collectie"
+      "label": "Knoptekst"
     },
 
     {
