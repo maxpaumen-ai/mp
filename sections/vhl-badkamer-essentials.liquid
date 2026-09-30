@@ -1,7 +1,10 @@
 {% comment %}
   VHL - Badkamer Essentials
-  ROHA-style product grid
-  Toont automatisch alle producten uit collectie "badkamer-essentials".
+  ROHA-style product strip
+  - Geen hero/header
+  - Geen "SHOP BADKAMER ESSENTIALS"
+  - Alle producten op 1 horizontale rij
+  - Huidige product wordt overgeslagen
 {% endcomment %}
 
 {% assign essentials_collection = collections['badkamer-essentials'] %}
@@ -9,6 +12,7 @@
 {% if essentials_collection != blank and essentials_collection.products_count > 0 %}
 
 <section class="vhl-essentials">
+
   <div class="vhl-essentials__inner">
 
     <div class="vhl-essentials__header">
@@ -23,124 +27,142 @@
       </a>
     </div>
 
-    <div class="vhl-essentials__products">
 
-      {% for item in essentials_collection.products %}
+    <div class="vhl-essentials__scroll">
 
-        <article class="vhl-essentials__card">
+      <div class="vhl-essentials__products">
 
-          <a
-            href="{{ item.url }}"
-            class="vhl-essentials__image-wrap"
-            aria-label="{{ item.title | escape }}"
-          >
+        {% for item in essentials_collection.products %}
 
-            {% if item.featured_image %}
+          {% if item.id != product.id %}
 
-              {{
-                item.featured_image
-                | image_url: width: 1000
-                | image_tag:
-                  loading: 'lazy',
-                  widths: '300, 450, 600, 750, 900, 1000',
-                  sizes: '(max-width: 749px) 50vw, 20vw',
-                  class: 'vhl-essentials__image',
-                  alt: item.title
-              }}
+            <article class="vhl-essentials__card">
 
-            {% endif %}
+              <a
+                href="{{ item.url }}"
+                class="vhl-essentials__image-wrap"
+                aria-label="{{ item.title | escape }}"
+              >
 
-          </a>
+                {% if item.featured_image %}
+
+                  {{
+                    item.featured_image
+                    | image_url: width: 900
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '300, 450, 600, 750, 900',
+                      sizes: '(max-width: 749px) 72vw, 20vw',
+                      class: 'vhl-essentials__image',
+                      alt: item.title
+                  }}
+
+                {% endif %}
+
+                <div class="vhl-essentials__new">
+                  <span>NEW · NEW · NEW</span>
+                </div>
+
+              </a>
 
 
-          <div class="vhl-essentials__info">
+              <div class="vhl-essentials__info">
 
-            <a
-              href="{{ item.url }}"
-              class="vhl-essentials__title"
-            >
-              {{ item.title }}
-            </a>
+                <a
+                  href="{{ item.url }}"
+                  class="vhl-essentials__title"
+                >
+                  {{ item.title }}
+                </a>
 
 
-            <div class="vhl-essentials__prices">
+                <div class="vhl-essentials__prices">
 
-              <span class="vhl-essentials__price">
-                {{ item.price | money }}
-              </span>
+                  <span class="vhl-essentials__price">
+                    {{ item.price | money }}
+                  </span>
 
-              {% if item.compare_at_price_max > item.price %}
+                  {% if item.compare_at_price_max > item.price %}
 
-                <span class="vhl-essentials__compare">
-                  {{ item.compare_at_price_max | money }}
-                </span>
+                    <span class="vhl-essentials__compare">
+                      {{ item.compare_at_price_max | money }}
+                    </span>
 
-              {% endif %}
+                  {% endif %}
 
-            </div>
+                </div>
 
-          </div>
+              </div>
 
-        </article>
+            </article>
 
-      {% endfor %}
+          {% endif %}
+
+        {% endfor %}
+
+      </div>
 
     </div>
 
   </div>
+
 </section>
 
 
 <style>
 
-/* =========================================================
-   VHL BADKAMER ESSENTIALS
-   ROHA STYLE
-   ========================================================= */
+/* =========================================
+   SECTION
+========================================= */
 
 .vhl-essentials {
   width: 100%;
-  background: #ffffff;
-  padding: 72px 0 95px;
+  background: #f7f7f7;
+  padding: 64px 0 76px;
+  overflow: hidden;
 }
 
 .vhl-essentials__inner {
   width: calc(100% - 80px);
-  max-width: 1600px;
+  max-width: 1800px;
   margin: 0 auto;
 }
 
 
-/* HEADER
-   ========================================================= */
+/* =========================================
+   HEADER
+========================================= */
 
 .vhl-essentials__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 30px;
 
-  margin-bottom: 38px;
+  margin-bottom: 34px;
 }
 
 .vhl-essentials__header h2 {
   margin: 0;
 
-  color: #111111;
+  color: #111;
 
   font-size: 16px;
   line-height: 1.2;
+
   font-weight: 700;
-
   letter-spacing: 0;
-}
 
+  text-transform: uppercase;
+}
 
 .vhl-essentials__more {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
 
-  color: #111111;
+  gap: 15px;
+
+  color: #111;
 
   text-decoration: none;
 
@@ -150,59 +172,68 @@
   white-space: nowrap;
 }
 
-
 .vhl-essentials__more span {
-  font-size: 23px;
+  font-size: 25px;
   line-height: 1;
 
   transform: translateY(-1px);
 }
 
 
-/* PRODUCT GRID
-   ========================================================= */
+/* =========================================
+   HORIZONTAL PRODUCT ROW
+========================================= */
+
+.vhl-essentials__scroll {
+  width: 100%;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scrollbar-width: none;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+.vhl-essentials__scroll::-webkit-scrollbar {
+  display: none;
+}
 
 .vhl-essentials__products {
-  display: grid;
+  display: flex;
 
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  flex-wrap: nowrap;
 
   gap: 22px;
+
+  width: max-content;
 }
 
 
-/* PRODUCT CARD
-   ========================================================= */
+/* =========================================
+   PRODUCT CARD
+========================================= */
 
 .vhl-essentials__card {
   position: relative;
 
-  min-width: 0;
+  flex: 0 0 calc((100vw - 80px - 88px) / 5);
 
-  background: #ffffff;
+  max-width: 340px;
+  min-width: 240px;
 
-  border: 1px solid #e8dccd;
+  background: #fff;
 
+  border: 1px solid #e6d4bd;
   border-radius: 6px;
 
   overflow: hidden;
-
-  transition:
-    transform .25s ease,
-    box-shadow .25s ease;
 }
 
 
-.vhl-essentials__card:hover {
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, .04);
-}
-
-
-/* IMAGE
-   ========================================================= */
+/* =========================================
+   PRODUCT IMAGE
+========================================= */
 
 .vhl-essentials__image-wrap {
   position: relative;
@@ -213,11 +244,10 @@
 
   aspect-ratio: 1 / 1;
 
-  background: #f7f7f7;
+  background: #f4f4f4;
 
   overflow: hidden;
 }
-
 
 .vhl-essentials__image {
   display: block;
@@ -230,42 +260,73 @@
   transition: transform .35s ease;
 }
 
-
 .vhl-essentials__card:hover .vhl-essentials__image {
-  transform: scale(1.018);
+  transform: scale(1.025);
 }
 
 
-/* PRODUCT INFO
-   ========================================================= */
+/* =========================================
+   NEW BADGE
+========================================= */
 
-.vhl-essentials__info {
+.vhl-essentials__new {
+  position: absolute;
+
+  top: 16px;
+  right: 16px;
+
+  width: 48px;
+  height: 48px;
+
+  border-radius: 50%;
+
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  min-height: 96px;
+  color: #111;
 
-  padding: 20px 14px 22px;
+  font-size: 5px;
+  font-weight: 700;
 
-  background: #ffffff;
+  letter-spacing: .7px;
+
+  border: 1px solid rgba(0,0,0,.08);
+
+  background: rgba(255,255,255,.25);
+}
+
+.vhl-essentials__new span {
+  display: block;
+
+  text-align: center;
+
+  line-height: 1.3;
+
+  max-width: 36px;
+}
+
+
+/* =========================================
+   PRODUCT INFORMATION
+========================================= */
+
+.vhl-essentials__info {
+  min-height: 108px;
+
+  padding: 23px 20px 24px;
+
+  background: #fff;
 
   text-align: center;
 }
 
-
-/* PRODUCT TITLE
-   ========================================================= */
-
 .vhl-essentials__title {
   display: block;
 
-  width: 100%;
+  margin: 0 0 11px;
 
-  margin: 0 0 8px;
-
-  color: #111111;
+  color: #111;
 
   text-decoration: none;
 
@@ -275,28 +336,26 @@
   line-height: 1.25;
 
   font-weight: 700;
-
-  text-align: center;
 }
 
 
-/* PRICES
-   ========================================================= */
+/* =========================================
+   PRICE
+========================================= */
 
 .vhl-essentials__prices {
   display: flex;
 
+  align-items: center;
   justify-content: center;
-  align-items: baseline;
 
   flex-wrap: wrap;
 
-  gap: 8px;
+  gap: 9px;
 }
 
-
 .vhl-essentials__price {
-  color: #111111;
+  color: #111;
 
   font-size: 15px;
   line-height: 1.2;
@@ -304,150 +363,119 @@
   font-weight: 700;
 }
 
-
 .vhl-essentials__compare {
-  color: #555555;
+  color: #555;
 
   font-size: 13px;
   line-height: 1.2;
 
-  font-weight: 400;
-
   text-decoration: line-through;
+
+  opacity: .65;
 }
 
 
-/* =========================================================
+/* =========================================
    TABLET
-   ========================================================= */
+========================================= */
 
-@media screen and (max-width: 1199px) {
-
-  .vhl-essentials__products {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-}
-
-
-@media screen and (max-width: 989px) {
-
-  .vhl-essentials {
-    padding: 55px 0 70px;
-  }
+@media screen and (max-width: 1100px) {
 
   .vhl-essentials__inner {
     width: calc(100% - 40px);
   }
 
-  .vhl-essentials__products {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .vhl-essentials__card {
+    flex: 0 0 29vw;
 
-    gap: 16px;
+    min-width: 260px;
   }
 
 }
 
 
-/* =========================================================
+/* =========================================
    MOBILE
-   ========================================================= */
+========================================= */
 
 @media screen and (max-width: 749px) {
 
   .vhl-essentials {
-    padding: 45px 0 55px;
+    padding: 42px 0 50px;
   }
-
 
   .vhl-essentials__inner {
     width: 100%;
   }
 
-
   .vhl-essentials__header {
-    padding: 0 16px;
+    padding: 0 18px;
 
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
-
 
   .vhl-essentials__header h2 {
-    font-size: 14px;
+    font-size: 13px;
   }
-
 
   .vhl-essentials__more {
     gap: 8px;
 
-    font-size: 14px;
+    font-size: 13px;
   }
-
 
   .vhl-essentials__more span {
     font-size: 20px;
   }
 
-
-  /* 2 products per row */
+  .vhl-essentials__scroll {
+    padding-left: 18px;
+  }
 
   .vhl-essentials__products {
-    display: grid;
+    gap: 12px;
 
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-
-    gap: 10px;
-
-    padding: 0 10px;
+    padding-right: 36px;
   }
-
 
   .vhl-essentials__card {
-    border-radius: 4px;
+    flex: 0 0 76vw;
+
+    min-width: 0;
+    max-width: none;
   }
-
-
-  .vhl-essentials__image-wrap {
-    aspect-ratio: 1 / 1;
-  }
-
 
   .vhl-essentials__info {
-    min-height: 88px;
+    min-height: 92px;
 
-    padding: 14px 8px 16px;
+    padding: 18px 14px 20px;
   }
-
 
   .vhl-essentials__title {
-    margin-bottom: 7px;
+    font-size: 13px;
 
-    font-size: 12px;
-
-    line-height: 1.25;
+    margin-bottom: 8px;
   }
-
-
-  .vhl-essentials__prices {
-    gap: 5px;
-  }
-
 
   .vhl-essentials__price {
-    font-size: 13px;
+    font-size: 14px;
   }
 
-
   .vhl-essentials__compare {
-    font-size: 11px;
+    font-size: 12px;
+  }
+
+  .vhl-essentials__new {
+    width: 42px;
+    height: 42px;
+
+    top: 12px;
+    right: 12px;
   }
 
 }
 
 </style>
-
-
-{% endif %}
 
 
 {% schema %}
