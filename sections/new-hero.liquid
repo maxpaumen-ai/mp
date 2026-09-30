@@ -4,6 +4,12 @@
   assign hero_desktop_image = section.settings.image
   assign hero_mobile_image = section.settings.mobile_image | default: section.settings.image
 
+  assign is_badkamer_essentials = false
+
+  if collection.handle == 'badkamer-essentials'
+    assign is_badkamer_essentials = true
+  endif
+
   if section.settings.use_collection_fallback
     if hero_heading == blank
       assign hero_heading = collection.metafields.custom.pdp_functional_headline.value | default: collection.title
@@ -23,6 +29,7 @@
   endif
 -%}
 
+
 <section
   id="VHLVideoHero-{{ section.id }}"
   class="vhl-video-hero{% if section.settings.mobile_heading_style == 'large' %} vhl-video-hero--mobile-heading-large{% endif %}"
@@ -30,63 +37,99 @@
 
   <div class="vhl-video-hero__media">
 
-    {% if section.settings.video != blank %}
+    {% if is_badkamer_essentials %}
+
+      <!-- BADKAMER ESSENTIALS DESKTOP -->
       <div class="vhl-video-hero__desktop-media">
-        {{
-          section.settings.video
-          | video_tag:
-            autoplay: true,
-            loop: true,
-            muted: true,
-            controls: false,
-            playsinline: true,
-            class: 'vhl-video-hero__video'
-        }}
+        <img
+          src="https://cdn.shopify.com/s/files/1/1025/7668/5443/files/Scherm_afbeelding_2026-09-30_om_14.43.01.png?v=1790772196"
+          alt="Badkamer Essentials"
+          class="vhl-video-hero__image"
+          width="2400"
+          height="1400"
+          loading="eager"
+          fetchpriority="high"
+        >
       </div>
 
-    {% elsif hero_desktop_image != blank %}
-
-      <div class="vhl-video-hero__desktop-media">
-        {{
-          hero_desktop_image
-          | image_url: width: 2400
-          | image_tag:
-            loading: 'eager',
-            widths: '1000, 1400, 1800, 2200, 2400',
-            sizes: '100vw',
-            class: 'vhl-video-hero__image'
-        }}
-      </div>
-    {% endif %}
-
-
-    {% if section.settings.mobile_video != blank %}
+      <!-- BADKAMER ESSENTIALS MOBILE -->
       <div class="vhl-video-hero__mobile-media">
-        {{
-          section.settings.mobile_video
-          | video_tag:
-            autoplay: true,
-            loop: true,
-            muted: true,
-            controls: false,
-            playsinline: true,
-            class: 'vhl-video-hero__video'
-        }}
+        <img
+          src="https://cdn.shopify.com/s/files/1/1025/7668/5443/files/Scherm_afbeelding_2026-09-30_om_14.43.01.png?v=1790772196"
+          alt="Badkamer Essentials"
+          class="vhl-video-hero__image"
+          width="1400"
+          height="1600"
+          loading="eager"
+          fetchpriority="high"
+        >
       </div>
 
-    {% elsif hero_mobile_image != blank %}
+    {% else %}
 
-      <div class="vhl-video-hero__mobile-media">
-        {{
-          hero_mobile_image
-          | image_url: width: 1400
-          | image_tag:
-            loading: 'eager',
-            widths: '500, 750, 900, 1100, 1400',
-            sizes: '100vw',
-            class: 'vhl-video-hero__image'
-        }}
-      </div>
+      {% if section.settings.video != blank %}
+
+        <div class="vhl-video-hero__desktop-media">
+          {{
+            section.settings.video
+            | video_tag:
+              autoplay: true,
+              loop: true,
+              muted: true,
+              controls: false,
+              playsinline: true,
+              class: 'vhl-video-hero__video'
+          }}
+        </div>
+
+      {% elsif hero_desktop_image != blank %}
+
+        <div class="vhl-video-hero__desktop-media">
+          {{
+            hero_desktop_image
+            | image_url: width: 2400
+            | image_tag:
+              loading: 'eager',
+              widths: '1000, 1400, 1800, 2200, 2400',
+              sizes: '100vw',
+              class: 'vhl-video-hero__image'
+          }}
+        </div>
+
+      {% endif %}
+
+
+      {% if section.settings.mobile_video != blank %}
+
+        <div class="vhl-video-hero__mobile-media">
+          {{
+            section.settings.mobile_video
+            | video_tag:
+              autoplay: true,
+              loop: true,
+              muted: true,
+              controls: false,
+              playsinline: true,
+              class: 'vhl-video-hero__video'
+          }}
+        </div>
+
+      {% elsif hero_mobile_image != blank %}
+
+        <div class="vhl-video-hero__mobile-media">
+          {{
+            hero_mobile_image
+            | image_url: width: 1400
+            | image_tag:
+              loading: 'eager',
+              widths: '500, 750, 900, 1100, 1400',
+              sizes: '100vw',
+              class: 'vhl-video-hero__image'
+          }}
+        </div>
+
+      {% endif %}
+
     {% endif %}
 
   </div>
@@ -95,138 +138,116 @@
   <div class="vhl-video-hero__overlay"></div>
 
 
-  {% if section.settings.eyebrow != blank
-    or hero_heading != blank
-    or hero_subheading != blank
-    or section.settings.button_label != blank
-  %}
+  {% unless is_badkamer_essentials %}
 
-    <div class="vhl-video-hero__inner">
+    {% if section.settings.eyebrow != blank
+      or hero_heading != blank
+      or hero_subheading != blank
+      or section.settings.button_label != blank
+    %}
 
-      <div class="vhl-video-hero__content">
+      <div class="vhl-video-hero__inner">
 
-        {% if section.settings.eyebrow != blank %}
-          <p class="vhl-video-hero__eyebrow">
-            {{ section.settings.eyebrow | escape }}
-          </p>
-        {% endif %}
+        <div class="vhl-video-hero__content">
 
+          {% if section.settings.eyebrow != blank %}
+            <p class="vhl-video-hero__eyebrow">
+              {{ section.settings.eyebrow | escape }}
+            </p>
+          {% endif %}
 
-        {% if hero_heading != blank %}
-          <h1 class="vhl-video-hero__heading">
-            {{ hero_heading | escape }}
-          </h1>
-        {% endif %}
+          {% if hero_heading != blank %}
+            <h1 class="vhl-video-hero__heading">
+              {{ hero_heading | escape }}
+            </h1>
+          {% endif %}
 
+          {% if hero_subheading != blank %}
+            <p class="vhl-video-hero__subheading">
+              {{ hero_subheading | escape }}
+            </p>
+          {% endif %}
 
-        {% if hero_subheading != blank %}
-          <p class="vhl-video-hero__subheading">
-            {{ hero_subheading | escape }}
-          </p>
-        {% endif %}
+          {% if section.settings.button_label != blank %}
+            <a
+              class="vhl-video-hero__button"
+              href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
+            >
+              {{ section.settings.button_label | escape }}
+            </a>
+          {% endif %}
 
-
-        {% if section.settings.button_label != blank %}
-          <a
-            class="vhl-video-hero__button"
-            href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
-          >
-            {{ section.settings.button_label | escape }}
-          </a>
-        {% endif %}
+        </div>
 
       </div>
 
-    </div>
+    {% endif %}
 
-  {% endif %}
+  {% endunless %}
 
 </section>
 
 
 {% style %}
 
-/* =========================================================
-   VHL VIDEO / IMAGE HERO
-   ========================================================= */
-
 #VHLVideoHero-{{ section.id }} {
   position: relative;
-
   width: 100%;
   min-height: {{ section.settings.desktop_height }}px;
-
   overflow: hidden;
   isolation: isolate;
-
   background: #171614;
-
   color: #ffffff;
 }
 
 
-/* =========================================================
+/* =========================
    MEDIA
-   ========================================================= */
+========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__media {
   position: absolute;
-
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   z-index: 0;
-
   overflow: hidden;
 }
-
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__desktop-media,
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__mobile-media {
   position: absolute;
-
   inset: 0;
-
   width: 100%;
   height: 100%;
 }
-
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__desktop-media {
   display: block;
 }
 
-
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__mobile-media {
   display: none;
 }
 
-
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__video,
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__image {
   display: block;
-
   width: 100%;
   height: 100%;
-
   object-fit: cover;
   object-position: center center;
 }
 
 
-/* =========================================================
+/* =========================
    OVERLAY
-   ========================================================= */
+========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__overlay {
   position: absolute;
-
   inset: 0;
-
   z-index: 1;
-
   pointer-events: none;
 
   background:
@@ -240,13 +261,23 @@
 }
 
 
-/* =========================================================
+/* Geen donkere overlay op Badkamer Essentials */
+
+{% if is_badkamer_essentials %}
+
+#VHLVideoHero-{{ section.id }} .vhl-video-hero__overlay {
+  display: none !important;
+}
+
+{% endif %}
+
+
+/* =========================
    CONTENT
-   ========================================================= */
+========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__inner {
   position: relative;
-
   z-index: 2;
 
   width: min(100%, 1600px);
@@ -263,37 +294,31 @@
   align-items: center;
 }
 
-
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__content {
   width: auto;
   max-width: none;
-
   transform: translateY(35px);
 }
 
 
-/* =========================================================
+/* =========================
    EYEBROW
-   ========================================================= */
+========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__eyebrow {
   margin: 0 0 15px;
-
   color: #ffffff;
-
   font-size: 11px;
   line-height: 1;
-
   font-weight: 600;
-
   letter-spacing: .19em;
   text-transform: uppercase;
 }
 
 
-/* =========================================================
+/* =========================
    HEADING
-   ========================================================= */
+========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__heading {
   margin: 0;
@@ -311,14 +336,13 @@
   line-height: 1;
 
   font-weight: 600;
-
   letter-spacing: -.035em;
 }
 
 
-/* =========================================================
+/* =========================
    SUBHEADING
-   ========================================================= */
+========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__subheading {
   margin: 14px 0 0;
@@ -331,14 +355,12 @@
   line-height: 1.5;
 
   font-weight: 400;
-
-  letter-spacing: -.005em;
 }
 
 
-/* =========================================================
+/* =========================
    BUTTON
-   ========================================================= */
+========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__button {
   display: inline-flex;
@@ -347,7 +369,6 @@
   min-height: 43px;
 
   margin-top: 26px;
-
   padding: 12px 22px;
 
   align-items: center;
@@ -367,83 +388,12 @@
 
   letter-spacing: .095em;
   text-transform: uppercase;
-
-  box-shadow: 0 2px 10px rgba(0,0,0,.05);
 }
 
 
-/* =========================================================
-   HOMEPAGE HEADER OVER HERO
-   ========================================================= */
-
-body.template-index .shopify-section-group-header-group {
-  position: absolute !important;
-
-  top: 0;
-  left: 0;
-
-  width: 100%;
-
-  z-index: 50;
-
-  background: transparent !important;
-}
-
-
-body.template-index .shopify-section-group-header-group .header-wrapper,
-body.template-index .shopify-section-group-header-group .header,
-body.template-index .shopify-section-group-header-group .vhl-header,
-body.template-index .shopify-section-group-header-group .vhl-header__inner,
-body.template-index .shopify-section-group-header-group .vhl-header__desktop,
-body.template-index .shopify-section-group-header-group .vhl-header__mobile,
-body.template-index .shopify-section-group-header-group .vhl-header__main,
-body.template-index .shopify-section-group-header-group .vhl-header__nav,
-body.template-index .shopify-section-group-header-group nav {
-  background: transparent !important;
-  background-color: transparent !important;
-
-  box-shadow: none !important;
-}
-
-
-body.template-index .shopify-section-group-header-group .header-wrapper,
-body.template-index .shopify-section-group-header-group .vhl-header,
-body.template-index .shopify-section-group-header-group .vhl-header__nav {
-  border-color: rgba(255,255,255,.16) !important;
-}
-
-
-body.template-index .shopify-section-group-header-group input[type="search"],
-body.template-index .shopify-section-group-header-group .search__input,
-body.template-index .shopify-section-group-header-group .vhl-header__search input,
-body.template-index .shopify-section-group-header-group .vhl-search input {
-  background: rgba(255,255,255,.82) !important;
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
-  border-color: rgba(255,255,255,.28) !important;
-}
-
-
-@media screen and (min-width: 750px) {
-
-  body.template-index .shopify-section-group-header-group a,
-  body.template-index .shopify-section-group-header-group button,
-  body.template-index .shopify-section-group-header-group svg {
-    color: #ffffff !important;
-  }
-
-  body.template-index .shopify-section-group-header-group svg {
-    stroke: currentColor;
-  }
-
-}
-
-
-/* =========================================================
+/* =========================
    MOBILE
-   ========================================================= */
+========================= */
 
 @media screen and (max-width: 749px) {
 
@@ -451,39 +401,21 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     min-height: {{ section.settings.mobile_height }}px;
   }
 
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__desktop-media {
     display: none;
   }
-
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__mobile-media {
     display: block;
   }
 
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__video,
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__image {
     width: 100%;
     height: 100%;
-
     object-fit: cover;
     object-position: center center;
   }
-
-
-  #VHLVideoHero-{{ section.id }} .vhl-video-hero__overlay {
-    background:
-      linear-gradient(
-        180deg,
-        rgba(8,7,6,0.00) 0%,
-        rgba(8,7,6,0.00) 48%,
-        rgba(8,7,6,0.10) 62%,
-        rgba(8,7,6,0.36) 78%,
-        rgba(8,7,6,0.70) 100%
-      );
-  }
-
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__inner {
     min-height: {{ section.settings.mobile_height }}px;
@@ -496,35 +428,19 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     align-items: flex-end;
   }
 
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__content {
     width: 100%;
     max-width: none;
-
     transform: none;
   }
-
-
-  #VHLVideoHero-{{ section.id }} .vhl-video-hero__eyebrow {
-    margin-bottom: 9px;
-
-    font-size: 9px;
-  }
-
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__heading {
     display: block !important;
 
     width: auto !important;
-
     max-width: calc(100vw - 40px) !important;
 
     margin: 0 !important;
-
-    white-space: nowrap !important;
-
-    overflow: visible !important;
-    text-overflow: clip !important;
 
     color: #ffffff !important;
 
@@ -532,23 +448,16 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     line-height: 1.1 !important;
 
     font-weight: 300 !important;
-
-    letter-spacing: -0.01em !important;
   }
-
 
   #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
     white-space: normal !important;
 
     font-size: clamp(32px, 11vw, 46px) !important;
-
     line-height: 1.05 !important;
 
     font-weight: 600 !important;
-
-    letter-spacing: -.03em !important;
   }
-
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__subheading {
     margin-top: 10px;
@@ -559,97 +468,21 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
     line-height: 1.5;
   }
 
-
-  #VHLVideoHero-{{ section.id }} .vhl-video-hero__button {
-    min-width: 150px;
-    min-height: 42px;
-
-    margin-top: 18px;
-
-    padding: 11px 18px;
-
-    font-size: 9px;
-  }
-
-
-  body.template-index .shopify-section-group-header-group {
-    position: absolute !important;
-
-    top: 0;
-    left: 0;
-
-    width: 100%;
-
-    z-index: 50;
-  }
-
-
-  body.template-index .shopify-section-group-header-group .header-wrapper,
-  body.template-index .shopify-section-group-header-group .header,
-  body.template-index .shopify-section-group-header-group .vhl-header,
-  body.template-index .shopify-section-group-header-group .vhl-header__inner,
-  body.template-index .shopify-section-group-header-group .vhl-header__mobile,
-  body.template-index .shopify-section-group-header-group .vhl-header__main {
-    background: transparent !important;
-    background-color: transparent !important;
-
-    box-shadow: none !important;
-  }
-
 }
 
 
-/* =========================================================
+/* =========================
    SMALL PHONE
-   ========================================================= */
+========================= */
 
 @media screen and (max-width: 390px) {
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__heading {
     font-size: 15px !important;
-
-    line-height: 1.1 !important;
-
-    font-weight: 300 !important;
-
-    letter-spacing: -0.008em !important;
-
-    white-space: nowrap !important;
   }
-
 
   #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
     font-size: clamp(26px, 10.5vw, 34px) !important;
-
-    line-height: 1.05 !important;
-
-    font-weight: 600 !important;
-
-    letter-spacing: -.02em !important;
-
-    white-space: normal !important;
-  }
-
-}
-
-
-/* =========================================================
-   VERY SMALL PHONE
-   ========================================================= */
-
-@media screen and (max-width: 350px) {
-
-  #VHLVideoHero-{{ section.id }} .vhl-video-hero__heading {
-    font-size: 14px !important;
-
-    font-weight: 300 !important;
-  }
-
-
-  #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
-    font-size: 24px !important;
-
-    font-weight: 600 !important;
   }
 
 }
@@ -754,7 +587,7 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
       "max": 900,
       "step": 10,
       "unit": "px",
-      "default": 700
+      "default": 580
     },
 
     {
@@ -765,7 +598,7 @@ body.template-index .shopify-section-group-header-group .vhl-search input {
       "max": 900,
       "step": 10,
       "unit": "px",
-      "default": 760
+      "default": 600
     },
 
     {
