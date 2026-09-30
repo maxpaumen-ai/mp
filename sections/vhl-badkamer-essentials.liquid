@@ -1,338 +1,454 @@
 {% comment %}
   VHL - Badkamer Essentials
-  Toont automatisch producten uit de collectie "badkamer-essentials".
-  Het huidige product wordt overgeslagen.
+  ROHA-style product grid
+  Toont automatisch alle producten uit collectie "badkamer-essentials".
 {% endcomment %}
 
 {% assign essentials_collection = collections['badkamer-essentials'] %}
 
-{% if essentials_collection != blank and essentials_collection.products_count > 1 %}
-  <section class="vhl-essentials">
-    <div class="vhl-essentials__inner">
+{% if essentials_collection != blank and essentials_collection.products_count > 0 %}
 
-      <div class="vhl-essentials__header">
-        <h2>BADKAMER ESSENTIALS</h2>
+<section class="vhl-essentials">
+  <div class="vhl-essentials__inner">
 
-        <a href="{{ essentials_collection.url }}" class="vhl-essentials__more">
-          Ontdek meer
-          <span aria-hidden="true">›</span>
-        </a>
-      </div>
+    <div class="vhl-essentials__header">
+      <h2>BADKAMER ESSENTIALS</h2>
 
-      <div class="vhl-essentials__products">
-        {% assign shown_products = 0 %}
+      <a
+        href="{{ essentials_collection.url }}"
+        class="vhl-essentials__more"
+      >
+        Ontdek meer
+        <span aria-hidden="true">›</span>
+      </a>
+    </div>
 
-        {% for item in essentials_collection.products %}
-          {% if item.id != product.id and shown_products < 4 %}
-            {% assign shown_products = shown_products | plus: 1 %}
+    <div class="vhl-essentials__products">
 
-            <article class="vhl-essentials__card">
+      {% for item in essentials_collection.products %}
 
-              <a
-                href="{{ item.url }}"
-                class="vhl-essentials__image-wrap"
-                aria-label="{{ item.title | escape }}"
-              >
-                {% if item.featured_image %}
-                  {{
-                    item.featured_image
-                    | image_url: width: 900
-                    | image_tag:
-                      loading: 'lazy',
-                      widths: '300, 450, 600, 750, 900',
-                      sizes: '(max-width: 749px) 72vw, 25vw',
-                      class: 'vhl-essentials__image',
-                      alt: item.title
-                  }}
-                {% endif %}
-              </a>
+        <article class="vhl-essentials__card">
 
-              <div class="vhl-essentials__info">
-                <a href="{{ item.url }}" class="vhl-essentials__title">
-                  {{ item.title }}
-                </a>
+          <a
+            href="{{ item.url }}"
+            class="vhl-essentials__image-wrap"
+            aria-label="{{ item.title | escape }}"
+          >
 
-                <div class="vhl-essentials__prices">
-                  <span class="vhl-essentials__price">
-                    {{ item.price | money }}
-                  </span>
+            {% if item.featured_image %}
 
-                  {% if item.compare_at_price_max > item.price %}
-                    <span class="vhl-essentials__compare">
-                      {{ item.compare_at_price_max | money }}
-                    </span>
-                  {% endif %}
-                </div>
-              </div>
+              {{
+                item.featured_image
+                | image_url: width: 1000
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '300, 450, 600, 750, 900, 1000',
+                  sizes: '(max-width: 749px) 50vw, 20vw',
+                  class: 'vhl-essentials__image',
+                  alt: item.title
+              }}
 
-              {% if item.available %}
-                {% assign quick_variant = item.selected_or_first_available_variant %}
+            {% endif %}
 
-                <product-form class="vhl-essentials__quick-form">
-                  {% form 'product', item %}
-                    <input
-                      type="hidden"
-                      name="id"
-                      value="{{ quick_variant.id }}"
-                    >
+          </a>
 
-                    <button
-                      type="submit"
-                      name="add"
-                      class="vhl-essentials__quick"
-                      {% unless quick_variant.available %}disabled{% endunless %}
-                    >
-                      + Snel toevoegen
-                    </button>
-                  {% endform %}
-                </product-form>
+
+          <div class="vhl-essentials__info">
+
+            <a
+              href="{{ item.url }}"
+              class="vhl-essentials__title"
+            >
+              {{ item.title }}
+            </a>
+
+
+            <div class="vhl-essentials__prices">
+
+              <span class="vhl-essentials__price">
+                {{ item.price | money }}
+              </span>
+
+              {% if item.compare_at_price_max > item.price %}
+
+                <span class="vhl-essentials__compare">
+                  {{ item.compare_at_price_max | money }}
+                </span>
+
               {% endif %}
 
-            </article>
-          {% endif %}
-        {% endfor %}
-      </div>
+            </div>
+
+          </div>
+
+        </article>
+
+      {% endfor %}
 
     </div>
-  </section>
 
-  <style>
-    .vhl-essentials {
-      width: 100%;
-      background: #fff;
-      padding: 72px 0 88px;
-      overflow: hidden;
-    }
+  </div>
+</section>
 
-    .vhl-essentials__inner {
-      width: min(1440px, calc(100% - 80px));
-      margin: 0 auto;
-    }
 
-    .vhl-essentials__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      margin-bottom: 38px;
-    }
+<style>
 
-    .vhl-essentials__header h2 {
-      margin: 0;
-      color: #111;
-      font-size: 16px;
-      line-height: 1.2;
-      font-weight: 700;
-      letter-spacing: 0;
-    }
+/* =========================================================
+   VHL BADKAMER ESSENTIALS
+   ROHA STYLE
+   ========================================================= */
 
-    .vhl-essentials__more {
-      display: inline-flex;
-      align-items: center;
-      gap: 16px;
-      color: #111;
-      text-decoration: none;
-      font-size: 16px;
-      line-height: 1;
-      white-space: nowrap;
-    }
+.vhl-essentials {
+  width: 100%;
+  background: #ffffff;
+  padding: 72px 0 95px;
+}
 
-    .vhl-essentials__more span {
-      font-size: 24px;
-      line-height: 1;
-      transform: translateY(-1px);
-    }
+.vhl-essentials__inner {
+  width: calc(100% - 80px);
+  max-width: 1600px;
+  margin: 0 auto;
+}
 
-    .vhl-essentials__products {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 22px;
-    }
 
-    .vhl-essentials__card {
-      position: relative;
-      min-width: 0;
-      background: #f1f1f1;
-      overflow: hidden;
-      border-radius: 5px;
-    }
+/* HEADER
+   ========================================================= */
 
-    .vhl-essentials__image-wrap {
-      position: relative;
-      display: block;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      background: #f5f5f5;
-      overflow: hidden;
-    }
+.vhl-essentials__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-    .vhl-essentials__image {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      transition: transform .35s ease;
-    }
+  margin-bottom: 38px;
+}
 
-    .vhl-essentials__card:hover .vhl-essentials__image {
-      transform: scale(1.025);
-    }
+.vhl-essentials__header h2 {
+  margin: 0;
 
-    .vhl-essentials__info {
-      min-height: 98px;
-      padding: 22px 28px 24px;
-      background: #ececec;
-    }
+  color: #111111;
 
-    .vhl-essentials__title {
-      display: block;
-      margin: 0 0 8px;
-      color: #111;
-      text-decoration: none;
-      text-transform: uppercase;
-      font-size: 16px;
-      line-height: 1.25;
-      font-weight: 700;
-    }
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 700;
 
-    .vhl-essentials__prices {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 9px;
-    }
+  letter-spacing: 0;
+}
 
-    .vhl-essentials__price,
-    .vhl-essentials__compare {
-      font-size: 16px;
-      line-height: 1.2;
-      color: #111;
-    }
 
-    .vhl-essentials__compare {
-      opacity: .55;
-      text-decoration: line-through;
-    }
+.vhl-essentials__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
 
-    .vhl-essentials__quick-form {
-      position: absolute;
-      right: 14px;
-      bottom: 112px;
-      z-index: 2;
-    }
+  color: #111111;
 
-    .vhl-essentials__quick-form form {
-      margin: 0;
-    }
+  text-decoration: none;
 
-    .vhl-essentials__quick {
-      appearance: none;
-      border: 0;
-      border-radius: 8px;
-      background: #181818;
-      color: #fff;
-      min-height: 46px;
-      padding: 0 22px;
-      cursor: pointer;
-      font: inherit;
-      font-size: 14px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
+  font-size: 16px;
+  line-height: 1;
 
-    .vhl-essentials__quick:hover {
-      opacity: .88;
-    }
+  white-space: nowrap;
+}
 
-    .vhl-essentials__quick:disabled {
-      opacity: .5;
-      cursor: default;
-    }
 
-    @media screen and (max-width: 989px) {
-      .vhl-essentials {
-        padding: 54px 0 64px;
-      }
+.vhl-essentials__more span {
+  font-size: 23px;
+  line-height: 1;
 
-      .vhl-essentials__inner {
-        width: calc(100% - 40px);
-      }
+  transform: translateY(-1px);
+}
 
-      .vhl-essentials__products {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-      }
-    }
 
-    @media screen and (max-width: 749px) {
-      .vhl-essentials {
-        padding: 44px 0 54px;
-      }
+/* PRODUCT GRID
+   ========================================================= */
 
-      .vhl-essentials__inner {
-        width: 100%;
-      }
+.vhl-essentials__products {
+  display: grid;
 
-      .vhl-essentials__header {
-        padding: 0 18px;
-        margin-bottom: 24px;
-      }
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 
-      .vhl-essentials__header h2 {
-        font-size: 14px;
-      }
+  gap: 22px;
+}
 
-      .vhl-essentials__more {
-        gap: 9px;
-        font-size: 14px;
-      }
 
-      .vhl-essentials__products {
-        display: flex;
-        gap: 12px;
-        overflow-x: auto;
-        padding: 0 18px 12px;
-        scroll-snap-type: x mandatory;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-      }
+/* PRODUCT CARD
+   ========================================================= */
 
-      .vhl-essentials__products::-webkit-scrollbar {
-        display: none;
-      }
+.vhl-essentials__card {
+  position: relative;
 
-      .vhl-essentials__card {
-        flex: 0 0 76%;
-        scroll-snap-align: start;
-      }
+  min-width: 0;
 
-      .vhl-essentials__info {
-        min-height: 86px;
-        padding: 17px 16px 19px;
-      }
+  background: #ffffff;
 
-      .vhl-essentials__title {
-        font-size: 13px;
-      }
+  border: 1px solid #e8dccd;
 
-      .vhl-essentials__price,
-      .vhl-essentials__compare {
-        font-size: 14px;
-      }
+  border-radius: 6px;
 
-      .vhl-essentials__quick-form {
-        right: 10px;
-        bottom: 98px;
-      }
+  overflow: hidden;
 
-      .vhl-essentials__quick {
-        min-height: 40px;
-        padding: 0 15px;
-        font-size: 12px;
-      }
-    }
-  </style>
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease;
+}
+
+
+.vhl-essentials__card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, .04);
+}
+
+
+/* IMAGE
+   ========================================================= */
+
+.vhl-essentials__image-wrap {
+  position: relative;
+
+  display: block;
+
+  width: 100%;
+
+  aspect-ratio: 1 / 1;
+
+  background: #f7f7f7;
+
+  overflow: hidden;
+}
+
+
+.vhl-essentials__image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  transition: transform .35s ease;
+}
+
+
+.vhl-essentials__card:hover .vhl-essentials__image {
+  transform: scale(1.018);
+}
+
+
+/* PRODUCT INFO
+   ========================================================= */
+
+.vhl-essentials__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 96px;
+
+  padding: 20px 14px 22px;
+
+  background: #ffffff;
+
+  text-align: center;
+}
+
+
+/* PRODUCT TITLE
+   ========================================================= */
+
+.vhl-essentials__title {
+  display: block;
+
+  width: 100%;
+
+  margin: 0 0 8px;
+
+  color: #111111;
+
+  text-decoration: none;
+
+  text-transform: uppercase;
+
+  font-size: 14px;
+  line-height: 1.25;
+
+  font-weight: 700;
+
+  text-align: center;
+}
+
+
+/* PRICES
+   ========================================================= */
+
+.vhl-essentials__prices {
+  display: flex;
+
+  justify-content: center;
+  align-items: baseline;
+
+  flex-wrap: wrap;
+
+  gap: 8px;
+}
+
+
+.vhl-essentials__price {
+  color: #111111;
+
+  font-size: 15px;
+  line-height: 1.2;
+
+  font-weight: 700;
+}
+
+
+.vhl-essentials__compare {
+  color: #555555;
+
+  font-size: 13px;
+  line-height: 1.2;
+
+  font-weight: 400;
+
+  text-decoration: line-through;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media screen and (max-width: 1199px) {
+
+  .vhl-essentials__products {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+}
+
+
+@media screen and (max-width: 989px) {
+
+  .vhl-essentials {
+    padding: 55px 0 70px;
+  }
+
+  .vhl-essentials__inner {
+    width: calc(100% - 40px);
+  }
+
+  .vhl-essentials__products {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 16px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media screen and (max-width: 749px) {
+
+  .vhl-essentials {
+    padding: 45px 0 55px;
+  }
+
+
+  .vhl-essentials__inner {
+    width: 100%;
+  }
+
+
+  .vhl-essentials__header {
+    padding: 0 16px;
+
+    margin-bottom: 24px;
+  }
+
+
+  .vhl-essentials__header h2 {
+    font-size: 14px;
+  }
+
+
+  .vhl-essentials__more {
+    gap: 8px;
+
+    font-size: 14px;
+  }
+
+
+  .vhl-essentials__more span {
+    font-size: 20px;
+  }
+
+
+  /* 2 products per row */
+
+  .vhl-essentials__products {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+
+    padding: 0 10px;
+  }
+
+
+  .vhl-essentials__card {
+    border-radius: 4px;
+  }
+
+
+  .vhl-essentials__image-wrap {
+    aspect-ratio: 1 / 1;
+  }
+
+
+  .vhl-essentials__info {
+    min-height: 88px;
+
+    padding: 14px 8px 16px;
+  }
+
+
+  .vhl-essentials__title {
+    margin-bottom: 7px;
+
+    font-size: 12px;
+
+    line-height: 1.25;
+  }
+
+
+  .vhl-essentials__prices {
+    gap: 5px;
+  }
+
+
+  .vhl-essentials__price {
+    font-size: 13px;
+  }
+
+
+  .vhl-essentials__compare {
+    font-size: 11px;
+  }
+
+}
+
+</style>
+
+
 {% endif %}
+
 
 {% schema %}
 {
