@@ -1,7 +1,13 @@
 {% comment %}
   VHL - Badkamer Essentials
-  ROHA-style product grid
-  Toont automatisch alle producten uit collectie "badkamer-essentials".
+  ROHA-style horizontale productrij
+
+  - Collectie: badkamer-essentials
+  - Huidige product wordt overgeslagen
+  - Altijd 1 rij
+  - Desktop: 5 producten zichtbaar
+  - Meer producten: horizontaal scrollen
+  - Mobiel: horizontaal swipen
 {% endcomment %}
 
 {% assign essentials_collection = collections['badkamer-essentials'] %}
@@ -23,68 +29,68 @@
       </a>
     </div>
 
-    <div class="vhl-essentials__products">
+    <div class="vhl-essentials__viewport">
+      <div class="vhl-essentials__products">
 
-      {% for item in essentials_collection.products %}
+        {% for item in essentials_collection.products %}
 
-        <article class="vhl-essentials__card">
+          {% unless item.id == product.id %}
 
-          <a
-            href="{{ item.url }}"
-            class="vhl-essentials__image-wrap"
-            aria-label="{{ item.title | escape }}"
-          >
+            <article class="vhl-essentials__card">
 
-            {% if item.featured_image %}
+              <a
+                href="{{ item.url }}"
+                class="vhl-essentials__image-wrap"
+                aria-label="{{ item.title | escape }}"
+              >
 
-              {{
-                item.featured_image
-                | image_url: width: 1000
-                | image_tag:
-                  loading: 'lazy',
-                  widths: '300, 450, 600, 750, 900, 1000',
-                  sizes: '(max-width: 749px) 50vw, 20vw',
-                  class: 'vhl-essentials__image',
-                  alt: item.title
-              }}
+                {% if item.featured_image %}
+                  {{
+                    item.featured_image
+                    | image_url: width: 1000
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '300, 450, 600, 750, 900, 1000',
+                      sizes: '(max-width: 749px) 72vw, 20vw',
+                      class: 'vhl-essentials__image',
+                      alt: item.title
+                  }}
+                {% endif %}
 
-            {% endif %}
+              </a>
 
-          </a>
+              <div class="vhl-essentials__info">
 
+                <a
+                  href="{{ item.url }}"
+                  class="vhl-essentials__title"
+                >
+                  {{ item.title }}
+                </a>
 
-          <div class="vhl-essentials__info">
+                <div class="vhl-essentials__prices">
 
-            <a
-              href="{{ item.url }}"
-              class="vhl-essentials__title"
-            >
-              {{ item.title }}
-            </a>
+                  <span class="vhl-essentials__price">
+                    {{ item.price | money }}
+                  </span>
 
+                  {% if item.compare_at_price_max > item.price %}
+                    <span class="vhl-essentials__compare">
+                      {{ item.compare_at_price_max | money }}
+                    </span>
+                  {% endif %}
 
-            <div class="vhl-essentials__prices">
+                </div>
 
-              <span class="vhl-essentials__price">
-                {{ item.price | money }}
-              </span>
+              </div>
 
-              {% if item.compare_at_price_max > item.price %}
+            </article>
 
-                <span class="vhl-essentials__compare">
-                  {{ item.compare_at_price_max | money }}
-                </span>
+          {% endunless %}
 
-              {% endif %}
+        {% endfor %}
 
-            </div>
-
-          </div>
-
-        </article>
-
-      {% endfor %}
-
+      </div>
     </div>
 
   </div>
@@ -95,13 +101,15 @@
 
 /* =========================================================
    VHL BADKAMER ESSENTIALS
-   ROHA STYLE
+   ALTIJD ÉÉN HORIZONTALE RIJ
    ========================================================= */
 
 .vhl-essentials {
   width: 100%;
+  max-width: 100%;
   background: #ffffff;
   padding: 72px 0 95px;
+  overflow: hidden;
 }
 
 .vhl-essentials__inner {
@@ -111,13 +119,13 @@
 }
 
 
-/* HEADER
-   ========================================================= */
+/* HEADER */
 
 .vhl-essentials__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
 
   margin-bottom: 38px;
 }
@@ -134,7 +142,6 @@
   letter-spacing: 0;
 }
 
-
 .vhl-essentials__more {
   display: inline-flex;
   align-items: center;
@@ -150,48 +157,87 @@
   white-space: nowrap;
 }
 
-
 .vhl-essentials__more span {
   font-size: 23px;
   line-height: 1;
-
-  transform: translateY(-1px);
 }
 
 
-/* PRODUCT GRID
+/* =========================================================
+   VIEWPORT
+   ========================================================= */
+
+.vhl-essentials__viewport {
+  width: 100%;
+  max-width: 100%;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+.vhl-essentials__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* =========================================================
+   PRODUCTRIJ
+   BELANGRIJK: FLEX + NOWRAP
    ========================================================= */
 
 .vhl-essentials__products {
-  display: grid;
+  display: flex !important;
 
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+
+  align-items: stretch;
 
   gap: 22px;
+
+  width: max-content;
+  min-width: 100%;
+
+  padding: 0;
+  margin: 0;
 }
 
 
-/* PRODUCT CARD
+/* =========================================================
+   PRODUCT CARD
+   5 PRODUCTEN ZICHTBAAR OP DESKTOP
    ========================================================= */
 
 .vhl-essentials__card {
   position: relative;
 
-  min-width: 0;
+  flex: 0 0 calc((100vw - 80px - 88px) / 5);
+
+  width: calc((100vw - 80px - 88px) / 5);
+
+  max-width: 286px;
+  min-width: 220px;
+
+  margin: 0 !important;
 
   background: #ffffff;
 
   border: 1px solid #e8dccd;
-
   border-radius: 6px;
 
   overflow: hidden;
+
+  box-sizing: border-box;
 
   transition:
     transform .25s ease,
     box-shadow .25s ease;
 }
-
 
 .vhl-essentials__card:hover {
   transform: translateY(-2px);
@@ -201,7 +247,8 @@
 }
 
 
-/* IMAGE
+/* =========================================================
+   IMAGE
    ========================================================= */
 
 .vhl-essentials__image-wrap {
@@ -218,7 +265,6 @@
   overflow: hidden;
 }
 
-
 .vhl-essentials__image {
   display: block;
 
@@ -230,18 +276,20 @@
   transition: transform .35s ease;
 }
 
-
 .vhl-essentials__card:hover .vhl-essentials__image {
   transform: scale(1.018);
 }
 
 
-/* PRODUCT INFO
+/* =========================================================
+   PRODUCT INFO
    ========================================================= */
 
 .vhl-essentials__info {
   display: flex;
+
   flex-direction: column;
+
   align-items: center;
   justify-content: center;
 
@@ -252,11 +300,9 @@
   background: #ffffff;
 
   text-align: center;
+
+  box-sizing: border-box;
 }
-
-
-/* PRODUCT TITLE
-   ========================================================= */
 
 .vhl-essentials__title {
   display: block;
@@ -268,20 +314,14 @@
   color: #111111;
 
   text-decoration: none;
-
   text-transform: uppercase;
 
   font-size: 14px;
   line-height: 1.25;
-
   font-weight: 700;
 
   text-align: center;
 }
-
-
-/* PRICES
-   ========================================================= */
 
 .vhl-essentials__prices {
   display: flex;
@@ -294,7 +334,6 @@
   gap: 8px;
 }
 
-
 .vhl-essentials__price {
   color: #111111;
 
@@ -303,7 +342,6 @@
 
   font-weight: 700;
 }
-
 
 .vhl-essentials__compare {
   color: #555555;
@@ -323,8 +361,11 @@
 
 @media screen and (max-width: 1199px) {
 
-  .vhl-essentials__products {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .vhl-essentials__card {
+    flex-basis: calc((100vw - 62px) / 3.5);
+    width: calc((100vw - 62px) / 3.5);
+
+    max-width: none;
   }
 
 }
@@ -341,9 +382,16 @@
   }
 
   .vhl-essentials__products {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-
     gap: 16px;
+  }
+
+  .vhl-essentials__card {
+    flex: 0 0 calc((100vw - 72px) / 2.6);
+
+    width: calc((100vw - 72px) / 2.6);
+
+    min-width: 0;
+    max-width: none;
   }
 
 }
@@ -359,11 +407,9 @@
     padding: 45px 0 55px;
   }
 
-
   .vhl-essentials__inner {
     width: 100%;
   }
-
 
   .vhl-essentials__header {
     padding: 0 16px;
@@ -371,11 +417,9 @@
     margin-bottom: 24px;
   }
 
-
   .vhl-essentials__header h2 {
     font-size: 14px;
   }
-
 
   .vhl-essentials__more {
     gap: 8px;
@@ -383,34 +427,34 @@
     font-size: 14px;
   }
 
-
   .vhl-essentials__more span {
     font-size: 20px;
   }
 
-
-  /* 2 products per row */
+  .vhl-essentials__viewport {
+    padding: 0;
+  }
 
   .vhl-essentials__products {
-    display: grid;
-
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-
     gap: 10px;
 
-    padding: 0 10px;
-  }
+    padding: 0 16px 8px;
 
+    min-width: max-content;
+
+    scroll-snap-type: x proximity;
+  }
 
   .vhl-essentials__card {
-    border-radius: 4px;
+    flex: 0 0 72vw !important;
+
+    width: 72vw !important;
+
+    min-width: 72vw !important;
+    max-width: 72vw !important;
+
+    scroll-snap-align: start;
   }
-
-
-  .vhl-essentials__image-wrap {
-    aspect-ratio: 1 / 1;
-  }
-
 
   .vhl-essentials__info {
     min-height: 88px;
@@ -418,25 +462,20 @@
     padding: 14px 8px 16px;
   }
 
-
   .vhl-essentials__title {
     margin-bottom: 7px;
 
     font-size: 12px;
-
     line-height: 1.25;
   }
-
 
   .vhl-essentials__prices {
     gap: 5px;
   }
 
-
   .vhl-essentials__price {
     font-size: 13px;
   }
-
 
   .vhl-essentials__compare {
     font-size: 11px;
@@ -445,7 +484,6 @@
 }
 
 </style>
-
 
 {% endif %}
 
