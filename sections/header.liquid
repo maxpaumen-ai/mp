@@ -1709,6 +1709,23 @@
                   section_id: section.id,
                   blocks: section.blocks
                 -%}
+
+                {%- comment -%}
+                  Losse permanente link direct na BADKAMER.
+                  Hiermee staat BADKAMER ESSENTIALS als vijfde hoofdoptie
+                  tussen BADKAMER en OPBERGEN, zonder mega-menu.
+                {%- endcomment -%}
+                {% assign child_handle = child.title | handleize %}
+                {% if child_handle == 'badkamer' %}
+                  <li class="vhliso-nav-item">
+                    <a
+                      class="vhliso-nav-link"
+                      href="/collections/badkamer-essentials"
+                    >
+                      BADKAMER ESSENTIALS
+                    </a>
+                  </li>
+                {% endif %}
               {% endfor %}
 
             {% else %}
