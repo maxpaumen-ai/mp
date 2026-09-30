@@ -2395,9 +2395,39 @@
 
   vhlMegaEntries.forEach(function (entry) {
 
+    /*
+      HOVER FIX:
+      Het mega-menu is position:fixed. Daardoor kan een browser bij de
+      overgang van de trigger naar het paneel kort een mouseleave op de
+      <li> registreren, ook al beweegt de cursor visueel het menu in.
+      We behandelen trigger + VOLLEDIG paneel daarom als één hover-zone.
+      De mini-delay overbrugt uitsluitend de fysieke overgang; zodra de
+      cursor echt buiten zowel trigger als paneel staat, sluit het menu.
+    */
+    var vhlMegaCloseTimer = null;
+
+    function vhlCancelMegaClose() {
+      if (vhlMegaCloseTimer) {
+        window.clearTimeout(vhlMegaCloseTimer);
+        vhlMegaCloseTimer = null;
+      }
+    }
+
+    function vhlScheduleMegaClose() {
+      vhlCancelMegaClose();
+
+      vhlMegaCloseTimer = window.setTimeout(function () {
+        if (!entry.li.matches(':hover') && !entry.panel.matches(':hover')) {
+          vhlCloseMega(entry);
+        }
+        vhlMegaCloseTimer = null;
+      }, 90);
+    }
+
     entry.li.addEventListener(
       'mouseenter',
       function () {
+        vhlCancelMegaClose();
         vhlOpenMega(entry);
       }
     );
@@ -2405,13 +2435,28 @@
     entry.li.addEventListener(
       'mouseleave',
       function () {
-        vhlCloseMega(entry);
+        vhlScheduleMegaClose();
+      }
+    );
+
+    entry.panel.addEventListener(
+      'mouseenter',
+      function () {
+        vhlCancelMegaClose();
+      }
+    );
+
+    entry.panel.addEventListener(
+      'mouseleave',
+      function () {
+        vhlScheduleMegaClose();
       }
     );
 
     entry.li.addEventListener(
       'focusin',
       function () {
+        vhlCancelMegaClose();
         vhlOpenMega(entry);
       }
     );
