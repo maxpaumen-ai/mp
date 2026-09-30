@@ -1,42 +1,76 @@
 {% comment %}
   VHL - Badkamer Essentials
-  ROHA-style horizontale productrij
+  ROHA-style banner + horizontale productrij
 
+  - Banner bovenaan via Shopify theme editor
+  - Geen tekst op/in de banner
+  - Geen BADKAMER ESSENTIALS titel
+  - Geen Ontdek meer
   - Automatisch collectie: badkamer-essentials
   - Huidige product wordt overgeslagen
-  - Geen tweede rij
-  - Alle producten blijven horizontaal naast elkaar
-  - Desktop: 5 producten zichtbaar
-  - Mobiel/tablet: horizontaal scrollen
+  - ALTIJD 1 productrij
+  - NOOIT wrapping / tweede rij
+  - Desktop: ongeveer 5 producten zichtbaar
+  - Rest horizontaal scrollbaar
+  - Mobiel: horizontaal swipen
 {% endcomment %}
 
 {% assign essentials_collection = collections['badkamer-essentials'] %}
 
 {% if essentials_collection != blank and essentials_collection.products_count > 0 %}
 
-<section class="vhl-essentials" data-vhl-essentials>
+<section
+  class="vhl-essentials"
+  data-vhl-essentials
+  id="vhl-essentials-{{ section.id }}"
+>
 
-  <div class="vhl-essentials__inner">
+  {% comment %}
+    ============================
+    BANNER
+    ============================
+  {% endcomment %}
 
-    <!-- HEADER -->
-    <div class="vhl-essentials__header">
+  {% if section.settings.banner_image != blank %}
+    <div class="vhl-essentials__banner">
 
-      <h2 class="vhl-essentials__heading">
-        BADKAMER ESSENTIALS
-      </h2>
+      <picture>
 
-      <a
-        href="{{ essentials_collection.url }}"
-        class="vhl-essentials__more"
-      >
-        <span>Ontdek meer</span>
-        <span class="vhl-essentials__arrow" aria-hidden="true">›</span>
-      </a>
+        {% if section.settings.banner_image_mobile != blank %}
+          <source
+            media="(max-width: 749px)"
+            srcset="
+              {{ section.settings.banner_image_mobile | image_url: width: 750 }} 750w,
+              {{ section.settings.banner_image_mobile | image_url: width: 1000 }} 1000w
+            "
+          >
+        {% endif %}
+
+        {{
+          section.settings.banner_image
+          | image_url: width: 2400
+          | image_tag:
+            loading: 'lazy',
+            widths: '1000, 1400, 1800, 2200, 2400',
+            sizes: '100vw',
+            class: 'vhl-essentials__banner-image',
+            alt: ''
+        }}
+
+      </picture>
 
     </div>
+  {% endif %}
 
 
-    <!-- HORIZONTALE PRODUCTRIJ -->
+  {% comment %}
+    ============================
+    PRODUCTEN
+    ============================
+  {% endcomment %}
+
+  <div class="vhl-essentials__products-area">
+
     <div class="vhl-essentials__viewport">
 
       <div class="vhl-essentials__track">
@@ -47,7 +81,6 @@
 
             <article class="vhl-essentials__card">
 
-              <!-- AFBEELDING -->
               <a
                 href="{{ item.url }}"
                 class="vhl-essentials__image-link"
@@ -72,7 +105,6 @@
               </a>
 
 
-              <!-- PRODUCTINFO -->
               <div class="vhl-essentials__info">
 
                 <a
@@ -118,23 +150,98 @@
 
 <style>
 
-/* =========================================================
-   VHL BADKAMER ESSENTIALS
-   ========================================================= */
+/* ==========================================================
+   RESET
+   ========================================================== */
 
-.vhl-essentials,
-.vhl-essentials *,
-.vhl-essentials *::before,
-.vhl-essentials *::after {
+#vhl-essentials-{{ section.id }},
+#vhl-essentials-{{ section.id }} *,
+#vhl-essentials-{{ section.id }} *::before,
+#vhl-essentials-{{ section.id }} *::after {
   box-sizing: border-box;
 }
 
 
-/* =========================================================
-   SECTION
-   ========================================================= */
+/* ==========================================================
+   COMPLETE SECTION
+   ========================================================== */
 
-.vhl-essentials {
+#vhl-essentials-{{ section.id }} {
+  display: block !important;
+
+  width: 100% !important;
+  max-width: none !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: #f5f5f5 !important;
+
+  overflow: hidden !important;
+}
+
+
+/* ==========================================================
+   BANNER
+   ========================================================== */
+
+#vhl-essentials-{{ section.id }} .vhl-essentials__banner {
+  position: relative !important;
+
+  display: block !important;
+
+  width: 100% !important;
+  max-width: none !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  overflow: hidden !important;
+
+  background: #111 !important;
+}
+
+
+/* picture moet volledig vullen */
+
+#vhl-essentials-{{ section.id }} .vhl-essentials__banner picture {
+  display: block !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+
+/* BANNER IMAGE */
+
+#vhl-essentials-{{ section.id }} .vhl-essentials__banner-image {
+  display: block !important;
+
+  width: 100% !important;
+
+  height: {{ section.settings.banner_height }}px !important;
+
+  max-width: none !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  object-fit: cover !important;
+
+  object-position:
+    {{ section.settings.banner_position }}
+    !important;
+}
+
+
+/* ==========================================================
+   PRODUCT AREA
+   ========================================================== */
+
+#vhl-essentials-{{ section.id }} .vhl-essentials__products-area {
   display: block !important;
 
   width: 100% !important;
@@ -142,131 +249,41 @@
 
   margin: 0 !important;
 
-  padding: 64px 0 76px !important;
+  padding: 64px 0 74px !important;
 
-  background: #f7f7f7 !important;
-
-  overflow: hidden !important;
+  background: #f5f5f5 !important;
 }
 
 
-/* =========================================================
-   INNER CONTAINER
-   ========================================================= */
+/* ==========================================================
+   VIEWPORT
+   Dit is het zichtbare gedeelte van de productrij
+   ========================================================== */
 
-.vhl-essentials__inner {
+#vhl-essentials-{{ section.id }} .vhl-essentials__viewport {
   display: block !important;
+
+  position: relative !important;
 
   width: calc(100% - 80px) !important;
   max-width: 1800px !important;
 
   margin: 0 auto !important;
-
-  padding: 0 !important;
-}
-
-
-/* =========================================================
-   HEADER
-   ========================================================= */
-
-.vhl-essentials__header {
-  display: flex !important;
-
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-
-  align-items: center !important;
-  justify-content: space-between !important;
-
-  width: 100% !important;
-
-  margin: 0 0 34px !important;
-  padding: 0 !important;
-
-  gap: 30px !important;
-}
-
-
-.vhl-essentials__heading {
-  display: block !important;
-
-  margin: 0 !important;
-  padding: 0 !important;
-
-  color: #111 !important;
-
-  font-size: 16px !important;
-  line-height: 1.2 !important;
-
-  font-weight: 700 !important;
-
-  letter-spacing: 0 !important;
-
-  text-transform: uppercase !important;
-}
-
-
-.vhl-essentials__more {
-  display: inline-flex !important;
-
-  align-items: center !important;
-
-  gap: 14px !important;
-
-  margin: 0 !important;
-  padding: 0 !important;
-
-  color: #111 !important;
-
-  text-decoration: none !important;
-
-  font-size: 16px !important;
-  line-height: 1 !important;
-
-  font-weight: 400 !important;
-
-  white-space: nowrap !important;
-}
-
-
-.vhl-essentials__arrow {
-  display: inline-block !important;
-
-  font-size: 24px !important;
-  line-height: 1 !important;
-
-  transform: translateY(-1px);
-}
-
-
-/* =========================================================
-   VIEWPORT
-   Dit is het zichtbare venster.
-   ========================================================= */
-
-.vhl-essentials__viewport {
-  display: block !important;
-
-  position: relative !important;
-
-  width: 100% !important;
-  max-width: 100% !important;
-
-  margin: 0 !important;
   padding: 0 !important;
 
   overflow-x: auto !important;
   overflow-y: hidden !important;
 
   scrollbar-width: none !important;
-
   -ms-overflow-style: none !important;
 
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch !important;
+
+  scroll-behavior: smooth;
 }
 
 
+#vhl-essentials-{{ section.id }}
 .vhl-essentials__viewport::-webkit-scrollbar {
   display: none !important;
 
@@ -275,13 +292,15 @@
 }
 
 
-/* =========================================================
+/* ==========================================================
    TRACK
-   ZEER BELANGRIJK:
-   alle producten worden gedwongen op 1 rij.
-   ========================================================= */
 
-.vhl-essentials__track {
+   BELANGRIJK:
+   FLEX + NOWRAP + MAX-CONTENT
+   Hierdoor KAN geen tweede rij ontstaan.
+   ========================================================== */
+
+#vhl-essentials-{{ section.id }} .vhl-essentials__track {
   display: flex !important;
 
   flex-direction: row !important;
@@ -290,11 +309,8 @@
   align-items: stretch !important;
   justify-content: flex-start !important;
 
-  grid-template-columns: none !important;
-  grid-template-rows: none !important;
-
   width: max-content !important;
-  min-width: 100% !important;
+  min-width: max-content !important;
   max-width: none !important;
 
   margin: 0 !important;
@@ -304,24 +320,34 @@
 
   overflow: visible !important;
 
-  list-style: none !important;
+  white-space: nowrap !important;
+
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
 }
 
 
-/* =========================================================
+/* ==========================================================
    PRODUCT CARD
-   5 kaarten zichtbaar op desktop.
-   ========================================================= */
+   ========================================================== */
 
-.vhl-essentials__card {
+#vhl-essentials-{{ section.id }} .vhl-essentials__card {
   position: relative !important;
 
   display: flex !important;
 
   flex-direction: column !important;
 
+  flex-wrap: nowrap !important;
+
   flex-grow: 0 !important;
   flex-shrink: 0 !important;
+
+  /*
+    5 producten zichtbaar.
+    Container = scherm - 80px.
+    4 gaps van 20px.
+  */
 
   flex-basis: calc((100vw - 160px) / 5) !important;
 
@@ -332,9 +358,11 @@
   margin: 0 !important;
   padding: 0 !important;
 
+  white-space: normal !important;
+
   background: #fff !important;
 
-  border: 1px solid #e8d7c1 !important;
+  border: 1px solid #e7d6bf !important;
   border-radius: 6px !important;
 
   overflow: hidden !important;
@@ -343,11 +371,11 @@
 }
 
 
-/* =========================================================
-   PRODUCT IMAGE AREA
-   ========================================================= */
+/* ==========================================================
+   PRODUCT IMAGE
+   ========================================================== */
 
-.vhl-essentials__image-link {
+#vhl-essentials-{{ section.id }} .vhl-essentials__image-link {
   position: relative !important;
 
   display: block !important;
@@ -369,7 +397,7 @@
 }
 
 
-.vhl-essentials__image {
+#vhl-essentials-{{ section.id }} .vhl-essentials__image {
   display: block !important;
 
   width: 100% !important;
@@ -378,6 +406,7 @@
   max-width: none !important;
 
   margin: 0 !important;
+  padding: 0 !important;
 
   object-fit: contain !important;
 
@@ -387,16 +416,18 @@
 }
 
 
-.vhl-essentials__card:hover .vhl-essentials__image {
-  transform: scale(1.02);
+#vhl-essentials-{{ section.id }}
+.vhl-essentials__card:hover
+.vhl-essentials__image {
+  transform: scale(1.02) !important;
 }
 
 
-/* =========================================================
-   PRODUCT INFORMATION
-   ========================================================= */
+/* ==========================================================
+   PRODUCT INFO
+   ========================================================== */
 
-.vhl-essentials__info {
+#vhl-essentials-{{ section.id }} .vhl-essentials__info {
   display: flex !important;
 
   flex-direction: column !important;
@@ -417,14 +448,16 @@
   background: #fff !important;
 
   text-align: center !important;
+
+  white-space: normal !important;
 }
 
 
-/* =========================================================
+/* ==========================================================
    PRODUCT TITLE
-   ========================================================= */
+   ========================================================== */
 
-.vhl-essentials__title {
+#vhl-essentials-{{ section.id }} .vhl-essentials__title {
   display: block !important;
 
   width: 100% !important;
@@ -446,14 +479,16 @@
   font-weight: 700 !important;
 
   letter-spacing: 0 !important;
+
+  white-space: normal !important;
 }
 
 
-/* =========================================================
+/* ==========================================================
    PRICES
-   ========================================================= */
+   ========================================================== */
 
-.vhl-essentials__prices {
+#vhl-essentials-{{ section.id }} .vhl-essentials__prices {
   display: flex !important;
 
   flex-direction: row !important;
@@ -468,10 +503,12 @@
 
   margin: 0 !important;
   padding: 0 !important;
+
+  white-space: normal !important;
 }
 
 
-.vhl-essentials__price {
+#vhl-essentials-{{ section.id }} .vhl-essentials__price {
   display: inline-block !important;
 
   color: #111 !important;
@@ -485,7 +522,7 @@
 }
 
 
-.vhl-essentials__compare {
+#vhl-essentials-{{ section.id }} .vhl-essentials__compare {
   display: inline-block !important;
 
   color: #555 !important;
@@ -503,46 +540,76 @@
 }
 
 
-/* =========================================================
-   GROTE DESKTOPS
-   Voorkomt dat kaarten gigantisch worden.
-   ========================================================= */
+/* ==========================================================
+   GROTE DESKTOP
+   ========================================================== */
 
 @media screen and (min-width: 1880px) {
 
-  .vhl-essentials__card {
-    flex-basis: 328px !important;
+  #vhl-essentials-{{ section.id }}
+  .vhl-essentials__viewport {
+    max-width: 1800px !important;
+  }
 
-    width: 328px !important;
-    min-width: 328px !important;
-    max-width: 328px !important;
+
+  #vhl-essentials-{{ section.id }}
+  .vhl-essentials__card {
+
+    flex-basis: 344px !important;
+
+    width: 344px !important;
+    min-width: 344px !important;
+    max-width: 344px !important;
   }
 
 }
 
 
-/* =========================================================
+/* ==========================================================
    TABLET
-   ========================================================= */
+   ========================================================== */
 
 @media screen and (max-width: 989px) {
 
-  .vhl-essentials {
-    padding: 52px 0 62px !important;
+  #vhl-essentials-{{ section.id }}
+  .vhl-essentials__banner-image {
+
+    height:
+      {{ section.settings.banner_height_tablet }}
+      px !important;
   }
 
 
-  .vhl-essentials__inner {
-    width: calc(100% - 40px) !important;
+  #vhl-essentials-{{ section.id }}
+  .vhl-essentials__products-area {
+
+    padding: 44px 0 54px !important;
   }
 
 
+  #vhl-essentials-{{ section.id }}
+  .vhl-essentials__viewport {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    padding-left: 20px !important;
+  }
+
+
+  #vhl-essentials-{{ section.id }}
   .vhl-essentials__track {
+
     gap: 16px !important;
+
+    padding-right: 40px !important;
   }
 
 
+  #vhl-essentials-{{ section.id }}
   .vhl-essentials__card {
+
     flex-basis: 310px !important;
 
     width: 310px !important;
@@ -553,67 +620,66 @@
 }
 
 
-/* =========================================================
+/* ==========================================================
    MOBILE
-   ========================================================= */
+   ========================================================== */
 
 @media screen and (max-width: 749px) {
 
-  .vhl-essentials {
-    padding: 42px 0 50px !important;
+  #vhl-essentials-{{ section.id }}
+  .vhl-essentials__banner-image {
+
+    height:
+      {{ section.settings.banner_height_mobile }}
+      px !important;
   }
 
 
-  .vhl-essentials__inner {
-    width: 100% !important;
-    max-width: none !important;
+  #vhl-essentials-{{ section.id }}
+  .vhl-essentials__products-area {
+
+    padding: 32px 0 42px !important;
   }
 
 
-  .vhl-essentials__header {
-    width: 100% !important;
-
-    margin-bottom: 22px !important;
-
-    padding-left: 18px !important;
-    padding-right: 18px !important;
-
-    gap: 15px !important;
-  }
-
-
-  .vhl-essentials__heading {
-    font-size: 13px !important;
-  }
-
-
-  .vhl-essentials__more {
-    gap: 8px !important;
-
-    font-size: 13px !important;
-  }
-
-
-  .vhl-essentials__arrow {
-    font-size: 20px !important;
-  }
-
-
+  #vhl-essentials-{{ section.id }}
   .vhl-essentials__viewport {
-    padding-left: 18px !important;
 
-    scroll-snap-type: x proximity;
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    padding-left: 16px !important;
+
+    scroll-snap-type: x proximity !important;
   }
 
 
+  #vhl-essentials-{{ section.id }}
   .vhl-essentials__track {
+
+    display: flex !important;
+
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+
+    width: max-content !important;
+    min-width: max-content !important;
+
     gap: 12px !important;
 
-    padding-right: 36px !important;
+    padding-right: 32px !important;
   }
 
 
+  #vhl-essentials-{{ section.id }}
   .vhl-essentials__card {
+
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+
     flex-basis: 76vw !important;
 
     width: 76vw !important;
@@ -622,26 +688,34 @@
   }
 
 
+  #vhl-essentials-{{ section.id }}
   .vhl-essentials__info {
+
     min-height: 90px !important;
 
     padding: 17px 12px 19px !important;
   }
 
 
+  #vhl-essentials-{{ section.id }}
   .vhl-essentials__title {
+
     margin-bottom: 8px !important;
 
     font-size: 13px !important;
   }
 
 
+  #vhl-essentials-{{ section.id }}
   .vhl-essentials__price {
+
     font-size: 14px !important;
   }
 
 
+  #vhl-essentials-{{ section.id }}
   .vhl-essentials__compare {
+
     font-size: 12px !important;
   }
 
@@ -653,7 +727,76 @@
 {% schema %}
 {
   "name": "VHL Badkamer Essentials",
-  "settings": [],
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "banner_image",
+      "label": "Banner afbeelding desktop"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_mobile",
+      "label": "Banner afbeelding mobiel"
+    },
+    {
+      "type": "range",
+      "id": "banner_height",
+      "min": 250,
+      "max": 900,
+      "step": 10,
+      "unit": "px",
+      "label": "Banner hoogte desktop",
+      "default": 560
+    },
+    {
+      "type": "range",
+      "id": "banner_height_tablet",
+      "min": 200,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "label": "Banner hoogte tablet",
+      "default": 430
+    },
+    {
+      "type": "range",
+      "id": "banner_height_mobile",
+      "min": 180,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "Banner hoogte mobiel",
+      "default": 320
+    },
+    {
+      "type": "select",
+      "id": "banner_position",
+      "label": "Positie banner afbeelding",
+      "default": "center center",
+      "options": [
+        {
+          "value": "left center",
+          "label": "Links"
+        },
+        {
+          "value": "center center",
+          "label": "Midden"
+        },
+        {
+          "value": "right center",
+          "label": "Rechts"
+        },
+        {
+          "value": "center top",
+          "label": "Boven"
+        },
+        {
+          "value": "center bottom",
+          "label": "Onder"
+        }
+      ]
+    }
+  ],
   "presets": [
     {
       "name": "VHL Badkamer Essentials"
