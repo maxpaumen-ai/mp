@@ -2394,88 +2394,74 @@
   }
 
   /*
-    HOVER FIX V3
-    ----------------
-    Sluit NIET meer op mouseleave van de <li>. Het mega-paneel is
-    position:fixed en beslaat vrijwel de hele viewportbreedte; daarom
-    behandelen we trigger + het VOLLEDIGE zichtbare paneel als één
-    hover-zone. Ook lege witte ruimte in het paneel telt dus mee.
-
-    We onthouden de laatste pointerpositie en sluiten alleen wanneer
-    die positie buiten zowel de trigger/nav-item als het paneel ligt.
+    HOVER FIX V4 — shared nav + panel hoverzone
+    --------------------------------------------
+    Geen globale pointer-coordinaten meer. We laten de browser zelf
+    bepalen of de pointer het ECHTE mega-paneel verlaat. Lege ruimte
+    binnen .vhliso-mega blijft daardoor gewoon onderdeel van de zone.
   */
-  var vhlPointerX = -9999;
-  var vhlPointerY = -9999;
+  var vhlActiveMega = null;
+  var vhlNavEl = root.querySelector('.vhliso-nav');
 
-  function vhlPointInsideRect(x, y, rect, extra) {
-    extra = extra || 0;
+  function vhlActivateMega(entry) {
+    vhlActiveMega = entry;
+    vhlOpenMega(entry);
+  }
+
+  function vhlNodeInsideActiveZone(node, entry) {
+    if (!node || !entry) return false;
     return (
-      x >= rect.left - extra &&
-      x <= rect.right + extra &&
-      y >= rect.top - extra &&
-      y <= rect.bottom + extra
+      entry.btn.contains(node) ||
+      entry.panel.contains(node) ||
+      (vhlNavEl && vhlNavEl.contains(node))
     );
   }
 
-  function vhlPointerInsideEntry(entry, x, y) {
-    if (!entry || !entry.li || !entry.panel || entry.panel.hidden) {
-      return false;
-    }
-
-    var liRect = entry.li.getBoundingClientRect();
-    var panelRect = entry.panel.getBoundingClientRect();
-
-    /* Kleine brug voorkomt 1px/subpixel-gaten tussen nav en paneel. */
-    return (
-      vhlPointInsideRect(x, y, liRect, 3) ||
-      vhlPointInsideRect(x, y, panelRect, 3)
-    );
+  function vhlCloseActiveMega() {
+    if (!vhlActiveMega) return;
+    vhlCloseMega(vhlActiveMega);
+    vhlActiveMega = null;
   }
 
   vhlMegaEntries.forEach(function (entry) {
 
-    entry.btn.addEventListener(
-      'mouseenter',
-      function () {
-        vhlOpenMega(entry);
-      }
-    );
+    entry.btn.addEventListener('pointerenter', function () {
+      vhlActivateMega(entry);
+    });
 
-    entry.btn.addEventListener(
-      'focusin',
-      function () {
-        vhlOpenMega(entry);
-      }
-    );
+    entry.btn.addEventListener('focusin', function () {
+      vhlActivateMega(entry);
+    });
 
-    entry.btn.addEventListener(
-      'click',
-      function (event) {
-        event.preventDefault();
-        vhlOpenMega(entry);
-      }
-    );
+    entry.btn.addEventListener('click', function (event) {
+      event.preventDefault();
+      vhlActivateMega(entry);
+    });
+
+    /*
+      Cruciaal: het paneel zelf bewaakt zijn volledige rechthoek.
+      pointerleave vuurt pas wanneer de pointer de buitenrand van het
+      paneel verlaat; bewegen over lege witte ruimte doet dus niets.
+    */
+    entry.panel.addEventListener('pointerleave', function (event) {
+      if (vhlNodeInsideActiveZone(event.relatedTarget, entry)) return;
+      if (vhlActiveMega === entry) vhlCloseActiveMega();
+    });
+
+    entry.panel.addEventListener('pointerenter', function () {
+      vhlActiveMega = entry;
+    });
 
   });
 
-  if (vhlMegaEntries.length) {
-    document.addEventListener(
-      'pointermove',
-      function (event) {
-        vhlPointerX = event.clientX;
-        vhlPointerY = event.clientY;
-
-        vhlMegaEntries.forEach(function (entry) {
-          if (entry.panel.hidden) return;
-
-          if (!vhlPointerInsideEntry(entry, vhlPointerX, vhlPointerY)) {
-            vhlCloseMega(entry);
-          }
-        });
-      },
-      { passive: true }
-    );
+  if (vhlNavEl) {
+    vhlNavEl.addEventListener('pointerleave', function (event) {
+      if (!vhlActiveMega) return;
+      if (vhlNodeInsideActiveZone(event.relatedTarget, vhlActiveMega)) return;
+      vhlCloseActiveMega();
+    });
   }
+
 
   if (vhlMegaEntries.length) {
 
