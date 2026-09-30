@@ -49,7 +49,7 @@
 {% for block in section.blocks %}
   {% if block.type == 'cart_progress_bar' %}
     {% assign free_product_price = block.settings.product_free_amount | default: 0 | times: 100 %}
-    {% assign free_shipping_price = block.settings.product_free_shipping | default: 0 | times: 100 %}
+    {% assign free_shipping_price = 3995 %}
 
     {% assign has_single_goal = false %}
     {% if free_shipping_price > 0 and free_product_price == 0 %}
@@ -3172,7 +3172,7 @@
           "type": "text",
           "id": "shipping_earn_text",
           "label": "Shipping earn text",
-          "default": "Je hebt gratis verzending"
+          "default": "Je bestelling wordt gratis verzonden"
         },
         {
           "type": "text",
