@@ -1726,22 +1726,23 @@
 
           {% else %}
 
-            {%- comment -%}
-              Top-level items ZONDER kinderen (bv. Home, Contact) worden
-              op DESKTOP bewust niet meer in de permanente navigatiebalk
-              gerenderd — die balk moet puur een commerciële categorie-nav
-              zijn (elk zichtbaar item hierboven is een echte mega-menu-
-              trigger, met eigen sub-links). Home is al bereikbaar via het
-              logo, Favorieten via het hart-icoon in .vhliso-actions.
+            {%- assign vhliso_flat_handle = link.title | handleize -%}
 
-              Dit is UITSLUITEND een renderkeuze op dit ene punt: er wordt
-              niets verwijderd of herschreven in de Shopify Navigation-data
-              zelf (section.settings.menu blijft volledig intact), en de
-              mobiele drawer (verderop, een aparte, ongewijzigde for-loop
-              over dezelfde section.settings.menu.links) blijft
-              Home/Catalogus/Contact gewoon tonen zoals voorheen — alleen
-              dit ene else-pad binnen de DESKTOP-nav wordt overgeslagen.
-            {%- endcomment -%}
+            {%- if vhliso_flat_handle == 'badkamer-essentials'
+              or vhliso_flat_handle == 'wandplanken'
+              or vhliso_flat_handle == 'wastafelkranen'
+              or vhliso_flat_handle == 'zeepdispensers'
+            -%}
+              <li class="vhliso-nav-item">
+                <a
+                  class="vhliso-nav-link"
+                  href="{{ link.url }}"
+                  {% if link.current %}aria-current="page"{% endif %}
+                >
+                  {{ link.title | upcase | escape }}
+                </a>
+              </li>
+            {%- endif -%}
 
           {% endif %}
 
