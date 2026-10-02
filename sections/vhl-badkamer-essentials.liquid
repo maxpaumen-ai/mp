@@ -1,20 +1,22 @@
 {% comment %}
-  VHL - Badkamer Essentials + automatische Wandplanken
+  VHL - Badkamer Essentials + automatische Wandplanken + Wastafelkranen
 
   Gedrag:
-  - BADKAMER ESSENTIALS blijft altijd zichtbaar zoals voorheen.
-  - Als het huidige product in collectie "wandplanken" zit,
-    verschijnt daaronder automatisch een tweede rij: WANDPLANKEN.
-  - "Ontdek meer" van die rij linkt naar de collectie Wandplanken.
-  - Het huidige product wordt in beide rijen overgeslagen.
+  - Als huidig product in "badkamer-essentials" zit: BADKAMER ESSENTIALS.
+  - Als huidig product in "wandplanken" zit: WANDPLANKEN.
+  - Als huidig product in "wastafelkranen" zit: WASTAFELKRANEN.
+  - "Ontdek meer" linkt naar de juiste collectie.
+  - Huidige product wordt in de productrij overgeslagen.
   - Geen handmatige collectie-selectie nodig.
 {% endcomment %}
 
 {% assign essentials_collection = collections['badkamer-essentials'] %}
 {% assign wandplanken_collection = collections['wandplanken'] %}
+{% assign wastafelkranen_collection = collections['wastafelkranen'] %}
 
 {% assign is_wandplank = false %}
 {% assign is_badkamer_essential = false %}
+{% assign is_wastafelkraan = false %}
 
 {% for product_collection in product.collections %}
 
@@ -24,6 +26,10 @@
 
   {% if product_collection.handle == 'badkamer-essentials' %}
     {% assign is_badkamer_essential = true %}
+  {% endif %}
+
+  {% if product_collection.handle == 'wastafelkranen' %}
+    {% assign is_wastafelkraan = true %}
   {% endif %}
 
 {% endfor %}
@@ -137,7 +143,6 @@
 {% comment %}
   =========================================================
   WANDPLANKEN
-  Alleen zichtbaar als huidig product in collectie Wandplanken zit.
   =========================================================
 {% endcomment %}
 
@@ -240,10 +245,115 @@
 {% endif %}
 
 
+{% comment %}
+  =========================================================
+  WASTAFELKRANEN
+  =========================================================
+{% endcomment %}
+
+{% if is_wastafelkraan and wastafelkranen_collection != blank and wastafelkranen_collection.products_count > 0 %}
+
+<section class="vhl-essentials vhl-essentials--wandplanken" data-vhl-wastafelkranen>
+
+  <div class="vhl-essentials__inner">
+
+    <div class="vhl-essentials__header">
+
+      <h2 class="vhl-essentials__heading">
+        WASTAFELKRANEN
+      </h2>
+
+      <a
+        href="{{ wastafelkranen_collection.url }}"
+        class="vhl-essentials__more"
+      >
+        <span>Ontdek meer</span>
+        <span class="vhl-essentials__arrow" aria-hidden="true">›</span>
+      </a>
+
+    </div>
+
+    <div class="vhl-essentials__viewport">
+
+      <div class="vhl-essentials__track">
+
+        {% for item in wastafelkranen_collection.products %}
+
+          {% if item.id != product.id %}
+
+            <article class="vhl-essentials__card">
+
+              <a
+                href="{{ item.url }}"
+                class="vhl-essentials__image-link"
+                aria-label="{{ item.title | escape }}"
+              >
+
+                {% if item.featured_image %}
+
+                  {{
+                    item.featured_image
+                    | image_url: width: 1000
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '300, 450, 600, 750, 900, 1000',
+                      sizes: '(max-width: 749px) 72vw, 20vw',
+                      class: 'vhl-essentials__image',
+                      alt: item.title
+                  }}
+
+                {% endif %}
+
+              </a>
+
+              <div class="vhl-essentials__info">
+
+                <a
+                  href="{{ item.url }}"
+                  class="vhl-essentials__title"
+                >
+                  {{ item.title }}
+                </a>
+
+                <div class="vhl-essentials__prices">
+
+                  <span class="vhl-essentials__price">
+                    {{ item.price | money }}
+                  </span>
+
+                  {% if item.compare_at_price_max > item.price %}
+
+                    <span class="vhl-essentials__compare">
+                      {{ item.compare_at_price_max | money }}
+                    </span>
+
+                  {% endif %}
+
+                </div>
+
+              </div>
+
+            </article>
+
+          {% endif %}
+
+        {% endfor %}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+{% endif %}
+
+
 <style>
 
 /* =========================================================
-   VHL BADKAMER ESSENTIALS + WANDPLANKEN
+   VHL BADKAMER ESSENTIALS + WANDPLANKEN + WASTAFELKRANEN
    ========================================================= */
 
 .vhl-essentials,
@@ -273,8 +383,6 @@
   overflow: hidden !important;
 }
 
-/* Wanneer Wandplanken direct na Badkamer Essentials verschijnt,
-   voorkomen we een onnodige dubbele tussenruimte. */
 .vhl-essentials + .vhl-essentials--wandplanken {
   padding-top: 0 !important;
 }
