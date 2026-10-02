@@ -1190,7 +1190,18 @@
 
 <section class="vhl-featured-products" id="vhl-featured-products-{{ section.id }}">
 
-  {% assign featured_collection = section.settings.collection %}
+  {% assign featured_collection = collections['wandplanken'] %}
+{% assign show_wandplanken = false %}
+{% if product != blank %}
+  {% for product_collection in product.collections %}
+    {% if product_collection.handle == 'wandplanken' %}
+      {% assign show_wandplanken = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if show_wandplanken and featured_collection != blank and featured_collection.products_count > 0 %}
 
 
 
@@ -1198,16 +1209,12 @@
 
     <div class="vhl-header vhl-reveal">
       <div class="vhl-header__copy">
-        {% if section.settings.heading != blank %}
-          <h2 class="vhl-title">{{ section.settings.heading }}</h2>
-        {% elsif featured_collection != blank %}
-          <h2 class="vhl-title">{{ featured_collection.title }}</h2>
-        {% endif %}
+        <h2 class="vhl-title">WANDPLANKEN</h2>
       </div>
 
       {% if featured_collection != blank %}
         <a class="vhl-view-all" href="{{ featured_collection.url }}">
-          <span>{{ section.settings.view_all_text | default: 'Ontdek meer' }}</span>
+          <span>Ontdek meer</span>
           <span class="vhl-view-all__arrow" aria-hidden="true">›</span>
         </a>
       {% endif %}
@@ -1710,6 +1717,8 @@
 </script>
 
 
+
+{% endif %}
 
 {% schema %}
 
