@@ -14,11 +14,18 @@
 {% assign wandplanken_collection = collections['wandplanken'] %}
 
 {% assign is_wandplank = false %}
+{% assign is_badkamer_essential = false %}
+
 {% for product_collection in product.collections %}
+
   {% if product_collection.handle == 'wandplanken' %}
     {% assign is_wandplank = true %}
-    {% break %}
   {% endif %}
+
+  {% if product_collection.handle == 'badkamer-essentials' %}
+    {% assign is_badkamer_essential = true %}
+  {% endif %}
+
 {% endfor %}
 
 
@@ -28,7 +35,7 @@
   =========================================================
 {% endcomment %}
 
-{% if essentials_collection != blank and essentials_collection.products_count > 0 %}
+{% if is_badkamer_essential and essentials_collection != blank and essentials_collection.products_count > 0 %}
 
 <section class="vhl-essentials" data-vhl-essentials>
 
