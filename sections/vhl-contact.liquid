@@ -1,0 +1,76 @@
+{% comment %}
+  VAN HOUTEN LIVING — Contactpagina
+  Geïsoleerde contactsectie met Shopify native contactformulier en FAQ.
+{% endcomment %}
+
+<section class="vhl-contact" id="VHLContact-{{ section.id }}">
+  <div class="vhl-contact__intro">
+    <div class="vhl-contact__intro-inner">
+      <p class="vhl-contact__eyebrow">CONTACTEER ONS</p>
+      <h1>Hulp nodig met jouw bestelling?</h1>
+      <p class="vhl-contact__intro-text">Ons team staat klaar om je te helpen, of het nu gaat om een vraag over een product, je bestelling of iets anders. We streven ernaar je zo snel en goed mogelijk van dienst te zijn.</p>
+      <a class="vhl-contact__mail" href="mailto:info@vanhoutenliving.nl">info@vanhoutenliving.nl</a>
+      <div class="vhl-contact__icon" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none"><path d="M10 22a14 14 0 0 1 28 0v8a5 5 0 0 1-5 5h-3" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M10 22v8a4 4 0 0 0 4 4h3V21h-3a4 4 0 0 0-4 4Zm28 0v8a4 4 0 0 1-4 4h-3V21h3a4 4 0 0 1 4 4Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M29 38h-8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </div>
+      <p class="vhl-contact__business">Vraag over een samenwerking of zakelijke aanvraag? <a href="mailto:info@vanhoutenliving.nl">Neem contact met ons op</a>.</p>
+    </div>
+  </div>
+
+  <div class="vhl-contact__direct">
+    <div class="vhl-contact__direct-inner">
+      <div class="vhl-contact__details">
+        <h2>Direct contact opnemen</h2>
+        <h3>We staan klaar om je te helpen met je vraag</h3>
+        <p>Heb je een vraag of opmerking? Neem gerust contact met ons op via e-mail of via het contactformulier.</p>
+        <p class="vhl-contact__detail-line"><strong>E-mail:</strong><br><a href="mailto:info@vanhoutenliving.nl">info@vanhoutenliving.nl</a></p>
+        <p class="vhl-contact__detail-line"><strong>Openingstijden klantenservice:</strong></p>
+        <p>Maandag t/m vrijdag: 09:00 – 18:00<br>Zaterdag &amp; zondag: gesloten</p>
+      </div>
+
+      <div class="vhl-contact__form-card">
+        {%- form 'contact', id: 'VHLContactForm' -%}
+          {%- if form.posted_successfully? -%}<div class="vhl-contact__success" tabindex="-1" autofocus>Bedankt voor je bericht. We nemen zo snel mogelijk contact met je op.</div>{%- elsif form.errors -%}<div class="vhl-contact__error" role="alert" tabindex="-1" autofocus>Controleer je gegevens en probeer het opnieuw. {{ form.errors | default_errors }}</div>{%- endif -%}
+          <div class="vhl-contact__form-row">
+            <div class="vhl-contact__field"><label class="visually-hidden" for="VHLContactForm-name">Naam</label><input type="text" id="VHLContactForm-name" name="contact[Naam]" autocomplete="name" value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}" placeholder="Naam"></div>
+            <div class="vhl-contact__field"><label class="visually-hidden" for="VHLContactForm-email">E-mailadres</label><input type="email" id="VHLContactForm-email" name="contact[email]" autocomplete="email" spellcheck="false" autocapitalize="off" required value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}" placeholder="E-mailadres"></div>
+          </div>
+          <div class="vhl-contact__field"><label class="visually-hidden" for="VHLContactForm-body">Bericht</label><textarea id="VHLContactForm-body" name="contact[Bericht]" rows="7" required placeholder="Bericht">{{- form.body -}}</textarea></div>
+          <button type="submit" class="vhl-contact__submit">BERICHT VERZENDEN</button>
+        {%- endform -%}
+      </div>
+    </div>
+  </div>
+
+  <div class="vhl-contact__faq-wrap">
+    <div class="vhl-contact__faq-heading"><p>VEELGESTELDE VRAGEN</p><h2>Waar kunnen we je mee helpen?</h2></div>
+    <div class="vhl-contact__faq">
+      <details><summary>Hoe lang duurt het voordat mijn bestelling wordt verwerkt?<span></span></summary><div class="vhl-contact__answer"><p>We verwerken en controleren je bestelling zo snel mogelijk. Zodra je bestelling is verzonden, ontvang je een verzendbevestiging met de beschikbare trackinginformatie.</p></div></details>
+      <details><summary>Wanneer ontvang ik mijn bestelling?<span></span></summary><div class="vhl-contact__answer"><p>De verwachte levertijd bedraagt doorgaans 5–10 werkdagen. Tijdens drukke periodes of door extra verwerking binnen het verzendnetwerk kan de bezorging iets langer duren.</p></div></details>
+      <details><summary>Kan ik mijn bestelling retourneren?<span></span></summary><div class="vhl-contact__answer"><p>Wil je een product retourneren? Neem dan contact met ons op via <a href="mailto:info@vanhoutenliving.nl">info@vanhoutenliving.nl</a> en vermeld je bestelnummer. We sturen je vervolgens de informatie die je nodig hebt voor je retour.</p></div></details>
+      <details><summary>Wat zijn de voorwaarden voor een terugbetaling?<span></span></summary><div class="vhl-contact__answer"><p>Na ontvangst en controle van een geaccepteerde retour verwerken we de terugbetaling via de oorspronkelijke betaalmethode. De verwerkingstijd bij je bank of betaalprovider kan daarna nog enkele werkdagen bedragen.</p></div></details>
+      <details><summary>Mijn artikel is beschadigd of werkt niet goed. Wat nu?<span></span></summary><div class="vhl-contact__answer"><p>Dat lossen we graag met je op. Neem contact op via <a href="mailto:info@vanhoutenliving.nl">info@vanhoutenliving.nl</a> en stuur je bestelnummer, een korte omschrijving van het probleem en duidelijke foto's van het artikel en de verpakking mee.</p></div></details>
+      <details><summary>Ik heb een probleem met het gebruik van een product. Wat kan ik doen?<span></span></summary><div class="vhl-contact__answer"><p>Stuur ons een bericht met je bestelnummer en een korte uitleg van het probleem. Ons team kijkt met je mee en helpt je graag verder.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<style>
+#VHLContact-{{ section.id }}{--t:#171717;--m:#5f5f5f;--soft:#f3f3f2;--line:#dcdcd9;color:var(--t);background:#fff}#VHLContact-{{ section.id }} *{box-sizing:border-box}#VHLContact-{{ section.id }} a{color:inherit;text-underline-offset:3px}
+#VHLContact-{{ section.id }} .vhl-contact__intro{padding:72px 24px 76px;text-align:center}#VHLContact-{{ section.id }} .vhl-contact__intro-inner{max-width:780px;margin:auto}#VHLContact-{{ section.id }} .vhl-contact__eyebrow,#VHLContact-{{ section.id }} .vhl-contact__faq-heading p{margin:0 0 18px;font-size:12px;font-weight:600;letter-spacing:.08em}#VHLContact-{{ section.id }} h1{margin:0;font-size:clamp(30px,3.1vw,44px);line-height:1.1;letter-spacing:-.035em;font-weight:500}#VHLContact-{{ section.id }} .vhl-contact__intro-text{max-width:680px;margin:26px auto 16px;font-size:15px;line-height:1.65;color:var(--m)}#VHLContact-{{ section.id }} .vhl-contact__mail{font-size:15px}#VHLContact-{{ section.id }} .vhl-contact__icon{width:42px;height:42px;margin:20px auto 12px}#VHLContact-{{ section.id }} .vhl-contact__icon svg{width:100%;height:100%}#VHLContact-{{ section.id }} .vhl-contact__business{margin:0;font-size:14px;color:var(--m)}
+#VHLContact-{{ section.id }} .vhl-contact__direct{background:#f7f7f6;padding:72px 24px}#VHLContact-{{ section.id }} .vhl-contact__direct-inner{max-width:1280px;margin:auto;display:grid;grid-template-columns:.9fr 1.1fr;gap:80px;align-items:center}#VHLContact-{{ section.id }} .vhl-contact__details h2{margin:0 0 30px;font-size:clamp(36px,3.6vw,56px);line-height:1.02;letter-spacing:-.045em;font-weight:400}#VHLContact-{{ section.id }} .vhl-contact__details h3{margin:0 0 20px;font-size:16px;font-weight:700}#VHLContact-{{ section.id }} .vhl-contact__details p{margin:0 0 18px;max-width:530px;font-size:15px;line-height:1.65}#VHLContact-{{ section.id }} .vhl-contact__detail-line{margin-top:28px!important;margin-bottom:12px!important}
+#VHLContact-{{ section.id }} .vhl-contact__form-card{background:#ededeb;border-radius:12px;padding:38px}#VHLContact-{{ section.id }} .vhl-contact__form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}#VHLContact-{{ section.id }} .vhl-contact__field{margin-bottom:14px}#VHLContact-{{ section.id }} input,#VHLContact-{{ section.id }} textarea{display:block;width:100%;border:1px solid #cfcfcb;border-radius:7px;background:transparent;color:var(--t);font:inherit;font-size:15px;outline:none;box-shadow:none}#VHLContact-{{ section.id }} input{height:58px;padding:0 18px}#VHLContact-{{ section.id }} textarea{min-height:178px;padding:18px;resize:vertical}#VHLContact-{{ section.id }} input:focus,#VHLContact-{{ section.id }} textarea:focus{border-color:#777}#VHLContact-{{ section.id }} .vhl-contact__submit{min-height:52px;padding:14px 26px;border:0;border-radius:999px;background:#171717;color:#fff;font:inherit;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer}#VHLContact-{{ section.id }} .vhl-contact__submit:hover{opacity:.86}#VHLContact-{{ section.id }} .vhl-contact__success,#VHLContact-{{ section.id }} .vhl-contact__error{margin-bottom:18px;padding:14px 16px;border-radius:7px;background:#fff;font-size:14px;line-height:1.5}
+#VHLContact-{{ section.id }} .vhl-contact__faq-wrap{padding:78px 24px 96px;background:#fff}#VHLContact-{{ section.id }} .vhl-contact__faq-heading{text-align:center;margin:0 auto 34px}#VHLContact-{{ section.id }} .vhl-contact__faq-heading h2{margin:0;font-size:clamp(28px,2.6vw,40px);font-weight:400;letter-spacing:-.035em}#VHLContact-{{ section.id }} .vhl-contact__faq{max-width:860px;margin:auto;padding:20px 42px;border-radius:12px;background:var(--soft)}#VHLContact-{{ section.id }} details{border-bottom:1px solid var(--line)}#VHLContact-{{ section.id }} details:last-child{border:0}#VHLContact-{{ section.id }} summary{position:relative;list-style:none;cursor:pointer;padding:21px 48px 21px 0;font-size:14px;line-height:1.45;font-weight:700}#VHLContact-{{ section.id }} summary::-webkit-details-marker{display:none}#VHLContact-{{ section.id }} summary span{position:absolute;right:0;top:50%;width:28px;height:28px;transform:translateY(-50%);border-radius:50%;background:#171717}#VHLContact-{{ section.id }} summary span:before,#VHLContact-{{ section.id }} summary span:after{content:"";position:absolute;left:50%;top:50%;width:8px;height:1px;background:#fff;transform:translate(-50%,-50%)}#VHLContact-{{ section.id }} summary span:after{transform:translate(-50%,-50%) rotate(90deg);transition:.2s}#VHLContact-{{ section.id }} details[open] summary span:after{transform:translate(-50%,-50%)}#VHLContact-{{ section.id }} .vhl-contact__answer{padding:0 52px 22px 0;color:#3d3d3d;font-size:14px;line-height:1.65}#VHLContact-{{ section.id }} .vhl-contact__answer p{margin:0}
+@media(max-width:900px){#VHLContact-{{ section.id }} .vhl-contact__direct-inner{grid-template-columns:1fr;gap:42px}}@media(max-width:749px){#VHLContact-{{ section.id }} .vhl-contact__intro{padding:50px 20px 56px}#VHLContact-{{ section.id }} .vhl-contact__intro-text{font-size:14px}#VHLContact-{{ section.id }} .vhl-contact__direct{padding:48px 18px}#VHLContact-{{ section.id }} .vhl-contact__details h2{font-size:36px;margin-bottom:22px}#VHLContact-{{ section.id }} .vhl-contact__form-card{padding:20px}#VHLContact-{{ section.id }} .vhl-contact__form-row{grid-template-columns:1fr;gap:0}#VHLContact-{{ section.id }} .vhl-contact__submit{width:100%}#VHLContact-{{ section.id }} .vhl-contact__faq-wrap{padding:52px 18px 64px}#VHLContact-{{ section.id }} .vhl-contact__faq{padding:10px 20px}#VHLContact-{{ section.id }} summary{padding:18px 42px 18px 0;font-size:13px}#VHLContact-{{ section.id }} .vhl-contact__answer{padding:0 0 20px;font-size:13px}}
+</style>
+
+{% schema %}
+{
+  "name": "VHL Contact",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {"groups": ["header", "footer"]},
+  "settings": [],
+  "presets": [{"name": "VHL Contact"}]
+}
+{% endschema %}
