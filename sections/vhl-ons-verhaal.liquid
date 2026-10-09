@@ -1,0 +1,96 @@
+{% comment %} Van Houten Living — zelfstandige Ons verhaal-sectie {% endcomment %}
+<section id="vhl-story-{{ section.id }}" class="vhl-story">
+  <div class="vhl-story__intro">
+    <p class="vhl-story__eyebrow">VANHOUTEN LIVING · ONS VERHAAL</p>
+    <h1>Een mooi interieur begint bij aandacht voor detail.</h1>
+    <p class="vhl-story__lead">Wij geloven dat een badkamer meer is dan een functionele ruimte. Het is een plek waar je de dag begint, tot rust komt en elke dag opnieuw comfort ervaart.</p>
+  </div>
+
+  <div class="vhl-story__hero">
+    {% if section.settings.hero_image != blank %}
+      {{ section.settings.hero_image | image_url: width: 2400 | image_tag: class: 'vhl-story__hero-image', loading: 'eager', widths: '750, 1100, 1500, 2000, 2400', sizes: '100vw', alt: 'Sfeervolle badkamer bij Van Houten Living' }}
+    {% else %}
+      <div class="vhl-story__hero-placeholder"><span>VANHOUTEN LIVING</span></div>
+    {% endif %}
+  </div>
+
+  <div class="vhl-story__statement">
+    <p class="vhl-story__eyebrow">ONZE MISSIE</p>
+    <h2>Stijl die je ziet.<br>Kwaliteit die je voelt.<br>Functionaliteit die je ervaart.</h2>
+    <p>Bij Van Houten Living brengen we uitstraling, kwaliteit en gebruiksgemak samen. Wij selecteren badkamerartikelen en accessoires die niet alleen mooi ogen, maar ook iets toevoegen aan het dagelijks leven. Van verfijnde afwerkingen tot praktische oplossingen: elk detail telt.</p>
+  </div>
+
+  <div class="vhl-story__values">
+    <article class="vhl-story__value"><span>01 / UITSTRALING</span><h3>Tijdloos en verfijnd</h3><p>Een rustig kleurenpalet, heldere vormen en zorgvuldig gekozen details geven jouw badkamer een stijlvolle uitstraling. We kiezen voor ontwerpen die niet afhankelijk zijn van vluchtige trends.</p></article>
+    <article class="vhl-story__value"><span>02 / KWALITEIT</span><h3>Aandacht voor wat blijft</h3><p>Een goed product moet prettig aanvoelen en geschikt zijn voor dagelijks gebruik. Daarom letten we bij onze selectie op materialen, afwerking en een overtuigende balans tussen vorm en functie.</p></article>
+    <article class="vhl-story__value"><span>03 / FUNCTIONALITEIT</span><h3>Mooi én praktisch</h3><p>Van slimme opbergmogelijkheden tot accessoires die jouw routine eenvoudiger maken: we geloven dat een doordacht interieur het leven aangenamer maakt, zonder concessies aan uitstraling.</p></article>
+  </div>
+
+  <div class="vhl-story__feature">
+    <div class="vhl-story__feature-media">
+      {% if section.settings.detail_image != blank %}
+        {{ section.settings.detail_image | image_url: width: 1400 | image_tag: loading: 'lazy', widths: '500, 800, 1100, 1400', sizes: '(min-width: 750px) 50vw, 100vw', alt: 'Badkameraccessoires en verfijnde details' }}
+      {% else %}
+        <div class="vhl-story__detail-placeholder"></div>
+      {% endif %}
+    </div>
+    <div class="vhl-story__feature-copy">
+      <p class="vhl-story__eyebrow">BEWUST GEKOZEN</p>
+      <h2>Rust begint bij de juiste keuzes.</h2>
+      <p>Wij geloven niet in meer spullen, maar in de juiste spullen. Producten die bijdragen aan een overzichtelijke, verzorgde en persoonlijke badkamer. Een plek waar alles klopt — van de kleinste accessoire tot het totaalbeeld.</p>
+      <p>Met Van Houten Living willen we je inspireren om jouw badkamer stap voor stap te veranderen in een ruimte waarin uitstraling en gemak vanzelfsprekend samenkomen.</p>
+      <a class="vhl-story__link" href="{{ routes.all_products_collection_url }}">ONTDEK ONZE COLLECTIE <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+
+  <div class="vhl-story__closing">
+    <p class="vhl-story__eyebrow">VANHOUTEN LIVING</p>
+    <h2>Met aandacht gekozen.<br>Voor elke dag ontworpen.</h2>
+    <a href="{{ routes.all_products_collection_url }}" class="vhl-story__button">BEKIJK ALLE PRODUCTEN <span aria-hidden="true">↗</span></a>
+  </div>
+</section>
+
+{% style %}
+#vhl-story-{{ section.id }}{background:#f6f3ee;color:#262320;overflow:hidden}
+#vhl-story-{{ section.id }} *{box-sizing:border-box}
+#vhl-story-{{ section.id }} .vhl-story__intro{max-width:1150px;margin:auto;text-align:center;padding:clamp(72px,9vw,135px) 24px clamp(55px,7vw,100px)}
+#vhl-story-{{ section.id }} .vhl-story__eyebrow{font-size:11px;font-weight:700;letter-spacing:.23em;line-height:1.6;margin:0 0 22px;color:#746e66}
+#vhl-story-{{ section.id }} h1,#vhl-story-{{ section.id }} h2,#vhl-story-{{ section.id }} h3{font-family:var(--font-heading-family,Arial,sans-serif);color:#262320;letter-spacing:-.045em}
+#vhl-story-{{ section.id }} h1{font-size:clamp(44px,6.6vw,92px);line-height:1.04;max-width:1040px;margin:0 auto 30px;font-weight:700}
+#vhl-story-{{ section.id }} .vhl-story__lead{font-size:clamp(17px,1.6vw,21px);line-height:1.75;max-width:710px;margin:auto;color:#666059}
+#vhl-story-{{ section.id }} .vhl-story__hero{max-width:1540px;margin:0 auto;padding:0 clamp(16px,3vw,48px)}
+#vhl-story-{{ section.id }} .vhl-story__hero-image,#vhl-story-{{ section.id }} .vhl-story__hero-placeholder{display:block;width:100%;height:clamp(330px,47vw,720px);object-fit:cover;border-radius:5px}
+#vhl-story-{{ section.id }} .vhl-story__hero-placeholder{display:grid;place-items:center;background:linear-gradient(125deg,#51483f,#b6a494 55%,#e5ddd3);color:#fff;letter-spacing:.25em;font-size:13px}
+#vhl-story-{{ section.id }} .vhl-story__statement{text-align:center;max-width:880px;margin:auto;padding:clamp(95px,12vw,180px) 24px}
+#vhl-story-{{ section.id }} .vhl-story__statement h2{font-size:clamp(36px,5.3vw,72px);line-height:1.12;margin:0 0 32px}
+#vhl-story-{{ section.id }} .vhl-story__statement>p:last-child{font-size:17px;line-height:1.9;max-width:700px;margin:auto;color:#676159}
+#vhl-story-{{ section.id }} .vhl-story__values{max-width:1440px;margin:auto;padding:0 clamp(22px,5vw,76px) clamp(100px,12vw,170px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(25px,4vw,65px)}
+#vhl-story-{{ section.id }} .vhl-story__value{border-top:1px solid #bdb5ac;padding-top:28px}
+#vhl-story-{{ section.id }} .vhl-story__value span{font-size:10px;letter-spacing:.2em;font-weight:700;color:#8b8277}
+#vhl-story-{{ section.id }} .vhl-story__value h3{font-size:clamp(25px,2.6vw,35px);line-height:1.15;margin:23px 0 18px}
+#vhl-story-{{ section.id }} .vhl-story__value p{font-size:15px;line-height:1.85;color:#6a645d;margin:0}
+#vhl-story-{{ section.id }} .vhl-story__feature{display:grid;grid-template-columns:1fr 1fr;background:#e8e1d7;min-height:620px}
+#vhl-story-{{ section.id }} .vhl-story__feature-media{min-height:520px}
+#vhl-story-{{ section.id }} .vhl-story__feature-media img,#vhl-story-{{ section.id }} .vhl-story__detail-placeholder{display:block;width:100%;height:100%;object-fit:cover}
+#vhl-story-{{ section.id }} .vhl-story__detail-placeholder{background:linear-gradient(145deg,#9c8876,#ded2c3)}
+#vhl-story-{{ section.id }} .vhl-story__feature-copy{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(50px,7vw,110px)}
+#vhl-story-{{ section.id }} .vhl-story__feature-copy h2{font-size:clamp(38px,4.5vw,65px);line-height:1.08;margin:0 0 30px}
+#vhl-story-{{ section.id }} .vhl-story__feature-copy>p:not(.vhl-story__eyebrow){font-size:16px;line-height:1.85;color:#615b54;max-width:560px;margin:0 0 20px}
+#vhl-story-{{ section.id }} .vhl-story__link{display:inline-flex;gap:16px;align-items:center;margin-top:20px;border-bottom:1px solid #262320;padding-bottom:8px;font-size:11px;letter-spacing:.13em;font-weight:700;text-decoration:none;color:#262320}
+#vhl-story-{{ section.id }} .vhl-story__closing{text-align:center;padding:clamp(95px,12vw,180px) 20px}
+#vhl-story-{{ section.id }} .vhl-story__closing h2{font-size:clamp(40px,5.8vw,78px);line-height:1.1;margin:0 0 42px}
+#vhl-story-{{ section.id }} .vhl-story__button{display:inline-flex;gap:22px;align-items:center;padding:19px 28px;background:#262320;color:white;text-decoration:none;font-size:11px;letter-spacing:.14em;font-weight:700;transition:background .2s}
+#vhl-story-{{ section.id }} .vhl-story__button:hover{background:#544b42}
+@media(max-width:749px){#vhl-story-{{ section.id }} .vhl-story__intro{padding:72px 22px 52px}#vhl-story-{{ section.id }} h1{font-size:clamp(40px,11vw,58px)}#vhl-story-{{ section.id }} .vhl-story__hero{padding:0 12px}#vhl-story-{{ section.id }} .vhl-story__hero-image,#vhl-story-{{ section.id }} .vhl-story__hero-placeholder{height:440px}#vhl-story-{{ section.id }} .vhl-story__statement{padding:95px 24px}#vhl-story-{{ section.id }} .vhl-story__values{grid-template-columns:1fr;gap:40px;padding:0 26px 95px}#vhl-story-{{ section.id }} .vhl-story__feature{grid-template-columns:1fr}#vhl-story-{{ section.id }} .vhl-story__feature-media{min-height:390px;height:390px}#vhl-story-{{ section.id }} .vhl-story__feature-copy{padding:70px 28px 80px}#vhl-story-{{ section.id }} .vhl-story__closing{padding:100px 22px}}
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "VHL Ons verhaal",
+  "settings": [
+    {"type":"image_picker","id":"hero_image","label":"Grote badkamerfoto bovenaan"},
+    {"type":"image_picker","id":"detail_image","label":"Foto naast het verhaal"}
+  ],
+  "presets": [{"name":"VHL Ons verhaal"}]
+}
+{% endschema %}
