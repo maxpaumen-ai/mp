@@ -1733,15 +1733,51 @@
               or vhliso_flat_handle == 'wastafelkranen'
               or vhliso_flat_handle == 'zeepdispensers'
             -%}
-              <li class="vhliso-nav-item">
-                <a
-                  class="vhliso-nav-link"
-                  href="{{ link.url }}"
-                  {% if link.current %}aria-current="page"{% endif %}
-                >
-                  {{ link.title | upcase | escape }}
-                </a>
-              </li>
+              {%- if vhliso_flat_handle == 'wandplanken' or vhliso_flat_handle == 'wastafelkranen' or vhliso_flat_handle == 'zeepdispensers' -%}
+                {%- liquid
+                  assign vhliso_product_collection = blank
+                  if link.type == 'collection_link'
+                    assign vhliso_product_collection = link.object
+                  endif
+                  if vhliso_product_collection == blank
+                    assign vhliso_product_collection = collections[vhliso_flat_handle]
+                  endif
+                  assign vhliso_product = vhliso_product_collection.products.first
+                -%}
+                <li class="vhliso-nav-item">
+                  <button type="button" class="vhliso-nav-trigger" aria-expanded="false" aria-controls="vhliso-mega-flat-{{ forloop.index }}-{{ section.id }}" data-vhliso-mega-trigger>
+                    {{ link.title | upcase | escape }}
+                  </button>
+                  <div class="vhliso-mega" id="vhliso-mega-flat-{{ forloop.index }}-{{ section.id }}" data-vhliso-mega-panel hidden>
+                    <div class="vhliso-mega-inner{% if vhliso_product != blank %} vhliso-mega-inner--with-featured{% endif %}">
+                      <div class="vhliso-mega-left">
+                        <p class="vhliso-mega-heading">{{ link.title | escape }}</p>
+                        <div class="vhliso-mega-viewall-wrap">
+                          <a href="{{ link.url }}" class="vhliso-mega-viewall">Bekijk alle {{ link.title | downcase | escape }} &rarr;</a>
+                        </div>
+                      </div>
+                      {% if vhliso_product != blank %}
+                        <div class="vhliso-mega-featured">
+                          <a class="vhliso-mega-card" href="{{ vhliso_product.url }}">
+                            {% if vhliso_product.featured_image != blank %}
+                              <span class="vhliso-mega-card-image">
+                                {{ vhliso_product.featured_image | image_url: width: 720 | image_tag: loading: 'lazy', alt: vhliso_product.title }}
+                              </span>
+                            {% endif %}
+                            <span class="vhliso-mega-card-title">{{ vhliso_product.title | escape }}</span>
+                          </a>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </li>
+              {%- else -%}
+                <li class="vhliso-nav-item">
+                  <a class="vhliso-nav-link" href="{{ link.url }}" {% if link.current %}aria-current="page"{% endif %}>
+                    {{ link.title | upcase | escape }}
+                  </a>
+                </li>
+              {%- endif -%}
             {%- endif -%}
 
           {% endif %}
