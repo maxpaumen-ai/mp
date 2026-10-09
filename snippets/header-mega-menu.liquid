@@ -1,113 +1,92 @@
 {% comment %}
-  Renders a megamenu for the header.
-
-  Usage:
-  {% render 'header-mega-menu' %}
+  VHL megamenu met automatische productfoto per hoofdmenu-collectie.
+  Vervangt snippets/header-mega-menu.liquid.
 {% endcomment %}
 
 <style>
   {% if use_theme_colors %}
-  .header__menu-item:hover,
-  .header__active-menu-item,
-  .mega-menu__link--active,
-  .header__menu-item:hover span,
-  .mega-menu__link:hover {
-    color: rgb(var(--color-drawer-text)) !important;
-  }
+    .header__menu-item:hover,
+    .header__active-menu-item,
+    .mega-menu__link--active,
+    .header__menu-item:hover span,
+    .mega-menu__link:hover {
+      color: rgb(var(--color-drawer-text)) !important;
+    }
   {% endif %}
+  .vhl-mega-layout { display:grid; grid-template-columns:minmax(0,1fr) 240px; gap:40px; align-items:start; }
+  .vhl-mega-layout .mega-menu__list { padding:0; margin:0; width:100%; }
+  .vhl-mega-product { display:block; text-decoration:none; color:inherit; }
+  .vhl-mega-product__image { display:block; width:100%; aspect-ratio:4/5; object-fit:cover; background:#f4f3f1; border-radius:3px; }
+  .vhl-mega-product__label { display:block; margin-top:12px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; opacity:.65; }
+  .vhl-mega-product__title { display:block; margin-top:5px; font-size:14px; line-height:1.45; }
+  @media screen and (max-width:1100px) { .vhl-mega-layout { grid-template-columns:minmax(0,1fr) 180px; gap:22px; } }
+  @media screen and (max-width:749px) { .vhl-mega-layout { grid-template-columns:1fr; } .vhl-mega-product { display:none; } }
 </style>
 
 <nav class="header__inline-menu">
-  <ul
-    class="list-menu list-menu--inline"
-    role="list"
-    style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}"
-  >
+  <ul class="list-menu list-menu--inline" role="list" style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}">
     {%- for link in section.settings.menu.links -%}
       <li>
         {%- if link.links != blank -%}
+          {%- liquid
+            assign vhl_collection = blank
+            assign vhl_handle = link.handle | downcase
+            if link.type == 'collection_link'
+              assign vhl_collection = link.object
+            elsif vhl_handle contains 'wandplank'
+              assign vhl_collection = collections['wandplanken']
+            elsif vhl_handle contains 'wastafelkraan' or vhl_handle contains 'wastafelkran'
+              assign vhl_collection = collections['wastafelkranen']
+            elsif vhl_handle contains 'zeepdispenser'
+              assign vhl_collection = collections['zeepdispensers']
+            endif
+            assign vhl_show_product = false
+            if vhl_handle contains 'wandplank' or vhl_handle contains 'wastafelkraan' or vhl_handle contains 'wastafelkran' or vhl_handle contains 'zeepdispenser'
+              assign vhl_show_product = true
+            endif
+            assign vhl_product = blank
+            if vhl_show_product and vhl_collection != blank
+              assign vhl_product = vhl_collection.products.first
+            endif
+          -%}
           <header-menu>
             <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-menu">
-              <summary
-                id="HeaderMenu-{{ link.handle }}"
-                class="header__menu-item list-menu__item link focus-inset"
-                style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}"
-              >
-                <span
-                  {%- if link.child_active %}
-                    class="header__active-menu-item"
-                    style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}"
-                  {% endif %}
-                >
-                  {{- link.title | escape -}}
-                </span>
+              <summary id="HeaderMenu-{{ link.handle }}" class="header__menu-item list-menu__item link focus-inset" style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}">
+                <span {% if link.child_active %}class="header__active-menu-item"{% endif %}>{{ link.title | escape }}</span>
                 {{- 'icon-caret.svg' | inline_asset_content -}}
               </summary>
-              <div
-                id="MegaMenu-Content-{{ forloop.index }}"
-                class="mega-menu__content gradient motion-reduce global-settings-popup"
-                tabindex="-1"
-              >
-                <ul
-                  class="mega-menu__list page-width{% if link.levels == 1 %} mega-menu__list--condensed{% endif %}"
-                  role="list"
-                >
-                  {%- for childlink in link.links -%}
-                    <li>
-                      <a
-                        id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
-                        href="{{ childlink.url }}"
-                        class="mega-menu__link mega-menu__link--level-2 link{% if childlink.current %} mega-menu__link--active{% endif %}"
-                        style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}"
-                        {% if childlink.current %}
-                          aria-current="page"
-                        {% endif %}
-                      >
-                        {{ childlink.title | escape }}
-                      </a>
-                      {%- if childlink.links != blank -%}
-                        <ul class="list-unstyled" role="list">
-                          {%- for grandchildlink in childlink.links -%}
-                            <li>
-                              <a
-                                id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
-                                href="{{ grandchildlink.url }}"
-                                class="mega-menu__link link{% if grandchildlink.current %} mega-menu__link--active{% endif %}"
-                                style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}"
-                                {% if grandchildlink.current %}
-                                  aria-current="page"
-                                {% endif %}
-                              >
-                                {{ grandchildlink.title | escape }}
-                              </a>
-                            </li>
-                          {%- endfor -%}
-                        </ul>
-                      {%- endif -%}
-                    </li>
-                  {%- endfor -%}
-                </ul>
+              <div id="MegaMenu-Content-{{ forloop.index }}" class="mega-menu__content gradient motion-reduce global-settings-popup" tabindex="-1">
+                <div class="{% if vhl_product != blank and vhl_product.featured_image != blank %}vhl-mega-layout{% endif %} page-width">
+                  <ul class="mega-menu__list{% if link.levels == 1 %} mega-menu__list--condensed{% endif %}" role="list">
+                    {%- for childlink in link.links -%}
+                      <li>
+                        <a id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}" href="{{ childlink.url }}" class="mega-menu__link mega-menu__link--level-2 link{% if childlink.current %} mega-menu__link--active{% endif %}" style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}" {% if childlink.current %}aria-current="page"{% endif %}>{{ childlink.title | escape }}</a>
+                        {%- if childlink.links != blank -%}
+                          <ul class="list-unstyled" role="list">
+                            {%- for grandchildlink in childlink.links -%}
+                              <li>
+                                <a id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}" href="{{ grandchildlink.url }}" class="mega-menu__link link{% if grandchildlink.current %} mega-menu__link--active{% endif %}" style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}" {% if grandchildlink.current %}aria-current="page"{% endif %}>{{ grandchildlink.title | escape }}</a>
+                              </li>
+                            {%- endfor -%}
+                          </ul>
+                        {%- endif -%}
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                  {%- if vhl_product != blank and vhl_product.featured_image != blank -%}
+                    <a class="vhl-mega-product" href="{{ vhl_product.url }}">
+                      {{ vhl_product.featured_image | image_url: width: 600 | image_tag: class: 'vhl-mega-product__image', loading: 'lazy', widths: '180, 300, 450, 600', alt: vhl_product.title }}
+                      <span class="vhl-mega-product__label">Uit de collectie</span>
+                      <span class="vhl-mega-product__title">{{ vhl_product.title | escape }}</span>
+                    </a>
+                  {%- endif -%}
+                </div>
               </div>
             </details>
           </header-menu>
         {%- else -%}
-          <a
-            id="HeaderMenu-{{ link.handle }}"
-            href="{{ link.url }}"
-            class="header__menu-item list-menu__item link link--text focus-inset"
-            style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}"
-            {% if link.current %}
-              aria-current="page"
-            {% endif %}
-          >
-            <span
-              {%- if link.current %}
-                class="header__active-menu-item"
-                style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}"
-              {% endif %}
-            >
-              {{- link.title | escape -}}
-            </span>
+          <a id="HeaderMenu-{{ link.handle }}" href="{{ link.url }}" class="header__menu-item list-menu__item link link--text focus-inset" style="{% if use_theme_colors %}color: {{ settings.global_section_text_color }};{% endif %}" {% if link.current %}aria-current="page"{% endif %}>
+            <span {% if link.current %}class="header__active-menu-item"{% endif %}>{{ link.title | escape }}</span>
           </a>
         {%- endif -%}
       </li>
