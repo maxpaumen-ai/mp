@@ -1,41 +1,43 @@
 {%- liquid
-
   assign hero_heading = section.settings.heading
-
   assign hero_subheading = section.settings.subheading
-
   assign hero_desktop_image = section.settings.image
-
   assign hero_mobile_image = section.settings.mobile_image | default: section.settings.image
+  assign hero_desktop_video = section.settings.video
+  assign hero_mobile_video = section.settings.mobile_video
 
-  if section.settings.use_collection_fallback
+  if collection != blank
+    assign collection_desktop_image = collection.metafields.custom.hero_desktop_image.value
+    assign collection_mobile_image = collection.metafields.custom.hero_mobile_image.value
 
-    if hero_heading == blank
-
-      assign hero_heading = collection.metafields.custom.pdp_functional_headline.value | default: collection.title
-
+    if collection_desktop_image != blank
+      assign hero_desktop_image = collection_desktop_image
+      assign hero_desktop_video = blank
     endif
 
-    if hero_subheading == blank
-
-      assign hero_subheading = collection.metafields.custom.pdp_functional_body_1.value
-
+    if collection_mobile_image != blank
+      assign hero_mobile_image = collection_mobile_image
+      assign hero_mobile_video = blank
+    elsif collection_desktop_image != blank
+      assign hero_mobile_image = collection_desktop_image
+      assign hero_mobile_video = blank
     endif
-
-    if hero_desktop_image == blank
-
-      assign hero_desktop_image = collection.image
-
-    endif
-
-    if hero_mobile_image == blank
-
-      assign hero_mobile_image = collection.image
-
-    endif
-
   endif
 
+  if section.settings.use_collection_fallback and collection != blank
+    if hero_heading == blank
+      assign hero_heading = collection.metafields.custom.pdp_functional_headline.value | default: collection.title
+    endif
+    if hero_subheading == blank
+      assign hero_subheading = collection.metafields.custom.pdp_functional_body_1.value
+    endif
+    if hero_desktop_image == blank
+      assign hero_desktop_image = collection.image
+    endif
+    if hero_mobile_image == blank
+      assign hero_mobile_image = collection.image
+    endif
+  endif
 -%}
 
 <section
@@ -48,38 +50,61 @@
 
   <div class="vhl-video-hero__media">
 
-    {% if section.settings.video != blank %}
+    {% if hero_desktop_video != blank %}
+
     <div class="vhl-video-hero__desktop-media">
-      {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, class: 'vhl-video-hero__video' }}
+
+      {{ hero_desktop_video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, class: 'vhl-video-hero__video' }}
+
     </div>
+
   {% elsif hero_desktop_image != blank %}
+
     <div class="vhl-video-hero__desktop-media">
+
       {{ hero_desktop_image | image_url: width: 2400 | image_tag: loading: 'eager', widths: '1000, 1400, 1800, 2200, 2400', sizes: '100vw', class: 'vhl-video-hero__image' }}
+
     </div>
+
   {% endif %}
 
-  {% if section.settings.mobile_video != blank %}
+  {% if hero_mobile_video != blank %}
+
     <div class="vhl-video-hero__mobile-media">
-      {{ section.settings.mobile_video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, class: 'vhl-video-hero__video' }}
+
+      {{ hero_mobile_video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, class: 'vhl-video-hero__video' }}
+
     </div>
+
   {% elsif hero_mobile_image != blank %}
+
     <div class="vhl-video-hero__mobile-media">
+
       {{ hero_mobile_image | image_url: width: 1400 | image_tag: loading: 'eager', widths: '500, 750, 900, 1100, 1400', sizes: '100vw', class: 'vhl-video-hero__image' }}
+
     </div>
-  {% elsif section.settings.video != blank %}
+
+  {% elsif hero_desktop_video != blank %}
+
     <div class="vhl-video-hero__mobile-media">
-      {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, class: 'vhl-video-hero__video' }}
+
+      {{ hero_desktop_video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, class: 'vhl-video-hero__video' }}
+
     </div>
+
   {% elsif hero_desktop_image != blank %}
+
     <div class="vhl-video-hero__mobile-media">
+
       {{ hero_desktop_image | image_url: width: 1400 | image_tag: loading: 'eager', widths: '500, 750, 900, 1100, 1400', sizes: '100vw', class: 'vhl-video-hero__image' }}
+
     </div>
+
   {% endif %}
+
   </div>
 
   <div class="vhl-video-hero__overlay"></div>
-
-  
 
     {% if section.settings.eyebrow != blank
 
@@ -147,8 +172,6 @@
 
     {% endif %}
 
-  
-
 </section>
 
 {% style %}
@@ -175,7 +198,7 @@
 
    MEDIA
 
-========================= */
+\========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__media {
 
@@ -239,7 +262,7 @@
 
    OVERLAY
 
-========================= */
+\========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__overlay {
 
@@ -273,7 +296,7 @@
 
    CONTENT
 
-========================= */
+\========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__inner {
 
@@ -315,7 +338,7 @@
 
    EYEBROW
 
-========================= */
+\========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__eyebrow {
 
@@ -339,7 +362,7 @@
 
    HEADING
 
-========================= */
+\========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__heading {
 
@@ -369,7 +392,7 @@
 
    SUBHEADING
 
-========================= */
+\========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__subheading {
 
@@ -391,7 +414,7 @@
 
    BUTTON
 
-========================= */
+\========================= */
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__button {
 
@@ -433,7 +456,7 @@
 
    MOBILE
 
-========================= */
+\========================= */
 
 @media screen and (max-width: 749px) {
 
@@ -545,7 +568,7 @@
 
    SMALL PHONE
 
-========================= */
+\========================= */
 
 @media screen and (max-width: 390px) {
 
