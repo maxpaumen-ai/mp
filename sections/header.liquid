@@ -1747,30 +1747,32 @@
                   if vhliso_product_collection == blank
                     assign vhliso_product_collection = collections[vhliso_flat_handle]
                   endif
-                  assign vhliso_product = vhliso_product_collection.products.first
+                  assign vhliso_products = vhliso_product_collection.products
                 -%}
                 <li class="vhliso-nav-item">
                   <button type="button" class="vhliso-nav-trigger" aria-expanded="false" aria-controls="vhliso-mega-flat-{{ forloop.index }}-{{ section.id }}" data-vhliso-mega-trigger>
                     {{ link.title | upcase | escape }}
                   </button>
                   <div class="vhliso-mega" id="vhliso-mega-flat-{{ forloop.index }}-{{ section.id }}" data-vhliso-mega-panel hidden>
-                    <div class="vhliso-mega-inner{% if vhliso_product != blank %} vhliso-mega-inner--with-featured{% endif %}">
+                    <div class="vhliso-mega-inner{% if vhliso_products.size > 0 %} vhliso-mega-inner--with-featured{% endif %}">
                       <div class="vhliso-mega-left">
                         <p class="vhliso-mega-heading">{{ link.title | escape }}</p>
                         <div class="vhliso-mega-viewall-wrap">
                           <a href="{{ link.url }}" class="vhliso-mega-viewall">Bekijk alle {{ link.title | downcase | escape }} &rarr;</a>
                         </div>
                       </div>
-                      {% if vhliso_product != blank %}
+                      {% if vhliso_products.size > 0 %}
                         <div class="vhliso-mega-featured vhliso-mega-featured--single">
-                          <a class="vhliso-mega-card" href="{{ vhliso_product.url }}">
-                            {% if vhliso_product.featured_image != blank %}
-                              <span class="vhliso-mega-card-image">
-                                {{ vhliso_product.featured_image | image_url: width: 720 | image_tag: loading: 'lazy', alt: vhliso_product.title }}
-                              </span>
-                            {% endif %}
-                            <span class="vhliso-mega-card-title">{{ vhliso_product.title | escape }}</span>
-                          </a>
+                          {% for vhliso_product in vhliso_products limit: 2 %}
+                            <a class="vhliso-mega-card" href="{{ vhliso_product.url }}">
+                              {% if vhliso_product.featured_image != blank %}
+                                <span class="vhliso-mega-card-image">
+                                  {{ vhliso_product.featured_image | image_url: width: 720 | image_tag: loading: 'lazy', alt: vhliso_product.title }}
+                                </span>
+                              {% endif %}
+                              <span class="vhliso-mega-card-title">{{ vhliso_product.title | escape }}</span>
+                            </a>
+                          {% endfor %}
                         </div>
                       {% endif %}
                     </div>
