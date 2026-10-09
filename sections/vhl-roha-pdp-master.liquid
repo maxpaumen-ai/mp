@@ -779,6 +779,33 @@
       });
     }
 
+    // VHL mobile gallery: swipe horizontally without blocking vertical scrolling.
+    if (galleryStage && thumbs.length > 1) {
+      var swipeStartX = 0;
+      var swipeStartY = 0;
+      var swipeStartedAt = 0;
+      galleryStage.addEventListener('touchstart', function (event) {
+        if (event.touches.length !== 1) { swipeStartedAt = 0; return; }
+        swipeStartX = event.touches[0].clientX;
+        swipeStartY = event.touches[0].clientY;
+        swipeStartedAt = Date.now();
+      }, { passive: true });
+      galleryStage.addEventListener('touchend', function (event) {
+        if (!swipeStartedAt || event.changedTouches.length !== 1) return;
+        var dx = event.changedTouches[0].clientX - swipeStartX;
+        var dy = event.changedTouches[0].clientY - swipeStartY;
+        swipeStartedAt = 0;
+        if (Math.abs(dx) < 45 || Math.abs(dx) <= Math.abs(dy) * 1.25) return;
+        var activeIndex = thumbs.findIndex(function (thumb) { return thumb.classList.contains('is-active'); });
+        if (activeIndex < 0) activeIndex = 0;
+        var nextIndex = dx < 0
+          ? (activeIndex + 1) % thumbs.length
+          : (activeIndex - 1 + thumbs.length) % thumbs.length;
+        thumbs[nextIndex].click();
+      }, { passive: true });
+      galleryStage.addEventListener('touchcancel', function () { swipeStartedAt = 0; }, { passive: true });
+    }
+
     if (mediaNextButton && thumbs.length > 1) {
       mediaNextButton.addEventListener('click', function () {
         var activeIndex = thumbs.findIndex(function (t) { return t.classList.contains('is-active'); });
@@ -885,6 +912,7 @@
   }
 
   #{{ root_id }} .vhl-roha-gallery__stage {
+    touch-action: pan-y pinch-zoom;
     grid-column: 2;
     position: relative;
     width: 100%;
