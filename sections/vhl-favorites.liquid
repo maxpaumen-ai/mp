@@ -39,7 +39,7 @@
 </section>
 
 {% style %}
-  #VHLFavorites-{{ section.id }} { overflow: hidden; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px; background: {{ section.settings.background }}; color: {{ section.settings.text_color }}; }
+  #VHLFavorites-{{ section.id }} { overflow: hidden; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px; background: linear-gradient(180deg, {{ section.settings.background }} 0%, #fbfaf8 52%, #ffffff 100%); color: {{ section.settings.text_color }}; }
   #VHLFavorites-{{ section.id }} * { box-sizing: border-box; }
   #VHLFavorites-{{ section.id }} .vhl-favorites__inner { width: min(100%, 1500px); margin: 0 auto; padding: 0 clamp(18px,4vw,58px); }
   #VHLFavorites-{{ section.id }} .vhl-favorites__header { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: clamp(28px,4vw,48px); }
@@ -51,6 +51,41 @@
   #VHLFavorites-{{ section.id }} .vhl-favorites__track { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(260px, calc((100% - 60px)/3.2)); gap: 20px; overflow-x: auto; padding: 0 1px 12px; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-inline: contain; }
   #VHLFavorites-{{ section.id }} .vhl-favorites__track::-webkit-scrollbar { display: none; }
   #VHLFavorites-{{ section.id }} .vhl-product-card { min-width: 0; scroll-snap-align: start; }
+
+  /* Alleen binnen VHL Favorites: SALE-labels verbergen. */
+  #VHLFavorites-{{ section.id }} .vhl-product-card__badge,
+  #VHLFavorites-{{ section.id }} .vhl-product-card__badge--sale,
+  #VHLFavorites-{{ section.id }} .vhl-product-card__sale,
+  #VHLFavorites-{{ section.id }} .vhl-product-card__sale-badge,
+  #VHLFavorites-{{ section.id }} .vhl-product-card__badges,
+  #VHLFavorites-{{ section.id }} .badge--sale,
+  #VHLFavorites-{{ section.id }} .sale-badge { display: none !important; }
+
+  /* De oranje snelle-toevoegen-knop en de opties-knop krijgen dezelfde rustige stijl. */
+  #VHLFavorites-{{ section.id }} .vhl-product-card button:not([class*="wishlist"]):not([class*="favorite"]),
+  #VHLFavorites-{{ section.id }} .vhl-product-card .vhl-product-card__button,
+  #VHLFavorites-{{ section.id }} .vhl-product-card .vhl-product-card__quick-add,
+  #VHLFavorites-{{ section.id }} .vhl-product-card .quick-add__submit {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #24211e !important;
+    border: 1px solid #24211e !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    text-transform: none;
+    transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+  }
+  #VHLFavorites-{{ section.id }} .vhl-product-card button:not([class*="wishlist"]):not([class*="favorite"]):hover,
+  #VHLFavorites-{{ section.id }} .vhl-product-card .vhl-product-card__button:hover,
+  #VHLFavorites-{{ section.id }} .vhl-product-card .vhl-product-card__quick-add:hover,
+  #VHLFavorites-{{ section.id }} .vhl-product-card .quick-add__submit:hover {
+    background: #24211e !important;
+    background-color: #24211e !important;
+    color: #fff !important;
+  }
+  #VHLFavorites-{{ section.id }} .vhl-product-card button::before,
+  #VHLFavorites-{{ section.id }} .vhl-product-card button::after { box-shadow: none !important; }
+
   @media screen and (max-width: 749px) {
     #VHLFavorites-{{ section.id }} { padding: {{ section.settings.padding_top_mobile }}px 0 {{ section.settings.padding_bottom_mobile }}px; }
     #VHLFavorites-{{ section.id }} .vhl-favorites__inner { padding-inline: 16px; }
