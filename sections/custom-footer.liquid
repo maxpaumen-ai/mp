@@ -1,1163 +1,2325 @@
 {% comment %}
+
   VAN HOUTEN LIVING — PREMIUM FOOTER V2
+
 {% endcomment %}
+
+
 
 <footer class="vhl-footer">
 
+
+
   <div class="vhl-footer__main">
+
+
 
     <div class="vhl-footer__content">
 
+
+
       <!-- =========================
+
            NEWSLETTER
-      ========================== -->
+
+      \========================== -->
+
+
 
       <div class="vhl-footer__newsletter">
 
+
+
         <h2>
+
           Schrijf je in & ontvang<br>
+
           tot 15% korting op je eerste<br>
+
           bestelling!
+
         </h2>
 
+
+
         <p class="vhl-footer__newsletter-text">
+
           Schrijf je in voor onze nieuwsbrief en ontvang de nieuwste updates,
+
           exclusieve aanbiedingen en inspiratie voor jouw badkamer.
+
         </p>
+
+
 
         {% form 'customer', class: 'vhl-footer__form' %}
 
+
+
           <input
+
             type="hidden"
+
             name="contact[tags]"
+
             value="newsletter"
-          >
+
+          \>
+
+
 
           <div class="vhl-footer__input-wrap">
 
+
+
             <input
+
               type="email"
+
               name="contact[email]"
+
               placeholder="Jouw e-mailadres"
+
               required
+
               autocomplete="email"
-            >
+
+            \>
+
+
 
             <button type="submit">
+
               INSCHRIJVEN
+
             </button>
+
+
 
           </div>
 
+
+
           {% if form.posted_successfully? %}
+
             <p class="vhl-footer__success">
+
               Bedankt voor je inschrijving.
+
             </p>
+
           {% endif %}
+
+
 
         {% endform %}
 
+
+
         <p class="vhl-footer__small">
+
           Door je in te schrijven ga je akkoord met onze voorwaarden.
+
           Je kunt je op ieder moment uitschrijven.
+
         </p>
+
+
 
       </div>
 
 
+
+
+
       <!-- =========================
+
            FOOTER LINKS
-      ========================== -->
+
+      \========================== -->
+
+
 
       <div class="vhl-footer__links">
 
+
+
         <!-- KLANTENSERVICE -->
+
+
 
         <div class="vhl-footer__column">
 
+
+
           <h3>Klantenservice</h3>
+
+
 
           <a href="/pages/contact">Contact</a>
 
-          <a href="/pages/shipping">
+
+
+          <a href="/pages/verzending">
+
             Verzending
+
           </a>
+
+
 
           <a href="/pages/returns">
+
             Retourneren
+
           </a>
+
+
 
           <a href="/pages/faq">
+
             Veelgestelde vragen
+
           </a>
+
+
 
           <a href="/pages/garantie">
+
             Garantie
+
           </a>
 
-          <a href="/account">
+
+
+          <a href="/apps/volg-je-bestelling">
+
             Volg je bestelling
+
           </a>
+
+
 
         </div>
+
+
+
 
 
         <!-- ONTDEK -->
 
+
+
         <div class="vhl-footer__column">
+
+
 
           <h3>Ontdek</h3>
 
+
+
           <a href="/pages/over-ons">
+
             Over ons
+
           </a>
+
+
 
           <a href="/collections/all">
+
             Alle producten
+
           </a>
+
+
 
           <a href="/collections/badkamer">
+
             Badkamer
+
           </a>
+
+
 
           <a href="/collections/opbergen">
+
             Opbergen
+
           </a>
+
+
 
           <a href="/collections/accessoires">
+
             Accessoires
+
           </a>
+
+
 
           <a href="/pages/contact">
+
             Contact
+
           </a>
 
+
+
         </div>
+
+
+
 
 
         <!-- =========================
+
              COLLECTIES
-        ========================== -->
+
+        \========================== -->
+
+
 
         <div class="vhl-footer__column vhl-footer__collections">
 
+
+
           <h3>Collecties</h3>
+
+
 
           <div class="vhl-footer__collection-grid">
 
+
+
             {% for collection in collections %}
 
+
+
               {% unless collection.handle == 'all'
+
                 or collection.handle == 'frontpage'
+
                 or collection.handle == 'favorieten'
+
               %}
 
+
+
                 <a href="{{ collection.url }}">
+
                   {{ collection.title }}
+
                 </a>
+
+
 
               {% endunless %}
 
+
+
             {% endfor %}
+
+
 
           </div>
 
+
+
         </div>
 
+
+
       </div>
+
+
 
     </div>
 
 
+
+
+
     <!-- =========================
+
          PAYMENT ICONS
+
          ALLEEN 4
-    ========================== -->
+
+    \========================== -->
+
+
 
     <div class="vhl-footer__payments">
 
 
+
+
+
       <!-- WERO -->
 
+
+
       <div
+
         class="vhl-payment vhl-payment--wero"
+
         aria-label="Wero"
-      >
+
+      \>
+
         WERO
+
       </div>
+
+
+
 
 
       <!-- MASTERCARD -->
 
+
+
       <div
+
         class="vhl-payment vhl-payment--mastercard"
+
         aria-label="Mastercard"
-      >
+
+      \>
+
+
 
         <svg
+
           viewBox="0 0 54 34"
+
           role="img"
+
           aria-hidden="true"
-        >
+
+        \>
+
+
 
           <circle
+
             cx="21"
+
             cy="17"
+
             r="11"
+
             fill="#EB001B"
+
           />
 
+
+
           <circle
+
             cx="33"
+
             cy="17"
+
             r="11"
+
             fill="#F79E1B"
+
           />
+
+
 
           <path
+
             d="M27 8.4a11 11 0 0 1 0 17.2 11 11 0 0 1 0-17.2z"
+
             fill="#FF5F00"
+
           />
+
+
 
         </svg>
 
+
+
       </div>
+
+
+
 
 
       <!-- APPLE PAY -->
 
+
+
       <div
+
         class="vhl-payment vhl-payment--apple"
+
         aria-label="Apple Pay"
-      >
+
+      \>
+
+
 
         <div class="vhl-apple-logo">
 
+
+
           <svg
+
             viewBox="0 0 24 28"
+
             aria-hidden="true"
-          >
+
+          \>
+
+
 
             <path
+
               fill="currentColor"
+
               d="M19.7 14.8c0-3.3 2.7-4.9 2.8-5-1.5-2.2-3.9-2.5-4.7-2.5-2-.2-3.9 1.2-4.9 1.2-1 0-2.6-1.2-4.3-1.2-2.2 0-4.3 1.3-5.5 3.3-2.4 4.1-.6 10.2 1.7 13.5 1.1 1.6 2.5 3.4 4.2 3.3 1.7-.1 2.3-1.1 4.4-1.1 2 0 2.6 1.1 4.4 1.1 1.8 0 3-1.6 4.1-3.3 1.3-1.9 1.8-3.8 1.9-3.9-.1 0-4.1-1.6-4.1-5.4zM16.5 5.2c.9-1.1 1.5-2.7 1.3-4.2-1.3.1-3 .9-3.9 2-.8.9-1.6 2.5-1.4 4 1.5.1 3-.7 4-1.8z"
+
             />
+
+
 
           </svg>
 
+
+
           <span>Pay</span>
+
+
 
         </div>
 
+
+
       </div>
+
+
+
 
 
       <!-- VISA -->
 
+
+
       <div
+
         class="vhl-payment vhl-payment--visa"
+
         aria-label="Visa"
-      >
+
+      \>
+
         VISA
+
       </div>
+
+
 
     </div>
 
 
+
+
+
     <!-- =========================
+
          FOOTER BOTTOM
-    ========================== -->
+
+    \========================== -->
+
+
 
     <div class="vhl-footer__bottom">
 
+
+
       <div class="vhl-footer__copyright">
+
+
 
         © {{ 'now' | date: '%Y' }} Van Houten Living
 
+
+
       </div>
+
+
+
 
 
       <div class="vhl-footer__legal">
 
+
+
         <a href="/policies/privacy-policy">
+
           Privacybeleid
+
         </a>
+
+
 
         <a href="/policies/refund-policy">
+
           Retourbeleid
+
         </a>
+
+
 
         <a href="/policies/shipping-policy">
+
           Verzendbeleid
+
         </a>
 
+
+
         <a href="/policies/terms-of-service">
+
           Algemene voorwaarden
+
         </a>
+
+
 
       </div>
 
+
+
     </div>
 
+
+
   </div>
+
+
 
 </footer>
 
 
+
+
+
 <style>
 
-/* =========================================================
+
+
+/\* =========================================================
+
    FOOTER
-========================================================= */
+
+\========================================================= \*/
+
+
 
 .vhl-footer {
+
   width: 100%;
+
   margin: 0;
+
+
 
   background: #f5f5f5;
 
+
+
   color: #4b4b4b;
+
 }
+
+
+
 
 
 .vhl-footer__main {
+
   width: 100%;
 
+
+
   padding:
+
     80px
+
     60px
+
     0;
+
 }
 
 
-/* =========================================================
+
+
+
+/\* =========================================================
+
    MAIN LAYOUT
-========================================================= */
+
+\========================================================= \*/
+
+
 
 .vhl-footer__content {
 
+
+
   width: 100%;
+
+
 
   max-width: 1700px;
 
+
+
   margin: 0 auto;
+
+
 
   display: grid;
 
+
+
   grid-template-columns:
+
     minmax(420px, 0.95fr)
+
     minmax(700px, 1.45fr);
+
+
 
   column-gap: 110px;
 
+
+
   align-items: start;
+
+
 
 }
 
 
-/* =========================================================
+
+
+
+/\* =========================================================
+
    NEWSLETTER
-========================================================= */
+
+\========================================================= \*/
+
+
 
 .vhl-footer__newsletter {
 
+
+
   width: 100%;
+
+
 
   max-width: 550px;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__newsletter h2 {
 
+
+
   margin:
+
     0
+
     0
+
     36px;
+
+
 
   color: #444444;
 
+
+
   font-size: 40px;
+
+
 
   line-height: 1.12;
 
+
+
   font-weight: 600;
+
+
 
   letter-spacing: -1.3px;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__newsletter-text {
 
+
+
   max-width: 520px;
 
+
+
   margin:
+
     0
+
     0
+
     42px;
+
+
 
   color: #626262;
 
+
+
   font-size: 14px;
+
+
 
   line-height: 1.65;
 
+
+
 }
 
 
-/* =========================================================
+
+
+
+/\* =========================================================
+
    NEWSLETTER INPUT
-========================================================= */
+
+\========================================================= \*/
+
+
 
 .vhl-footer__form {
 
+
+
   width: 100%;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__input-wrap {
 
+
+
   width: 100%;
+
+
 
   max-width: 520px;
 
+
+
   height: 54px;
+
+
 
   display: flex;
 
+
+
   align-items: stretch;
+
+
 
   overflow: hidden;
 
+
+
   background: #ffffff;
+
+
 
   border-radius: 28px;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__input-wrap input {
 
+
+
   flex: 1;
+
+
 
   min-width: 0;
 
+
+
   padding:
+
     0
+
     23px;
+
+
 
   border: 0;
 
+
+
   outline: 0;
+
+
 
   background: #ffffff;
 
+
+
   color: #333333;
+
+
 
   font-family: inherit;
 
+
+
   font-size: 13px;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__input-wrap input::placeholder {
 
+
+
   color: #777777;
+
+
 
 }
 
 
-/* BLACK BUTTON */
+
+
+
+/\* BLACK BUTTON \*/
+
+
 
 .vhl-footer__input-wrap button {
 
+
+
   min-width: 135px;
 
+
+
   padding:
+
     0
+
     24px;
+
+
 
   border: 0;
 
+
+
   border-radius: 28px;
+
+
 
   background: #171717 !important;
 
+
+
   color: #ffffff !important;
+
+
 
   font-family: inherit;
 
+
+
   font-size: 13px;
+
+
 
   font-weight: 700;
 
+
+
   cursor: pointer;
 
+
+
   transition:
+
     background .2s ease;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__input-wrap button:hover {
 
+
+
   background: #000000 !important;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__small {
 
+
+
   max-width: 500px;
 
+
+
   margin:
+
     40px
+
     0
+
     0;
+
+
 
   color: #777777;
 
+
+
   font-size: 11px;
+
+
 
   line-height: 1.6;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__success {
 
+
+
   margin-top: 15px;
+
+
 
   color: #333333;
 
+
+
   font-size: 13px;
+
+
 
 }
 
 
-/* =========================================================
+
+
+
+/\* =========================================================
+
    LINKS
-========================================================= */
+
+\========================================================= \*/
+
+
 
 .vhl-footer__links {
 
+
+
   width: 100%;
+
+
 
   display: grid;
 
+
+
   grid-template-columns:
+
     minmax(140px, .75fr)
+
     minmax(140px, .75fr)
+
     minmax(340px, 1.5fr);
+
+
 
   gap: 55px;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__column {
 
+
+
   min-width: 0;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__column h3 {
 
+
+
   margin:
+
     0
+
     0
+
     27px;
+
+
 
   color: #444444;
 
+
+
   font-size: 15px;
+
+
 
   line-height: 1.2;
 
+
+
   font-weight: 700;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__column a {
 
+
+
   display: block;
+
+
 
   width: fit-content;
 
+
+
   margin:
+
     0
+
     0
+
     17px;
+
+
 
   color: #666666;
 
+
+
   text-decoration: none;
+
+
 
   font-size: 13px;
 
+
+
   line-height: 1.35;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__column a:hover {
 
+
+
   color: #111111;
+
+
 
 }
 
 
-/* =========================================================
+
+
+
+/\* =========================================================
+
    COLLECTIONS — 2 COLUMNS
-========================================================= */
+
+\========================================================= \*/
+
+
 
 .vhl-footer__collections {
 
+
+
   width: 100%;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__collection-grid {
 
+
+
   width: 100%;
+
+
 
   display: grid;
 
+
+
   grid-template-columns:
+
     repeat(2, minmax(0, 1fr));
+
+
 
   column-gap: 38px;
 
+
+
   row-gap: 0;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__collection-grid a {
 
+
+
   margin-bottom: 17px;
+
+
 
 }
 
 
-/* =========================================================
+
+
+
+/\* =========================================================
+
    PAYMENT METHODS
-========================================================= */
+
+\========================================================= \*/
+
+
 
 .vhl-footer__payments {
 
+
+
   width: 100%;
+
+
 
   max-width: 1700px;
 
+
+
   margin:
+
     55px
+
     auto
+
     45px;
+
+
 
   display: flex;
 
+
+
   align-items: center;
+
+
 
   gap: 12px;
 
+
+
 }
 
 
-/* STANDARD PAYMENT BOX */
+
+
+
+/\* STANDARD PAYMENT BOX \*/
+
+
 
 .vhl-payment {
 
+
+
   width: 68px;
+
+
 
   height: 44px;
 
+
+
   display: flex;
+
+
 
   align-items: center;
 
+
+
   justify-content: center;
+
+
 
   box-sizing: border-box;
 
+
+
   overflow: hidden;
 
+
+
   border:
+
     1px
+
     solid
+
     #d6d6d6;
+
+
 
   border-radius: 6px;
 
+
+
   background: #ffffff;
+
+
 
 }
 
 
-/* WERO */
+
+
+
+/\* WERO \*/
+
+
 
 .vhl-payment--wero {
 
+
+
   background: #fff39a;
+
+
 
   color: #111111;
 
+
+
   font-family:
+
     Arial,
+
     sans-serif;
+
+
 
   font-size: 19px;
 
+
+
   font-weight: 800;
+
+
 
   letter-spacing: -1.5px;
 
+
+
 }
 
 
-/* MASTERCARD */
+
+
+
+/\* MASTERCARD \*/
+
+
 
 .vhl-payment--mastercard {
 
+
+
   background: #1d1d1d;
+
+
 
   border-color: #1d1d1d;
 
+
+
 }
+
+
+
 
 
 .vhl-payment--mastercard svg {
 
+
+
   width: 48px;
+
+
 
   height: 31px;
 
+
+
 }
 
 
-/* APPLE PAY */
+
+
+
+/\* APPLE PAY \*/
+
+
 
 .vhl-payment--apple {
 
+
+
   border:
+
     2px
+
     solid
+
     #111111;
+
+
 
   color: #000000;
 
+
+
 }
+
+
+
 
 
 .vhl-apple-logo {
 
+
+
   display: flex;
+
+
 
   align-items: center;
 
+
+
   justify-content: center;
+
+
 
   gap: 4px;
 
+
+
 }
+
+
+
 
 
 .vhl-apple-logo svg {
 
+
+
   width: 18px;
+
+
 
   height: 22px;
 
+
+
 }
+
+
+
 
 
 .vhl-apple-logo span {
 
+
+
   color: #000000;
 
+
+
   font-family:
+
     Arial,
+
     sans-serif;
+
+
 
   font-size: 17px;
 
+
+
   font-weight: 600;
+
+
 
 }
 
 
-/* VISA */
+
+
+
+/\* VISA \*/
+
+
 
 .vhl-payment--visa {
 
+
+
   background: #1434cb;
+
+
 
   border-color: #1434cb;
 
+
+
   color: #ffffff;
 
+
+
   font-family:
+
     Arial,
+
     sans-serif;
+
+
 
   font-size: 21px;
 
+
+
   font-weight: 800;
+
+
 
   font-style: italic;
 
+
+
   letter-spacing: -1px;
+
+
 
 }
 
 
-/* =========================================================
+
+
+
+/\* =========================================================
+
    FOOTER BOTTOM
-========================================================= */
+
+\========================================================= \*/
+
+
 
 .vhl-footer__bottom {
 
+
+
   width: 100%;
+
+
 
   max-width: 1700px;
 
+
+
   min-height: 75px;
+
+
 
   margin: 0 auto;
 
+
+
   padding:
+
     22px
+
     0;
+
+
 
   display: flex;
 
+
+
   align-items: center;
+
+
 
   justify-content: space-between;
 
+
+
   gap: 40px;
 
+
+
   border-top:
+
     1px
+
     solid
+
     #d8d8d8;
+
+
 
   color: #777777;
 
+
+
   font-size: 11px;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__legal {
 
+
+
   display: flex;
+
+
 
   align-items: center;
 
+
+
   justify-content: flex-end;
+
+
 
   flex-wrap: wrap;
 
+
+
   gap: 32px;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__legal a {
 
+
+
   color: #777777;
+
+
 
   text-decoration: none;
 
+
+
 }
+
+
+
 
 
 .vhl-footer__legal a:hover {
 
+
+
   color: #222222;
+
+
 
 }
 
 
-/* =========================================================
+
+
+
+/\* =========================================================
+
    TABLET
-========================================================= */
+
+\========================================================= \*/
+
+
 
 @media screen and (max-width: 1200px) {
 
+
+
   .vhl-footer__main {
 
+
+
     padding:
+
       65px
+
       35px
+
       0;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__content {
 
+
+
     grid-template-columns: 1fr;
+
+
 
     gap: 60px;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__newsletter {
 
+
+
     max-width: 620px;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__links {
 
+
+
     grid-template-columns:
+
       .7fr
+
       .7fr
+
       1.6fr;
 
+
+
   }
+
+
 
 }
 
 
-/* =========================================================
+
+
+
+/\* =========================================================
+
    MOBILE
-========================================================= */
+
+\========================================================= \*/
+
+
 
 @media screen and (max-width: 749px) {
 
+
+
   .vhl-footer__main {
 
+
+
     padding:
+
       45px
+
       20px
+
       0;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__content {
 
+
+
     display: block;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__newsletter h2 {
 
+
+
     margin-bottom: 23px;
+
+
 
     font-size: 29px;
 
+
+
     line-height: 1.12;
+
+
 
     letter-spacing: -.8px;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__newsletter-text {
 
+
+
     margin-bottom: 28px;
+
+
 
     font-size: 13px;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__input-wrap {
 
+
+
     height: 50px;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__input-wrap input {
 
+
+
     padding:
+
       0
+
       17px;
+
+
 
     font-size: 12px;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__input-wrap button {
 
+
+
     min-width: 108px;
 
+
+
     padding:
+
       0
+
       16px;
+
+
 
     font-size: 11px;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__small {
 
+
+
     margin-top: 25px;
+
+
 
     font-size: 10px;
 
+
+
   }
 
 
-  /* FOOTER LINKS */
+
+
+
+  /\* FOOTER LINKS \*/
+
+
 
   .vhl-footer__links {
 
+
+
     margin-top: 50px;
 
+
+
     grid-template-columns:
+
       repeat(2, minmax(0, 1fr));
 
+
+
     gap:
+
       45px
+
       25px;
+
+
 
   }
 
 
-  /* COLLECTIONS FULL WIDTH */
+
+
+
+  /\* COLLECTIONS FULL WIDTH \*/
+
+
 
   .vhl-footer__collections {
 
+
+
     grid-column:
+
       1
+
       /
+
       -1;
+
+
 
   }
 
 
-  /* COLLECTIONS STAY 2 COLUMNS */
+
+
+
+  /\* COLLECTIONS STAY 2 COLUMNS \*/
+
+
 
   .vhl-footer__collection-grid {
 
+
+
     grid-template-columns:
+
       repeat(2, minmax(0, 1fr));
+
+
 
     column-gap: 25px;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__column h3 {
 
+
+
     margin-bottom: 20px;
+
+
 
     font-size: 14px;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__column a {
 
+
+
     margin-bottom: 14px;
+
+
 
     font-size: 12px;
 
+
+
   }
 
 
-  /* PAYMENTS */
+
+
+
+  /\* PAYMENTS \*/
+
+
 
   .vhl-footer__payments {
 
+
+
     margin:
+
       45px
+
       0
+
       30px;
+
+
 
     gap: 8px;
 
+
+
   }
+
+
+
 
 
   .vhl-payment {
 
+
+
     width: 57px;
+
+
 
     height: 37px;
 
+
+
   }
+
+
+
 
 
   .vhl-payment--wero {
 
+
+
     font-size: 16px;
 
+
+
   }
+
+
+
 
 
   .vhl-payment--visa {
 
+
+
     font-size: 18px;
 
+
+
   }
+
+
+
 
 
   .vhl-payment--mastercard svg {
 
+
+
     width: 42px;
+
+
 
   }
 
 
-  /* BOTTOM */
+
+
+
+  /\* BOTTOM \*/
+
+
 
   .vhl-footer__bottom {
 
+
+
     flex-direction: column;
+
+
 
     align-items: flex-start;
 
+
+
     gap: 20px;
 
+
+
     padding:
+
       25px
+
       0
+
       32px;
 
+
+
   }
+
+
+
 
 
   .vhl-footer__legal {
 
+
+
     justify-content: flex-start;
 
+
+
     gap:
+
       14px
+
       20px;
+
+
 
   }
 
+
+
 }
+
+
 
 </style>
 
 
+
+
+
 {% schema %}
+
 {
+
   "name": "VHL Footer",
+
   "settings": [],
+
   "presets": [
+
     {
+
       "name": "VHL Footer"
+
     }
+
   ]
+
 }
+
 {% endschema %}
