@@ -650,6 +650,11 @@
     align-self: center;
   }
 
+  /* Zelfde kaartbreedte als de twee kaarten bij Badkamer Essentials. */
+  #vhliso-{{ section.id }} .vhliso-mega-featured--single {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   #vhliso-{{ section.id }} .vhliso-mega-card {
     display: flex;
     flex-direction: column;
@@ -1757,7 +1762,7 @@
                         </div>
                       </div>
                       {% if vhliso_product != blank %}
-                        <div class="vhliso-mega-featured">
+                        <div class="vhliso-mega-featured vhliso-mega-featured--single">
                           <a class="vhliso-mega-card" href="{{ vhliso_product.url }}">
                             {% if vhliso_product.featured_image != blank %}
                               <span class="vhliso-mega-card-image">
