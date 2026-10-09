@@ -8,20 +8,6 @@
 
   assign hero_mobile_image = section.settings.mobile_image | default: section.settings.image
 
-
-
-  assign is_badkamer_essentials = false
-
-
-
-  if collection.handle == 'badkamer-essentials'
-
-    assign is_badkamer_essentials = true
-
-  endif
-
-
-
   if section.settings.use_collection_fallback
 
     if hero_heading == blank
@@ -30,23 +16,17 @@
 
     endif
 
-
-
     if hero_subheading == blank
 
       assign hero_subheading = collection.metafields.custom.pdp_functional_body_1.value
 
     endif
 
-
-
     if hero_desktop_image == blank
 
       assign hero_desktop_image = collection.image
 
     endif
-
-
 
     if hero_mobile_image == blank
 
@@ -58,10 +38,6 @@
 
 -%}
 
-
-
-
-
 <section
 
   id="VHLVideoHero-{{ section.id }}"
@@ -70,217 +46,40 @@
 
 >
 
-
-
   <div class="vhl-video-hero__media">
 
-
-
-    {% if is_badkamer_essentials %}
-
-
-
-      <!-- BADKAMER ESSENTIALS DESKTOP -->
-
-      <div class="vhl-video-hero__desktop-media">
-
-        <img
-
-          src="https://cdn.shopify.com/s/files/1/1025/7668/5443/files/Scherm_afbeelding_2026-09-30_om_14.43.01.png?v=1790772196"
-
-          alt="Badkamer Essentials"
-
-          class="vhl-video-hero__image"
-
-          width="2400"
-
-          height="1400"
-
-          loading="eager"
-
-          fetchpriority="high"
-
-        >
-
-      </div>
-
-
-
-      <!-- BADKAMER ESSENTIALS MOBILE -->
-
-      <div class="vhl-video-hero__mobile-media">
-
-        <img
-
-          src="https://cdn.shopify.com/s/files/1/1025/7668/5443/files/Scherm_afbeelding_2026-09-30_om_14.43.01.png?v=1790772196"
-
-          alt="Badkamer Essentials"
-
-          class="vhl-video-hero__image"
-
-          width="1400"
-
-          height="1600"
-
-          loading="eager"
-
-          fetchpriority="high"
-
-        >
-
-      </div>
-
-
-
-    {% else %}
-
-
-
-      {% if section.settings.video != blank %}
-
-
-
-        <div class="vhl-video-hero__desktop-media">
-
-          {{
-
-            section.settings.video
-
-            | video_tag:
-
-              autoplay: true,
-
-              loop: true,
-
-              muted: true,
-
-              controls: false,
-
-              playsinline: true,
-
-              class: 'vhl-video-hero__video'
-
-          }}
-
-        </div>
-
-
-
-      {% elsif hero_desktop_image != blank %}
-
-
-
-        <div class="vhl-video-hero__desktop-media">
-
-          {{
-
-            hero_desktop_image
-
-            | image_url: width: 2400
-
-            | image_tag:
-
-              loading: 'eager',
-
-              widths: '1000, 1400, 1800, 2200, 2400',
-
-              sizes: '100vw',
-
-              class: 'vhl-video-hero__image'
-
-          }}
-
-        </div>
-
-
-
-      {% endif %}
-
-
-
-
-
-      {% if section.settings.mobile_video != blank %}
-
-
-
-        <div class="vhl-video-hero__mobile-media">
-
-          {{
-
-            section.settings.mobile_video
-
-            | video_tag:
-
-              autoplay: true,
-
-              loop: true,
-
-              muted: true,
-
-              controls: false,
-
-              playsinline: true,
-
-              class: 'vhl-video-hero__video'
-
-          }}
-
-        </div>
-
-
-
-      {% elsif hero_mobile_image != blank %}
-
-
-
-        <div class="vhl-video-hero__mobile-media">
-
-          {{
-
-            hero_mobile_image
-
-            | image_url: width: 1400
-
-            | image_tag:
-
-              loading: 'eager',
-
-              widths: '500, 750, 900, 1100, 1400',
-
-              sizes: '100vw',
-
-              class: 'vhl-video-hero__image'
-
-          }}
-
-        </div>
-
-
-
-      {% endif %}
-
-
-
-    {% endif %}
-
-
-
+    {% if section.settings.video != blank %}
+    <div class="vhl-video-hero__desktop-media">
+      {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, class: 'vhl-video-hero__video' }}
+    </div>
+  {% elsif hero_desktop_image != blank %}
+    <div class="vhl-video-hero__desktop-media">
+      {{ hero_desktop_image | image_url: width: 2400 | image_tag: loading: 'eager', widths: '1000, 1400, 1800, 2200, 2400', sizes: '100vw', class: 'vhl-video-hero__image' }}
+    </div>
+  {% endif %}
+
+  {% if section.settings.mobile_video != blank %}
+    <div class="vhl-video-hero__mobile-media">
+      {{ section.settings.mobile_video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, class: 'vhl-video-hero__video' }}
+    </div>
+  {% elsif hero_mobile_image != blank %}
+    <div class="vhl-video-hero__mobile-media">
+      {{ hero_mobile_image | image_url: width: 1400 | image_tag: loading: 'eager', widths: '500, 750, 900, 1100, 1400', sizes: '100vw', class: 'vhl-video-hero__image' }}
+    </div>
+  {% elsif section.settings.video != blank %}
+    <div class="vhl-video-hero__mobile-media">
+      {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, class: 'vhl-video-hero__video' }}
+    </div>
+  {% elsif hero_desktop_image != blank %}
+    <div class="vhl-video-hero__mobile-media">
+      {{ hero_desktop_image | image_url: width: 1400 | image_tag: loading: 'eager', widths: '500, 750, 900, 1100, 1400', sizes: '100vw', class: 'vhl-video-hero__image' }}
+    </div>
+  {% endif %}
   </div>
-
-
-
-
 
   <div class="vhl-video-hero__overlay"></div>
 
-
-
-
-
-  {% unless is_badkamer_essentials %}
-
-
+  
 
     {% if section.settings.eyebrow != blank
 
@@ -292,15 +91,9 @@
 
     %}
 
-
-
       <div class="vhl-video-hero__inner">
 
-
-
         <div class="vhl-video-hero__content">
-
-
 
           {% if section.settings.eyebrow != blank %}
 
@@ -312,8 +105,6 @@
 
           {% endif %}
 
-
-
           {% if hero_heading != blank %}
 
             <h1 class="vhl-video-hero__heading">
@@ -323,8 +114,6 @@
             </h1>
 
           {% endif %}
-
-
 
           {% if hero_subheading != blank %}
 
@@ -336,15 +125,13 @@
 
           {% endif %}
 
-
-
           {% if section.settings.button_label != blank %}
 
             <a
 
               class="vhl-video-hero__button"
 
-              href="/collections/badkamer-essentials"
+              href="{{ section.settings.button_link | default: routes.all_products_collection_url }}"
 
             >
 
@@ -354,33 +141,17 @@
 
           {% endif %}
 
-
-
         </div>
-
-
 
       </div>
 
-
-
     {% endif %}
 
-
-
-  {% endunless %}
-
-
+  
 
 </section>
 
-
-
-
-
 {% style %}
-
-
 
 #VHLVideoHero-{{ section.id }} {
 
@@ -400,17 +171,11 @@
 
 }
 
-
-
-
-
 /* =========================
 
    MEDIA
 
 ========================= */
-
-
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__media {
 
@@ -428,8 +193,6 @@
 
 }
 
-
-
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__desktop-media,
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__mobile-media {
@@ -444,23 +207,17 @@
 
 }
 
-
-
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__desktop-media {
 
   display: block;
 
 }
 
-
-
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__mobile-media {
 
   display: none;
 
 }
-
-
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__video,
 
@@ -478,17 +235,11 @@
 
 }
 
-
-
-
-
 /* =========================
 
    OVERLAY
 
 ========================= */
-
-
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__overlay {
 
@@ -499,8 +250,6 @@
   z-index: 1;
 
   pointer-events: none;
-
-
 
   background:
 
@@ -520,39 +269,11 @@
 
 }
 
-
-
-
-
-/* Geen donkere overlay op Badkamer Essentials */
-
-
-
-{% if is_badkamer_essentials %}
-
-
-
-#VHLVideoHero-{{ section.id }} .vhl-video-hero__overlay {
-
-  display: none !important;
-
-}
-
-
-
-{% endif %}
-
-
-
-
-
 /* =========================
 
    CONTENT
 
 ========================= */
-
-
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__inner {
 
@@ -560,17 +281,11 @@
 
   z-index: 2;
 
-
-
   width: min(100%, 1600px);
 
   min-height: {{ section.settings.desktop_height }}px;
 
-
-
   margin: 0 auto;
-
-
 
   padding:
 
@@ -580,15 +295,11 @@
 
     70px;
 
-
-
   display: flex;
 
   align-items: center;
 
 }
-
-
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__content {
 
@@ -600,17 +311,11 @@
 
 }
 
-
-
-
-
 /* =========================
 
    EYEBROW
 
 ========================= */
-
-
 
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__eyebrow {
 
@@ -630,47 +335,29 @@
 
 }
 
-
-
-
-
 /* =========================
 
    HEADING
 
 ========================= */
 
-
-
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__heading {
 
   margin: 0;
-
-
 
   width: max-content;
 
   max-width: none;
 
-
-
   white-space: nowrap;
-
-
 
   color: #ffffff !important;
 
-
-
   font-family: var(--font-heading-family, sans-serif);
-
-
 
   font-size: clamp(38px, 3.6vw, 58px);
 
   line-height: 1;
-
-
 
   font-weight: 600;
 
@@ -678,45 +365,27 @@
 
 }
 
-
-
-
-
 /* =========================
 
    SUBHEADING
 
 ========================= */
 
-
-
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__subheading {
 
   margin: 14px 0 0;
 
-
-
   max-width: 480px;
 
-
-
   color: rgba(255,255,255,.88);
-
-
 
   font-size: 16px;
 
   line-height: 1.5;
 
-
-
   font-weight: 400;
 
 }
-
-
-
-
 
 /* =========================
 
@@ -724,55 +393,35 @@
 
 ========================= */
 
-
-
 #VHLVideoHero-{{ section.id }} .vhl-video-hero__button {
 
   display: inline-flex;
-
-
 
   min-width: 160px;
 
   min-height: 43px;
 
-
-
   margin-top: 26px;
 
   padding: 12px 22px;
-
-
 
   align-items: center;
 
   justify-content: center;
 
-
-
   border-radius: 999px;
-
-
 
   background: #ffffff;
 
   color: #2a2927;
 
-
-
   text-decoration: none;
-
-
 
   font-size: 10px;
 
   line-height: 1;
 
-
-
   font-weight: 700;
-
-
 
   letter-spacing: .095em;
 
@@ -780,21 +429,13 @@
 
 }
 
-
-
-
-
 /* =========================
 
    MOBILE
 
 ========================= */
 
-
-
 @media screen and (max-width: 749px) {
-
-
 
   #VHLVideoHero-{{ section.id }} {
 
@@ -802,23 +443,17 @@
 
   }
 
-
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__desktop-media {
 
     display: none;
 
   }
 
-
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__mobile-media {
 
     display: block;
 
   }
-
-
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__video,
 
@@ -834,13 +469,9 @@
 
   }
 
-
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__inner {
 
     min-height: {{ section.settings.mobile_height }}px;
-
-
 
     padding:
 
@@ -850,13 +481,9 @@
 
       36px;
 
-
-
     align-items: flex-end;
 
   }
-
-
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__content {
 
@@ -868,67 +495,43 @@
 
   }
 
-
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__heading {
 
     display: block !important;
-
-
 
     width: auto !important;
 
     max-width: calc(100vw - 40px) !important;
 
-
-
     margin: 0 !important;
 
-
-
     color: #ffffff !important;
-
-
 
     font-size: 16px !important;
 
     line-height: 1.1 !important;
 
-
-
     font-weight: 300 !important;
 
   }
-
-
 
   #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
 
     white-space: normal !important;
 
-
-
     font-size: clamp(32px, 11vw, 46px) !important;
 
     line-height: 1.05 !important;
-
-
 
     font-weight: 600 !important;
 
   }
 
-
-
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__subheading {
 
     margin-top: 10px;
 
-
-
     max-width: calc(100vw - 40px);
-
-
 
     font-size: 13px;
 
@@ -936,13 +539,7 @@
 
   }
 
-
-
 }
-
-
-
-
 
 /* =========================
 
@@ -950,11 +547,7 @@
 
 ========================= */
 
-
-
 @media screen and (max-width: 390px) {
-
-
 
   #VHLVideoHero-{{ section.id }} .vhl-video-hero__heading {
 
@@ -962,31 +555,19 @@
 
   }
 
-
-
   #VHLVideoHero-{{ section.id }}.vhl-video-hero--mobile-heading-large .vhl-video-hero__heading {
 
     font-size: clamp(26px, 10.5vw, 34px) !important;
 
   }
 
-
-
 }
 
-
-
 {% endstyle %}
-
-
-
-
 
 <script>
 
 (() => {
-
-
 
   const hero =
 
@@ -996,33 +577,21 @@
 
     );
 
-
-
   if (!hero) return;
-
-
 
   const videos =
 
     hero.querySelectorAll('video');
 
-
-
   videos.forEach((video) => {
 
-
-
     video.muted = true;
-
-
 
     video.setAttribute('muted', '');
 
     video.setAttribute('playsinline', '');
 
     video.setAttribute('webkit-playsinline', '');
-
-
 
     if (
 
@@ -1034,11 +603,7 @@
 
     ) {
 
-
-
       const playPromise = video.play();
-
-
 
       if (playPromise) {
 
@@ -1046,23 +611,13 @@
 
       }
 
-
-
     }
 
-
-
   });
-
-
 
 })();
 
 </script>
-
-
-
-
 
 {% schema %}
 
@@ -1070,11 +625,7 @@
 
   "name": "VHL Video Hero",
 
-
-
   "settings": [
-
-
 
     {
 
@@ -1086,8 +637,6 @@
 
     },
 
-
-
     {
 
       "type": "video",
@@ -1097,8 +646,6 @@
       "label": "Hero video mobiel"
 
     },
-
-
 
     {
 
@@ -1110,8 +657,6 @@
 
     },
 
-
-
     {
 
       "type": "image_picker",
@@ -1121,8 +666,6 @@
       "label": "Hero afbeelding mobiel"
 
     },
-
-
 
     {
 
@@ -1135,8 +678,6 @@
       "default": false
 
     },
-
-
 
     {
 
@@ -1158,8 +699,6 @@
 
     },
 
-
-
     {
 
       "type": "range",
@@ -1179,8 +718,6 @@
       "default": 580
 
     },
-
-
 
     {
 
@@ -1202,8 +739,6 @@
 
     },
 
-
-
     {
 
       "type": "text",
@@ -1213,8 +748,6 @@
       "label": "Boventitel"
 
     },
-
-
 
     {
 
@@ -1226,8 +759,6 @@
 
     },
 
-
-
     {
 
       "type": "text",
@@ -1237,8 +768,6 @@
       "label": "Subtitel"
 
     },
-
-
 
     {
 
@@ -1272,8 +801,6 @@
 
     },
 
-
-
     {
 
       "type": "text",
@@ -1283,8 +810,6 @@
       "label": "Knoptekst"
 
     },
-
-
 
     {
 
@@ -1296,11 +821,7 @@
 
     }
 
-
-
   ],
-
-
 
   "presets": [
 
