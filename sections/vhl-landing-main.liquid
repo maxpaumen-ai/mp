@@ -35,7 +35,7 @@
       {%- else -%}
       {%- for m in product.media -%}
         {%- assign m_alt = m.alt | default: product.title -%}
-        <button type="button" class="vl-gal__thumb{% if forloop.first %} is-active{% endif %}" data-vl-thumb data-src="{{ m.preview_image | image_url: width: 1400 }}" aria-label="Foto {{ forloop.index }}">
+        <button type="button" class="vl-gal__thumb{% if forloop.first %} is-active{% endif %}" data-vl-thumb data-media-id="{{ m.id }}" data-src="{{ m.preview_image | image_url: width: 1400 }}" aria-label="Foto {{ forloop.index }}">
           <img src="{{ m.preview_image | image_url: width: 160 }}" alt="{{ m_alt | escape }}" loading="lazy" width="76" height="76">
         </button>
       {%- endfor -%}
@@ -109,6 +109,23 @@
         {%- form 'product', product, data-type: 'add-to-cart-form', class: 'vl-form__f' -%}
           <input type="hidden" name="id" value="{{ cv.id }}">
           <input type="hidden" name="quantity" value="1" data-vl-qty>
+          {%- unless product.has_only_default_variant -%}
+          {%- comment -%} Variantkeuze (kleur/maat), alleen bij producten met meer dan één variant {%- endcomment -%}
+          <div class="vl-opts" data-vl-opts>
+            {%- for opt in product.options_with_values -%}
+            {%- assign oi = forloop.index -%}
+            <div class="vl-opt">
+              <div class="vl-opt__name">{{ opt.name | escape }}: <span data-vl-opt-val="{{ oi }}">{{ opt.selected_value | escape }}</span></div>
+              <div class="vl-opt__vals">
+                {%- for val in opt.values -%}
+                <label class="vl-opt__pill{% if val == opt.selected_value %} is-active{% endif %}"><input type="radio" name="vl-opt-{{ section.id }}-{{ oi }}" value="{{ val | escape }}" data-vl-opt="{{ oi }}" {% if val == opt.selected_value %}checked{% endif %}><span>{{ val | escape }}</span></label>
+                {%- endfor -%}
+              </div>
+            </div>
+            {%- endfor -%}
+          </div>
+          <script type="application/json" data-vl-variants>{{ product.variants | json }}</script>
+          {%- endunless -%}
           {%- assign n_bundles = 0 -%}{%- for block in section.blocks -%}{%- if block.type == 'bundle' -%}{%- assign n_bundles = n_bundles | plus: 1 -%}{%- endif -%}{%- endfor -%}
           {%- if n_bundles > 0 -%}
           <div class="vl-bundle" data-vl-bundle>
@@ -198,6 +215,24 @@
   /* aantal-keuze */
   var qty=root.querySelector('[data-vl-qty]'),atcPrice=root.querySelector('[data-vl-atc-price]'),stickyPrice=root.querySelector('[data-vl-sticky-price]');
   root.querySelectorAll('[data-vl-bundle] input').forEach(function(r){r.addEventListener('change',function(){root.querySelectorAll('[data-vl-bundle] label').forEach(function(l){l.classList.toggle('is-active',l.contains(r))});if(qty)qty.value=r.value;if(atcPrice)atcPrice.textContent=r.dataset.price;if(stickyPrice)stickyPrice.textContent=r.dataset.price})});
+  /* variantkeuze */
+  var vdata=root.querySelector('[data-vl-variants]'),idInput=root.querySelector('input[name="id"]'),priceEl=root.querySelector('[data-vl-price]'),oldEl=root.querySelector('.vl-price__old'),saveEl=root.querySelector('.vl-price__save'),atcBtn=root.querySelector('[data-vl-atc]');
+  function eur(c){return '€'+(c/100).toFixed(2).replace('.',',')}
+  if(vdata&&idInput){var variants=[];try{variants=JSON.parse(vdata.textContent)}catch(e){}
+    var optInputs=[].slice.call(root.querySelectorAll('[data-vl-opt]'));
+    function pick(){var sel={};optInputs.forEach(function(i){if(i.checked)sel[i.dataset.vlOpt]=i.value});
+      var v=null;for(var k=0;k<variants.length;k++){var ok=true;for(var o in sel){if(variants[k]['option'+o]!==sel[o])ok=false}if(ok){v=variants[k];break}}
+      optInputs.forEach(function(i){i.closest('label').classList.toggle('is-active',i.checked);var lab=root.querySelector('[data-vl-opt-val="'+i.dataset.vlOpt+'"]');if(i.checked&&lab)lab.textContent=i.value});
+      if(!v)return;idInput.value=v.id;
+      if(priceEl)priceEl.textContent=eur(v.price);
+      var cmp=v.compare_at_price&&v.compare_at_price>v.price?v.compare_at_price:0;
+      if(oldEl){oldEl.textContent=cmp?eur(cmp):'';oldEl.style.display=cmp?'':'none'}
+      if(saveEl){saveEl.textContent=cmp?'Bespaar '+eur(cmp-v.price):'';saveEl.style.display=cmp?'':'none'}
+      root.querySelectorAll('[data-vl-bundle] input').forEach(function(r){var q=parseInt(r.value,10)||1;r.dataset.price=eur(v.price*q);var pr=r.closest('label').querySelector('.vl-bundle__pr');if(pr)pr.innerHTML=eur(v.price*q)+(cmp?'<s>'+eur(cmp*q)+'</s>':'');if(r.checked){if(atcPrice)atcPrice.textContent=r.dataset.price;if(stickyPrice)stickyPrice.textContent=r.dataset.price}});
+      if(atcBtn){atcBtn.disabled=!v.available;var bt=atcBtn.querySelector('.button-text');if(bt&&!v.available)bt.textContent='Uitverkocht'}
+      if(v.featured_media&&v.featured_media.id){var th=root.querySelector('[data-vl-thumb][data-media-id="'+v.featured_media.id+'"]');if(th)th.click()}
+      try{var u=new URL(location.href);u.searchParams.set('variant',v.id);history.replaceState({},'',u)}catch(e){}}
+    optInputs.forEach(function(i){i.addEventListener('change',pick)})}
   /* betaalmodal */
   var modal=root.querySelector('[data-vl-pay-modal]');
   root.querySelectorAll('[data-vl-pay-open]').forEach(function(b){b.addEventListener('click',function(){modal.hidden=false})});
