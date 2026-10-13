@@ -1,0 +1,60 @@
+/* VHL swipe-galerij voor de standaard themagalerij (shop-product-details), 13 okt 2026.
+   Op mobiel staan alle productfoto's naast elkaar in één strook met scroll-snap,
+   zodat je echt doorschuift in plaats van dat er een andere foto in beeld schiet.
+   Desktop blijft ongewijzigd. Hogere specificiteit dan de regels in het
+   custom-liquid-blok van de productpagina, daarom de lange selectors. */
+@media (max-width: 767px) {
+  .shop-product-section .shop-product-carousel .shop-image-container.shop-square-container {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+  .shop-product-section .shop-product-carousel .shop-image-container.shop-square-container::-webkit-scrollbar {
+    display: none;
+  }
+  .shop-product-section .shop-image-container.shop-square-container .shop-image-zoom-wrapper,
+  .shop-product-section .shop-image-container.shop-square-container > .shop-main-image {
+    position: relative !important;
+    inset: auto !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    overflow: hidden !important;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    transition: none !important;
+  }
+  .shop-product-section .shop-image-container.shop-square-container .shop-image-zoom-wrapper img.shop-main-image,
+  .shop-product-section .shop-image-container.shop-square-container .shop-image-zoom-wrapper .shop-main-image {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    object-fit: initial !important;
+    object-position: initial !important;
+    transition: none !important;
+  }
+}

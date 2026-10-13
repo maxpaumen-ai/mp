@@ -161,7 +161,7 @@
           {%- endfor -%}
         </div>
 
-        <div class="vhl-roha-gallery__stage">
+        <div class="vhl-roha-gallery__stage{% if media_count > 1 %} vhl-roha-gallery__stage--swipe{% endif %}">
           {%- if display_image -%}
             {{
               display_image
@@ -172,6 +172,37 @@
                 widths: '700, 1000, 1400, 1800',
                 alt: display_image.alt
             }}
+          {%- endif -%}
+
+          {%- comment -%}
+            VHL swipe-galerij (mobiel, 13 okt 2026): alle foto's naast elkaar in
+            één strook met scroll-snap, zodat je op de telefoon echt doorschuift
+            in plaats van dat er een andere foto in beeld schiet. Op desktop
+            blijft de strook verborgen en werkt de losse hoofdfoto zoals voorheen.
+          {%- endcomment -%}
+          {%- if media_count > 1 -%}
+            <div class="vhl-roha-gallery__track" data-vhl-gallery-track>
+              {%- for media in product.media -%}
+                {%- if media.media_type == 'image' -%}
+                  <div class="vhl-roha-gallery__slide" data-vhl-gallery-slide data-media-id="{{ media.id }}">
+                    {{
+                      media.preview_image
+                      | image_url: width: 1200
+                      | image_tag:
+                        loading: 'lazy',
+                        widths: '480, 720, 960, 1200',
+                        sizes: '100vw',
+                        alt: media.alt
+                    }}
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+            <div class="vhl-roha-gallery__dots" data-vhl-gallery-dots aria-hidden="true">
+              {%- for media in product.media -%}
+                {%- if media.media_type == 'image' -%}<span class="vhl-roha-gallery__dot"></span>{%- endif -%}
+              {%- endfor -%}
+            </div>
           {%- endif -%}
 
           {%- if media_count > 1 -%}
@@ -550,6 +581,51 @@
     var thumbRail = root.querySelector('.vhl-roha-gallery__thumbs');
     var galleryStage = root.querySelector('.vhl-roha-gallery__stage');
 
+    /* VHL swipe-galerij (mobiel): strook met scroll-snap, stippen en koppeling met thumbs. */
+    var swipeTrack = root.querySelector('[data-vhl-gallery-track]');
+    var swipeSlides = swipeTrack ? Array.prototype.slice.call(swipeTrack.querySelectorAll('[data-vhl-gallery-slide]')) : [];
+    var swipeDots = Array.prototype.slice.call(root.querySelectorAll('[data-vhl-gallery-dots] .vhl-roha-gallery__dot'));
+
+    function swipeActive() {
+      return !!swipeTrack && swipeTrack.clientWidth > 0;
+    }
+
+    function markSwipeDots(index) {
+      swipeDots.forEach(function (dot, i) { dot.classList.toggle('is-on', i === index); });
+    }
+
+    function swipeTo(index, behavior) {
+      if (!swipeActive() || !swipeSlides[index]) return;
+      swipeTrack.scrollTo({ left: swipeSlides[index].offsetLeft, behavior: behavior || 'smooth' });
+      markSwipeDots(index);
+    }
+
+    function activeThumbIndex() {
+      var index = thumbs.findIndex(function (t) { return t.classList.contains('is-active'); });
+      return index < 0 ? 0 : index;
+    }
+
+    if (swipeTrack) {
+      var swipeScrollTimer = null;
+      swipeTrack.addEventListener('scroll', function () {
+        if (swipeScrollTimer) clearTimeout(swipeScrollTimer);
+        swipeScrollTimer = setTimeout(function () {
+          var width = swipeTrack.clientWidth;
+          if (!width) return;
+          var index = Math.round(swipeTrack.scrollLeft / width);
+          index = Math.max(0, Math.min(swipeSlides.length - 1, index));
+          markSwipeDots(index);
+          thumbs.forEach(function (t, i) { t.classList.toggle('is-active', i === index); });
+        }, 60);
+      }, { passive: true });
+
+      var swipeResizeTimer = null;
+      window.addEventListener('resize', function () {
+        if (swipeResizeTimer) clearTimeout(swipeResizeTimer);
+        swipeResizeTimer = setTimeout(function () { swipeTo(activeThumbIndex(), 'auto'); }, 120);
+      });
+    }
+
     function keepThumbVisible(thumb, behavior) {
       if (!thumbRail || !thumb || window.matchMedia('(max-width: 749px)').matches) return;
 
@@ -761,7 +837,7 @@
     thumbs.forEach(function (thumb) {
       thumb.addEventListener('click', function () {
         var image = thumb.getAttribute('data-image');
-        if (mainImage && image) {
+        if (mainImage && image && !swipeActive()) {
           mainImage.removeAttribute('srcset');
           mainImage.src = image;
           mainImage.alt = thumb.getAttribute('data-alt') || mainImage.alt;
@@ -769,6 +845,7 @@
         thumbs.forEach(function (t) { t.classList.remove('is-active'); });
         thumb.classList.add('is-active');
         keepThumbVisible(thumb, 'smooth');
+        swipeTo(thumbs.indexOf(thumb));
       });
     });
 
@@ -778,6 +855,10 @@
         keepThumbVisible(initiallyActiveThumb, 'auto');
       });
     }
+    requestAnimationFrame(function () {
+      markSwipeDots(activeThumbIndex());
+      swipeTo(activeThumbIndex(), 'auto');
+    });
 
     // VHL mobile gallery: swipe horizontally without blocking vertical scrolling.
     if (galleryStage && thumbs.length > 1) {
@@ -785,7 +866,7 @@
       var swipeStartY = 0;
       var swipeStartedAt = 0;
       galleryStage.addEventListener('touchstart', function (event) {
-        if (event.touches.length !== 1) { swipeStartedAt = 0; return; }
+        if (swipeActive() || event.touches.length !== 1) { swipeStartedAt = 0; return; }
         swipeStartX = event.touches[0].clientX;
         swipeStartY = event.touches[0].clientY;
         swipeStartedAt = Date.now();
@@ -973,6 +1054,12 @@
     transform: translateY(-1px);
   }
 
+  /* VHL swipe-galerij: alleen op mobiel zichtbaar (zie blok max-width 749px) */
+  #{{ root_id }} .vhl-roha-gallery__track,
+  #{{ root_id }} .vhl-roha-gallery__dots {
+    display: none;
+  }
+
   #{{ root_id }} .vhl-roha-pdp__panel {
     min-width: 0;
   }
@@ -1028,6 +1115,80 @@
       right: 12px;
       width: 36px;
       height: 36px;
+      z-index: 3;
+    }
+
+    /* VHL swipe-galerij (mobiel): strook met scroll-snap in plaats van losse hoofdfoto */
+    #{{ root_id }} .vhl-roha-gallery__stage--swipe {
+      touch-action: auto;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__stage--swipe .vhl-roha-gallery__main-image {
+      display: none;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__track {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      background: #ffffff;
+      z-index: 1;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__track::-webkit-scrollbar {
+      display: none;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__slide {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__slide img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      object-fit: cover;
+      object-position: center;
+      border: 0;
+      border-radius: 0;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__dots {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(17, 17, 17, 0.22);
+      transition: background 0.2s ease;
+    }
+
+    #{{ root_id }} .vhl-roha-gallery__dot.is-on {
+      background: #111111;
     }
   }
 

@@ -33,6 +33,7 @@
       this.attachEvents();
       this.setupThumbnailStripDrag();
       this.syncThumbColumnHeight();
+      this.setupSwipeTrack();
       this.handleVideoAutoplay(0);
       this.touchStartX = 0;
       this.touchEndX = 0;
@@ -46,6 +47,7 @@
         imageContainer.addEventListener(
           "touchstart",
           (e) => {
+            if (this.isSwipeTrackActive()) return;
             // Clear any pending swipe detection
             if (this.swipeDetectionTimer) {
               clearTimeout(this.swipeDetectionTimer);
@@ -75,6 +77,7 @@
         imageContainer.addEventListener(
           "touchmove",
           (e) => {
+            if (this.isSwipeTrackActive()) return;
             // Ignore swipe if user is pinching
             if (this.isPinching || !this.isSwiping) return;
             const currentX = e.changedTouches[0].screenX;
@@ -88,6 +91,7 @@
         imageContainer.addEventListener(
           "touchend",
           (e) => {
+            if (this.isSwipeTrackActive()) return;
             // Clear any pending swipe detection timer
             if (this.swipeDetectionTimer) {
               clearTimeout(this.swipeDetectionTimer);
@@ -298,6 +302,45 @@
         else img.addEventListener("load", setHeight);
       });
     }
+    /* VHL swipe-galerij (mobiel, 13 okt 2026): de .shop-image-container is op mobiel een
+       scroll-snap-strook (zie assets/vhl-swipe-gallery.css). Hier koppelen we het
+       scrollen aan de actieve foto en de miniaturen, en schuiven we de strook mee
+       bij een klik op miniatuur, pijl of stip. */
+    isSwipeTrackActive() {
+      const track = this.container.querySelector(".shop-image-container");
+      if (!track) return false;
+      const snap = window.getComputedStyle(track).scrollSnapType || "";
+      return snap.indexOf("x") === 0 && track.clientWidth > 0;
+    }
+    setupSwipeTrack() {
+      const track = this.container.querySelector(".shop-image-container");
+      if (!track) return;
+      this.swipeTrack = track;
+      let timer = null;
+      track.addEventListener(
+        "scroll",
+        () => {
+          if (!this.isSwipeTrackActive()) return;
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => {
+            const width = track.clientWidth;
+            if (!width) return;
+            let index = Math.round(track.scrollLeft / width);
+            index = Math.max(0, Math.min(this.maxIndex, index));
+            if (index !== this.currentIndex) {
+              this._fromSwipeScroll = true;
+              this.changeImage(index);
+              this._fromSwipeScroll = false;
+            }
+          }, 60);
+        },
+        { passive: true },
+      );
+    }
+    scrollSwipeTrackTo(index, behavior) {
+      if (!this.swipeTrack || !this.isSwipeTrackActive()) return;
+      this.swipeTrack.scrollTo({ left: index * this.swipeTrack.clientWidth, behavior: behavior || "smooth" });
+    }
     createIndicators() {
       if (!this.indicatorsContainer) return;
       this.indicatorsContainer.innerHTML = "";
@@ -328,6 +371,7 @@
         });
       }
       this.currentIndex = index;
+      if (!this._fromSwipeScroll) this.scrollSwipeTrackTo(index);
       this.scrollToThumbnail(index);
       this.handleVideoAutoplay(index);
       if (this._setThumbColumnHeight) requestAnimationFrame(() => this._setThumbColumnHeight());
