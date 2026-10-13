@@ -1,0 +1,73 @@
+{%- comment -%} VHL landing — klantbeoordelingen: samenvatting met sterrenbalken + grid met foto's (opzet Sanova). Blokken zijn voorbeeldkaarten tot er echte reviews zijn. {%- endcomment -%}
+{{ 'vhl-landing.css' | asset_url | stylesheet_tag }}
+<section class="vl vl-section vl-section--grey" id="vl-rev-{{ section.id }}" data-per-page="{{ section.settings.per_page | default: 6 }}" {{ section.shopify_attributes }}>
+<div class="vl-wrap">
+  {%- assign n = section.blocks.size -%}
+  {%- assign sum = 0 -%}{%- for b in section.blocks -%}{%- assign sum = sum | plus: b.settings.rating -%}{%- endfor -%}
+  {%- assign avg = 0 -%}{%- if n > 0 -%}{%- assign avg = sum | times: 100 | divided_by: n -%}{%- endif -%}
+  <div class="vl-rev__sum">
+    <h2>{{ section.settings.heading | escape }}</h2>
+    {%- assign tot = n -%}{%- if section.settings.total > 0 -%}{%- assign tot = section.settings.total -%}{%- endif -%}
+    {%- assign avg_txt = avg | divided_by: 100.0 | round: 2 -%}{%- if section.settings.average != blank -%}{%- assign avg_txt = section.settings.average -%}{%- endif -%}
+    <div class="vl-rev__score"><div class="vl-stars" style="font-size:18px">★★★★★</div><div><b>{{ avg_txt }} van de 5</b></div><div>Gebaseerd op {{ tot }} beoordelingen</div></div>
+    <div class="vl-rev__bars">
+      {%- assign manual = section.settings.counts | split: ',' -%}
+      {%- for s in (1..5) -%}{%- assign star = 6 | minus: s -%}{%- assign c = 0 -%}
+      {%- if manual.size == 5 -%}{%- assign c = manual[forloop.index0] | strip | plus: 0 -%}{%- else -%}
+      {%- for b in section.blocks -%}{%- if b.settings.rating == star -%}{%- assign c = c | plus: 1 -%}{%- endif -%}{%- endfor -%}{%- endif -%}
+      {%- assign pct = 0 -%}{%- if tot > 0 -%}{%- assign pct = c | times: 100 | divided_by: tot -%}{%- endif -%}
+      <div><span class="vl-stars">{% for i in (1..5) %}<span{% if i > star %} class="is-empty"{% endif %}>★</span>{% endfor %}</span><i><b style="width:{{ pct }}%"></b></i><span>{{ c }}</span></div>
+      {%- endfor -%}
+    </div>
+    <div><a class="vl-btn" href="{{ section.settings.write_link | default: '/pages/contact' }}">Schrijf een beoordeling</a></div>
+  </div>
+  <div class="vl-rev__bar"><span>Foto's eerst ▾</span><span>{{ tot }} beoordelingen</span></div>
+  <div class="vl-rev__grid" data-vl-grid>
+  {%- for block in section.blocks -%}
+    <div class="vl-rev__card" data-vl-card="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+      {%- if block.settings.placeholder -%}<div class="vl-rev__note">Voorbeeld van de opmaak — vervangen door een echte review</div>{%- endif -%}
+      <div class="vl-stars">{% for i in (1..5) %}<span{% unless i <= block.settings.rating %} class="is-empty"{% endunless %}>★</span>{% endfor %}</div>
+      <div class="vl-rev__who"><span>{{ block.settings.author | escape }}</span>{% if block.settings.verified %}<em>Geverifieerd</em>{% endif %}</div>
+      {%- if block.settings.asset != blank -%}<div class="vl-img"><img src="{{ block.settings.asset | asset_url }}" alt="" loading="lazy" width="700" height="700"></div>
+      {%- else -%}
+      {%- assign img = block.settings.image -%}
+      {%- if img == blank and block.settings.show_photo and product and product.media.size > block.settings.media_index -%}{%- assign img = product.media[block.settings.media_index].preview_image -%}{%- endif -%}
+      {%- if img != blank -%}<div class="vl-img"><img src="{{ img | image_url: width: 700 }}" alt="" loading="lazy" width="700" height="700"></div>{%- endif -%}
+      {%- endif -%}
+      <h4>{{ block.settings.title | escape }}</h4>
+      <p>{{ block.settings.text | escape | newline_to_br }}</p>
+    </div>
+  {%- endfor -%}
+  </div>
+  <div class="vl-rev__pag" data-vl-pag></div>
+</div>
+<script>(function(){var r=document.getElementById('vl-rev-{{ section.id }}');if(!r)return;var per=parseInt(r.dataset.perPage,10)||6,cards=[].slice.call(r.querySelectorAll('[data-vl-card]')),pag=r.querySelector('[data-vl-pag]'),n=Math.ceil(cards.length/per),cur=0;
+function go(p){cur=Math.max(0,Math.min(n-1,p));cards.forEach(function(c,i){c.style.display=(i>=cur*per&&i<(cur+1)*per)?'':'none'});
+var h='';for(var i=0;i<n;i++)h+='<button type="button" data-p="'+i+'"'+(i===cur?' class="is-cur"':'')+'>'+(i+1)+'</button>';
+if(n>1){h+='<button type="button" data-p="'+(cur+1)+'" aria-label="Volgende"'+(cur===n-1?' disabled':'')+'>›</button><button type="button" data-p="'+(n-1)+'" aria-label="Laatste"'+(cur===n-1?' disabled':'')+'>»</button>'}
+pag.innerHTML=h;pag.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){go(parseInt(b.dataset.p,10));var y=r.getBoundingClientRect().top+window.scrollY-120;window.scrollTo({top:y,behavior:'smooth'})})})}
+go(0)})();</script>
+</section>
+{% schema %}
+{ "name": "VHL landing beoordelingen", "tag": "section", "class": "section-vl-rev",
+  "settings":[
+    {"type":"text","id":"heading","label":"Titel","default":"Klantbeoordelingen"},
+    {"type":"url","id":"write_link","label":"Link 'Schrijf een beoordeling'"},
+    {"type":"text","id":"average","label":"Gemiddelde (leeg = berekend uit de blokken)"},
+    {"type":"number","id":"total","label":"Totaal aantal beoordelingen (0 = aantal blokken)","default":0},
+    {"type":"text","id":"counts","label":"Aantal per ster, 5 t/m 1, kommagescheiden (leeg = berekend)"},
+    {"type":"range","id":"per_page","label":"Beoordelingen per pagina","min":3,"max":12,"step":1,"default":6}],
+  "blocks":[{"type":"review","name":"Beoordeling","settings":[
+    {"type":"range","id":"rating","label":"Sterren","min":1,"max":5,"step":1,"default":5},
+    {"type":"text","id":"author","label":"Naam","default":"Naam"},
+    {"type":"checkbox","id":"verified","label":"Geverifieerd","default":true},
+    {"type":"text","id":"title","label":"Titel","default":"Titel"},
+    {"type":"textarea","id":"text","label":"Tekst"},
+    {"type":"text","id":"asset","label":"Foto uit het thema (assets/…)"},
+    {"type":"checkbox","id":"show_photo","label":"Foto tonen","default":true},
+    {"type":"image_picker","id":"image","label":"Foto (leeg = productfoto hieronder)"},
+    {"type":"number","id":"media_index","label":"Productfoto nummer (0 = eerste)","default":0},
+    {"type":"checkbox","id":"placeholder","label":"Dit is een voorbeeld (label zichtbaar)","default":true}]}],
+  "max_blocks": 50,
+  "presets":[{"name":"VHL landing beoordelingen"}] }
+{% endschema %}

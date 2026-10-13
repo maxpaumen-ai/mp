@@ -1,0 +1,32 @@
+{%- comment -%} VHL landing — fotoband als overlappende slider: grootste in het midden, kleiner naar de zijkanten (opzet Sanova). {%- endcomment -%}
+{{ 'vhl-landing.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign lijst = section.settings.assets | split: ','
+-%}
+<section class="vl vl-section vl-cover" id="vl-cover-{{ section.id }}" {{ section.shopify_attributes }}>
+  <div class="vl-cover__stage" data-vl-stage>
+  {%- if section.settings.assets != blank -%}
+    {%- for a in lijst -%}{%- assign f = a | strip -%}<div class="vl-cover__item" data-vl-item><img src="{{ f | asset_url }}" alt="" loading="lazy" width="600" height="600"></div>{%- endfor -%}
+  {%- else -%}
+    {%- for m in product.media -%}{%- if m.media_type == 'image' and forloop.index0 >= section.settings.skip -%}<div class="vl-cover__item" data-vl-item>{{ m.preview_image | image_url: width: 700 | image_tag: loading: 'lazy' }}</div>{%- endif -%}{%- endfor -%}
+  {%- endif -%}
+  </div>
+  <button type="button" class="vl-cover__nav vl-cover__nav--prev" data-dir="-1" aria-label="Vorige"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button type="button" class="vl-cover__nav vl-cover__nav--next" data-dir="1" aria-label="Volgende"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+<script>(function(){var r=document.getElementById('vl-cover-{{ section.id }}');if(!r)return;var items=[].slice.call(r.querySelectorAll('[data-vl-item]')),n=items.length,cur=0,timer;
+function lay(){var w=r.clientWidth,base=Math.min(460,w*0.42),step=base*0.78;items.forEach(function(it,i){var d=((i-cur)%n+n)%n;if(d>n/2)d-=n;var ad=Math.abs(d);var sc=Math.max(.55,1-ad*.12);it.style.transform='translate(-50%,-50%) translateX('+(d*step)+'px) scale('+sc+')';it.style.zIndex=20-ad;it.style.opacity=ad>3?0:1;it.style.width=base+'px';it.style.height=base+'px';it.classList.toggle('is-active',d===0)})}
+function go(d){cur=((cur+d)%n+n)%n;lay()}
+r.querySelectorAll('[data-dir]').forEach(function(b){b.addEventListener('click',function(){go(parseInt(b.dataset.dir,10));restart()})});
+items.forEach(function(it,i){it.addEventListener('click',function(){cur=i;lay();restart()})});
+function restart(){clearInterval(timer);timer=setInterval(function(){go(1)},{{ section.settings.interval | default: 4000 }})}
+window.addEventListener('resize',lay);lay();{% if section.settings.autoplay %}restart();{% endif %}})();</script>
+</section>
+{% schema %}
+{ "name": "VHL landing fotoband", "tag": "section", "class": "section-vl-strip",
+  "settings":[
+    {"type":"text","id":"assets","label":"Bestanden uit het thema, kommagescheiden (leeg = productfoto's)"},
+    {"type":"range","id":"skip","label":"Eerste productfoto's overslaan","min":0,"max":5,"step":1,"default":1},
+    {"type":"checkbox","id":"autoplay","label":"Automatisch doorschuiven","default":true},
+    {"type":"range","id":"interval","label":"Interval (ms)","min":2000,"max":8000,"step":500,"default":4000}],
+  "presets":[{"name":"VHL landing fotoband"}] }
+{% endschema %}

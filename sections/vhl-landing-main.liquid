@@ -1,0 +1,237 @@
+{%- comment -%}
+  VHL landing — koopblok (opzet Sanova, stijl Van Houten Living). Voorbeeld 12 okt 2026.
+  Galerij links, rechts: sociale-bewijspil, titel, sterren, prijs, drie vinkjes, drie iconen,
+  aantal-keuze (1 stuk / 2 stuks), koopknop met prijs, twee vertrouwensregels, betaalregel,
+  uitklapmenu's. Plakkende koopbalk onderaan. Winkelwagen via <product-form> van het thema.
+{%- endcomment -%}
+{{ 'vhl-landing.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign root_id = 'vl-main-' | append: section.id
+  assign cv = product.selected_or_first_available_variant
+  assign cmp = cv.compare_at_price
+  if section.settings.compare_override > 0
+    assign cmp = section.settings.compare_override | times: 100
+  endif
+  assign saving = 0
+  if cmp > cv.price
+    assign saving = cmp | minus: cv.price
+  endif
+  assign rating = product.metafields.reviews.rating.value
+  assign rating_count = product.metafields.reviews.rating_count.value
+-%}
+<section id="{{ root_id }}" class="vl vl-main" {{ section.shopify_attributes }}>
+<div class="vl-wrap">
+  <div class="vl-main__grid">
+
+    <div class="vl-gal" data-vl-gal>
+      <div class="vl-gal__thumbs">
+      {%- if section.settings.gallery_assets != blank -%}
+        {%- assign gl = section.settings.gallery_assets | split: ',' -%}
+        {%- for a in gl -%}{%- assign f = a | strip -%}
+        <button type="button" class="vl-gal__thumb{% if forloop.first %} is-active{% endif %}" data-vl-thumb data-src="{{ f | asset_url }}" aria-label="Foto {{ forloop.index }}">
+          <img src="{{ f | asset_url }}" alt="{{ section.settings.title_override | default: product.title | escape }}" loading="lazy" width="76" height="76">
+        </button>
+        {%- endfor -%}
+      {%- else -%}
+      {%- for m in product.media -%}
+        {%- assign m_alt = m.alt | default: product.title -%}
+        <button type="button" class="vl-gal__thumb{% if forloop.first %} is-active{% endif %}" data-vl-thumb data-src="{{ m.preview_image | image_url: width: 1400 }}" aria-label="Foto {{ forloop.index }}">
+          <img src="{{ m.preview_image | image_url: width: 160 }}" alt="{{ m_alt | escape }}" loading="lazy" width="76" height="76">
+        </button>
+      {%- endfor -%}
+      {%- endif -%}
+      </div>
+      <div class="vl-gal__stage" data-vl-track>
+        {%- if section.settings.gallery_assets != blank -%}
+          {%- assign gl = section.settings.gallery_assets | split: ',' -%}
+          {%- for a in gl -%}{%- assign f = a | strip -%}
+          <div class="vl-gal__slide" data-vl-slide><img src="{{ f | asset_url }}" alt="{{ section.settings.title_override | default: product.title | escape }}" width="1400" height="1400" {% if forloop.index > 2 %}loading="lazy"{% endif %}></div>
+          {%- endfor -%}
+        {%- else -%}
+          {%- for m in product.media -%}
+          <div class="vl-gal__slide" data-vl-slide><img src="{{ m.preview_image | image_url: width: 1400 }}" alt="{{ m.alt | default: product.title | escape }}" width="1400" height="1400" {% if forloop.index > 2 %}loading="lazy"{% endif %}></div>
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+      <button type="button" class="vl-gal__nav vl-gal__nav--prev" data-vl-nav="-1" aria-label="Vorige"><svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button type="button" class="vl-gal__nav vl-gal__nav--next" data-vl-nav="1" aria-label="Volgende"><svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+      <div class="vl-gal__dots" data-vl-dots></div>
+    </div>
+
+    <div class="vl-panel">
+      {%- if section.settings.pill_text != blank -%}
+      <div class="vl-pill"><span class="vl-pill__av">{%- for i in (1..3) -%}{%- assign av = 'vl-sanova-avatar-' | append: i | append: '.png' -%}<img src="{{ av | asset_url }}" alt="" width="28" height="28">{%- endfor -%}</span><span><b>{{ section.settings.pill_name | escape }}</b> <i>✔</i> {{ section.settings.pill_text | escape }}</span></div>
+      {%- endif -%}
+      <h1 class="vl-title">{{ section.settings.title_override | default: product.title }}</h1>
+      {%- if rating != blank -%}
+      <div class="vl-rating"><span class="vl-stars">★★★★★</span><span>{{ rating.rating | default: rating }}{% if rating_count != blank %} ({{ rating_count }}){% endif %}</span></div>
+      {%- elsif section.settings.rating_text != blank -%}
+      <div class="vl-rating"><span class="vl-stars">★★★★★</span><span>{{ section.settings.rating_text | escape }}</span></div>
+      {%- endif -%}
+      {%- if section.settings.price_text != blank -%}
+      <div class="vl-price">
+        {%- if section.settings.compare_text != blank -%}<span class="vl-price__old">{{ section.settings.compare_text | escape }}</span>{%- endif -%}
+        <span class="vl-price__cur" data-vl-price>{{ section.settings.price_text | escape }}</span>
+        {%- if section.settings.save_text != blank -%}<span class="vl-price__save">{{ section.settings.save_text | escape }}</span>{%- endif -%}
+      </div>
+      {%- else -%}
+      <div class="vl-price">
+        {%- if saving > 0 -%}<span class="vl-price__old">{{ cmp | money }}</span>{%- endif -%}
+        <span class="vl-price__cur" data-vl-price>{{ cv.price | money }}</span>
+        {%- if saving > 0 -%}<span class="vl-price__save">Bespaar {{ saving | money }}</span>{%- endif -%}
+      </div>
+      {%- endif -%}
+
+      <ul class="vl-checks">
+      {%- for block in section.blocks -%}{%- if block.type == 'check' -%}
+        <li {{ block.shopify_attributes }}><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#171717"/><path d="M7.5 12.5l3 3 6-6.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>{{ block.settings.label | escape }}:</b> {{ block.settings.text | escape }}</span></li>
+      {%- endif -%}{%- endfor -%}
+      </ul>
+
+      <div class="vl-icons">
+      {%- for block in section.blocks -%}{%- if block.type == 'icon' -%}
+        <div {{ block.shopify_attributes }}>
+          {%- if block.settings.asset != blank -%}<img src="{{ block.settings.asset | asset_url }}" alt="" class="vl-icons__img" width="64" height="64">{%- else -%}
+          {%- case block.settings.icon -%}
+          {%- when 'suction' -%}<svg viewBox="0 0 48 48"><path d="M8 20c0-6.6 7.2-12 16-12s16 5.4 16 12c0 4-4 6-8 6H16c-4 0-8-2-8-6zM24 26v14M18 40h12"/></svg>
+          {%- when 'silicone' -%}<svg viewBox="0 0 48 48"><path d="M6 18c6 0 6 6 12 6s6-6 12-6 6 6 12 6M6 30c6 0 6 6 12 6s6-6 12-6 6 6 12 6"/></svg>
+          {%- when 'steel' -%}<svg viewBox="0 0 48 48"><rect x="8" y="10" width="32" height="28" rx="6"/><path d="M8 20h32M16 10v28"/></svg>
+          {%- when 'scratch' -%}<svg viewBox="0 0 48 48"><path d="M24 6l6 12 13 2-9.5 9 2.5 13L24 36l-12 6 2.5-13L5 20l13-2z"/></svg>
+          {%- when 'wide' -%}<svg viewBox="0 0 48 48"><path d="M6 24h36M10 18l-4 6 4 6M38 18l4 6-4 6"/></svg>
+          {%- else -%}<svg viewBox="0 0 48 48"><path d="M10 25l9 9 19-20"/></svg>
+          {%- endcase -%}{%- endif -%}
+          <span>{{ block.settings.label | escape }}</span>
+        </div>
+      {%- endif -%}{%- endfor -%}
+      </div>
+
+      <product-form class="vl-form">
+        {%- form 'product', product, data-type: 'add-to-cart-form', class: 'vl-form__f' -%}
+          <input type="hidden" name="id" value="{{ cv.id }}">
+          <input type="hidden" name="quantity" value="1" data-vl-qty>
+          {%- assign n_bundles = 0 -%}{%- for block in section.blocks -%}{%- if block.type == 'bundle' -%}{%- assign n_bundles = n_bundles | plus: 1 -%}{%- endif -%}{%- endfor -%}
+          {%- if n_bundles > 0 -%}
+          <div class="vl-bundle" data-vl-bundle>
+          {%- assign b_i = 0 -%}
+          {%- for block in section.blocks -%}{%- if block.type == 'bundle' -%}{%- assign b_i = b_i | plus: 1 -%}
+            {%- assign q = block.settings.qty | default: 1 -%}
+            {%- assign total = cv.price | times: q -%}
+            {%- assign total_cmp = cmp | times: q -%}
+            {%- if cmp <= cv.price -%}{%- assign total_cmp = 0 -%}{%- endif -%}
+            <label class="{% if b_i == 1 %}is-active{% endif %}" {{ block.shopify_attributes }}>
+              <input type="radio" name="vl-bundle-{{ section.id }}" value="{{ q }}" data-price="{% if block.settings.price_text != blank %}{{ block.settings.price_text | escape }}{% else %}{{ total | money }}{% endif %}" {% if b_i == 1 %}checked{% endif %}>
+              <span class="vl-bundle__lbl">{{ block.settings.label | escape }}{% if block.settings.badge != blank %}<span class="vl-bundle__badge">{{ block.settings.badge | escape }}</span>{% endif %}</span>
+              <span class="vl-bundle__pr">{% if block.settings.price_text != blank %}{{ block.settings.price_text | escape }}{% else %}{{ total | money }}{% endif %}{% if block.settings.compare_text != blank %}<s>{{ block.settings.compare_text | escape }}</s>{% elsif total_cmp > 0 %}<s>{{ total_cmp | money }}</s>{% endif %}</span>
+            </label>
+          {%- endif -%}{%- endfor -%}
+          </div>
+          {%- endif -%}
+          <button type="submit" name="add" class="vl-btn vl-atc" data-vl-atc style="background:#1a1a1a!important;color:#fff!important;border-radius:999px!important;border:0!important;box-shadow:none!important" {% unless cv.available %}disabled aria-disabled="true"{% endunless %}>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l1.6 9.6a2 2 0 0 0 2 1.7h7.6a2 2 0 0 0 2-1.6L19.5 8H6.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="19.5" r="1.4" fill="currentColor"/><circle cx="17" cy="19.5" r="1.4" fill="currentColor"/></svg>
+            <span class="button-text">{% if cv.available %}{{ section.settings.atc_label | escape }}{% if section.settings.show_price_in_button %} • <span data-vl-atc-price>{{ section.settings.price_text | default: cv.price | money }}</span>{% endif %}{% else %}Uitverkocht{% endif %}</span>
+            {% render 'loading-spinner' %}
+          </button>
+          <div class="product-form__error-message-wrapper" role="alert" hidden><span class="product-form__error-message"></span></div>
+        {%- endform -%}
+      </product-form>
+
+      <div class="vl-trust">
+        <div><img src="{{ 'vl-sanova-truck.png' | asset_url }}" alt="" width="22" height="22"><span>{{ section.settings.trust_1 | escape }}</span></div>
+        <div><img src="{{ 'vl-sanova-calendar.png' | asset_url }}" alt="" width="22" height="22"><span>{{ section.settings.trust_2 | escape }}</span></div>
+      </div>
+      {%- if section.settings.installments != blank -%}<div class="vl-inst">{{ section.settings.installments }}</div>{%- endif -%}
+      <button type="button" class="vl-pay" data-vl-pay-open><svg viewBox="0 0 20 20" fill="none"><rect x="4" y="9" width="12" height="8" rx="1.5"/><path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9"/></svg><span>Betaal veilig met <u>deze betaalmogelijkheden</u>.</span></button>
+      <div class="vl-paymodal" data-vl-pay-modal hidden>
+        <div class="vl-paymodal__bg" data-vl-pay-close></div>
+        <div class="vl-paymodal__box" role="dialog" aria-modal="true" aria-label="Betaalmethoden">
+          <p>Betaal veilig met de volgende betaalmethoden</p>
+          <div class="vl-paymodal__m">{{ 'wero' | payment_type_svg_tag }}{{ 'master' | payment_type_svg_tag }}{{ 'apple_pay' | payment_type_svg_tag }}{{ 'visa' | payment_type_svg_tag }}{{ 'ideal' | payment_type_svg_tag }}</div>
+          <button type="button" class="vl-btn" data-vl-pay-close>Sluiten</button>
+        </div>
+      </div>
+
+      <div class="vl-acc">
+      {%- for block in section.blocks -%}{%- if block.type == 'accordion' -%}
+        <details {{ block.shopify_attributes }}>
+          <summary>
+            {%- case block.settings.icon -%}
+            {%- when 'text' -%}<img class="ic" src="{{ 'vl-sanova-lines.png' | asset_url }}" alt="" width="22" height="22">
+            {%- when 'calendar' -%}<img class="ic" src="{{ 'vl-sanova-calendar.png' | asset_url }}" alt="" width="22" height="22">
+            {%- when 'truck' -%}<img class="ic" src="{{ 'vl-sanova-truck.png' | asset_url }}" alt="" width="22" height="22">
+            {%- when 'heart' -%}<img class="ic" src="{{ 'vl-sanova-heart.png' | asset_url }}" alt="" width="22" height="22">
+            {%- when 'shield' -%}<img class="ic" src="{{ 'vl-sanova-shield.webp' | asset_url }}" alt="" width="22" height="22">
+            {%- else -%}<svg class="ic" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+            {%- endcase -%}
+            {{ block.settings.title | escape }}
+            <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="#171717" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="vl-acc__body">{% if block.settings.use_description %}{{ product.description }}{% else %}{{ block.settings.text }}{% endif %}</div>
+        </details>
+      {%- endif -%}{%- endfor -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- if section.settings.sticky -%}
+<div class="vl vl-sticky" data-vl-sticky>
+  <div class="vl-sticky__in">
+    {%- if section.settings.gallery_assets != blank -%}{%- assign first = section.settings.gallery_assets | split: ',' | first | strip -%}<img src="{{ first | asset_url }}" alt="" width="52" height="52">{%- elsif product.featured_image -%}<img src="{{ product.featured_image | image_url: width: 120 }}" alt="" width="52" height="52">{%- endif -%}
+    <div class="vl-sticky__meta"><strong>{{ section.settings.title_override | default: product.title }}</strong><span>{% if section.settings.compare_text != blank %}<s>{{ section.settings.compare_text | escape }}</s>{% elsif saving > 0 %}<s>{{ cmp | money }}</s>{% endif %}<b data-vl-sticky-price>{{ section.settings.price_text | default: cv.price | money }}</b></span></div>
+    <button type="button" class="vl-btn" data-vl-sticky-add><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l1.6 9.6a2 2 0 0 0 2 1.7h7.6a2 2 0 0 0 2-1.6L19.5 8H6.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="19.5" r="1.4" fill="currentColor"/><circle cx="17" cy="19.5" r="1.4" fill="currentColor"/></svg>{{ section.settings.atc_label | escape }}</button>
+  </div>
+</div>
+{%- endif -%}
+</section>
+<script src="{{ 'product-form.js' | asset_url }}" defer></script>
+<script>
+(function(){
+  var root=document.getElementById({{ root_id | json }});if(!root)return;
+  /* galerij: swipe-strook met snap, miniaturen en pijlen lopen mee */
+  var track=root.querySelector('[data-vl-track]'),slides=[].slice.call(root.querySelectorAll('[data-vl-slide]')),thumbs=[].slice.call(root.querySelectorAll('[data-vl-thumb]')),dots=root.querySelector('[data-vl-dots]'),cur=0,n=slides.length;
+  if(dots){dots.innerHTML=slides.map(function(_,i){return '<i'+(i===0?' class="is-on"':'')+'></i>'}).join('')}
+  function mark(i){cur=i;thumbs.forEach(function(t,k){t.classList.toggle('is-active',k===i)});if(dots)[].forEach.call(dots.children,function(d,k){d.classList.toggle('is-on',k===i)});var th=thumbs[i];if(th&&th.scrollIntoView)th.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}
+  function goTo(i,instant){i=Math.max(0,Math.min(n-1,i));track.scrollTo({left:slides[i].offsetLeft,behavior:instant?'auto':'smooth'});mark(i)}
+  thumbs.forEach(function(t,k){t.addEventListener('click',function(){goTo(k)})});
+  root.querySelectorAll('[data-vl-nav]').forEach(function(b){b.addEventListener('click',function(){goTo(cur+parseInt(b.dataset.vlNav,10))})});
+  var st;track.addEventListener('scroll',function(){clearTimeout(st);st=setTimeout(function(){var i=Math.round(track.scrollLeft/track.clientWidth);if(i!==cur)mark(i)},80)},{passive:true});
+  /* aantal-keuze */
+  var qty=root.querySelector('[data-vl-qty]'),atcPrice=root.querySelector('[data-vl-atc-price]'),stickyPrice=root.querySelector('[data-vl-sticky-price]');
+  root.querySelectorAll('[data-vl-bundle] input').forEach(function(r){r.addEventListener('change',function(){root.querySelectorAll('[data-vl-bundle] label').forEach(function(l){l.classList.toggle('is-active',l.contains(r))});if(qty)qty.value=r.value;if(atcPrice)atcPrice.textContent=r.dataset.price;if(stickyPrice)stickyPrice.textContent=r.dataset.price})});
+  /* betaalmodal */
+  var modal=root.querySelector('[data-vl-pay-modal]');
+  root.querySelectorAll('[data-vl-pay-open]').forEach(function(b){b.addEventListener('click',function(){modal.hidden=false})});
+  root.querySelectorAll('[data-vl-pay-close]').forEach(function(b){b.addEventListener('click',function(){modal.hidden=true})});
+  /* plakkende koopbalk */
+  var sticky=root.querySelector('[data-vl-sticky]'),atc=root.querySelector('[data-vl-atc]');
+  if(sticky&&atc){var io=new IntersectionObserver(function(e){var r=e[0].boundingClientRect;sticky.classList.toggle('is-on',!e[0].isIntersecting&&r.top<0)},{threshold:0});io.observe(atc);
+    sticky.querySelector('[data-vl-sticky-add]').addEventListener('click',function(){atc.click()})}
+})();
+</script>
+{% schema %}
+{ "name": "VHL landing — koopblok", "tag": "section", "class": "section-vl-main",
+  "settings": [
+    {"type":"text","id":"title_override","label":"Titel (leeg = producttitel)"},
+    {"type":"text","id":"gallery_assets","label":"Galerij uit het thema, kommagescheiden (leeg = productfoto's)"},
+    {"type":"text","id":"price_text","label":"Prijs als tekst (leeg = echte prijs)"},
+    {"type":"text","id":"compare_text","label":"Doorgestreepte prijs als tekst"},
+    {"type":"text","id":"save_text","label":"Bespaarbadge-tekst"},
+    {"type":"checkbox","id":"show_price_in_button","label":"Prijs in de koopknop","default":true},
+    {"type":"text","id":"pill_name","label":"Sociaal bewijs: naam","default":"Sanne"},
+    {"type":"text","id":"pill_text","label":"Sociaal bewijs: tekst (leeg = verbergen)","default":"en honderden anderen kozen Vanhouten Living."},
+    {"type":"text","id":"rating_text","label":"Sterrentekst als er geen reviews-metafield is (leeg = verbergen)"},
+    {"type":"number","id":"compare_override","label":"Vergelijkingsprijs in euro's (0 = uit Shopify)","default":0},
+    {"type":"text","id":"atc_label","label":"Koopknop","default":"In winkelwagen"},
+    {"type":"text","id":"trust_1","label":"Vertrouwensregel 1","default":"Voor 18:00 besteld, dezelfde dag verzonden"},
+    {"type":"text","id":"trust_2","label":"Vertrouwensregel 2","default":"30 dagen uitproberen"},
+    {"type":"richtext","id":"installments","label":"Termijnregel (bijv. Klarna)"},
+    {"type":"checkbox","id":"sticky","label":"Plakkende koopbalk","default":true}
+  ],
+  "blocks": [
+    {"type":"check","name":"Vinkje","limit":4,"settings":[{"type":"text","id":"label","label":"Dikgedrukt","default":"Zonder boren"},{"type":"text","id":"text","label":"Tekst","default":"Zuignap houdt op glas en tegels"}]},
+    {"type":"icon","name":"Icoon","limit":3,"settings":[{"type":"text","id":"asset","label":"Afbeelding uit het thema (assets/…), leeg = icoon hieronder"},{"type":"select","id":"icon","label":"Icoon","options":[{"value":"suction","label":"Zuignap"},{"value":"silicone","label":"Siliconen"},{"value":"steel","label":"Staal"},{"value":"scratch","label":"Anti-kras"},{"value":"wide","label":"Breed"},{"value":"check","label":"Vinkje"}],"default":"check"},{"type":"text","id":"label","label":"Tekst","default":"Voordeel"}]},
+    {"type":"bundle","name":"Aantal-optie","limit":3,"settings":[{"type":"number","id":"qty","label":"Aantal","default":1},{"type":"text","id":"label","label":"Label","default":"1 stuk"},{"type":"text","id":"badge","label":"Badge (bijv. Bespaar €10, alleen met een automatische korting)"},{"type":"text","id":"price_text","label":"Prijstekst (leeg = aantal × prijs)"},{"type":"text","id":"compare_text","label":"Doorgestreepte prijs als tekst"}]},
+    {"type":"accordion","name":"Uitklapmenu","limit":6,"settings":[{"type":"select","id":"icon","label":"Icoon","options":[{"value":"text","label":"Tekst"},{"value":"calendar","label":"Kalender"},{"value":"truck","label":"Bezorging"},{"value":"heart","label":"Hart"},{"value":"shield","label":"Schild"}],"default":"text"},{"type":"text","id":"title","label":"Titel","default":"Beschrijving"},{"type":"checkbox","id":"use_description","label":"Productbeschrijving uit Shopify tonen","default":false},{"type":"richtext","id":"text","label":"Tekst"}]}
+  ],
+  "presets":[{"name":"VHL landing — koopblok"}] }
+{% endschema %}

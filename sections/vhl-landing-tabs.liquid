@@ -1,0 +1,47 @@
+{%- comment -%} VHL landing — vier tabbladen met icoon, tekst en productfoto (opzet Sanova). {%- endcomment -%}
+{{ 'vhl-landing.css' | asset_url | stylesheet_tag }}
+<section class="vl vl-section vl-section--grey" {{ section.shopify_attributes }}>
+<div class="vl-wrap"><div class="vl-tabs__box" id="vl-tabs-{{ section.id }}">
+  <div class="vl-tabs__nav" role="tablist">
+  {%- for block in section.blocks -%}
+    <button role="tab" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" data-tab="{{ forloop.index }}" {{ block.shopify_attributes }}>
+      {%- if block.settings.icon_asset != blank -%}<img src="{{ block.settings.icon_asset | asset_url }}" alt="" width="18" height="18">{%- else -%}
+      {%- case block.settings.icon -%}
+      {%- when 'suction' -%}<svg viewBox="0 0 24 24"><path d="M4 10c0-3.3 3.6-6 8-6s8 2.7 8 6c0 2-2 3-4 3h-8c-2 0-4-1-4-3zM12 13v7M9 20h6"/></svg>
+      {%- when 'hook' -%}<svg viewBox="0 0 24 24"><path d="M12 3v7a4 4 0 0 0 8 0M8 21h8M12 10v11"/></svg>
+      {%- when 'sparkle' -%}<svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg>
+      {%- when 'drop' -%}<svg viewBox="0 0 24 24"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg>
+      {%- when 'shield' -%}<svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z"/></svg>
+      {%- else -%}<svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>
+      {%- endcase -%}{%- endif -%}
+      {{ block.settings.title | escape }}</button>
+  {%- endfor -%}
+  </div>
+  {%- for block in section.blocks -%}
+  <div class="vl-tabs__panel" role="tabpanel" data-tab="{{ forloop.index }}" {% if forloop.first %}data-active{% endif %}>
+    <div><h3>{{ block.settings.title | escape }}</h3>{{ block.settings.text }}</div>
+    {%- if block.settings.asset != blank -%}<div class="vl-img"><img src="{{ block.settings.asset | asset_url }}" alt="{{ block.settings.title | escape }}" loading="lazy" width="1000" height="1000"></div>
+    {%- else -%}
+    {%- assign img = block.settings.image -%}
+    {%- if img == blank and product and product.media.size > block.settings.media_index -%}{%- assign img = product.media[block.settings.media_index].preview_image -%}{%- endif -%}
+    {%- if img != blank -%}<div class="vl-img"><img src="{{ img | image_url: width: 1000 }}" alt="{{ block.settings.title | escape }}" loading="lazy" width="1000" height="1000"></div>{%- endif -%}
+    {%- endif -%}
+  </div>
+  {%- endfor -%}
+</div></div>
+<script>(function(){var r=document.getElementById('vl-tabs-{{ section.id }}');if(!r)return;r.querySelectorAll('[role=tab]').forEach(function(b){b.addEventListener('click',function(){r.querySelectorAll('[role=tab]').forEach(function(x){x.setAttribute('aria-selected','false')});r.querySelectorAll('[role=tabpanel]').forEach(function(x){x.removeAttribute('data-active')});b.setAttribute('aria-selected','true');var p=r.querySelector('[role=tabpanel][data-tab="'+b.dataset.tab+'"]');if(p)p.setAttribute('data-active','')})})})();</script>
+</section>
+{% schema %}
+{ "name": "VHL landing tabbladen", "tag": "section", "class": "section-vl-tabs",
+  "blocks": [{"type":"tab","name":"Tabblad","settings":[
+    {"type":"select","id":"icon","label":"Icoon","options":[{"value":"suction","label":"Zuignap"},{"value":"hook","label":"Haak"},{"value":"sparkle","label":"Streeploos"},{"value":"drop","label":"Druppel"},{"value":"shield","label":"Schild"},{"value":"check","label":"Vinkje"}],"default":"check"},
+    {"type":"text","id":"icon_asset","label":"Icoon uit het thema (assets/…)"},
+    {"type":"text","id":"asset","label":"Afbeelding uit het thema (assets/…)"},
+    {"type":"text","id":"title","label":"Titel","default":"Voordeel"},
+    {"type":"richtext","id":"text","label":"Tekst"},
+    {"type":"image_picker","id":"image","label":"Afbeelding (leeg = productfoto hieronder)"},
+    {"type":"number","id":"media_index","label":"Productfoto nummer (0 = eerste)","default":0}
+  ]}],
+  "max_blocks": 6,
+  "presets":[{"name":"VHL landing tabbladen"}] }
+{% endschema %}

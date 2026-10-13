@@ -1,0 +1,32 @@
+{%- comment -%}
+  VHL landing — aftelbalk (opzet Sanova, stijl VHL). Voorbeeld 12 okt 2026.
+  Zet "Afteltimer tonen" uit of vul een echte einddatum in; een valse deadline is geen optie.
+{%- endcomment -%}
+{{ 'vhl-landing.css' | asset_url | stylesheet_tag }}
+{%- if section.settings.enabled -%}
+<div class="vl vl-count" id="vl-count-{{ section.id }}" data-end="{{ section.settings.end }}" {{ section.shopify_attributes }}>
+  <span>{{ section.settings.text | escape }}</span>
+  {%- if section.settings.show_timer -%}
+  <span class="vl-count__t"><span data-d>0d</span><span data-h>00u</span><span data-m>00m</span><span data-s>00s</span></span>
+  {%- endif -%}
+</div>
+<script>
+(function(){var el=document.getElementById('vl-count-{{ section.id }}');if(!el||!el.querySelector('.vl-count__t'))return;
+var end=new Date(el.dataset.end.replace(' ','T'));if(isNaN(end))return;
+function p(n){return (n<10?'0':'')+n}
+function q(k,v){var x=el.querySelector(k);if(x)x.textContent=v}
+function tick(){var ms=end-new Date();if(ms<=0){el.style.display='none';return}var s=Math.floor(ms/1000);
+q('[data-d]',Math.floor(s/86400)+'d');q('[data-h]',p(Math.floor(s%86400/3600))+'u');q('[data-m]',p(Math.floor(s%3600/60))+'m');q('[data-s]',p(s%60)+'s')}
+tick();setInterval(tick,1000)})();
+</script>
+{%- endif -%}
+{% schema %}
+{ "name": "VHL landing aftelbalk", "tag": "section", "class": "section-vl-count",
+  "settings": [
+    {"type":"checkbox","id":"enabled","label":"Tonen","default":true},
+    {"type":"text","id":"text","label":"Tekst","default":"Herfstactie: tot 40% korting op badkamer essentials"},
+    {"type":"checkbox","id":"show_timer","label":"Afteltimer tonen","default":true},
+    {"type":"text","id":"end","label":"Einde (JJJJ-MM-DD UU:MM, tijd van de bezoeker)","default":"2026-10-19 23:59"}
+  ],
+  "presets":[{"name":"VHL landing aftelbalk"}] }
+{% endschema %}

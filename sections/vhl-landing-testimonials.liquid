@@ -1,0 +1,36 @@
+{%- comment -%} VHL landing — "Dit zeggen onze klanten": samenvatting links, kaarten rechts (opzet Sanova). {%- endcomment -%}
+{{ 'vhl-landing.css' | asset_url | stylesheet_tag }}
+<section class="vl vl-section" id="vl-test-{{ section.id }}" {{ section.shopify_attributes }}>
+<div class="vl-wrap"><div class="vl-test">
+  <div class="vl-test__sum">
+    <h2>{{ section.settings.heading | escape }}</h2>
+    <div class="vl-stars">★★★★★</div>
+    <small>{{ section.settings.subheading | escape }}</small>
+  </div>
+  <div class="vl-test__track">
+  {%- for block in section.blocks -%}
+    <div class="vl-test__card" {{ block.shopify_attributes }}>
+      {%- if block.settings.placeholder -%}<div class="vl-rev__note">Voorbeeld — vervangen door een echte review</div>{%- endif -%}
+      <div class="vl-stars">{% for i in (1..5) %}<span{% unless i <= block.settings.rating %} class="is-empty"{% endunless %}>★</span>{% endfor %}</div>
+      <h4>{{ block.settings.title | escape }}</h4>
+      <p>{{ block.settings.text | escape }}</p>
+      <small>{{ block.settings.author | escape }}</small>
+    </div>
+  {%- endfor -%}
+  </div>
+</div></div>
+</section>
+{% schema %}
+{ "name": "VHL landing klanten", "tag": "section", "class": "section-vl-test",
+  "settings":[
+    {"type":"text","id":"heading","label":"Titel","default":"Dit zeggen onze klanten:"},
+    {"type":"text","id":"subheading","label":"Ondertitel","default":"Gebaseerd op reviews van onze klanten"}],
+  "blocks":[{"type":"quote","name":"Review","settings":[
+    {"type":"range","id":"rating","label":"Sterren","min":1,"max":5,"step":1,"default":5},
+    {"type":"text","id":"title","label":"Titel","default":"Snelle levering"},
+    {"type":"textarea","id":"text","label":"Tekst"},
+    {"type":"text","id":"author","label":"Naam","default":"Naam"},
+    {"type":"checkbox","id":"placeholder","label":"Dit is een voorbeeld (label zichtbaar)","default":true}]}],
+  "max_blocks": 12,
+  "presets":[{"name":"VHL landing klanten"}] }
+{% endschema %}

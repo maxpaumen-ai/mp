@@ -1,0 +1,32 @@
+{%- comment -%} VHL landing — FAQ in twee kolommen (opzet Sanova), donkere kaart in VHL-stijl. {%- endcomment -%}
+{{ 'vhl-landing.css' | asset_url | stylesheet_tag }}
+<section class="vl vl-section vl-section--grey" {{ section.shopify_attributes }}>
+<div class="vl-wrap"><div class="vl-faq">
+  <div class="vl-faq__copy">
+    <h2>{{ section.settings.heading | escape }}</h2>
+    {{ section.settings.text }}
+    {%- if section.settings.button_label != blank -%}<a class="vl-btn" href="{{ section.settings.button_link | default: '/pages/contact' }}">{{ section.settings.button_label | escape }}</a>{%- endif -%}
+  </div>
+  <div class="vl-faq__card">
+  {%- for block in section.blocks -%}
+    <details {{ block.shopify_attributes }}>
+      <summary>{{ block.settings.question | escape }}<span class="t"><svg viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+      <div class="vl-faq__a">{{ block.settings.answer }}</div>
+    </details>
+  {%- endfor -%}
+  </div>
+</div></div>
+</section>
+{% schema %}
+{ "name": "VHL landing FAQ", "tag": "section", "class": "section-vl-faq",
+  "settings":[
+    {"type":"text","id":"heading","label":"Titel","default":"Veelgestelde vragen"},
+    {"type":"richtext","id":"text","label":"Tekst","default":"<p>Heb je nog andere vragen? Ons team staat voor je klaar.</p>"},
+    {"type":"text","id":"button_label","label":"Knoptekst","default":"Contact"},
+    {"type":"url","id":"button_link","label":"Knoplink"}],
+  "blocks":[{"type":"faq","name":"Vraag","settings":[
+    {"type":"text","id":"question","label":"Vraag","default":"Vraag"},
+    {"type":"richtext","id":"answer","label":"Antwoord","default":"<p>Antwoord</p>"}]}],
+  "max_blocks": 10,
+  "presets":[{"name":"VHL landing FAQ"}] }
+{% endschema %}
