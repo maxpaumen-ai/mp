@@ -12,39 +12,8 @@
 {% endcomment %}
 
 {%- liquid
-  assign matched_target_collection = blank
-  assign matched_rule_id = blank
-
-  if cart != empty
-    for rule in section.blocks
-      if rule.type == 'auto_upsell_rule'
-        assign source_collection = rule.settings.source_collection
-        assign target_collection = rule.settings.target_collection
-        assign rule_matches = false
-
-        if source_collection != blank and target_collection != blank
-          for cart_item in cart.items
-            for product_collection in cart_item.product.collections
-              if product_collection.id == source_collection.id
-                assign rule_matches = true
-                break
-              endif
-            endfor
-
-            if rule_matches
-              break
-            endif
-          endfor
-        endif
-
-        if rule_matches
-          assign matched_target_collection = target_collection
-          assign matched_rule_id = rule.id
-          break
-        endif
-      endif
-    endfor
-  endif
+  assign matched_target_collection = collections['badkamer-essentials']
+  assign matched_rule_id = 'badkamer-essentials'
 -%}
 
 {%- if matched_target_collection != blank -%}
@@ -68,11 +37,7 @@
 
       <div class="vhl-auto-upsells__heading-row">
         <div class="vhl-auto-upsells__heading">
-          {{ section.settings.auto_upsell_heading | default: 'Maak je badkamer compleet' }}
-        </div>
-
-        <div class="vhl-auto-upsells__discount-pill">
-          Mix & ontvang 10% korting
+          Maak je badkamer compleet
         </div>
       </div>
 
@@ -100,7 +65,7 @@
         <div
           class="vhl-auto-upsells__track"
           role="region"
-          aria-label="Aanbevolen producten met 10% combinatievoordeel"
+          aria-label="Aanbevolen producten uit Badkamer Essentials"
           tabindex="0"
         >
 
