@@ -3,7 +3,7 @@
 
   Functionaliteit:
   - Automatische upsells op basis van collectie-koppeling.
-  - Maximaal section.settings.auto_upsell_limit producten (standaard 5).
+  - Maximaal 8 beschikbare producten, exclusief producten die al in de winkelwagen zitten.
   - Producten die al in de winkelmand zitten worden overgeslagen.
   - Horizontale swipe / scroll.
   - Pijlen links en rechts over de productcarrousel.
@@ -70,7 +70,7 @@
         >
 
           {%- assign rendered_count = 0 -%}
-          {%- assign max_items = section.settings.auto_upsell_limit | default: 5 -%}
+          {%- assign max_items = 8 -%}
 
           {%- for upsell_product in matched_target_collection.products limit: 30 -%}
 
