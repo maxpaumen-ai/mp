@@ -1,0 +1,40 @@
+{%- comment -%} VHL landing: donker blok met tekst links en video rechts (naar het Twist & Lock-blok van sanova-sanitair.nl). Video en poster als themabestand. {%- endcomment -%}
+{{ 'vhl-landing.css' | asset_url | stylesheet_tag }}
+<style>
+.vl-video{padding:16px 16px 40px}
+.vl-video__card{max-width:1200px;margin:0 auto;background:#141720;color:#fff;border-radius:20px;padding:40px 32px;display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+.vl-video__eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;opacity:.7;margin:0 0 10px}
+.vl-video__heading{color:#fff;font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-1px;margin:0 0 16px}
+.vl-video__text{color:#fff;font-size:16px;line-height:1.55;opacity:.92}
+.vl-video__text p{margin:0 0 10px}
+.vl-video__media{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000}
+.vl-video__media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+@media (max-width:900px){.vl-video__card{grid-template-columns:1fr;padding:28px 20px}.vl-video__heading{font-size:26px}}
+</style>
+<section class="vl-video" {{ section.shopify_attributes }}>
+  <div class="vl-video__card">
+    <div>
+      {%- if section.settings.eyebrow != blank -%}<p class="vl-video__eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+      <h2 class="vl-video__heading">{{ section.settings.heading | escape }}</h2>
+      <div class="vl-video__text">{{ section.settings.text }}</div>
+    </div>
+    {%- if section.settings.video_asset != blank -%}
+    <div class="vl-video__media">
+      <video playsinline autoplay loop muted preload="metadata"{% if section.settings.poster_asset != blank %} poster="{{ section.settings.poster_asset | asset_url }}"{% endif %}>
+        <source src="{{ section.settings.video_asset | asset_url }}" type="video/mp4">
+      </video>
+    </div>
+    {%- endif -%}
+  </div>
+</section>
+{% schema %}
+{ "name": "VHL landing video", "tag": "section", "class": "section-vl-video",
+  "settings": [
+    {"type":"text","id":"eyebrow","label":"Boventitel"},
+    {"type":"text","id":"heading","label":"Titel","default":"Twist & Lock Technologie"},
+    {"type":"richtext","id":"text","label":"Tekst"},
+    {"type":"text","id":"video_asset","label":"Video uit het thema (assets/…, mp4)"},
+    {"type":"text","id":"poster_asset","label":"Stilstaand beeld uit het thema (assets/…)"}
+  ],
+  "presets":[{"name":"VHL landing video"}] }
+{% endschema %}

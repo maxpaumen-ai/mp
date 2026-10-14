@@ -1,0 +1,21 @@
+/* 14 okt 2026 — Zoeksuggesties onder de zoekbalk in de header (Ruben). Gedrag: assets/vhl-search.js. */
+.vhliso-search.has-suggestions { z-index: 1200; }
+.vhl-ps { position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 1200; max-height: min(70vh, 34rem); overflow-y: auto; padding: 10px; border-radius: 18px; background: #fff; color: #1a1a1a; box-shadow: 0 10px 30px rgb(0 0 0 / 0.14), 0 1px 3px rgb(0 0 0 / 0.08); text-align: left; font-size: 14px; line-height: 1.35; }
+.vhl-ps__chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 6px 10px; }
+.vhl-ps__chip { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 999px; background: #f5f5f4; color: #1a1a1a; font-size: 13px; font-weight: 600; letter-spacing: 0.01em; text-decoration: none; text-transform: capitalize; }
+.vhl-ps__chip:hover, .vhl-ps__chip.is-active { background: #1a1a1a; color: #fff; }
+.vhl-ps__list { display: grid; }
+.vhl-ps__item { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; align-items: center; padding: 6px 8px; border-radius: 12px; color: #1a1a1a; text-decoration: none; transition: background 0.12s ease; }
+.vhl-ps__item:hover, .vhl-ps__item.is-active { background: rgb(26 26 26 / 0.05); }
+.vhl-ps__img { display: block; width: 48px; height: 48px; object-fit: cover; border-radius: 8px; background: #f5f5f4; }
+.vhl-ps__body { display: grid; gap: 2px; min-width: 0; }
+.vhl-ps__title { font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vhl-ps__price { font-size: 13px; }
+.vhl-ps__price s { opacity: 0.5; margin-right: 5px; }
+.vhl-ps__all { display: block; margin-top: 6px; padding: 11px 8px; border-top: 1px solid rgb(26 26 26 / 0.1); color: #1a1a1a; font-size: 13px; font-weight: 600; text-decoration: none; }
+.vhl-ps__all:hover, .vhl-ps__all.is-active { text-decoration: underline; text-underline-offset: 3px; }
+.vhl-ps__empty { margin: 0; padding: 10px; font-size: 14px; color: rgb(26 26 26 / 0.6); }
+@media screen and (max-width: 749px) {
+  .vhl-ps { max-height: 60vh; padding: 6px; border-radius: 12px; }
+  .vhl-ps__title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+}
