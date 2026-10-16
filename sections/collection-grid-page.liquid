@@ -25,6 +25,22 @@
 
 {{ 'collection-grid-page.css' | asset_url | stylesheet_tag }}
 
+{%- comment -%} VHL: compacte producttitels uitsluitend op mobiel {%- endcomment -%}
+<style>
+  @media screen and (max-width: 749px) {
+    #shopify-section-{{ section.id }} .collection-product-info h3.product-title {
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      line-height: 1.25 !important;
+      letter-spacing: -0.2px !important;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none !important;
+    }
+  }
+</style>
+
+
 {%- style -%}
   .section-{{ section.id }} {
     /* CSS Variables for dynamic styling */
