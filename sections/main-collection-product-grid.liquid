@@ -33,6 +33,26 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
+
+  /* VHL: compactere producttitels uitsluitend in collectiegrid op mobiel */
+  @media screen and (max-width: 749px) {
+    .section-{{ section.id }}-padding #product-grid .card__information .card__heading,
+    .section-{{ section.id }}-padding #product-grid .card-information .card__heading,
+    .section-{{ section.id }}-padding #product-grid .card__heading.h5 {
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      line-height: 1.3 !important;
+      letter-spacing: -0.2px !important;
+      overflow-wrap: anywhere;
+    }
+    .section-{{ section.id }}-padding #product-grid .card__heading a.full-unstyled-link {
+      font-size: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+      letter-spacing: inherit !important;
+      overflow-wrap: anywhere;
+    }
+  }
 {%- endstyle -%}
 
 <div class="section-{{ section.id }}-padding gradient {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-up{% endif %}">
