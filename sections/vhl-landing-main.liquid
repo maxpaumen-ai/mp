@@ -195,7 +195,7 @@
   <div class="vl-sticky__in">
     {%- if section.settings.gallery_assets != blank -%}{%- assign first = section.settings.gallery_assets | split: ',' | first | strip -%}<img src="{{ first | asset_url }}" alt="" width="52" height="52">{%- elsif product.featured_image -%}<img src="{{ product.featured_image | image_url: width: 120 }}" alt="" width="52" height="52">{%- endif -%}
     <div class="vl-sticky__meta"><strong>{{ section.settings.title_override | default: product.title }}</strong><span>{% if section.settings.compare_text != blank %}<s>{{ section.settings.compare_text | escape }}</s>{% elsif saving > 0 %}<s>{{ cmp | money }}</s>{% endif %}<b data-vl-sticky-price>{{ section.settings.price_text | default: cv.price | money }}</b></span></div>
-    <button type="button" class="vl-btn" data-vl-sticky-add><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l1.6 9.6a2 2 0 0 0 2 1.7h7.6a2 2 0 0 0 2-1.6L19.5 8H6.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="19.5" r="1.4" fill="currentColor"/><circle cx="17" cy="19.5" r="1.4" fill="currentColor"/></svg>{{ section.settings.atc_label | escape }}</button>
+    <button type="button" class="vl-btn" data-vl-sticky-add><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l1.6 9.6a2 2 0 0 0 2 1.7h7.6a2 2 0 0 0 2-1.6L19.5 8H6.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="19.5" r="1.4" fill="currentColor"/><circle cx="17" cy="19.5" r="1.4" fill="currentColor"/></svg><span class="vl-sticky__lbl">{{ section.settings.atc_label | escape }}</span><span class="vl-sticky__lbl-s">Toevoegen</span></button>
   </div>
 </div>
 {%- endif -%}
