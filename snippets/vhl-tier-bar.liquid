@@ -1,0 +1,84 @@
+{% comment %}
+  VHL kortingstreden in de winkelwagen
+  - 2 artikelen: 15% korting op de hele bestelling
+  - 3 of meer artikelen: 25% korting op de hele bestelling
+  De korting zelf komt uit twee automatische kortingen in Shopify;
+  deze balk toont alleen de voortgang.
+{% endcomment %}
+<div class="vhl-tier" data-vhl-tier data-count="{{ cart.item_count }}">
+  <p class="vhl-tier__msg" data-vhl-tier-msg></p>
+  <div class="vhl-tier__track">
+    <div class="vhl-tier__fill" data-vhl-tier-fill></div>
+    <div class="vhl-tier__step" data-step="2" style="left: 66.666%">
+      <span class="vhl-tier__dot">15%</span>
+      <span class="vhl-tier__lbl">2 artikelen</span>
+    </div>
+    <div class="vhl-tier__step" data-step="3" style="left: 100%">
+      <span class="vhl-tier__dot">25%</span>
+      <span class="vhl-tier__lbl">3 artikelen</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .vhl-tier { padding: 16px 20px 30px; font-family: Helvetica, Arial, sans-serif; }
+  .vhl-tier__msg { margin: 0 0 18px; font-size: 15px; font-weight: 700; color: #333; line-height: 1.35; }
+  .vhl-tier__msg strong { color: #171717; }
+  .vhl-tier__track { position: relative; height: 6px; margin: 0 22px 0 4px; border-radius: 99px; background: #e6e6e6; }
+  .vhl-tier__fill { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 99px; background: #171717; transition: width .35s ease; }
+  .vhl-tier__step { position: absolute; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; }
+  .vhl-tier__dot { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 2px solid #d5d5d5; color: #777; font-size: 12px; font-weight: 700; transition: background .25s, color .25s, border-color .25s; }
+  .vhl-tier__step.is-done .vhl-tier__dot { background: #171717; border-color: #171717; color: #fff; }
+  .vhl-tier__lbl { position: absolute; top: 46px; white-space: nowrap; font-size: 11px; color: #777; }
+  .vhl-tier__step.is-done .vhl-tier__lbl { color: #171717; font-weight: 600; }
+</style>
+
+<script>
+  (function () {
+    function render(count) {
+      document.querySelectorAll('[data-vhl-tier]').forEach(function (el) {
+        var msg = el.querySelector('[data-vhl-tier-msg]');
+        var fill = el.querySelector('[data-vhl-tier-fill]');
+        var text;
+        if (count >= 3) {
+          text = 'Je krijgt <strong>25% korting</strong> op je hele bestelling';
+        } else if (count === 2) {
+          text = '<strong>15% korting</strong> toegepast. Voeg nog 1 artikel toe voor <strong>25% korting</strong>';
+        } else {
+          var need = 2 - count;
+          text = 'Voeg nog ' + need + ' artikel' + (need > 1 ? 'en' : '') + ' toe voor <strong>15% korting</strong> op je hele bestelling';
+        }
+        msg.innerHTML = text;
+        fill.style.width = Math.min(count, 3) / 3 * 100 + '%';
+        el.querySelectorAll('.vhl-tier__step').forEach(function (s) {
+          s.classList.toggle('is-done', count >= parseInt(s.dataset.step, 10));
+        });
+        el.dataset.count = count;
+      });
+    }
+    function refresh() {
+      fetch('/cart.js', { headers: { Accept: 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (c) { render(c.item_count); })
+        .catch(function () {});
+    }
+    var first = document.querySelector('[data-vhl-tier]');
+    render(first ? parseInt(first.dataset.count, 10) || 0 : 0);
+
+    if (!window.__vhlTierHooked) {
+      window.__vhlTierHooked = true;
+      var orig = window.fetch;
+      window.fetch = function (input) {
+        var url = typeof input === 'string' ? input : (input && input.url) || '';
+        var p = orig.apply(this, arguments);
+        if (/\/cart\/(add|change|update|clear)/.test(url)) p.then(function () { setTimeout(refresh, 150); });
+        return p;
+      };
+      document.addEventListener('cart:updated', refresh);
+      new MutationObserver(function () {
+        var el = document.querySelector('[data-vhl-tier]');
+        if (el && !el.querySelector('[data-vhl-tier-msg]').innerHTML) refresh();
+      }).observe(document.body, { childList: true, subtree: true });
+    }
+  })();
+</script>

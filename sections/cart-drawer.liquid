@@ -227,8 +227,14 @@
               {% case block.type %}
                 {% when 'cart_progress_bar' %}
                   <div {{ block.shopify_attributes }}>
-                    {% render 'cart-drawer_pgb_style', block: block %}
-                    {% render 'cart-progress-bar', block: block %}
+                    {%- comment -%} VHL: kortingstreden. Zet vhl_tiers_live op true zodra de automatische kortingen (15%/25%) in Shopify actief zijn. {%- endcomment -%}
+                    {%- assign vhl_tiers_live = false -%}
+                    {%- if vhl_tiers_live or cart.attributes._vhl_tier_preview == '1' -%}
+                      {% render 'vhl-tier-bar' %}
+                    {%- else -%}
+                      {% render 'cart-drawer_pgb_style', block: block %}
+                      {% render 'cart-progress-bar', block: block %}
+                    {%- endif -%}
                   </div>
               {% endcase %}
             {% endfor %}
