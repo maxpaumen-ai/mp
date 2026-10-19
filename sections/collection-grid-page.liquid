@@ -25,17 +25,27 @@
 
 {{ 'collection-grid-page.css' | asset_url | stylesheet_tag }}
 
-{%- comment -%} VHL: compacte producttitels uitsluitend op mobiel {%- endcomment -%}
+{%- comment -%} VHL: rustige, elegante producttitels (alle schermformaten) {%- endcomment -%}
 <style>
+  #shopify-section-{{ section.id }} .collection-product-info h3.product-title {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase;
+    color: #171717 !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: manual !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+    min-height: 2.8em !important;
+    margin: 0 0 6px !important;
+  }
   @media screen and (max-width: 749px) {
     #shopify-section-{{ section.id }} .collection-product-info h3.product-title {
-      font-size: 14px !important;
-      font-weight: 500 !important;
-      line-height: 1.25 !important;
-      letter-spacing: -0.2px !important;
-      overflow-wrap: normal !important;
-      word-break: normal !important;
-      hyphens: none !important;
+      font-size: 12.5px !important;
+      letter-spacing: 0.03em !important;
     }
   }
 </style>
