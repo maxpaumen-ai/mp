@@ -5,6 +5,7 @@
   {%- assign n = section.blocks.size -%}
   {%- assign sum = 0 -%}{%- for b in section.blocks -%}{%- assign sum = sum | plus: b.settings.rating -%}{%- endfor -%}
   {%- assign avg = 0 -%}{%- if n > 0 -%}{%- assign avg = sum | times: 100 | divided_by: n -%}{%- endif -%}
+  {%- if section.settings.hide_summary -%}<style>#vl-rev-{{ section.id }} .vl-rev__sum{display:none !important}</style>{%- endif -%}
   <div class="vl-rev__sum">
     <h2>{{ section.settings.heading | escape }}</h2>
     {%- assign tot = n -%}{%- if section.settings.total > 0 -%}{%- assign tot = section.settings.total -%}{%- endif -%}
@@ -51,6 +52,7 @@ go(0)})();</script>
 {% schema %}
 { "name": "VHL landing beoordelingen", "tag": "section", "class": "section-vl-rev",
   "settings":[
+    {"type":"checkbox","id":"hide_summary","label":"Samenvatting (sterren, balken en knop) verbergen","default":false},
     {"type":"text","id":"heading","label":"Titel","default":"Klantbeoordelingen"},
     {"type":"url","id":"write_link","label":"Link 'Schrijf een beoordeling'"},
     {"type":"text","id":"average","label":"Gemiddelde (leeg = berekend uit de blokken)"},
