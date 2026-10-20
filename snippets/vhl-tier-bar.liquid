@@ -1,69 +1,98 @@
 {% comment %}
   VHL kortingstreden in de winkelwagen
-  - 2 artikelen: 15% korting op de hele bestelling
-  - 3 of meer artikelen: 25% korting op de hele bestelling
-  De korting zelf komt uit twee automatische kortingen in Shopify;
-  deze balk toont alleen de voortgang.
+  - 1 artikel: gratis verzending
+  - 2 artikelen: 10% korting
+  - 3 of meer artikelen: 20% korting
+  De kortingen zelf zijn automatische kortingen in Shopify op de collectie
+  "Kortingsactie (zonder kranen)". Producten met "Tuvalu" of "kraan" in de naam
+  tellen niet mee; deze balk telt op dezelfde manier.
 {% endcomment %}
-<div class="vhl-tier" data-vhl-tier data-count="{{ cart.item_count }}">
+{%- liquid
+  assign vhl_count = 0
+  for item in cart.items
+    assign t = item.product.title | downcase
+    unless t contains 'tuvalu' or t contains 'kraan'
+      assign vhl_count = vhl_count | plus: item.quantity
+    endunless
+  endfor
+-%}
+<div class="vhl-tier" data-vhl-tier data-count="{{ vhl_count }}" data-total="{{ cart.item_count }}">
   <p class="vhl-tier__msg" data-vhl-tier-msg></p>
   <div class="vhl-tier__track">
     <div class="vhl-tier__fill" data-vhl-tier-fill></div>
-    <div class="vhl-tier__step" data-step="2" style="left: 66.666%">
-      <span class="vhl-tier__dot">15%</span>
+    <div class="vhl-tier__step" data-step="1" style="left: 0%">
+      <span class="vhl-tier__dot vhl-tier__dot--icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7" cy="17" r="1.8" fill="currentColor"/><circle cx="17.5" cy="17" r="1.8" fill="currentColor"/></svg></span>
+      <span class="vhl-tier__lbl">Gratis verzending</span>
+    </div>
+    <div class="vhl-tier__step" data-step="2" style="left: 50%">
+      <span class="vhl-tier__dot">10%</span>
       <span class="vhl-tier__lbl">2 artikelen</span>
     </div>
     <div class="vhl-tier__step" data-step="3" style="left: 100%">
-      <span class="vhl-tier__dot">25%</span>
+      <span class="vhl-tier__dot">20%</span>
       <span class="vhl-tier__lbl">3 artikelen</span>
     </div>
   </div>
+  <p class="vhl-tier__note" data-vhl-tier-note hidden>Kranen tellen niet mee voor de korting.</p>
 </div>
 
 <style>
-  .vhl-tier { padding: 16px 20px 40px; font-family: Helvetica, Arial, sans-serif; }
-  .vhl-tier__msg { margin: 0 0 18px; font-size: 15px; font-weight: 700; color: #333; line-height: 1.35; }
-  .vhl-tier__msg strong { color: #171717; }
-  .vhl-tier__track { position: relative; height: 6px; margin: 0 22px 0 4px; border-radius: 99px; background: #e6e6e6; }
+  .vhl-tier { padding: 16px 26px 40px; font-family: Helvetica, Arial, sans-serif; }
+  .vhl-tier__msg { margin: 0 0 18px; font-size: 15px; font-weight: 400; color: #333; line-height: 1.35; }
+  .vhl-tier__msg strong { color: #171717; font-weight: 700; }
+  .vhl-tier__track { position: relative; height: 6px; margin: 0 18px; border-radius: 99px; background: #e6e6e6; }
   .vhl-tier__fill { display: block !important; position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 99px; background: #171717; transition: width .35s ease; }
   .vhl-tier__step { position: absolute; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; }
-  .vhl-tier__dot { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 2px solid #d5d5d5; color: #777; font-size: 12px; font-weight: 700; transition: background .25s, color .25s, border-color .25s; }
+  .vhl-tier__dot { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #fff; border: 2px solid #d5d5d5; color: #777; font-size: 12px; font-weight: 700; transition: background .25s, color .25s, border-color .25s; }
+  .vhl-tier__dot svg { width: 20px; height: 20px; }
   .vhl-tier__step.is-done .vhl-tier__dot { background: #171717; border-color: #171717; color: #fff; }
-  .vhl-tier__lbl { position: absolute; top: 46px; white-space: nowrap; font-size: 11px; color: #777; }
+  .vhl-tier__lbl { position: absolute; top: 44px; white-space: nowrap; font-size: 11px; color: #777; }
   .vhl-tier__step.is-done .vhl-tier__lbl { color: #171717; font-weight: 600; }
+  .vhl-tier__note { margin: 34px 0 0; font-size: 12px; color: #777; }
 </style>
 
 <script>
   (function () {
-    function render(count) {
+    function eligible(cart) {
+      return cart.items.reduce(function (n, it) {
+        var t = (it.product_title || '').toLowerCase();
+        return t.indexOf('tuvalu') > -1 || t.indexOf('kraan') > -1 ? n : n + it.quantity;
+      }, 0);
+    }
+    function render(count, total) {
       document.querySelectorAll('[data-vhl-tier]').forEach(function (el) {
         var msg = el.querySelector('[data-vhl-tier-msg]');
-        var fill = el.querySelector('[data-vhl-tier-fill]');
         var text;
         if (count >= 3) {
-          text = 'Je krijgt <strong>25% korting</strong> op je hele bestelling';
+          text = 'Je krijgt <strong>20% korting</strong> en <strong>gratis verzending</strong>';
         } else if (count === 2) {
-          text = '<strong>15% korting</strong> toegepast. Voeg nog 1 artikel toe voor <strong>25% korting</strong>';
+          text = '<strong>10% korting</strong> toegepast. Voeg nog 1 artikel toe voor <strong>20% korting</strong>';
+        } else if (count === 1) {
+          text = '<strong>Gratis verzending</strong>. Voeg nog 1 artikel toe voor <strong>10% korting</strong>';
+        } else if (total > 0) {
+          text = 'Je bestelling wordt <strong>gratis verzonden</strong>';
         } else {
-          var need = 2 - count;
-          text = 'Voeg nog ' + need + ' artikel' + (need > 1 ? 'en' : '') + ' toe voor <strong>15% korting</strong> op je hele bestelling';
+          text = 'Voeg een artikel toe voor <strong>gratis verzending</strong>';
         }
         msg.innerHTML = text;
-        fill.style.width = Math.min(count, 3) / 3 * 100 + '%';
+        var shown = total > 0 ? Math.max(count, 1) : 0;
+        el.querySelector('[data-vhl-tier-fill]').style.width = Math.max(0, Math.min(shown, 3) - 1) / 2 * 100 + '%';
         el.querySelectorAll('.vhl-tier__step').forEach(function (s) {
-          s.classList.toggle('is-done', count >= parseInt(s.dataset.step, 10));
+          s.classList.toggle('is-done', shown >= parseInt(s.dataset.step, 10));
         });
+        el.querySelector('[data-vhl-tier-note]').hidden = total === count;
         el.dataset.count = count;
+        el.dataset.total = total;
       });
     }
     function refresh() {
       fetch('/cart.js', { headers: { Accept: 'application/json' } })
         .then(function (r) { return r.json(); })
-        .then(function (c) { render(c.item_count); })
+        .then(function (c) { render(eligible(c), c.item_count); })
         .catch(function () {});
     }
     var first = document.querySelector('[data-vhl-tier]');
-    render(first ? parseInt(first.dataset.count, 10) || 0 : 0);
+    if (first) render(parseInt(first.dataset.count, 10) || 0, parseInt(first.dataset.total, 10) || 0);
 
     if (!window.__vhlTierHooked) {
       window.__vhlTierHooked = true;
