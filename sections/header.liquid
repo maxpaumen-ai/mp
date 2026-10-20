@@ -2010,6 +2010,10 @@
 
             {% for link in section.settings.menu.links %}
 
+              {%- comment -%} VHL: Catalogus en Contact niet in het mobiele menu {%- endcomment -%}
+              {%- assign vhl_menu_t = link.title | downcase | strip -%}
+              {%- if vhl_menu_t == 'catalogus' or vhl_menu_t == 'contact' -%}{%- continue -%}{%- endif -%}
+
               {% liquid
                 assign top_i = forloop.index
               %}
